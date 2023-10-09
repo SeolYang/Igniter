@@ -1,20 +1,19 @@
 #pragma once
+/**
+ * 'Frieren' assumes that type of 'std::string' instances must be a 'UTF-8 encoded string'.
+ * 'Frieren' assumes that source code files are encoded in UTF-8.
+ * Also, All strings stored in memory are instances of std::string.
+ * When string comes in either UTF-16 encoded or as a wide characters. It must converted to UTF-8 encoded string using 'Narrower' function.
+ * Basically, 'Frieren' is targeting the 'Windows Platform'. Sometimes, It should pass string as 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider character string.
+ * For all literal constant strings, they must be used with the 'FE_TEXT macro function'.
+ */
+#include <string>
 #ifndef UTF_CPP_CPLUSPLUS 
 #define UTF_CPP_CPLUSPLUS 201703L
 #endif
-
-#include <string>
 #include <utf8cpp/utf8.h>
-#define FE_TEXT(x) (u8##x)
 
-/**
-* 'Frieren' assumes that type of 'std::string' instances must be a "UTF-8 encoded".
-* 'Frieren' assumes that source code files are encoded in UTF-8.
-* Also, All strings stored in memory are instances of std::string.
-* When string comes in either UTF-16 encoded or as a wide characters. It must converted to UTF-8 encoded string using 'Narrower' function.
-* Basically, 'Frieren' is targeting the 'Windows Platform'. Sometimes, It should pass string as 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider character string.
-* For all literal constant strings, they must be used with the 'FE_TEXT macro function'.
-*/
+#define FE_TEXT(x) (u8##x)
 
 namespace fe
 {

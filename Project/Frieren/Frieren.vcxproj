@@ -12,10 +12,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Frieren\Core\Engine.cpp" />
+    <ClCompile Include="..\..\Source\Frieren\Core\Hash.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\..\Source\Frieren\Core\Engine.h" />
+    <ClInclude Include="..\..\Source\Frieren\Core\HandleManagementSystem.h" />
+    <ClInclude Include="..\..\Source\Frieren\Core\Hash.h" />
     <ClInclude Include="..\..\Source\Frieren\Core\String.h" />
   </ItemGroup>
   <ItemGroup>
