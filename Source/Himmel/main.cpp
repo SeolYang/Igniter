@@ -3,6 +3,7 @@
 #include <Core/Hash.h>
 #include <Core/Assert.h>
 #include <Core/Name.h>
+#include <Core/Pool.h>
 
 int main()
 {
@@ -24,6 +25,12 @@ int main()
 	// fe::Name invalidName = fe::Name(std::string(reinterpret_cast<const char*>(&L"인코딩")));
 	// fe::Name invalidEmptyName = fe::Name("");
 	// FE_ASSERT(invalidName != invalidEmptyName);
+
+	fe::Pool<unsigned int> pool{ 1, 1 };
+	auto				   allocation = pool.Allocate(0);
+	auto				   allocation2 = pool.Allocate(1);
+	pool.Deallocate(allocation);
+	pool.Deallocate(allocation2);
 
 	return 0;
 }
