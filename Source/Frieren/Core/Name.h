@@ -31,7 +31,7 @@ namespace fe
 		void SetString(std::string_view nameString);
 
 		bool	 IsValid() const { return hashOfString != InvalidNameHash; }
-		uint64_t GetHash() { return hashOfString; }
+		uint64_t GetHash() const { return hashOfString; }
 
 		Name& operator=(std::string_view nameString);
 		operator std::string() const
@@ -57,4 +57,18 @@ namespace fe
 	private:
 		uint64_t hashOfString;
 	};
+
 } // namespace fe
+
+namespace std
+{
+	template <>
+	class hash<fe::Name>
+	{
+	public:
+		size_t operator()(const fe::Name& name) const
+		{
+			return name.GetHash();
+		}
+	};
+} // namespace std

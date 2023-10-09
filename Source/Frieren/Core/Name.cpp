@@ -68,9 +68,7 @@ namespace fe
 
 	bool Name::operator==(const std::string_view nameString) const
 	{
-		return hashOfString == InvalidNameHash ? 
-			false : 
-			(hashOfString == HashCRC64(nameString));
+		return hashOfString == InvalidNameHash ? false : (hashOfString == HashCRC64(nameString));
 	}
 
 	bool Name::operator==(const Name& name) const

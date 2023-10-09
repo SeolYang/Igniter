@@ -10,19 +10,20 @@ int main()
 	constexpr uint64_t		   compileTimeHashTest = fe::HashCRC64(compileTimeStringView);
 	constexpr uint64_t		   compileTimeHasOfType = fe::HashOfType<std::string_view>;
 
-	std::string runtimeString = FE_TEXT("테스트");
+	std::string	   runtimeString = FE_TEXT("테스트");
 	const uint64_t runtimeHashTest = fe::HashCRC64(runtimeString);
 
 	FE_ASSERT(runtimeHashTest == compileTimeHashTest, "");
 
 	const std::string nameString = FE_TEXT("프리렌");
-	const fe::Name name = fe::Name(nameString);
+	const fe::Name	  name = fe::Name(nameString);
 	FE_ASSERT(name.IsValid());
 	FE_ASSERT(nameString == name.AsString());
+	FE_ASSERT(std::hash<fe::Name>()(name) == name.GetHash());
 
-	//fe::Name invalidName = fe::Name(std::string(reinterpret_cast<const char*>(&L"인코딩")));
-	//fe::Name invalidEmptyName = fe::Name("");
-	//FE_ASSERT(invalidName != invalidEmptyName);
+	// fe::Name invalidName = fe::Name(std::string(reinterpret_cast<const char*>(&L"인코딩")));
+	// fe::Name invalidEmptyName = fe::Name("");
+	// FE_ASSERT(invalidName != invalidEmptyName);
 
-    return 0;
+	return 0;
 }
