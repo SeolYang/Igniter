@@ -30,4 +30,9 @@ namespace fe
 		utf8::utf16to8(from.begin(), from.end(), std::back_inserter(result));
 		return result;
 	}
+
+	inline bool IsValidUTF8(const std::string_view string)
+	{
+		return utf8::is_valid(string);
+	}
 }

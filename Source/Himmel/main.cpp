@@ -2,6 +2,7 @@
 #include <Core/String.h>
 #include <Core/Hash.h>
 #include <Core/Assert.h>
+#include <Core/Name.h>
 
 int main()
 {
@@ -13,5 +14,15 @@ int main()
 	const uint64_t runtimeHashTest = fe::HashCRC64(runtimeString);
 
 	FE_ASSERT(runtimeHashTest == compileTimeHashTest, "");
+
+	const std::string nameString = FE_TEXT("프리렌");
+	const fe::Name name = fe::Name(nameString);
+	FE_ASSERT(name.IsValid());
+	FE_ASSERT(nameString == name.AsString());
+
+	//fe::Name invalidName = fe::Name(std::string(reinterpret_cast<const char*>(&L"인코딩")));
+	//fe::Name invalidEmptyName = fe::Name("");
+	//FE_ASSERT(invalidName != invalidEmptyName);
+
     return 0;
 }
