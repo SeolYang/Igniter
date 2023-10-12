@@ -13,8 +13,6 @@
 #endif
 #include <utf8cpp/utf8.h>
 
-#define FE_TEXT(x) (u8##x)
-
 namespace fe
 {
 	inline std::wstring Wider(const std::string_view from)

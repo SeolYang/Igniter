@@ -6,11 +6,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Himmel\main.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
+    <None Include="..\..\.clang-format" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\.clang-format" />
+    <ClCompile Include="..\Source\Himmel\main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

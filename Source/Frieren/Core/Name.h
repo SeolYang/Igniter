@@ -24,6 +24,7 @@ namespace fe
 	class Name final
 	{
 	public:
+		Name() = default;
 		Name(std::string_view name);
 		Name(const Name& name);
 		~Name() = default;
@@ -40,6 +41,8 @@ namespace fe
 		}
 		std::string AsString() const;
 
+		operator bool() const { return IsValid(); }
+
 		Name& operator=(const Name& name);
 
 		bool operator==(std::string_view nameString) const;
@@ -55,7 +58,7 @@ namespace fe
 		constexpr static uint64_t InvalidNameHash = 0;
 
 	private:
-		uint64_t hashOfString;
+		uint64_t hashOfString = InvalidNameHash;
 	};
 
 } // namespace fe

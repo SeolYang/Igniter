@@ -68,12 +68,14 @@ namespace fe
 
 	bool Name::operator==(const std::string_view nameString) const
 	{
-		return hashOfString == InvalidNameHash ? false : (hashOfString == HashCRC64(nameString));
+		return (*this) == Name{ nameString };
 	}
 
 	bool Name::operator==(const Name& name) const
 	{
-		return (IsValid() && name.IsValid()) ? hashOfString == name.hashOfString : false;
+		const bool bValidNames = IsValid() && name.IsValid();
+		FE_ASSERT(bValidNames, "Invalid name comparision.");
+		return bValidNames ? hashOfString == name.hashOfString : false;
 	}
 
 } // namespace fe

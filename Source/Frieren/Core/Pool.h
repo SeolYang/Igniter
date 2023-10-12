@@ -93,7 +93,6 @@ namespace fe
 		{
 			uint64_t ChunkIndex = std::numeric_limits<uint32_t>::max();
 			uint64_t ElementIndex = std::numeric_limits<uint32_t>::max();
-			T*		 AddressOfInstance = nullptr;
 		};
 
 	public:
@@ -107,7 +106,7 @@ namespace fe
 			}
 		}
 
-		explicit Pool(const size_t numOfInitialChunks)
+		explicit Pool(const size_t numOfInitialChunks = 1)
 			: Pool(numOfInitialChunks, DefaultChunkSize / sizeof(T))
 		{
 		}
@@ -117,20 +116,28 @@ namespace fe
 		template <typename... Args>
 		Allocation Allocate(Args&&... args)
 		{
-			Allocation result = Allocate();
-			new (result.AddressOfInstance) T(std::forward<Args>(args)...);
+			const Allocation result = Allocate();
+			T* const		 addressOfInstance = GetAddressOfAllocation(result);
+			new (addressOfInstance) T(std::forward<Args>(args)...);
 			return result;
 		}
 
 		void Deallocate(const Allocation allocation)
 		{
-			FE_ASSERT(allocation.ChunkIndex < chunks.size());
-			T* properPointer = reinterpret_cast<T*>(chunks[allocation.ChunkIndex]->GetPointerOfSlot(allocation.ElementIndex));
-			if (properPointer != nullptr)
+			FE_ASSERT(allocation.ChunkIndex < chunks.size(), "Invalid Chunk Index");
+			T* const addressOfInstance = GetAddressOfAllocation(allocation);
+			if (addressOfInstance != nullptr)
 			{
-				properPointer->~T();
+				addressOfInstance->~T();
 			}
 			chunks[allocation.ChunkIndex]->Deallocate(allocation.ElementIndex);
+		}
+
+		T* GetAddressOfAllocation(const Allocation allocation) const
+		{
+			const bool bIsValidChunkIndex = allocation.ChunkIndex < chunks.size();
+			FE_ASSERT(bIsValidChunkIndex, "Invalid chunk index from Allocation.");
+			return bIsValidChunkIndex ? reinterpret_cast<T*>(chunks[allocation.ChunkIndex]->GetPointerOfSlot(allocation.ElementIndex)) : nullptr;
 		}
 
 	private:
@@ -154,7 +161,6 @@ namespace fe
 
 			result.ChunkIndex = chunkIndex;
 			result.ElementIndex = chunks[chunkIndex]->Allocate();
-			result.AddressOfInstance = reinterpret_cast<T*>(chunks[chunkIndex]->GetPointerOfSlot(result.ElementIndex));
 
 			return result;
 		}
@@ -164,4 +170,7 @@ namespace fe
 		const size_t						numOfElementsPerChunk;
 		std::vector<std::unique_ptr<Chunk>> chunks;
 	};
+
+	template <typename T>
+	using PoolAllocation = Pool<T>::Allocation;
 } // namespace fe
