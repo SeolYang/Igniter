@@ -1,5 +1,5 @@
 #pragma once
-#if defined(_DEBUG) || defined(DEBUG) || defined(FORCE_ENABLE_ASSERTION)
+#if (defined(_DEBUG) || defined(DEBUG) || defined(FORCE_ENABLE_ASSERT)) && !defined(FORCE_DISABLE_ASSERT)
 	#define FE_ASSERT(CONDITION, FORMAT_STR, ...) \
 		do                                        \
 			if (!(CONDITION))                     \

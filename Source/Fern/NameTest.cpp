@@ -6,7 +6,7 @@ TEST_CASE("Core.Name")
 	using namespace fe;
 
 	constexpr std::string_view testStringView = "프리렌Frieren";
-	const std::string testString = std::string(testStringView);
+	const std::string		   testString = std::string(testStringView);
 
 	const fe::Name testName = fe::Name(testStringView);
 	const fe::Name testNameFromString = fe::Name(testString);
@@ -33,5 +33,18 @@ TEST_CASE("Core.Name")
 	SECTION("String equality of name.")
 	{
 		REQUIRE(testName.AsString() == testString);
+	}
+
+	const fe::Name incorretlyEncodedName = fe::Name(std::string(reinterpret_cast<const char*>(&L"인코딩")));
+	const fe::Name invalidEmptyName = fe::Name("");
+	SECTION("Invalid Name")
+	{
+		REQUIRE(!incorretlyEncodedName);
+		REQUIRE(!invalidEmptyName);
+	}
+
+	SECTION("Inequality of Invalid Name")
+	{
+		REQUIRE((!(incorretlyEncodedName == invalidEmptyName) && (incorretlyEncodedName != invalidEmptyName)));
 	}
 }
