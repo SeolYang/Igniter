@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <robin_hood.h>
 #include <Core/Assert.h>
+#include <Core/Misc.h>
 
 namespace fe
 {
@@ -114,7 +115,7 @@ namespace fe
 		~Pool() = default;
 
 		template <typename... Args>
-		Allocation Allocate(Args&&... args)
+		[[nodiscard]] Allocation Allocate(Args&&... args)
 		{
 			const Allocation result = Allocate();
 			T* const		 addressOfInstance = GetAddressOfAllocation(result);
@@ -131,6 +132,12 @@ namespace fe
 				addressOfInstance->~T();
 			}
 			chunks[allocation.ChunkIndex]->Deallocate(allocation.ElementIndex);
+		}
+
+		void SafeDeallocate(Allocation& allocation)
+		{
+			Deallocate(allocation);
+			allocation.ChunkIndex = allocation.ElementIndex = InvalidIndex;
 		}
 
 		T* GetAddressOfAllocation(const Allocation allocation) const

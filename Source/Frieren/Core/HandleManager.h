@@ -7,8 +7,6 @@
 
 namespace fe
 {
-	constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
-
 	class HandleRepository
 	{
 	public:

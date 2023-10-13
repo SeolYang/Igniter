@@ -5,6 +5,8 @@
 
 namespace fe
 {
+	constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
+
     template <typename T>
     using Optional = std::optional<T>;
 
