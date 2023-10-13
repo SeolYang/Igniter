@@ -21,5 +21,8 @@
     <ClCompile Include="..\Source\Fern\PoolTest.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Fern\HandleTest.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

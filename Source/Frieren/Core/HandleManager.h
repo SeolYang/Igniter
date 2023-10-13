@@ -3,153 +3,157 @@
 #include <Core/Name.h>
 #include <Core/Pool.h>
 #include <Core/Mutex.h>
+#include <Core/Hash.h>
 #include <Core/Misc.h>
 
 namespace fe
 {
-	class HandleRepository
+	namespace Private
 	{
-	public:
-		virtual ~HandleRepository() = default;
-
-	protected:
-		HandleRepository() = default;
-	};
-
-	template <typename T>
-	class GenericHandleRepository final : public HandleRepository
-	{
-		friend class HandleManager;
-
-	public:
-		GenericHandleRepository()
-			: HandleRepository()
+		class HandleRepository
 		{
-		}
+		public:
+			virtual ~HandleRepository() = default;
 
-		virtual ~GenericHandleRepository()
+		protected:
+			HandleRepository() = default;
+		};
+
+		template <typename T>
+		class GenericHandleRepository final : public HandleRepository
 		{
-			const bool bNoRemainHandles = nameMap.empty();
-			FE_ASSERT(bNoRemainHandles, "Some handles does not destroyed.");
-			if (!bNoRemainHandles)
+			friend class HandleManager;
+
+		public:
+			GenericHandleRepository()
+				: HandleRepository()
 			{
-				for (const auto namePair : nameMap)
+			}
+
+			virtual ~GenericHandleRepository()
+			{
+				const bool bNoRemainHandles = nameMap.empty();
+				FE_ASSERT(bNoRemainHandles, "Some handles does not destroyed.");
+				if (!bNoRemainHandles)
 				{
-					Deallocation(namePair.first);
+					for (const auto namePair : nameMap)
+					{
+						Deallocation(namePair.first);
+					}
 				}
 			}
-		}
 
-		GenericHandleRepository(const GenericHandleRepository&) = delete;
-		GenericHandleRepository(GenericHandleRepository&&) noexcept = delete;
+			GenericHandleRepository(const GenericHandleRepository&) = delete;
+			GenericHandleRepository(GenericHandleRepository&&) noexcept = delete;
 
-		GenericHandleRepository& operator=(const GenericHandleRepository&) = delete;
-		GenericHandleRepository& operator=(GenericHandleRepository&&) = delete;
+			GenericHandleRepository& operator=(const GenericHandleRepository&) = delete;
+			GenericHandleRepository& operator=(GenericHandleRepository&&) = delete;
 
-	private:
-		static uint64_t PackAllocationToIndex(const PoolAllocation<T> allocation)
-		{
-			constexpr uint64_t MaximumIndexRange = 0x00000000ffffffff;
-			FE_ASSERT(allocation.ChunkIndex < MaximumIndexRange || allocation.ElementIndex < MaximumIndexRange, "Outranged Allocation to pack.");
-			uint64_t result = 0;
-			result = ((allocation.ChunkIndex & MaximumIndexRange) << 32) & (allocation.ElementIndex & MaximumIndexRange);
-			return result;
-		}
-
-		static PoolAllocation<T> UnpackIndexToAllocation(const uint64_t index)
-		{
-			constexpr uint64_t Mask = 0x00000000ffffffff;
-			return PoolAllocation<T>{
-				.ChunkIndex = (index >> 32) & Mask,
-				.ElementIndex = index & Mask
-			};
-		}
-
-		template <typename... Args>
-		uint64_t Create(const Name name, Args&&... args)
-		{
-			PoolAllocation<T> allocation;
+		private:
+			static uint64_t PackAllocationToIndex(const PoolAllocation<T> allocation)
 			{
-				WriteLock lock{ poolMutex };
-				allocation = instancePool.Allocate(std::forward<Args>(args)...);
+				constexpr uint64_t MaximumIndexRange = 0x00000000ffffffff;
+				FE_ASSERT(allocation.ChunkIndex < MaximumIndexRange || allocation.ElementIndex < MaximumIndexRange, "Outranged Allocation to pack.");
+				uint64_t result = 0;
+				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32) & (allocation.ElementIndex & MaximumIndexRange);
+				return result;
 			}
 
-			const uint64_t packedIndex = PackAllocationToIndex(allocation);
+			static PoolAllocation<T> UnpackIndexToAllocation(const uint64_t index)
 			{
-				WriteLock lock{ nameMapMutex };
-				nameMap[packedIndex] = name;
+				constexpr uint64_t Mask = 0x00000000ffffffff;
+				return PoolAllocation<T>{
+					.ChunkIndex = (index >> 32) & Mask,
+					.ElementIndex = index & Mask
+				};
 			}
 
-			return packedIndex;
-		}
-
-		void Destroy(const uint64_t index)
-		{
-			FE_ASSERT(index != InvalidIndex, "Trying to delete invalid index.");
-			if (IsValid(index))
+			template <typename... Args>
+			uint64_t Create(const Name name, Args&&... args)
 			{
+				PoolAllocation<T> allocation;
 				{
 					WriteLock lock{ poolMutex };
-					Deallocation(index);
+					allocation = instancePool.Allocate(std::forward<Args>(args)...);
 				}
 
+				const uint64_t packedIndex = PackAllocationToIndex(allocation);
 				{
 					WriteLock lock{ nameMapMutex };
-					nameMap.erase(index);
+					nameMap[packedIndex] = name;
+				}
+
+				return packedIndex;
+			}
+
+			void Destroy(const uint64_t index)
+			{
+				FE_ASSERT(index != InvalidIndex, "Trying to delete invalid index.");
+				if (IsValid(index))
+				{
+					{
+						WriteLock lock{ poolMutex };
+						Deallocation(index);
+					}
+
+					{
+						WriteLock lock{ nameMapMutex };
+						nameMap.erase(index);
+					}
 				}
 			}
-		}
 
-		void Deallocation(const uint64_t index)
-		{
-			const PoolAllocation<T> allocation = UnpackIndexToAllocation(index);
-			instancePool.Deallocate(allocation);
-		}
-
-		bool IsValid(const uint64_t index) const
-		{
-			if (index == InvalidIndex)
+			void Deallocation(const uint64_t index)
 			{
-				return false;
+				const PoolAllocation<T> allocation = UnpackIndexToAllocation(index);
+				instancePool.Deallocate(allocation);
 			}
 
-			ReadOnlyLock lock{ nameMapMutex };
-			return nameMap.contains(index);
-		}
-
-		Name QueryName(const uint64_t index) const
-		{
-			if (index == InvalidIndex)
+			bool IsValid(const uint64_t index) const
 			{
-				return {};
+				if (index == InvalidIndex)
+				{
+					return false;
+				}
+
+				ReadOnlyLock lock{ nameMapMutex };
+				return nameMap.contains(index);
 			}
 
-			ReadOnlyLock lock{ nameMapMutex };
-			if (!nameMap.contains(index))
+			Name QueryName(const uint64_t index) const
 			{
-				return {};
+				if (index == InvalidIndex)
+				{
+					return {};
+				}
+
+				ReadOnlyLock lock{ nameMapMutex };
+				if (!nameMap.contains(index))
+				{
+					return {};
+				}
+
+				return nameMap.find(index)->second;
 			}
 
-			return nameMap.find(index)->second;
-		}
-
-		T* QueryAddressOfInstance(const uint64_t index) const
-		{
-			if (IsValid(index))
+			T* QueryAddressOfInstance(const uint64_t index) const
 			{
-				return instancePool.GetAddressOfAllocation(UnpackIndexToAllocation(index));
+				if (IsValid(index))
+				{
+					return instancePool.GetAddressOfAllocation(UnpackIndexToAllocation(index));
+				}
+
+				return nullptr;
 			}
 
-			return nullptr;
-		}
+		private:
+			mutable SharedMutex poolMutex;
+			Pool<T>				instancePool;
 
-	private:
-		mutable SharedMutex poolMutex;
-		Pool<T>				instancePool;
-
-		mutable SharedMutex						  nameMapMutex;
-		robin_hood::unordered_map<uint64_t, Name> nameMap;
-	};
+			mutable SharedMutex						  nameMapMutex;
+			robin_hood::unordered_map<uint64_t, Name> nameMap;
+		};
+	} // namespace Private
 
 	class HandleManager final
 	{
@@ -337,18 +341,18 @@ namespace fe
 				WriteLock lock{ repositoryMapMutex };
 				if (!repositoryMap.contains(hashOfType))
 				{
-					repositoryMap[hashOfType] = static_cast<HandleRepository*>(new GenericHandleRepository<T>());
+					repositoryMap[hashOfType] = static_cast<Private::HandleRepository*>(new Private::GenericHandleRepository<T>());
 				}
 			}
 
-			GenericHandleRepository<T>* repository = GetRepository<T>();
+			Private::GenericHandleRepository<T>* repository = GetRepository<T>();
 			return repository->Create(name, std::forward<Args>(args)...);
 		}
 
 		template <typename T>
 		void Destroy(const uint64_t handle)
 		{
-			GenericHandleRepository<T>* repository = GetRepository<T>();
+			Private::GenericHandleRepository<T>* repository = GetRepository<T>();
 			if (repository != nullptr)
 			{
 				repository->Destroy(handle);
@@ -356,23 +360,23 @@ namespace fe
 		}
 
 		template <typename T>
-		GenericHandleRepository<T>* GetRepository() const
+		Private::GenericHandleRepository<T>* GetRepository() const
 		{
 			ReadOnlyLock lock{ repositoryMapMutex };
-			return static_cast<GenericHandleRepository<T>*>(repositoryMap.find(HashOfType<T>)->second);
+			return static_cast<Private::GenericHandleRepository<T>*>(repositoryMap.find(HashOfType<T>)->second);
 		}
 
 		template <typename T>
 		T* QueryAddressOfInstance(const uint64_t index) const
 		{
-			const GenericHandleRepository<T>* repository = GetRepository<T>();
+			const Private::GenericHandleRepository<T>* repository = GetRepository<T>();
 			return repository == nullptr ? nullptr : repository->QueryAddressOfInstance(index);
 		}
 
 		template <typename T>
 		Name QueryName(const uint64_t index) const
 		{
-			const GenericHandleRepository<T>* repository = GetRepository<T>();
+			const Private::GenericHandleRepository<T>* repository = GetRepository<T>();
 			return repository == nullptr ? Name() : repository->QueryName(index);
 		}
 
@@ -384,13 +388,13 @@ namespace fe
 				return false;
 			}
 
-			const GenericHandleRepository<T>* repository = GetRepository<T>();
+			const Private::GenericHandleRepository<T>* repository = GetRepository<T>();
 			return repository == nullptr ? false : repository->IsValid(index);
 		}
 
 	private:
-		mutable SharedMutex									   repositoryMapMutex;
-		robin_hood::unordered_map<uint64_t, HandleRepository*> repositoryMap;
+		mutable SharedMutex												repositoryMapMutex;
+		robin_hood::unordered_map<uint64_t, Private::HandleRepository*> repositoryMap;
 	};
 
 	template <typename T>

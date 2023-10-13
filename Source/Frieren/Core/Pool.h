@@ -8,83 +8,89 @@
 
 namespace fe
 {
-	/**
-	 * Chunk and Pool either does not guarantees 'Thread-safety'.
-	 */
-	class Chunk
+	template <typename T>
+	class Pool;
+
+	namespace Private
 	{
-	public:
-		template <typename T>
-		friend class Pool;
-
-		explicit Chunk(const size_t sizeOfElement, const size_t alignmentOfElement, const size_t numOfElements)
-			: sizeOfElement(sizeOfElement), base(_aligned_malloc(sizeOfElement * numOfElements, alignmentOfElement))
+		/**
+		 * Chunk and Pool either does not guarantees 'Thread-safety'.
+		 */
+		class Chunk
 		{
-			for (size_t index = 0; index < numOfElements; ++index)
+		public:
+			template <typename T>
+			friend class fe::Pool;
+
+			explicit Chunk(const size_t sizeOfElement, const size_t alignmentOfElement, const size_t numOfElements)
+				: sizeOfElement(sizeOfElement), base(_aligned_malloc(sizeOfElement * numOfElements, alignmentOfElement))
 			{
-				freeSlots.push(index);
-			}
-		}
-
-		~Chunk()
-		{
-			FE_ASSERT(allocatedSlot.empty(), "Some slots does not returned. It may occur cause of memory leak.");
-			_aligned_free(base);
-		}
-
-		bool IsValidSlot(const size_t slot) const
-		{
-			return allocatedSlot.contains(slot);
-		}
-
-	private:
-		template <typename T>
-		static std::unique_ptr<Chunk> Create(const size_t numOfElements)
-		{
-			FE_ASSERT(numOfElements > 0, "Zero elements chunk does not allowed.");
-			return std::make_unique<Chunk>(sizeof(T), alignof(T), numOfElements);
-		}
-
-		size_t Allocate()
-		{
-			const size_t allocated = freeSlots.front();
-			freeSlots.pop();
-			allocatedSlot.insert(allocated);
-			return allocated;
-		}
-
-		void Deallocate(const size_t slot)
-		{
-			const bool bIsValidSlot = IsValidSlot(slot);
-			FE_ASSERT(bIsValidSlot, "Trying to deallocate invalid slot {}.", slot);
-			if (bIsValidSlot)
-			{
-				freeSlots.push(slot);
-				allocatedSlot.erase(slot);
-			}
-		}
-
-		void* GetBasePointer() const { return base; }
-
-		void* GetPointerOfSlot(const size_t slot) const
-		{
-			if (!IsValidSlot(slot))
-			{
-				return nullptr;
+				for (size_t index = 0; index < numOfElements; ++index)
+				{
+					freeSlots.push(index);
+				}
 			}
 
-			char* result = reinterpret_cast<char*>(base) + (slot * sizeOfElement);
-			return reinterpret_cast<void*>(result);
-		}
+			~Chunk()
+			{
+				FE_ASSERT(allocatedSlot.empty(), "Some slots does not returned. It may occur cause of memory leak.");
+				_aligned_free(base);
+			}
 
-		bool HasAnyFreeSlot() const { return !freeSlots.empty(); }
+			bool IsValidSlot(const size_t slot) const
+			{
+				return allocatedSlot.contains(slot);
+			}
 
-	private:
-		const size_t					  sizeOfElement;
-		void*							  base;
-		std::queue<size_t>				  freeSlots;
-		robin_hood::unordered_set<size_t> allocatedSlot;
-	};
+		private:
+			template <typename T>
+			static std::unique_ptr<Chunk> Create(const size_t numOfElements)
+			{
+				FE_ASSERT(numOfElements > 0, "Zero elements chunk does not allowed.");
+				return std::make_unique<Chunk>(sizeof(T), alignof(T), numOfElements);
+			}
+
+			size_t Allocate()
+			{
+				const size_t allocated = freeSlots.front();
+				freeSlots.pop();
+				allocatedSlot.insert(allocated);
+				return allocated;
+			}
+
+			void Deallocate(const size_t slot)
+			{
+				const bool bIsValidSlot = IsValidSlot(slot);
+				FE_ASSERT(bIsValidSlot, "Trying to deallocate invalid slot {}.", slot);
+				if (bIsValidSlot)
+				{
+					freeSlots.push(slot);
+					allocatedSlot.erase(slot);
+				}
+			}
+
+			void* GetBasePointer() const { return base; }
+
+			void* GetPointerOfSlot(const size_t slot) const
+			{
+				if (!IsValidSlot(slot))
+				{
+					return nullptr;
+				}
+
+				char* result = reinterpret_cast<char*>(base) + (slot * sizeOfElement);
+				return reinterpret_cast<void*>(result);
+			}
+
+			bool HasAnyFreeSlot() const { return !freeSlots.empty(); }
+
+		private:
+			const size_t					  sizeOfElement;
+			void*							  base;
+			std::queue<size_t>				  freeSlots;
+			robin_hood::unordered_set<size_t> allocatedSlot;
+		};
+	} // namespace Private
 
 	template <typename T>
 	class Pool
@@ -103,7 +109,7 @@ namespace fe
 			chunks.reserve(numOfInitialChunks);
 			for (size_t chunkIndex = 0; chunkIndex < numOfInitialChunks; ++chunkIndex)
 			{
-				chunks.emplace_back(Chunk::Create<T>(numOfElementsPerChunk));
+				chunks.emplace_back(Private::Chunk::Create<T>(numOfElementsPerChunk));
 			}
 		}
 
@@ -163,7 +169,7 @@ namespace fe
 
 			if (chunkIndex == chunks.size())
 			{
-				chunks.emplace_back(Chunk::Create<T>(numOfElementsPerChunk));
+				chunks.emplace_back(Private::Chunk::Create<T>(numOfElementsPerChunk));
 			}
 
 			result.ChunkIndex = chunkIndex;
@@ -173,9 +179,9 @@ namespace fe
 		}
 
 	private:
-		constexpr static size_t				DefaultChunkSize = 16384;
-		const size_t						numOfElementsPerChunk;
-		std::vector<std::unique_ptr<Chunk>> chunks;
+		constexpr static size_t						 DefaultChunkSize = 16384;
+		const size_t								 numOfElementsPerChunk;
+		std::vector<std::unique_ptr<Private::Chunk>> chunks;
 	};
 
 	template <typename T>

@@ -29,7 +29,7 @@ namespace fe
 		const bool bIsValidString = bIsNotEmpty && bIsEncodedAsUTF8;
 		if (bIsValidString)
 		{
-			hashOfString = HashCRC64(nameString);
+			hashOfString = Private::HashCRC64(nameString);
 
 			WriteLock lock{ hashStringMapMutex };
 			if (!hashStringMap.contains(hashOfString))

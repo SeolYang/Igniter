@@ -8,12 +8,6 @@
 
 int main()
 {
-	fe::Pool<unsigned int> pool{ 1, 1 };
-	auto				   allocation = pool.Allocate(0);
-	auto				   allocation2 = pool.Allocate(1);
-	pool.Deallocate(allocation);
-	pool.Deallocate(allocation2);
-
 	std::unique_ptr<fe::HandleManager> handleManager = std::make_unique<fe::HandleManager>();
 	fe::OwnedHandle<int>			   handle0 = fe::OwnedHandle<int>::Create(*handleManager, "Handle0", 235);
 	FE_ASSERT(handle0.IsValid());

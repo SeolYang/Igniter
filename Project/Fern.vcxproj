@@ -136,6 +136,7 @@
     <None Include="..\..\.clang-format" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Fern\HandleTest.cpp" />
     <ClCompile Include="..\Source\Fern\main.cpp" />
     <ClCompile Include="..\Source\Fern\NameTest.cpp" />
     <ClCompile Include="..\Source\Fern\PoolTest.cpp" />

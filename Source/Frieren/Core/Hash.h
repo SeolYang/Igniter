@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string_view>
 
-namespace fe::global
+namespace fe::Private::global
 {
 	static constexpr uint64_t gCRC64Table[] = {
 		UINT64_C(0x0000000000000000),
@@ -264,7 +264,7 @@ namespace fe::global
 	};
 }
 
-namespace fe
+namespace fe::Private
 {
 	constexpr uint64_t HashSimple(const std::string_view targetString)
 	{
@@ -299,6 +299,10 @@ namespace fe
 		return HashCRC64(__FUNCSIG__);
 	}
 
+}
+
+namespace fe
+{
 	template <typename T>
-	constexpr uint64_t HashOfType = EvaluateHashOfType<T>();
+	constexpr uint64_t HashOfType = Private::EvaluateHashOfType<T>();
 } // namespace fe
