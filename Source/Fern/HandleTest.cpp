@@ -78,6 +78,13 @@ TEST_CASE("Core.HandleManager")
 		REQUIRE(wh0_0->nameString == wh0_1->nameString);
 	}
 
+	SECTION("Renaming Handle")
+	{
+		wh0_0.Rename(FE_NAME("Renamed TD0"));
+		REQUIRE(wh0_0.QueryName() == FE_NAME("Renamed TD0"));
+		REQUIRE(h0.QueryName() == FE_NAME("Renamed TD0"));
+	}
+
 	SECTION("Destroy-Expired Handle")
 	{
 		h0.Destroy();

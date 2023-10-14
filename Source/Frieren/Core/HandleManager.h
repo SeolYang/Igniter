@@ -110,15 +110,20 @@ namespace fe
 				instancePool.Deallocate(allocation);
 			}
 
-			bool IsValid(const uint64_t index) const
+			bool IsValidUnsafe(const uint64_t index) const
 			{
 				if (index == InvalidIndex)
 				{
 					return false;
 				}
 
-				ReadOnlyLock lock{ nameMapMutex };
 				return nameMap.contains(index);
+			}
+
+			bool IsValid(const uint64_t index) const
+			{
+				ReadOnlyLock lock{ nameMapMutex };
+				return IsValidUnsafe(index);
 			}
 
 			Name QueryName(const uint64_t index) const
@@ -135,6 +140,15 @@ namespace fe
 				}
 
 				return nameMap.find(index)->second;
+			}
+
+			void Rename(const uint64_t index, const Name newName)
+			{
+				WriteLock lock{ nameMapMutex };
+				if (IsValidUnsafe(index))
+				{
+					nameMap[index] = newName;
+				}
 			}
 
 			T* QueryAddressOfInstance(const uint64_t index) const
@@ -245,6 +259,14 @@ namespace fe
 				}
 
 				return rHandleManager->QueryName<T>(index);
+			}
+
+			void Rename(const Name newName)
+			{
+				if (rHandleManager != nullptr && index != InvalidIndex)
+				{
+					rHandleManager->Rename<T>(index, newName);
+				}
 			}
 
 		protected:
@@ -401,6 +423,16 @@ namespace fe
 
 			const Private::GenericHandleRepository<T>* repository = GetRepository<T>();
 			return repository == nullptr ? false : repository->IsValid(index);
+		}
+
+		template <typename T>
+		void Rename(const uint64_t index, const Name newName)
+		{
+			if (Private::GenericHandleRepository<T>* repository = GetRepository<T>();
+				repository != nullptr)
+			{
+				repository->Rename(index, newName);
+			}
 		}
 
 	private:

@@ -75,3 +75,5 @@ namespace std
 		}
 	};
 } // namespace std
+
+#define FE_NAME(x) fe::Name(x)
