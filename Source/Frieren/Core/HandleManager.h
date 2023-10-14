@@ -8,6 +8,7 @@
 
 namespace fe
 {
+	class HandleManager;
 	namespace Private
 	{
 		class HandleRepository
@@ -22,7 +23,7 @@ namespace fe
 		template <typename T>
 		class GenericHandleRepository final : public HandleRepository
 		{
-			friend class HandleManager;
+			friend class fe::HandleManager;
 
 		public:
 			GenericHandleRepository()
@@ -55,7 +56,7 @@ namespace fe
 				constexpr uint64_t MaximumIndexRange = 0x00000000ffffffff;
 				FE_ASSERT(allocation.ChunkIndex < MaximumIndexRange || allocation.ElementIndex < MaximumIndexRange, "Outranged Allocation to pack.");
 				uint64_t result = 0;
-				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32) & (allocation.ElementIndex & MaximumIndexRange);
+				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32) | (allocation.ElementIndex & MaximumIndexRange);
 				return result;
 			}
 
@@ -159,7 +160,13 @@ namespace fe
 	{
 	public:
 		HandleManager() = default;
-		~HandleManager() = default;
+		~HandleManager()
+		{
+			for (auto& repositoryPair : repositoryMap)
+			{
+				delete repositoryPair.second;
+			}
+		}
 
 		HandleManager(const HandleManager&) = delete;
 		HandleManager(HandleManager&&) noexcept = delete;
@@ -190,6 +197,11 @@ namespace fe
 			bool operator==(const WeakHandle& rhs) const
 			{
 				return this->index == rhs.index;
+			}
+
+			bool operator!=(const WeakHandle& rhs) const
+			{
+				return !(*this == rhs);
 			}
 
 			T& operator*()
@@ -321,8 +333,7 @@ namespace fe
 			template <typename... Args>
 			static OwnedHandle Create(HandleManager& handleManager, const std::string_view name, Args&&... args)
 			{
-				return OwnedHandle(handleManager,
-					handleManager.Create<T>(Name(name), std::forward<Args>(args)...));
+				return Create(handleManager, Name(name), std::forward<Args>(args)...);
 			}
 
 		private:
