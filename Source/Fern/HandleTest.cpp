@@ -6,6 +6,11 @@ struct TestData
 {
 	std::string nameString;
 	fe::Name	name;
+
+	~TestData()
+	{
+		nameString.clear();
+	}
 };
 
 TEST_CASE("Core.HandleManager")
@@ -19,7 +24,7 @@ TEST_CASE("Core.HandleManager")
 	};
 
 	const TestData td1{
-		"Test Project Fern",
+		"Fern, The Test Project",
 		Name{ "FErn" }
 	};
 
@@ -69,5 +74,28 @@ TEST_CASE("Core.HandleManager")
 
 		REQUIRE(wh0_0->name == td0.name);
 		REQUIRE(wh0_0->nameString == td0.nameString);
+		REQUIRE(wh0_0->name == wh0_1->name);
+		REQUIRE(wh0_0->nameString == wh0_1->nameString);
+	}
+
+	SECTION("Destroy-Expired Handle")
+	{
+		h0.Destroy();
+		REQUIRE(!h0);
+		REQUIRE(!wh0_0);
+		REQUIRE(!wh0_1);
+
+		h1.Destroy();
+		REQUIRE(!h1);
+		REQUIRE(!wh1_0);
+
+		REQUIRE(!h0.QueryName());
+		REQUIRE(!h1.QueryName());
+		REQUIRE(!wh0_0.QueryName());
+		REQUIRE(!wh0_1.QueryName());
+		REQUIRE(!wh1_0.QueryName());
+
+		fe::WeakHandle<TestData> weakHandleFromExpired = h0.DeriveWeak();
+		REQUIRE(!weakHandleFromExpired);
 	}
 }
