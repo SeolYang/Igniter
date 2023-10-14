@@ -440,9 +440,18 @@ namespace fe
 		robin_hood::unordered_map<uint64_t, Private::HandleRepository*> repositoryMap;
 	};
 
+	/**
+	 * Auto-managed Handle based on Pool allocation.
+	 * It provides a memory-safe access to avoid undefined behavior caused by invalid dynamic memory access.
+	 * Owned Handle follows the 'RAII (Resource Acquisition Is Initialization)' principle for allocation management.
+	 * Additionally, it minimizes deallocation of memory for unmanaged (or out-of-management) allocation during manager destruction.
+	 * (Due to its simple structure, it is able to identify which type of instances have become unmanaged.)
+	 * In general, it is recommended to destroy owned handles upon the destruction of the object that allocated the handle.
+	 */
+	template <typename T>
+	using OwnedHandle = HandleManager::OwnedHandle<T>;
+
 	template <typename T>
 	using WeakHandle = HandleManager::WeakHandle<T>;
 
-	template <typename T>
-	using OwnedHandle = HandleManager::OwnedHandle<T>;
 } // namespace fe
