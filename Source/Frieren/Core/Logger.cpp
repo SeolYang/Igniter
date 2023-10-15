@@ -9,12 +9,6 @@ namespace fe
 		consoleSink->set_pattern(pattern);
 		fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
 		fileSink->set_pattern(pattern);
-
-		RegisterCategory<LogTemp>();
-		RegisterCategory<LogInfo>();
-		RegisterCategory<LogDebug>();
-		RegisterCategory<LogWarn>();
-		RegisterCategory<LogFatal>();
 	}
 
 	Logger::~Logger()
@@ -24,5 +18,4 @@ namespace fe
 			delete logger.second;
 		}
 	}
-
-}
+} // namespace fe
