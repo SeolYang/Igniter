@@ -22,6 +22,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Hash.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Logger.h" />
     <ClInclude Include="..\Source\Frieren\Core\Misc.h" />
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h" />
     <ClInclude Include="..\Source\Frieren\Core\Name.h" />
@@ -30,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\Engine.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\Logger.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Name.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

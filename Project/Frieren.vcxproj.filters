@@ -39,12 +39,18 @@
     <ClInclude Include="..\Source\Frieren\Core\String.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\Logger.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\Engine.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\Name.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\Logger.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>

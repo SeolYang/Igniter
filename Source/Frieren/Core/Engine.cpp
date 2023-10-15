@@ -1,5 +1,6 @@
 #include <Core/Engine.h>
 #include <Core/Assert.h>
+#include <Core/Logger.h>
 #include <Core/HandleManager.h>
 
 namespace fe
@@ -13,6 +14,8 @@ namespace fe
 		if (bIsFirstEngineCreation)
 		{
 			instance = this;
+
+			logger = std::make_unique<Logger>();
 			handleManager = std::make_unique<HandleManager>();
 		}
 	}
@@ -23,6 +26,15 @@ namespace fe
 		{
 			instance = nullptr;
 		}
+
+		handleManager.reset();
+		logger.reset();
+	}
+
+	Logger& Engine::GetLogger()
+	{
+		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		return *(instance->logger);
 	}
 
 	HandleManager& Engine::GetHandleManager()
