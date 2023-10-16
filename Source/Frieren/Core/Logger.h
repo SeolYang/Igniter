@@ -17,6 +17,7 @@ namespace fe
 		Info,
 		Debug,
 		Warning,
+		Error,
 		Fatal
 	};
 
@@ -49,6 +50,10 @@ namespace fe
 
 				case ELogVerbosiy::Warning:
 					logger->warn(formattedMessage);
+					break;
+
+				case ELogVerbosiy::Error:
+					logger->error(formattedMessage);
 					break;
 
 				case ELogVerbosiy::Fatal:
@@ -96,5 +101,6 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(LogInfo, ELogVerbosiy::Info);
 	FE_DECLARE_LOG_CATEGORY(LogDebug, ELogVerbosiy::Debug);
 	FE_DECLARE_LOG_CATEGORY(LogWarn, ELogVerbosiy::Warning);
+	FE_DECLARE_LOG_CATEGORY(LogError, ELogVerbosiy::Error);
 	FE_DECLARE_LOG_CATEGORY(LogFatal, ELogVerbosiy::Fatal);
 } // namespace fe
