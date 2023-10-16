@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
+    <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Frieren\Core\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Hash.h" />
@@ -28,6 +29,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Name.h" />
     <ClInclude Include="..\Source\Frieren\Core\Pool.h" />
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\Engine.cpp" />

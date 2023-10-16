@@ -1,8 +1,11 @@
 #pragma once
 #include <memory>
+#include <Core/Version.h>
 
 namespace fe
 {
+	constexpr Version EngineVersion = CreateVersion(0, 1, 0);
+
 	class HandleManager;
 	class Logger;
 	class Engine final

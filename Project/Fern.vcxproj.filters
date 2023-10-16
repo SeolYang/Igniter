@@ -24,5 +24,8 @@
     <ClCompile Include="..\Source\Fern\HandleTest.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Fern\VersionTest.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
