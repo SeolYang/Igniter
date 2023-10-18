@@ -39,13 +39,25 @@
     <ClInclude Include="..\Source\Frieren\Core\String.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\Logger.h">
+    <ClInclude Include="..\Source\Frieren\Core\Log.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Version.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\InputManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\Window.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\Timer.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\Win32API.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,7 +68,10 @@
     <ClCompile Include="..\Source\Frieren\Core\Name.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Core\Logger.cpp">
+    <ClCompile Include="..\Source\Frieren\Core\Log.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\Window.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>

@@ -54,6 +54,17 @@ namespace fe
 		return hashStringMap[hashOfString];
 	}
 
+	std::string_view Name::AsStringView() const
+	{
+		if (hashOfString == InvalidNameHash)
+		{
+			return {};
+		}
+
+		ReadOnlyLock lock{ hashStringMapMutex };
+		return hashStringMap[hashOfString];
+	}
+
 	Name& Name::operator=(const std::string_view nameString)
 	{
 		SetString(nameString);

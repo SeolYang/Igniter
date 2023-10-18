@@ -39,7 +39,9 @@ namespace fe
 		{
 			return AsString();
 		}
+		operator std::string_view() const { return AsStringView(); }
 		std::string AsString() const;
+		std::string_view AsStringView() const;
 
 		operator bool() const { return IsValid(); }
 

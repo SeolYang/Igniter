@@ -1,4 +1,4 @@
-#include <Core/Logger.h>
+#include <Core/Log.h>
 
 namespace fe
 {

@@ -8,19 +8,26 @@ namespace fe
 
 	class HandleManager;
 	class Logger;
+	class Window;
+	class Timer;
 	class Engine final
 	{
 	public:
 		Engine();
 		~Engine();
 
-		[[nodiscard]] static Logger& GetLogger();
+		[[nodiscard]] static Logger&		GetLogger();
 		[[nodiscard]] static HandleManager& GetHandleManager();
 		bool								IsValid() const { return this == instance; }
 
+		int Execute();
+
 	private:
 		static Engine*				   instance;
+		bool						   bShouldExit = false;
+		std::unique_ptr<Timer>		   timer;
 		std::unique_ptr<Logger>		   logger;
 		std::unique_ptr<HandleManager> handleManager;
+		std::unique_ptr<Window>		   window;
 	};
 } // namespace fe
