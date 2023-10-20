@@ -6,10 +6,7 @@ namespace fe
 {
 	Window::Window(const WindowDescription description)
 	{
-		const auto title = description.Title.AsStringView();
-		constexpr size_t TitleBufferSize = 256;
-		wchar_t	   wcharTitle[TitleBufferSize];
-		MultiByteToWideChar(CP_UTF8, 0, title.data(), -1, wcharTitle, TitleBufferSize);
+		std::wstring wideCharTitle = description.Title.AsWideString();
 
 		FE_ASSERT(description.Width > 0 && description.Height > 0, "Invalid Window Resolution.");
 		windowClass = {
@@ -17,7 +14,7 @@ namespace fe
 			CS_OWNDC,
 			WindowProc, 0L, 0L,
 			GetModuleHandle(NULL), NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL,
-			wcharTitle, NULL
+			wideCharTitle.c_str(), NULL
 		};
 
 		if (RegisterClassEx(&windowClass))
@@ -40,7 +37,7 @@ namespace fe
 			windowHandle = CreateWindowEx(
 				exWindowStyle,
 				windowClass.lpszClassName,
-				wcharTitle,
+				wideCharTitle.c_str(),
 				windowStyle,
 				(screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
 				winRect.right - winRect.left, winRect.top - winRect.bottom,

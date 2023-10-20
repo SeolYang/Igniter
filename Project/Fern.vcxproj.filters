@@ -12,7 +12,7 @@
     <None Include="..\..\.clang-format" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Fern\NameTest.cpp">
+    <ClCompile Include="..\Source\Fern\StringTEst.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Fern\main.cpp">

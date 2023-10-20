@@ -66,7 +66,6 @@ namespace fe
 		bool	 IsValid() const { return hashOfString != InvalidHash; }
 		uint64_t GetHash() const { return hashOfString; }
 
-		String& operator=(std::string_view nameString);
 		operator std::string() const
 		{
 			return AsString();
@@ -74,10 +73,13 @@ namespace fe
 		operator std::string_view() const { return AsStringView(); }
 		std::string AsString() const;
 		std::string_view AsStringView() const;
+		std::wstring	 AsWideString() const;
 
 		operator bool() const { return IsValid(); }
 
-		String& operator=(const String& name);
+		String& operator=(const String& rhs);
+		String& operator=(std::string_view rhs);
+		String& operator=(const std::string& rhs);
 
 		bool operator==(std::string_view rhs) const;
 		bool operator!=(const std::string_view rhs) const { return !(*this == rhs); }

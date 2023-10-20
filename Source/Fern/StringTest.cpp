@@ -47,4 +47,12 @@ TEST_CASE("Core.String")
 	{
 		REQUIRE((!(incorretlyEncodedName == invalidEmptyName) && (incorretlyEncodedName != invalidEmptyName)));
 	}
+
+	const std::wstring wideCharString = L"안녕";
+	const fe::String   feStringHello = fe::String("안녕");
+	SECTION("String As Wide Character String")
+	{
+		REQUIRE(wideCharString == feStringHello.AsWideString());
+	}
+	
 }

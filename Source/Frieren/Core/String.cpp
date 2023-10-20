@@ -5,7 +5,7 @@
 namespace fe
 {
 	String::HashStringMap String::hashStringMap = {};
-	SharedMutex			String::hashStringMapMutex;
+	SharedMutex			  String::hashStringMapMutex;
 
 	String::String(const std::string_view stringView)
 		: hashOfString(InvalidHash)
@@ -18,23 +18,23 @@ namespace fe
 	{
 	}
 
-	void String::SetString(const std::string_view nameString)
+	void String::SetString(const std::string_view stringView)
 	{
-		const bool bIsNotEmpty = !nameString.empty();
+		const bool bIsNotEmpty = !stringView.empty();
 		FE_ASSERT(bIsNotEmpty, "Empty Name");
 
-		const bool bIsEncodedAsUTF8 = IsValidUTF8(nameString);
-		FE_ASSERT(bIsEncodedAsUTF8, "Invalid UTF-8 String: {}", nameString);
+		const bool bIsEncodedAsUTF8 = IsValidUTF8(stringView);
+		FE_ASSERT(bIsEncodedAsUTF8, "Invalid UTF-8 String: {}", stringView);
 
 		const bool bIsValidString = bIsNotEmpty && bIsEncodedAsUTF8;
 		if (bIsValidString)
 		{
-			hashOfString = Private::HashCRC64(nameString);
+			hashOfString = Private::HashCRC64(stringView);
 
 			WriteLock lock{ hashStringMapMutex };
 			if (!hashStringMap.contains(hashOfString))
 			{
-				hashStringMap[hashOfString] = nameString;
+				hashStringMap[hashOfString] = stringView;
 			}
 		}
 		else
@@ -65,28 +65,39 @@ namespace fe
 		return hashStringMap[hashOfString];
 	}
 
-	String& String::operator=(const std::string_view nameString)
+	std::wstring String::AsWideString() const
 	{
-		SetString(nameString);
+		return Wider(AsStringView());
+	}
+
+	String& String::operator=(const std::string& rhs)
+	{
+		SetString(rhs);
 		return *this;
 	}
 
-	String& String::operator=(const String& name)
+	String& String::operator=(const std::string_view rhs)
 	{
-		hashOfString = name.hashOfString;
+		SetString(rhs);
 		return *this;
 	}
 
-	bool String::operator==(const std::string_view nameString) const
+	String& String::operator=(const String& rhs)
 	{
-		return (*this) == String{ nameString };
+		hashOfString = rhs.hashOfString;
+		return *this;
 	}
 
-	bool String::operator==(const String& name) const
+	bool String::operator==(const std::string_view rhs) const
 	{
-		const bool bValidNames = IsValid() && name.IsValid();
-		FE_ASSERT(bValidNames, "Invalid name comparision.");
-		return bValidNames ? hashOfString == name.hashOfString : false;
+		return (*this) == String{ rhs };
+	}
+
+	bool String::operator==(const String& rhs) const
+	{
+		const bool bIsValid = IsValid() && rhs.IsValid();
+		FE_ASSERT(bIsValid, "Invalid string comparision.");
+		return bIsValid ? hashOfString == rhs.hashOfString : false;
 	}
 
 } // namespace fe
