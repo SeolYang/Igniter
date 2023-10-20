@@ -26,7 +26,7 @@ namespace fe
 			const WindowDescription windowDesc{
 				.Width = 1280,
 				.Height = 720,
-				.Title = Name(settings::GameName)
+				.Title = String(settings::GameName)
 			};
 
 			window = std::make_unique<Window>(windowDesc);

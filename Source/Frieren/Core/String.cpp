@@ -1,24 +1,24 @@
-#include <Core/Name.h>
+#include <Core/String.h>
 #include <Core/Hash.h>
 #include <Core/Assert.h>
 
 namespace fe
 {
-	Name::HashStringMap Name::hashStringMap = {};
-	SharedMutex			Name::hashStringMapMutex;
+	String::HashStringMap String::hashStringMap = {};
+	SharedMutex			String::hashStringMapMutex;
 
-	Name::Name(const std::string_view nameString)
-		: hashOfString(InvalidNameHash)
+	String::String(const std::string_view stringView)
+		: hashOfString(InvalidHash)
 	{
-		SetString(nameString);
+		SetString(stringView);
 	}
 
-	Name::Name(const Name& name)
-		: hashOfString(name.hashOfString)
+	String::String(const String& other)
+		: hashOfString(other.hashOfString)
 	{
 	}
 
-	void Name::SetString(const std::string_view nameString)
+	void String::SetString(const std::string_view nameString)
 	{
 		const bool bIsNotEmpty = !nameString.empty();
 		FE_ASSERT(bIsNotEmpty, "Empty Name");
@@ -39,13 +39,13 @@ namespace fe
 		}
 		else
 		{
-			hashOfString = InvalidNameHash;
+			hashOfString = InvalidHash;
 		}
 	}
 
-	std::string Name::AsString() const
+	std::string String::AsString() const
 	{
-		if (hashOfString == InvalidNameHash)
+		if (hashOfString == InvalidHash)
 		{
 			return std::string();
 		}
@@ -54,9 +54,9 @@ namespace fe
 		return hashStringMap[hashOfString];
 	}
 
-	std::string_view Name::AsStringView() const
+	std::string_view String::AsStringView() const
 	{
-		if (hashOfString == InvalidNameHash)
+		if (hashOfString == InvalidHash)
 		{
 			return {};
 		}
@@ -65,24 +65,24 @@ namespace fe
 		return hashStringMap[hashOfString];
 	}
 
-	Name& Name::operator=(const std::string_view nameString)
+	String& String::operator=(const std::string_view nameString)
 	{
 		SetString(nameString);
 		return *this;
 	}
 
-	Name& Name::operator=(const Name& name)
+	String& String::operator=(const String& name)
 	{
 		hashOfString = name.hashOfString;
 		return *this;
 	}
 
-	bool Name::operator==(const std::string_view nameString) const
+	bool String::operator==(const std::string_view nameString) const
 	{
-		return (*this) == Name{ nameString };
+		return (*this) == String{ nameString };
 	}
 
-	bool Name::operator==(const Name& name) const
+	bool String::operator==(const String& name) const
 	{
 		const bool bValidNames = IsValid() && name.IsValid();
 		FE_ASSERT(bValidNames, "Invalid name comparision.");

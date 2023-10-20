@@ -30,13 +30,10 @@
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\Name.h">
+    <ClInclude Include="..\Source\Frieren\Core\String.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Pool.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\String.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Log.h">
@@ -65,7 +62,7 @@
     <ClCompile Include="..\Source\Frieren\Core\Engine.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Core\Name.cpp">
+    <ClCompile Include="..\Source\Frieren\Core\String.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp">

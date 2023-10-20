@@ -1,11 +1,11 @@
 #include <catch.hpp>
 #include <Core/HandleManager.h>
-#include <Core/Name.h>
+#include <Core/String.h>
 
 struct TestData
 {
 	std::string nameString;
-	fe::Name	name;
+	fe::String	name;
 
 	~TestData()
 	{
@@ -20,12 +20,12 @@ TEST_CASE("Core.HandleManager")
 
 	const TestData td0{
 		"NiceString",
-		Name{ "NiceName" }
+		String{ "NiceName" }
 	};
 
 	const TestData td1{
 		"Fern, The Test Project",
-		Name{ "FErn" }
+		String{ "FErn" }
 	};
 
 	OwnedHandle<TestData> h0 = OwnedHandle<TestData>::Create(
@@ -47,13 +47,13 @@ TEST_CASE("Core.HandleManager")
 
 		// name query 과정에 뭔가 이상함
 		auto queriedName = h0.QueryName();
-		REQUIRE(h0.QueryName() == Name("TD0"));
+		REQUIRE(h0.QueryName() == String("TD0"));
 
 		REQUIRE(h0->name == td0.name);
 		REQUIRE(h0->nameString == td0.nameString);
 
 
-		REQUIRE(h1.QueryName() == Name("TD1"));
+		REQUIRE(h1.QueryName() == String("TD1"));
 	}
 
 	WeakHandle<TestData> wh0_0 = h0.DeriveWeak();
@@ -70,7 +70,7 @@ TEST_CASE("Core.HandleManager")
 		REQUIRE(wh1_0 != h0);
 		REQUIRE(wh1_0 == h1);
 
-		REQUIRE(wh0_0.QueryName() == Name("TD0"));
+		REQUIRE(wh0_0.QueryName() == String("TD0"));
 
 		REQUIRE(wh0_0->name == td0.name);
 		REQUIRE(wh0_0->nameString == td0.nameString);
@@ -80,9 +80,9 @@ TEST_CASE("Core.HandleManager")
 
 	SECTION("Renaming Handle")
 	{
-		wh0_0.Rename(FE_NAME("Renamed TD0"));
-		REQUIRE(wh0_0.QueryName() == FE_NAME("Renamed TD0"));
-		REQUIRE(h0.QueryName() == FE_NAME("Renamed TD0"));
+		wh0_0.Rename(String("Renamed TD0"));
+		REQUIRE(wh0_0.QueryName() == String("Renamed TD0"));
+		REQUIRE(h0.QueryName() == String("Renamed TD0"));
 	}
 
 	SECTION("Destroy-Expired Handle")

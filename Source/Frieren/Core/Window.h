@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <Core/Win32API.h>
-#include <Core/Name.h>
+#include <Core/String.h>
 #include <Core/Log.h>
 
 namespace fe
@@ -10,7 +10,7 @@ namespace fe
 	{
 		const uint32_t Width;
 		const uint32_t Height;
-		const Name	   Title;
+		const String   Title;
 	};
 
 	class Window final
@@ -29,6 +29,6 @@ namespace fe
 
 	private:
 		WNDCLASSEX windowClass;
-		HWND		windowHandle = NULL;
+		HWND	   windowHandle = NULL;
 	};
 } // namespace fe

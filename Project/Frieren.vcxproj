@@ -27,9 +27,8 @@
     <ClInclude Include="..\Source\Frieren\Core\Log.h" />
     <ClInclude Include="..\Source\Frieren\Core\Misc.h" />
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h" />
-    <ClInclude Include="..\Source\Frieren\Core\Name.h" />
-    <ClInclude Include="..\Source\Frieren\Core\Pool.h" />
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Pool.h" />
     <ClInclude Include="..\Source\Frieren\Core\Timer.h" />
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
@@ -38,7 +37,7 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp" />
-    <ClCompile Include="..\Source\Frieren\Core\Name.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

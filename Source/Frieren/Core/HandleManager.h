@@ -1,6 +1,5 @@
 #pragma once
 #include <Core/String.h>
-#include <Core/Name.h>
 #include <Core/Pool.h>
 #include <Core/Mutex.h>
 #include <Core/Hash.h>
@@ -70,7 +69,7 @@ namespace fe
 			}
 
 			template <typename... Args>
-			uint64_t Create(const Name name, Args&&... args)
+			uint64_t Create(const String name, Args&&... args)
 			{
 				PoolAllocation<T> allocation;
 				{
@@ -126,7 +125,7 @@ namespace fe
 				return IsValidUnsafe(index);
 			}
 
-			Name QueryName(const uint64_t index) const
+			String QueryName(const uint64_t index) const
 			{
 				if (index == InvalidIndex)
 				{
@@ -142,7 +141,7 @@ namespace fe
 				return nameMap.find(index)->second;
 			}
 
-			void Rename(const uint64_t index, const Name newName)
+			void Rename(const uint64_t index, const String newName)
 			{
 				WriteLock lock{ nameMapMutex };
 				if (IsValidUnsafe(index))
@@ -166,7 +165,7 @@ namespace fe
 			Pool<T>				instancePool;
 
 			mutable SharedMutex						  nameMapMutex;
-			robin_hood::unordered_map<uint64_t, Name> nameMap;
+			robin_hood::unordered_map<uint64_t, String> nameMap;
 		};
 	} // namespace Private
 
@@ -251,7 +250,7 @@ namespace fe
 				return rHandleManager != nullptr && index != InvalidIndex && rHandleManager->IsValidIndex<T>(index);
 			}
 
-			Name QueryName() const
+			String QueryName() const
 			{
 				if (rHandleManager == nullptr || index == InvalidIndex)
 				{
@@ -261,7 +260,7 @@ namespace fe
 				return rHandleManager->QueryName<T>(index);
 			}
 
-			void Rename(const Name newName)
+			void Rename(const String newName)
 			{
 				if (rHandleManager != nullptr && index != InvalidIndex)
 				{
@@ -346,7 +345,7 @@ namespace fe
 
 		public:
 			template <typename... Args>
-			static OwnedHandle Create(HandleManager& handleManager, const Name name, Args&&... args)
+			static OwnedHandle Create(HandleManager& handleManager, const String name, Args&&... args)
 			{
 				return OwnedHandle(handleManager,
 					handleManager.Create<T>(name, std::forward<Args>(args)...));
@@ -355,7 +354,7 @@ namespace fe
 			template <typename... Args>
 			static OwnedHandle Create(HandleManager& handleManager, const std::string_view name, Args&&... args)
 			{
-				return Create(handleManager, Name(name), std::forward<Args>(args)...);
+				return Create(handleManager, String(name), std::forward<Args>(args)...);
 			}
 
 		private:
@@ -367,7 +366,7 @@ namespace fe
 
 	private:
 		template <typename T, typename... Args>
-		uint64_t Create(const Name name, Args&&... args)
+		uint64_t Create(const String name, Args&&... args)
 		{
 			constexpr uint64_t hashOfType = HashOfType<T>;
 			{
@@ -407,10 +406,10 @@ namespace fe
 		}
 
 		template <typename T>
-		Name QueryName(const uint64_t index) const
+		String QueryName(const uint64_t index) const
 		{
 			const Private::GenericHandleRepository<T>* repository = GetRepository<T>();
-			return repository == nullptr ? Name() : repository->QueryName(index);
+			return repository == nullptr ? String() : repository->QueryName(index);
 		}
 
 		template <typename T>
@@ -426,7 +425,7 @@ namespace fe
 		}
 
 		template <typename T>
-		void Rename(const uint64_t index, const Name newName)
+		void Rename(const uint64_t index, const String newName)
 		{
 			if (Private::GenericHandleRepository<T>* repository = GetRepository<T>();
 				repository != nullptr)

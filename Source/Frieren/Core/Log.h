@@ -5,7 +5,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <robin_hood.h>
 #include <format>
-#include <Core/Name.h>
+#include <Core/String.h>
 #include <Core/Hash.h>
 #include <Core/Mutex.h>
 

@@ -303,6 +303,8 @@ namespace fe::Private
 
 namespace fe
 {
+	constexpr uint64_t InvalidHash = 0xffffffffffffffffUi64;
+
 	template <typename T>
 	constexpr uint64_t HashOfType = Private::EvaluateHashOfType<T>();
 } // namespace fe

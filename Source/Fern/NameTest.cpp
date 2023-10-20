@@ -1,16 +1,16 @@
 #include <catch.hpp>
-#include <Core/Name.h>
+#include <Core/String.h>
 
-TEST_CASE("Core.Name")
+TEST_CASE("Core.String")
 {
 	using namespace fe;
 
 	constexpr std::string_view testStringView = "프리렌Frieren";
 	const std::string		   testString = std::string(testStringView);
 
-	const fe::Name testName = fe::Name(testStringView);
-	const fe::Name testNameFromString = fe::Name(testString);
-	SECTION("Initialization of Name.")
+	const fe::String testName = fe::String(testStringView);
+	const fe::String testNameFromString = fe::String(testString);
+	SECTION("Initialization of String.")
 	{
 		REQUIRE(testName.IsValid());
 		REQUIRE(testNameFromString.IsValid());
@@ -19,11 +19,11 @@ TEST_CASE("Core.Name")
 	SECTION("Hash equality of name.")
 	{
 		REQUIRE(testName == testNameFromString);
-		REQUIRE(std::hash<fe::Name>()(testName) == testName.GetHash());
+		REQUIRE(std::hash<fe::String>()(testName) == testName.GetHash());
 	}
 
 	constexpr std::string_view otherStringView = "페른Fern";
-	const fe::Name			   otherName = fe::Name(otherStringView);
+	const fe::String		   otherName = fe::String(otherStringView);
 	SECTION("Hash inequality of name.")
 	{
 		REQUIRE(otherName != testName);
@@ -35,15 +35,15 @@ TEST_CASE("Core.Name")
 		REQUIRE(testName.AsString() == testString);
 	}
 
-	const fe::Name incorretlyEncodedName = fe::Name(std::string(reinterpret_cast<const char*>(&L"인코딩")));
-	const fe::Name invalidEmptyName = fe::Name("");
-	SECTION("Invalid Name")
+	const fe::String incorretlyEncodedName = fe::String(std::string(reinterpret_cast<const char*>(&L"인코딩")));
+	const fe::String invalidEmptyName = fe::String("");
+	SECTION("Invalid String")
 	{
 		REQUIRE(!incorretlyEncodedName);
 		REQUIRE(!invalidEmptyName);
 	}
 
-	SECTION("Inequality of Invalid Name")
+	SECTION("Inequality of Invalid String")
 	{
 		REQUIRE((!(incorretlyEncodedName == invalidEmptyName) && (incorretlyEncodedName != invalidEmptyName)));
 	}
