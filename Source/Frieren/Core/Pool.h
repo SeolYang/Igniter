@@ -123,7 +123,7 @@ namespace fe
 		template <typename... Args>
 		[[nodiscard]] Allocation Allocate(Args&&... args)
 		{
-			const Allocation result = Allocate();
+			const Allocation result = AllocateInternal();
 			T* const		 addressOfInstance = GetAddressOfAllocation(result);
 			new (addressOfInstance) T(std::forward<Args>(args)...);
 			return result;
@@ -154,7 +154,7 @@ namespace fe
 		}
 
 	private:
-		Allocation Allocate()
+		Allocation AllocateInternal()
 		{
 			Allocation result{};
 

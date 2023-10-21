@@ -38,7 +38,7 @@ namespace fe
 	}
 
 	/**
-	 * The String class is extremely light-weight String-String comparing helper class.
+	 * The String class is light-weight strictly UTF-8 Encoded String.
 	 * It provides light-weight string-string comparing based on 'CRC64' hash.
 	 * And also, it is convertible as std::string.
 	 *

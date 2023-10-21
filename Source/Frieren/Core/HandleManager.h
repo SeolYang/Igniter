@@ -164,11 +164,12 @@ namespace fe
 			mutable SharedMutex poolMutex;
 			Pool<T>				instancePool;
 
-			mutable SharedMutex						  nameMapMutex;
+			mutable SharedMutex							nameMapMutex;
 			robin_hood::unordered_map<uint64_t, String> nameMap;
 		};
 	} // namespace Private
 
+	// @dependency	None
 	class HandleManager final
 	{
 	public:
@@ -191,6 +192,10 @@ namespace fe
 		class WeakHandle
 		{
 		public:
+			using AlterConstnessType = std::conditional_t<std::is_const_v<T>, std::remove_const_t<T>, const T>;
+			friend WeakHandle<AlterConstnessType>;
+
+			WeakHandle() = default;
 			WeakHandle(const WeakHandle&) = default;
 			WeakHandle(WeakHandle&&) noexcept = default;
 			virtual ~WeakHandle()
@@ -268,21 +273,36 @@ namespace fe
 				}
 			}
 
+			WeakHandle<T> DeriveWeak()
+			{
+				if (this->IsValid())
+				{
+					return WeakHandle<T>{
+						*(this->rHandleManager),
+						this->index
+					};
+				}
+
+				return {};
+			}
+
+			WeakHandle<const T> DeriveWeak() const
+			{
+				if (this->IsValid())
+				{
+					return WeakHandle<const T>{
+						*(this->rHandleManager),
+						this->index
+					};
+				}
+
+				return WeakHandle<const T>{};
+			}
+
 		protected:
-			WeakHandle() = default;
 			WeakHandle(HandleManager& handleManager, const uint64_t index)
 				: rHandleManager(&handleManager), index(index)
 			{
-			}
-
-			static WeakHandle Create(HandleManager& handleManager, const uint64_t index)
-			{
-				return WeakHandle{ handleManager, index };
-			}
-
-			static WeakHandle CreateInvalid()
-			{
-				return {};
 			}
 
 		private:
@@ -331,16 +351,6 @@ namespace fe
 					this->rHandleManager = nullptr;
 					this->index = InvalidIndex;
 				}
-			}
-
-			WeakHandle<T> DeriveWeak()
-			{
-				if (this->IsValid())
-				{
-					return WeakHandle<T>::Create(*(this->rHandleManager), this->index);
-				}
-
-				return WeakHandle<T>::CreateInvalid();
 			}
 
 		public:
@@ -452,5 +462,4 @@ namespace fe
 
 	template <typename T>
 	using WeakHandle = HandleManager::WeakHandle<T>;
-
 } // namespace fe

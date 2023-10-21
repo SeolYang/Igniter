@@ -1,6 +1,8 @@
 #include <Core/Window.h>
 #include <Core/Assert.h>
 #include <Core/EmbededSettings.h>
+#include <Core/Engine.h>
+#include <Core/InputManager.h>
 
 namespace fe
 {
@@ -69,6 +71,7 @@ namespace fe
 				break;
 		}
 
+		Engine::GetInputManager().HandleEvent(uMsg, wParam, lParam);
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 } // namespace fe

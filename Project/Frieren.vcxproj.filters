@@ -71,5 +71,8 @@
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

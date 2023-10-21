@@ -3,16 +3,17 @@
 
 namespace fe
 {
+	// @dependency	None
 	class Timer final
 	{
 	public:
 		Timer() = default;
 		Timer(const Timer&) = delete;
-		Timer(Timer&&) = delete;
+		Timer(Timer&&) noexcept = delete;
 		~Timer() = default;
 
 		Timer& operator=(const Timer&) = delete;
-		Timer& operator=(Timer&&) = delete;
+		Timer& operator=(Timer&&) noexcept = delete;
 
 		void Begin()
 		{

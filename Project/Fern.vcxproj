@@ -138,7 +138,7 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Fern\HandleTest.cpp" />
     <ClCompile Include="..\Source\Fern\main.cpp" />
-    <ClCompile Include="..\Source\Fern\StringTEst.cpp" />
+    <ClCompile Include="..\Source\Fern\StringTest.cpp" />
     <ClCompile Include="..\Source\Fern\PoolTest.cpp" />
     <ClCompile Include="..\Source\Fern\VersionTest.cpp" />
   </ItemGroup>

@@ -10,6 +10,7 @@ namespace fe
 	class Logger;
 	class Window;
 	class Timer;
+	class InputManager;
 	class Engine final
 	{
 	public:
@@ -18,6 +19,7 @@ namespace fe
 
 		[[nodiscard]] static Logger&		GetLogger();
 		[[nodiscard]] static HandleManager& GetHandleManager();
+		[[nodiscard]] static InputManager&	GetInputManager();
 		bool								IsValid() const { return this == instance; }
 
 		int Execute();
@@ -28,6 +30,7 @@ namespace fe
 		std::unique_ptr<Timer>		   timer;
 		std::unique_ptr<Logger>		   logger;
 		std::unique_ptr<HandleManager> handleManager;
+		std::unique_ptr<InputManager>  inputManager;
 		std::unique_ptr<Window>		   window;
 	};
 } // namespace fe

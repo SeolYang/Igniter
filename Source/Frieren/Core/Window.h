@@ -13,16 +13,17 @@ namespace fe
 		const String   Title;
 	};
 
+	// @dependency	fe::Engine, fe::Logger, fe::InputManager
 	class Window final
 	{
 	public:
 		Window(WindowDescription description);
 		~Window();
 		Window(const Window&) = delete;
-		Window(Window&&) = delete;
+		Window(Window&&) noexcept = delete;
 
 		Window& operator=(const Window&) = delete;
-		Window& operator=(Window&&) = delete;
+		Window& operator=(Window&&) noexcept = delete;
 
 	private:
 		static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);

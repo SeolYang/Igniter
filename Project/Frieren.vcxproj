@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\Engine.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />

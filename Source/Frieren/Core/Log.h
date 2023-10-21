@@ -21,11 +21,18 @@ namespace fe
 		Fatal
 	};
 
+	// @dependency	None
 	class Logger final
 	{
 	public:
 		Logger();
 		~Logger();
+
+		Logger(const Logger&) = delete;
+		Logger(Logger&&) noexcept = delete;
+
+		Logger& operator=(const Logger&) = delete;
+		Logger& operator=(Logger&&) noexcept = delete;
 
 		template <typename C, typename... Args>
 		void Log(const std::string_view logMessage, Args&&... args)
