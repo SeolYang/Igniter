@@ -11,8 +11,8 @@
 #include <Core/Mutex.h>
 #include <Core/Hash.h>
 #include <string>
-#ifndef UTF_CPP_CPLUSPLUS 
-#define UTF_CPP_CPLUSPLUS 201703L
+#ifndef UTF_CPP_CPLUSPLUS
+	#define UTF_CPP_CPLUSPLUS 201703L
 #endif
 #include <utf8cpp/utf8.h>
 
@@ -66,12 +66,9 @@ namespace fe
 		bool	 IsValid() const { return hashOfString != InvalidHash; }
 		uint64_t GetHash() const { return hashOfString; }
 
-		operator std::string() const
-		{
-			return AsString();
-		}
+		operator std::string() const { return AsString(); }
 		operator std::string_view() const { return AsStringView(); }
-		std::string AsString() const;
+		std::string		 AsString() const;
 		std::string_view AsStringView() const;
 		std::wstring	 AsWideString() const;
 
@@ -90,7 +87,6 @@ namespace fe
 		using HashStringMap = robin_hood::unordered_map<uint64_t, std::string>;
 		static HashStringMap hashStringMap;
 		static SharedMutex	 hashStringMapMutex;
-
 
 	private:
 		uint64_t hashOfString = InvalidHash;

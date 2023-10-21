@@ -33,6 +33,10 @@ namespace fe
 			inputManager->BindAxis(String("MoveForward"), EInput::S, -1.f);
 			inputManager->BindAxis(String("MoveLeft"), EInput::A, 1.f);
 			inputManager->BindAxis(String("MoveLeft"), EInput::D, -1.f);
+			inputManager->BindAxis(String("MouseX"), EInput::MouseX, 1.f);
+			inputManager->BindAxis(String("MouseY"), EInput::MouseY, 1.f);
+			inputManager->BindAxis(String("RelativeMouseX"), EInput::RelativeMouseX, 1.f);
+			inputManager->BindAxis(String("RelativeMouseY"), EInput::RelativeMouseY, 1.f);
 
 			/* @test temp window descriptor */
 			const WindowDescription windowDesc{
@@ -52,11 +56,17 @@ namespace fe
 			instance = nullptr;
 		}
 
-		window.reset();
 		inputManager.reset();
 		handleManager.reset();
+		window.reset();
 		logger.reset();
 		timer.reset();
+	}
+
+	Timer& Engine::GetTimer()
+	{
+		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		return *(instance->timer);
 	}
 
 	Logger& Engine::GetLogger()
@@ -69,6 +79,12 @@ namespace fe
 	{
 		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
 		return *(instance->handleManager);
+	}
+
+	fe::Window& Engine::GetWindow()
+	{
+		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		return *(instance->window);
 	}
 
 	InputManager& Engine::GetInputManager()

@@ -25,10 +25,14 @@ namespace fe
 		Window& operator=(const Window&) = delete;
 		Window& operator=(Window&&) noexcept = delete;
 
+		WindowDescription GetDescription() const { return windowDesc; }
+
 	private:
 		static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
 	private:
+		WindowDescription windowDesc;
+
 		WNDCLASSEX windowClass;
 		HWND	   windowHandle = NULL;
 	};

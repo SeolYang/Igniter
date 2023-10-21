@@ -17,8 +17,10 @@ namespace fe
 		Space,
 
 		/** Mouse physical inputs */
-		MouseY,
 		MouseX,
+		MouseY,
+		RelativeMouseX,
+		RelativeMouseY,
 		MouseLB,
 		MouseRB
 	};
@@ -41,7 +43,7 @@ namespace fe
 		float Value = 0.0f;
 	};
 
-	// @dependency	fe::Engine, fe::Logger, fe::HandleManager
+	// @dependency	fe::Engine, fe::Logger, fe::HandleManager, fe::Window
 	class InputManager
 	{
 	public:
@@ -92,6 +94,9 @@ namespace fe
 
 		EventMap<Action> actionMap;
 		EventMap<Axis>	 axisMap;
+
+		float latestMouseX = std::numeric_limits<float>::infinity();
+		float latestMouseY = std::numeric_limits<float>::infinity();
 	};
 
 	namespace Private

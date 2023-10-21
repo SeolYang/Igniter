@@ -1,6 +1,7 @@
 #include <Core/InputManager.h>
 #include <Core/Engine.h>
 #include <Core/Log.h>
+#include <Core/Window.h>
 
 namespace fe
 {
@@ -112,9 +113,26 @@ namespace fe
 		HandleAxis(input, 0.f);
 	}
 
-	void InputManager::HandleMouseMove(WPARAM wParam, LPARAM lParam)
+	void InputManager::HandleMouseMove(const WPARAM wParam, const LPARAM lParam)
 	{
-		/* @todo impl mouse move capture*/
+		constexpr float Infinity = std::numeric_limits<float>::infinity();
+
+		const WindowDescription windowDesc = Engine::GetWindow().GetDescription();
+		const float				mouseX = static_cast<float>(LOWORD(lParam)) / windowDesc.Width;
+		const float				mouseY = static_cast<float>(HIWORD(lParam)) / windowDesc.Height;
+		HandleAxis(EInput::MouseX, mouseX);
+		HandleAxis(EInput::MouseY, mouseY);
+
+		if (latestMouseX != Infinity && latestMouseY != Infinity)
+		{
+			const float relativeMouseX = mouseX - latestMouseX;
+			const float relativeMouseY = mouseY - latestMouseY;
+			HandleAxis(EInput::RelativeMouseX, relativeMouseX);
+			HandleAxis(EInput::RelativeMouseY, relativeMouseY);
+		}
+
+		latestMouseX = mouseX;
+		latestMouseY = mouseY;
 	}
 
 	void InputManager::HandlePressAction(const EInput input)

@@ -7,6 +7,7 @@
 namespace fe
 {
 	Window::Window(const WindowDescription description)
+		: windowDesc(description)
 	{
 		std::wstring wideCharTitle = description.Title.AsWideString();
 
