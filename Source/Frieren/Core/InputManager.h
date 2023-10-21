@@ -9,14 +9,14 @@ namespace fe
 	{
 		None,
 
-		/** Keyboard physical inputs */
+		/** Keyboard inputs */
 		W,
 		A,
 		S,
 		D,
 		Space,
 
-		/** Mouse physical inputs */
+		/** Mouse inputs */
 		MouseX,
 		MouseY,
 		RelativeMouseX,

@@ -5,8 +5,6 @@
 
 namespace fe
 {
-	FE_DECLARE_LOG_CATEGORY(LogInputInfo, ELogVerbosiy::Info);
-
 	void InputManager::BindAction(const String nameOfAction, const EInput input)
 	{
 		const bool bIsValidName = nameOfAction;

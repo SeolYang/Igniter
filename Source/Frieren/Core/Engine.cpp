@@ -23,21 +23,7 @@ namespace fe
 			logger = std::make_unique<Logger>();
 			handleManager = std::make_unique<HandleManager>();
 			inputManager = std::make_unique<InputManager>();
-			/* @test */
-			inputManager->BindAction(String("Jump"), EInput::Space);
-			inputManager->BindAction(String("Forward"), EInput::W);
-			inputManager->BindAction(String("Left"), EInput::A);
-			inputManager->BindAction(String("Backward"), EInput::S);
-			inputManager->BindAction(String("Right"), EInput::D);
-			inputManager->BindAxis(String("MoveForward"), EInput::W, 1.f);
-			inputManager->BindAxis(String("MoveForward"), EInput::S, -1.f);
-			inputManager->BindAxis(String("MoveLeft"), EInput::A, 1.f);
-			inputManager->BindAxis(String("MoveLeft"), EInput::D, -1.f);
-			inputManager->BindAxis(String("MouseX"), EInput::MouseX, 1.f);
-			inputManager->BindAxis(String("MouseY"), EInput::MouseY, 1.f);
-			inputManager->BindAxis(String("RelativeMouseX"), EInput::RelativeMouseX, 1.f);
-			inputManager->BindAxis(String("RelativeMouseY"), EInput::RelativeMouseY, 1.f);
-
+			
 			/* @test temp window descriptor */
 			const WindowDescription windowDesc{
 				.Width = 1280,
