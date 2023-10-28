@@ -7,15 +7,15 @@
     <Filter Include="Source\Core">
       <UniqueIdentifier>{187f7688-de80-481c-8f77-0314177ce907}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Gameplay">
+      <UniqueIdentifier>{8520c80d-9a10-48dc-8dff-f6ce375af563}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.clang-format" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\Engine.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h">
@@ -57,11 +57,11 @@
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Engine.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Frieren\Core\Engine.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
@@ -73,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp">
       <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Engine.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

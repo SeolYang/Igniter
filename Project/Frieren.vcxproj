@@ -20,7 +20,6 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
-    <ClInclude Include="..\Source\Frieren\Core\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Hash.h" />
     <ClInclude Include="..\Source\Frieren\Core\InputManager.h" />
@@ -33,13 +32,14 @@
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
+    <ClInclude Include="..\Source\Frieren\Engine.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Frieren\Core\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
+    <ClCompile Include="..\Source\Frieren\Engine.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

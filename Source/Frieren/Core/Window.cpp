@@ -1,8 +1,8 @@
 #include <Core/Window.h>
 #include <Core/Assert.h>
 #include <Core/EmbededSettings.h>
-#include <Core/Engine.h>
 #include <Core/InputManager.h>
+#include <Engine.h>
 
 namespace fe
 {
