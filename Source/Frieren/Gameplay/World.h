@@ -16,7 +16,7 @@ namespace fe
 		World& operator=(const World&) = delete;
 		World& operator=(World&&) noexcept = delete;
 
-		inline Entity Create()
+		[[nodiscard]] inline Entity Create()
 		{
 			return registry.create();
 		}
@@ -41,7 +41,7 @@ namespace fe
 		}
 
 		template <typename Component>
-		Entity ToEntity(const Component& component) const
+		[[nodiscard]] Entity ToEntity(const Component& component) const
 		{
 			registry.view()
 			return entt::to_entity(registry, component);
@@ -57,18 +57,6 @@ namespace fe
 		void Attach(Itr begin, Itr end, const Component& value = {})
 		{
 			registry.insert<Component>(begin, end, value);
-		}
-
-		template <typename Component, typename... Args>
-		Component& Replace(const Entity entity, Args&&... args)
-		{
-			return registry.emplace<Component>(entity, std::forward<Args>(args)...);
-		}
-
-		template <typename Component, typename... Func>
-		Component& Patch(const Entity entity, Func&&... func)
-		{
-			return registry.patch<Component>(entity, std::forward<Func>(func)...);
 		}
 
 		template <typename Component, typename... Args>
@@ -108,6 +96,18 @@ namespace fe
 			return registry.remove<Components...>(begin, end);
 		}
 
+		template <typename Component, typename... Args>
+		Component& Replace(const Entity entity, Args&&... args)
+		{
+			return registry.emplace<Component>(entity, std::forward<Args>(args)...);
+		}
+
+		template <typename Component, typename... Func>
+		Component& Patch(const Entity entity, Func&&... func)
+		{
+			return registry.patch<Component>(entity, std::forward<Func>(func)...);
+		}
+
 		template <typename... Components>
 		[[nodiscard]] auto Get(const Entity entity)
 		{
@@ -145,32 +145,32 @@ namespace fe
 		}
 
 		template <typename... Components>
-		void ClearComponent()
+		void Clear()
 		{
 			registry.clear<Components...>();
 		}
 
-		void Clear()
+		void Reset()
 		{
 			registry.clear();
 		}
 
 		template <typename... Components>
-		bool AllOf(const Entity entity) const
+		[[nodiscard]] bool AllOf(const Entity entity) const
 		{
 			return registry.all_of<Components...>(entity);
 		}
 		
 		template <typename... Components>
-		bool AnyOf(const Entity entity) const
+		[[nodiscard]] bool AnyOf(const Entity entity) const
 		{
 			return registry.any_of<Components...>(entity);
 		}
 
 		/** (numOfComponents in entity == 0) == true */
-		bool IsOrphan(const Entity entity) const;
+		[[nodiscard]] bool IsOrphan(const Entity entity) const;
 		/** Entity does not destroyed. */
-		bool IsValid(const Entity entity) const;
+		[[nodiscard]] bool IsValid(const Entity entity) const;
 
 	private:
 		Registry registry;
