@@ -15,6 +15,7 @@
     "entt",
     "sdl2-mixer",
     "utfcpp",
-    "catch2"
+    "catch2",
+    "tracy"
   ]
 }

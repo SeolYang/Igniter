@@ -1,8 +1,13 @@
-#include <iostream>
 #include <Engine.h>
-
+#include <entt/entt.hpp>
 int main()
 {
-	fe::Engine engine;
-	return engine.Execute();
+	int result = 0;
+	{
+		fe::Engine engine;
+		result = engine.Execute();
+	}
+
+	entt::registry registry;
+	return result;
 }

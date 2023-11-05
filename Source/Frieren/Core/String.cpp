@@ -70,6 +70,12 @@ namespace fe
 		return Wider(AsStringView());
 	}
 
+	void String::ClearCache()
+	{
+		WriteLock lock{ hashStringMapMutex };
+		hashStringMap.clear();
+	}
+
 	String& String::operator=(const std::string& rhs)
 	{
 		SetString(rhs);
