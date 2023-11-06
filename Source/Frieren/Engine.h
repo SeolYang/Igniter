@@ -11,6 +11,7 @@ namespace fe
 	class Window;
 	class Timer;
 	class InputManager;
+	class GameInstance;
 	class Engine final
 	{
 	public:
@@ -22,6 +23,7 @@ namespace fe
 		[[nodiscard]] static HandleManager& GetHandleManager();
 		[[nodiscard]] static Window&		GetWindow();
 		[[nodiscard]] static InputManager&	GetInputManager();
+		[[nodiscard]] static GameInstance&	GetGameInstance();
 		bool								IsValid() const { return this == instance; }
 
 		int Execute();
@@ -34,5 +36,6 @@ namespace fe
 		std::unique_ptr<Window>		   window;
 		std::unique_ptr<HandleManager> handleManager;
 		std::unique_ptr<InputManager>  inputManager;
+		std::unique_ptr<GameInstance>  gameInstance;
 	};
 } // namespace fe

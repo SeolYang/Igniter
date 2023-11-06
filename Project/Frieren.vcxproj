@@ -33,6 +33,9 @@
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
+    <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
+    <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
+    <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp" />
@@ -40,6 +43,8 @@
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
+    <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
+    <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

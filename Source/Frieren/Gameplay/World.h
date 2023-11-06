@@ -47,9 +47,9 @@ namespace fe
 		}
 
 		template <typename Component, typename... Args>
-		Component& Attach(const Entity entity, [[maybe_unused]] Args&&... args)
+		auto Attach(const Entity entity, [[maybe_unused]] Args&&... args)
 		{
-			return registry.emplace<Component>(entt, std::forward<Args>(args)...);
+			return registry.emplace<Component>(entity, std::forward<Args>(args)...);
 		}
 
 		template <typename Component, typename Itr>
@@ -59,7 +59,7 @@ namespace fe
 		}
 
 		template <typename Component, typename... Args>
-		Component& AttachOrReplace(const Entity entity, Args&&... args)
+		auto AttachOrReplace(const Entity entity, Args&&... args)
 		{
 			if (registry.all_of<Component>(entity))
 			{

@@ -6,6 +6,7 @@
 #include <Core/InputManager.h>
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
+#include <Gameplay/GameInstance.h>
 
 namespace fe
 {
@@ -32,6 +33,8 @@ namespace fe
 			};
 
 			window = std::make_unique<Window>(windowDesc);
+
+			gameInstance = std::make_unique<GameInstance>();
 		}
 	}
 
@@ -42,6 +45,7 @@ namespace fe
 			instance = nullptr;
 		}
 
+		gameInstance.reset();
 		inputManager.reset();
 		handleManager.reset();
 		window.reset();
@@ -67,7 +71,7 @@ namespace fe
 		return *(instance->handleManager);
 	}
 
-	fe::Window& Engine::GetWindow()
+	Window& Engine::GetWindow()
 	{
 		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
 		return *(instance->window);
@@ -77,6 +81,12 @@ namespace fe
 	{
 		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
 		return *(instance->inputManager);
+	}
+
+	GameInstance& Engine::GetGameInstance()
+	{
+		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		return *(instance->gameInstance);
 	}
 
 	int Engine::Execute()
@@ -96,6 +106,14 @@ namespace fe
 
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
+			}
+
+			{
+				gameInstance->Update();
+			}
+
+			{
+				inputManager->PostUpdate();
 			}
 
 			timer->End();

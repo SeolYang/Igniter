@@ -60,6 +60,15 @@
     <ClInclude Include="..\Source\Frieren\Engine.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Gameplay\World.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -76,6 +85,12 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Engine.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp">
+      <Filter>Source\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp">
+      <Filter>Source\Gameplay</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
