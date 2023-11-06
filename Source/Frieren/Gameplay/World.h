@@ -3,10 +3,10 @@
 
 namespace fe
 {
-    class World
-    {
+	using Entity = entt::entity;
+	class World
+	{
 	public:
-		using Entity = entt::entity;
 		using Registry = entt::registry;
 
 		World() = default;
@@ -43,7 +43,6 @@ namespace fe
 		template <typename Component>
 		[[nodiscard]] Entity ToEntity(const Component& component) const
 		{
-			registry.view()
 			return entt::to_entity(registry, component);
 		}
 
@@ -68,7 +67,7 @@ namespace fe
 			}
 			else
 			{
-				return registry.emplace<Component>(entity, std::forward<Args>(args)....);
+				return registry.emplace<Component>(entity, std::forward<Args>(args)...);
 			}
 		}
 
@@ -160,7 +159,7 @@ namespace fe
 		{
 			return registry.all_of<Components...>(entity);
 		}
-		
+
 		template <typename... Components>
 		[[nodiscard]] bool AnyOf(const Entity entity) const
 		{
@@ -174,6 +173,5 @@ namespace fe
 
 	private:
 		Registry registry;
-
-    };
-}
+	};
+} // namespace fe
