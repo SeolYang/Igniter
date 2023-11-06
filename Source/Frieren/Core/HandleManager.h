@@ -405,7 +405,8 @@ namespace fe
 		Private::GenericHandleRepository<T>* GetRepository() const
 		{
 			ReadOnlyLock lock{ repositoryMapMutex };
-			return static_cast<Private::GenericHandleRepository<T>*>(repositoryMap.find(HashOfType<T>)->second);
+			const auto itr = repositoryMap.find(HashOfType<T>);
+			return itr != repositoryMap.end() ? static_cast<Private::GenericHandleRepository<T>*>(itr->second) : nullptr;
 		}
 
 		template <typename T>
