@@ -306,5 +306,5 @@ namespace fe
 	constexpr uint64_t InvalidHash = 0xffffffffffffffffUi64;
 
 	template <typename T>
-	constexpr uint64_t HashOfType = Private::EvaluateHashOfType<T>();
+	constexpr uint64_t HashOfType = Private::EvaluateHashOfType<std::decay_t<T>>();
 } // namespace fe
