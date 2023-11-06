@@ -35,6 +35,13 @@ namespace fe
 
 	struct Action
 	{
+	public:
+		bool IsAnyPressing() const
+		{
+			return State == fe::EInputState::Pressed || State == EInputState::OnPressing;
+		}
+
+	public:
 		EInputState State = EInputState::None;
 	};
 
@@ -72,6 +79,8 @@ namespace fe
 
 		void HandleEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
+		void PostUpdate();
+
 	private:
 		void HandleKeyDown(WPARAM wParam, LPARAM lParam);
 		void HandleKeyUp(WPARAM wParam, LPARAM lParam);
@@ -97,6 +106,8 @@ namespace fe
 
 		float latestMouseX = std::numeric_limits<float>::infinity();
 		float latestMouseY = std::numeric_limits<float>::infinity();
+
+		robin_hood::unordered_set<EInput> preesedInputSet;
 	};
 
 	namespace Private
@@ -125,6 +136,13 @@ namespace fe
 				/** Virtual Keys */
 				case VK_SPACE:
 					return EInput::Space;
+
+				case VK_LBUTTON:
+					return EInput::MouseLB;
+
+				case VK_RBUTTON:
+					return EInput::MouseRB;
+
 				default:
 					return EInput::None;
 			}

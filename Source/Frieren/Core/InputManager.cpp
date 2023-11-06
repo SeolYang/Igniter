@@ -81,10 +81,22 @@ namespace fe
 
 	void InputManager::HandleEvent(const UINT message, const WPARAM wParam, const LPARAM lParam)
 	{
+		constexpr WPARAM MouseLBWParam = 1;
+		constexpr WPARAM MouseRBWParam = 2;
+
 		switch (message)
 		{
+			case WM_LBUTTONDOWN:
+			case WM_RBUTTONDOWN:
 			case WM_KEYDOWN:
 				HandleKeyDown(wParam, lParam);
+				break;
+
+			case WM_LBUTTONUP:
+				HandleKeyUp(MouseLBWParam, lParam);
+				break;
+			case WM_RBUTTONUP:
+				HandleKeyUp(MouseRBWParam, lParam);
 				break;
 
 			case WM_KEYUP:
@@ -94,6 +106,26 @@ namespace fe
 			case WM_MOUSEMOVE:
 				HandleMouseMove(wParam, lParam);
 				break;
+		}
+	}
+
+	void InputManager::PostUpdate()
+	{
+		if (!preesedInputSet.empty())
+		{
+			for (const auto& input : preesedInputSet)
+			{
+				for (const auto& actionName : inputActionNameMap[input])
+				{
+					auto& action = actionMap[actionName];
+					if (action->State == EInputState::Pressed)
+					{
+						action->State = EInputState::OnPressing;
+					}
+				}
+			}
+
+			preesedInputSet.clear();
 		}
 	}
 
@@ -146,10 +178,7 @@ namespace fe
 					case EInputState::None:
 					case EInputState::Released:
 						action->State = EInputState::Pressed;
-						break;
-
-					case EInputState::Pressed:
-						action->State = EInputState::OnPressing;
+						preesedInputSet.insert(input);
 						break;
 				}
 			}
