@@ -8,6 +8,6 @@ namespace fe
 	public:
         GameFlow() = default;
 		virtual ~GameFlow() = default;
-		virtual void Update(World& world) { }
+		virtual void Update(World& world) = 0;
     };
 }

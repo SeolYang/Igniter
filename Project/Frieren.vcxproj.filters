@@ -10,6 +10,9 @@
     <Filter Include="Source\Gameplay">
       <UniqueIdentifier>{8520c80d-9a10-48dc-8dff-f6ce375af563}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\D3D12">
+      <UniqueIdentifier>{2b718f61-774c-4896-a78a-8c6d3ec1833c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.clang-format" />
@@ -69,6 +72,9 @@
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h">
       <Filter>Source\Gameplay</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\Device.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -91,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp">
       <Filter>Source\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp">
+      <Filter>Source\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

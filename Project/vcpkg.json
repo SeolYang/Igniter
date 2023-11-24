@@ -16,6 +16,9 @@
     "sdl2-mixer",
     "utfcpp",
     "catch2",
-    "tracy"
+    "tracy",
+    "directxmath",
+    "directx-dxc",
+    "d3d12-memory-allocator"
   ]
 }

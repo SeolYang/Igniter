@@ -6,12 +6,19 @@
 			{                                     \
 				__debugbreak();                   \
 			}                                     \
-		while (0)
+		while (false)
+
+	#define FE_FORCE_ASSERT(FORMAT_STR, ...) \
+		__debugbreak();
+
 #else
 	#define FE_ASSERT(CONDITION, FORMAT_STR, ...) \
 		do                                        \
 		{                                         \
 			CONDITION;                            \
 		}                                         \
-		while (0)
+		while (false)
+
+	#define FE_FORCE_ASSERT(FORMAT_STR, ...)
+
 #endif

@@ -102,6 +102,32 @@ namespace fe
 
 #define FE_LOG(LOG_CATEGORY, ...) fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
 
+#if (defined(_DEBUG) || defined(DEBUG) || defined(FORCE_ENABLE_ASSERT)) && !defined(FORCE_DISABLE_ASSERT)
+	#define FE_ASSERT_LOG(LOG_CATEGORY, CONDITION, ...) \
+		do                                              \
+			if (!(CONDITION))                           \
+			{                                           \
+				FE_LOG(LOG_CATEGORY, __VA_ARGS__);      \
+				__debugbreak();                         \
+			}                                           \
+		while (false)
+
+	#define FE_FORCE_ASSERT_LOG(LOG_CATEGORY, ...) \
+		FE_LOG(LOG_CATEGORY, __VA_ARGS__);         \
+		__debugbreak();
+
+#else
+	#define FE_ASSERT_LOG(LOG_CATEGORY, CONDITION, ...) \
+		do                                              \
+		{                                               \
+			CONDITION;                                  \
+		}                                               \
+		while (false)
+
+	#define FE_FORCE_ASSERT_LOG(LOG_CATEGORY, ...) \
+		FE_LOG(LOG_CATEGORY, __VA_ARGS__);
+#endif
+
 namespace fe
 {
 	FE_DECLARE_LOG_CATEGORY(LogTemp, ELogVerbosiy::Temp);

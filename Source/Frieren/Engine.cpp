@@ -6,6 +6,7 @@
 #include <Core/InputManager.h>
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
+#include <D3D12/Device.h>
 #include <Gameplay/GameInstance.h>
 
 namespace fe
@@ -35,6 +36,8 @@ namespace fe
 			window = std::make_unique<Window>(windowDesc);
 
 			gameInstance = std::make_unique<GameInstance>();
+
+			device = std::make_unique<Device>();
 		}
 	}
 

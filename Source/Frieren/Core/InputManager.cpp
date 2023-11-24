@@ -9,8 +9,8 @@ namespace fe
 	{
 		const bool bIsValidName = nameOfAction;
 		const bool bIsValidInput = input != EInput::None;
-		FE_ASSERT(bIsValidName);
-		FE_ASSERT(bIsValidInput);
+		FE_ASSERT(bIsValidName, "Invalid Name");
+		FE_ASSERT(bIsValidInput, "Invalid Input");
 		if (bIsValidName && bIsValidInput)
 		{
 			inputActionNameMap[input].insert(nameOfAction);
@@ -25,8 +25,8 @@ namespace fe
 	{
 		const bool bIsValidName = nameOfAxis;
 		const bool bIsValidInput = input != EInput::None;
-		FE_ASSERT(bIsValidName);
-		FE_ASSERT(bIsValidInput);
+		FE_ASSERT(bIsValidName, "Invalid Name");
+		FE_ASSERT(bIsValidInput, "Invalid Input");
 		if (bIsValidName && bIsValidInput)
 		{
 			if (!axisMap.contains(nameOfAxis))

@@ -12,6 +12,7 @@ namespace fe
 	class Timer;
 	class InputManager;
 	class GameInstance;
+	class Device;
 	class Engine final
 	{
 	public:
@@ -36,6 +37,7 @@ namespace fe
 		std::unique_ptr<Window>		   window;
 		std::unique_ptr<HandleManager> handleManager;
 		std::unique_ptr<InputManager>  inputManager;
+		std::unique_ptr<Device>		   device;
 		std::unique_ptr<GameInstance>  gameInstance;
 	};
 } // namespace fe
