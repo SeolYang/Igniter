@@ -1,6 +1,5 @@
 #include <D3D12/Device.h>
 #include <Engine.h>
-#include <Core/Log.h>
 #include <Core/Assert.h>
 #include <dxgidebug.h>
 
@@ -26,29 +25,26 @@ namespace fe::Private
 
 namespace fe
 {
-	FE_DECLARE_LOG_CATEGORY(DeviceInfo, ELogVerbosiy::Info);
-	FE_DECLARE_LOG_CATEGORY(DeviceWarn, ELogVerbosiy::Warning);
-	FE_DECLARE_LOG_CATEGORY(DeviceFatal, ELogVerbosiy::Fatal);
 
 	Device::Device()
 	{
 		const bool bIsAcquiredAdapter = AcquireAdapterFromFactory();
 		if (bIsAcquiredAdapter)
 		{
-			FE_LOG(DeviceInfo, "The Adapter successfully acuiqred from factory.");
+			FE_LOG(D3D12Info, "The Adapter successfully acuiqred from factory.");
 			LogAdapterInformations();
 
 			const bool bIsDeviceCreated = CreateDevice();
 			if (bIsDeviceCreated)
 			{
-				FE_LOG(DeviceInfo, "The Device successfully created from the adapter.");
+				FE_LOG(D3D12Info, "The Device successfully created from the adapter.");
 				Private::SetD3DObjectName(device.Get(), "Device");
 				SetSeverityLevel();
 
 				const bool bIsCommandQueuesCreated = CreateCommandQueues();
 				if (bIsCommandQueuesCreated)
 				{
-					FE_LOG(DeviceInfo, "Command Queues are successfully created.");
+					FE_LOG(D3D12Info, "Command Queues are successfully created.");
 					Private::SetD3DObjectName(directQueue.Get(), "DirectQueue");
 					Private::SetD3DObjectName(asyncComputeQueue.Get(), "AsyncComputeQueue");
 					Private::SetD3DObjectName(copyQueue.Get(), "CopyQueue");
@@ -70,7 +66,7 @@ namespace fe
 
 #ifdef _DEBUG
 		wrl::ComPtr<IDXGIDebug1> dxgiDebug;
-		if (IsDXCallSucceed(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+		if (IsDXCallSucceeded(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
 		{
 			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
 		}
@@ -79,14 +75,14 @@ namespace fe
 
 	void Device::FlushQueue(const D3D12_COMMAND_LIST_TYPE queueType)
 	{
-		FE_ASSERT_LOG(DeviceFatal, queueType != D3D12_COMMAND_LIST_TYPE_BUNDLE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(DeviceFatal, queueType != D3D12_COMMAND_LIST_TYPE_NONE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(DeviceFatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(DeviceFatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(DeviceFatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS, "Invalid queue type to flush.");
+		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_BUNDLE, "Invalid queue type to flush.");
+		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_NONE, "Invalid queue type to flush.");
+		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE, "Invalid queue type to flush.");
+		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE, "Invalid queue type to flush.");
+		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS, "Invalid queue type to flush.");
 
 		wrl::ComPtr<ID3D12Fence> fence;
-		if (IsDXCallSucceed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
+		if (IsDXCallSucceeded(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
 		{
 			ID3D12CommandQueue* queue = nullptr;
 			switch (queueType)
@@ -104,7 +100,7 @@ namespace fe
 
 			FE_ASSERT(queue != nullptr, "Invalid queue.");
 
-			if (IsDXCallSucceed(queue->Signal(fence.Get(), 1)))
+			if (IsDXCallSucceeded(queue->Signal(fence.Get(), 1)))
 			{
 				const HANDLE handleFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 				fence->SetEventOnCompletion(1, handleFenceEvent);
@@ -113,12 +109,12 @@ namespace fe
 			}
 			else
 			{
-				FE_FORCE_ASSERT_LOG(DeviceFatal, "Failed to signal fence.");
+				FE_FORCE_ASSERT_LOG(D3D12Fatal, "Failed to signal fence.");
 			}
 		}
 		else
 		{
-			FE_FORCE_ASSERT_LOG(DeviceFatal, "Failed to create fence for flush.");
+			FE_FORCE_ASSERT_LOG(D3D12Fatal, "Failed to create fence for flush.");
 		}
 	}
 
@@ -136,32 +132,32 @@ namespace fe
 #if defined(DEBUG) || defined(_DEBUG)
 			factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
 			wrl::ComPtr<ID3D12Debug5> debugController;
-			const bool				  bDebugControllerAcquired = IsDXCallSucceed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
-			FE_ASSERT_LOG(fe::DeviceFatal, bDebugControllerAcquired, "Failed to get debug controller.");
+			const bool				  bDebugControllerAcquired = IsDXCallSucceeded(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
+			FE_ASSERT_LOG(fe::D3D12Fatal, bDebugControllerAcquired, "Failed to get debug controller.");
 			if (bDebugControllerAcquired)
 			{
 				debugController->EnableDebugLayer();
-				FE_LOG(DeviceInfo, "D3D12 Debug Layer Enabled.");
+				FE_LOG(D3D12Info, "D3D12 Debug Layer Enabled.");
 	#if defined(ENABLE_GPU_VALIDATION)
 				// gpu based validation?
 				debugController->SetEnableGPUBasedValidation(true);
-				FE_LOG(DeviceInfo, "D3D12 GPU Based Validation Enabled.")''
+				FE_LOG(D3D12Info, "D3D12 GPU Based Validation Enabled.")''
 	#endif
 			}
 #endif
 		}
 
 		wrl::ComPtr<IDXGIFactory6> factory;
-		const bool				   bFactoryCreated = IsDXCallSucceed(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
-		FE_ASSERT_LOG(DeviceFatal, bFactoryCreated, "Failed to create factory.");
+		const bool				   bFactoryCreated = IsDXCallSucceeded(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
+		FE_ASSERT_LOG(D3D12Fatal, bFactoryCreated, "Failed to create factory.");
 
 		if (bFactoryCreated)
 		{
-			const bool bIsAdapterAcquired = IsDXCallSucceed(factory->EnumAdapterByGpuPreference(
+			const bool bIsAdapterAcquired = IsDXCallSucceeded(factory->EnumAdapterByGpuPreference(
 				0,
 				DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
 				IID_PPV_ARGS(&adapter)));
-			FE_ASSERT_LOG(DeviceFatal, bIsAdapterAcquired, "Failed to acquire adapter from factory.");
+			FE_ASSERT_LOG(D3D12Fatal, bIsAdapterAcquired, "Failed to acquire adapter from factory.");
 			return bIsAdapterAcquired;
 		}
 
@@ -172,20 +168,20 @@ namespace fe
 	{
 		DXGI_ADAPTER_DESC adapterDesc;
 		adapter->GetDesc(&adapterDesc);
-		FE_LOG(DeviceInfo, "----------- The GPU Infos -----------");
-		FE_LOG(DeviceInfo, "{}", Narrower(adapterDesc.Description));
-		FE_LOG(DeviceInfo, "Vendor ID: {}", adapterDesc.VendorId);
-		FE_LOG(DeviceInfo, "Dedicated Video Memory: {}", adapterDesc.DedicatedVideoMemory);
-		FE_LOG(DeviceInfo, "Dedicated System Memory: {}", adapterDesc.DedicatedSystemMemory);
-		FE_LOG(DeviceInfo, "Shared System Memory: {}", adapterDesc.SharedSystemMemory);
-		FE_LOG(DeviceInfo, "-------------------------------------");
+		FE_LOG(D3D12Info, "----------- The GPU Infos -----------");
+		FE_LOG(D3D12Info, "{}", Narrower(adapterDesc.Description));
+		FE_LOG(D3D12Info, "Vendor ID: {}", adapterDesc.VendorId);
+		FE_LOG(D3D12Info, "Dedicated Video Memory: {}", adapterDesc.DedicatedVideoMemory);
+		FE_LOG(D3D12Info, "Dedicated System Memory: {}", adapterDesc.DedicatedSystemMemory);
+		FE_LOG(D3D12Info, "Shared System Memory: {}", adapterDesc.SharedSystemMemory);
+		FE_LOG(D3D12Info, "-------------------------------------");
 	}
 
 	bool Device::CreateDevice()
 	{
 		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
-		const bool					bIsDeviceCreated = IsDXCallSucceed(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
-		FE_ASSERT_LOG(DeviceFatal, bIsDeviceCreated, "Failed to create the device from the adapter.");
+		const bool					bIsDeviceCreated = IsDXCallSucceeded(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
+		FE_ASSERT_LOG(D3D12Fatal, bIsDeviceCreated, "Failed to create the device from the adapter.");
 		return bIsDeviceCreated;
 	}
 
@@ -193,7 +189,7 @@ namespace fe
 	{
 #if defined(_DEBUG) || defined(ENABLE_GPU_VALIDATION)
 		wrl::ComPtr<ID3D12InfoQueue> infoQueue;
-		if (IsDXCallSucceed(device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+		if (IsDXCallSucceeded(device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
 		{
 			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
@@ -201,7 +197,7 @@ namespace fe
 		}
 		else
 		{
-			FE_LOG(DeviceWarn, "Failed to query a info queue from the device.");
+			FE_LOG(D3D12Warn, "Failed to query a info queue from the device.");
 		}
 #endif
 	}
@@ -239,9 +235,9 @@ namespace fe
 			desc.NodeMask = 0;
 			desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 			desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-			if (!IsDXCallSucceed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&directQueue))))
+			if (!IsDXCallSucceeded(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&directQueue))))
 			{
-				FE_ASSERT_LOG(DeviceFatal, false, "Failed to create the direct command queue.");
+				FE_ASSERT_LOG(D3D12Fatal, false, "Failed to create the direct command queue.");
 				return false;
 			}
 		}
@@ -251,9 +247,9 @@ namespace fe
 			desc.NodeMask = 0;
 			desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 			desc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-			if (!IsDXCallSucceed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&asyncComputeQueue))))
+			if (!IsDXCallSucceeded(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&asyncComputeQueue))))
 			{
-				FE_ASSERT_LOG(DeviceFatal, false, "Failed to create the async compute command queue.");
+				FE_ASSERT_LOG(D3D12Fatal, false, "Failed to create the async compute command queue.");
 				return false;
 			}
 		}
@@ -263,9 +259,9 @@ namespace fe
 			desc.NodeMask = 0;
 			desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 			desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
-			if (!IsDXCallSucceed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&copyQueue))))
+			if (!IsDXCallSucceeded(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&copyQueue))))
 			{
-				FE_ASSERT_LOG(DeviceFatal, false, "Failed to create the copy command queue.");
+				FE_ASSERT_LOG(D3D12Fatal, false, "Failed to create the copy command queue.");
 				return false;
 			}
 		}

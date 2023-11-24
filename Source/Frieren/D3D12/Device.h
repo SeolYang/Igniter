@@ -5,13 +5,12 @@
 #include <AgilitySDK/d3d12sdklayers.h>
 #include <AgilitySDK/d3d12shader.h>
 #include <AgilitySDK/dxgiformat.h>
-
 #include <dxgi.h>
 #include <dxgi1_6.h>
-
 #include <directx-dxc/dxcapi.h>
-
 #include <D3D12MemAlloc.h>
+
+#include <Core/Log.h>
 
 namespace fe::Private
 {
@@ -26,7 +25,11 @@ namespace fe::wrl
 
 namespace fe
 {
-	inline bool IsDXCallSucceed(const HRESULT result)
+	FE_DECLARE_LOG_CATEGORY(D3D12Info, ELogVerbosiy::Info);
+	FE_DECLARE_LOG_CATEGORY(D3D12Warn, ELogVerbosiy::Warning);
+	FE_DECLARE_LOG_CATEGORY(D3D12Fatal, ELogVerbosiy::Fatal);
+
+	inline bool IsDXCallSucceeded(const HRESULT result)
 	{
 		return result == S_OK;
 	}
@@ -43,6 +46,8 @@ namespace fe
 
 		void FlushQueue(D3D12_COMMAND_LIST_TYPE queueType);
 		void FlushGPU();
+
+		ID3D12Device9& GetNative() const { return *device.Get(); }
 
 	private:
 		bool AcquireAdapterFromFactory();

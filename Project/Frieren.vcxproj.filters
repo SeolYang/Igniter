@@ -75,6 +75,9 @@
     <ClInclude Include="..\Source\Frieren\D3D12\Device.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\Fence.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -99,6 +102,9 @@
       <Filter>Source\Gameplay</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
   </ItemGroup>

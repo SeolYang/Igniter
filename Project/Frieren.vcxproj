@@ -33,6 +33,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Device.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\Fence.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
@@ -44,6 +45,7 @@
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
