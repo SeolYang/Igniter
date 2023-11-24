@@ -1,7 +1,8 @@
-#include <D3D12/Device.h>
-#include <Engine.h>
-#include <Core/Assert.h>
 #include <dxgidebug.h>
+
+#include <D3D12/Device.h>
+#include <Core/Assert.h>
+#include <Engine.h>
 
 extern "C"
 {
@@ -25,7 +26,6 @@ namespace fe::Private
 
 namespace fe
 {
-
 	Device::Device()
 	{
 		const bool bIsAcquiredAdapter = AcquireAdapterFromFactory();

@@ -1,18 +1,19 @@
 #pragma once
 #include <memory>
+
 #include <Core/Version.h>
 
 namespace fe
 {
 	constexpr Version EngineVersion = CreateVersion(0, 1, 0);
 
-	class HandleManager;
-	class Logger;
-	class Window;
 	class Timer;
+	class Logger;
+	class HandleManager;
+	class Window;
 	class InputManager;
+	class Renderer;
 	class GameInstance;
-	class Device;
 	class Engine final
 	{
 	public:
@@ -24,6 +25,7 @@ namespace fe
 		[[nodiscard]] static HandleManager& GetHandleManager();
 		[[nodiscard]] static Window&		GetWindow();
 		[[nodiscard]] static InputManager&	GetInputManager();
+		[[nodiscard]] static Renderer&		GetRenderer();
 		[[nodiscard]] static GameInstance&	GetGameInstance();
 		bool								IsValid() const { return this == instance; }
 
@@ -34,10 +36,10 @@ namespace fe
 		bool						   bShouldExit = false;
 		std::unique_ptr<Timer>		   timer;
 		std::unique_ptr<Logger>		   logger;
-		std::unique_ptr<Window>		   window;
 		std::unique_ptr<HandleManager> handleManager;
+		std::unique_ptr<Window>		   window;
 		std::unique_ptr<InputManager>  inputManager;
-		std::unique_ptr<Device>		   device;
+		std::unique_ptr<Renderer>	   renderer;
 		std::unique_ptr<GameInstance>  gameInstance;
 	};
 } // namespace fe

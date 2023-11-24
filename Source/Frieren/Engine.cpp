@@ -6,7 +6,7 @@
 #include <Core/InputManager.h>
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
-#include <D3D12/Device.h>
+#include <Renderer/Renderer.h>
 #include <Gameplay/GameInstance.h>
 
 namespace fe
@@ -16,7 +16,7 @@ namespace fe
 	Engine::Engine()
 	{
 		const bool bIsFirstEngineCreation = instance == nullptr;
-		FE_ASSERT(bIsFirstEngineCreation, "Engine instance exist.");
+		FE_ASSERT(bIsFirstEngineCreation, "Engine instance already exist.");
 		if (bIsFirstEngineCreation)
 		{
 			instance = this;
@@ -24,8 +24,7 @@ namespace fe
 			timer = std::make_unique<Timer>();
 			logger = std::make_unique<Logger>();
 			handleManager = std::make_unique<HandleManager>();
-			inputManager = std::make_unique<InputManager>();
-			
+
 			/* @test temp window descriptor */
 			const WindowDescription windowDesc{
 				.Width = 1280,
@@ -34,10 +33,11 @@ namespace fe
 			};
 
 			window = std::make_unique<Window>(windowDesc);
+			inputManager = std::make_unique<InputManager>();
+
+			renderer = std::make_unique<Renderer>();
 
 			gameInstance = std::make_unique<GameInstance>();
-
-			device = std::make_unique<Device>();
 		}
 	}
 
@@ -49,9 +49,10 @@ namespace fe
 		}
 
 		gameInstance.reset();
+		renderer.reset();
 		inputManager.reset();
-		handleManager.reset();
 		window.reset();
+		handleManager.reset();
 		logger.reset();
 		timer.reset();
 	}
@@ -84,6 +85,12 @@ namespace fe
 	{
 		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
 		return *(instance->inputManager);
+	}
+
+	Renderer& Engine::GetRenderer()
+	{
+		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		return *(instance->renderer);
 	}
 
 	GameInstance& Engine::GetGameInstance()

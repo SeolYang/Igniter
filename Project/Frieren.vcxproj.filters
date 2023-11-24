@@ -13,6 +13,9 @@
     <Filter Include="Source\D3D12">
       <UniqueIdentifier>{2b718f61-774c-4896-a78a-8c6d3ec1833c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Renderer">
+      <UniqueIdentifier>{ebf89346-5007-4bda-ac52-6f027287c8c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.clang-format" />
@@ -78,6 +81,9 @@
     <ClInclude Include="..\Source\Frieren\D3D12\Fence.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -106,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp">
       <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp">
+      <Filter>Source\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
