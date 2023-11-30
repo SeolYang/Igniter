@@ -7,9 +7,10 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning);
 	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal);
 
-	constexpr uint8_t MaxInflightFrames = 2;
+	constexpr uint8_t MaxFramesInFlight = 2;
 
 	class Device;
+	class DescriptorHeap;
     class Renderer
     {
 	public:
@@ -18,5 +19,6 @@ namespace fe
 
 	private:
 		std::unique_ptr<Device> device;
+		std::unique_ptr<DescriptorHeap> srvDescHeap;
     };
 }

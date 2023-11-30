@@ -16,6 +16,12 @@
     <Filter Include="Source\Renderer">
       <UniqueIdentifier>{ebf89346-5007-4bda-ac52-6f027287c8c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thirdparty">
+      <UniqueIdentifier>{649caa31-cf2a-4603-ace2-485c6b0c9660}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\D3D12MemAlloc">
+      <UniqueIdentifier>{d6c45c0b-c442-4eac-90cf-dcc17c5d6e29}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.clang-format" />
@@ -84,6 +90,63 @@
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h">
       <Filter>Source\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUContext.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUAllocation.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GraphicsContext.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\AsyncComputeContext.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\CopyContext.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\ShaderCompiler.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\Shader.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\Utility.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUMemoryAllocator.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\Commons.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDescription.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
+      <Filter>Thirdparty\D3D12MemAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDescription.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -115,6 +178,21 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp">
       <Filter>Source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\Commons.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDescription.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
+      <Filter>Thirdparty\D3D12MemAlloc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp">
+      <Filter>Source\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

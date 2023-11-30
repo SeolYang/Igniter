@@ -6,4 +6,6 @@ namespace fe
     using SharedMutex = std::shared_mutex;
     using ReadOnlyLock = std::shared_lock<SharedMutex>;
     using WriteLock = std::unique_lock<SharedMutex>;
+    using RecursiveMutex = std::recursive_mutex;
+    using RecursiveLock = std::unique_lock<RecursiveMutex>;
 }

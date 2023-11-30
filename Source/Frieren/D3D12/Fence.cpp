@@ -6,7 +6,7 @@ namespace fe
 	Fence::Fence(Device& device, const std::string_view debugName)
 		: eventHandle(CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS))
 	{
-		ID3D12Device9& nativeDevice = device.GetNative();
+		ID3D12Device10& nativeDevice = device.GetNative();
 		const bool	   bIsFenceCreated = IsDXCallSucceeded(nativeDevice.CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 		FE_ASSERT_LOG(D3D12Fatal, bIsFenceCreated, "Failed to create fence.");
 

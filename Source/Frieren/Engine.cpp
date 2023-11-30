@@ -43,11 +43,6 @@ namespace fe
 
 	Engine::~Engine()
 	{
-		if (instance == this)
-		{
-			instance = nullptr;
-		}
-
 		gameInstance.reset();
 		renderer.reset();
 		inputManager.reset();
@@ -55,6 +50,11 @@ namespace fe
 		handleManager.reset();
 		logger.reset();
 		timer.reset();
+
+		if (instance == this)
+		{
+			instance = nullptr;
+		}
 	}
 
 	Timer& Engine::GetTimer()

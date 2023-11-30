@@ -29,28 +29,52 @@
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
     <ClInclude Include="..\Source\Frieren\Core\Pool.h" />
     <ClInclude Include="..\Source\Frieren\Core\Timer.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Utility.h" />
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\AsyncComputeContext.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\CopyContext.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\Commons.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Device.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Fence.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUAllocation.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDescription.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUContext.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUMemoryAllocator.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDescription.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GraphicsContext.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\Shader.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\ShaderCompiler.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
+    <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\Commons.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDescription.cpp" />
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp" />
+    <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -123,10 +147,10 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -150,10 +174,10 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FORCE_DISABLE_ASSERT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FORCE_DISABLE_ASSERT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -178,10 +202,10 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>

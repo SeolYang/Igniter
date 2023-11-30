@@ -4,6 +4,7 @@
     "name": "frieren",
     "version": "0.0.1",
   "dependencies": [
+    "mimalloc",
     "imgui",
     "assimp",
     "meshoptimizer",
@@ -18,7 +19,6 @@
     "catch2",
     "tracy",
     "directxmath",
-    "directx-dxc",
-    "d3d12-memory-allocator"
+    "directx-dxc"
   ]
 }

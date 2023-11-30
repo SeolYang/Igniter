@@ -1,28 +1,10 @@
 #include <dxgidebug.h>
 
-#include <D3D12/Device.h>
 #include <Core/Assert.h>
 #include <Engine.h>
-
-extern "C"
-{
-	__declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_SDK_VERSION;
-}
-extern "C"
-{
-	__declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
-}
-
-namespace fe::Private
-{
-	void SetD3DObjectName(ID3D12Object* object, std::string_view name)
-	{
-		if (object != nullptr)
-		{
-			object->SetName(Wider(name).c_str());
-		}
-	}
-} // namespace fe::Private
+#include <D3D12/Device.h>
+#include <D3D12/DescriptorHeap.h>
+#include <D3D12/GPUBuffer.h>
 
 namespace fe
 {
@@ -34,15 +16,21 @@ namespace fe
 			FE_LOG(D3D12Info, "The Adapter successfully acuiqred from factory.");
 			LogAdapterInformations();
 
-			const bool bIsDeviceCreated = CreateDevice();
-			if (bIsDeviceCreated)
+			if (CreateDevice())
 			{
 				FE_LOG(D3D12Info, "The Device successfully created from the adapter.");
 				Private::SetD3DObjectName(device.Get(), "Device");
 				SetSeverityLevel();
 
-				const bool bIsCommandQueuesCreated = CreateCommandQueues();
-				if (bIsCommandQueuesCreated)
+				CheckSupportedFeatures();
+
+				if (CreateMemoryAllcator())
+				{
+					CacheDescriptorHandleIncrementSize();
+					CreateDescriptorHeaps();
+				}
+
+				if (CreateCommandQueues())
 				{
 					FE_LOG(D3D12Info, "Command Queues are successfully created.");
 					Private::SetD3DObjectName(directQueue.Get(), "DirectQueue");
@@ -57,9 +45,16 @@ namespace fe
 	{
 		FlushGPU();
 
+		cbvSrvUavDescriptorHeap.reset();
+		samplerDescriptorHeap.reset();
+		rtvDescriptorHeap.reset();
+		dsvDescriptorHeap.reset();
+
 		copyQueue.Reset();
 		asyncComputeQueue.Reset();
 		directQueue.Reset();
+
+		allocator->Release();
 
 		device.Reset();
 		adapter.Reset();
@@ -123,6 +118,56 @@ namespace fe
 		FlushQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		FlushQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
 		FlushQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	}
+
+	GPUBuffer Device::CreateBuffer(const GPUBufferDescription description)
+	{
+		// #todo handle failing
+		Private::GPUAllocation		   allocation{};
+		const D3D12_RESOURCE_DESC1	   resourceDesc = description.AsResourceDescription();
+		const D3D12MA::ALLOCATION_DESC allocationDesc = description.AsAllocationDescription();
+		allocator->CreateResource3(
+			&allocationDesc, &resourceDesc,
+			D3D12_BARRIER_LAYOUT_UNDEFINED,
+			nullptr, 0, nullptr,
+			&allocation.Allocation,
+			IID_PPV_ARGS(&allocation.Resource));
+
+		Private::SetD3DObjectName(allocation.Resource, description.DebugName);
+
+		std::optional<Descriptor>					   cbvDescriptor = std::nullopt;
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = description.AsConstantBufferViewDescription(allocation.Resource->GetGPUVirtualAddress());
+		if (cbvDesc)
+		{
+			cbvDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateConstantBufferView(
+				&cbvDesc.value(),
+				cbvDescriptor->GetCPUDescriptorHandle());
+		}
+
+		std::optional<Descriptor> srvDescriptor = std::nullopt;
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = description.AsShaderResourceViewDescription();
+		if (srvDesc)
+		{
+			srvDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateShaderResourceView(
+				allocation.Resource,
+				&srvDesc.value(), 
+				srvDescriptor->GetCPUDescriptorHandle());
+		}
+
+		std::optional<Descriptor> uavDescriptor = std::nullopt;
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = description.AsUnorderedAccessViewDescription();
+		if (uavDesc)
+		{
+			uavDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateUnorderedAccessView(
+				allocation.Resource, nullptr,
+				&uavDesc.value(), 
+				uavDescriptor->GetCPUDescriptorHandle());
+		}
+
+		return GPUBuffer{ description, allocation, std::move(cbvDescriptor), std::move(srvDescriptor), std::move(uavDescriptor) };
 	}
 
 	bool Device::AcquireAdapterFromFactory()
@@ -204,18 +249,49 @@ namespace fe
 
 	void Device::CheckSupportedFeatures()
 	{
-		// @todo impl proper tier/feature check
+
+		CD3DX12FeatureSupport features;
+		features.Init(device.Get());
+
+		if (features.EnhancedBarriersSupported())
+		{
+			FE_LOG(D3D12Info, "Enhanced Barriers supported.");
+		}
+		else
+		{
+			FE_FORCE_ASSERT_LOG(D3D12Fatal, "Enhanced Barriers does not supported.");
+		}
+
 		/**
-		 * D3D12_FEATURE_DATA_D3D12_OPTIONS
+		 * Ray-tracing Tier: https://github.com/microsoft/DirectX-Specs/blob/master/d3d/Raytracing.md#d3d12_raytracing_tier
+		 */
+		switch (features.RaytracingTier())
+		{
+			case D3D12_RAYTRACING_TIER_NOT_SUPPORTED:
+				FE_LOG(D3D12Info, "Raytracing does not supported.");
+				break;
+			case D3D12_RAYTRACING_TIER_1_0:
+				FE_LOG(D3D12Info, "Raytracing Tier 1.0 supported.");
+				break;
+			case D3D12_RAYTRACING_TIER_1_1:
+				FE_LOG(D3D12Info, "Raytracing Tier 1.1 supported.");
+				break;
+		}
+
+		if (features.HighestShaderModel() >= D3D_SHADER_MODEL_6_6)
+		{
+			FE_LOG(D3D12Info, "Least Shader model 6.6 supported.");
+		}
+		else
+		{
+			FE_FORCE_ASSERT_LOG(D3D12Fatal, "Shader Model 6.6 does not supported.");
+		}
+
+		/**
 		 * Resource Binding Tier: https://microsoft.github.io/DirectX-Specs/d3d/ResourceBinding.html#levels-of-hardware-support
 		 * Tiled Resource Tier: https://learn.microsoft.com/en-us/windows/win32/direct3d11/tiled-resources-features-tiers
 		 * Conservative Rasterization Tier: https://learn.microsoft.com/en-us/windows/win32/direct3d12/conservative-rasterization#implementation-details
 		 * Resource Heap Tier: https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_resource_heap_tier
-		 */
-
-		/**
-		 * D3D12_FEATURE_DATA_D3D12_OPTIONS5
-		 * Ray-tracing Tier: https://github.com/microsoft/DirectX-Specs/blob/master/d3d/Raytracing.md#d3d12_raytracing_tier
 		 */
 
 		/**
@@ -224,8 +300,30 @@ namespace fe
 		 */
 
 		// D3D12_FEATURE_DATA_D3D12_OPTIONS7: Mesh Shader/Sampler Feedback Tier
-		// D3D12_FEATURE_DATA_SHADER_MODEL: Shader Model > 6.6
 		// D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS
+	}
+
+	void Device::CacheDescriptorHandleIncrementSize()
+	{
+		cbvSrvUavDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		samplerDescritorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		dsvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		rtvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+		FE_LOG(D3D12Info, "* CBV-SRV-UAV Descriptor Handle Increment Size: {}", cbvSrvUavDescriptorHandleIncrementSize);
+		FE_LOG(D3D12Info, "* Sampler Descriptor Handle Increment Size: {}", samplerDescritorHandleIncrementSize);
+		FE_LOG(D3D12Info, "* DSV Descriptor Handle Increment Size: {}", dsvDescriptorHandleIncrementSize);
+		FE_LOG(D3D12Info, "* RTV Descriptor Handle Increment Size: {}", rtvDescriptorHandleIncrementSize);
+	}
+
+	bool Device::CreateMemoryAllcator()
+	{
+		D3D12MA::ALLOCATOR_DESC desc{};
+		desc.pAdapter = adapter.Get();
+		desc.pDevice = device.Get();
+		const bool bSucceeded = IsDXCallSucceeded(D3D12MA::CreateAllocator(&desc, &allocator));
+		FE_ASSERT_LOG(D3D12Fatal, bSucceeded, "Failed to create D3D12MA::Allocator.");
+		return bSucceeded;
 	}
 
 	bool Device::CreateCommandQueues()
@@ -267,6 +365,39 @@ namespace fe
 		}
 
 		return true;
+	}
+
+	void Device::CreateDescriptorHeaps()
+	{
+		cbvSrvUavDescriptorHeap = std::make_unique<DescriptorHeap>(
+			*this,
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			NumCbvSrvUavDescriptors,
+			"Bindless CBV_SRV_UAV Descriptor Heap");
+
+		samplerDescriptorHeap = std::make_unique<DescriptorHeap>(
+			*this,
+			D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+			NumSamplerDescriptors,
+			"Bindless Sampler Descriptor Heap");
+
+		rtvDescriptorHeap = std::make_unique<DescriptorHeap>(
+			*this,
+			D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+			NumRtvDescriptors,
+			"Bindless RTV Descriptor Heap");
+
+		dsvDescriptorHeap = std::make_unique<DescriptorHeap>(
+			*this,
+			D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+			NumDsvDescriptors,
+			"Bindless DSV Descriptor Heap");
+
+		FE_LOG(D3D12Info, "Bindless(Dynamic Resource) Descriptor Heaps initialized.");
+		FE_LOG(D3D12Info, "CBV-SRV-UAV Descriptor Heap::NumDescriptors: {}", NumCbvSrvUavDescriptors);
+		FE_LOG(D3D12Info, "Sampler Descriptor Heap::NumDescriptors: {}", NumSamplerDescriptors);
+		FE_LOG(D3D12Info, "RTV Descriptor Heap::NumDescriptors: {}", NumRtvDescriptors);
+		FE_LOG(D3D12Info, "DSV Descriptor Heap::NumDescriptors: {}", NumDsvDescriptors);
 	}
 
 } // namespace fe
