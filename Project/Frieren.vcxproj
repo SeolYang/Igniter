@@ -33,8 +33,6 @@
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\AsyncComputeContext.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\CopyContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Commons.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Device.h" />
@@ -43,10 +41,8 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDescription.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUContext.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUMemoryAllocator.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDescription.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GraphicsContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Shader.h" />
@@ -70,6 +66,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDescription.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDescription.cpp" />
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />

@@ -13,10 +13,10 @@ namespace fe
 
 	private:
 		friend class Device;
-		GPUBuffer(const GPUBufferDescription description, const Private::GPUAllocation allocation, std::optional<Descriptor> cbv, std::optional<Descriptor> srv, std::optional<Descriptor> uav);
+		GPUBuffer(const GPUBufferDesc description, const Private::GPUAllocation allocation, std::optional<Descriptor> cbv, std::optional<Descriptor> srv, std::optional<Descriptor> uav);
 
 	private:
-		const GPUBufferDescription description;
+		const GPUBufferDesc description;
 		Private::GPUAllocation	   allocation;
 		std::optional<Descriptor>  srv;
 		std::optional<Descriptor>  cbv;

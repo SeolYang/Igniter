@@ -2,7 +2,7 @@
 
 namespace fe
 {
-	GPUBuffer::GPUBuffer(const GPUBufferDescription description, const Private::GPUAllocation allocation, std::optional<Descriptor> cbv, std::optional<Descriptor> srv, std::optional<Descriptor> uav)
+	GPUBuffer::GPUBuffer(const GPUBufferDesc description, const Private::GPUAllocation allocation, std::optional<Descriptor> cbv, std::optional<Descriptor> srv, std::optional<Descriptor> uav)
 		: description(description), allocation(allocation), srv(std::move(srv)), cbv(std::move(cbv)), uav(std::move(uav))
 	{
 	}

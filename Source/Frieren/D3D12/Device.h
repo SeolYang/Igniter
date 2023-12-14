@@ -60,7 +60,7 @@ namespace fe
 
 		ID3D12Device10& GetNative() const { return *device.Get(); }
 
-		GPUBuffer CreateBuffer(const GPUBufferDescription description);
+		GPUBuffer CreateBuffer(const GPUBufferDesc description);
 		// GPUTexture BuildGPUTexture(GPUTextureBuildDescription);
 
 	private:

@@ -120,12 +120,12 @@ namespace fe
 		FlushQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	}
 
-	GPUBuffer Device::CreateBuffer(const GPUBufferDescription description)
+	GPUBuffer Device::CreateBuffer(const GPUBufferDesc description)
 	{
 		// #todo handle failing
 		Private::GPUAllocation		   allocation{};
-		const D3D12_RESOURCE_DESC1	   resourceDesc = description.AsResourceDescription();
-		const D3D12MA::ALLOCATION_DESC allocationDesc = description.AsAllocationDescription();
+		const D3D12_RESOURCE_DESC1	   resourceDesc = description.AsResourceDesc();
+		const D3D12MA::ALLOCATION_DESC allocationDesc = description.AsAllocationDesc();
 		allocator->CreateResource3(
 			&allocationDesc, &resourceDesc,
 			D3D12_BARRIER_LAYOUT_UNDEFINED,
@@ -136,7 +136,7 @@ namespace fe
 		Private::SetD3DObjectName(allocation.Resource, description.DebugName);
 
 		std::optional<Descriptor>					   cbvDescriptor = std::nullopt;
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = description.AsConstantBufferViewDescription(allocation.Resource->GetGPUVirtualAddress());
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = description.AsConstantBufferViewDesc(allocation.Resource->GetGPUVirtualAddress());
 		if (cbvDesc)
 		{
 			cbvDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
@@ -146,7 +146,7 @@ namespace fe
 		}
 
 		std::optional<Descriptor> srvDescriptor = std::nullopt;
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = description.AsShaderResourceViewDescription();
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = description.AsShaderResourceViewDesc();
 		if (srvDesc)
 		{
 			srvDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
@@ -157,7 +157,7 @@ namespace fe
 		}
 
 		std::optional<Descriptor> uavDescriptor = std::nullopt;
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = description.AsUnorderedAccessViewDescription();
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = description.AsUnorderedAccessViewDesc();
 		if (uavDesc)
 		{
 			uavDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
