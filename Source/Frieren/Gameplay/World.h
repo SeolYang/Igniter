@@ -21,15 +21,6 @@ namespace fe
 			return registry.create();
 		}
 
-		void Release(Entity entity);
-		template <typename Itr>
-		void Release(Itr begin, const Itr end)
-		{
-			for (; begin != end; ++begin)
-			{
-				Release(*begin);
-			}
-		}
 		void Destroy(Entity entity);
 		template <typename Itr>
 		void Destroy(Itr begin, const Itr end)

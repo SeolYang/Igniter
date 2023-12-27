@@ -13,14 +13,14 @@
     <Filter Include="Source\D3D12">
       <UniqueIdentifier>{2b718f61-774c-4896-a78a-8c6d3ec1833c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Renderer">
-      <UniqueIdentifier>{ebf89346-5007-4bda-ac52-6f027287c8c8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Thirdparty">
       <UniqueIdentifier>{649caa31-cf2a-4603-ace2-485c6b0c9660}</UniqueIdentifier>
     </Filter>
     <Filter Include="Thirdparty\D3D12MemAlloc">
       <UniqueIdentifier>{d6c45c0b-c442-4eac-90cf-dcc17c5d6e29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{ebf89346-5007-4bda-ac52-6f027287c8c8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -88,7 +88,7 @@
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h">
-      <Filter>Source\Renderer</Filter>
+      <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h">
       <Filter>Source\D3D12</Filter>
@@ -149,9 +149,6 @@
     <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Engine.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp">
       <Filter>Source\Gameplay</Filter>
     </ClCompile>
@@ -165,7 +162,7 @@
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp">
-      <Filter>Source\Renderer</Filter>
+      <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp">
       <Filter>Source\D3D12</Filter>
@@ -184,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDescription.cpp">
       <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Engine.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

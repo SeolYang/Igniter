@@ -190,19 +190,19 @@ namespace fe
 		return desc;
 	}
 
-	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::AsShaderResourceViewDesc() const
-	{
-	}
+	//std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::AsShaderResourceViewDesc() const
+	//{
+	//}
 
-	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::AsUnorderedAccessViewDesc() const
-	{
-	}
+	//std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::AsUnorderedAccessViewDesc() const
+	//{
+	//}
 
-	std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::AsRenderTargetViewDesc() const
-	{
-	}
+	//std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::AsRenderTargetViewDesc() const
+	//{
+	//}
 
-	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GPUTextureDesc::AsDepthStencilViewDesc() const
-	{
-	}
+	//std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GPUTextureDesc::AsDepthStencilViewDesc() const
+	//{
+	//}
 } // namespace fe

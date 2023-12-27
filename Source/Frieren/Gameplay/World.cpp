@@ -2,11 +2,6 @@
 
 namespace fe
 {
-	void World::Release(const Entity entity)
-	{
-		registry.release(entity);
-	}
-
 	void World::Destroy(const Entity entity)
 	{
 		registry.destroy(entity);

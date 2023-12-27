@@ -1,6 +1,6 @@
 
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
     "name": "frieren",
     "version": "0.0.1",
   "dependencies": [
@@ -13,12 +13,12 @@
     "nlohmann-json",
     "magic-enum",
     "spdlog",
-    "entt",
     "sdl2-mixer",
     "utfcpp",
     "catch2",
     "tracy",
     "directxmath",
-    "directx-dxc"
+    "directx-dxc",
+    "entt"
   ]
 }
