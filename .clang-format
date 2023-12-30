@@ -5,12 +5,13 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveDeclarations: true
 AlignEscapedNewlines: Left
-AlignOperands: DontAlign
+AlignOperands: Align
 AlignTrailingComments: true
-AllowShortBlocksOnASingleLine: Empty
-AllowShortEnumsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortLambdasOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: false
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
@@ -27,7 +28,7 @@ BraceWrapping:
   BeforeLambdaBody: false
   BeforeWhile: true
   IndentBraces: false
-BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
 BreakInheritanceList: AfterColon
 BreakBeforeTernaryOperators: true
@@ -45,5 +46,8 @@ NamespaceIndentation: All
 PointerAlignment: Left
 SortIncludes: false
 SpaceBeforeCaseColon: false
+SpaceBeforeCtorInitializerColon : true
+SpaceBeforeInheritanceColon : true
+SpaceBeforeCpp11BracedList : false
 TabWidth: 4
 UseTab: Always
