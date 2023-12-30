@@ -1,8 +1,7 @@
-
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "name": "frieren",
-    "version": "0.0.1",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "frieren",
+  "version": "0.0.1",
   "dependencies": [
     "mimalloc",
     "imgui",
@@ -20,5 +19,12 @@
     "directxmath",
     "directx-dxc",
     "entt"
+  ],
+  "builtin-baseline": "c8696863d371ab7f46e213d8f5ca923c4aef2a00",
+  "overrides": [
+    {
+      "name": "imgui",
+      "version": "1.90"
+    }
   ]
 }
