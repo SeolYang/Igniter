@@ -19,6 +19,5 @@ namespace fe
 
 	private:
 		std::unique_ptr<Device> device;
-		std::unique_ptr<DescriptorHeap> srvDescHeap;
     };
 }

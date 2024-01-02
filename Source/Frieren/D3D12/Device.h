@@ -2,7 +2,6 @@
 #include <Core/Log.h>
 #include <Core/HandleManager.h>
 #include <D3D12/Commons.h>
-#include <D3D12/GPUBufferDescription.h>
 
 namespace fe
 {
@@ -16,8 +15,12 @@ namespace fe
 	}
 
 	class DescriptorHeap;
+	class GPUBufferDesc;
 	class GPUBuffer;
+	class GPUTextureDesc;
+	class GPUTextureSubresource;
 	class GPUTexture;
+	class Descriptor;
 	class Device
 	{
 	public:
@@ -60,8 +63,17 @@ namespace fe
 
 		ID3D12Device10& GetNative() const { return *device.Get(); }
 
-		GPUBuffer CreateBuffer(const GPUBufferDesc description);
-		// GPUTexture BuildGPUTexture(GPUTextureBuildDescription);
+		GPUBuffer CreateBuffer(const GPUBufferDesc& desc);
+		GPUTexture CreateTexture(const GPUTextureDesc& desc);
+
+		std::optional<Descriptor> CreateShaderResourceView(const GPUBuffer& gpuBuffer);
+		std::optional<Descriptor> CreateConstantBufferView(const GPUBuffer& gpuBuffer);
+		std::optional<Descriptor> CreateUnorderedAccessView(const GPUBuffer& gpuBuffer);
+
+		std::optional<Descriptor> CreateShaderResourceView(const GPUTexture& texture, const GPUTextureSubresource subresource);
+		std::optional<Descriptor> CreateUnorderedAccessView(const GPUTexture& texture, const GPUTextureSubresource subresource);
+		std::optional<Descriptor> CreateRenderTargetView(const GPUTexture& texture, const GPUTextureSubresource subresource);
+		std::optional<Descriptor> CreateDepthStencilView(const GPUTexture& texture, const GPUTextureSubresource subresource);
 
 	private:
 		bool AcquireAdapterFromFactory();
@@ -73,6 +85,8 @@ namespace fe
 		bool CreateMemoryAllcator();
 		bool CreateCommandQueues();
 		void CreateDescriptorHeaps();
+
+		GPUAllocation AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc);
 
 	public:
 		static constexpr uint32_t NumCbvSrvUavDescriptors = 2048;

@@ -1,39 +1,40 @@
 #pragma once
 #include <D3D12/Commons.h>
+#include <Core/Mutex.h>
 #include <queue>
 
 namespace fe
 {
 	class Device;
-	class DescriptorHeap
+	class DescriptorHeap;
+	class Descriptor
 	{
 	public:
-		class Descriptor
-		{
-		public:
-			Descriptor(Descriptor&& rhs) noexcept;
-			~Descriptor();
+		Descriptor(Descriptor&& rhs) noexcept;
+		~Descriptor();
 
-			Descriptor& operator=(Descriptor&& rhs) noexcept;
+		Descriptor& operator=(Descriptor&& rhs) noexcept;
 
-			uint32_t					GetDescriptorIndex() const { return index; }
-			D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle() const { return cpuHandle; }
-			D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() const { return gpuHandle; }
+		uint32_t					GetDescriptorIndex() const { return index; }
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle() const { return cpuHandle; }
+		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() const { return gpuHandle; }
 
-		private:
-			friend DescriptorHeap;
-			explicit Descriptor(DescriptorHeap& descriptorHeap);
+	private:
+		explicit Descriptor(DescriptorHeap& descriptorHeap);
 
-		public:
-			static constexpr uint32_t InvalidIndex = 0xffffffff;
+	public:
+		static constexpr uint32_t InvalidIndex = 0xffffffff;
 
-		private:
-			DescriptorHeap*				ownedDescriptorHeap = nullptr;
-			uint32_t					index;
-			D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-			D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
-		};
+	private:
+		friend DescriptorHeap;
+		DescriptorHeap*				ownedDescriptorHeap = nullptr;
+		uint32_t					index;
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+	};
 
+	class DescriptorHeap
+	{
 	private:
 		uint32_t AllocateIndex();
 		void	 ReleaseIndex(const uint32_t index);
@@ -57,6 +58,7 @@ namespace fe
 		}
 
 	private:
+		friend Descriptor;
 		wrl::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 		const bool						  bIsShaderVisible = false;
 		const uint32_t					  descriptorHandleIncrementSize = 0;
@@ -65,9 +67,8 @@ namespace fe
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
 
 		const uint32_t numInitialDescriptors = 0;
-		// @todo impl thread-safe alloc/release
+
+		RecursiveMutex		 mutex;
 		std::queue<uint32_t> indexPool;
 	};
-
-	using Descriptor = DescriptorHeap::Descriptor;
 } // namespace fe

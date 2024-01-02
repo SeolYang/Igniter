@@ -4,7 +4,10 @@
 #include <Engine.h>
 #include <D3D12/Device.h>
 #include <D3D12/DescriptorHeap.h>
+#include <D3D12/GPUBufferDesc.h>
 #include <D3D12/GPUBuffer.h>
+#include <D3D12/GPUTextureDesc.h>
+#include <D3D12/GPUTexture.h>
 
 namespace fe
 {
@@ -120,54 +123,153 @@ namespace fe
 		FlushQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	}
 
-	GPUBuffer Device::CreateBuffer(const GPUBufferDesc description)
+	GPUBuffer Device::CreateBuffer(const GPUBufferDesc& desc)
 	{
-		// #todo handle failing
-		Private::GPUAllocation		   allocation{};
-		const D3D12_RESOURCE_DESC1	   resourceDesc = description.AsResourceDesc();
-		const D3D12MA::ALLOCATION_DESC allocationDesc = description.AsAllocationDesc();
-		allocator->CreateResource3(
-			&allocationDesc, &resourceDesc,
-			D3D12_BARRIER_LAYOUT_UNDEFINED,
-			nullptr, 0, nullptr,
-			&allocation.Allocation,
-			IID_PPV_ARGS(&allocation.Resource));
+		// #todo handle failure
+		GPUAllocation allocation = AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc());
+		Private::SetD3DObjectName(allocation.GetResource(), desc.DebugName);
+		return GPUBuffer{ desc, std::move(allocation) };
+	}
 
-		Private::SetD3DObjectName(allocation.Resource, description.DebugName);
+	GPUTexture Device::CreateTexture(const GPUTextureDesc& desc)
+	{
+		// #todo handle failure
+		GPUAllocation allocation = AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc());
+		Private::SetD3DObjectName(allocation.GetResource(), desc.DebugName);
+		return GPUTexture{ desc, std::move(allocation) };
+	}
 
-		std::optional<Descriptor>					   cbvDescriptor = std::nullopt;
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = description.AsConstantBufferViewDesc(allocation.Resource->GetGPUVirtualAddress());
-		if (cbvDesc)
-		{
-			cbvDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateConstantBufferView(
-				&cbvDesc.value(),
-				cbvDescriptor->GetCPUDescriptorHandle());
-		}
-
-		std::optional<Descriptor> srvDescriptor = std::nullopt;
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = description.AsShaderResourceViewDesc();
+	std::optional<Descriptor> Device::CreateShaderResourceView(const GPUBuffer& gpuBuffer)
+	{
+		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
 		if (srvDesc)
 		{
-			srvDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			const GPUAllocation&	  allocation = gpuBuffer.GetAllocation();
+			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateShaderResourceView(
-				allocation.Resource,
-				&srvDesc.value(), 
-				srvDescriptor->GetCPUDescriptorHandle());
+				allocation.GetResource(),
+				&srvDesc.value(),
+				descriptor->GetCPUDescriptorHandle());
+
+			return descriptor;
 		}
 
-		std::optional<Descriptor> uavDescriptor = std::nullopt;
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = description.AsUnorderedAccessViewDesc();
+		return std::nullopt;
+	}
+
+	std::optional<Descriptor> Device::CreateUnorderedAccessView(const GPUBuffer& gpuBuffer)
+	{
+		const GPUBufferDesc&							desc = gpuBuffer.GetDesc();
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
 		if (uavDesc)
 		{
-			uavDescriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			const GPUAllocation&	  allocation = gpuBuffer.GetAllocation();
+			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateUnorderedAccessView(
-				allocation.Resource, nullptr,
-				&uavDesc.value(), 
-				uavDescriptor->GetCPUDescriptorHandle());
+				allocation.GetResource(), nullptr,
+				&uavDesc.value(),
+				descriptor->GetCPUDescriptorHandle());
+
+			return descriptor;
 		}
 
-		return GPUBuffer{ description, allocation, std::move(cbvDescriptor), std::move(srvDescriptor), std::move(uavDescriptor) };
+		return std::nullopt;
+	}
+
+	std::optional<Descriptor> Device::CreateConstantBufferView(const GPUBuffer& gpuBuffer)
+	{
+		const GPUBufferDesc& desc = gpuBuffer.GetDesc();
+		const GPUAllocation& allocation = gpuBuffer.GetAllocation();
+
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(allocation.GetResource()->GetGPUVirtualAddress());
+		if (cbvDesc)
+		{
+			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateConstantBufferView(
+				&cbvDesc.value(),
+				descriptor->GetCPUDescriptorHandle());
+
+			return descriptor;
+		}
+
+		return std::nullopt;
+	}
+
+	std::optional<Descriptor> Device::CreateShaderResourceView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	{
+		const GPUTextureDesc&						   desc = texture.GetDesc();
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
+		if (srvDesc)
+		{
+			const GPUAllocation&	  allocation = texture.GetAllocation();
+			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateShaderResourceView(
+				allocation.GetResource(),
+				&srvDesc.value(),
+				descriptor->GetCPUDescriptorHandle());
+
+			return descriptor;
+		}
+
+		return std::nullopt;
+	}
+
+	std::optional<Descriptor> Device::CreateUnorderedAccessView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	{
+		const GPUTextureDesc&							desc = texture.GetDesc();
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
+		if (uavDesc)
+		{
+			const GPUAllocation&	  allocation = texture.GetAllocation();
+			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateUnorderedAccessView(
+				allocation.GetResource(), nullptr,
+				&uavDesc.value(),
+				descriptor->GetCPUDescriptorHandle());
+
+			return descriptor;
+		}
+
+		return std::nullopt;
+	}
+
+	std::optional<Descriptor> Device::CreateRenderTargetView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	{
+		const GPUTextureDesc&						 desc = texture.GetDesc();
+		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
+		if (rtvDesc)
+		{
+			const GPUAllocation&	  allocation = texture.GetAllocation();
+			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateRenderTargetView(
+				allocation.GetResource(),
+				&rtvDesc.value(),
+				descriptor->GetCPUDescriptorHandle());
+
+			return descriptor;
+		}
+
+		return std::nullopt;
+	}
+
+	std::optional<Descriptor> Device::CreateDepthStencilView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	{
+		const GPUTextureDesc&						 desc = texture.GetDesc();
+		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
+		if (dsvDesc)
+		{
+			const GPUAllocation&	  allocation = texture.GetAllocation();
+			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			device->CreateDepthStencilView(
+				allocation.GetResource(),
+				&dsvDesc.value(),
+				descriptor->GetCPUDescriptorHandle());
+
+			return descriptor;
+		}
+
+		return std::nullopt;
 	}
 
 	bool Device::AcquireAdapterFromFactory()
@@ -400,4 +502,16 @@ namespace fe
 		FE_LOG(D3D12Info, "DSV Descriptor Heap::NumDescriptors: {}", NumDsvDescriptors);
 	}
 
+	GPUAllocation Device::AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc)
+	{
+		D3D12MA::Allocation* allocation = nullptr;
+		ID3D12Resource*		 resource = nullptr;
+		allocator->CreateResource3(
+			&allocationDesc, &resourceDesc,
+			D3D12_BARRIER_LAYOUT_UNDEFINED,
+			nullptr, 0, nullptr,
+			&allocation,
+			IID_PPV_ARGS(&resource));
+		return GPUAllocation{ resource, allocation };
+	}
 } // namespace fe

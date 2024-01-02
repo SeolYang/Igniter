@@ -1,8 +1,6 @@
 #pragma once
 #include <D3D12/DescriptorHeap.h>
-#include <D3D12/GPUAllocation.h>
-#include <D3D12/GPUBufferDescription.h>
-#include <optional>
+#include <D3D12/GPUBufferDesc.h>
 
 namespace fe
 {
@@ -11,16 +9,19 @@ namespace fe
 	public:
 		~GPUBuffer();
 
-	private:
-		friend class Device;
-		GPUBuffer(const GPUBufferDesc description, const Private::GPUAllocation allocation, std::optional<Descriptor> cbv, std::optional<Descriptor> srv, std::optional<Descriptor> uav);
+		GPUBuffer(GPUBuffer&& other) noexcept;
+		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
+
+		const GPUBufferDesc& GetDesc() const { return desc; }
+		const GPUAllocation& GetAllocation() const { return allocation; }
 
 	private:
-		const GPUBufferDesc description;
-		Private::GPUAllocation	   allocation;
-		std::optional<Descriptor>  srv;
-		std::optional<Descriptor>  cbv;
-		std::optional<Descriptor>  uav;
+		friend class Device;
+		GPUBuffer(const GPUBufferDesc& description, GPUAllocation allocation);
+
+	private:
+		GPUBufferDesc desc;
+		GPUAllocation allocation;
 	};
 
 } // namespace fe

@@ -18,7 +18,7 @@ namespace fe
 		desc.Flags = bIsShaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 		ID3D12Device10& nativeDevice = device.GetNative();
-		const bool	   bSucceeded = IsDXCallSucceeded(nativeDevice.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
+		const bool		bSucceeded = IsDXCallSucceeded(nativeDevice.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
 		FE_ASSERT_LOG(D3D12Fatal, bSucceeded, "Failed to create descriptor heap {}", debugName);
 
 		if (bSucceeded)
@@ -35,6 +35,7 @@ namespace fe
 
 	uint32_t DescriptorHeap::AllocateIndex()
 	{
+		RecursiveLock lock{ mutex };
 		if (indexPool.empty())
 		{
 			FE_LOG(D3D12Warn, "There are no more remaining descriptors.");
@@ -50,6 +51,8 @@ namespace fe
 	{
 		FE_ASSERT(index < numInitialDescriptors, "Out of range index.");
 		FE_ASSERT(index != Descriptor::InvalidIndex, "Invalid Descriptor Index.");
+
+		RecursiveLock lock{ mutex };
 		FE_ASSERT(indexPool.size() <= numInitialDescriptors, "Invalid release request.");
 		if (index != Descriptor::InvalidIndex)
 		{
@@ -67,17 +70,17 @@ namespace fe
 		return bIsShaderVisible ? CD3DX12_GPU_DESCRIPTOR_HANDLE{ gpuDescriptorHandleForHeapStart, static_cast<INT>(index), descriptorHandleIncrementSize } : gpuDescriptorHandleForHeapStart;
 	}
 
-	DescriptorHeap::Descriptor::Descriptor(DescriptorHeap& descriptorHeap)
+	Descriptor::Descriptor(DescriptorHeap& descriptorHeap)
 		: ownedDescriptorHeap(&descriptorHeap), index(descriptorHeap.AllocateIndex()), cpuHandle(descriptorHeap.GetIndexedCPUDescriptorHandle(index)), gpuHandle(descriptorHeap.GetIndexedGPUDescriptorHandle(index))
 	{
 	}
 
-	DescriptorHeap::Descriptor::Descriptor(Descriptor&& rhs) noexcept
+	Descriptor::Descriptor(Descriptor&& rhs) noexcept
 		: ownedDescriptorHeap(std::exchange(rhs.ownedDescriptorHeap, nullptr)), index(std::exchange(rhs.index, Descriptor::InvalidIndex)), cpuHandle(std::exchange(rhs.cpuHandle, {})), gpuHandle(std::exchange(rhs.gpuHandle, {}))
 	{
 	}
 
-	DescriptorHeap::Descriptor::~Descriptor()
+	Descriptor::~Descriptor()
 	{
 		if (ownedDescriptorHeap != nullptr && index != InvalidIndex)
 		{
@@ -85,7 +88,7 @@ namespace fe
 		}
 	}
 
-	DescriptorHeap::Descriptor& DescriptorHeap::Descriptor::operator=(Descriptor&& rhs) noexcept
+	Descriptor& Descriptor::operator=(Descriptor&& rhs) noexcept
 	{
 		this->ownedDescriptorHeap = std::exchange(rhs.ownedDescriptorHeap, nullptr);
 		this->index = std::exchange(rhs.index, Descriptor::InvalidIndex);

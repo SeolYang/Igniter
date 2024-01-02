@@ -24,9 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\.clang-format" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -105,9 +102,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUAllocation.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
@@ -126,13 +120,13 @@
     <ClInclude Include="..\Source\Frieren\D3D12\Commons.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDescription.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
       <Filter>Thirdparty\D3D12MemAlloc</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDescription.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
@@ -170,7 +164,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\Commons.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDescription.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -179,11 +173,14 @@
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDescription.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Engine.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUTexture.cpp">
+      <Filter>Source\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

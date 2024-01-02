@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -13,9 +13,6 @@
       <Configuration>Test</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\.clang-format" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
@@ -37,12 +34,12 @@
     <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Device.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Fence.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUAllocation.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDescription.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUContext.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUResoureView.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDescription.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Shader.h" />
@@ -65,13 +62,14 @@
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDescription.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDescription.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp" />
+    <ClCompile Include="GPUTexture.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

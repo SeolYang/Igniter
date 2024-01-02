@@ -2,14 +2,25 @@
 
 namespace fe
 {
-	GPUBuffer::GPUBuffer(const GPUBufferDesc description, const Private::GPUAllocation allocation, std::optional<Descriptor> cbv, std::optional<Descriptor> srv, std::optional<Descriptor> uav)
-		: description(description), allocation(allocation), srv(std::move(srv)), cbv(std::move(cbv)), uav(std::move(uav))
+	GPUBuffer::GPUBuffer(const GPUBufferDesc& desc, GPUAllocation allocation)
+		: desc(desc), allocation(std::move(allocation))
 	{
+	}
+
+	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept
+		: desc(other.desc), allocation(std::move(other.allocation))
+	{
+	}
+
+	GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept
+	{
+		this->desc = other.desc;
+		this->allocation = std::move(other.allocation);
+		return *this;
 	}
 
 	GPUBuffer::~GPUBuffer()
 	{
-		allocation.Resource->Release();
-		allocation.Allocation->Release();
+		allocation.SafeRelease();
 	}
 } // namespace fe

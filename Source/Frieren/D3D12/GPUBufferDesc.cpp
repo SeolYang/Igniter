@@ -1,5 +1,5 @@
-#include <D3D12/GPUBufferDescription.h>
 #include <Core/Utility.h>
+#include <D3D12/GPUBufferDesc.h>
 
 namespace fe
 {
@@ -10,7 +10,7 @@ namespace fe
 			.SizeInBytes = Private::AdjustSizeForConstantBuffer(sizeOfBufferInBytes),
 			.bIsShaderReadWritable = false,
 			.bIsCPUAccessible = true,
-			.StandardBarrier = D3D12_BUFFER_BARRIER{
+			.StandardBarrier = D3D12_BUFFER_BARRIER {
 				.SyncBefore = D3D12_BARRIER_SYNC_NONE,
 				.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
 				.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -33,7 +33,7 @@ namespace fe
 			.ElementStrideInBytes = sizeOfElementInBytes,
 			.bIsShaderReadWritable = bIsDynamic,
 			.bIsCPUAccessible = false,
-			.StandardBarrier = D3D12_BUFFER_BARRIER{
+			.StandardBarrier = D3D12_BUFFER_BARRIER {
 				.SyncBefore = D3D12_BARRIER_SYNC_NONE,
 				.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
 				.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -48,7 +48,7 @@ namespace fe
 			.SizeInBytes = sizeOfBufferInBytes,
 			.bIsShaderReadWritable = false,
 			.bIsCPUAccessible = true,
-			.StandardBarrier = D3D12_BUFFER_BARRIER{
+			.StandardBarrier = D3D12_BUFFER_BARRIER {
 				.SyncBefore = D3D12_BARRIER_SYNC_NONE,
 				.SyncAfter = D3D12_BARRIER_SYNC_COPY,
 				.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -63,7 +63,7 @@ namespace fe
 			.SizeInBytes = sizeOfBufferInBytes,
 			.bIsShaderReadWritable = false,
 			.bIsCPUAccessible = true,
-			.StandardBarrier = D3D12_BUFFER_BARRIER{
+			.StandardBarrier = D3D12_BUFFER_BARRIER {
 				.SyncBefore = D3D12_BARRIER_SYNC_NONE,
 				.SyncAfter = D3D12_BARRIER_SYNC_RESOLVE,
 				.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -80,7 +80,7 @@ namespace fe
 			.ElementStrideInBytes = sizeOfVertexInBytes,
 			.bIsShaderReadWritable = false,
 			.bIsCPUAccessible = false,
-			.StandardBarrier = D3D12_BUFFER_BARRIER{
+			.StandardBarrier = D3D12_BUFFER_BARRIER {
 				.SyncBefore = D3D12_BARRIER_SYNC_NONE,
 				.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
 				.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -97,7 +97,7 @@ namespace fe
 			.ElementStrideInBytes = sizeOfIndexInBytes,
 			.bIsShaderReadWritable = false,
 			.bIsCPUAccessible = false,
-			.StandardBarrier = D3D12_BUFFER_BARRIER{
+			.StandardBarrier = D3D12_BUFFER_BARRIER {
 				.SyncBefore = D3D12_BARRIER_SYNC_NONE,
 				.SyncAfter = D3D12_BARRIER_SYNC_INDEX_INPUT,
 				.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -130,9 +130,9 @@ namespace fe
 		return bIsCPUAccessible && BitFlagContains(StandardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_RESOLVE_SOURCE);
 	}
 
-	D3D12_RESOURCE_DESC1 GPUBufferDesc::AsResourceDesc() const
+	D3D12_RESOURCE_DESC1 GPUBufferDesc::ToResourceDesc() const
 	{
-		D3D12_RESOURCE_DESC1 desc{};
+		D3D12_RESOURCE_DESC1 desc {};
 		desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 		/** resource alignment: https://asawicki.info/news_1726_secrets_of_direct3d_12_resource_alignment */
 		desc.Alignment = 0;
@@ -148,9 +148,9 @@ namespace fe
 		return desc;
 	}
 
-	D3D12MA::ALLOCATION_DESC GPUBufferDesc::AsAllocationDesc() const
+	D3D12MA::ALLOCATION_DESC GPUBufferDesc::ToAllocationDesc() const
 	{
-		D3D12MA::ALLOCATION_DESC desc{};
+		D3D12MA::ALLOCATION_DESC desc {};
 		if (IsShaderResourceCompatible() || IsConstantBufferCompatible() || IsUnorderedAccessCompatible())
 		{
 			desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
@@ -167,11 +167,11 @@ namespace fe
 		return desc;
 	}
 
-	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUBufferDesc::AsShaderResourceViewDesc() const
+	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUBufferDesc::ToShaderResourceViewDesc() const
 	{
 		if (BitFlagContains(StandardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_SHADER_RESOURCE))
 		{
-			D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
+			D3D12_SHADER_RESOURCE_VIEW_DESC desc {};
 			desc.Format = DXGI_FORMAT_UNKNOWN;
 			desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -184,11 +184,11 @@ namespace fe
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> GPUBufferDesc::AsConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
+	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> GPUBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
 	{
 		if (BitFlagContains(StandardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_CONSTANT_BUFFER))
 		{
-			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
+			D3D12_CONSTANT_BUFFER_VIEW_DESC desc {};
 			desc.BufferLocation = bufferLocation;
 			desc.SizeInBytes = SizeInBytes;
 			return desc;
@@ -197,11 +197,11 @@ namespace fe
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUBufferDesc::AsUnorderedAccessViewDesc() const
+	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUBufferDesc::ToUnorderedAccessViewDesc() const
 	{
 		if (BitFlagContains(StandardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS))
 		{
-			D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
+			D3D12_UNORDERED_ACCESS_VIEW_DESC desc {};
 			desc.Format = DXGI_FORMAT_UNKNOWN;
 			desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 			desc.Buffer.FirstElement = 0;

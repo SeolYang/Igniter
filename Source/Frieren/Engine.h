@@ -4,7 +4,7 @@
 
 namespace fe
 {
-	constexpr Version EngineVersion = CreateVersion(0, 1, 0);
+	constexpr Version EngineVersion = CreateVersion(0, 2, 1);
 
 	class Timer;
 	class Logger;

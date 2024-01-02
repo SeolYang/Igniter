@@ -16,7 +16,7 @@ namespace fe::Private
 
 namespace fe
 {
-	struct GPUBufferDesc
+	class GPUBufferDesc
 	{
 	public:
 		static GPUBufferDesc BuildConstantBuffer(const uint32_t sizeOfBufferInBytes);
@@ -32,14 +32,14 @@ namespace fe
 		bool IsUploadCompatible() const;
 		bool IsReadbackCompatible() const;
 
-		D3D12_RESOURCE_DESC1							AsResourceDesc() const;
-		D3D12MA::ALLOCATION_DESC						AsAllocationDesc() const;
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	AsShaderResourceViewDesc() const;
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>	AsConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> AsUnorderedAccessViewDesc() const;
+		D3D12_RESOURCE_DESC1							ToResourceDesc() const;
+		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc() const;
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>	ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc() const;
 
 	public:
-		String				 DebugName = String{ "Buffer" };
+		String				 DebugName = String { "Buffer" };
 		uint32_t			 SizeInBytes = 1;
 		uint32_t			 NumElements = 1;
 		uint32_t			 ElementStrideInBytes = 1;

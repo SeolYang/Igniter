@@ -8,6 +8,7 @@
 #include <Core/EmbededSettings.h>
 #include <Renderer/Renderer.h>
 #include <Gameplay/GameInstance.h>
+#include <Gameplay/World.h>
 
 namespace fe
 {
