@@ -1,18 +1,19 @@
 #include <D3D12/GPUTexture.h>
+#include <D3D12/Device.h>
 
 namespace fe
 {
+	GPUTexture::GPUTexture(Device& device, const GPUTextureDesc& desc)
+		: desc(desc), allocation(device.AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc()))
+	{
+	}
+
 	GPUTexture::~GPUTexture()
 	{
 	}
 
 	GPUTexture::GPUTexture(GPUTexture&& other) noexcept
 		: desc(other.desc), allocation(std::move(other.allocation))
-	{
-	}
-
-	GPUTexture::GPUTexture(const GPUTextureDesc& desc, GPUAllocation allocation)
-		: desc(desc), allocation(std::move(allocation))
 	{
 	}
 

@@ -17,7 +17,7 @@ namespace fe
 	Engine::Engine()
 	{
 		const bool bIsFirstEngineCreation = instance == nullptr;
-		FE_ASSERT(bIsFirstEngineCreation, "Engine instance already exist.");
+		FE_ASSERT(bIsFirstEngineCreation);
 		if (bIsFirstEngineCreation)
 		{
 			instance = this;
@@ -60,43 +60,43 @@ namespace fe
 
 	Timer& Engine::GetTimer()
 	{
-		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		FE_ASSERT(instance != nullptr);
 		return *(instance->timer);
 	}
 
 	Logger& Engine::GetLogger()
 	{
-		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		FE_ASSERT(instance != nullptr);
 		return *(instance->logger);
 	}
 
 	HandleManager& Engine::GetHandleManager()
 	{
-		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		FE_ASSERT(instance != nullptr);
 		return *(instance->handleManager);
 	}
 
 	Window& Engine::GetWindow()
 	{
-		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		FE_ASSERT(instance != nullptr);
 		return *(instance->window);
 	}
 
 	InputManager& Engine::GetInputManager()
 	{
-		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		FE_ASSERT(instance != nullptr);
 		return *(instance->inputManager);
 	}
 
 	Renderer& Engine::GetRenderer()
 	{
-		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		FE_ASSERT(instance != nullptr);
 		return *(instance->renderer);
 	}
 
 	GameInstance& Engine::GetGameInstance()
 	{
-		FE_ASSERT(instance != nullptr, "Engine does not intialized.");
+		FE_ASSERT(instance != nullptr);
 		return *(instance->gameInstance);
 	}
 

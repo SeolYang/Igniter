@@ -16,6 +16,7 @@ namespace fe
 		Fence& operator=(Fence&&) noexcept = delete;
 
 		void Next() { ++counter; }
+		// #todo Moved to device
 		void Signal(ID3D12CommandQueue& cmdQueue);
 		void GpuWaitForFence(ID3D12CommandQueue& cmdQueue);
 		void CpuWaitForFence();

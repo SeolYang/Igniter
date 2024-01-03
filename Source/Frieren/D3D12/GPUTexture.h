@@ -4,23 +4,21 @@
 
 namespace fe
 {
+	class Device;
 	class GPUTexture
 	{
 	public:
+		GPUTexture(Device& device, const GPUTextureDesc& desc);
 		~GPUTexture();
 
 		GPUTexture(GPUTexture&& other) noexcept;
 		GPUTexture& operator=(GPUTexture&& other) noexcept;
 
 		const GPUTextureDesc& GetDesc() const { return desc; }
-		const GPUAllocation&  GetAllocation() const { return allocation; }
-
-	private:
-		friend class Device;
-		GPUTexture(const GPUTextureDesc& desc, GPUAllocation allocation);
+		const GPUResource&	  GetAllocation() const { return allocation; }
 
 	private:
 		GPUTextureDesc desc;
-		GPUAllocation  allocation;
+		GPUResource	   allocation;
 	};
 } // namespace fe

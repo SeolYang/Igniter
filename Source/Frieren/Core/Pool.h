@@ -33,7 +33,7 @@ namespace fe
 
 			~Chunk()
 			{
-				FE_ASSERT(allocatedSlot.empty(), "Some slots does not returned. It may occur cause of memory leak.");
+				FE_ASSERT(allocatedSlot.empty());
 				_aligned_free(base);
 			}
 
@@ -46,7 +46,7 @@ namespace fe
 			template <typename T>
 			static std::unique_ptr<Chunk> Create(const size_t numOfElements)
 			{
-				FE_ASSERT(numOfElements > 0, "Zero elements chunk does not allowed.");
+				FE_ASSERT(numOfElements > 0);
 				return std::make_unique<Chunk>(sizeof(T), alignof(T), numOfElements);
 			}
 
@@ -61,7 +61,7 @@ namespace fe
 			void Deallocate(const size_t slot)
 			{
 				const bool bIsValidSlot = IsValidSlot(slot);
-				FE_ASSERT(bIsValidSlot, "Trying to deallocate invalid slot {}.", slot);
+				FE_ASSERT(bIsValidSlot);
 				if (bIsValidSlot)
 				{
 					freeSlots.push(slot);
@@ -131,7 +131,7 @@ namespace fe
 
 		void Deallocate(const Allocation allocation)
 		{
-			FE_ASSERT(allocation.ChunkIndex < chunks.size(), "Invalid Chunk Index");
+			FE_ASSERT(allocation.ChunkIndex < chunks.size());
 			T* const addressOfInstance = GetAddressOfAllocation(allocation);
 			if (addressOfInstance != nullptr)
 			{
@@ -149,7 +149,7 @@ namespace fe
 		T* GetAddressOfAllocation(const Allocation allocation) const
 		{
 			const bool bIsValidChunkIndex = allocation.ChunkIndex < chunks.size();
-			FE_ASSERT(bIsValidChunkIndex, "Invalid chunk index from Allocation.");
+			FE_ASSERT(bIsValidChunkIndex);
 			return bIsValidChunkIndex ? reinterpret_cast<T*>(chunks[allocation.ChunkIndex]->GetPointerOfSlot(allocation.ElementIndex)) : nullptr;
 		}
 

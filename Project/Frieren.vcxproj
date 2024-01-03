@@ -36,7 +36,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\Fence.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDesc.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUContext.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUResoureView.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />

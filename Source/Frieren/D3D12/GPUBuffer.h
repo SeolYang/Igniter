@@ -4,24 +4,22 @@
 
 namespace fe
 {
+	class Device;
 	class GPUBuffer
 	{
 	public:
+		GPUBuffer(Device& device, const GPUBufferDesc& desc);
 		~GPUBuffer();
 
 		GPUBuffer(GPUBuffer&& other) noexcept;
 		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
 
 		const GPUBufferDesc& GetDesc() const { return desc; }
-		const GPUAllocation& GetAllocation() const { return allocation; }
-
-	private:
-		friend class Device;
-		GPUBuffer(const GPUBufferDesc& description, GPUAllocation allocation);
+		const GPUResource& GetAllocation() const { return allocation; }
 
 	private:
 		GPUBufferDesc desc;
-		GPUAllocation allocation;
+		GPUResource allocation;
 	};
 
 } // namespace fe

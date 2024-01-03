@@ -307,7 +307,7 @@ namespace fe
 
 	D3D12_RESOURCE_DESC1 GPUTextureDesc::ToResourceDesc() const
 	{
-		FE_ASSERT(Width > 0, "Invalid width.");
+		FE_ASSERT(Width > 0);
 		D3D12_RESOURCE_DESC1 desc{};
 		desc.Dimension = IsTexture1D() ? D3D12_RESOURCE_DIMENSION_TEXTURE1D : (IsTexture2D() ? D3D12_RESOURCE_DIMENSION_TEXTURE2D : (IsTexture3D() ? D3D12_RESOURCE_DIMENSION_TEXTURE3D : D3D12_RESOURCE_DIMENSION_UNKNOWN));
 		/** resource alignment: https://asawicki.info/news_1726_secrets_of_direct3d_12_resource_alignment */

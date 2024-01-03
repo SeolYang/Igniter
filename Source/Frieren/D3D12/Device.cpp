@@ -73,11 +73,11 @@ namespace fe
 
 	void Device::FlushQueue(const D3D12_COMMAND_LIST_TYPE queueType)
 	{
-		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_BUNDLE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_NONE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE, "Invalid queue type to flush.");
-		FE_ASSERT_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS, "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_BUNDLE, "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_NONE, "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE, "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE, "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS, "Invalid queue type to flush.");
 
 		wrl::ComPtr<ID3D12Fence> fence;
 		if (IsDXCallSucceeded(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
@@ -96,7 +96,7 @@ namespace fe
 					break;
 			}
 
-			FE_ASSERT(queue != nullptr, "Invalid queue.");
+			FE_ASSERT(queue != nullptr);
 
 			if (IsDXCallSucceeded(queue->Signal(fence.Get(), 1)))
 			{
@@ -107,12 +107,12 @@ namespace fe
 			}
 			else
 			{
-				FE_FORCE_ASSERT_LOG(D3D12Fatal, "Failed to signal fence.");
+				FE_LOG(D3D12Fatal, "Failed to signal fence.");
 			}
 		}
 		else
 		{
-			FE_FORCE_ASSERT_LOG(D3D12Fatal, "Failed to create fence for flush.");
+			FE_LOG(D3D12Fatal, "Failed to create fence for flush.");
 		}
 	}
 
@@ -123,29 +123,13 @@ namespace fe
 		FlushQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	}
 
-	GPUBuffer Device::CreateBuffer(const GPUBufferDesc& desc)
-	{
-		// #todo handle failure
-		GPUAllocation allocation = AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc());
-		Private::SetD3DObjectName(allocation.GetResource(), desc.DebugName);
-		return GPUBuffer{ desc, std::move(allocation) };
-	}
-
-	GPUTexture Device::CreateTexture(const GPUTextureDesc& desc)
-	{
-		// #todo handle failure
-		GPUAllocation allocation = AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc());
-		Private::SetD3DObjectName(allocation.GetResource(), desc.DebugName);
-		return GPUTexture{ desc, std::move(allocation) };
-	}
-
 	std::optional<Descriptor> Device::CreateShaderResourceView(const GPUBuffer& gpuBuffer)
 	{
 		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
 		if (srvDesc)
 		{
-			const GPUAllocation&	  allocation = gpuBuffer.GetAllocation();
+			const GPUResource&		  allocation = gpuBuffer.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateShaderResourceView(
 				allocation.GetResource(),
@@ -164,7 +148,7 @@ namespace fe
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
 		if (uavDesc)
 		{
-			const GPUAllocation&	  allocation = gpuBuffer.GetAllocation();
+			const GPUResource&		  allocation = gpuBuffer.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateUnorderedAccessView(
 				allocation.GetResource(), nullptr,
@@ -180,7 +164,7 @@ namespace fe
 	std::optional<Descriptor> Device::CreateConstantBufferView(const GPUBuffer& gpuBuffer)
 	{
 		const GPUBufferDesc& desc = gpuBuffer.GetDesc();
-		const GPUAllocation& allocation = gpuBuffer.GetAllocation();
+		const GPUResource&	 allocation = gpuBuffer.GetAllocation();
 
 		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(allocation.GetResource()->GetGPUVirtualAddress());
 		if (cbvDesc)
@@ -202,7 +186,7 @@ namespace fe
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
 		if (srvDesc)
 		{
-			const GPUAllocation&	  allocation = texture.GetAllocation();
+			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateShaderResourceView(
 				allocation.GetResource(),
@@ -221,7 +205,7 @@ namespace fe
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
 		if (uavDesc)
 		{
-			const GPUAllocation&	  allocation = texture.GetAllocation();
+			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateUnorderedAccessView(
 				allocation.GetResource(), nullptr,
@@ -240,7 +224,7 @@ namespace fe
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
 		if (rtvDesc)
 		{
-			const GPUAllocation&	  allocation = texture.GetAllocation();
+			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateRenderTargetView(
 				allocation.GetResource(),
@@ -259,7 +243,7 @@ namespace fe
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
 		if (dsvDesc)
 		{
-			const GPUAllocation&	  allocation = texture.GetAllocation();
+			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateDepthStencilView(
 				allocation.GetResource(),
@@ -280,7 +264,7 @@ namespace fe
 			factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
 			wrl::ComPtr<ID3D12Debug5> debugController;
 			const bool				  bDebugControllerAcquired = IsDXCallSucceeded(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
-			FE_ASSERT_LOG(fe::D3D12Fatal, bDebugControllerAcquired, "Failed to get debug controller.");
+			FE_CONDITIONAL_LOG(fe::D3D12Fatal, bDebugControllerAcquired, "Failed to get debug controller.");
 			if (bDebugControllerAcquired)
 			{
 				debugController->EnableDebugLayer();
@@ -296,7 +280,7 @@ namespace fe
 
 		wrl::ComPtr<IDXGIFactory6> factory;
 		const bool				   bFactoryCreated = IsDXCallSucceeded(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
-		FE_ASSERT_LOG(D3D12Fatal, bFactoryCreated, "Failed to create factory.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, bFactoryCreated, "Failed to create factory.");
 
 		if (bFactoryCreated)
 		{
@@ -304,7 +288,7 @@ namespace fe
 				0,
 				DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
 				IID_PPV_ARGS(&adapter)));
-			FE_ASSERT_LOG(D3D12Fatal, bIsAdapterAcquired, "Failed to acquire adapter from factory.");
+			FE_CONDITIONAL_LOG(D3D12Fatal, bIsAdapterAcquired, "Failed to acquire adapter from factory.");
 			return bIsAdapterAcquired;
 		}
 
@@ -328,7 +312,7 @@ namespace fe
 	{
 		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
 		const bool					bIsDeviceCreated = IsDXCallSucceeded(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
-		FE_ASSERT_LOG(D3D12Fatal, bIsDeviceCreated, "Failed to create the device from the adapter.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, bIsDeviceCreated, "Failed to create the device from the adapter.");
 		return bIsDeviceCreated;
 	}
 
@@ -361,7 +345,7 @@ namespace fe
 		}
 		else
 		{
-			FE_FORCE_ASSERT_LOG(D3D12Fatal, "Enhanced Barriers does not supported.");
+			FE_LOG(D3D12Fatal, "Enhanced Barriers does not supported.");
 		}
 
 		/**
@@ -386,7 +370,7 @@ namespace fe
 		}
 		else
 		{
-			FE_FORCE_ASSERT_LOG(D3D12Fatal, "Shader Model 6.6 does not supported.");
+			FE_LOG(D3D12Fatal, "Shader Model 6.6 does not supported.");
 		}
 
 		/**
@@ -424,7 +408,7 @@ namespace fe
 		desc.pAdapter = adapter.Get();
 		desc.pDevice = device.Get();
 		const bool bSucceeded = IsDXCallSucceeded(D3D12MA::CreateAllocator(&desc, &allocator));
-		FE_ASSERT_LOG(D3D12Fatal, bSucceeded, "Failed to create D3D12MA::Allocator.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, bSucceeded, "Failed to create D3D12MA::Allocator.");
 		return bSucceeded;
 	}
 
@@ -437,7 +421,7 @@ namespace fe
 			desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 			if (!IsDXCallSucceeded(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&directQueue))))
 			{
-				FE_ASSERT_LOG(D3D12Fatal, false, "Failed to create the direct command queue.");
+				FE_CONDITIONAL_LOG(D3D12Fatal, false, "Failed to create the direct command queue.");
 				return false;
 			}
 		}
@@ -449,7 +433,7 @@ namespace fe
 			desc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
 			if (!IsDXCallSucceeded(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&asyncComputeQueue))))
 			{
-				FE_ASSERT_LOG(D3D12Fatal, false, "Failed to create the async compute command queue.");
+				FE_CONDITIONAL_LOG(D3D12Fatal, false, "Failed to create the async compute command queue.");
 				return false;
 			}
 		}
@@ -461,7 +445,7 @@ namespace fe
 			desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
 			if (!IsDXCallSucceeded(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&copyQueue))))
 			{
-				FE_ASSERT_LOG(D3D12Fatal, false, "Failed to create the copy command queue.");
+				FE_CONDITIONAL_LOG(D3D12Fatal, false, "Failed to create the copy command queue.");
 				return false;
 			}
 		}
@@ -502,16 +486,8 @@ namespace fe
 		FE_LOG(D3D12Info, "DSV Descriptor Heap::NumDescriptors: {}", NumDsvDescriptors);
 	}
 
-	GPUAllocation Device::AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc)
+	GPUResource Device::AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc)
 	{
-		D3D12MA::Allocation* allocation = nullptr;
-		ID3D12Resource*		 resource = nullptr;
-		allocator->CreateResource3(
-			&allocationDesc, &resourceDesc,
-			D3D12_BARRIER_LAYOUT_UNDEFINED,
-			nullptr, 0, nullptr,
-			&allocation,
-			IID_PPV_ARGS(&resource));
-		return GPUAllocation{ resource, allocation };
+		return GPUResource{ allocator, resourceDesc, allocationDesc };
 	}
 } // namespace fe

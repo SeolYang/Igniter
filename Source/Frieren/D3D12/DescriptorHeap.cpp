@@ -19,7 +19,7 @@ namespace fe
 
 		ID3D12Device10& nativeDevice = device.GetNative();
 		const bool		bSucceeded = IsDXCallSucceeded(nativeDevice.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
-		FE_ASSERT_LOG(D3D12Fatal, bSucceeded, "Failed to create descriptor heap {}", debugName);
+		FE_CONDITIONAL_LOG(D3D12Fatal, bSucceeded, "Failed to create descriptor heap {}", debugName);
 
 		if (bSucceeded)
 		{
@@ -30,7 +30,7 @@ namespace fe
 
 	DescriptorHeap::~DescriptorHeap()
 	{
-		FE_ASSERT_LOG(D3D12Warn, numInitialDescriptors == indexPool.size(), "Some Descriptorsd doesn't released yet. {}/{}", indexPool.size(), numInitialDescriptors);
+		FE_CONDITIONAL_LOG(D3D12Warn, numInitialDescriptors == indexPool.size(), "Some Descriptorsd doesn't released yet. {}/{}", indexPool.size(), numInitialDescriptors);
 	}
 
 	uint32_t DescriptorHeap::AllocateIndex()
@@ -49,11 +49,11 @@ namespace fe
 
 	void DescriptorHeap::ReleaseIndex(const uint32_t index)
 	{
-		FE_ASSERT(index < numInitialDescriptors, "Out of range index.");
-		FE_ASSERT(index != Descriptor::InvalidIndex, "Invalid Descriptor Index.");
+		FE_ASSERT(index < numInitialDescriptors);
+		FE_ASSERT(index != Descriptor::InvalidIndex);
 
 		RecursiveLock lock{ mutex };
-		FE_ASSERT(indexPool.size() <= numInitialDescriptors, "Invalid release request.");
+		FE_ASSERT(indexPool.size() <= numInitialDescriptors);
 		if (index != Descriptor::InvalidIndex)
 		{
 			indexPool.push(index);

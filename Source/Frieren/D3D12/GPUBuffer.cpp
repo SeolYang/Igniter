@@ -1,14 +1,15 @@
 #include <D3D12/GPUBuffer.h>
+#include <D3D12/Device.h>
 
 namespace fe
 {
-	GPUBuffer::GPUBuffer(const GPUBufferDesc& desc, GPUAllocation allocation)
-		: desc(desc), allocation(std::move(allocation))
+	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept
+		: desc(other.desc), allocation(std::move(other.allocation))
 	{
 	}
 
-	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept
-		: desc(other.desc), allocation(std::move(other.allocation))
+	GPUBuffer::GPUBuffer(Device& device, const GPUBufferDesc& desc)
+		: desc(desc), allocation(device.AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc()))
 	{
 	}
 

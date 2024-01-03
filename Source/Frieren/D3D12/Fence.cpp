@@ -8,7 +8,7 @@ namespace fe
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
 		const bool	   bIsFenceCreated = IsDXCallSucceeded(nativeDevice.CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-		FE_ASSERT_LOG(D3D12Fatal, bIsFenceCreated, "Failed to create fence.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, bIsFenceCreated, "Failed to create fence.");
 
 		Private::SetD3DObjectName(fence.Get(), debugName);
 	}
@@ -35,9 +35,9 @@ namespace fe
 		const uint64_t completedValue = fence->GetCompletedValue();
 		if (completedValue < counter)
 		{
-			FE_ASSERT_LOG(D3D12Fatal, eventHandle != NULL, "Invalid Event Handle.");
+			FE_CONDITIONAL_LOG(D3D12Fatal, eventHandle != NULL, "Invalid Event Handle.");
 			const bool bSetEventSucceded = IsDXCallSucceeded(fence->SetEventOnCompletion(counter, eventHandle));
-			FE_ASSERT_LOG(D3D12Fatal, bSetEventSucceded, "Failed to set event on completion of fence.");
+			FE_CONDITIONAL_LOG(D3D12Fatal, bSetEventSucceded, "Failed to set event on completion of fence.");
 			if (bSetEventSucceded)
 			{
 				::WaitForSingleObject(eventHandle, INFINITE);

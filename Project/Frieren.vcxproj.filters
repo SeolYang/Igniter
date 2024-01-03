@@ -90,7 +90,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUContext.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h">
@@ -129,6 +129,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUResoureView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">

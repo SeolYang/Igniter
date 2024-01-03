@@ -12,25 +12,38 @@
 
 namespace fe
 {
-	class GPUAllocation
+	class GPUResource
 	{
 	public:
-		GPUAllocation(ID3D12Resource* resource, D3D12MA::Allocation* allocation)
+		GPUResource(D3D12MA::Allocator* allocator, const D3D12_RESOURCE_DESC1& resourceDesc, const D3D12MA::ALLOCATION_DESC& allocDesc)
+		{
+			if (allocator != nullptr)
+			{
+				allocator->CreateResource3(
+					&allocDesc, &resourceDesc,
+					D3D12_BARRIER_LAYOUT_UNDEFINED,
+					nullptr, 0, nullptr,
+					&allocation,
+					IID_PPV_ARGS(&resource));
+			}
+		}
+
+		GPUResource(ID3D12Resource* resource, D3D12MA::Allocation* allocation)
 			: resource(resource), allocation(allocation)
 		{
 		}
 
-		~GPUAllocation()
+		~GPUResource()
 		{
 			SafeRelease();
 		}
 
-		GPUAllocation(GPUAllocation&& other) noexcept
+		GPUResource(GPUResource&& other) noexcept
 			: resource(std::exchange(other.resource, nullptr)), allocation(std::exchange(other.allocation, nullptr))
 		{
 		}
 
-		GPUAllocation& operator=(GPUAllocation&& other) noexcept
+		GPUResource& operator=(GPUResource&& other) noexcept
 		{
 			this->resource = std::exchange(other.resource, nullptr);
 			this->allocation = std::exchange(other.allocation, nullptr);

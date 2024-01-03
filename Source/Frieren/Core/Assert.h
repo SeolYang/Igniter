@@ -1,6 +1,6 @@
 #pragma once
-#if (defined(_DEBUG) || defined(DEBUG) || defined(FORCE_ENABLE_ASSERT)) && !defined(FORCE_DISABLE_ASSERT)
-	#define FE_ASSERT(CONDITION, FORMAT_STR, ...) \
+#if (defined(_DEBUG) || defined(DEBUG))
+	#define FE_ASSERT(CONDITION) \
 		do                                        \
 			if (!(CONDITION))                     \
 			{                                     \
@@ -8,11 +8,8 @@
 			}                                     \
 		while (false)
 
-	#define FE_FORCE_ASSERT(FORMAT_STR, ...) \
-		__debugbreak();
-
 #else
-	#define FE_ASSERT(CONDITION, FORMAT_STR, ...) \
+	#define FE_ASSERT(CONDITION) \
 		do                                        \
 		{                                         \
 			CONDITION;                            \

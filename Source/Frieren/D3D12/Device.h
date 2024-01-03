@@ -21,6 +21,7 @@ namespace fe
 	class GPUTextureSubresource;
 	class GPUTexture;
 	class Descriptor;
+	class CommandContext;
 	class Device
 	{
 	public:
@@ -36,12 +37,13 @@ namespace fe
 		ID3D12CommandQueue& GetDirectQueue() const { return *directQueue.Get(); }
 		ID3D12CommandQueue& GetAsyncComputeQueue() const { return *asyncComputeQueue.Get(); }
 		ID3D12CommandQueue& GetCopyQueue() const { return *copyQueue.Get(); }
+		ID3D12Device10&		GetNative() const { return *device.Get(); }
 
 		uint32_t GetCbvSrvUavDescriptorHandleIncrementSize() const { return cbvSrvUavDescriptorHandleIncrementSize; }
 		uint32_t GetSamplerDescriptorHandleIncrementSize() const { return samplerDescritorHandleIncrementSize; }
 		uint32_t GetDsvDescriptorHandleIncrementSize() const { return dsvDescriptorHandleIncrementSize; }
 		uint32_t GetRtvDescriptorHandleIncrementSize() const { return rtvDescriptorHandleIncrementSize; }
-		uint32_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type)
+		uint32_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type) const
 		{
 			switch (type)
 			{
@@ -58,22 +60,24 @@ namespace fe
 			}
 		}
 
+		// #todo Execute Command Context	(Immediate)
+		// #todo Execute Command Contexts	(Immediate)
+
 		void FlushQueue(D3D12_COMMAND_LIST_TYPE queueType);
 		void FlushGPU();
 
-		ID3D12Device10& GetNative() const { return *device.Get(); }
-
-		GPUBuffer CreateBuffer(const GPUBufferDesc& desc);
-		GPUTexture CreateTexture(const GPUTextureDesc& desc);
-
+		// #todo Descriptor -> BufferView = Descriptor + Reference to buffer?
 		std::optional<Descriptor> CreateShaderResourceView(const GPUBuffer& gpuBuffer);
 		std::optional<Descriptor> CreateConstantBufferView(const GPUBuffer& gpuBuffer);
 		std::optional<Descriptor> CreateUnorderedAccessView(const GPUBuffer& gpuBuffer);
 
+		// #todo Descriptor -> TextureView = Descriptor + Reference to texture + subresource + view format?
 		std::optional<Descriptor> CreateShaderResourceView(const GPUTexture& texture, const GPUTextureSubresource subresource);
 		std::optional<Descriptor> CreateUnorderedAccessView(const GPUTexture& texture, const GPUTextureSubresource subresource);
 		std::optional<Descriptor> CreateRenderTargetView(const GPUTexture& texture, const GPUTextureSubresource subresource);
 		std::optional<Descriptor> CreateDepthStencilView(const GPUTexture& texture, const GPUTextureSubresource subresource);
+
+		GPUResource AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc);
 
 	private:
 		bool AcquireAdapterFromFactory();
@@ -85,8 +89,6 @@ namespace fe
 		bool CreateMemoryAllcator();
 		bool CreateCommandQueues();
 		void CreateDescriptorHeaps();
-
-		GPUAllocation AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc);
 
 	public:
 		static constexpr uint32_t NumCbvSrvUavDescriptors = 2048;

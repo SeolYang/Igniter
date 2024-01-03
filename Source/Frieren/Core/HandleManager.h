@@ -33,13 +33,10 @@ namespace fe
 			virtual ~GenericHandleRepository()
 			{
 				const bool bNoRemainHandles = nameMap.empty();
-				FE_ASSERT(bNoRemainHandles, "Some handles does not destroyed.");
-				if (!bNoRemainHandles)
+				FE_ASSERT(bNoRemainHandles);
+				for (const auto namePair : nameMap)
 				{
-					for (const auto namePair : nameMap)
-					{
-						Deallocation(namePair.first);
-					}
+					Deallocation(namePair.first);
 				}
 			}
 
@@ -53,7 +50,7 @@ namespace fe
 			static uint64_t PackAllocationToIndex(const PoolAllocation<T> allocation)
 			{
 				constexpr uint64_t MaximumIndexRange = 0x00000000ffffffff;
-				FE_ASSERT(allocation.ChunkIndex < MaximumIndexRange || allocation.ElementIndex < MaximumIndexRange, "Outranged Allocation to pack.");
+				FE_ASSERT(allocation.ChunkIndex < MaximumIndexRange || allocation.ElementIndex < MaximumIndexRange);
 				uint64_t result = 0;
 				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32) | (allocation.ElementIndex & MaximumIndexRange);
 				return result;
@@ -88,7 +85,7 @@ namespace fe
 
 			void Destroy(const uint64_t index)
 			{
-				FE_ASSERT(index != InvalidIndex, "Trying to delete invalid index.");
+				FE_ASSERT(index != InvalidIndex);
 				if (IsValid(index))
 				{
 					{
@@ -225,28 +222,28 @@ namespace fe
 			T& operator*()
 			{
 				T* const addressOfInstance = QueryAddressOfInstance();
-				FE_ASSERT(addressOfInstance != nullptr, "Trying to access to invalid handle.");
+				FE_ASSERT(addressOfInstance != nullptr);
 				return *addressOfInstance;
 			}
 
 			const T& operator*() const
 			{
 				T* const addressOfInstance = QueryAddressOfInstance();
-				FE_ASSERT(addressOfInstance != nullptr, "Trying to access to invalid handle.");
+				FE_ASSERT(addressOfInstance != nullptr);
 				return *addressOfInstance;
 			}
 
 			T* operator->()
 			{
 				T* const addressOfInstance = QueryAddressOfInstance();
-				FE_ASSERT(addressOfInstance != nullptr, "Trying to access to invalid handle.");
+				FE_ASSERT(addressOfInstance != nullptr);
 				return addressOfInstance;
 			}
 
 			const T* operator->() const
 			{
 				const T* const addressOfInstance = QueryAddressOfInstance();
-				FE_ASSERT(addressOfInstance != nullptr, "Trying to access to invalid handle.");
+				FE_ASSERT(addressOfInstance != nullptr);
 				return addressOfInstance;
 			}
 
@@ -405,7 +402,7 @@ namespace fe
 		Private::GenericHandleRepository<T>* GetRepository() const
 		{
 			ReadOnlyLock lock{ repositoryMapMutex };
-			const auto itr = repositoryMap.find(HashOfType<T>);
+			const auto	 itr = repositoryMap.find(HashOfType<T>);
 			return itr != repositoryMap.end() ? static_cast<Private::GenericHandleRepository<T>*>(itr->second) : nullptr;
 		}
 
