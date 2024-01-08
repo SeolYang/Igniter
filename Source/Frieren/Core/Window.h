@@ -27,6 +27,8 @@ namespace fe
 
 		WindowDescription GetDescription() const { return windowDesc; }
 
+		HWND GetNative() const { return windowHandle; }
+
 	private:
 		static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 

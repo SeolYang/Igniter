@@ -11,13 +11,18 @@ namespace fe
 
 	class Device;
 	class DescriptorHeap;
+	class Swapchain;
+	class Window;
     class Renderer
     {
 	public:
-		Renderer();
+		Renderer(const Window& window);
 		~Renderer();
+
+		void Render();
 
 	private:
 		std::unique_ptr<Device> device;
+		std::unique_ptr<Swapchain> swapchain;
     };
 }

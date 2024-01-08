@@ -9,9 +9,44 @@
 #include <dxgi1_6.h>
 #include <directx-dxc/dxcapi.h>
 #include <D3D12MemAlloc.h>
+#include <exception>
 
 namespace fe
 {
+	inline bool IsDXCallSucceeded(const HRESULT result)
+	{
+		return result == S_OK;
+	}
+
+	// https://github.com/Microsoft/DirectXTK/wiki/ThrowIfFailed
+	class ComException : public std::exception
+	{
+	public:
+		ComException(const HRESULT hr)
+			: result(hr)
+		{
+		}
+
+		const char* what() const noexcept override
+		{
+			static char strBuffer[64] = {};
+			sprintf_s(strBuffer, "Failure with HRESULT of %08X",
+				static_cast<unsigned int>(result));
+			return strBuffer;
+		}
+
+	private:
+		HRESULT result;
+	};
+
+	inline void ThrowIfFailed(HRESULT hr)
+	{
+		if (!IsDXCallSucceeded(hr))
+		{
+			throw ComException(hr);
+		}
+	}
+
 	class GPUResource
 	{
 	public:

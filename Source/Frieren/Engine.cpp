@@ -36,7 +36,7 @@ namespace fe
 			window = std::make_unique<Window>(windowDesc);
 			inputManager = std::make_unique<InputManager>();
 
-			renderer = std::make_unique<Renderer>();
+			renderer = std::make_unique<Renderer>(*window);
 
 			gameInstance = std::make_unique<GameInstance>();
 		}
@@ -119,13 +119,9 @@ namespace fe
 				DispatchMessage(&msg);
 			}
 
-			{
-				gameInstance->Update();
-			}
-
-			{
-				inputManager->PostUpdate();
-			}
+			gameInstance->Update();
+			inputManager->PostUpdate();
+			renderer->Render();
 
 			timer->End();
 		}

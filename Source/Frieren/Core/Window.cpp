@@ -20,39 +20,34 @@ namespace fe
 			wideCharTitle.c_str(), NULL
 		};
 
-		if (RegisterClassEx(&windowClass))
-		{
-			const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
-			const auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
+		const bool bSucceeded = RegisterClassEx(&windowClass);
+		FE_ASSERT(bSucceeded, "Failed to register window class.");
+		const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
+		const auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-			constexpr auto windowStyle = WS_OVERLAPPEDWINDOW;
-			constexpr auto exWindowStyle = 0;
+		constexpr auto windowStyle = WS_OVERLAPPEDWINDOW;
+		constexpr auto exWindowStyle = 0;
 
-			RECT winRect{
-				0,
-				static_cast<LONG>(description.Height),
-				static_cast<LONG>(description.Width),
-				0
-			};
+		RECT winRect{
+			0,
+			static_cast<LONG>(description.Height),
+			static_cast<LONG>(description.Width),
+			0
+		};
 
-			FE_ASSERT(AdjustWindowRectEx(&winRect, windowStyle, false, exWindowStyle) != 0, "Failed to adjust window rect");
+		FE_ASSERT(AdjustWindowRectEx(&winRect, windowStyle, false, exWindowStyle) != 0);
 
-			windowHandle = CreateWindowEx(
-				exWindowStyle,
-				windowClass.lpszClassName,
-				wideCharTitle.c_str(),
-				windowStyle,
-				(screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
-				winRect.right - winRect.left, winRect.top - winRect.bottom,
-				NULL, NULL, windowClass.hInstance, NULL);
+		windowHandle = CreateWindowEx(
+			exWindowStyle,
+			windowClass.lpszClassName,
+			wideCharTitle.c_str(),
+			windowStyle,
+			(screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
+			winRect.right - winRect.left, winRect.top - winRect.bottom,
+			NULL, NULL, windowClass.hInstance, NULL);
 
-			ShowWindow(windowHandle, SW_SHOWDEFAULT);
-			UpdateWindow(windowHandle);
-		}
-		else
-		{
-			FE_ASSERT(false, "Failed to register window class.");
-		}
+		ShowWindow(windowHandle, SW_SHOWDEFAULT);
+		UpdateWindow(windowHandle);
 	}
 
 	Window::~Window()

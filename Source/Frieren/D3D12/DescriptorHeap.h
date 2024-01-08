@@ -1,5 +1,5 @@
 #pragma once
-#include <D3D12/Commons.h>
+#include <D3D12/Common.h>
 #include <Core/Mutex.h>
 #include <queue>
 
@@ -43,7 +43,7 @@ namespace fe
 		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index);
 
 	public:
-		DescriptorHeap(Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors, const std::string_view debugName);
+		DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors, const std::string_view debugName);
 		~DescriptorHeap();
 
 		DescriptorHeap(const DescriptorHeap&) = delete;

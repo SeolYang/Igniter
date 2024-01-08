@@ -1,6 +1,18 @@
 #pragma once
 #include <stdint.h>
 #include <string_view>
+#include <Math/Common.h>
+
+#ifdef _M_X64
+	#define ENABLE_SSE_CRC32 1
+#else
+	#define ENABLE_SSE_CRC32 0
+#endif
+
+#if ENABLE_SSE_CRC32
+	#pragma intrinsic(_mm_crc32_u32)
+	#pragma intrinsic(_mm_crc32_u64)
+#endif
 
 namespace fe::Private::global
 {
@@ -264,9 +276,48 @@ namespace fe::Private::global
 	};
 }
 
-namespace fe::Private
+namespace fe
 {
-	constexpr uint64_t HashSimple(const std::string_view targetString)
+	constexpr uint64_t InvalidHash = 0xffffffffffffffffUi64;
+
+	inline size_t HashRange(const uint32_t* const begin, const uint32_t* const end, size_t hash)
+	{
+#if ENABLE_SSE_CRC32
+		const uint64_t*		  iter64 = (const uint64_t*)AlignUp(begin, 8);
+		const uint64_t* const end64 = (const uint64_t* const)AlignDown(end, 8);
+
+		if ((uint32_t*)iter64 > begin)
+		{
+			hash = _mm_crc32_u32((uint32_t)hash, *begin);
+		}
+
+		while (iter64 < end64)
+		{
+			hash = _mm_crc32_u64((uint64_t)hash, *iter64++);
+		}
+
+		if ((uint32_t*)iter64 < end)
+		{
+			hash = _mm_crc32_u32((uint32_t)hash, *(uint32_t*)iter64);
+		}
+#else
+		for (const uint32_t* iter = begin; iter < end; ++iter)
+		{
+			hash = 16777619U * hash ^ *iter;
+		}
+#endif
+
+		return hash;
+	}
+
+	template <typename T>
+	inline size_t HashState(const T* stateDesc, size_t count = 1, size_t hash = 2166136261U)
+	{
+		static_assert((sizeof(T) & 3) == 0 && alignof(T) >= 4, "State object is not word-aligned");
+		return HashRange((uint32_t*)stateDesc, (uint32_t*)(stateDesc + count), hash);
+	}
+
+	constexpr uint64_t HashStringSimple(const std::string_view targetString)
 	{
 		uint64_t result = 0;
 
@@ -281,30 +332,30 @@ namespace fe::Private
 	/**
 	 * @reference	https://github.com/srned/baselib/blob/master/crc64.c
 	 */
-	constexpr uint64_t HashCRC64(const std::string_view targetString)
+	constexpr uint64_t HashStringCRC64(const std::string_view targetString)
 	{
 		uint64_t result = 0;
 		for (const unsigned char byte : targetString)
 		{
-			result = global::gCRC64Table[(uint8_t)result ^ byte] ^ (result >> 8);
+			result = Private::global::gCRC64Table[(uint8_t)result ^ byte] ^ (result >> 8);
 		}
 
 		return result;
 	}
+} // namespace fe
 
+namespace fe::Private
+{
 	/** https://stackoverflow.com/questions/56292104/hashing-types-at-compile-time-in-c17-c2a */
 	template <typename T>
 	constexpr uint64_t EvaluateHashOfType()
 	{
-		return HashCRC64(__FUNCSIG__);
+		return HashStringCRC64(__FUNCSIG__);
 	}
-
-}
+} // namespace fe::Private
 
 namespace fe
 {
-	constexpr uint64_t InvalidHash = 0xffffffffffffffffUi64;
-
 	template <typename T>
 	constexpr uint64_t HashOfType = Private::EvaluateHashOfType<std::decay_t<T>>();
 } // namespace fe

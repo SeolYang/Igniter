@@ -1,4 +1,4 @@
-#include <D3D12/Commons.h>
+#include <D3D12/Common.h>
 #include <Core/String.h>
 
 extern "C"

@@ -3,7 +3,7 @@
 #include <span>
 
 #include <Core/String.h>
-#include <D3D12/Commons.h>
+#include <D3D12/Common.h>
 
 namespace fe::Private
 {

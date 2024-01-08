@@ -1,18 +1,13 @@
 #pragma once
 #include <Core/Log.h>
 #include <Core/HandleManager.h>
-#include <D3D12/Commons.h>
+#include <D3D12/Common.h>
 
 namespace fe
 {
 	FE_DECLARE_LOG_CATEGORY(D3D12Info, ELogVerbosiy::Info);
 	FE_DECLARE_LOG_CATEGORY(D3D12Warn, ELogVerbosiy::Warning);
 	FE_DECLARE_LOG_CATEGORY(D3D12Fatal, ELogVerbosiy::Fatal);
-
-	inline bool IsDXCallSucceeded(const HRESULT result)
-	{
-		return result == S_OK;
-	}
 
 	class DescriptorHeap;
 	class GPUBufferDesc;
@@ -66,6 +61,7 @@ namespace fe
 		void FlushQueue(D3D12_COMMAND_LIST_TYPE queueType);
 		void FlushGPU();
 
+		// #todo Move Create...View to independent Bindless-Descriptor Manager
 		// #todo Descriptor -> BufferView = Descriptor + Reference to buffer?
 		std::optional<Descriptor> CreateShaderResourceView(const GPUBuffer& gpuBuffer);
 		std::optional<Descriptor> CreateConstantBufferView(const GPUBuffer& gpuBuffer);
