@@ -32,7 +32,7 @@ namespace fe
 		wrl::ComPtr<IDXGISwapChain4> swapchain;
 		bool						 bIsTearingSupport = false;
 
-		const size_t							 backBufferCount;
+		const uint32_t							 backBufferCount;
 		std::vector<wrl::ComPtr<ID3D12Resource>> backBuffers;
 
 		std::unique_ptr<DescriptorHeap> descriptorHeap;

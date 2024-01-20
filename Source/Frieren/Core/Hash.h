@@ -280,7 +280,7 @@ namespace fe
 {
 	constexpr uint64_t InvalidHash = 0xffffffffffffffffUi64;
 
-	inline size_t HashRange(const uint32_t* const begin, const uint32_t* const end, size_t hash)
+	inline uint64_t HashRange(const uint32_t* const begin, const uint32_t* const end, uint64_t hash)
 	{
 #if ENABLE_SSE_CRC32
 		const uint64_t*		  iter64 = (const uint64_t*)AlignUp(begin, 8);
@@ -311,7 +311,7 @@ namespace fe
 	}
 
 	template <typename T>
-	inline size_t HashState(const T* stateDesc, size_t count = 1, size_t hash = 2166136261U)
+	inline uint64_t HashState(const T* stateDesc, size_t count = 1, uint64_t hash = 2166136261U)
 	{
 		static_assert((sizeof(T) & 3) == 0 && alignof(T) >= 4, "State object is not word-aligned");
 		return HashRange((uint32_t*)stateDesc, (uint32_t*)(stateDesc + count), hash);

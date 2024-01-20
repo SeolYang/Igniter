@@ -79,6 +79,7 @@ namespace fe
 			// #todo Should i Wrapping backBuffer over GPUTexture? // or should i treat swapchain as one of abstracted another type of resource itself?
 			ThrowIfFailed(swapchain->GetBuffer(idx, IID_PPV_ARGS(&backBuffers[idx])));
 
+			Private::SetD3DObjectName(backBuffers[idx].Get(), std::format("Backbuffer {}", idx));
 			renderTargetViews.emplace_back(descriptorHeap->AllocateDescriptor());
 
 			ID3D12Device10& nativeDevice = device.GetNative();

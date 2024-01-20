@@ -13,11 +13,6 @@
 
 namespace fe
 {
-	inline bool IsDXCallSucceeded(const HRESULT result)
-	{
-		return result == S_OK;
-	}
-
 	// https://github.com/Microsoft/DirectXTK/wiki/ThrowIfFailed
 	class ComException : public std::exception
 	{
@@ -41,7 +36,7 @@ namespace fe
 
 	inline void ThrowIfFailed(HRESULT hr)
 	{
-		if (!IsDXCallSucceeded(hr))
+		if (!SUCCEEDED(hr))
 		{
 			throw ComException(hr);
 		}
