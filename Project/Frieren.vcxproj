@@ -41,6 +41,8 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Shader.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\ShaderCompiler.h" />
@@ -65,6 +67,9 @@
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\PiepelineStateDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\PipelineState.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\RootSignature.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Swapchain.cpp" />
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />

@@ -5,7 +5,7 @@
 
 namespace fe
 {
-	class Shader;
+	class ShaderBlob;
 	class GraphicsPipelineStateDesc : public D3D12_GRAPHICS_PIPELINE_STATE_DESC
 	{
 	public:
@@ -20,11 +20,11 @@ namespace fe
 			this->InputLayout.NumElements = 0;
 		}
 
-		void SetVertexShader(const Shader& vertexShader);
-		void SetPixelShader(const Shader& pixelShader);
-		void SetDomainShader(const Shader& domainShader);
-		void SetHullShader(const Shader& hullShader);
-		void SetGeometryShader(const Shader& geometryShader);
+		void SetVertexShader(const ShaderBlob& vertexShader);
+		void SetPixelShader(const ShaderBlob& pixelShader);
+		void SetDomainShader(const ShaderBlob& domainShader);
+		void SetHullShader(const ShaderBlob& hullShader);
+		void SetGeometryShader(const ShaderBlob& geometryShader);
 
 	public:
 		String Name;
@@ -40,7 +40,7 @@ namespace fe
 			this->pRootSignature = nullptr;
 		}
 
-		void SetComputeShader(const Shader& computeShader);
+		void SetComputeShader(const ShaderBlob& computeShader);
 
 	public:
 		String Name;

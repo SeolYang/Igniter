@@ -18,7 +18,7 @@ namespace fe
 		desc.Flags = bIsShaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 		ID3D12Device10& nativeDevice = device.GetNative();
-		const bool		bSucceeded = IsDXCallSucceeded(nativeDevice.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
+		const bool		bSucceeded = SUCCEEDED(nativeDevice.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
 		FE_CONDITIONAL_LOG(D3D12Fatal, bSucceeded, "Failed to create descriptor heap {}", debugName);
 
 		if (bSucceeded)
