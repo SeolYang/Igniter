@@ -2,6 +2,7 @@
 #include <Core/Log.h>
 #include <Core/HandleManager.h>
 #include <D3D12/Common.h>
+#include <D3D12/GPUResource.h>
 
 namespace fe
 {
@@ -73,7 +74,7 @@ namespace fe
 		std::optional<Descriptor> CreateRenderTargetView(const GPUTexture& texture, const GPUTextureSubresource subresource);
 		std::optional<Descriptor> CreateDepthStencilView(const GPUTexture& texture, const GPUTextureSubresource subresource);
 
-		GPUResource AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc);
+		GPUResource AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc, const D3D12_RESOURCE_DESC1& resourceDesc);
 
 	private:
 		bool AcquireAdapterFromFactory();

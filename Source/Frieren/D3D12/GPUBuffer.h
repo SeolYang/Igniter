@@ -1,4 +1,6 @@
 #pragma once
+#include <D3D12/Common.h>
+#include <D3D12/GPUResource.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUBufferDesc.h>
 

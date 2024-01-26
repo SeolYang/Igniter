@@ -132,7 +132,7 @@ namespace fe
 			const GPUResource&		  allocation = gpuBuffer.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateShaderResourceView(
-				allocation.GetResource(),
+				&allocation.GetResource(),
 				&srvDesc.value(),
 				descriptor->GetCPUDescriptorHandle());
 
@@ -151,7 +151,7 @@ namespace fe
 			const GPUResource&		  allocation = gpuBuffer.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateUnorderedAccessView(
-				allocation.GetResource(), nullptr,
+				&allocation.GetResource(), nullptr,
 				&uavDesc.value(),
 				descriptor->GetCPUDescriptorHandle());
 
@@ -166,7 +166,7 @@ namespace fe
 		const GPUBufferDesc& desc = gpuBuffer.GetDesc();
 		const GPUResource&	 allocation = gpuBuffer.GetAllocation();
 
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(allocation.GetResource()->GetGPUVirtualAddress());
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(allocation.GetResource().GetGPUVirtualAddress());
 		if (cbvDesc)
 		{
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
@@ -189,7 +189,7 @@ namespace fe
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateShaderResourceView(
-				allocation.GetResource(),
+				&allocation.GetResource(),
 				&srvDesc.value(),
 				descriptor->GetCPUDescriptorHandle());
 
@@ -208,7 +208,7 @@ namespace fe
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateUnorderedAccessView(
-				allocation.GetResource(), nullptr,
+				&allocation.GetResource(), nullptr,
 				&uavDesc.value(),
 				descriptor->GetCPUDescriptorHandle());
 
@@ -227,7 +227,7 @@ namespace fe
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateRenderTargetView(
-				allocation.GetResource(),
+				&allocation.GetResource(),
 				&rtvDesc.value(),
 				descriptor->GetCPUDescriptorHandle());
 
@@ -246,7 +246,7 @@ namespace fe
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
 			device->CreateDepthStencilView(
-				allocation.GetResource(),
+				&allocation.GetResource(),
 				&dsvDesc.value(),
 				descriptor->GetCPUDescriptorHandle());
 
@@ -486,8 +486,9 @@ namespace fe
 		FE_LOG(D3D12Info, "DSV Descriptor Heap::NumDescriptors: {}", NumDsvDescriptors);
 	}
 
-	GPUResource Device::AllocateResource(const D3D12_RESOURCE_DESC1 resourceDesc, const D3D12MA::ALLOCATION_DESC allocationDesc)
+	GPUResource Device::AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc, const D3D12_RESOURCE_DESC1& resourceDesc)
 	{
-		return GPUResource{ allocator, resourceDesc, allocationDesc };
+		FE_ASSERT(allocator != nullptr);
+		return GPUResource{ *allocator, allocationDesc, resourceDesc };
 	}
 } // namespace fe

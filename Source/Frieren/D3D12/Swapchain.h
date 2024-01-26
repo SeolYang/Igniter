@@ -33,7 +33,7 @@ namespace fe
 		bool						 bIsTearingSupport = false;
 
 		const uint32_t							 backBufferCount;
-		std::vector<wrl::ComPtr<ID3D12Resource>> backBuffers;
+		std::vector<wrl::ComPtr<ID3D12Resource>> backBuffers; // #todo ID3D12Resource -> GPUTexture?
 
 		std::unique_ptr<DescriptorHeap> descriptorHeap;
 		std::vector<Descriptor>			renderTargetViews;

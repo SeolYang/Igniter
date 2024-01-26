@@ -37,6 +37,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUResource.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUResoureView.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
@@ -51,6 +52,7 @@
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
     <ClInclude Include="..\Source\Frieren\Math\Common.h" />
+    <ClInclude Include="..\Source\Frieren\Renderer\FrameResource.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
   </ItemGroup>

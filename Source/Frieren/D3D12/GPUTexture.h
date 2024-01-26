@@ -1,4 +1,6 @@
 #pragma once
+#include <D3D12/Common.h>
+#include <D3D12/GPUResource.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTextureDesc.h>
 
@@ -9,6 +11,7 @@ namespace fe
 	{
 	public:
 		GPUTexture(Device& device, const GPUTextureDesc& desc);
+		GPUTexture(wrl::ComPtr<ID3D12Resource> existTexture);
 		~GPUTexture();
 
 		GPUTexture(GPUTexture&& other) noexcept;

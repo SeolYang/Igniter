@@ -1,7 +1,7 @@
 #include <Core/Assert.h>
 #include <D3D12/GPUTextureDesc.h>
 
-namespace fe::Private
+namespace fe
 {
 	size_t SizeOfTexelInBits(const DXGI_FORMAT format)
 	{
@@ -181,113 +181,194 @@ namespace fe::Private
 			   format == DXGI_FORMAT_B8G8R8X8_TYPELESS || format == DXGI_FORMAT_BC6H_TYPELESS ||
 			   format == DXGI_FORMAT_BC7_TYPELESS;
 	}
-} // namespace fe::Private
 
-namespace fe
-{
-	GPUTextureDesc GPUTextureDesc::BuildTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bIsShaderReadWrite)
+	void GPUTextureDesc::AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess)
 	{
-		return {
-			.DebugName = String{ "Texture1D" },
-			.Width = width,
-			.MipLevels = mipLevels,
-			.Format = format,
-			.bIsShaderReadWrite = bIsShaderReadWrite
-		};
+		bIsArray = false;
+		bIsMSAAEnabled = false;
+		bIsCubemap = false;
+		bIsShaderReadWrite = bEnableShaderReadWrite;
+		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
+
+		FE_ASSERT(width > 0);
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
+		Alignment = 0;
+		Width = width;
+		Height = 0;
+		DepthOrArraySize = 0;
+		MipLevels = mipLevels;
+		Format = format;
+		SampleDesc.Count = 1;
+		SampleDesc.Quality = 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	GPUTextureDesc GPUTextureDesc::BuildTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bIsShaderReadWrite, const bool bIsMSAAEnabled /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+	void GPUTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		return {
-			.DebugName = String{ "Texture2D" },
-			.Width = width,
-			.Height = height,
-			.MipLevels = mipLevels,
-			.Format = format,
-			.bIsShaderReadWrite = bIsShaderReadWrite,
-			.bIsMSAAEnabled = bIsMSAAEnabled,
-			.SampleCount = bIsMSAAEnabled ? sampleCount : 1,
-			.SampleQuality = bIsMSAAEnabled ? sampleQuality : 0
-		};
+		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		bIsArray = false;
+		bIsMSAAEnabled = bEnableMSAA;
+		bIsCubemap = false;
+		bIsShaderReadWrite = bEnableShaderReadWrite;
+		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
+
+		FE_ASSERT(width > 0 && height > 0);
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		Alignment = 0;
+		Width = width;
+		Height = height;
+		DepthOrArraySize = 0;
+		MipLevels = mipLevels;
+		Format = format;
+		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
+		SampleDesc.Quality = bIsMSAAEnabled ? sampleQuality : 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	GPUTextureDesc GPUTextureDesc::BuildTexture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bIsShaderReadWrite, const bool bIsMSAAEnabled, const uint32_t sampleCount, uint32_t sampleQuality)
+	void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		return {
-			.DebugName = String{ "Texture2D" },
-			.Width = width,
-			.Height = height,
-			.Depth = depth,
-			.MipLevels = mipLevels,
-			.Format = format,
-			.bIsShaderReadWrite = bIsShaderReadWrite,
-			.bIsMSAAEnabled = bIsMSAAEnabled,
-			.SampleCount = bIsMSAAEnabled ? sampleCount : 1,
-			.SampleQuality = bIsMSAAEnabled ? sampleQuality : 0
-		};
+		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		bIsArray = false;
+		bIsMSAAEnabled = bEnableMSAA;
+		bIsCubemap = false;
+		bIsShaderReadWrite = bEnableShaderReadWrite;
+		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
+
+		FE_ASSERT(width > 0 && height > 0 && depth > 0);
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
+		Alignment = 0;
+		Width = width;
+		Height = height;
+		DepthOrArraySize = depth;
+		MipLevels = mipLevels;
+		Format = format;
+		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
+		SampleDesc.Quality = bIsMSAAEnabled ? sampleQuality : 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	GPUTextureDesc GPUTextureDesc::BuildRenderTarget(const uint32_t width, const uint32_t height, const DXGI_FORMAT format)
+	void GPUTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		return {
-			.DebugName = String{ "RenderTarget" },
-			.Width = width,
-			.Height = height,
-			.Format = format
-		};
+		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		bIsArray = false;
+		bIsMSAAEnabled = bEnableMSAA;
+		bIsCubemap = false;
+		bIsShaderReadWrite = false;
+		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
+
+		FE_ASSERT(width > 0 && height > 0);
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		Alignment = 0;
+		Width = width;
+		Height = height;
+		DepthOrArraySize = 0;
+		MipLevels = mipLevels;
+		Format = format;
+		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
+		SampleDesc.Quality = bIsMSAAEnabled ? sampleQuality : 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	GPUTextureDesc GPUTextureDesc::BuildDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format)
+	void GPUTextureDesc::AsDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format)
 	{
-		// #todo Assertion on non depth-stencil formats.
-		return {
-			.DebugName = String{ "DepthStencil" },
-			.Width = width,
-			.Height = height,
-			.Format = format
-		};
+		bIsArray = false;
+		bIsMSAAEnabled = false;
+		bIsCubemap = false;
+		bIsShaderReadWrite = false;
+		bIsAllowSimultaneousAccess = false;
+
+		FE_ASSERT(width > 0 && height > 0);
+		FE_ASSERT(IsDepthStencilFormat(format));
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		Alignment = 0;
+		Width = width;
+		Height = height;
+		DepthOrArraySize = 0;
+		MipLevels = 1;
+		Format = format;
+		SampleDesc.Count = 1;
+		SampleDesc.Quality = 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 	}
 
-	GPUTextureDesc GPUTextureDesc::BuildTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bIsShaderReadWrite)
+	void GPUTextureDesc::AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/)
 	{
-		return {
-			.DebugName = String{ "Texture1DArray" },
-			.Width = width,
-			.ArrayLength = arrayLength,
-			.MipLevels = mipLevels,
-			.Format = format,
-			.bIsShaderReadWrite = bIsShaderReadWrite
-		};
+		bIsArray = true;
+		bIsMSAAEnabled = false;
+		bIsCubemap = false;
+		bIsShaderReadWrite = bEnableShaderReadWrite;
+		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
+
+		FE_ASSERT(width > 0 && arrayLength > 0);
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
+		Alignment = 0;
+		Width = width;
+		Height = 0;
+		DepthOrArraySize = arrayLength;
+		MipLevels = mipLevels;
+		Format = format;
+		SampleDesc.Count = 1;
+		SampleDesc.Quality = 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	GPUTextureDesc GPUTextureDesc::BuildTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bIsShaderReadWrite, const bool bIsMSAAEnabled /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+	void GPUTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		return {
-			.DebugName = String{ "Texture2D" },
-			.Width = width,
-			.Height = height,
-			.ArrayLength = arrayLength,
-			.MipLevels = mipLevels,
-			.Format = format,
-			.bIsShaderReadWrite = bIsShaderReadWrite,
-			.bIsMSAAEnabled = bIsMSAAEnabled,
-			.SampleCount = bIsMSAAEnabled ? sampleCount : 1,
-			.SampleQuality = bIsMSAAEnabled ? sampleQuality : 0
-		};
+		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		bIsArray = true;
+		bIsMSAAEnabled = bEnableMSAA;
+		bIsCubemap = false;
+		bIsShaderReadWrite = bEnableShaderReadWrite;
+		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
+
+		FE_ASSERT(width > 0 && height > 0 && arrayLength > 0);
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		Alignment = 0;
+		Width = width;
+		Height = height;
+		DepthOrArraySize = arrayLength;
+		MipLevels = mipLevels;
+		Format = format;
+		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
+		SampleDesc.Quality = bIsMSAAEnabled ? sampleQuality : 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	GPUTextureDesc GPUTextureDesc::BuildCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bIsShaderReadWrite)
+	void GPUTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		return {
-			.DebugName = String{ "Cubemap" },
-			.Width = width,
-			.Height = height,
-			.ArrayLength = 6,
-			.MipLevels = mipLevels,
-			.Format = format,
-			.bIsCubemap = true,
-			.bIsShaderReadWrite = bIsShaderReadWrite
-		};
+		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		bIsArray = true;
+		bIsMSAAEnabled = bEnableMSAA;
+		bIsCubemap = true;
+		bIsShaderReadWrite = bEnableShaderReadWrite;
+		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
+
+		FE_ASSERT(width > 0 && height > 0);
+		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		Alignment = 0;
+		Width = width;
+		Height = height;
+		DepthOrArraySize = 6;
+		MipLevels = mipLevels;
+		Format = format;
+		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
+		SampleDesc.Quality = bIsMSAAEnabled ? sampleQuality : 0;
+		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
 	bool GPUTextureDesc::IsUnorderedAccessCompatible() const
@@ -297,31 +378,12 @@ namespace fe
 
 	bool GPUTextureDesc::IsDepthStencilCompatible() const
 	{
-		return !IsTexture3D() && Private::IsDepthStencilFormat(Format);
+		return IsTexture2D() && IsDepthStencilFormat(Format);
 	}
 
 	bool GPUTextureDesc::IsRenderTargetCompatible() const
 	{
 		return !IsUnorderedAccessCompatible() && !IsDepthStencilCompatible();
-	}
-
-	D3D12_RESOURCE_DESC1 GPUTextureDesc::ToResourceDesc() const
-	{
-		FE_ASSERT(Width > 0);
-		D3D12_RESOURCE_DESC1 desc{};
-		desc.Dimension = IsTexture1D() ? D3D12_RESOURCE_DIMENSION_TEXTURE1D : (IsTexture2D() ? D3D12_RESOURCE_DIMENSION_TEXTURE2D : (IsTexture3D() ? D3D12_RESOURCE_DIMENSION_TEXTURE3D : D3D12_RESOURCE_DIMENSION_UNKNOWN));
-		/** resource alignment: https://asawicki.info/news_1726_secrets_of_direct3d_12_resource_alignment */
-		desc.Alignment = 0;
-		desc.Width = Width;
-		desc.Height = Height;
-		desc.DepthOrArraySize = Depth;
-		desc.MipLevels = MipLevels;
-		desc.Format = Format;
-		desc.SampleDesc.Count = bIsMSAAEnabled ? SampleCount : 1;
-		desc.SampleDesc.Quality = bIsMSAAEnabled ? SampleQuality : 0;
-		desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-
-		return desc;
 	}
 
 	D3D12MA::ALLOCATION_DESC GPUTextureDesc::ToAllocationDesc() const
@@ -333,7 +395,7 @@ namespace fe
 
 	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::ToShaderResourceViewDesc(const GPUTextureSubresource subresource) const
 	{
-		if (!Private::IsTypelessFormat(Format))
+		if (!IsTypelessFormat(Format))
 		{
 			D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
 			desc.Format = Format;
@@ -417,7 +479,7 @@ namespace fe
 
 	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::ToUnorderedAccessViewDesc(const GPUTextureSubresource subresource) const
 	{
-		if (IsUnorderedAccessCompatible() && !Private::IsTypelessFormat(Format))
+		if (IsUnorderedAccessCompatible() && !IsTypelessFormat(Format))
 		{
 			D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
 			desc.Format = Format;
@@ -484,7 +546,7 @@ namespace fe
 
 	std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::ToRenderTargetViewDesc(const GPUTextureSubresource subresource) const
 	{
-		if (IsRenderTargetCompatible() && !Private::IsTypelessFormat(Format))
+		if (IsRenderTargetCompatible() && !IsTypelessFormat(Format))
 		{
 			D3D12_RENDER_TARGET_VIEW_DESC desc{};
 			desc.Format = Format;
@@ -606,4 +668,20 @@ namespace fe
 
 		return std::nullopt;
 	}
+
+	void GPUTextureDesc::From(const D3D12_RESOURCE_DESC& desc)
+	{
+		this->Dimension = desc.Dimension;
+		this->Alignment = desc.Alignment;
+		this->Width = desc.Width;
+		this->Height = desc.Height;
+		this->DepthOrArraySize = desc.DepthOrArraySize;
+		this->MipLevels = desc.MipLevels;
+		this->Format = desc.Format;
+		this->SampleDesc = desc.SampleDesc;
+		this->Layout = desc.Layout;
+		this->Flags = desc.Flags;
+		this->SamplerFeedbackMipRegion = {};
+	}
+
 } // namespace fe

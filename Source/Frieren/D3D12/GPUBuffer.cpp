@@ -9,7 +9,7 @@ namespace fe
 	}
 
 	GPUBuffer::GPUBuffer(Device& device, const GPUBufferDesc& desc)
-		: desc(desc), allocation(device.AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc()))
+		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc(), desc.ToResourceDesc()))
 	{
 	}
 

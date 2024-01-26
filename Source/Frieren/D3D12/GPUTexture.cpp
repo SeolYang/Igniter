@@ -4,8 +4,16 @@
 namespace fe
 {
 	GPUTexture::GPUTexture(Device& device, const GPUTextureDesc& desc)
-		: desc(desc), allocation(device.AllocateResource(desc.ToResourceDesc(), desc.ToAllocationDesc()))
+		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc() , desc))
 	{
+	}
+
+	GPUTexture::GPUTexture(wrl::ComPtr<ID3D12Resource> existTexture)
+		: allocation(GPUResource{existTexture})
+	{
+		FE_ASSERT(existTexture.Get() != nullptr);
+		desc.From(existTexture->GetDesc());
+		FE_ASSERT(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
 	}
 
 	GPUTexture::~GPUTexture()

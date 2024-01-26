@@ -1,5 +1,6 @@
 #pragma once
 #include <Core/Log.h>
+#include <Renderer/FrameResource.h>
 
 namespace fe
 {
@@ -13,8 +14,9 @@ namespace fe
 	class DescriptorHeap;
 	class Swapchain;
 	class Window;
-    class Renderer
-    {
+	class FrameResource;
+	class Renderer
+	{
 	public:
 		Renderer(const Window& window);
 		~Renderer();
@@ -22,7 +24,13 @@ namespace fe
 		void Render();
 
 	private:
-		std::unique_ptr<Device> device;
+		void BeginFrame(FrameResource& frameResource);
+		void EndFrame(FrameResource& frameResource);
+
+	private:
+		std::unique_ptr<Device>	   device;
 		std::unique_ptr<Swapchain> swapchain;
-    };
-}
+		std::vector<FrameResource> frameResources; // reserved #'MaxFramesInFlight'
+
+	};
+} // namespace fe
