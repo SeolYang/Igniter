@@ -44,8 +44,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\Shader.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\ShaderCompiler.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
@@ -60,23 +59,25 @@
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\CommandContext.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Common.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\PiepelineStateDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\PipelineStateDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineState.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\RootSignature.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\ShaderBlob.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Swapchain.cpp" />
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp" />
-    <ClCompile Include="GPUTexture.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
