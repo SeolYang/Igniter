@@ -9,8 +9,14 @@ namespace fe
 	}
 
 	GPUBuffer::GPUBuffer(Device& device, const GPUBufferDesc& desc)
-		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc(), desc.ToResourceDesc()))
+		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc(), desc))
 	{
+	}
+
+	GPUBuffer::GPUBuffer(wrl::ComPtr<ID3D12Resource> existBuffer) : allocation(GPUResource{existBuffer})
+	{
+		FE_ASSERT(existBuffer.Get() != nullptr);
+		desc.From(existBuffer->GetDesc());
 	}
 
 	GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept
@@ -18,10 +24,5 @@ namespace fe
 		this->desc = other.desc;
 		this->allocation = std::move(other.allocation);
 		return *this;
-	}
-
-	GPUBuffer::~GPUBuffer()
-	{
-		allocation.SafeRelease();
 	}
 } // namespace fe

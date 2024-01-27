@@ -194,8 +194,8 @@ namespace fe
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
 		Alignment = 0;
 		Width = width;
-		Height = 0;
-		DepthOrArraySize = 0;
+		Height = 1;
+		DepthOrArraySize = 1;
 		MipLevels = mipLevels;
 		Format = format;
 		SampleDesc.Count = 1;
@@ -219,7 +219,7 @@ namespace fe
 		Alignment = 0;
 		Width = width;
 		Height = height;
-		DepthOrArraySize = 0;
+		DepthOrArraySize = 1;
 		MipLevels = mipLevels;
 		Format = format;
 		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
@@ -267,7 +267,7 @@ namespace fe
 		Alignment = 0;
 		Width = width;
 		Height = height;
-		DepthOrArraySize = 0;
+		DepthOrArraySize = 1;
 		MipLevels = mipLevels;
 		Format = format;
 		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
@@ -291,7 +291,7 @@ namespace fe
 		Alignment = 0;
 		Width = width;
 		Height = height;
-		DepthOrArraySize = 0;
+		DepthOrArraySize = 1;
 		MipLevels = 1;
 		Format = format;
 		SampleDesc.Count = 1;
@@ -312,7 +312,7 @@ namespace fe
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
 		Alignment = 0;
 		Width = width;
-		Height = 0;
+		Height = 1;
 		DepthOrArraySize = arrayLength;
 		MipLevels = mipLevels;
 		Format = format;
@@ -671,17 +671,17 @@ namespace fe
 
 	void GPUTextureDesc::From(const D3D12_RESOURCE_DESC& desc)
 	{
-		this->Dimension = desc.Dimension;
-		this->Alignment = desc.Alignment;
-		this->Width = desc.Width;
-		this->Height = desc.Height;
-		this->DepthOrArraySize = desc.DepthOrArraySize;
-		this->MipLevels = desc.MipLevels;
-		this->Format = desc.Format;
-		this->SampleDesc = desc.SampleDesc;
-		this->Layout = desc.Layout;
-		this->Flags = desc.Flags;
-		this->SamplerFeedbackMipRegion = {};
+		FE_ASSERT(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
+		Dimension = desc.Dimension;
+		Alignment = desc.Alignment;
+		Width = desc.Width;
+		Height = desc.Height;
+		DepthOrArraySize = desc.DepthOrArraySize;
+		MipLevels = desc.MipLevels;
+		Format = desc.Format;
+		SampleDesc = desc.SampleDesc;
+		Layout = desc.Layout;
+		Flags = desc.Flags;
+		SamplerFeedbackMipRegion = {};
 	}
-
 } // namespace fe

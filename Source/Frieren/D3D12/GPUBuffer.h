@@ -11,7 +11,8 @@ namespace fe
 	{
 	public:
 		GPUBuffer(Device& device, const GPUBufferDesc& desc);
-		~GPUBuffer();
+		GPUBuffer(wrl::ComPtr<ID3D12Resource> existBuffer);
+		~GPUBuffer() = default;
 
 		GPUBuffer(GPUBuffer&& other) noexcept;
 		GPUBuffer& operator=(GPUBuffer&& other) noexcept;

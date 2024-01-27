@@ -16,10 +16,6 @@ namespace fe
 		FE_ASSERT(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
 	}
 
-	GPUTexture::~GPUTexture()
-	{
-	}
-
 	GPUTexture::GPUTexture(GPUTexture&& other) noexcept
 		: desc(other.desc), allocation(std::move(other.allocation))
 	{

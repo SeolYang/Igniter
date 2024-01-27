@@ -12,7 +12,7 @@ namespace fe
 	public:
 		GPUTexture(Device& device, const GPUTextureDesc& desc);
 		GPUTexture(wrl::ComPtr<ID3D12Resource> existTexture);
-		~GPUTexture();
+		~GPUTexture() = default;
 
 		GPUTexture(GPUTexture&& other) noexcept;
 		GPUTexture& operator=(GPUTexture&& other) noexcept;
