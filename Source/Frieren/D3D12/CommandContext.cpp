@@ -8,8 +8,8 @@ namespace fe::dx
 		: typeOfCommandList(type)
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
-		ThrowIfFailed(nativeDevice.CreateCommandList1(0, type, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&cmdList)));
-		ThrowIfFailed(nativeDevice.CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAllocator)));
+		FE_SUCCEEDED_ASSERT(nativeDevice.CreateCommandList1(0, type, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&cmdList)));
+		FE_SUCCEEDED_ASSERT(nativeDevice.CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAllocator)));
 	}
 
 	void CommandContext::Begin(const PipelineState* initState)
@@ -20,14 +20,14 @@ namespace fe::dx
 		ID3D12PipelineState* nativeInitState = initState != nullptr ? &initState->GetNative() : nullptr;
 		FE_ASSERT(initState == nullptr || (initState != nullptr && nativeInitState != nullptr));
 
-		ThrowIfFailed(cmdAllocator->Reset());
-		ThrowIfFailed(cmdList->Reset(cmdAllocator.Get(), nativeInitState));
+		FE_SUCCEEDED_ASSERT(cmdAllocator->Reset());
+		FE_SUCCEEDED_ASSERT(cmdList->Reset(cmdAllocator.Get(), nativeInitState));
 	}
 
 	void CommandContext::End()
 	{
 		FE_ASSERT(cmdList.Get() != nullptr);
-		ThrowIfFailed(cmdList->Close());
+		FE_SUCCEEDED_ASSERT(cmdList->Close());
 	}
 
 } // namespace fe

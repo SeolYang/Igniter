@@ -225,7 +225,7 @@ namespace fe::dx
 		if (rtvDesc)
 		{
 			const GPUResource&		  allocation = texture.GetAllocation();
-			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor = rtvDescriptorHeap->AllocateDescriptor();
 			device->CreateRenderTargetView(
 				&allocation.GetResource(),
 				&rtvDesc.value(),
@@ -244,7 +244,7 @@ namespace fe::dx
 		if (dsvDesc)
 		{
 			const GPUResource&		  allocation = texture.GetAllocation();
-			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor = dsvDescriptorHeap->AllocateDescriptor();
 			device->CreateDepthStencilView(
 				&allocation.GetResource(),
 				&dsvDesc.value(),

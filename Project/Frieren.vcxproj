@@ -68,6 +68,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUResource.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineStateDesc.cpp" />

@@ -102,7 +102,7 @@ namespace fe::dx
 		uint32_t				 codePage = CP_UTF8;
 		const std::wstring		 wideSourcePath = desc.SourcePath.AsWideString();
 		ComPtr<IDxcBlobEncoding> sourceBlob;
-		ThrowIfFailed(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
+		FE_SUCCEEDED_ASSERT(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
 
 		ComPtr<IDxcCompiler3> compiler;
 		FE_ASSERT(SUCCEEDED(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf()))));
@@ -114,7 +114,7 @@ namespace fe::dx
 		};
 
 		ComPtr<IDxcResult> result;
-		ThrowIfFailed(compiler->Compile(
+		FE_SUCCEEDED_ASSERT(compiler->Compile(
 			&buffer,
 			arguments.data(), arguments.size(),
 			defaultIncludeHandler.Get(),
@@ -128,6 +128,6 @@ namespace fe::dx
 		//	Logging(Error, (char*)errors->GetBufferPointer());
 		//}
 
-		FE_ASSERT(SUCCEEDED(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr)));
+		FE_SUCCEEDED_ASSERT(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
 	}
 } // namespace fe::dx

@@ -539,6 +539,12 @@ namespace fe::dx
 				desc.Texture3D.WSize = subresource.WSize;
 				desc.Texture3D.MipSlice = subresource.MipSlice;
 			}
+			else
+			{
+				return std::nullopt;
+			}
+
+			return desc;
 		}
 
 		return std::nullopt;
@@ -606,6 +612,12 @@ namespace fe::dx
 				desc.Texture3D.FirstWSlice = subresource.FirstWSlice;
 				desc.Texture3D.WSize = subresource.WSize;
 			}
+			else
+			{
+				return std::nullopt;
+			}
+
+			return desc;
 		}
 
 		return std::nullopt;
@@ -664,6 +676,12 @@ namespace fe::dx
 					}
 				}
 			}
+			else
+			{
+				return std::nullopt;
+			}
+
+			return desc;
 		}
 
 		return std::nullopt;

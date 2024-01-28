@@ -216,5 +216,8 @@
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUResource.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -50,7 +50,7 @@ namespace fe::dx
 			 * Unordered Access View: 3D
 			 * Render Target View: 3D
 			 */
-			uint16_t WSize = -1;
+			uint16_t WSize = 0;
 		};
 
 		/**
@@ -86,7 +86,7 @@ namespace fe::dx
 		 * Render Target View: 1D Array, 2D Array, 2DMS Array
 		 * Depth Stencil View: 1D Array, 2D Array, 2DMS Array
 		 */
-		uint16_t ArraySize = -1;
+		uint16_t ArraySize = 0;
 	};
 
 	// #todo Simultaneous Access flag for resource aka. D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS
@@ -112,12 +112,12 @@ namespace fe::dx
 		bool IsDepthStencilCompatible() const;
 		bool IsRenderTargetCompatible() const;
 
-		bool IsTexture1D() const { return Width > 0 && Height == 0 && DepthOrArraySize == 0; }
-		bool IsTexture2D() const { return Width > 0 && Height > 0 && DepthOrArraySize == 0; }
+		bool IsTexture1D() const { return Width > 0 && Height == 1 && DepthOrArraySize == 1; }
+		bool IsTexture2D() const { return Width > 0 && Height > 0 && DepthOrArraySize == 1; }
 		bool IsTexture3D() const { return Width > 0 && Height > 0 && DepthOrArraySize > 0; }
 
 		bool IsTextureArray() const { return bIsArray; }
-		bool IsTexture1DArray() const { return IsTextureArray() && Width > 0 && Height == 0 && DepthOrArraySize > 0; }
+		bool IsTexture1DArray() const { return IsTextureArray() && Width > 0 && Height == 1 && DepthOrArraySize > 0; }
 		bool IsTexture2DArray() const { return IsTextureArray() && Width > 0 && Height > 0 && DepthOrArraySize > 0; }
 		bool IsTextureCube() const { return bIsCubemap; }
 		bool IsMSAAEnabled() const { return bIsMSAAEnabled; }

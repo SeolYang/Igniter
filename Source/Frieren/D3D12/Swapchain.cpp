@@ -1,21 +1,21 @@
 #include <D3D12/Swapchain.h>
 #include <D3D12/Device.h>
 #include <D3D12/DescriptorHeap.h>
+#include <D3D12/GPUTexture.h>
 #include <Core/Window.h>
 
 namespace fe::dx
 {
-	Swapchain::Swapchain(const Window& window, const Device& device, const uint32_t backBufferCount)
-		: backBufferCount(std::clamp(backBufferCount, MinBackBufferCount, MaxBackBufferCount)), descriptorHeap(std::make_unique<DescriptorHeap>(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, backBufferCount, "BackBufferDescHeap"))
+	Swapchain::Swapchain(const Window& window, Device& device, const uint32_t backBufferCount)
+		: backBufferCount(std::clamp(backBufferCount, MinBackBufferCount, MaxBackBufferCount))
 	{
 		InitSwapchain(window, device);
-		CreateRenderTargetViews(device);
+		InitRenderTargetViews(device);
 	}
 
 	Swapchain::~Swapchain()
 	{
 		renderTargetViews.clear();
-		descriptorHeap.reset();
 		backBuffers.clear();
 	}
 
@@ -28,7 +28,7 @@ namespace fe::dx
 		factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-		ThrowIfFailed(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
+		FE_SUCCEEDED_ASSERT(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
 
 		DXGI_SWAP_CHAIN_DESC1 desc = {};
 		/** #todo Customizable(or preset)Swapchain Resolution */
@@ -49,12 +49,12 @@ namespace fe::dx
 		desc.Flags = bIsTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		ComPtr<IDXGISwapChain1> swapchain1;
-		ThrowIfFailed(factory->CreateSwapChainForHwnd(&device.GetDirectQueue(), window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
+		FE_SUCCEEDED_ASSERT(factory->CreateSwapChainForHwnd(&device.GetDirectQueue(), window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
 
 		// Disable Alt+Enter full-screen toggle.
-		ThrowIfFailed(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
+		FE_SUCCEEDED_ASSERT(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
 
-		ThrowIfFailed(swapchain1.As(&swapchain));
+		FE_SUCCEEDED_ASSERT(swapchain1.As(&swapchain));
 	}
 
 	void Swapchain::CheckTearingSupport(ComPtr<IDXGIFactory5> factory)
@@ -70,20 +70,24 @@ namespace fe::dx
 		}
 	}
 
-	void Swapchain::CreateRenderTargetViews(const Device& device)
+	void Swapchain::InitRenderTargetViews(Device& device)
 	{
 		renderTargetViews.reserve(backBufferCount);
-		backBuffers.resize(backBufferCount);
+		backBuffers.reserve(backBufferCount);
 		for (uint32_t idx = 0; idx < backBufferCount; ++idx)
 		{
 			// #todo Should i Wrapping backBuffer over GPUTexture? // or should i treat swapchain as one of abstracted another type of resource itself?
-			ThrowIfFailed(swapchain->GetBuffer(idx, IID_PPV_ARGS(&backBuffers[idx])));
+			ComPtr<ID3D12Resource1> resource;
+			FE_SUCCEEDED_ASSERT(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
+			SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
 
-			SetObjectName(backBuffers[idx].Get(), std::format("Backbuffer {}", idx));
-			renderTargetViews.emplace_back(descriptorHeap->AllocateDescriptor());
-
-			ID3D12Device10& nativeDevice = device.GetNative();
-			nativeDevice.CreateRenderTargetView(backBuffers[idx].Get(), nullptr, renderTargetViews[idx].GetCPUDescriptorHandle());
+			backBuffers.emplace_back(std::make_unique<GPUTexture>(resource));
+			std::optional<Descriptor> descriptor = device.CreateRenderTargetView(*backBuffers[idx], {});
+			if (!descriptor)
+			{
+				throw std::runtime_error("Failed to create render target view from back-buffer.");
+			}
+			renderTargetViews.emplace_back(std::move(*descriptor));
 		}
 	}
 

@@ -9,40 +9,11 @@
 #include <dxgi1_6.h>
 #include <directx-dxc/dxcapi.h>
 #include <D3D12MemAlloc.h>
-#include <exception>
 
 namespace fe::dx
 {
 	template <typename Ty>
 	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
-
-	class ComException : public std::exception
-	{
-	public:
-		ComException(const HRESULT hr)
-			: result(hr)
-		{
-		}
-
-		const char* what() const noexcept override
-		{
-			static char strBuffer[64] = {};
-			sprintf_s(strBuffer, "Failure with HRESULT of %08X",
-				static_cast<unsigned int>(result));
-			return strBuffer;
-		}
-
-	private:
-		const HRESULT result;
-	};
-
-	inline void ThrowIfFailed(const HRESULT hr)
-	{
-		if (!SUCCEEDED(hr))
-		{
-			throw ComException(hr);
-		}
-	}
 
 	void SetObjectName(ID3D12Object* object, std::string_view name);
 } // namespace fe
