@@ -3,7 +3,7 @@
 #include <D3D12/DescriptorHeap.h>
 #include <Core/Window.h>
 
-namespace fe
+namespace fe::dx
 {
 	Swapchain::Swapchain(const Window& window, const Device& device, const uint32_t backBufferCount)
 		: backBufferCount(std::clamp(backBufferCount, MinBackBufferCount, MaxBackBufferCount)), descriptorHeap(std::make_unique<DescriptorHeap>(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, backBufferCount, "BackBufferDescHeap"))
@@ -21,7 +21,7 @@ namespace fe
 
 	void Swapchain::InitSwapchain(const Window& window, const Device& device)
 	{
-		wrl::ComPtr<IDXGIFactory5> factory;
+		ComPtr<IDXGIFactory5> factory;
 
 		uint32_t factoryFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -48,7 +48,7 @@ namespace fe
 		CheckTearingSupport(factory);
 		desc.Flags = bIsTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
-		wrl::ComPtr<IDXGISwapChain1> swapchain1;
+		ComPtr<IDXGISwapChain1> swapchain1;
 		ThrowIfFailed(factory->CreateSwapChainForHwnd(&device.GetDirectQueue(), window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
 
 		// Disable Alt+Enter full-screen toggle.
@@ -57,7 +57,7 @@ namespace fe
 		ThrowIfFailed(swapchain1.As(&swapchain));
 	}
 
-	void Swapchain::CheckTearingSupport(wrl::ComPtr<IDXGIFactory5> factory)
+	void Swapchain::CheckTearingSupport(ComPtr<IDXGIFactory5> factory)
 	{
 		BOOL allowTearing = FALSE;
 		if (FAILED(factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing))))
@@ -79,7 +79,7 @@ namespace fe
 			// #todo Should i Wrapping backBuffer over GPUTexture? // or should i treat swapchain as one of abstracted another type of resource itself?
 			ThrowIfFailed(swapchain->GetBuffer(idx, IID_PPV_ARGS(&backBuffers[idx])));
 
-			Private::SetD3DObjectName(backBuffers[idx].Get(), std::format("Backbuffer {}", idx));
+			SetObjectName(backBuffers[idx].Get(), std::format("Backbuffer {}", idx));
 			renderTargetViews.emplace_back(descriptorHeap->AllocateDescriptor());
 
 			ID3D12Device10& nativeDevice = device.GetNative();

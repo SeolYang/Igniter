@@ -1,7 +1,7 @@
 #include <D3D12/RootSignature.h>
 #include <D3D12/Device.h>
 
-namespace fe
+namespace fe::dx
 {
 	RootSignature::RootSignature(const Device& device)
 	{
@@ -14,8 +14,8 @@ namespace fe
 			.Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED
 		};
 
-		wrl::ComPtr<ID3DBlob> rootSignatureBlob;
-		wrl::ComPtr<ID3DBlob> errorBlob;
+		ComPtr<ID3DBlob> rootSignatureBlob;
+		ComPtr<ID3DBlob> errorBlob;
 
 		FE_ASSERT(SUCCEEDED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_1, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf())));
 
@@ -29,5 +29,4 @@ namespace fe
 	RootSignature::~RootSignature()
 	{
 	}
-
-} // namespace fe
+} // namespace fe::dx

@@ -3,7 +3,7 @@
 #include <Core/String.h>
 #include <Core/Mutex.h>
 
-namespace fe
+namespace fe::dx
 {
 	class Device;
 	class GraphicsPipelineStateDesc;
@@ -27,6 +27,6 @@ namespace fe
 	private:
 		const bool						 bIsGraphicsPSO;
 		const String					 name;
-		wrl::ComPtr<ID3D12PipelineState> pso;
+		ComPtr<ID3D12PipelineState> pso;
 	};
 } // namespace fe

@@ -1,7 +1,7 @@
 #include <D3D12/Fence.h>
 #include <Engine.h>
 
-namespace fe
+namespace fe::dx
 {
 	Fence::Fence(Device& device, const std::string_view debugName)
 		: eventHandle(CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS))
@@ -10,7 +10,7 @@ namespace fe
 		const bool	   bIsFenceCreated = SUCCEEDED(nativeDevice.CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 		FE_CONDITIONAL_LOG(D3D12Fatal, bIsFenceCreated, "Failed to create fence.");
 
-		Private::SetD3DObjectName(fence.Get(), debugName);
+		SetObjectName(fence.Get(), debugName);
 	}
 
 	Fence::~Fence()

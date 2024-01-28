@@ -1,7 +1,7 @@
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/Device.h>
 
-namespace fe
+namespace fe::dx
 {
 	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept
 		: desc(other.desc), allocation(std::move(other.allocation))
@@ -13,7 +13,7 @@ namespace fe
 	{
 	}
 
-	GPUBuffer::GPUBuffer(wrl::ComPtr<ID3D12Resource> existBuffer) : allocation(GPUResource{existBuffer})
+	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> existBuffer) : allocation(GPUResource{existBuffer})
 	{
 		FE_ASSERT(existBuffer.Get() != nullptr);
 		desc.From(existBuffer->GetDesc());

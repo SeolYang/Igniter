@@ -2,7 +2,7 @@
 #include <D3D12/Common.h>
 #include <Core/String.h>
 
-namespace fe
+namespace fe::dx
 {
 	class Device;
 	class PipelineState;
@@ -21,8 +21,8 @@ namespace fe
 		ID3D12GraphicsCommandList1& GetNative() const { return *cmdList.Get(); }
 
 	private:
-		wrl::ComPtr<ID3D12CommandAllocator> cmdAllocator;
-		wrl::ComPtr<ID3D12GraphicsCommandList1> cmdList;
+		ComPtr<ID3D12CommandAllocator> cmdAllocator;
+		ComPtr<ID3D12GraphicsCommandList1> cmdList;
 		const D3D12_COMMAND_LIST_TYPE			typeOfCommandList;
 
 	};

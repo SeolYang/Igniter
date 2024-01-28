@@ -9,7 +9,7 @@
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
 
-namespace fe
+namespace fe::dx
 {
 	Device::Device()
 	{
@@ -22,7 +22,7 @@ namespace fe
 			if (CreateDevice())
 			{
 				FE_LOG(D3D12Info, "The Device successfully created from the adapter.");
-				Private::SetD3DObjectName(device.Get(), "Device");
+				SetObjectName(device.Get(), "Device");
 				SetSeverityLevel();
 
 				CheckSupportedFeatures();
@@ -36,9 +36,9 @@ namespace fe
 				if (CreateCommandQueues())
 				{
 					FE_LOG(D3D12Info, "Command Queues are successfully created.");
-					Private::SetD3DObjectName(directQueue.Get(), "DirectQueue");
-					Private::SetD3DObjectName(asyncComputeQueue.Get(), "AsyncComputeQueue");
-					Private::SetD3DObjectName(copyQueue.Get(), "CopyQueue");
+					SetObjectName(directQueue.Get(), "DirectQueue");
+					SetObjectName(asyncComputeQueue.Get(), "AsyncComputeQueue");
+					SetObjectName(copyQueue.Get(), "CopyQueue");
 				}
 			}
 		}
@@ -63,7 +63,7 @@ namespace fe
 		adapter.Reset();
 
 #ifdef _DEBUG
-		wrl::ComPtr<IDXGIDebug1> dxgiDebug;
+		ComPtr<IDXGIDebug1> dxgiDebug;
 		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
 		{
 			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
@@ -79,7 +79,7 @@ namespace fe
 		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE, "Invalid queue type to flush.");
 		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS, "Invalid queue type to flush.");
 
-		wrl::ComPtr<ID3D12Fence> fence;
+		ComPtr<ID3D12Fence> fence;
 		if (SUCCEEDED(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
 		{
 			ID3D12CommandQueue* queue = nullptr;
@@ -262,9 +262,9 @@ namespace fe
 		{
 #if defined(DEBUG) || defined(_DEBUG)
 			factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
-			wrl::ComPtr<ID3D12Debug5> debugController;
+			ComPtr<ID3D12Debug5> debugController;
 			const bool				  bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
-			FE_CONDITIONAL_LOG(fe::D3D12Fatal, bDebugControllerAcquired, "Failed to get debug controller.");
+			FE_CONDITIONAL_LOG(D3D12Fatal, bDebugControllerAcquired, "Failed to get debug controller.");
 			if (bDebugControllerAcquired)
 			{
 				debugController->EnableDebugLayer();
@@ -278,7 +278,7 @@ namespace fe
 #endif
 		}
 
-		wrl::ComPtr<IDXGIFactory6> factory;
+		ComPtr<IDXGIFactory6> factory;
 		const bool				   bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
 		FE_CONDITIONAL_LOG(D3D12Fatal, bFactoryCreated, "Failed to create factory.");
 
@@ -319,7 +319,7 @@ namespace fe
 	void Device::SetSeverityLevel()
 	{
 #if defined(_DEBUG) || defined(ENABLE_GPU_VALIDATION)
-		wrl::ComPtr<ID3D12InfoQueue> infoQueue;
+		ComPtr<ID3D12InfoQueue> infoQueue;
 		if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
 		{
 			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);

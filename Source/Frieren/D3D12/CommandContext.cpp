@@ -2,7 +2,7 @@
 #include <D3D12/Device.h>
 #include <D3D12/PipelineState.h>
 
-namespace fe
+namespace fe::dx
 {
 	CommandContext::CommandContext(const Device& device, const String debugName, const D3D12_COMMAND_LIST_TYPE type)
 		: typeOfCommandList(type)

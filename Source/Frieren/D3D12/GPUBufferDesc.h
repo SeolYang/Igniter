@@ -5,7 +5,7 @@
 #include <Core/String.h>
 #include <D3D12/Common.h>
 
-namespace fe
+namespace fe::dx
 {
 	inline uint32_t AdjustSizeForConstantBuffer(const uint32_t originalSizeInBytes)
 	{

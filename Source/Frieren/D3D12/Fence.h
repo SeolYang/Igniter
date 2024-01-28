@@ -1,7 +1,7 @@
 #pragma once
 #include <D3D12/Device.h>
 
-namespace fe
+namespace fe::dx
 {
 	class Fence
 	{
@@ -24,6 +24,6 @@ namespace fe
 	private:
 		HANDLE					 eventHandle;
 		uint64_t				 counter = 0;
-		wrl::ComPtr<ID3D12Fence> fence;
+		ComPtr<ID3D12Fence> fence;
 	};
 } // namespace fe

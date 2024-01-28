@@ -3,8 +3,12 @@
 
 namespace fe
 {
-	class Device;
 	class Window;
+}
+
+namespace fe::dx
+{
+	class Device;
 	class DescriptorHeap;
 	class Descriptor;
 	class Swapchain
@@ -21,7 +25,7 @@ namespace fe
 
 	private:
 		void InitSwapchain(const Window& window, const Device& device);
-		void CheckTearingSupport(wrl::ComPtr<IDXGIFactory5> factory);
+		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
 		void CreateRenderTargetViews(const Device& device);
 
 	public:
@@ -29,13 +33,13 @@ namespace fe
 		static constexpr uint32_t MaxBackBufferCount = 4;
 
 	private:
-		wrl::ComPtr<IDXGISwapChain4> swapchain;
-		bool						 bIsTearingSupport = false;
+		ComPtr<IDXGISwapChain4> swapchain;
+		bool					bIsTearingSupport = false;
 
-		const uint32_t							 backBufferCount;
-		std::vector<wrl::ComPtr<ID3D12Resource>> backBuffers; // #todo ID3D12Resource -> GPUTexture?
+		const uint32_t						backBufferCount;
+		std::vector<ComPtr<ID3D12Resource>> backBuffers; // #todo ID3D12Resource -> GPUTexture?
 
 		std::unique_ptr<DescriptorHeap> descriptorHeap;
 		std::vector<Descriptor>			renderTargetViews;
 	};
-} // namespace fe
+} // namespace fe::dx

@@ -1,8 +1,8 @@
 #include <D3D12/PipelineStateDesc.h>
 #include <D3D12/ShaderBlob.h>
-namespace fe
-{
 
+namespace fe::dx
+{
 	void GraphicsPipelineStateDesc::SetVertexShader(const ShaderBlob& vertexShader)
 	{
 		FE_ASSERT(vertexShader.GetType() == EShaderType::Vertex);
@@ -62,4 +62,4 @@ namespace fe
 		FE_ASSERT(nativeBlob.GetBufferSize() > 0);
 		this->CS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
 	}
-} // namespace fe
+} // namespace fe::dx

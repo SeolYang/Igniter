@@ -5,7 +5,7 @@
 #include <Core/String.h>
 #include <D3D12/Common.h>
 
-namespace fe
+namespace fe::dx
 {
 	size_t	 SizeOfTexelInBits(const DXGI_FORMAT format);
 	uint16_t CalculateMaxNumMipLevels(const uint64_t width, const uint64_t height, const uint64_t depth);

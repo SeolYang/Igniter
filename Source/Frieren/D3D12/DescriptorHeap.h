@@ -3,7 +3,7 @@
 #include <Core/Mutex.h>
 #include <queue>
 
-namespace fe
+namespace fe::dx
 {
 	class Device;
 	class DescriptorHeap;
@@ -59,7 +59,7 @@ namespace fe
 
 	private:
 		friend Descriptor;
-		wrl::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+		ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 		const bool						  bIsShaderVisible = false;
 		const uint32_t					  descriptorHandleIncrementSize = 0;
 

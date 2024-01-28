@@ -2,7 +2,7 @@
 #include <D3D12/Device.h>
 #include <D3D12/PipelineStateDesc.h>
 
-namespace fe
+namespace fe::dx
 {
 	PipelineState::PipelineState(const Device& device, const GraphicsPipelineStateDesc& desc)
 		: bIsGraphicsPSO(true), name(desc.Name)

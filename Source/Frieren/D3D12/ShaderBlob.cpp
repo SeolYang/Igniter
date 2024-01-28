@@ -1,7 +1,7 @@
 #include <D3D12/ShaderBlob.h>
 #include <array>
 
-namespace fe
+namespace fe::dx
 {
 	// #todo 쉐이더 컴파일 후 파일로 저장
 	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)
@@ -90,21 +90,21 @@ namespace fe
 			arguments.push_back(TEXT("-Zi"));
 		}
 
-		wrl::ComPtr<IDxcUtils> utils;
+		ComPtr<IDxcUtils> utils;
 		FE_ASSERT(SUCCEEDED(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(utils.ReleaseAndGetAddressOf()))));
 
-		wrl::ComPtr<IDxcIncludeHandler> defaultIncludeHandler;
+		ComPtr<IDxcIncludeHandler> defaultIncludeHandler;
 		utils->CreateDefaultIncludeHandler(defaultIncludeHandler.ReleaseAndGetAddressOf());
 
-		wrl::ComPtr<IDxcLibrary> library;
+		ComPtr<IDxcLibrary> library;
 		FE_ASSERT(SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf()))));
 
-		uint32_t					  codePage = CP_UTF8;
-		const std::wstring			  wideSourcePath = desc.SourcePath.AsWideString();
-		wrl::ComPtr<IDxcBlobEncoding> sourceBlob;
+		uint32_t				 codePage = CP_UTF8;
+		const std::wstring		 wideSourcePath = desc.SourcePath.AsWideString();
+		ComPtr<IDxcBlobEncoding> sourceBlob;
 		ThrowIfFailed(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
 
-		wrl::ComPtr<IDxcCompiler3> compiler;
+		ComPtr<IDxcCompiler3> compiler;
 		FE_ASSERT(SUCCEEDED(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf()))));
 
 		const DxcBuffer buffer{
@@ -113,7 +113,7 @@ namespace fe
 			.Encoding = codePage
 		};
 
-		wrl::ComPtr<IDxcResult> result;
+		ComPtr<IDxcResult> result;
 		ThrowIfFailed(compiler->Compile(
 			&buffer,
 			arguments.data(), arguments.size(),
@@ -121,13 +121,13 @@ namespace fe
 			IID_PPV_ARGS(result.GetAddressOf())));
 
 		// #todo 별도의 error handling 구현 https://youtu.be/tyyKeTsdtmo?si=gERRzeRVmqxAcPT7&t=1158
-		//wrl::ComPtr<IDxcBlobUtf8> errors;
-		//result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
-		//if (errors && errors->GetStringLength() > 0)
+		// ComPtr<IDxcBlobUtf8> errors;
+		// result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
+		// if (errors && errors->GetStringLength() > 0)
 		//{
 		//	Logging(Error, (char*)errors->GetBufferPointer());
 		//}
 
 		FE_ASSERT(SUCCEEDED(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr)));
 	}
-} // namespace fe
+} // namespace fe::dx

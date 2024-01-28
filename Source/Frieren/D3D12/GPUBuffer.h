@@ -4,14 +4,14 @@
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUBufferDesc.h>
 
-namespace fe
+namespace fe::dx
 {
 	class Device;
 	class GPUBuffer
 	{
 	public:
 		GPUBuffer(Device& device, const GPUBufferDesc& desc);
-		GPUBuffer(wrl::ComPtr<ID3D12Resource> existBuffer);
+		GPUBuffer(ComPtr<ID3D12Resource> existBuffer);
 		~GPUBuffer() = default;
 
 		GPUBuffer(GPUBuffer&& other) noexcept;

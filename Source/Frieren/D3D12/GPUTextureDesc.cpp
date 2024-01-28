@@ -1,7 +1,7 @@
 #include <Core/Assert.h>
 #include <D3D12/GPUTextureDesc.h>
 
-namespace fe
+namespace fe::dx
 {
 	size_t SizeOfTexelInBits(const DXGI_FORMAT format)
 	{

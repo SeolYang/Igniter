@@ -11,9 +11,11 @@
 #include <D3D12MemAlloc.h>
 #include <exception>
 
-namespace fe
+namespace fe::dx
 {
-	// https://github.com/Microsoft/DirectXTK/wiki/ThrowIfFailed
+	template <typename Ty>
+	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
+
 	class ComException : public std::exception
 	{
 	public:
@@ -31,10 +33,10 @@ namespace fe
 		}
 
 	private:
-		HRESULT result;
+		const HRESULT result;
 	};
 
-	inline void ThrowIfFailed(HRESULT hr)
+	inline void ThrowIfFailed(const HRESULT hr)
 	{
 		if (!SUCCEEDED(hr))
 		{
@@ -42,15 +44,5 @@ namespace fe
 		}
 	}
 
+	void SetObjectName(ID3D12Object* object, std::string_view name);
 } // namespace fe
-
-namespace fe::Private
-{
-	void SetD3DObjectName(ID3D12Object* object, std::string_view name);
-} // namespace fe::Private
-
-namespace fe::wrl
-{
-	template <typename Ty>
-	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
-}

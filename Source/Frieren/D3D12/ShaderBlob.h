@@ -2,7 +2,7 @@
 #include <D3D12/Common.h>
 #include <Core/String.h>
 
-namespace fe
+namespace fe::dx
 {
 	enum class EShaderType
 	{
@@ -30,12 +30,12 @@ namespace fe
 	public:
 		String					 SourcePath;
 		EShaderType				 Type;
-		bool					 bPackMarticesInRowMajor = false; // -Zpr
+		bool					 bPackMarticesInRowMajor = false;				   // -Zpr
 		EShaderOptimizationLevel OptimizationLevel = EShaderOptimizationLevel::O3; // -Od~-O3
-		bool					 bDisableValidation = false; // -Vd
-		bool					 bTreatWarningAsErrors = false; // -WX
-		bool					 bForceEnableDebugInformation = false; // -Zi
-		// #todo Define Macros
+		bool					 bDisableValidation = false;					   // -Vd
+		bool					 bTreatWarningAsErrors = false;					   // -WX
+		bool					 bForceEnableDebugInformation = false;			   // -Zi
+																				   // #todo Define Macros
 	};
 
 	// from compiled binary
@@ -46,10 +46,10 @@ namespace fe
 		~ShaderBlob() = default;
 
 		EShaderType GetType() const { return type; }
-		IDxcBlob& GetNative() const { return *shader.Get(); }
+		IDxcBlob&	GetNative() const { return *shader.Get(); }
 
 	private:
 		const EShaderType type;
-		wrl::ComPtr<IDxcBlob> shader;
+		ComPtr<IDxcBlob>  shader;
 	};
-} // namespace fe
+} // namespace fe::dx

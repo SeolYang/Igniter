@@ -1,14 +1,14 @@
 #include <D3D12/GPUTexture.h>
 #include <D3D12/Device.h>
 
-namespace fe
+namespace fe::dx
 {
 	GPUTexture::GPUTexture(Device& device, const GPUTextureDesc& desc)
 		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc() , desc))
 	{
 	}
 
-	GPUTexture::GPUTexture(wrl::ComPtr<ID3D12Resource> existTexture)
+	GPUTexture::GPUTexture(ComPtr<ID3D12Resource> existTexture)
 		: allocation(GPUResource{existTexture})
 	{
 		FE_ASSERT(existTexture.Get() != nullptr);

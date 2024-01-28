@@ -1,7 +1,7 @@
 #include <Core/Utility.h>
 #include <D3D12/GPUBufferDesc.h>
 
-namespace fe
+namespace fe::dx
 {
 	void GPUBufferDesc::AsConstantBuffer(const uint32_t sizeOfBufferInBytes)
 	{

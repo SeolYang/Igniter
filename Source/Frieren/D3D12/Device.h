@@ -4,7 +4,7 @@
 #include <D3D12/Common.h>
 #include <D3D12/GPUResource.h>
 
-namespace fe
+namespace fe::dx
 {
 	FE_DECLARE_LOG_CATEGORY(D3D12Info, ELogVerbosiy::Info);
 	FE_DECLARE_LOG_CATEGORY(D3D12Warn, ELogVerbosiy::Warning);
@@ -94,12 +94,12 @@ namespace fe
 		static constexpr uint32_t NumDsvDescriptors = NumRtvDescriptors;
 
 	private:
-		wrl::ComPtr<IDXGIAdapter>	adapter;
-		wrl::ComPtr<ID3D12Device10> device;
+		ComPtr<IDXGIAdapter>	adapter;
+		ComPtr<ID3D12Device10> device;
 
-		wrl::ComPtr<ID3D12CommandQueue> directQueue;
-		wrl::ComPtr<ID3D12CommandQueue> asyncComputeQueue;
-		wrl::ComPtr<ID3D12CommandQueue> copyQueue;
+		ComPtr<ID3D12CommandQueue> directQueue;
+		ComPtr<ID3D12CommandQueue> asyncComputeQueue;
+		ComPtr<ID3D12CommandQueue> copyQueue;
 
 		uint32_t cbvSrvUavDescriptorHandleIncrementSize = 0;
 		uint32_t samplerDescritorHandleIncrementSize = 0;

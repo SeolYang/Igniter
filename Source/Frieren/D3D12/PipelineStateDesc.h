@@ -3,7 +3,7 @@
 #include <Core/String.h>
 #include <span>
 
-namespace fe
+namespace fe::dx
 {
 	class ShaderBlob;
 	class GraphicsPipelineStateDesc : public D3D12_GRAPHICS_PIPELINE_STATE_DESC
@@ -46,4 +46,4 @@ namespace fe
 		String Name;
 	};
 
-} // namespace fe
+} // namespace fe::dx

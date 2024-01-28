@@ -7,6 +7,9 @@ namespace fe
     class FrameResource
     {
 	private:
+		size_t localFrameIndex;
+		size_t globalFrameIndex;
+
         // Local Frame Index
         // Global Frame Index
         // Back buffer

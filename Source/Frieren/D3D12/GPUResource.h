@@ -1,7 +1,7 @@
 #pragma once
 #include <D3D12/Common.h>
 
-namespace fe
+namespace fe::dx
 {
 	class GPUResource
 	{
@@ -16,12 +16,12 @@ namespace fe
 				IID_PPV_ARGS(&resource)));
 		}
 
-		GPUResource(wrl::ComPtr<D3D12MA::Allocation> allocation, wrl::ComPtr<ID3D12Resource> resource)
+		GPUResource(ComPtr<D3D12MA::Allocation> allocation, ComPtr<ID3D12Resource> resource)
 			: allocation(allocation), resource(resource)
 		{
 		}
 
-		GPUResource(wrl::ComPtr<ID3D12Resource> resource)
+		GPUResource(ComPtr<ID3D12Resource> resource)
 			: resource(resource)
 		{
 		}
@@ -50,7 +50,7 @@ namespace fe
 		D3D12MA::Allocation& GetAllocation() const { return *allocation.Get(); }
 
 	private:
-		wrl::ComPtr<D3D12MA::Allocation> allocation = {};
-		wrl::ComPtr<ID3D12Resource>		 resource = {};
+		ComPtr<D3D12MA::Allocation> allocation = {};
+		ComPtr<ID3D12Resource>		 resource = {};
 	};
 } // namespace fe

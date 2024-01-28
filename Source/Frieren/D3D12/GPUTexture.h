@@ -4,14 +4,14 @@
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTextureDesc.h>
 
-namespace fe
+namespace fe::dx
 {
 	class Device;
 	class GPUTexture
 	{
 	public:
 		GPUTexture(Device& device, const GPUTextureDesc& desc);
-		GPUTexture(wrl::ComPtr<ID3D12Resource> existTexture);
+		GPUTexture(ComPtr<ID3D12Resource> existTexture);
 		~GPUTexture() = default;
 
 		GPUTexture(GPUTexture&& other) noexcept;
