@@ -11,7 +11,7 @@ namespace fe
 	{
 		std::wstring wideCharTitle = description.Title.AsWideString();
 
-		FE_ASSERT(description.Width > 0 && description.Height > 0, "Invalid Window Resolution.");
+		verify(description.Width > 0 && description.Height > 0, "Invalid Window Resolution.");
 		windowClass = {
 			sizeof(WNDCLASSEX),
 			CS_OWNDC,
@@ -21,7 +21,7 @@ namespace fe
 		};
 
 		const bool bSucceeded = RegisterClassEx(&windowClass);
-		FE_ASSERT(bSucceeded, "Failed to register window class.");
+		verify(bSucceeded, "Failed to register window class.");
 		const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
 		const auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -35,7 +35,7 @@ namespace fe
 			0
 		};
 
-		FE_ASSERT(AdjustWindowRectEx(&winRect, windowStyle, false, exWindowStyle) != 0);
+		verify(AdjustWindowRectEx(&winRect, windowStyle, false, exWindowStyle) != 0);
 
 		windowHandle = CreateWindowEx(
 			exWindowStyle,

@@ -11,9 +11,9 @@ namespace fe::dx
 	GPUTexture::GPUTexture(ComPtr<ID3D12Resource> existTexture)
 		: allocation(GPUResource{existTexture})
 	{
-		FE_ASSERT(existTexture.Get() != nullptr);
+		verify(existTexture.Get() != nullptr);
 		desc.From(existTexture->GetDesc());
-		FE_ASSERT(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
+		verify(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
 	}
 
 	GPUTexture::GPUTexture(GPUTexture&& other) noexcept

@@ -12,7 +12,7 @@ namespace fe
 	template <typename T>
 	__forceinline T AlignUp(T value, const size_t alignment)
 	{
-		FE_ASSERT(IsPow2(value));
+		verify(IsPow2(value));
 		const size_t mask = alignment - 1;
 		return (T)((size_t)(value + mask) & ~mask);
 	}
@@ -20,7 +20,7 @@ namespace fe
 	template <typename T>
 	__forceinline T AlignDown(T value, const size_t alignment)
 	{
-		FE_ASSERT(IsPow2(value));
+		verify(IsPow2(value));
 		const size_t mask = alignment - 1;
 		return (T)((size_t)value & ~mask);
 	}

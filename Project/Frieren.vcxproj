@@ -38,7 +38,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUResource.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUResoureView.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
@@ -153,7 +152,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

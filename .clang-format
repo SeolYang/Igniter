@@ -1,4 +1,4 @@
-Language: Cpp
+Standard: c++20
 BasedOnStyle: LLVM
 
 AccessModifierOffset: -4
@@ -19,7 +19,6 @@ BraceWrapping:
   AfterEnum: true
   AfterFunction: true
   AfterNamespace: true
-  AfterObjCDeclaration: true
   AfterStruct: true
   AfterUnion: true
   AfterExternBlock: true

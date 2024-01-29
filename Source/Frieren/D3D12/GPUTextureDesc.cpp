@@ -190,7 +190,7 @@ namespace fe::dx
 		bIsShaderReadWrite = bEnableShaderReadWrite;
 		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-		FE_ASSERT(width > 0);
+		verify(width > 0);
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
 		Alignment = 0;
 		Width = width;
@@ -207,14 +207,14 @@ namespace fe::dx
 
 	void GPUTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = false;
 		bIsMSAAEnabled = bEnableMSAA;
 		bIsCubemap = false;
 		bIsShaderReadWrite = bEnableShaderReadWrite;
 		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-		FE_ASSERT(width > 0 && height > 0);
+		verify(width > 0 && height > 0);
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		Alignment = 0;
 		Width = width;
@@ -231,14 +231,14 @@ namespace fe::dx
 
 	void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = false;
 		bIsMSAAEnabled = bEnableMSAA;
 		bIsCubemap = false;
 		bIsShaderReadWrite = bEnableShaderReadWrite;
 		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-		FE_ASSERT(width > 0 && height > 0 && depth > 0);
+		verify(width > 0 && height > 0 && depth > 0);
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
 		Alignment = 0;
 		Width = width;
@@ -255,14 +255,14 @@ namespace fe::dx
 
 	void GPUTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = false;
 		bIsMSAAEnabled = bEnableMSAA;
 		bIsCubemap = false;
 		bIsShaderReadWrite = false;
 		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-		FE_ASSERT(width > 0 && height > 0);
+		verify(width > 0 && height > 0);
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		Alignment = 0;
 		Width = width;
@@ -285,8 +285,8 @@ namespace fe::dx
 		bIsShaderReadWrite = false;
 		bIsAllowSimultaneousAccess = false;
 
-		FE_ASSERT(width > 0 && height > 0);
-		FE_ASSERT(IsDepthStencilFormat(format));
+		verify(width > 0 && height > 0);
+		verify(IsDepthStencilFormat(format));
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		Alignment = 0;
 		Width = width;
@@ -308,7 +308,7 @@ namespace fe::dx
 		bIsShaderReadWrite = bEnableShaderReadWrite;
 		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-		FE_ASSERT(width > 0 && arrayLength > 0);
+		verify(width > 0 && arrayLength > 0);
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
 		Alignment = 0;
 		Width = width;
@@ -325,14 +325,14 @@ namespace fe::dx
 
 	void GPUTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = true;
 		bIsMSAAEnabled = bEnableMSAA;
 		bIsCubemap = false;
 		bIsShaderReadWrite = bEnableShaderReadWrite;
 		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-		FE_ASSERT(width > 0 && height > 0 && arrayLength > 0);
+		verify(width > 0 && height > 0 && arrayLength > 0);
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		Alignment = 0;
 		Width = width;
@@ -349,14 +349,14 @@ namespace fe::dx
 
 	void GPUTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
-		FE_ASSERT(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = true;
 		bIsMSAAEnabled = bEnableMSAA;
 		bIsCubemap = true;
 		bIsShaderReadWrite = bEnableShaderReadWrite;
 		bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-		FE_ASSERT(width > 0 && height > 0);
+		verify(width > 0 && height > 0);
 		Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		Alignment = 0;
 		Width = width;
@@ -689,7 +689,7 @@ namespace fe::dx
 
 	void GPUTextureDesc::From(const D3D12_RESOURCE_DESC& desc)
 	{
-		FE_ASSERT(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
+		verify(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
 		Dimension = desc.Dimension;
 		Alignment = desc.Alignment;
 		Width = desc.Width;

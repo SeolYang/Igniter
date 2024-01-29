@@ -8,7 +8,7 @@ namespace fe::dx
 		: bIsGraphicsPSO(true), name(desc.Name)
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
-		FE_SUCCEEDED_ASSERT(nativeDevice.CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso)));
+		verify_succeeded(nativeDevice.CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso)));
 
 		// #todo PSOCache!
 		const std::wstring widerName = name.AsWideString();
@@ -19,7 +19,7 @@ namespace fe::dx
 		: bIsGraphicsPSO(false), name(desc.Name)
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
-		FE_SUCCEEDED_ASSERT(nativeDevice.CreateComputePipelineState(&desc, IID_PPV_ARGS(&pso)));
+		verify_succeeded(nativeDevice.CreateComputePipelineState(&desc, IID_PPV_ARGS(&pso)));
 
 		// #todo PSOCache!
 		const std::wstring widerName = name.AsWideString();

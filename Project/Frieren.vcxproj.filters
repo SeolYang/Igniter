@@ -129,7 +129,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUResoureView.h" />
     <ClInclude Include="..\Source\Frieren\Math\Common.h">
       <Filter>Source\Math</Filter>
     </ClInclude>

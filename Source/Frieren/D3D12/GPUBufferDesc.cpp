@@ -5,7 +5,7 @@ namespace fe::dx
 {
 	void GPUBufferDesc::AsConstantBuffer(const uint32_t sizeOfBufferInBytes)
 	{
-		FE_ASSERT(sizeOfBufferInBytes > 0);
+		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
 		standardBarrier = {
@@ -34,8 +34,8 @@ namespace fe::dx
 
 	void GPUBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
 	{
-		FE_ASSERT(sizeOfElementInBytes > 0);
-		FE_ASSERT(numOfElements > 0);
+		verify(sizeOfElementInBytes > 0);
+		verify(numOfElements > 0);
 		bIsShaderReadWritable = bEnableShaderReadWrtie;
 		bIsCPUAccessible = false;
 		standardBarrier = {
@@ -64,7 +64,7 @@ namespace fe::dx
 
 	void GPUBufferDesc::AsUploadBuffer(const uint32_t sizeOfBufferInBytes)
 	{
-		FE_ASSERT(sizeOfBufferInBytes > 0);
+		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
 		standardBarrier = {
@@ -93,7 +93,7 @@ namespace fe::dx
 
 	void GPUBufferDesc::AsReadbackBuffer(const uint32_t sizeOfBufferInBytes)
 	{
-		FE_ASSERT(sizeOfBufferInBytes > 0);
+		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
 		standardBarrier = {
@@ -122,8 +122,8 @@ namespace fe::dx
 
 	void GPUBufferDesc::AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices)
 	{
-		FE_ASSERT(sizeOfVertexInBytes > 0);
-		FE_ASSERT(numVertices > 0);
+		verify(sizeOfVertexInBytes > 0);
+		verify(numVertices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
 		standardBarrier = {
@@ -152,8 +152,8 @@ namespace fe::dx
 
 	void GPUBufferDesc::AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices)
 	{
-		FE_ASSERT(sizeOfIndexInBytes > 0);
-		FE_ASSERT(numIndices > 0);
+		verify(sizeOfIndexInBytes > 0);
+		verify(numIndices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
 		standardBarrier = {
@@ -273,7 +273,7 @@ namespace fe::dx
 
 	void GPUBufferDesc::From(const D3D12_RESOURCE_DESC& desc)
 	{
-		FE_ASSERT(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
+		verify(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
 		Dimension = desc.Dimension;
 		Alignment = desc.Alignment;
 		Width = desc.Width;

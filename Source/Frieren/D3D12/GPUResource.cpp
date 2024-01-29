@@ -5,7 +5,7 @@ namespace fe::dx
 {
 	GPUResource::GPUResource(D3D12MA::Allocator& allocator, const D3D12MA::ALLOCATION_DESC& allocationDesc, const D3D12_RESOURCE_DESC1& resourceDesc)
 	{
-		FE_SUCCEEDED_ASSERT(allocator.CreateResource3(
+		verify_succeeded(allocator.CreateResource3(
 			&allocationDesc, &resourceDesc,
 			D3D12_BARRIER_LAYOUT_UNDEFINED,
 			nullptr, 0, nullptr,

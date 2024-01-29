@@ -21,15 +21,15 @@ namespace fe
 	void String::SetString(const std::string_view stringView)
 	{
 		const bool bIsNotEmpty = !stringView.empty();
-		FE_ASSERT(bIsNotEmpty, "Empty Name");
+		verify(bIsNotEmpty, "Empty Name");
 
 		const bool bIsEncodedAsUTF8 = IsValidUTF8(stringView);
-		FE_ASSERT(bIsEncodedAsUTF8, "Invalid UTF-8 String: {}", stringView);
+		verify(bIsEncodedAsUTF8, "Invalid UTF-8 String: {}", stringView);
 
 		const bool bIsValidString = bIsNotEmpty && bIsEncodedAsUTF8;
 		if (bIsValidString)
 		{
-			hashOfString = Private::HashCRC64(stringView);
+			hashOfString = HashStringCRC64(stringView);
 
 			WriteLock lock{ hashStringMapMutex };
 			if (!hashStringMap.contains(hashOfString))
@@ -102,7 +102,6 @@ namespace fe
 	bool String::operator==(const String& rhs) const
 	{
 		const bool bIsValid = IsValid() && rhs.IsValid();
-		FE_ASSERT(bIsValid, "Invalid string comparision.");
 		return bIsValid ? hashOfString == rhs.hashOfString : false;
 	}
 

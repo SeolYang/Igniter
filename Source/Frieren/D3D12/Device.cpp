@@ -96,7 +96,7 @@ namespace fe::dx
 					break;
 			}
 
-			FE_ASSERT(queue != nullptr);
+			verify(queue != nullptr);
 
 			if (SUCCEEDED(queue->Signal(fence.Get(), 1)))
 			{
@@ -488,7 +488,7 @@ namespace fe::dx
 
 	GPUResource Device::AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc, const D3D12_RESOURCE_DESC1& resourceDesc)
 	{
-		FE_ASSERT(allocator != nullptr);
+		verify(allocator != nullptr);
 		return GPUResource{ *allocator, allocationDesc, resourceDesc };
 	}
 } // namespace fe

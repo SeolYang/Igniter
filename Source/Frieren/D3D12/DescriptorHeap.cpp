@@ -9,7 +9,7 @@ namespace fe::dx
 	DescriptorHeap::DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors, const std::string_view debugName)
 		: bIsShaderVisible(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER), descriptorHandleIncrementSize(device.GetDescriptorHandleIncrementSize(type)), numInitialDescriptors(numDescriptors), indexPool(CreateIndexQueue(numDescriptors))
 	{
-		FE_ASSERT(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES != type);
+		verify(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES != type);
 
 		D3D12_DESCRIPTOR_HEAP_DESC desc{};
 		desc.NodeMask = 0;
@@ -49,11 +49,11 @@ namespace fe::dx
 
 	void DescriptorHeap::ReleaseIndex(const uint32_t index)
 	{
-		FE_ASSERT(index < numInitialDescriptors);
-		FE_ASSERT(index != Descriptor::InvalidIndex);
+		verify(index < numInitialDescriptors);
+		verify(index != Descriptor::InvalidIndex);
 
 		RecursiveLock lock{ mutex };
-		FE_ASSERT(indexPool.size() <= numInitialDescriptors);
+		verify(indexPool.size() <= numInitialDescriptors);
 		if (index != Descriptor::InvalidIndex)
 		{
 			indexPool.push(index);

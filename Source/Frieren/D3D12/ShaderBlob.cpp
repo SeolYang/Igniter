@@ -39,7 +39,7 @@ namespace fe::dx
 				arguments.push_back(TEXT("as_6_6"));
 				break;
 			default:
-				FE_ASSERT(false);
+				verify(false);
 				break;
 		}
 
@@ -91,21 +91,21 @@ namespace fe::dx
 		}
 
 		ComPtr<IDxcUtils> utils;
-		FE_ASSERT(SUCCEEDED(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(utils.ReleaseAndGetAddressOf()))));
+		verify_succeeded(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(utils.ReleaseAndGetAddressOf())));
 
 		ComPtr<IDxcIncludeHandler> defaultIncludeHandler;
 		utils->CreateDefaultIncludeHandler(defaultIncludeHandler.ReleaseAndGetAddressOf());
 
 		ComPtr<IDxcLibrary> library;
-		FE_ASSERT(SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf()))));
+		verify_succeeded(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
 
 		uint32_t				 codePage = CP_UTF8;
 		const std::wstring		 wideSourcePath = desc.SourcePath.AsWideString();
 		ComPtr<IDxcBlobEncoding> sourceBlob;
-		FE_SUCCEEDED_ASSERT(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
+		verify_succeeded(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
 
 		ComPtr<IDxcCompiler3> compiler;
-		FE_ASSERT(SUCCEEDED(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf()))));
+		verify_succeeded(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf())));
 
 		const DxcBuffer buffer{
 			.Ptr = sourceBlob->GetBufferPointer(),
@@ -114,7 +114,7 @@ namespace fe::dx
 		};
 
 		ComPtr<IDxcResult> result;
-		FE_SUCCEEDED_ASSERT(compiler->Compile(
+		verify_succeeded(compiler->Compile(
 			&buffer,
 			arguments.data(), arguments.size(),
 			defaultIncludeHandler.Get(),
@@ -128,6 +128,6 @@ namespace fe::dx
 		//	Logging(Error, (char*)errors->GetBufferPointer());
 		//}
 
-		FE_SUCCEEDED_ASSERT(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
+		verify_succeeded(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
 	}
 } // namespace fe::dx

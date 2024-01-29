@@ -17,10 +17,10 @@ namespace fe::dx
 		ComPtr<ID3DBlob> rootSignatureBlob;
 		ComPtr<ID3DBlob> errorBlob;
 
-		FE_ASSERT(SUCCEEDED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_1, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf())));
+		verify(SUCCEEDED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_1, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf())));
 
 		ID3D12Device10& nativeDevice = device.GetNative();
-		FE_ASSERT(SUCCEEDED(nativeDevice.CreateRootSignature(
+		verify(SUCCEEDED(nativeDevice.CreateRootSignature(
 			0,
 			rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(),
 			IID_PPV_ARGS(&rootSignature))));

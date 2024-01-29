@@ -28,7 +28,7 @@ namespace fe::dx
 		factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-		FE_SUCCEEDED_ASSERT(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
+		verify_succeeded(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
 
 		DXGI_SWAP_CHAIN_DESC1 desc = {};
 		/** #todo Customizable(or preset)Swapchain Resolution */
@@ -49,12 +49,12 @@ namespace fe::dx
 		desc.Flags = bIsTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		ComPtr<IDXGISwapChain1> swapchain1;
-		FE_SUCCEEDED_ASSERT(factory->CreateSwapChainForHwnd(&device.GetDirectQueue(), window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
+		verify_succeeded(factory->CreateSwapChainForHwnd(&device.GetDirectQueue(), window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
 
 		// Disable Alt+Enter full-screen toggle.
-		FE_SUCCEEDED_ASSERT(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
+		verify_succeeded(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
 
-		FE_SUCCEEDED_ASSERT(swapchain1.As(&swapchain));
+		verify_succeeded(swapchain1.As(&swapchain));
 	}
 
 	void Swapchain::CheckTearingSupport(ComPtr<IDXGIFactory5> factory)
@@ -78,7 +78,7 @@ namespace fe::dx
 		{
 			// #todo Should i Wrapping backBuffer over GPUTexture? // or should i treat swapchain as one of abstracted another type of resource itself?
 			ComPtr<ID3D12Resource1> resource;
-			FE_SUCCEEDED_ASSERT(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
+			verify_succeeded(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
 			SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
 
 			backBuffers.emplace_back(std::make_unique<GPUTexture>(resource));

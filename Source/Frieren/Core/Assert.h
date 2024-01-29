@@ -1,23 +1,28 @@
 #pragma once
 #if (defined(_DEBUG) || defined(DEBUG))
-	#define FE_ASSERT(CONDITION) \
-		do                                        \
-			if (!(CONDITION))                     \
-			{                                     \
-				__debugbreak();                   \
-			}                                     \
+	#define verify(EXPRESSION)  \
+		do                      \
+			if (!(EXPRESSION))  \
+			{                   \
+				__debugbreak(); \
+			}                   \
 		while (false)
 
+	#define check(CONDITION) verify(CONDITION)
 #else
-	#define FE_ASSERT(CONDITION) \
-		do                                        \
-		{                                         \
-			CONDITION;                            \
-		}                                         \
+	#define verify(EXPRESSION) \
+		do                     \
+		{                      \
+			EXPRESSION;        \
+		}                      \
 		while (false)
 
-	#define FE_FORCE_ASSERT(FORMAT_STR, ...)
-
+	#define check(CONDITION) ((void)0)
 #endif
 
-#define FE_SUCCEEDED_ASSERT(RESULT) FE_ASSERT(SUCCEEDED(RESULT))
+#define checkNoEntry() check(false)
+#define checkNoReentry() check(false)
+#define checkNoRecursion() check(false)
+#define unimplemented() check(false)
+
+#define verify_succeeded(RESULT) verify(SUCCEEDED(RESULT))

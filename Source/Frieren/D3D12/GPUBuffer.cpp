@@ -15,7 +15,7 @@ namespace fe::dx
 
 	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> existBuffer) : allocation(GPUResource{existBuffer})
 	{
-		FE_ASSERT(existBuffer.Get() != nullptr);
+		verify(existBuffer.Get() != nullptr);
 		desc.From(existBuffer->GetDesc());
 	}
 
