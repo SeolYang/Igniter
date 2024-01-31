@@ -6,7 +6,7 @@ namespace fe::dx
 	class Fence
 	{
 	public:
-		Fence(Device& device, std::string_view debugName);
+		Fence(const Device& device, std::string_view debugName);
 		~Fence();
 
 		Fence(const Fence&) = delete;
@@ -22,8 +22,8 @@ namespace fe::dx
 		void CpuWaitForFence();
 
 	private:
-		HANDLE					 eventHandle;
-		uint64_t				 counter = 0;
+		HANDLE				eventHandle;
+		uint64_t			counter = 0;
 		ComPtr<ID3D12Fence> fence;
 	};
-} // namespace fe
+} // namespace fe::dx

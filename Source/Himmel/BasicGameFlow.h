@@ -6,11 +6,11 @@ class PlayerControllSystem;
 class BasicGameFlow : public fe::GameFlow
 {
 public:
-	BasicGameFlow();
-	~BasicGameFlow();
+    BasicGameFlow();
+    ~BasicGameFlow();
 
-	virtual void Update(fe::World& world) override;
+    virtual void Update(fe::World& world) override;
 
-	private:
-	std::unique_ptr<PlayerControllSystem> playerControllSystem;
+private:
+    std::unique_ptr<PlayerControllSystem> playerControllSystem;
 };

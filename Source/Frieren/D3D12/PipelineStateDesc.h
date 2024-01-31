@@ -9,8 +9,7 @@ namespace fe::dx
 	class GraphicsPipelineStateDesc : public D3D12_GRAPHICS_PIPELINE_STATE_DESC
 	{
 	public:
-		GraphicsPipelineStateDesc()
-			: Name("GraphicsPSO")
+		GraphicsPipelineStateDesc() : Name("GraphicsPSO")
 		{
 			this->NodeMask = 0;
 			this->pRootSignature = nullptr;
@@ -33,8 +32,7 @@ namespace fe::dx
 	class ComputePipelineStateDesc : public D3D12_COMPUTE_PIPELINE_STATE_DESC
 	{
 	public:
-		ComputePipelineStateDesc()
-			: Name("ComputePSO")
+		ComputePipelineStateDesc() : Name("ComputePSO")
 		{
 			this->NodeMask = 0;
 			this->pRootSignature = nullptr;

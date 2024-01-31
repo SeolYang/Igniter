@@ -17,13 +17,12 @@ namespace fe::dx
 		// Equivalent to Close
 		void End();
 
-		D3D12_COMMAND_LIST_TYPE GetType() const { return typeOfCommandList; }
+		D3D12_COMMAND_LIST_TYPE		GetType() const { return typeOfCommandList; }
 		ID3D12GraphicsCommandList1& GetNative() const { return *cmdList.Get(); }
 
 	private:
-		ComPtr<ID3D12CommandAllocator> cmdAllocator;
+		ComPtr<ID3D12CommandAllocator>	   cmdAllocator;
 		ComPtr<ID3D12GraphicsCommandList1> cmdList;
-		const D3D12_COMMAND_LIST_TYPE			typeOfCommandList;
-
+		const D3D12_COMMAND_LIST_TYPE	   typeOfCommandList;
 	};
-} // namespace fe
+} // namespace fe::dx

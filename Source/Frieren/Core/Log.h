@@ -45,7 +45,9 @@ namespace fe
 				logger->set_level(spdlog::level::trace);
 			}
 
-			const std::string formattedMessage = std::vformat(logMessage, std::make_format_args(std::forward<Args>(args)...));
+			const std::string formattedMessage =
+				std::vformat(logMessage, std::make_format_args(std::forward<Args>(args)...));
+
 			switch (C::Verbosity)
 			{
 				case ELogVerbosiy::Info:

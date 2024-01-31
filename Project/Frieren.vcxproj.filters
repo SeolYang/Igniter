@@ -218,5 +218,8 @@
     <ClCompile Include="..\Source\Frieren\D3D12\GPUResource.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Renderer\FrameResource.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

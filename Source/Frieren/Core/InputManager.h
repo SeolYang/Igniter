@@ -36,10 +36,7 @@ namespace fe
 	struct Action
 	{
 	public:
-		bool IsAnyPressing() const
-		{
-			return State == fe::EInputState::Pressed || State == EInputState::OnPressing;
-		}
+		bool IsAnyPressing() const { return State == fe::EInputState::Pressed || State == EInputState::OnPressing; }
 
 	public:
 		EInputState State = EInputState::None;

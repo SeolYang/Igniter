@@ -15,10 +15,13 @@ namespace fe::dx
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, Device& device, const uint32_t backBufferCount = DefaultBackBufferCount);
+		Swapchain(const Window& window, Device& device, const uint32_t numInflightFrames);
 		~Swapchain();
 
 		bool IsTearingSupport() const { return bIsTearingSupport; }
+
+		const GPUTexture& GetBackBuffer() const;
+		const Descriptor& GetRenderTargetView() const;
 
 		// #todo Resize Swapchain(back buffers)!
 
@@ -29,16 +32,11 @@ namespace fe::dx
 		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
 		void InitRenderTargetViews(Device& device);
 
-	public:
-		static constexpr uint32_t MinBackBufferCount = 1;
-		static constexpr uint32_t MaxBackBufferCount = 3;
-		static constexpr uint32_t DefaultBackBufferCount = 2;
-
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;
 		bool					bIsTearingSupport = false;
 
-		const uint32_t							 backBufferCount;
+		const uint32_t							 numInflightFrames;
 		std::vector<std::unique_ptr<GPUTexture>> backBuffers;
 		std::vector<Descriptor>					 renderTargetViews;
 	};

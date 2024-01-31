@@ -24,4 +24,4 @@ namespace fe::dx
 		GPUTextureDesc desc;
 		GPUResource	   allocation;
 	};
-} // namespace fe
+} // namespace fe::dx

@@ -6,19 +6,23 @@
 
 namespace fe
 {
-	Window::Window(const WindowDescription description)
-		: windowDesc(description)
+	Window::Window(const WindowDescription description) : windowDesc(description)
 	{
 		std::wstring wideCharTitle = description.Title.AsWideString();
 
 		verify(description.Width > 0 && description.Height > 0, "Invalid Window Resolution.");
-		windowClass = {
-			sizeof(WNDCLASSEX),
-			CS_OWNDC,
-			WindowProc, 0L, 0L,
-			GetModuleHandle(NULL), NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL,
-			wideCharTitle.c_str(), NULL
-		};
+		windowClass = { sizeof(WNDCLASSEX),
+						CS_OWNDC,
+						WindowProc,
+						0L,
+						0L,
+						GetModuleHandle(NULL),
+						NULL,
+						LoadCursor(NULL, IDC_ARROW),
+						NULL,
+						NULL,
+						wideCharTitle.c_str(),
+						NULL };
 
 		const bool bSucceeded = RegisterClassEx(&windowClass);
 		verify(bSucceeded, "Failed to register window class.");
@@ -28,23 +32,14 @@ namespace fe
 		constexpr auto windowStyle = WS_OVERLAPPEDWINDOW;
 		constexpr auto exWindowStyle = 0;
 
-		RECT winRect{
-			0,
-			static_cast<LONG>(description.Height),
-			static_cast<LONG>(description.Width),
-			0
-		};
+		RECT winRect{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
 
 		verify(AdjustWindowRectEx(&winRect, windowStyle, false, exWindowStyle) != 0);
 
-		windowHandle = CreateWindowEx(
-			exWindowStyle,
-			windowClass.lpszClassName,
-			wideCharTitle.c_str(),
-			windowStyle,
-			(screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
-			winRect.right - winRect.left, winRect.top - winRect.bottom,
-			NULL, NULL, windowClass.hInstance, NULL);
+		windowHandle = CreateWindowEx(exWindowStyle, windowClass.lpszClassName, wideCharTitle.c_str(), windowStyle,
+									  (screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
+									  winRect.right - winRect.left, winRect.top - winRect.bottom, NULL, NULL,
+									  windowClass.hInstance, NULL);
 
 		ShowWindow(windowHandle, SW_SHOWDEFAULT);
 		UpdateWindow(windowHandle);

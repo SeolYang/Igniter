@@ -1,21 +1,31 @@
- #pragma once
+#pragma once
 #include <memory>
+
+namespace fe::dx
+{
+	class Device;
+	class Fence;
+}
 
 namespace fe
 {
-	class Fence;
-    class FrameResource
-    {
+	class FrameResource
+	{
+	public:
+		FrameResource(const dx::Device& device, const size_t numInflightFrames);
+		~FrameResource();
+
+		void BeginFrame(const size_t currentGlobalFrameIdx);
+
+		size_t GetGlobalFrameIndex() const { return globalFrameIdx; }
+		size_t GetLocalFrameIndex() const { return localFrameIdx; }
+
 	private:
-		size_t localFrameIndex;
-		size_t globalFrameIndex;
+		const size_t numInflightFrames;
+		size_t		 globalFrameIdx = 0;
+		size_t		 localFrameIdx = 0;
 
-        // Local Frame Index
-        // Global Frame Index
-        // Back buffer
-        // Frame Fence
+		std::unique_ptr<dx::Fence> fence;
 
-		//std::unique_ptr<Fence> fence;
-
-    };
-}
+	};
+} // namespace fe

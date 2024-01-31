@@ -7,16 +7,12 @@ namespace fe
 	String::HashStringMap String::hashStringMap = {};
 	SharedMutex			  String::hashStringMapMutex;
 
-	String::String(const std::string_view stringView)
-		: hashOfString(InvalidHash)
+	String::String(const std::string_view stringView) : hashOfString(InvalidHash)
 	{
 		SetString(stringView);
 	}
 
-	String::String(const String& other)
-		: hashOfString(other.hashOfString)
-	{
-	}
+	String::String(const String& other) : hashOfString(other.hashOfString) {}
 
 	void String::SetString(const std::string_view stringView)
 	{

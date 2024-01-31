@@ -18,11 +18,11 @@ namespace fe::dx
 		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
 
 		const GPUBufferDesc& GetDesc() const { return desc; }
-		const GPUResource& GetAllocation() const { return allocation; }
+		const GPUResource&	 GetAllocation() const { return allocation; }
 
 	private:
 		GPUBufferDesc desc;
-		GPUResource allocation;
+		GPUResource	  allocation;
 	};
 
-} // namespace fe
+} // namespace fe::dx

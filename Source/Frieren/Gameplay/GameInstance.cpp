@@ -4,9 +4,7 @@
 
 namespace fe
 {
-	GameInstance::GameInstance()
-	{
-	}
+	GameInstance::GameInstance() {}
 
 	GameInstance::~GameInstance()
 	{

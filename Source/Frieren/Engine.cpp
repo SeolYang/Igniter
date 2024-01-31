@@ -27,11 +27,7 @@ namespace fe
 			handleManager = std::make_unique<HandleManager>();
 
 			/* @test temp window descriptor */
-			const WindowDescription windowDesc{
-				.Width = 1280,
-				.Height = 720,
-				.Title = String(settings::GameName)
-			};
+			const WindowDescription windowDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
 
 			window = std::make_unique<Window>(windowDesc);
 			inputManager = std::make_unique<InputManager>();

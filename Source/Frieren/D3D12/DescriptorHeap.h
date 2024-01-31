@@ -43,7 +43,8 @@ namespace fe::dx
 		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index);
 
 	public:
-		DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors, const std::string_view debugName);
+		DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors,
+					   const std::string_view debugName);
 		~DescriptorHeap();
 
 		DescriptorHeap(const DescriptorHeap&) = delete;
@@ -52,16 +53,13 @@ namespace fe::dx
 		DescriptorHeap& operator=(const DescriptorHeap&) = delete;
 		DescriptorHeap& operator=(DescriptorHeap&&) noexcept = delete;
 
-		Descriptor AllocateDescriptor()
-		{
-			return Descriptor{ *this };
-		}
+		Descriptor AllocateDescriptor() { return Descriptor{ *this }; }
 
 	private:
 		friend Descriptor;
 		ComPtr<ID3D12DescriptorHeap> descriptorHeap;
-		const bool						  bIsShaderVisible = false;
-		const uint32_t					  descriptorHandleIncrementSize = 0;
+		const bool					 bIsShaderVisible = false;
+		const uint32_t				 descriptorHandleIncrementSize = 0;
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandleForHeapStart{};
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
@@ -71,4 +69,4 @@ namespace fe::dx
 		RecursiveMutex		 mutex;
 		std::queue<uint32_t> indexPool;
 	};
-} // namespace fe
+} // namespace fe::dx

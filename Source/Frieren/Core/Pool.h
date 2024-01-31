@@ -37,10 +37,7 @@ namespace fe
 				_aligned_free(base);
 			}
 
-			bool IsValidSlot(const size_t slot) const
-			{
-				return allocatedSlot.contains(slot);
-			}
+			bool IsValidSlot(const size_t slot) const { return allocatedSlot.contains(slot); }
 
 		private:
 			template <typename T>
@@ -113,10 +110,7 @@ namespace fe
 			}
 		}
 
-		explicit Pool(const size_t numOfInitialChunks = 1)
-			: Pool(numOfInitialChunks, DefaultChunkSize / sizeof(T))
-		{
-		}
+		explicit Pool(const size_t numOfInitialChunks = 1) : Pool(numOfInitialChunks, DefaultChunkSize / sizeof(T)) {}
 
 		~Pool() = default;
 
@@ -150,7 +144,9 @@ namespace fe
 		{
 			const bool bIsValidChunkIndex = allocation.ChunkIndex < chunks.size();
 			verify(bIsValidChunkIndex);
-			return bIsValidChunkIndex ? reinterpret_cast<T*>(chunks[allocation.ChunkIndex]->GetPointerOfSlot(allocation.ElementIndex)) : nullptr;
+			return bIsValidChunkIndex
+					   ? reinterpret_cast<T*>(chunks[allocation.ChunkIndex]->GetPointerOfSlot(allocation.ElementIndex))
+					   : nullptr;
 		}
 
 	private:

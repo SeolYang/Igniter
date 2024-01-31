@@ -16,10 +16,7 @@ namespace fe
 		World& operator=(const World&) = delete;
 		World& operator=(World&&) noexcept = delete;
 
-		[[nodiscard]] inline Entity Create()
-		{
-			return registry.create();
-		}
+		[[nodiscard]] inline Entity Create() { return registry.create(); }
 
 		void Destroy(Entity entity);
 		template <typename Itr>
@@ -140,10 +137,7 @@ namespace fe
 			registry.clear<Components...>();
 		}
 
-		void Reset()
-		{
-			registry.clear();
-		}
+		void Reset() { registry.clear(); }
 
 		template <typename... Components>
 		[[nodiscard]] bool AllOf(const Entity entity) const

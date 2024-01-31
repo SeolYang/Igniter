@@ -158,10 +158,8 @@ namespace fe::dx
 
 	bool IsDepthStencilFormat(const DXGI_FORMAT format)
 	{
-		return format == DXGI_FORMAT_D16_UNORM ||
-			   format == DXGI_FORMAT_D24_UNORM_S8_UINT ||
-			   format == DXGI_FORMAT_D32_FLOAT ||
-			   format == DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+		return format == DXGI_FORMAT_D16_UNORM || format == DXGI_FORMAT_D24_UNORM_S8_UINT ||
+			   format == DXGI_FORMAT_D32_FLOAT || format == DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 	}
 
 	bool IsTypelessFormat(const DXGI_FORMAT format)
@@ -171,18 +169,18 @@ namespace fe::dx
 			   format == DXGI_FORMAT_R32G8X24_TYPELESS || format == DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS ||
 			   format == DXGI_FORMAT_X32_TYPELESS_G8X24_UINT || format == DXGI_FORMAT_R10G10B10A2_TYPELESS ||
 			   format == DXGI_FORMAT_R8G8B8A8_TYPELESS || format == DXGI_FORMAT_R16G16_TYPELESS ||
-			   format == DXGI_FORMAT_R32_TYPELESS ||
-			   format == DXGI_FORMAT_R24G8_TYPELESS || format == DXGI_FORMAT_R24_UNORM_X8_TYPELESS ||
-			   format == DXGI_FORMAT_X24_TYPELESS_G8_UINT || format == DXGI_FORMAT_R8G8_TYPELESS ||
-			   format == DXGI_FORMAT_R16_TYPELESS || format == DXGI_FORMAT_R8_TYPELESS ||
-			   format == DXGI_FORMAT_BC1_TYPELESS || format == DXGI_FORMAT_BC2_TYPELESS ||
-			   format == DXGI_FORMAT_BC3_TYPELESS || format == DXGI_FORMAT_BC4_TYPELESS ||
-			   format == DXGI_FORMAT_BC5_TYPELESS || format == DXGI_FORMAT_R8G8B8A8_TYPELESS ||
-			   format == DXGI_FORMAT_B8G8R8X8_TYPELESS || format == DXGI_FORMAT_BC6H_TYPELESS ||
-			   format == DXGI_FORMAT_BC7_TYPELESS;
+			   format == DXGI_FORMAT_R32_TYPELESS || format == DXGI_FORMAT_R24G8_TYPELESS ||
+			   format == DXGI_FORMAT_R24_UNORM_X8_TYPELESS || format == DXGI_FORMAT_X24_TYPELESS_G8_UINT ||
+			   format == DXGI_FORMAT_R8G8_TYPELESS || format == DXGI_FORMAT_R16_TYPELESS ||
+			   format == DXGI_FORMAT_R8_TYPELESS || format == DXGI_FORMAT_BC1_TYPELESS ||
+			   format == DXGI_FORMAT_BC2_TYPELESS || format == DXGI_FORMAT_BC3_TYPELESS ||
+			   format == DXGI_FORMAT_BC4_TYPELESS || format == DXGI_FORMAT_BC5_TYPELESS ||
+			   format == DXGI_FORMAT_R8G8B8A8_TYPELESS || format == DXGI_FORMAT_B8G8R8X8_TYPELESS ||
+			   format == DXGI_FORMAT_BC6H_TYPELESS || format == DXGI_FORMAT_BC7_TYPELESS;
 	}
 
-	void GPUTextureDesc::AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess)
+	void GPUTextureDesc::AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format,
+									 const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess)
 	{
 		bIsArray = false;
 		bIsMSAAEnabled = false;
@@ -205,7 +203,11 @@ namespace fe::dx
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	void GPUTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+	void GPUTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
+									 const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/,
+									 const bool bEnableSimultaneousAccess /*= false*/,
+									 const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
+									 uint32_t sampleQuality /*= 0*/)
 	{
 		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = false;
@@ -229,7 +231,12 @@ namespace fe::dx
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+	void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint32_t depth,
+									 const uint16_t mipLevels, const DXGI_FORMAT format,
+									 const bool bEnableShaderReadWrite,
+									 const bool bEnableSimultaneousAccess /*= false*/,
+									 const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
+									 uint32_t sampleQuality /*= 0*/)
 	{
 		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = false;
@@ -253,7 +260,10 @@ namespace fe::dx
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	void GPUTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+	void GPUTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
+										const DXGI_FORMAT format, const bool bEnableSimultaneousAccess /*= false*/,
+										const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
+										uint32_t sampleQuality /*= 0*/)
 	{
 		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = false;
@@ -300,7 +310,9 @@ namespace fe::dx
 		Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 	}
 
-	void GPUTextureDesc::AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/)
+	void GPUTextureDesc::AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels,
+										  const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/,
+										  const bool bEnableSimultaneousAccess /*= false*/)
 	{
 		bIsArray = true;
 		bIsMSAAEnabled = false;
@@ -323,7 +335,12 @@ namespace fe::dx
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	void GPUTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+	void GPUTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength,
+										  const uint16_t mipLevels, const DXGI_FORMAT format,
+										  const bool bEnableShaderReadWrite /*= false*/,
+										  const bool bEnableSimultaneousAccess /*= false*/,
+										  const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
+										  uint32_t sampleQuality /*= 0*/)
 	{
 		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = true;
@@ -347,7 +364,10 @@ namespace fe::dx
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	void GPUTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+	void GPUTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
+								   const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/,
+								   const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
+								   const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
 	{
 		verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
 		bIsArray = true;
@@ -393,7 +413,8 @@ namespace fe::dx
 		return desc;
 	}
 
-	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::ToShaderResourceViewDesc(const GPUTextureSubresource subresource) const
+	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>
+	GPUTextureDesc::ToShaderResourceViewDesc(const GPUTextureSubresource subresource) const
 	{
 		if (!IsTypelessFormat(Format))
 		{
@@ -477,7 +498,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::ToUnorderedAccessViewDesc(const GPUTextureSubresource subresource) const
+	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC>
+	GPUTextureDesc::ToUnorderedAccessViewDesc(const GPUTextureSubresource subresource) const
 	{
 		if (IsUnorderedAccessCompatible() && !IsTypelessFormat(Format))
 		{
@@ -550,7 +572,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::ToRenderTargetViewDesc(const GPUTextureSubresource subresource) const
+	std::optional<D3D12_RENDER_TARGET_VIEW_DESC>
+	GPUTextureDesc::ToRenderTargetViewDesc(const GPUTextureSubresource subresource) const
 	{
 		if (IsRenderTargetCompatible() && !IsTypelessFormat(Format))
 		{
@@ -623,7 +646,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GPUTextureDesc::ToDepthStencilViewDesc(const GPUTextureSubresource subresource) const
+	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>
+	GPUTextureDesc::ToDepthStencilViewDesc(const GPUTextureSubresource subresource) const
 	{
 		if (IsDepthStencilCompatible())
 		{
@@ -702,4 +726,4 @@ namespace fe::dx
 		Flags = desc.Flags;
 		SamplerFeedbackMipRegion = {};
 	}
-} // namespace fe
+} // namespace fe::dx

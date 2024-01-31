@@ -8,12 +8,10 @@ namespace fe::dx
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		standardBarrier = {
-			.SyncBefore = D3D12_BARRIER_SYNC_NONE,
-			.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
-			.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-			.AccessAfter = D3D12_BARRIER_ACCESS_CONSTANT_BUFFER
-		};
+		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
+							.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
+							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
+							.AccessAfter = D3D12_BARRIER_ACCESS_CONSTANT_BUFFER };
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -24,26 +22,24 @@ namespace fe::dx
 		Height = 1;
 		DepthOrArraySize = 1;
 		MipLevels = 1;
-		SampleDesc = {
-			.Count = 1,
-			.Quality = 0
-		};
+		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
 
-	void GPUBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
+	void GPUBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements,
+										   const bool bEnableShaderReadWrtie /*= false*/)
 	{
 		verify(sizeOfElementInBytes > 0);
 		verify(numOfElements > 0);
 		bIsShaderReadWritable = bEnableShaderReadWrtie;
 		bIsCPUAccessible = false;
-		standardBarrier = {
-			.SyncBefore = D3D12_BARRIER_SYNC_NONE,
-			.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
-			.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-			.AccessAfter = bIsShaderReadWritable ? (D3D12_BARRIER_ACCESS_SHADER_RESOURCE | D3D12_BARRIER_ACCESS_UNORDERED_ACCESS) : D3D12_BARRIER_ACCESS_SHADER_RESOURCE
-		};
+		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
+							.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
+							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
+							.AccessAfter = bIsShaderReadWritable ? (D3D12_BARRIER_ACCESS_SHADER_RESOURCE |
+																	D3D12_BARRIER_ACCESS_UNORDERED_ACCESS)
+																 : D3D12_BARRIER_ACCESS_SHADER_RESOURCE };
 
 		structureByteStride = sizeOfElementInBytes;
 		numElements = numOfElements;
@@ -54,10 +50,7 @@ namespace fe::dx
 		Height = 1;
 		DepthOrArraySize = 1;
 		MipLevels = 1;
-		SampleDesc = {
-			.Count = 1,
-			.Quality = 0
-		};
+		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = bIsShaderReadWritable ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 	}
@@ -67,12 +60,10 @@ namespace fe::dx
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		standardBarrier = {
-			.SyncBefore = D3D12_BARRIER_SYNC_NONE,
-			.SyncAfter = D3D12_BARRIER_SYNC_COPY,
-			.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-			.AccessAfter = D3D12_BARRIER_ACCESS_COPY_SOURCE
-		};
+		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
+							.SyncAfter = D3D12_BARRIER_SYNC_COPY,
+							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
+							.AccessAfter = D3D12_BARRIER_ACCESS_COPY_SOURCE };
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -83,10 +74,7 @@ namespace fe::dx
 		Height = 1;
 		DepthOrArraySize = 1;
 		MipLevels = 1;
-		SampleDesc = {
-			.Count = 1,
-			.Quality = 0
-		};
+		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
 	}
@@ -96,12 +84,10 @@ namespace fe::dx
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		standardBarrier = {
-			.SyncBefore = D3D12_BARRIER_SYNC_NONE,
-			.SyncAfter = D3D12_BARRIER_SYNC_RESOLVE,
-			.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-			.AccessAfter = D3D12_BARRIER_ACCESS_RESOLVE_SOURCE
-		};
+		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
+							.SyncAfter = D3D12_BARRIER_SYNC_RESOLVE,
+							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
+							.AccessAfter = D3D12_BARRIER_ACCESS_RESOLVE_SOURCE };
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -112,10 +98,7 @@ namespace fe::dx
 		Height = 1;
 		DepthOrArraySize = 1;
 		MipLevels = 1;
-		SampleDesc = {
-			.Count = 1,
-			.Quality = 0
-		};
+		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
@@ -126,12 +109,10 @@ namespace fe::dx
 		verify(numVertices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
-		standardBarrier = {
-			.SyncBefore = D3D12_BARRIER_SYNC_NONE,
-			.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
-			.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-			.AccessAfter = D3D12_BARRIER_ACCESS_VERTEX_BUFFER
-		};
+		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
+							.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
+							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
+							.AccessAfter = D3D12_BARRIER_ACCESS_VERTEX_BUFFER };
 
 		structureByteStride = sizeOfVertexInBytes;
 		numElements = numVertices;
@@ -142,10 +123,7 @@ namespace fe::dx
 		Height = 1;
 		DepthOrArraySize = 1;
 		MipLevels = 1;
-		SampleDesc = {
-			.Count = 1,
-			.Quality = 0
-		};
+		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
@@ -156,12 +134,10 @@ namespace fe::dx
 		verify(numIndices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
-		standardBarrier = {
-			.SyncBefore = D3D12_BARRIER_SYNC_NONE,
-			.SyncAfter = D3D12_BARRIER_SYNC_INDEX_INPUT,
-			.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-			.AccessAfter = D3D12_BARRIER_ACCESS_INDEX_BUFFER
-		};
+		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
+							.SyncAfter = D3D12_BARRIER_SYNC_INDEX_INPUT,
+							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
+							.AccessAfter = D3D12_BARRIER_ACCESS_INDEX_BUFFER };
 
 		structureByteStride = sizeOfIndexInBytes;
 		numElements = numIndices;
@@ -172,10 +148,7 @@ namespace fe::dx
 		Height = 1;
 		DepthOrArraySize = 1;
 		MipLevels = 1;
-		SampleDesc = {
-			.Count = 1,
-			.Quality = 0
-		};
+		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
@@ -241,7 +214,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> GPUBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
+	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>
+	GPUBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
 	{
 		if (BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_CONSTANT_BUFFER))
 		{
@@ -286,4 +260,4 @@ namespace fe::dx
 		Flags = desc.Flags;
 		SamplerFeedbackMipRegion = {};
 	}
-} // namespace fe
+} // namespace fe::dx

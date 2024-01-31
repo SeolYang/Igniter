@@ -25,10 +25,7 @@ namespace fe
 			friend class fe::HandleManager;
 
 		public:
-			GenericHandleRepository()
-				: HandleRepository()
-			{
-			}
+			GenericHandleRepository() : HandleRepository() {}
 
 			virtual ~GenericHandleRepository()
 			{
@@ -52,17 +49,15 @@ namespace fe
 				constexpr uint64_t MaximumIndexRange = 0x00000000ffffffff;
 				verify(allocation.ChunkIndex < MaximumIndexRange || allocation.ElementIndex < MaximumIndexRange);
 				uint64_t result = 0;
-				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32) | (allocation.ElementIndex & MaximumIndexRange);
+				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32)
+						 | (allocation.ElementIndex & MaximumIndexRange);
 				return result;
 			}
 
 			static PoolAllocation<T> UnpackIndexToAllocation(const uint64_t index)
 			{
 				constexpr uint64_t Mask = 0x00000000ffffffff;
-				return PoolAllocation<T>{
-					.ChunkIndex = (index >> 32) & Mask,
-					.ElementIndex = index & Mask
-				};
+				return PoolAllocation<T>{ .ChunkIndex = (index >> 32) & Mask, .ElementIndex = index & Mask };
 			}
 
 			template <typename... Args>
@@ -204,20 +199,11 @@ namespace fe
 			WeakHandle& operator=(const WeakHandle&) = default;
 			WeakHandle& operator=(WeakHandle&&) noexcept = default;
 
-			operator bool() const
-			{
-				return IsValid();
-			}
+			operator bool() const { return IsValid(); }
 
-			bool operator==(const WeakHandle& rhs) const
-			{
-				return this->index == rhs.index;
-			}
+			bool operator==(const WeakHandle& rhs) const { return this->index == rhs.index; }
 
-			bool operator!=(const WeakHandle& rhs) const
-			{
-				return !(*this == rhs);
-			}
+			bool operator!=(const WeakHandle& rhs) const { return !(*this == rhs); }
 
 			T& operator*()
 			{
@@ -274,10 +260,7 @@ namespace fe
 			{
 				if (this->IsValid())
 				{
-					return WeakHandle<T>{
-						*(this->rHandleManager),
-						this->index
-					};
+					return WeakHandle<T>{ *(this->rHandleManager), this->index };
 				}
 
 				return {};
@@ -287,10 +270,7 @@ namespace fe
 			{
 				if (this->IsValid())
 				{
-					return WeakHandle<const T>{
-						*(this->rHandleManager),
-						this->index
-					};
+					return WeakHandle<const T>{ *(this->rHandleManager), this->index };
 				}
 
 				return WeakHandle<const T>{};
@@ -327,10 +307,7 @@ namespace fe
 				: WeakHandle<T>(std::exchange(other.rHandleManager, nullptr), std::exchange(other.index, InvalidIndex))
 			{
 			}
-			virtual ~OwnedHandle() override
-			{
-				Destroy();
-			}
+			virtual ~OwnedHandle() override { Destroy(); }
 
 			OwnedHandle& operator=(const OwnedHandle&) = delete;
 			OwnedHandle& operator=(OwnedHandle&& other) noexcept
@@ -354,8 +331,7 @@ namespace fe
 			template <typename... Args>
 			static OwnedHandle Create(HandleManager& handleManager, const String name, Args&&... args)
 			{
-				return OwnedHandle(handleManager,
-					handleManager.Create<T>(name, std::forward<Args>(args)...));
+				return OwnedHandle(handleManager, handleManager.Create<T>(name, std::forward<Args>(args)...));
 			}
 
 			template <typename... Args>
@@ -365,10 +341,7 @@ namespace fe
 			}
 
 		private:
-			OwnedHandle(HandleManager& handleManager, const uint64_t index)
-				: WeakHandle<T>(handleManager, index)
-			{
-			}
+			OwnedHandle(HandleManager& handleManager, const uint64_t index) : WeakHandle<T>(handleManager, index) {}
 		};
 
 	private:
@@ -380,7 +353,8 @@ namespace fe
 				WriteLock lock{ repositoryMapMutex };
 				if (!repositoryMap.contains(hashOfType))
 				{
-					repositoryMap[hashOfType] = static_cast<Private::HandleRepository*>(new Private::GenericHandleRepository<T>());
+					repositoryMap[hashOfType]
+						= static_cast<Private::HandleRepository*>(new Private::GenericHandleRepository<T>());
 				}
 			}
 
@@ -403,7 +377,8 @@ namespace fe
 		{
 			ReadOnlyLock lock{ repositoryMapMutex };
 			const auto	 itr = repositoryMap.find(HashOfType<T>);
-			return itr != repositoryMap.end() ? static_cast<Private::GenericHandleRepository<T>*>(itr->second) : nullptr;
+			return itr != repositoryMap.end() ? static_cast<Private::GenericHandleRepository<T>*>(itr->second)
+											  : nullptr;
 		}
 
 		template <typename T>
@@ -435,8 +410,7 @@ namespace fe
 		template <typename T>
 		void Rename(const uint64_t index, const String newName)
 		{
-			if (Private::GenericHandleRepository<T>* repository = GetRepository<T>();
-				repository != nullptr)
+			if (Private::GenericHandleRepository<T>* repository = GetRepository<T>(); repository != nullptr)
 			{
 				repository->Rename(index, newName);
 			}
@@ -451,9 +425,10 @@ namespace fe
 	 * Auto-managed Handle based on Pool allocation.
 	 * It provides a memory-safe access to avoid undefined behavior caused by invalid dynamic memory access.
 	 * Owned Handle follows the 'RAII (Resource Acquisition Is Initialization)' principle for allocation management.
-	 * Additionally, it minimizes deallocation of memory for unmanaged (or out-of-management) allocation during manager destruction.
-	 * (Due to its simple structure, it is able to identify which type of instances have become unmanaged.)
-	 * In general, it is recommended to destroy owned handles upon the destruction of the object that allocated the handle.
+	 * Additionally, it minimizes deallocation of memory for unmanaged (or out-of-management) allocation during manager
+	 * destruction. (Due to its simple structure, it is able to identify which type of instances have become unmanaged.)
+	 * In general, it is recommended to destroy owned handles upon the destruction of the object that allocated the
+	 * handle.
 	 */
 	template <typename T>
 	using OwnedHandle = HandleManager::OwnedHandle<T>;

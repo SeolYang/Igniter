@@ -8,7 +8,8 @@ namespace fe::dx
 		: typeOfCommandList(type)
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
-		verify_succeeded(nativeDevice.CreateCommandList1(0, type, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&cmdList)));
+		verify_succeeded(
+			nativeDevice.CreateCommandList1(0, type, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&cmdList)));
 		verify_succeeded(nativeDevice.CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAllocator)));
 	}
 
@@ -30,4 +31,4 @@ namespace fe::dx
 		verify_succeeded(cmdList->Close());
 	}
 
-} // namespace fe
+} // namespace fe::dx

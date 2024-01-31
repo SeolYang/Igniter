@@ -6,7 +6,8 @@
 namespace fe
 {
 	Renderer::Renderer(const Window& window)
-		: device(std::make_unique<dx::Device>()), swapchain(std::make_unique<dx::Swapchain>(window, *device))
+		: device(std::make_unique<dx::Device>())
+		, swapchain(std::make_unique<dx::Swapchain>(window, *device, MaxFramesInFlight))
 	{
 	}
 

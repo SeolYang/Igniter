@@ -3,11 +3,11 @@
 
 namespace fe::dx
 {
-	Fence::Fence(Device& device, const std::string_view debugName)
+	Fence::Fence(const Device& device, const std::string_view debugName)
 		: eventHandle(CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS))
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
-		const bool	   bIsFenceCreated = SUCCEEDED(nativeDevice.CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+		const bool		bIsFenceCreated = SUCCEEDED(nativeDevice.CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 		FE_CONDITIONAL_LOG(D3D12Fatal, bIsFenceCreated, "Failed to create fence.");
 
 		SetObjectName(fence.Get(), debugName);
@@ -35,13 +35,8 @@ namespace fe::dx
 		const uint64_t completedValue = fence->GetCompletedValue();
 		if (completedValue < counter)
 		{
-			FE_CONDITIONAL_LOG(D3D12Fatal, eventHandle != NULL, "Invalid Event Handle.");
-			const bool bSetEventSucceded = SUCCEEDED(fence->SetEventOnCompletion(counter, eventHandle));
-			FE_CONDITIONAL_LOG(D3D12Fatal, bSetEventSucceded, "Failed to set event on completion of fence.");
-			if (bSetEventSucceded)
-			{
-				::WaitForSingleObject(eventHandle, INFINITE);
-			}
+			check(SUCCEEDED(fence->SetEventOnCompletion(counter, eventHandle)));
+			WaitForSingleObject(eventHandle, INFINITE);
 		}
 	}
-} // namespace fe
+} // namespace fe::dx

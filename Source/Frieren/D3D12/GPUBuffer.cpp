@@ -3,20 +3,18 @@
 
 namespace fe::dx
 {
-	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept
-		: desc(other.desc), allocation(std::move(other.allocation))
-	{
-	}
+	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept : desc(other.desc), allocation(std::move(other.allocation)) {}
 
 	GPUBuffer::GPUBuffer(Device& device, const GPUBufferDesc& desc)
 		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc(), desc))
 	{
 	}
 
-	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> existBuffer) : allocation(GPUResource{existBuffer})
+	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> existBuffer) : allocation(GPUResource{ existBuffer })
 	{
-		verify(existBuffer.Get() != nullptr);
+		check(existBuffer.Get() != nullptr);
 		desc.From(existBuffer->GetDesc());
+		check(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
 	}
 
 	GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept
@@ -25,4 +23,4 @@ namespace fe::dx
 		this->allocation = std::move(other.allocation);
 		return *this;
 	}
-} // namespace fe
+} // namespace fe::dx

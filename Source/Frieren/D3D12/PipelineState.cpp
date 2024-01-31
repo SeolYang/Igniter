@@ -26,7 +26,5 @@ namespace fe::dx
 		pso->SetName(widerName.c_str());
 	}
 
-	PipelineState::~PipelineState()
-	{
-	}
-} // namespace fe
+	PipelineState::~PipelineState() {}
+} // namespace fe::dx

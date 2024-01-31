@@ -2,12 +2,12 @@
 
 namespace fe
 {
-    class World;
-    class GameFlow
-    {
+	class World;
+	class GameFlow
+	{
 	public:
-        GameFlow() = default;
+		GameFlow() = default;
 		virtual ~GameFlow() = default;
 		virtual void Update(World& world) = 0;
-    };
-}
+	};
+} // namespace fe

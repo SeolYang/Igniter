@@ -78,6 +78,7 @@
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
+    <ClCompile Include="..\Source\Frieren\Renderer\FrameResource.cpp" />
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp" />
   </ItemGroup>

@@ -16,4 +16,4 @@ namespace fe::dx
 	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
 
 	void SetObjectName(ID3D12Object* object, std::string_view name);
-} // namespace fe
+} // namespace fe::dx

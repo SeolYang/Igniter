@@ -6,8 +6,12 @@
 
 namespace fe::dx
 {
-	DescriptorHeap::DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors, const std::string_view debugName)
-		: bIsShaderVisible(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER), descriptorHandleIncrementSize(device.GetDescriptorHandleIncrementSize(type)), numInitialDescriptors(numDescriptors), indexPool(CreateIndexQueue(numDescriptors))
+	DescriptorHeap::DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type,
+								   const uint32_t numDescriptors, const std::string_view debugName)
+		: bIsShaderVisible(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
+		, descriptorHandleIncrementSize(device.GetDescriptorHandleIncrementSize(type))
+		, numInitialDescriptors(numDescriptors)
+		, indexPool(CreateIndexQueue(numDescriptors))
 	{
 		verify(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES != type);
 
@@ -24,13 +28,15 @@ namespace fe::dx
 		if (bSucceeded)
 		{
 			cpuDescriptorHandleForHeapStart = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-			gpuDescriptorHandleForHeapStart = bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart() : CD3DX12_GPU_DESCRIPTOR_HANDLE{};
+			gpuDescriptorHandleForHeapStart = bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart()
+															   : CD3DX12_GPU_DESCRIPTOR_HANDLE{};
 		}
 	}
 
 	DescriptorHeap::~DescriptorHeap()
 	{
-		FE_CONDITIONAL_LOG(D3D12Warn, numInitialDescriptors == indexPool.size(), "Some Descriptorsd doesn't released yet. {}/{}", indexPool.size(), numInitialDescriptors);
+		FE_CONDITIONAL_LOG(D3D12Warn, numInitialDescriptors == indexPool.size(),
+						   "Some Descriptorsd doesn't released yet. {}/{}", indexPool.size(), numInitialDescriptors);
 	}
 
 	uint32_t DescriptorHeap::AllocateIndex()
@@ -62,21 +68,31 @@ namespace fe::dx
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const uint32_t index)
 	{
-		return CD3DX12_CPU_DESCRIPTOR_HANDLE{ cpuDescriptorHandleForHeapStart, static_cast<INT>(index), descriptorHandleIncrementSize };
+		return CD3DX12_CPU_DESCRIPTOR_HANDLE{ cpuDescriptorHandleForHeapStart, static_cast<INT>(index),
+											  descriptorHandleIncrementSize };
 	}
 
 	D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedGPUDescriptorHandle(const uint32_t index)
 	{
-		return bIsShaderVisible ? CD3DX12_GPU_DESCRIPTOR_HANDLE{ gpuDescriptorHandleForHeapStart, static_cast<INT>(index), descriptorHandleIncrementSize } : gpuDescriptorHandleForHeapStart;
+		return bIsShaderVisible
+				   ? CD3DX12_GPU_DESCRIPTOR_HANDLE{ gpuDescriptorHandleForHeapStart, static_cast<INT>(index),
+													descriptorHandleIncrementSize }
+				   : gpuDescriptorHandleForHeapStart;
 	}
 
 	Descriptor::Descriptor(DescriptorHeap& descriptorHeap)
-		: ownedDescriptorHeap(&descriptorHeap), index(descriptorHeap.AllocateIndex()), cpuHandle(descriptorHeap.GetIndexedCPUDescriptorHandle(index)), gpuHandle(descriptorHeap.GetIndexedGPUDescriptorHandle(index))
+		: ownedDescriptorHeap(&descriptorHeap)
+		, index(descriptorHeap.AllocateIndex())
+		, cpuHandle(descriptorHeap.GetIndexedCPUDescriptorHandle(index))
+		, gpuHandle(descriptorHeap.GetIndexedGPUDescriptorHandle(index))
 	{
 	}
 
 	Descriptor::Descriptor(Descriptor&& rhs) noexcept
-		: ownedDescriptorHeap(std::exchange(rhs.ownedDescriptorHeap, nullptr)), index(std::exchange(rhs.index, Descriptor::InvalidIndex)), cpuHandle(std::exchange(rhs.cpuHandle, {})), gpuHandle(std::exchange(rhs.gpuHandle, {}))
+		: ownedDescriptorHeap(std::exchange(rhs.ownedDescriptorHeap, nullptr))
+		, index(std::exchange(rhs.index, Descriptor::InvalidIndex))
+		, cpuHandle(std::exchange(rhs.cpuHandle, {}))
+		, gpuHandle(std::exchange(rhs.gpuHandle, {}))
 	{
 	}
 
@@ -97,4 +113,4 @@ namespace fe::dx
 		return *this;
 	}
 
-} // namespace fe
+} // namespace fe::dx

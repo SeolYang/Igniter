@@ -4,8 +4,7 @@
 namespace fe::dx
 {
 	// #todo 쉐이더 컴파일 후 파일로 저장
-	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)
-		: type(desc.Type)
+	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc) : type(desc.Type)
 	{
 		std::vector<const wchar_t*> arguments;
 		arguments.push_back(TEXT("-E"));
@@ -107,18 +106,13 @@ namespace fe::dx
 		ComPtr<IDxcCompiler3> compiler;
 		verify_succeeded(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf())));
 
-		const DxcBuffer buffer{
-			.Ptr = sourceBlob->GetBufferPointer(),
-			.Size = sourceBlob->GetBufferSize(),
-			.Encoding = codePage
-		};
+		const DxcBuffer buffer{ .Ptr = sourceBlob->GetBufferPointer(),
+								.Size = sourceBlob->GetBufferSize(),
+								.Encoding = codePage };
 
 		ComPtr<IDxcResult> result;
-		verify_succeeded(compiler->Compile(
-			&buffer,
-			arguments.data(), arguments.size(),
-			defaultIncludeHandler.Get(),
-			IID_PPV_ARGS(result.GetAddressOf())));
+		verify_succeeded(compiler->Compile(&buffer, arguments.data(), arguments.size(), defaultIncludeHandler.Get(),
+										   IID_PPV_ARGS(result.GetAddressOf())));
 
 		// #todo 별도의 error handling 구현 https://youtu.be/tyyKeTsdtmo?si=gERRzeRVmqxAcPT7&t=1158
 		// ComPtr<IDxcBlobUtf8> errors;

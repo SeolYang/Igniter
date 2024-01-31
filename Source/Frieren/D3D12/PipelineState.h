@@ -25,8 +25,8 @@ namespace fe::dx
 		bool IsCompute() const { return !bIsGraphicsPSO; }
 
 	private:
-		const bool						 bIsGraphicsPSO;
-		const String					 name;
+		const bool					bIsGraphicsPSO;
+		const String				name;
 		ComPtr<ID3D12PipelineState> pso;
 	};
-} // namespace fe
+} // namespace fe::dx

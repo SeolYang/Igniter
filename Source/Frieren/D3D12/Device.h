@@ -69,12 +69,20 @@ namespace fe::dx
 		std::optional<Descriptor> CreateUnorderedAccessView(const GPUBuffer& gpuBuffer);
 
 		// #todo Descriptor -> TextureView = Descriptor + Reference to texture + subresource + view format?
-		std::optional<Descriptor> CreateShaderResourceView(const GPUTexture& texture, const GPUTextureSubresource subresource);
-		std::optional<Descriptor> CreateUnorderedAccessView(const GPUTexture& texture, const GPUTextureSubresource subresource);
-		std::optional<Descriptor> CreateRenderTargetView(const GPUTexture& texture, const GPUTextureSubresource subresource);
-		std::optional<Descriptor> CreateDepthStencilView(const GPUTexture& texture, const GPUTextureSubresource subresource);
+		std::optional<Descriptor> CreateShaderResourceView(const GPUTexture&		   texture,
+														   const GPUTextureSubresource subresource);
 
-		GPUResource AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc, const D3D12_RESOURCE_DESC1& resourceDesc);
+		std::optional<Descriptor> CreateUnorderedAccessView(const GPUTexture&			texture,
+															const GPUTextureSubresource subresource);
+
+		std::optional<Descriptor> CreateRenderTargetView(const GPUTexture&			 texture,
+														 const GPUTextureSubresource subresource);
+
+		std::optional<Descriptor> CreateDepthStencilView(const GPUTexture&			 texture,
+														 const GPUTextureSubresource subresource);
+
+		GPUResource AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc,
+									 const D3D12_RESOURCE_DESC1&	 resourceDesc);
 
 	private:
 		bool AcquireAdapterFromFactory();
@@ -94,7 +102,7 @@ namespace fe::dx
 		static constexpr uint32_t NumDsvDescriptors = NumRtvDescriptors;
 
 	private:
-		ComPtr<IDXGIAdapter>	adapter;
+		ComPtr<IDXGIAdapter>   adapter;
 		ComPtr<ID3D12Device10> device;
 
 		ComPtr<ID3D12CommandQueue> directQueue;
@@ -113,4 +121,4 @@ namespace fe::dx
 		std::unique_ptr<DescriptorHeap> rtvDescriptorHeap;
 		std::unique_ptr<DescriptorHeap> dsvDescriptorHeap;
 	};
-} // namespace fe
+} // namespace fe::dx
