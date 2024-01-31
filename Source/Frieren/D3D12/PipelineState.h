@@ -14,12 +14,12 @@ namespace fe::dx
 	class PipelineState
 	{
 	public:
-		PipelineState(const Device& device, const GraphicsPipelineStateDesc& desc);
-		PipelineState(const Device& device, const ComputePipelineStateDesc& desc);
+		PipelineState(Device& device, const GraphicsPipelineStateDesc& desc);
+		PipelineState(Device& device, const ComputePipelineStateDesc& desc);
 		~PipelineState();
 
 		String				 GetName() const { return name; }
-		ID3D12PipelineState& GetNative() const { return *pso.Get(); }
+		ID3D12PipelineState& GetNative() { return *pso.Get(); }
 
 		bool IsGraphics() const { return bIsGraphicsPSO; }
 		bool IsCompute() const { return !bIsGraphicsPSO; }

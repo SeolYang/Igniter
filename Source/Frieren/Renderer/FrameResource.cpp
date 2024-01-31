@@ -4,7 +4,7 @@
 
 namespace fe
 {
-	FrameResource::FrameResource(const dx::Device& device, const size_t numInflightFrames)
+	FrameResource::FrameResource(dx::Device& device, const size_t numInflightFrames)
 		: numInflightFrames(numInflightFrames), fence(std::make_unique<dx::Fence>(device, "FrameFence"))
 	{
 	}

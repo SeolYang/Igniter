@@ -6,7 +6,7 @@ namespace fe::dx
 	class Fence
 	{
 	public:
-		Fence(const Device& device, std::string_view debugName);
+		Fence(Device& device, std::string_view debugName);
 		~Fence();
 
 		Fence(const Fence&) = delete;

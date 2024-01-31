@@ -43,7 +43,7 @@ namespace fe::dx
 		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index);
 
 	public:
-		DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors,
+		DescriptorHeap(Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors,
 					   const std::string_view debugName);
 		~DescriptorHeap();
 

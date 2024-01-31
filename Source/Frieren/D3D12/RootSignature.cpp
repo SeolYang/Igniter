@@ -3,7 +3,7 @@
 
 namespace fe::dx
 {
-	RootSignature::RootSignature(const Device& device)
+	RootSignature::RootSignature(Device& device)
 	{
 		// WITH THOSE FLAGS, IT MUST BIND DESCRIPTOR HEAP FIRST BEFORE BINDING ROOT SIGNATURE
 		const D3D12_ROOT_SIGNATURE_DESC desc{ .NumParameters = 0,

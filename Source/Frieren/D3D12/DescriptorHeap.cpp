@@ -6,7 +6,7 @@
 
 namespace fe::dx
 {
-	DescriptorHeap::DescriptorHeap(const Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type,
+	DescriptorHeap::DescriptorHeap(Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type,
 								   const uint32_t numDescriptors, const std::string_view debugName)
 		: bIsShaderVisible(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
 		, descriptorHandleIncrementSize(device.GetDescriptorHandleIncrementSize(type))

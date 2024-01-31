@@ -9,10 +9,10 @@ namespace fe::dx
 	class RootSignature
 	{
 	public:
-		RootSignature(const Device& device);
+		RootSignature(Device& device);
 		~RootSignature();
 
-		ID3D12RootSignature& GetNative() const { return *rootSignature.Get(); }
+		ID3D12RootSignature& GetNative() { return *rootSignature.Get(); }
 
 	private:
 		ComPtr<ID3D12RootSignature> rootSignature;

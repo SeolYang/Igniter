@@ -4,7 +4,7 @@
 
 namespace fe::dx
 {
-	PipelineState::PipelineState(const Device& device, const GraphicsPipelineStateDesc& desc)
+	PipelineState::PipelineState(Device& device, const GraphicsPipelineStateDesc& desc)
 		: bIsGraphicsPSO(true), name(desc.Name)
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
@@ -15,7 +15,7 @@ namespace fe::dx
 		pso->SetName(widerName.c_str());
 	}
 
-	PipelineState::PipelineState(const Device& device, const ComputePipelineStateDesc& desc)
+	PipelineState::PipelineState(Device& device, const ComputePipelineStateDesc& desc)
 		: bIsGraphicsPSO(false), name(desc.Name)
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();

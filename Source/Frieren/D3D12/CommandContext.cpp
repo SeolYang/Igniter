@@ -4,7 +4,7 @@
 
 namespace fe::dx
 {
-	CommandContext::CommandContext(const Device& device, const String debugName, const D3D12_COMMAND_LIST_TYPE type)
+	CommandContext::CommandContext(Device& device, const String debugName, const D3D12_COMMAND_LIST_TYPE type)
 		: typeOfCommandList(type)
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();
@@ -13,7 +13,7 @@ namespace fe::dx
 		verify_succeeded(nativeDevice.CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAllocator)));
 	}
 
-	void CommandContext::Begin(const PipelineState* initState)
+	void CommandContext::Begin(PipelineState* initState)
 	{
 		verify(cmdAllocator.Get() != nullptr);
 		verify(cmdList.Get() != nullptr);

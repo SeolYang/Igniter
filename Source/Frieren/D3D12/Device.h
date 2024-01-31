@@ -24,16 +24,16 @@ namespace fe::dx
 		Device();
 		~Device();
 
-		Device(const Device&) = delete;
+		Device(Device&) = delete;
 		Device(Device&&) noexcept = delete;
 
-		Device& operator=(const Device&) = delete;
+		Device& operator=(Device&) = delete;
 		Device& operator=(Device&&) noexcept = delete;
 
-		ID3D12CommandQueue& GetDirectQueue() const { return *directQueue.Get(); }
-		ID3D12CommandQueue& GetAsyncComputeQueue() const { return *asyncComputeQueue.Get(); }
-		ID3D12CommandQueue& GetCopyQueue() const { return *copyQueue.Get(); }
-		ID3D12Device10&		GetNative() const { return *device.Get(); }
+		ID3D12CommandQueue& GetDirectQueue() { return *directQueue.Get(); }
+		ID3D12CommandQueue& GetAsyncComputeQueue() { return *asyncComputeQueue.Get(); }
+		ID3D12CommandQueue& GetCopyQueue() { return *copyQueue.Get(); }
+		ID3D12Device10&		GetNative() { return *device.Get(); }
 
 		uint32_t GetCbvSrvUavDescriptorHandleIncrementSize() const { return cbvSrvUavDescriptorHandleIncrementSize; }
 		uint32_t GetSamplerDescriptorHandleIncrementSize() const { return samplerDescritorHandleIncrementSize; }

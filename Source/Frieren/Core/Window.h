@@ -17,7 +17,7 @@ namespace fe
 	class Window final
 	{
 	public:
-		Window(WindowDescription description);
+		Window(const WindowDescription& description);
 		~Window();
 		Window(const Window&) = delete;
 		Window(Window&&) noexcept = delete;
@@ -25,7 +25,7 @@ namespace fe
 		Window& operator=(const Window&) = delete;
 		Window& operator=(Window&&) noexcept = delete;
 
-		WindowDescription GetDescription() const { return windowDesc; }
+		const WindowDescription& GetDescription() const { return windowDesc; }
 
 		HWND GetNative() const { return windowHandle; }
 

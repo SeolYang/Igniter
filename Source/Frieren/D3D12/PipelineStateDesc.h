@@ -19,11 +19,11 @@ namespace fe::dx
 			this->InputLayout.NumElements = 0;
 		}
 
-		void SetVertexShader(const ShaderBlob& vertexShader);
-		void SetPixelShader(const ShaderBlob& pixelShader);
-		void SetDomainShader(const ShaderBlob& domainShader);
-		void SetHullShader(const ShaderBlob& hullShader);
-		void SetGeometryShader(const ShaderBlob& geometryShader);
+		void SetVertexShader(ShaderBlob& vertexShader);
+		void SetPixelShader(ShaderBlob& pixelShader);
+		void SetDomainShader(ShaderBlob& domainShader);
+		void SetHullShader(ShaderBlob& hullShader);
+		void SetGeometryShader(ShaderBlob& geometryShader);
 
 	public:
 		String Name;
@@ -38,8 +38,7 @@ namespace fe::dx
 			this->pRootSignature = nullptr;
 		}
 
-		void SetComputeShader(const ShaderBlob& computeShader);
-
+		void SetComputeShader(ShaderBlob& computeShader);
 	public:
 		String Name;
 	};

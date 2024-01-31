@@ -28,8 +28,8 @@ namespace fe
 		void Render();
 
 	private:
-		void BeginFrame(FrameResource& frameResource);
-		void EndFrame(FrameResource& frameResource);
+		void BeginFrame();
+		void EndFrame();
 
 	private:
 		std::unique_ptr<dx::Device>	   device;

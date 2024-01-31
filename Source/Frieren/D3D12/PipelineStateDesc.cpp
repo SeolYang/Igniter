@@ -3,7 +3,7 @@
 
 namespace fe::dx
 {
-	void GraphicsPipelineStateDesc::SetVertexShader(const ShaderBlob& vertexShader)
+	void GraphicsPipelineStateDesc::SetVertexShader(ShaderBlob& vertexShader)
 	{
 		verify(vertexShader.GetType() == EShaderType::Vertex);
 
@@ -13,7 +13,7 @@ namespace fe::dx
 		this->VS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
 	}
 
-	void GraphicsPipelineStateDesc::SetPixelShader(const ShaderBlob& pixelShader)
+	void GraphicsPipelineStateDesc::SetPixelShader(ShaderBlob& pixelShader)
 	{
 		verify(pixelShader.GetType() == EShaderType::Pixel);
 
@@ -23,7 +23,7 @@ namespace fe::dx
 		this->PS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
 	}
 
-	void GraphicsPipelineStateDesc::SetDomainShader(const ShaderBlob& domainShader)
+	void GraphicsPipelineStateDesc::SetDomainShader(ShaderBlob& domainShader)
 	{
 		verify(domainShader.GetType() == EShaderType::Domain);
 
@@ -33,7 +33,7 @@ namespace fe::dx
 		this->DS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
 	}
 
-	void GraphicsPipelineStateDesc::SetHullShader(const ShaderBlob& hullShader)
+	void GraphicsPipelineStateDesc::SetHullShader(ShaderBlob& hullShader)
 	{
 		verify(hullShader.GetType() == EShaderType::Hull);
 
@@ -43,7 +43,7 @@ namespace fe::dx
 		this->HS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
 	}
 
-	void GraphicsPipelineStateDesc::SetGeometryShader(const ShaderBlob& geometryShader)
+	void GraphicsPipelineStateDesc::SetGeometryShader(ShaderBlob& geometryShader)
 	{
 		verify(geometryShader.GetType() == EShaderType::Geometry);
 
@@ -53,7 +53,7 @@ namespace fe::dx
 		this->GS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
 	}
 
-	void ComputePipelineStateDesc::SetComputeShader(const ShaderBlob& computeShader)
+	void ComputePipelineStateDesc::SetComputeShader(ShaderBlob& computeShader)
 	{
 		verify(computeShader.GetType() == EShaderType::Compute);
 

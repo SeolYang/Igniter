@@ -12,7 +12,7 @@ namespace fe
 	class FrameResource
 	{
 	public:
-		FrameResource(const dx::Device& device, const size_t numInflightFrames);
+		FrameResource(dx::Device& device, const size_t numInflightFrames);
 		~FrameResource();
 
 		void BeginFrame(const size_t currentGlobalFrameIdx);

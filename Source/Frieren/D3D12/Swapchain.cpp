@@ -20,7 +20,7 @@ namespace fe::dx
 		backBuffers.clear();
 	}
 
-	void Swapchain::InitSwapchain(const Window& window, const Device& device)
+	void Swapchain::InitSwapchain(const Window& window, Device& device)
 	{
 		ComPtr<IDXGIFactory5> factory;
 

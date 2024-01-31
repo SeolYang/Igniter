@@ -18,7 +18,9 @@ namespace fe
 
 	void Renderer::Render()
 	{
+		//BeginFrame();
 		swapchain->Present();
+		//EndFrame();
 	}
 
 } // namespace fe

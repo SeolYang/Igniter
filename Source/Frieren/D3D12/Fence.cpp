@@ -3,7 +3,7 @@
 
 namespace fe::dx
 {
-	Fence::Fence(const Device& device, const std::string_view debugName)
+	Fence::Fence(Device& device, const std::string_view debugName)
 		: eventHandle(CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS))
 	{
 		ID3D12Device10& nativeDevice = device.GetNative();

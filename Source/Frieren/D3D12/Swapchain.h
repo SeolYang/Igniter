@@ -1,5 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
+#include <Core/Assert.h>
 
 namespace fe
 {
@@ -23,12 +24,12 @@ namespace fe::dx
 		const GPUTexture& GetBackBuffer() const;
 		const Descriptor& GetRenderTargetView() const;
 
-		// #todo Resize Swapchain(back buffers)!
-
+	// #todo Impl Resize Swapchain!
+		void Resize(const uint32_t width, const uint32_t height) { unimplemented(); }
 		void Present();
 
 	private:
-		void InitSwapchain(const Window& window, const Device& device);
+		void InitSwapchain(const Window& window, Device& device);
 		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
 		void InitRenderTargetViews(Device& device);
 
