@@ -13,16 +13,16 @@ namespace fe::dx
 		~CommandContext() = default;
 
 		// Equivalent to Reset
-		void Begin(PipelineState* initState = nullptr);
+		void Begin(PipelineState* const initState = nullptr);
 		// Equivalent to Close
 		void End();
 
-		D3D12_COMMAND_LIST_TYPE		GetType() const { return typeOfCommandList; }
-		ID3D12GraphicsCommandList1& GetNative() { return *cmdList.Get(); }
+		D3D12_COMMAND_LIST_TYPE GetType() const { return typeOfCommandList; }
+		auto&					GetNative() { return *cmdList.Get(); }
 
 	private:
 		ComPtr<ID3D12CommandAllocator>	   cmdAllocator;
-		ComPtr<ID3D12GraphicsCommandList1> cmdList;
+		ComPtr<ID3D12GraphicsCommandList7> cmdList;
 		const D3D12_COMMAND_LIST_TYPE	   typeOfCommandList;
 	};
 } // namespace fe::dx

@@ -30,10 +30,10 @@ namespace fe::dx
 		Device& operator=(Device&) = delete;
 		Device& operator=(Device&&) noexcept = delete;
 
-		ID3D12CommandQueue& GetDirectQueue() { return *directQueue.Get(); }
-		ID3D12CommandQueue& GetAsyncComputeQueue() { return *asyncComputeQueue.Get(); }
-		ID3D12CommandQueue& GetCopyQueue() { return *copyQueue.Get(); }
-		ID3D12Device10&		GetNative() { return *device.Get(); }
+		auto& GetDirectQueue() { return *directQueue.Get(); }
+		auto& GetAsyncComputeQueue() { return *asyncComputeQueue.Get(); }
+		auto& GetCopyQueue() { return *copyQueue.Get(); }
+		[[nodiscard]] auto& GetNative() { return *device.Get(); }
 
 		uint32_t GetCbvSrvUavDescriptorHandleIncrementSize() const { return cbvSrvUavDescriptorHandleIncrementSize; }
 		uint32_t GetSamplerDescriptorHandleIncrementSize() const { return samplerDescritorHandleIncrementSize; }

@@ -15,6 +15,9 @@ namespace fe::dx
 		Fence& operator=(const Fence&) = delete;
 		Fence& operator=(Fence&&) noexcept = delete;
 
+		uint64_t			GetCounter() const { return counter; }
+		[[nodiscard]] auto& GetNative() { return *fence.Get(); }
+
 		void Next() { ++counter; }
 		// #todo Moved to device
 		void Signal(ID3D12CommandQueue& cmdQueue);

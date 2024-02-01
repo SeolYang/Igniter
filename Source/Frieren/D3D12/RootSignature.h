@@ -12,7 +12,7 @@ namespace fe::dx
 		RootSignature(Device& device);
 		~RootSignature();
 
-		ID3D12RootSignature& GetNative() { return *rootSignature.Get(); }
+		[[nodiscard]] auto& GetNative() { return *rootSignature.Get(); }
 
 	private:
 		ComPtr<ID3D12RootSignature> rootSignature;

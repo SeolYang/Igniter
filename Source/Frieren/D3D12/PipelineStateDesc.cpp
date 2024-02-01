@@ -7,7 +7,7 @@ namespace fe::dx
 	{
 		verify(vertexShader.GetType() == EShaderType::Vertex);
 
-		IDxcBlob& nativeBlob = vertexShader.GetNative();
+		auto& nativeBlob = vertexShader.GetNative();
 		verify(nativeBlob.GetBufferPointer() != nullptr);
 		verify(nativeBlob.GetBufferSize() > 0);
 		this->VS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
@@ -17,7 +17,7 @@ namespace fe::dx
 	{
 		verify(pixelShader.GetType() == EShaderType::Pixel);
 
-		IDxcBlob& nativeBlob = pixelShader.GetNative();
+		auto& nativeBlob = pixelShader.GetNative();
 		verify(nativeBlob.GetBufferPointer() != nullptr);
 		verify(nativeBlob.GetBufferSize() > 0);
 		this->PS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
@@ -27,7 +27,7 @@ namespace fe::dx
 	{
 		verify(domainShader.GetType() == EShaderType::Domain);
 
-		IDxcBlob& nativeBlob = domainShader.GetNative();
+		auto& nativeBlob = domainShader.GetNative();
 		verify(nativeBlob.GetBufferPointer() != nullptr);
 		verify(nativeBlob.GetBufferSize() > 0);
 		this->DS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
@@ -37,7 +37,7 @@ namespace fe::dx
 	{
 		verify(hullShader.GetType() == EShaderType::Hull);
 
-		IDxcBlob& nativeBlob = hullShader.GetNative();
+		auto& nativeBlob = hullShader.GetNative();
 		verify(nativeBlob.GetBufferPointer() != nullptr);
 		verify(nativeBlob.GetBufferSize() > 0);
 		this->HS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
@@ -47,7 +47,7 @@ namespace fe::dx
 	{
 		verify(geometryShader.GetType() == EShaderType::Geometry);
 
-		IDxcBlob& nativeBlob = geometryShader.GetNative();
+		auto& nativeBlob = geometryShader.GetNative();
 		verify(nativeBlob.GetBufferPointer() != nullptr);
 		verify(nativeBlob.GetBufferSize() > 0);
 		this->GS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
@@ -57,7 +57,7 @@ namespace fe::dx
 	{
 		verify(computeShader.GetType() == EShaderType::Compute);
 
-		IDxcBlob& nativeBlob = computeShader.GetNative();
+		auto& nativeBlob = computeShader.GetNative();
 		verify(nativeBlob.GetBufferPointer() != nullptr);
 		verify(nativeBlob.GetBufferSize() > 0);
 		this->CS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());

@@ -24,8 +24,11 @@ namespace fe::dx
 		const GPUTexture& GetBackBuffer() const;
 		const Descriptor& GetRenderTargetView() const;
 
-	// #todo Impl Resize Swapchain!
+		// #todo Impl Resize Swapchain!
 		void Resize(const uint32_t width, const uint32_t height) { unimplemented(); }
+		// #todo Impl Change Color Space
+		void SetColorSpace(DXGI_COLOR_SPACE_TYPE newColorSpace) { unimplemented(); }
+
 		void Present();
 
 	private:

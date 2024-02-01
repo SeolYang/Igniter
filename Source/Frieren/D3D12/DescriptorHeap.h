@@ -1,5 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
+#include <Core/Misc.h>
 #include <Core/Mutex.h>
 #include <queue>
 
@@ -23,7 +24,7 @@ namespace fe::dx
 		explicit Descriptor(DescriptorHeap& descriptorHeap);
 
 	public:
-		static constexpr uint32_t InvalidIndex = 0xffffffff;
+		static constexpr uint32_t InvalidIndex = InvalidIndexU32;
 
 	private:
 		friend DescriptorHeap;

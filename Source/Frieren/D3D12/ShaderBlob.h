@@ -46,7 +46,7 @@ namespace fe::dx
 		~ShaderBlob() = default;
 
 		EShaderType GetType() const { return type; }
-		IDxcBlob&	GetNative() { return *shader.Get(); }
+		auto&		GetNative() { return *shader.Get(); }
 
 	private:
 		const EShaderType type;

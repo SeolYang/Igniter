@@ -17,7 +17,7 @@ namespace fe::dx
 
 		void SafeRelease();
 
-		ID3D12Resource&		 GetResource() const { return *resource.Get(); }
+		auto&				 GetResource() const { return *resource.Get(); }
 		D3D12MA::Allocation& GetAllocation() const { return *allocation.Get(); }
 
 	private:

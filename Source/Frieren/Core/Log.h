@@ -77,7 +77,7 @@ namespace fe
 
 	private:
 		template <typename C>
-		spdlog::logger* QueryCategory() const
+		spdlog::logger* QueryCategory()
 		{
 			ReadOnlyLock lock{ mutex };
 			return categoryMap.contains(HashOfType<C>) ? categoryMap.find(HashOfType<C>)->second : nullptr;

@@ -18,8 +18,8 @@ namespace fe::dx
 		PipelineState(Device& device, const ComputePipelineStateDesc& desc);
 		~PipelineState();
 
-		String				 GetName() const { return name; }
-		ID3D12PipelineState& GetNative() { return *pso.Get(); }
+		String GetName() const { return name; }
+		auto&  GetNative() { return *pso.Get(); }
 
 		bool IsGraphics() const { return bIsGraphicsPSO; }
 		bool IsCompute() const { return !bIsGraphicsPSO; }
