@@ -25,9 +25,9 @@ namespace fe::dx
 		const Descriptor& GetRenderTargetView() const;
 
 		// #todo Impl Resize Swapchain!
-		void Resize(const uint32_t width, const uint32_t height) { unimplemented(); }
+		// void Resize(const uint32_t width, const uint32_t height);
 		// #todo Impl Change Color Space
-		void SetColorSpace(DXGI_COLOR_SPACE_TYPE newColorSpace) { unimplemented(); }
+		// void SetColorSpace(DXGI_COLOR_SPACE_TYPE newColorSpace);
 
 		void Present();
 

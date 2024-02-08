@@ -5,6 +5,42 @@
 
 namespace fe
 {
+	EInput WParamToInput(const WPARAM wParam)
+	{
+		switch (wParam)
+		{
+			/** Characters */
+			case 'W':
+			case 'w':
+				return EInput::W;
+
+			case 'S':
+			case 's':
+				return EInput::S;
+
+			case 'A':
+			case 'a':
+				return EInput::A;
+
+			case 'D':
+			case 'd':
+				return EInput::D;
+
+			/** Virtual Keys */
+			case VK_SPACE:
+				return EInput::Space;
+
+			case VK_LBUTTON:
+				return EInput::MouseLB;
+
+			case VK_RBUTTON:
+				return EInput::MouseRB;
+
+			default:
+				return EInput::None;
+		}
+	}
+
 	void InputManager::BindAction(const String nameOfAction, const EInput input)
 	{
 		check(nameOfAction);
@@ -121,19 +157,19 @@ namespace fe
 
 	void InputManager::HandleKeyDown(const WPARAM wParam, const LPARAM /** unused */)
 	{
-		const EInput input = Private::WParamToInput(wParam);
+		const EInput input = WParamToInput(wParam);
 		HandlePressAction(input);
 		HandleAxis(input, 1.f);
 	}
 
 	void InputManager::HandleKeyUp(const WPARAM wParam, const LPARAM /* unused */)
 	{
-		const EInput input = Private::WParamToInput(wParam);
+		const EInput input = WParamToInput(wParam);
 		HandleReleaseAction(input);
 		HandleAxis(input, 0.f);
 	}
 
-	void InputManager::HandleMouseMove(const WPARAM wParam, const LPARAM lParam)
+	void InputManager::HandleMouseMove(const WPARAM /*wParam*/, const LPARAM lParam)
 	{
 		constexpr float Infinity = std::numeric_limits<float>::infinity();
 

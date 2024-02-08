@@ -4,7 +4,7 @@
 
 namespace fe::dx
 {
-	CommandContext::CommandContext(Device& device, const String debugName, const D3D12_COMMAND_LIST_TYPE type)
+	CommandContext::CommandContext(Device& device, const String /*debugName*/, const D3D12_COMMAND_LIST_TYPE type)
 		: typeOfCommandList(type)
 	{
 		auto& nativeDevice = device.GetNative();

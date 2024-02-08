@@ -1,8 +1,12 @@
 #pragma once
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+#pragma warning(push)
+#pragma warning(disable:26800)
+#pragma warning(disable:26498)
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#pragma warning(pop)
 #include <format>
 #include <Core/Container.h>
 #include <Core/String.h>

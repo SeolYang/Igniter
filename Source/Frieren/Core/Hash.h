@@ -151,7 +151,7 @@ namespace fe
 	{
 		uint64_t result = 0;
 
-		for (const auto& c : __FUNCSIG__)
+		for (const auto& c : targetString)
 		{
 			(result ^= c) <<= 1;
 		}

@@ -13,7 +13,7 @@
 	#define verify(EXPRESSION) \
 		do                     \
 		{                      \
-			EXPRESSION;        \
+			(EXPRESSION);        \
 		}                      \
 		while (false)
 

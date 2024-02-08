@@ -16,14 +16,7 @@ namespace fe
 
 	void String::SetString(const std::string_view stringView)
 	{
-		const bool bIsNotEmpty = !stringView.empty();
-		verify(bIsNotEmpty, "Empty Name");
-
-		const bool bIsEncodedAsUTF8 = IsValidUTF8(stringView);
-		verify(bIsEncodedAsUTF8, "Invalid UTF-8 String: {}", stringView);
-
-		const bool bIsValidString = bIsNotEmpty && bIsEncodedAsUTF8;
-		if (bIsValidString)
+		if (!stringView.empty() && IsValidUTF8(stringView))
 		{
 			hashOfString = HashStringCRC64(stringView);
 

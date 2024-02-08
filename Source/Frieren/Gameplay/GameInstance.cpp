@@ -19,13 +19,13 @@ namespace fe
 		}
 	}
 
-	void GameInstance::SetWorld(std::unique_ptr<World> world)
+	void GameInstance::SetWorld(std::unique_ptr<World> newWorld)
 	{
-		this->world = std::move(world);
+		world = std::move(newWorld);
 	}
 
-	void GameInstance::SetGameFlow(std::unique_ptr<GameFlow> gameFlow)
+	void GameInstance::SetGameFlow(std::unique_ptr<GameFlow> newGameFlow)
 	{
-		this->gameFlow = std::move(gameFlow);
+		gameFlow = std::move(newGameFlow);
 	}
 } // namespace fe

@@ -20,14 +20,12 @@ namespace fe::dx
 
 	void Fence::Signal(ID3D12CommandQueue& cmdQueue)
 	{
-		const bool bSignalSucceeded = SUCCEEDED(cmdQueue.Signal(fence.Get(), counter));
-		FE_LOG(D3D12Warn, "Failed to signal fence to {}", counter);
+		verify_succeeded(cmdQueue.Signal(fence.Get(), counter));
 	}
 
 	void Fence::GpuWaitForFence(ID3D12CommandQueue& cmdQueue)
 	{
-		const bool bIsValidWait = SUCCEEDED(cmdQueue.Wait(fence.Get(), counter));
-		FE_LOG(D3D12Warn, "This is not valid wait request.");
+		verify_succeeded(cmdQueue.Wait(fence.Get(), counter));
 	}
 
 	void Fence::CpuWaitForFence()
@@ -35,7 +33,7 @@ namespace fe::dx
 		const uint64_t completedValue = fence->GetCompletedValue();
 		if (completedValue < counter)
 		{
-			check(SUCCEEDED(fence->SetEventOnCompletion(counter, eventHandle)));
+			verify_succeeded(fence->SetEventOnCompletion(counter, eventHandle));
 			WaitForSingleObject(eventHandle, INFINITE);
 		}
 	}

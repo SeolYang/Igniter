@@ -17,14 +17,11 @@ namespace fe::dx
 	public:
 		union
 		{
-			struct
-			{
-				/**
-				 * Available for
-				 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
-				 */
-				uint16_t MostDetailedMip;
-			};
+			/**
+			 * Available for
+			 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
+			 */
+			uint16_t MostDetailedMip;
 
 			/**
 			 * Available for
@@ -36,14 +33,11 @@ namespace fe::dx
 
 		union
 		{
-			struct
-			{
-				/**
-				 * Available for
-				 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
-				 */
-				uint16_t MipLevels;
-			};
+			/**
+			 * Available for
+			 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
+			 */
+			uint16_t MipLevels;
 
 			/**
 			 * Available for
@@ -102,7 +96,7 @@ namespace fe::dx
 						 const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false,
 						 const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
 						 const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
-		void AsTexture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const uint16_t mipLevels,
+		void AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth, const uint16_t mipLevels,
 						 const DXGI_FORMAT format, const bool bEnableShaderReadWrite,
 						 const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
 						 const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);

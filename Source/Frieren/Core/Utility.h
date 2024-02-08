@@ -1,6 +1,8 @@
 #pragma once
 #include <Core/Container.h>
 
+#define UNUSED(x) (x)
+
 namespace fe
 {
 	template <typename IndexType>

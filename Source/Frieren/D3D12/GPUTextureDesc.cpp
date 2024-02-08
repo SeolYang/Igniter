@@ -231,7 +231,7 @@ namespace fe::dx
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 	}
 
-	void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint32_t depth,
+	void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth,
 									 const uint16_t mipLevels, const DXGI_FORMAT format,
 									 const bool bEnableShaderReadWrite,
 									 const bool bEnableSimultaneousAccess /*= false*/,

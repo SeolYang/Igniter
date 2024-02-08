@@ -221,7 +221,7 @@ namespace fe::dx
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
 			desc.BufferLocation = bufferLocation;
-			desc.SizeInBytes = Width;
+			desc.SizeInBytes = static_cast<uint32_t>(Width);
 			return desc;
 		}
 

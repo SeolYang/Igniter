@@ -25,6 +25,8 @@ namespace fe
 		MouseRB
 	};
 
+	EInput WParamToInput(const WPARAM wParam);
+
 	enum class EInputState
 	{
 		None,
@@ -106,43 +108,4 @@ namespace fe
 
 		robin_hood::unordered_set<EInput> preesedInputSet;
 	};
-
-	namespace Private
-	{
-		static EInput WParamToInput(const WPARAM wParam)
-		{
-			switch (wParam)
-			{
-				/** Characters */
-				case 'W':
-				case 'w':
-					return EInput::W;
-
-				case 'S':
-				case 's':
-					return EInput::S;
-
-				case 'A':
-				case 'a':
-					return EInput::A;
-
-				case 'D':
-				case 'd':
-					return EInput::D;
-
-				/** Virtual Keys */
-				case VK_SPACE:
-					return EInput::Space;
-
-				case VK_LBUTTON:
-					return EInput::MouseLB;
-
-				case VK_RBUTTON:
-					return EInput::MouseRB;
-
-				default:
-					return EInput::None;
-			}
-		}
-	} // namespace Private
 } // namespace fe

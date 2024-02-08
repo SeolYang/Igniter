@@ -19,8 +19,8 @@ namespace fe
 
 		void Update();
 
-		void SetWorld(std::unique_ptr<World> world);
-		void SetGameFlow(std::unique_ptr<GameFlow> gameFlow);
+		void SetWorld(std::unique_ptr<World> newWorld);
+		void SetGameFlow(std::unique_ptr<GameFlow> newGameFlow);
 
 	private:
 		std::unique_ptr<World>	  world;

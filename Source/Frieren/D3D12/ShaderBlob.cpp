@@ -111,7 +111,7 @@ namespace fe::dx
 								.Encoding = codePage };
 
 		ComPtr<IDxcResult> result;
-		verify_succeeded(compiler->Compile(&buffer, arguments.data(), arguments.size(), defaultIncludeHandler.Get(),
+		verify_succeeded(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
 										   IID_PPV_ARGS(result.GetAddressOf())));
 
 		// #todo 별도의 error handling 구현 https://youtu.be/tyyKeTsdtmo?si=gERRzeRVmqxAcPT7&t=1158

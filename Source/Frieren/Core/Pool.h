@@ -124,7 +124,7 @@ namespace fe
 
 		void Deallocate(const Allocation allocation)
 		{
-			verify(allocation.ChunkIndex < chunks.size());
+			check(allocation.ChunkIndex < chunks.size());
 			T* const addressOfInstance = GetAddressOfAllocation(allocation);
 			if (addressOfInstance != nullptr)
 			{
