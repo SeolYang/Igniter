@@ -66,7 +66,8 @@ namespace fe::dx
 		ComPtr<IDXGIDebug1> dxgiDebug;
 		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
 		{
-			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
+										 DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
 		}
 #endif
 	}
@@ -75,9 +76,12 @@ namespace fe::dx
 	{
 		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_BUNDLE, "Invalid queue type to flush.");
 		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_NONE, "Invalid queue type to flush.");
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE, "Invalid queue type to flush.");
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE, "Invalid queue type to flush.");
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS, "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE,
+						   "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE,
+						   "Invalid queue type to flush.");
+		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS,
+						   "Invalid queue type to flush.");
 
 		ComPtr<ID3D12Fence> fence;
 		if (SUCCEEDED(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
@@ -123,18 +127,15 @@ namespace fe::dx
 		FlushQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	}
 
-	std::optional<Descriptor> Device::CreateShaderResourceView(const GPUBuffer& gpuBuffer)
+	std::optional<Descriptor> Device::CreateShaderResourceView(GPUBuffer& gpuBuffer)
 	{
 		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
 		if (srvDesc)
 		{
-			const GPUResource&		  allocation = gpuBuffer.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateShaderResourceView(
-				&allocation.GetResource(),
-				&srvDesc.value(),
-				descriptor->GetCPUDescriptorHandle());
+			device->CreateShaderResourceView(&gpuBuffer.GetNative(), &srvDesc.value(),
+											 descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
 		}
@@ -142,18 +143,15 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateUnorderedAccessView(const GPUBuffer& gpuBuffer)
+	std::optional<Descriptor> Device::CreateUnorderedAccessView(GPUBuffer& gpuBuffer)
 	{
 		const GPUBufferDesc&							desc = gpuBuffer.GetDesc();
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
 		if (uavDesc)
 		{
-			const GPUResource&		  allocation = gpuBuffer.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateUnorderedAccessView(
-				&allocation.GetResource(), nullptr,
-				&uavDesc.value(),
-				descriptor->GetCPUDescriptorHandle());
+			device->CreateUnorderedAccessView(&gpuBuffer.GetNative(), nullptr, &uavDesc.value(),
+											  descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
 		}
@@ -161,18 +159,16 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateConstantBufferView(const GPUBuffer& gpuBuffer)
+	std::optional<Descriptor> Device::CreateConstantBufferView(GPUBuffer& gpuBuffer)
 	{
 		const GPUBufferDesc& desc = gpuBuffer.GetDesc();
-		const GPUResource&	 allocation = gpuBuffer.GetAllocation();
 
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(allocation.GetResource().GetGPUVirtualAddress());
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc =
+			desc.ToConstantBufferViewDesc(gpuBuffer.GetNative().GetGPUVirtualAddress());
 		if (cbvDesc)
 		{
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateConstantBufferView(
-				&cbvDesc.value(),
-				descriptor->GetCPUDescriptorHandle());
+			device->CreateConstantBufferView(&cbvDesc.value(), descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
 		}
@@ -180,7 +176,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateShaderResourceView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateShaderResourceView(GPUTexture&				   texture,
+															   const GPUTextureSubresource subresource)
 	{
 		const GPUTextureDesc&						   desc = texture.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
@@ -188,10 +185,8 @@ namespace fe::dx
 		{
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateShaderResourceView(
-				&allocation.GetResource(),
-				&srvDesc.value(),
-				descriptor->GetCPUDescriptorHandle());
+			device->CreateShaderResourceView(&allocation.GetResource(), &srvDesc.value(),
+											 descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
 		}
@@ -199,7 +194,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateUnorderedAccessView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateUnorderedAccessView(GPUTexture&					texture,
+																const GPUTextureSubresource subresource)
 	{
 		const GPUTextureDesc&							desc = texture.GetDesc();
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
@@ -207,10 +203,8 @@ namespace fe::dx
 		{
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateUnorderedAccessView(
-				&allocation.GetResource(), nullptr,
-				&uavDesc.value(),
-				descriptor->GetCPUDescriptorHandle());
+			device->CreateUnorderedAccessView(&allocation.GetResource(), nullptr, &uavDesc.value(),
+											  descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
 		}
@@ -218,7 +212,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateRenderTargetView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateRenderTargetView(GPUTexture&				 texture,
+															 const GPUTextureSubresource subresource)
 	{
 		const GPUTextureDesc&						 desc = texture.GetDesc();
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
@@ -226,10 +221,8 @@ namespace fe::dx
 		{
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = rtvDescriptorHeap->AllocateDescriptor();
-			device->CreateRenderTargetView(
-				&allocation.GetResource(),
-				&rtvDesc.value(),
-				descriptor->GetCPUDescriptorHandle());
+			device->CreateRenderTargetView(&allocation.GetResource(), &rtvDesc.value(),
+										   descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
 		}
@@ -237,7 +230,8 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateDepthStencilView(const GPUTexture& texture, const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateDepthStencilView(GPUTexture&				 texture,
+															 const GPUTextureSubresource subresource)
 	{
 		const GPUTextureDesc&						 desc = texture.GetDesc();
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
@@ -245,10 +239,8 @@ namespace fe::dx
 		{
 			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = dsvDescriptorHeap->AllocateDescriptor();
-			device->CreateDepthStencilView(
-				&allocation.GetResource(),
-				&dsvDesc.value(),
-				descriptor->GetCPUDescriptorHandle());
+			device->CreateDepthStencilView(&allocation.GetResource(), &dsvDesc.value(),
+										   descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
 		}
@@ -263,7 +255,7 @@ namespace fe::dx
 #if defined(DEBUG) || defined(_DEBUG)
 			factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
 			ComPtr<ID3D12Debug5> debugController;
-			const bool				  bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
+			const bool bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 			FE_CONDITIONAL_LOG(D3D12Fatal, bDebugControllerAcquired, "Failed to get debug controller.");
 			if (bDebugControllerAcquired)
 			{
@@ -279,15 +271,13 @@ namespace fe::dx
 		}
 
 		ComPtr<IDXGIFactory6> factory;
-		const bool				   bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
+		const bool bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
 		FE_CONDITIONAL_LOG(D3D12Fatal, bFactoryCreated, "Failed to create factory.");
 
 		if (bFactoryCreated)
 		{
-			const bool bIsAdapterAcquired = SUCCEEDED(factory->EnumAdapterByGpuPreference(
-				0,
-				DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-				IID_PPV_ARGS(&adapter)));
+			const bool bIsAdapterAcquired = SUCCEEDED(
+				factory->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)));
 			FE_CONDITIONAL_LOG(D3D12Fatal, bIsAdapterAcquired, "Failed to acquire adapter from factory.");
 			return bIsAdapterAcquired;
 		}
@@ -311,7 +301,8 @@ namespace fe::dx
 	bool Device::CreateDevice()
 	{
 		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
-		const bool					bIsDeviceCreated = SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
+		const bool					bIsDeviceCreated =
+			SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
 		FE_CONDITIONAL_LOG(D3D12Fatal, bIsDeviceCreated, "Failed to create the device from the adapter.");
 		return bIsDeviceCreated;
 	}
@@ -349,7 +340,8 @@ namespace fe::dx
 		}
 
 		/**
-		 * Ray-tracing Tier: https://github.com/microsoft/DirectX-Specs/blob/master/d3d/Raytracing.md#d3d12_raytracing_tier
+		 * Ray-tracing Tier:
+		 * https://github.com/microsoft/DirectX-Specs/blob/master/d3d/Raytracing.md#d3d12_raytracing_tier
 		 */
 		switch (features.RaytracingTier())
 		{
@@ -374,10 +366,13 @@ namespace fe::dx
 		}
 
 		/**
-		 * Resource Binding Tier: https://microsoft.github.io/DirectX-Specs/d3d/ResourceBinding.html#levels-of-hardware-support
-		 * Tiled Resource Tier: https://learn.microsoft.com/en-us/windows/win32/direct3d11/tiled-resources-features-tiers
-		 * Conservative Rasterization Tier: https://learn.microsoft.com/en-us/windows/win32/direct3d12/conservative-rasterization#implementation-details
-		 * Resource Heap Tier: https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_resource_heap_tier
+		 * Resource Binding Tier:
+		 * https://microsoft.github.io/DirectX-Specs/d3d/ResourceBinding.html#levels-of-hardware-support Tiled Resource
+		 * Tier: https://learn.microsoft.com/en-us/windows/win32/direct3d11/tiled-resources-features-tiers Conservative
+		 * Rasterization Tier:
+		 * https://learn.microsoft.com/en-us/windows/win32/direct3d12/conservative-rasterization#implementation-details
+		 * Resource Heap Tier:
+		 * https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_resource_heap_tier
 		 */
 
 		/**
@@ -391,8 +386,10 @@ namespace fe::dx
 
 	void Device::CacheDescriptorHandleIncrementSize()
 	{
-		cbvSrvUavDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		samplerDescritorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		cbvSrvUavDescriptorHandleIncrementSize =
+			device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		samplerDescritorHandleIncrementSize =
+			device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 		dsvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 		rtvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
@@ -455,29 +452,18 @@ namespace fe::dx
 
 	void Device::CreateDescriptorHeaps()
 	{
-		cbvSrvUavDescriptorHeap = std::make_unique<DescriptorHeap>(
-			*this,
-			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-			NumCbvSrvUavDescriptors,
-			"Bindless CBV_SRV_UAV Descriptor Heap");
+		cbvSrvUavDescriptorHeap =
+			std::make_unique<DescriptorHeap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, NumCbvSrvUavDescriptors,
+											 "Bindless CBV_SRV_UAV Descriptor Heap");
 
 		samplerDescriptorHeap = std::make_unique<DescriptorHeap>(
-			*this,
-			D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
-			NumSamplerDescriptors,
-			"Bindless Sampler Descriptor Heap");
+			*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, NumSamplerDescriptors, "Bindless Sampler Descriptor Heap");
 
-		rtvDescriptorHeap = std::make_unique<DescriptorHeap>(
-			*this,
-			D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
-			NumRtvDescriptors,
-			"Bindless RTV Descriptor Heap");
+		rtvDescriptorHeap = std::make_unique<DescriptorHeap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, NumRtvDescriptors,
+															 "Bindless RTV Descriptor Heap");
 
-		dsvDescriptorHeap = std::make_unique<DescriptorHeap>(
-			*this,
-			D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
-			NumDsvDescriptors,
-			"Bindless DSV Descriptor Heap");
+		dsvDescriptorHeap = std::make_unique<DescriptorHeap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, NumDsvDescriptors,
+															 "Bindless DSV Descriptor Heap");
 
 		FE_LOG(D3D12Info, "Bindless(Dynamic Resource) Descriptor Heaps initialized.");
 		FE_LOG(D3D12Info, "CBV-SRV-UAV Descriptor Heap::NumDescriptors: {}", NumCbvSrvUavDescriptors);
@@ -486,9 +472,25 @@ namespace fe::dx
 		FE_LOG(D3D12Info, "DSV Descriptor Heap::NumDescriptors: {}", NumDsvDescriptors);
 	}
 
-	GPUResource Device::AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc, const D3D12_RESOURCE_DESC1& resourceDesc)
+	GPUResource Device::AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc,
+										 const D3D12_RESOURCE_DESC1&	 resourceDesc)
 	{
 		verify(allocator != nullptr);
 		return GPUResource{ *allocator, allocationDesc, resourceDesc };
 	}
-} // namespace fe
+
+	std::optional<GPUBuffer> Device::CreateBuffer(const GPUBufferDesc& bufferDesc)
+	{
+		const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.ToAllocationDesc();
+		ComPtr<D3D12MA::Allocation>	   allocation{};
+		ComPtr<ID3D12Resource>		   resource{};
+		if (!SUCCEEDED(allocator->CreateResource3(&allocationDesc, &bufferDesc, D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr,
+												  0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource))))
+		{
+			return std::nullopt;
+		}
+
+		return GPUBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
+	}
+
+} // namespace fe::dx

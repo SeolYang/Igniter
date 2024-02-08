@@ -30,9 +30,9 @@ namespace fe::dx
 		Device& operator=(Device&) = delete;
 		Device& operator=(Device&&) noexcept = delete;
 
-		auto& GetDirectQueue() { return *directQueue.Get(); }
-		auto& GetAsyncComputeQueue() { return *asyncComputeQueue.Get(); }
-		auto& GetCopyQueue() { return *copyQueue.Get(); }
+		auto&				GetDirectQueue() { return *directQueue.Get(); }
+		auto&				GetAsyncComputeQueue() { return *asyncComputeQueue.Get(); }
+		auto&				GetCopyQueue() { return *copyQueue.Get(); }
 		[[nodiscard]] auto& GetNative() { return *device.Get(); }
 
 		uint32_t GetCbvSrvUavDescriptorHandleIncrementSize() const { return cbvSrvUavDescriptorHandleIncrementSize; }
@@ -64,22 +64,22 @@ namespace fe::dx
 
 		// #todo Move Create...View to independent Bindless-Descriptor Manager
 		// #todo Descriptor -> BufferView = Descriptor + Reference to buffer?
-		std::optional<Descriptor> CreateShaderResourceView(const GPUBuffer& gpuBuffer);
-		std::optional<Descriptor> CreateConstantBufferView(const GPUBuffer& gpuBuffer);
-		std::optional<Descriptor> CreateUnorderedAccessView(const GPUBuffer& gpuBuffer);
+		std::optional<Descriptor> CreateShaderResourceView(GPUBuffer& gpuBuffer);
+		std::optional<Descriptor> CreateConstantBufferView(GPUBuffer& gpuBuffer);
+		std::optional<Descriptor> CreateUnorderedAccessView(GPUBuffer& gpuBuffer);
 
 		// #todo Descriptor -> TextureView = Descriptor + Reference to texture + subresource + view format?
-		std::optional<Descriptor> CreateShaderResourceView(const GPUTexture&		   texture,
+		std::optional<Descriptor> CreateShaderResourceView(GPUTexture&				   texture,
 														   const GPUTextureSubresource subresource);
 
-		std::optional<Descriptor> CreateUnorderedAccessView(const GPUTexture&			texture,
+		std::optional<Descriptor> CreateUnorderedAccessView(GPUTexture&					texture,
 															const GPUTextureSubresource subresource);
 
-		std::optional<Descriptor> CreateRenderTargetView(const GPUTexture&			 texture,
-														 const GPUTextureSubresource subresource);
+		std::optional<Descriptor> CreateRenderTargetView(GPUTexture& texture, const GPUTextureSubresource subresource);
 
-		std::optional<Descriptor> CreateDepthStencilView(const GPUTexture&			 texture,
-														 const GPUTextureSubresource subresource);
+		std::optional<Descriptor> CreateDepthStencilView(GPUTexture& texture, const GPUTextureSubresource subresource);
+
+		std::optional<GPUBuffer> CreateBuffer(const GPUBufferDesc& bufferDesc);
 
 		GPUResource AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc,
 									 const D3D12_RESOURCE_DESC1&	 resourceDesc);

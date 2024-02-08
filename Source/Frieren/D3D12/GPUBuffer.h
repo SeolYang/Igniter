@@ -9,20 +9,29 @@ namespace fe::dx
 	class Device;
 	class GPUBuffer
 	{
+		friend class Device;
+
 	public:
-		GPUBuffer(Device& device, const GPUBufferDesc& desc);
-		GPUBuffer(ComPtr<ID3D12Resource> existBuffer);
+		GPUBuffer(ComPtr<ID3D12Resource> bufferResource);
+		GPUBuffer(const GPUBuffer&) = delete;
+		GPUBuffer(GPUBuffer&& other) noexcept;
 		~GPUBuffer() = default;
 
-		GPUBuffer(GPUBuffer&& other) noexcept;
+		GPUBuffer& operator=(const GPUBuffer&) = delete;
 		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
 
 		const GPUBufferDesc& GetDesc() const { return desc; }
-		const GPUResource&	 GetAllocation() const { return allocation; }
+		const auto&			 GetNative() const { return *resource.Get(); }
+		auto&				 GetNative() { return *resource.Get(); }
 
 	private:
-		GPUBufferDesc desc;
-		GPUResource	  allocation;
+		GPUBuffer(const GPUBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+				  ComPtr<ID3D12Resource> newResource);
+
+	private:
+		GPUBufferDesc				desc;
+		ComPtr<D3D12MA::Allocation> allocation;
+		ComPtr<ID3D12Resource>		resource;
 	};
 
 } // namespace fe::dx

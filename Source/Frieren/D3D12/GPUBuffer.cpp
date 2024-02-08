@@ -3,24 +3,29 @@
 
 namespace fe::dx
 {
-	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept : desc(other.desc), allocation(std::move(other.allocation)) {}
-
-	GPUBuffer::GPUBuffer(Device& device, const GPUBufferDesc& desc)
-		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc(), desc))
+	GPUBuffer::GPUBuffer(const GPUBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+						 ComPtr<ID3D12Resource> newResource)
+		: desc(newDesc), allocation(std::move(newAllocation)), resource(std::move(newResource))
 	{
 	}
 
-	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> existBuffer) : allocation(GPUResource{ existBuffer })
+	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept
+		: desc(other.desc), allocation(std::move(other.allocation)), resource(std::move(other.resource))
 	{
-		check(existBuffer.Get() != nullptr);
-		desc.From(existBuffer->GetDesc());
+	}
+
+	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> bufferResource) : resource(std::move(bufferResource))
+	{
+		check(resource);
+		desc.From(resource->GetDesc());
 		check(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
 	}
 
 	GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept
 	{
-		this->desc = other.desc;
-		this->allocation = std::move(other.allocation);
+		desc = other.desc;
+		allocation = std::move(other.allocation);
+		resource = std::move(other.resource);
 		return *this;
 	}
 } // namespace fe::dx
