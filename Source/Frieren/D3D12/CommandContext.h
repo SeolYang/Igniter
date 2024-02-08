@@ -17,12 +17,19 @@ namespace fe::dx
 		// Equivalent to Close
 		void End();
 
+		void AddGlobalBarrier(const D3D12_GLOBAL_BARRIER& barrierToPending);
+		void AddTextureBarrier(const D3D12_TEXTURE_BARRIER& barrierToPending);
+
 		D3D12_COMMAND_LIST_TYPE GetType() const { return typeOfCommandList; }
-		auto&					GetNative() { return *cmdList.Get(); }
 
 	private:
 		ComPtr<ID3D12CommandAllocator>	   cmdAllocator;
 		ComPtr<ID3D12GraphicsCommandList7> cmdList;
 		const D3D12_COMMAND_LIST_TYPE	   typeOfCommandList;
+
+		std::vector<D3D12_GLOBAL_BARRIER>  pendingGlobalBarriers;
+		std::vector<D3D12_TEXTURE_BARRIER> pendingTextureBarriers;
+		std::vector<D3D12_BUFFER_BARRIER>  pendingBufferBarriers;
+
 	};
 } // namespace fe::dx

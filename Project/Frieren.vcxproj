@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Container.h" />
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Hash.h" />

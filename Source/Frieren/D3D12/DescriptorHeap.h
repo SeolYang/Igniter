@@ -2,7 +2,7 @@
 #include <D3D12/Common.h>
 #include <Core/Misc.h>
 #include <Core/Mutex.h>
-#include <queue>
+#include <Core/Container.h>
 
 namespace fe::dx
 {

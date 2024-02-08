@@ -8,7 +8,7 @@
  * 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider
  * character string. For all literal constant strings, they must be used with the 'FE_TEXT macro function'.
  */
-#include <robin_hood.h>
+#include <Core/Container.h>
 #include <Core/Mutex.h>
 #include <Core/Hash.h>
 #include <string>
