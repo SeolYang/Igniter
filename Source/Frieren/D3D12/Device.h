@@ -62,6 +62,9 @@ namespace fe::dx
 		void FlushQueue(D3D12_COMMAND_LIST_TYPE queueType);
 		void FlushGPU();
 
+		std::optional<GPUBuffer>  CreateBuffer(const GPUBufferDesc& bufferDesc);
+		std::optional<GPUTexture> CreateTexture(const GPUTextureDesc& textureDesc);
+
 		// #todo Move Create...View to independent Bindless-Descriptor Manager
 		// #todo Descriptor -> BufferView = Descriptor + Reference to buffer?
 		std::optional<Descriptor> CreateShaderResourceView(GPUBuffer& gpuBuffer);
@@ -78,8 +81,6 @@ namespace fe::dx
 		std::optional<Descriptor> CreateRenderTargetView(GPUTexture& texture, const GPUTextureSubresource subresource);
 
 		std::optional<Descriptor> CreateDepthStencilView(GPUTexture& texture, const GPUTextureSubresource subresource);
-
-		std::optional<GPUBuffer> CreateBuffer(const GPUBufferDesc& bufferDesc);
 
 		GPUResource AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc,
 									 const D3D12_RESOURCE_DESC1&	 resourceDesc);

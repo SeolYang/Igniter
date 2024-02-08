@@ -3,19 +3,23 @@
 
 namespace fe::dx
 {
-	GPUTexture::GPUTexture(Device& device, const GPUTextureDesc& desc)
-		: desc(desc), allocation(device.AllocateResource(desc.ToAllocationDesc(), desc))
+	GPUTexture::GPUTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+						   ComPtr<ID3D12Resource> newResource)
+		: desc(newDesc), allocation(std::move(newAllocation)), resource(std::move(newResource))
 	{
 	}
 
-	GPUTexture::GPUTexture(ComPtr<ID3D12Resource> existTexture) : allocation(GPUResource{ existTexture })
+	GPUTexture::GPUTexture(ComPtr<ID3D12Resource> textureResource) : resource(std::move(textureResource))
 	{
-		check(existTexture.Get() != nullptr);
-		desc.From(existTexture->GetDesc());
+		check(resource);
+		desc.From(resource->GetDesc());
 		check(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
 	}
 
-	GPUTexture::GPUTexture(GPUTexture&& other) noexcept : desc(other.desc), allocation(std::move(other.allocation)) {}
+	GPUTexture::GPUTexture(GPUTexture&& other) noexcept
+		: desc(other.desc), allocation(std::move(other.allocation)), resource(std::move(other.resource))
+	{
+	}
 
 	GPUTexture& GPUTexture::operator=(GPUTexture&& other) noexcept
 	{

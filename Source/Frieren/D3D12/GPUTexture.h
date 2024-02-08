@@ -9,19 +9,38 @@ namespace fe::dx
 	class Device;
 	class GPUTexture
 	{
+		friend class Device;
+
 	public:
-		GPUTexture(Device& device, const GPUTextureDesc& desc);
-		GPUTexture(ComPtr<ID3D12Resource> existTexture);
+		GPUTexture(ComPtr<ID3D12Resource> textureResource);
+		GPUTexture(const GPUTexture&) = delete;
+		GPUTexture(GPUTexture&& other) noexcept;
 		~GPUTexture() = default;
 
-		GPUTexture(GPUTexture&& other) noexcept;
+		GPUTexture& operator=(const GPUTexture&) = delete;
 		GPUTexture& operator=(GPUTexture&& other) noexcept;
 
 		const GPUTextureDesc& GetDesc() const { return desc; }
-		const GPUResource&	  GetAllocation() const { return allocation; }
+
+		const auto& GetNative() const
+		{
+			check(resource);
+			return *resource.Get();
+		}
+
+		auto& GetNative()
+		{
+			check(resource);
+			return *resource.Get();
+		}
 
 	private:
-		GPUTextureDesc desc;
-		GPUResource	   allocation;
+		GPUTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+				   ComPtr<ID3D12Resource> newResource);
+
+	private:
+		GPUTextureDesc				desc;
+		ComPtr<D3D12MA::Allocation> allocation;
+		ComPtr<ID3D12Resource>		resource;
 	};
 } // namespace fe::dx

@@ -183,9 +183,8 @@ namespace fe::dx
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
 		if (srvDesc)
 		{
-			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateShaderResourceView(&allocation.GetResource(), &srvDesc.value(),
+			device->CreateShaderResourceView(&texture.GetNative(), &srvDesc.value(),
 											 descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
@@ -201,9 +200,8 @@ namespace fe::dx
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
 		if (uavDesc)
 		{
-			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
-			device->CreateUnorderedAccessView(&allocation.GetResource(), nullptr, &uavDesc.value(),
+			device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &uavDesc.value(),
 											  descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
@@ -219,9 +217,8 @@ namespace fe::dx
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
 		if (rtvDesc)
 		{
-			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = rtvDescriptorHeap->AllocateDescriptor();
-			device->CreateRenderTargetView(&allocation.GetResource(), &rtvDesc.value(),
+			device->CreateRenderTargetView(&texture.GetNative(), &rtvDesc.value(),
 										   descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
@@ -237,9 +234,8 @@ namespace fe::dx
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
 		if (dsvDesc)
 		{
-			const GPUResource&		  allocation = texture.GetAllocation();
 			std::optional<Descriptor> descriptor = dsvDescriptorHeap->AllocateDescriptor();
-			device->CreateDepthStencilView(&allocation.GetResource(), &dsvDesc.value(),
+			device->CreateDepthStencilView(&texture.GetNative(), &dsvDesc.value(),
 										   descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
@@ -491,6 +487,21 @@ namespace fe::dx
 		}
 
 		return GPUBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
+	}
+
+	std::optional<GPUTexture> Device::CreateTexture(const GPUTextureDesc& textureDesc)
+	{
+		const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.ToAllocationDesc();
+		ComPtr<D3D12MA::Allocation>	   allocation{};
+		ComPtr<ID3D12Resource>		   resource{};
+		if (!SUCCEEDED(allocator->CreateResource3(&allocationDesc, &textureDesc, D3D12_BARRIER_LAYOUT_UNDEFINED,
+												  nullptr, 0, nullptr, allocation.GetAddressOf(),
+												  IID_PPV_ARGS(&resource))))
+		{
+			return std::nullopt;
+		}
+
+		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
 } // namespace fe::dx

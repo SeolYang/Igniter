@@ -21,8 +21,18 @@ namespace fe::dx
 		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
 
 		const GPUBufferDesc& GetDesc() const { return desc; }
-		const auto&			 GetNative() const { return *resource.Get(); }
-		auto&				 GetNative() { return *resource.Get(); }
+
+		const auto& GetNative() const
+		{
+			check(resource);
+			return *resource.Get();
+		}
+
+		auto& GetNative()
+		{
+			check(resource);
+			return *resource.Get();
+		}
 
 	private:
 		GPUBuffer(const GPUBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
