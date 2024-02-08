@@ -468,13 +468,6 @@ namespace fe::dx
 		FE_LOG(D3D12Info, "DSV Descriptor Heap::NumDescriptors: {}", NumDsvDescriptors);
 	}
 
-	GPUResource Device::AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc,
-										 const D3D12_RESOURCE_DESC1&	 resourceDesc)
-	{
-		verify(allocator != nullptr);
-		return GPUResource{ *allocator, allocationDesc, resourceDesc };
-	}
-
 	std::optional<GPUBuffer> Device::CreateBuffer(const GPUBufferDesc& bufferDesc)
 	{
 		const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.ToAllocationDesc();

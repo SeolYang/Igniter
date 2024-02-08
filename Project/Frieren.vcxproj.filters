@@ -141,9 +141,6 @@
     <ClInclude Include="..\Source\Frieren\Renderer\FrameResource.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUResource.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Container.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -216,9 +213,6 @@
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUResource.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Renderer\FrameResource.cpp">

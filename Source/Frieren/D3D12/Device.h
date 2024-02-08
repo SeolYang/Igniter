@@ -2,7 +2,6 @@
 #include <Core/Log.h>
 #include <Core/HandleManager.h>
 #include <D3D12/Common.h>
-#include <D3D12/GPUResource.h>
 
 namespace fe::dx
 {
@@ -65,25 +64,15 @@ namespace fe::dx
 		std::optional<GPUBuffer>  CreateBuffer(const GPUBufferDesc& bufferDesc);
 		std::optional<GPUTexture> CreateTexture(const GPUTextureDesc& textureDesc);
 
-		// #todo Move Create...View to independent Bindless-Descriptor Manager
-		// #todo Descriptor -> BufferView = Descriptor + Reference to buffer?
 		std::optional<Descriptor> CreateShaderResourceView(GPUBuffer& gpuBuffer);
 		std::optional<Descriptor> CreateConstantBufferView(GPUBuffer& gpuBuffer);
 		std::optional<Descriptor> CreateUnorderedAccessView(GPUBuffer& gpuBuffer);
-
-		// #todo Descriptor -> TextureView = Descriptor + Reference to texture + subresource + view format?
 		std::optional<Descriptor> CreateShaderResourceView(GPUTexture&				   texture,
 														   const GPUTextureSubresource subresource);
-
 		std::optional<Descriptor> CreateUnorderedAccessView(GPUTexture&					texture,
 															const GPUTextureSubresource subresource);
-
 		std::optional<Descriptor> CreateRenderTargetView(GPUTexture& texture, const GPUTextureSubresource subresource);
-
 		std::optional<Descriptor> CreateDepthStencilView(GPUTexture& texture, const GPUTextureSubresource subresource);
-
-		GPUResource AllocateResource(const D3D12MA::ALLOCATION_DESC& allocationDesc,
-									 const D3D12_RESOURCE_DESC1&	 resourceDesc);
 
 	private:
 		bool AcquireAdapterFromFactory();
