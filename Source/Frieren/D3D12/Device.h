@@ -16,6 +16,7 @@ namespace fe::dx
 	class GPUTextureSubresource;
 	class GPUTexture;
 	class Descriptor;
+	class Fence;
 	class CommandContext;
 	class Device
 	{
@@ -73,6 +74,8 @@ namespace fe::dx
 															const GPUTextureSubresource subresource);
 		std::optional<Descriptor> CreateRenderTargetView(GPUTexture& texture, const GPUTextureSubresource subresource);
 		std::optional<Descriptor> CreateDepthStencilView(GPUTexture& texture, const GPUTextureSubresource subresource);
+
+		std::optional<Fence> CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
 
 	private:
 		bool AcquireAdapterFromFactory();

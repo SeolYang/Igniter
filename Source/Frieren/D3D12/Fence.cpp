@@ -1,35 +1,52 @@
 #include <D3D12/Fence.h>
-#include <Engine.h>
+#include <Core/Assert.h>
 
 namespace fe::dx
 {
-	Fence::Fence(Device& device, const std::string_view debugName)
-		: eventHandle(CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS))
+	Fence::Fence(ComPtr<ID3D12Fence> newFence)
+		: fence(std::move(newFence)), eventHandle(CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS))
 	{
-		auto& nativeDevice = device.GetNative();
-		const bool		bIsFenceCreated = SUCCEEDED(nativeDevice.CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-		FE_CONDITIONAL_LOG(D3D12Fatal, bIsFenceCreated, "Failed to create fence.");
+	}
 
-		SetObjectName(fence.Get(), debugName);
+	Fence::Fence(Fence&& other) noexcept
+		: fence(std::move(other.fence))
+		, eventHandle(std::exchange(other.eventHandle, (HANDLE)NULL))
+		, counter(std::exchange(other.counter, 0))
+	{
 	}
 
 	Fence::~Fence()
 	{
-		CloseHandle(eventHandle);
+		if (eventHandle != NULL)
+		{
+			CloseHandle(eventHandle);
+		}
+	}
+
+	Fence& Fence::operator=(Fence&& other) noexcept
+	{
+		fence = std::move(other.fence);
+		eventHandle = std::exchange(other.eventHandle, (HANDLE)NULL);
+		counter = std::exchange(other.counter, 0);
+		return *this;
 	}
 
 	void Fence::Signal(ID3D12CommandQueue& cmdQueue)
 	{
+		check(fence);
 		verify_succeeded(cmdQueue.Signal(fence.Get(), counter));
 	}
 
 	void Fence::GpuWaitForFence(ID3D12CommandQueue& cmdQueue)
 	{
+		check(fence);
 		verify_succeeded(cmdQueue.Wait(fence.Get(), counter));
 	}
 
 	void Fence::CpuWaitForFence()
 	{
+		check(fence);
+		check(eventHandle != NULL);
 		const uint64_t completedValue = fence->GetCompletedValue();
 		if (completedValue < counter)
 		{

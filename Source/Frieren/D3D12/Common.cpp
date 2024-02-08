@@ -12,7 +12,7 @@ extern "C"
 
 namespace fe::dx
 {
-	void SetObjectName(ID3D12Object* object, std::string_view name)
+	void SetObjectName(ID3D12Object* object, const std::string_view name)
 	{
 		if (object != nullptr)
 		{

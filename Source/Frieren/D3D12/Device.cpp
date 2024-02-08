@@ -8,6 +8,7 @@
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
+#include <D3D12/Fence.h>
 
 namespace fe::dx
 {
@@ -495,6 +496,18 @@ namespace fe::dx
 		}
 
 		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
+	}
+
+	std::optional<Fence> Device::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/) 
+	{
+		ComPtr<ID3D12Fence> newFence{};
+		if (!SUCCEEDED(device->CreateFence(initialCounter, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence))))
+		{
+			return std::nullopt;
+		}
+
+		SetObjectName(newFence.Get(), debugName);
+		return Fence{ std::move(newFence) };
 	}
 
 } // namespace fe::dx

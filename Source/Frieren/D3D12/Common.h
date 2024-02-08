@@ -34,5 +34,5 @@ namespace fe::dx
 	template <typename Ty>
 	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
 
-	void SetObjectName(ID3D12Object* object, std::string_view name);
+	void SetObjectName(ID3D12Object* object, const std::string_view name);
 } // namespace fe::dx
