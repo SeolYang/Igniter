@@ -2,31 +2,32 @@
 #include <D3D12/Common.h>
 #include <Core/String.h>
 #include <Core/Mutex.h>
+#include <variant>
 
 namespace fe::dx
 {
 	class Device;
-	class GraphicsPipelineStateDesc;
-	class ComputePipelineStateDesc;
 	// class PSOCache;
 	//  PipelineStateDesc -> private static 캐시를 이용한 flyweight 패턴 구현
 	//  buffer, texture 는 내부 데이터가 다를 수 있기 때문에 flyweight 불가능
 	class PipelineState
 	{
+		friend class Device;
+
 	public:
-		PipelineState(Device& device, const GraphicsPipelineStateDesc& desc);
-		PipelineState(Device& device, const ComputePipelineStateDesc& desc);
 		~PipelineState();
 
-		String GetName() const { return name; }
-		auto&  GetNative() { return *pso.Get(); }
+		auto& GetNative() { return *pso.Get(); }
 
-		bool IsGraphics() const { return bIsGraphicsPSO; }
-		bool IsCompute() const { return !bIsGraphicsPSO; }
+		bool IsGraphics() const { return bIsGraphics; }
+		bool IsCompute() const { return !bIsGraphics; }
 
 	private:
-		const bool					bIsGraphicsPSO;
-		const String				name;
+		PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO);
+
+	private:
 		ComPtr<ID3D12PipelineState> pso;
+		const bool					bIsGraphics;
+		// const size_t pipelineStateHash;
 	};
 } // namespace fe::dx

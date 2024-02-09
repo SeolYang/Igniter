@@ -1,10 +1,10 @@
 #pragma once
 #include <memory>
-#include <D3D12/Fence.h>
 
 namespace fe::dx
 {
 	class Device;
+	class Fence;
 } // namespace fe::dx
 
 namespace fe
@@ -24,6 +24,6 @@ namespace fe
 		const size_t numInflightFrames;
 		size_t		 globalFrameIdx = 0;
 		size_t		 localFrameIdx = 0;
-		dx::Fence	 fence;
+		std::unique_ptr<dx::Fence> fence;
 	};
 } // namespace fe

@@ -9,6 +9,8 @@
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
 #include <D3D12/Fence.h>
+#include <D3D12/PipelineState.h>
+#include <D3D12/PipelineStateDesc.h>
 
 namespace fe::dx
 {
@@ -498,7 +500,7 @@ namespace fe::dx
 		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
-	std::optional<Fence> Device::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/) 
+	std::optional<Fence> Device::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/)
 	{
 		ComPtr<ID3D12Fence> newFence{};
 		if (!SUCCEEDED(device->CreateFence(initialCounter, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence))))
@@ -508,6 +510,30 @@ namespace fe::dx
 
 		SetObjectName(newFence.Get(), debugName);
 		return Fence{ std::move(newFence) };
+	}
+
+	std::optional<PipelineState> Device::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
+	{
+		ComPtr<ID3D12PipelineState> newPipelineState{};
+		if (!SUCCEEDED(device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState))))
+		{
+			return std::nullopt;
+		}
+
+		SetObjectName(newPipelineState.Get(), desc.Name);
+		return PipelineState{ std::move(newPipelineState), true };
+	}
+
+	std::optional<PipelineState> Device::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
+	{
+		ComPtr<ID3D12PipelineState> newPipelineState{};
+		if (!SUCCEEDED(device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState))))
+		{
+			return std::nullopt;
+		}
+
+		SetObjectName(newPipelineState.Get(), desc.Name);
+		return PipelineState{ std::move(newPipelineState), false };
 	}
 
 } // namespace fe::dx

@@ -1,11 +1,12 @@
 #include <Renderer/FrameResource.h>
 #include <D3D12/Device.h>
+#include <D3D12/Fence.h>
 
 namespace fe
 {
 	FrameResource::FrameResource(dx::Device& device, const size_t numInflightFrames)
 		: numInflightFrames(numInflightFrames)
-		, fence(device.CreateFence("FrameFence").value())
+		, fence(std::make_unique<dx::Fence>(device.CreateFence("FrameFence").value()))
 	{
 	}
 
@@ -18,6 +19,6 @@ namespace fe
 		localFrameIdx = currentGlobalFrameIdx % numInflightFrames;
 
 		check(fence);
-		fence.Next();
+		fence->Next();
 	}
 } // namespace fe

@@ -4,26 +4,9 @@
 
 namespace fe::dx
 {
-	PipelineState::PipelineState(Device& device, const GraphicsPipelineStateDesc& desc)
-		: bIsGraphicsPSO(true), name(desc.Name)
+	PipelineState::PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO)
+		: pso(std::move(newPSO)), bIsGraphics(bIsGraphicsPSO)
 	{
-		auto& nativeDevice = device.GetNative();
-		verify_succeeded(nativeDevice.CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso)));
-
-		// #todo PSOCache!
-		const std::wstring widerName = name.AsWideString();
-		pso->SetName(widerName.c_str());
-	}
-
-	PipelineState::PipelineState(Device& device, const ComputePipelineStateDesc& desc)
-		: bIsGraphicsPSO(false), name(desc.Name)
-	{
-		auto& nativeDevice = device.GetNative();
-		verify_succeeded(nativeDevice.CreateComputePipelineState(&desc, IID_PPV_ARGS(&pso)));
-
-		// #todo PSOCache!
-		const std::wstring widerName = name.AsWideString();
-		pso->SetName(widerName.c_str());
 	}
 
 	PipelineState::~PipelineState() {}

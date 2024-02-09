@@ -18,6 +18,9 @@ namespace fe::dx
 	class Descriptor;
 	class Fence;
 	class CommandContext;
+	class PipelineState;
+	class GraphicsPipelineStateDesc;
+	class ComputePipelineStateDesc;
 	class Device
 	{
 	public:
@@ -76,6 +79,9 @@ namespace fe::dx
 		std::optional<Descriptor> CreateDepthStencilView(GPUTexture& texture, const GPUTextureSubresource subresource);
 
 		std::optional<Fence> CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
+
+		std::optional<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
+		std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
 
 	private:
 		bool AcquireAdapterFromFactory();
