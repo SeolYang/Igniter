@@ -4,15 +4,22 @@
 namespace fe::dx
 {
 	class Device;
-	// 현재는 Bindless root signature 의 생성만 구현, 이후에 Root Parameter, Root Constant 또는 Root Descriptor Table로
-	// 확장 가능하도록 일반화
 	class RootSignature
 	{
+		friend class Device;
+
 	public:
-		RootSignature(Device& device);
+		RootSignature(const RootSignature&) = delete;
+		RootSignature(RootSignature&& other) noexcept;
 		~RootSignature();
 
+		RootSignature& operator=(const RootSignature&) = delete;
+		RootSignature& operator=(RootSignature&& other) noexcept;
+
 		[[nodiscard]] auto& GetNative() { return *rootSignature.Get(); }
+
+	private:
+		RootSignature(ComPtr<ID3D12RootSignature> newRootSignature);
 
 	private:
 		ComPtr<ID3D12RootSignature> rootSignature;

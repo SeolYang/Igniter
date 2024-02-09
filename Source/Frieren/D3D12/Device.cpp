@@ -11,6 +11,7 @@
 #include <D3D12/Fence.h>
 #include <D3D12/PipelineState.h>
 #include <D3D12/PipelineStateDesc.h>
+#include <D3D12/RootSignature.h>
 
 namespace fe::dx
 {
@@ -534,6 +535,35 @@ namespace fe::dx
 
 		SetObjectName(newPipelineState.Get(), desc.Name);
 		return PipelineState{ std::move(newPipelineState), false };
+	}
+
+	std::optional<RootSignature> Device::CreateBindlessRootSignature()
+	{
+		// WITH THOSE FLAGS, IT MUST BIND DESCRIPTOR HEAP FIRST BEFORE BINDING ROOT SIGNATURE
+		const D3D12_ROOT_SIGNATURE_DESC desc{ .NumParameters = 0,
+											  .pParameters = nullptr,
+											  .NumStaticSamplers = 0,
+											  .pStaticSamplers = nullptr,
+											  .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED |
+													   D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED };
+
+		ComPtr<ID3DBlob> rootSignatureBlob;
+		ComPtr<ID3DBlob> errorBlob;
+		if (!SUCCEEDED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_1,
+												   rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf())))
+		{
+			return std::nullopt;
+		}
+
+		ComPtr<ID3D12RootSignature> newRootSignature;
+		if (!SUCCEEDED(device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(),
+												   rootSignatureBlob->GetBufferSize(),
+												   IID_PPV_ARGS(&newRootSignature))))
+		{
+			return std::nullopt;
+		}
+
+		return RootSignature{ std::move(newRootSignature) };
 	}
 
 } // namespace fe::dx

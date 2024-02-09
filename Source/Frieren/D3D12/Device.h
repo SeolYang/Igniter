@@ -21,6 +21,7 @@ namespace fe::dx
 	class PipelineState;
 	class GraphicsPipelineStateDesc;
 	class ComputePipelineStateDesc;
+	class RootSignature;
 	class Device
 	{
 	public:
@@ -82,6 +83,8 @@ namespace fe::dx
 
 		std::optional<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
 		std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
+
+		std::optional<RootSignature> CreateBindlessRootSignature();
 
 	private:
 		bool AcquireAdapterFromFactory();
