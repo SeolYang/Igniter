@@ -36,36 +36,38 @@ namespace fe::dx
 
 	class DescriptorHeap
 	{
+		friend class Device;
+		friend class Descriptor;
+
 	private:
 		uint32_t AllocateIndex();
 		void	 ReleaseIndex(const uint32_t index);
 
-		D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index);
-		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index);
+		D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
+		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
 
 	public:
-		DescriptorHeap(Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type, const uint32_t numDescriptors,
-					   const std::string_view debugName);
+		DescriptorHeap(const DescriptorHeap&) = delete;
+		DescriptorHeap(DescriptorHeap&& other) noexcept;
 		~DescriptorHeap();
 
-		DescriptorHeap(const DescriptorHeap&) = delete;
-		DescriptorHeap(DescriptorHeap&&) noexcept = delete;
-
 		DescriptorHeap& operator=(const DescriptorHeap&) = delete;
-		DescriptorHeap& operator=(DescriptorHeap&&) noexcept = delete;
+		DescriptorHeap& operator=(DescriptorHeap&& other) noexcept;
 
 		Descriptor AllocateDescriptor() { return Descriptor{ *this }; }
 
 	private:
-		friend Descriptor;
-		ComPtr<ID3D12DescriptorHeap> descriptorHeap;
-		const bool					 bIsShaderVisible = false;
-		const uint32_t				 descriptorHandleIncrementSize = 0;
+		DescriptorHeap(ComPtr<ID3D12DescriptorHeap> newDescriptorHeap, const bool bIsShaderVisibleHeap,
+					   const uint32_t numDescriptorsInHeap, const uint32_t descriptorHandleIncSizeInHeap);
 
+	private:
+		ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+		uint32_t					 descriptorHandleIncrementSize = 0;
+		uint32_t					 numInitialDescriptors = 0;
+
+		bool						bIsShaderVisible = false;
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandleForHeapStart{};
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
-
-		const uint32_t numInitialDescriptors = 0;
 
 		RecursiveMutex		 mutex;
 		std::queue<uint32_t> indexPool;

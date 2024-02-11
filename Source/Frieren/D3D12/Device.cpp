@@ -35,7 +35,7 @@ namespace fe::dx
 				if (CreateMemoryAllcator())
 				{
 					CacheDescriptorHandleIncrementSize();
-					CreateDescriptorHeaps();
+					CreateBindlessDescriptorHeaps();
 				}
 
 				if (CreateCommandQueues())
@@ -446,26 +446,16 @@ namespace fe::dx
 		return true;
 	}
 
-	void Device::CreateDescriptorHeaps()
+	void Device::CreateBindlessDescriptorHeaps()
 	{
-		cbvSrvUavDescriptorHeap =
-			std::make_unique<DescriptorHeap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, NumCbvSrvUavDescriptors,
-											 "Bindless CBV_SRV_UAV Descriptor Heap");
-
+		cbvSrvUavDescriptorHeap = std::make_unique<DescriptorHeap>(
+			CreateDescriptorHeap(EDescriptorHeapType::CBV_SRV_UAV, NumCbvSrvUavDescriptors).value());
 		samplerDescriptorHeap = std::make_unique<DescriptorHeap>(
-			*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, NumSamplerDescriptors, "Bindless Sampler Descriptor Heap");
-
-		rtvDescriptorHeap = std::make_unique<DescriptorHeap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, NumRtvDescriptors,
-															 "Bindless RTV Descriptor Heap");
-
-		dsvDescriptorHeap = std::make_unique<DescriptorHeap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, NumDsvDescriptors,
-															 "Bindless DSV Descriptor Heap");
-
-		FE_LOG(D3D12Info, "Bindless(Dynamic Resource) Descriptor Heaps initialized.");
-		FE_LOG(D3D12Info, "CBV-SRV-UAV Descriptor Heap::NumDescriptors: {}", NumCbvSrvUavDescriptors);
-		FE_LOG(D3D12Info, "Sampler Descriptor Heap::NumDescriptors: {}", NumSamplerDescriptors);
-		FE_LOG(D3D12Info, "RTV Descriptor Heap::NumDescriptors: {}", NumRtvDescriptors);
-		FE_LOG(D3D12Info, "DSV Descriptor Heap::NumDescriptors: {}", NumDsvDescriptors);
+			CreateDescriptorHeap(EDescriptorHeapType::Sampler, NumSamplerDescriptors).value());
+		rtvDescriptorHeap =
+			std::make_unique<DescriptorHeap>(CreateDescriptorHeap(EDescriptorHeapType::RTV, NumRtvDescriptors).value());
+		dsvDescriptorHeap =
+			std::make_unique<DescriptorHeap>(CreateDescriptorHeap(EDescriptorHeapType::DSV, NumDsvDescriptors).value());
 	}
 
 	std::optional<GPUBuffer> Device::CreateBuffer(const GPUBufferDesc& bufferDesc)
@@ -642,6 +632,46 @@ namespace fe::dx
 			device->CreateCommandList1(0, cmdListType, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&newCmdList)));
 
 		return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), cmdListType };
+	}
+
+	std::optional<DescriptorHeap> Device::CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType,
+															   const uint32_t			 numDescriptors)
+	{
+		D3D12_DESCRIPTOR_HEAP_TYPE targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+		switch (descriptorHeapType)
+		{
+			case EDescriptorHeapType::CBV_SRV_UAV:
+				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+				break;
+			case EDescriptorHeapType::Sampler:
+				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+				break;
+			case EDescriptorHeapType::DSV:
+				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+				break;
+			case EDescriptorHeapType::RTV:
+				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+				break;
+		}
+		check(targetDescriptorHeapType != D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES);
+		const bool bIsShaderVisibleDescriptorHeap = descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV ||
+													descriptorHeapType == EDescriptorHeapType::Sampler;
+
+		const D3D12_DESCRIPTOR_HEAP_DESC desc{ .Type = targetDescriptorHeapType,
+											   .NumDescriptors = numDescriptors,
+											   .Flags = bIsShaderVisibleDescriptorHeap
+															? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+															: D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+											   .NodeMask = 0 };
+
+		ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
+		if (!SUCCEEDED(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap))))
+		{
+			return std::nullopt;
+		}
+
+		return DescriptorHeap{ std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
+							   GetDescriptorHandleIncrementSize(targetDescriptorHeapType) };
 	}
 
 } // namespace fe::dx

@@ -6,37 +6,34 @@
 
 namespace fe::dx
 {
-	DescriptorHeap::DescriptorHeap(Device& device, const D3D12_DESCRIPTOR_HEAP_TYPE type,
-								   const uint32_t numDescriptors, const std::string_view debugName)
-		: bIsShaderVisible(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
-		, descriptorHandleIncrementSize(device.GetDescriptorHandleIncrementSize(type))
-		, numInitialDescriptors(numDescriptors)
-		, indexPool(CreateIndexQueue(numDescriptors))
+	DescriptorHeap::DescriptorHeap(DescriptorHeap&& other) noexcept
+		: descriptorHeap(std::move(other.descriptorHeap))
+		, descriptorHandleIncrementSize(other.descriptorHandleIncrementSize)
+		, numInitialDescriptors(std::exchange(other.numInitialDescriptors, 0))
+		, cpuDescriptorHandleForHeapStart(std::exchange(other.cpuDescriptorHandleForHeapStart, {}))
+		, gpuDescriptorHandleForHeapStart(std::exchange(other.gpuDescriptorHandleForHeapStart, {}))
+		, bIsShaderVisible(other.bIsShaderVisible)
+		, indexPool(std::move(other.indexPool))
 	{
-		verify(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES != type);
-
-		D3D12_DESCRIPTOR_HEAP_DESC desc{};
-		desc.NodeMask = 0;
-		desc.NumDescriptors = numDescriptors;
-		desc.Type = type;
-		desc.Flags = bIsShaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
-		auto& nativeDevice = device.GetNative();
-		const bool		bSucceeded = SUCCEEDED(nativeDevice.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
-		FE_CONDITIONAL_LOG(D3D12Fatal, bSucceeded, "Failed to create descriptor heap {}", debugName);
-
-		if (bSucceeded)
-		{
-			cpuDescriptorHandleForHeapStart = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-			gpuDescriptorHandleForHeapStart = bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart()
-															   : CD3DX12_GPU_DESCRIPTOR_HANDLE{};
-		}
 	}
 
 	DescriptorHeap::~DescriptorHeap()
 	{
-		FE_CONDITIONAL_LOG(D3D12Warn, numInitialDescriptors == indexPool.size(),
-						   "Some Descriptorsd doesn't released yet. {}/{}", indexPool.size(), numInitialDescriptors);
+		check(numInitialDescriptors == indexPool.size());
+	}
+
+	DescriptorHeap::DescriptorHeap(ComPtr<ID3D12DescriptorHeap> newDescriptorHeap, const bool bIsShaderVisibleHeap,
+								   const uint32_t numDescriptorsInHeap, const uint32_t descriptorHandleIncSizeInHeap)
+		: descriptorHeap(newDescriptorHeap)
+		, descriptorHandleIncrementSize(descriptorHandleIncSizeInHeap)
+		, numInitialDescriptors(numDescriptorsInHeap)
+		, bIsShaderVisible(bIsShaderVisibleHeap)
+		, cpuDescriptorHandleForHeapStart(descriptorHeap->GetCPUDescriptorHandleForHeapStart())
+		, gpuDescriptorHandleForHeapStart(bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart()
+														   : D3D12_GPU_DESCRIPTOR_HANDLE{})
+		, indexPool(CreateIndexQueue(numDescriptorsInHeap))
+	{
+		check(newDescriptorHeap);
 	}
 
 	uint32_t DescriptorHeap::AllocateIndex()
@@ -66,18 +63,30 @@ namespace fe::dx
 		}
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const uint32_t index)
+	D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const uint32_t index) const
 	{
 		return CD3DX12_CPU_DESCRIPTOR_HANDLE{ cpuDescriptorHandleForHeapStart, static_cast<INT>(index),
 											  descriptorHandleIncrementSize };
 	}
 
-	D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedGPUDescriptorHandle(const uint32_t index)
+	D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedGPUDescriptorHandle(const uint32_t index) const
 	{
 		return bIsShaderVisible
 				   ? CD3DX12_GPU_DESCRIPTOR_HANDLE{ gpuDescriptorHandleForHeapStart, static_cast<INT>(index),
 													descriptorHandleIncrementSize }
 				   : gpuDescriptorHandleForHeapStart;
+	}
+
+	DescriptorHeap& DescriptorHeap::operator=(DescriptorHeap&& other) noexcept 
+	{
+		descriptorHeap = std::move(other.descriptorHeap);
+		descriptorHandleIncrementSize = other.descriptorHandleIncrementSize;
+		numInitialDescriptors = other.numInitialDescriptors;
+		bIsShaderVisible = other.bIsShaderVisible;
+		cpuDescriptorHandleForHeapStart = other.cpuDescriptorHandleForHeapStart;
+		gpuDescriptorHandleForHeapStart = other.gpuDescriptorHandleForHeapStart;
+		indexPool = std::move(other.indexPool);
+		return *this;
 	}
 
 	Descriptor::Descriptor(DescriptorHeap& descriptorHeap)

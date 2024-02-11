@@ -16,6 +16,14 @@ namespace fe::dx
 		Copy
 	};
 
+	enum class EDescriptorHeapType
+	{
+		CBV_SRV_UAV,
+		Sampler,
+		RTV,
+		DSV
+	};
+
 	class DescriptorHeap;
 	class GPUBufferDesc;
 	class GPUBuffer;
@@ -43,11 +51,14 @@ namespace fe::dx
 
 		[[nodiscard]] auto& GetNative() { return *device.Get(); }
 
-		ID3D12CommandQueue&	 GetCommandQueue(const EQueueType queueType);
-		uint32_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type) const;
+		ID3D12CommandQueue& GetCommandQueue(const EQueueType queueType);
+		uint32_t			GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type) const;
 
 		std::optional<GPUBuffer>  CreateBuffer(const GPUBufferDesc& bufferDesc);
 		std::optional<GPUTexture> CreateTexture(const GPUTextureDesc& textureDesc);
+
+		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType,
+														   const uint32_t			 numDescriptors);
 
 		std::optional<Descriptor> CreateShaderResourceView(GPUBuffer& gpuBuffer);
 		std::optional<Descriptor> CreateConstantBufferView(GPUBuffer& gpuBuffer);
@@ -84,7 +95,7 @@ namespace fe::dx
 		void CacheDescriptorHandleIncrementSize();
 		bool CreateMemoryAllcator();
 		bool CreateCommandQueues();
-		void CreateDescriptorHeaps();
+		void CreateBindlessDescriptorHeaps();
 
 	private:
 		static constexpr uint32_t NumCbvSrvUavDescriptors = 2048;
