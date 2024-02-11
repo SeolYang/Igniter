@@ -3,8 +3,10 @@
   "name": "frieren",
   "version": "0.0.1",
   "dependencies": [
-    "mimalloc",
-    "imgui",
+    {
+    "name": "imgui",
+    "features": ["dx12-binding", "docking-experimental"]  
+    },
     "assimp",
     "meshoptimizer",
     "stb",

@@ -46,6 +46,10 @@
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\Common.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\ImGuiCanvas.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Frieren\Math\Common.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\FrameResource.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
@@ -57,7 +61,7 @@
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContext.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\Common.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\D3D12Common.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
@@ -73,6 +77,9 @@
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCanvas.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCommon.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="..\Source\Frieren\Renderer\FrameResource.cpp" />
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">

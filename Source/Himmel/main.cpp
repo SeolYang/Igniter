@@ -1,10 +1,10 @@
 #include <Engine.h>
 #include <Core/InputManager.h>
+#include <D3D12/Device.h>
 #include <Gameplay/GameInstance.h>
 #include <Gameplay/World.h>
 #include <PlayerArchetype.h>
 #include <BasicGameFlow.h>
-#include <D3D12/Device.h>
 
 int main()
 {

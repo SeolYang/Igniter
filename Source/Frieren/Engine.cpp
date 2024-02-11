@@ -7,6 +7,8 @@
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
 #include <Renderer/Renderer.h>
+#include <ImGui/ImGuiRenderer.h>
+#include <ImGui/ImGuiCanvas.h>
 #include <Gameplay/GameInstance.h>
 #include <Gameplay/World.h>
 
@@ -17,7 +19,7 @@ namespace fe
 	Engine::Engine()
 	{
 		const bool bIsFirstEngineCreation = instance == nullptr;
-		verify(bIsFirstEngineCreation);
+		check(bIsFirstEngineCreation);
 		if (bIsFirstEngineCreation)
 		{
 			instance = this;
@@ -34,6 +36,9 @@ namespace fe
 
 			renderer = std::make_unique<Renderer>(*window);
 
+			imguiRenderer = std::make_unique<ImGuiRenderer>();
+			imguiCanvas = std::make_unique<ImGuiCanvas>();
+
 			gameInstance = std::make_unique<GameInstance>();
 		}
 	}
@@ -41,6 +46,8 @@ namespace fe
 	Engine::~Engine()
 	{
 		gameInstance.reset();
+		imguiCanvas.reset();
+		imguiRenderer.reset();
 		renderer.reset();
 		inputManager.reset();
 		window.reset();
@@ -56,43 +63,55 @@ namespace fe
 
 	Timer& Engine::GetTimer()
 	{
-		verify(instance != nullptr);
+		check(instance != nullptr);
 		return *(instance->timer);
 	}
 
 	Logger& Engine::GetLogger()
 	{
-		verify(instance != nullptr);
+		check(instance != nullptr);
 		return *(instance->logger);
 	}
 
 	HandleManager& Engine::GetHandleManager()
 	{
-		verify(instance != nullptr);
+		check(instance != nullptr);
 		return *(instance->handleManager);
 	}
 
 	Window& Engine::GetWindow()
 	{
-		verify(instance != nullptr);
+		check(instance != nullptr);
 		return *(instance->window);
 	}
 
 	InputManager& Engine::GetInputManager()
 	{
-		verify(instance != nullptr);
+		check(instance != nullptr);
 		return *(instance->inputManager);
 	}
 
 	Renderer& Engine::GetRenderer()
 	{
-		verify(instance != nullptr);
+		check(instance != nullptr);
 		return *(instance->renderer);
+	}
+
+	ImGuiRenderer& Engine::GetImGuiRenderer() 
+	{
+		check(instance != nullptr);
+		return *(instance->imguiRenderer);
+	}
+
+	ImGuiCanvas& Engine::GetImGuiCanvas() 
+	{
+		check(instance != nullptr);
+		return *(instance->imguiCanvas);
 	}
 
 	GameInstance& Engine::GetGameInstance()
 	{
-		verify(instance != nullptr);
+		check(instance != nullptr);
 		return *(instance->gameInstance);
 	}
 
@@ -118,6 +137,7 @@ namespace fe
 			gameInstance->Update();
 			inputManager->PostUpdate();
 			renderer->Render();
+			imguiRenderer->Render(*imguiCanvas);
 
 			timer->End();
 		}

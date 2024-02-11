@@ -25,6 +25,9 @@
     <Filter Include="Source\Math">
       <UniqueIdentifier>{678be2b1-c00f-418d-a544-a1a472855147}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\ImGui">
+      <UniqueIdentifier>{13d19af1-2a32-4de0-96a7-7a2dfced32f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -144,6 +147,18 @@
     <ClInclude Include="..\Source\Frieren\Core\Container.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\Common.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\ImGuiRenderer.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\ImGuiCanvas.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\ImGuiLayer.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -176,7 +191,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\Common.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\D3D12Common.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp">
@@ -217,6 +232,15 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Renderer\FrameResource.cpp">
       <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCommon.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\ImGuiRenderer.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCanvas.cpp">
+      <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

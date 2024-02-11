@@ -13,6 +13,8 @@ namespace fe
 	class InputManager;
 	class Renderer;
 	class GameInstance;
+	class ImGuiCanvas;
+	class ImGuiRenderer;
 	class Engine final
 	{
 	public:
@@ -25,6 +27,8 @@ namespace fe
 		[[nodiscard]] static Window&		GetWindow();
 		[[nodiscard]] static InputManager&	GetInputManager();
 		[[nodiscard]] static Renderer&		GetRenderer();
+		[[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
+		[[nodiscard]] static ImGuiCanvas&	GetImGuiCanvas();
 		[[nodiscard]] static GameInstance&	GetGameInstance();
 		bool								IsValid() const { return this == instance; }
 
@@ -39,6 +43,8 @@ namespace fe
 		std::unique_ptr<Window>		   window;
 		std::unique_ptr<InputManager>  inputManager;
 		std::unique_ptr<Renderer>	   renderer;
+		std::unique_ptr<ImGuiRenderer> imguiRenderer;
+		std::unique_ptr<ImGuiCanvas>   imguiCanvas;
 		std::unique_ptr<GameInstance>  gameInstance;
 	};
 } // namespace fe
