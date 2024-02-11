@@ -136,8 +136,11 @@ namespace fe
 
 			gameInstance->Update();
 			inputManager->PostUpdate();
+
+			renderer->BeginFrame();
 			renderer->Render();
 			imguiRenderer->Render(*imguiCanvas);
+			renderer->EndFrame();
 
 			timer->End();
 		}

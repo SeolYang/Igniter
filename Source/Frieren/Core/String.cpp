@@ -90,8 +90,7 @@ namespace fe
 
 	bool String::operator==(const String& rhs) const
 	{
-		const bool bIsValid = IsValid() && rhs.IsValid();
-		return bIsValid ? hashOfString == rhs.hashOfString : false;
+		return (IsValid() && rhs.IsValid()) ? hashOfString == rhs.hashOfString : false;
 	}
 
 } // namespace fe

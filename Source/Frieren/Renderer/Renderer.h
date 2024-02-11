@@ -19,13 +19,17 @@ namespace fe
 
 	class Window;
 	class FrameResource;
+	class World;
 	class Renderer
 	{
 	public:
 		Renderer(const Window& window);
 		~Renderer();
 
+		void BeginFrame() {}
 		void Render();
+		void Render(World& world);
+		void EndFrame() {}
 
 	private:
 		std::unique_ptr<dx::Device>	   device;

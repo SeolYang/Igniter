@@ -17,7 +17,7 @@ namespace fe
 			requires std::derived_from<T, ImGuiLayer>
 		void AddLayer(Args&&... args)
 		{
-			layers.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+			layers.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
 		}
 
 		template <typename T>
@@ -43,6 +43,18 @@ namespace fe
 				if (typeid(*(*itr)) == typeid(T))
 				{
 					layers.erase(itr);
+				}
+			}
+		}
+
+		void RemoveLayer(const String layerName)
+		{
+			for (auto itr = layers.begin(); itr != layers.end(); ++itr)
+			{
+				if ((*itr)->GetName() == layerName)
+				{
+					layers.erase(itr);
+					break;
 				}
 			}
 		}
