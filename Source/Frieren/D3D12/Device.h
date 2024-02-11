@@ -66,6 +66,8 @@ namespace fe::dx
 
 		std::optional<RootSignature> CreateBindlessRootSignature();
 
+		std::optional<CommandContext> CreateCommandContext(const EQueueType targetQueueType);
+
 		void Signal(Fence& fence, const EQueueType targetQueueType);
 		void NextSignal(Fence& fence, const EQueueType targetQueueType);
 		void Wait(Fence& fence, const EQueueType targetQueueTytpe);

@@ -4,13 +4,23 @@
 
 namespace fe::dx
 {
-	CommandContext::CommandContext(Device& device, const String /*debugName*/, const D3D12_COMMAND_LIST_TYPE type)
-		: typeOfCommandList(type)
+	CommandContext::CommandContext(CommandContext&& other) noexcept
+		: cmdAllocator(std::move(other.cmdAllocator))
+		, cmdList(std::move(other.cmdList))
+		, cmdListTargetQueueType(other.cmdListTargetQueueType)
+		, pendingGlobalBarriers(std::move(other.pendingGlobalBarriers))
+		, pendingTextureBarriers(std::move(other.pendingTextureBarriers))
+		, pendingBufferBarriers(std::move(other.pendingBufferBarriers))
 	{
-		auto& nativeDevice = device.GetNative();
-		verify_succeeded(
-			nativeDevice.CreateCommandList1(0, type, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&cmdList)));
-		verify_succeeded(nativeDevice.CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAllocator)));
+	}
+
+	CommandContext::CommandContext(ComPtr<ID3D12CommandAllocator>	  newCmdAllocator,
+								   ComPtr<ID3D12GraphicsCommandList7> newCmdList,
+								   const D3D12_COMMAND_LIST_TYPE	  targetQueueType)
+		: cmdAllocator(std::move(newCmdAllocator))
+		, cmdList(std::move(newCmdList))
+		, cmdListTargetQueueType(targetQueueType)
+	{
 	}
 
 	void CommandContext::Begin(PipelineState* const initStatePtr)
@@ -29,4 +39,16 @@ namespace fe::dx
 		verify(cmdList.Get() != nullptr);
 		verify_succeeded(cmdList->Close());
 	}
+
+	CommandContext& CommandContext::operator=(CommandContext&& other) noexcept
+	{
+		cmdAllocator = std::move(other.cmdAllocator);
+		cmdList = std::move(other.cmdList);
+		cmdListTargetQueueType = other.cmdListTargetQueueType;
+		pendingGlobalBarriers = std::move(other.pendingGlobalBarriers);
+		pendingTextureBarriers = std::move(other.pendingTextureBarriers);
+		pendingBufferBarriers = std::move(other.pendingBufferBarriers);
+		return *this;
+	}
+
 } // namespace fe::dx

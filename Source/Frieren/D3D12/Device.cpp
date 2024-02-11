@@ -12,6 +12,7 @@
 #include <D3D12/PipelineState.h>
 #include <D3D12/PipelineStateDesc.h>
 #include <D3D12/RootSignature.h>
+#include <D3D12/CommandContext.h>
 
 namespace fe::dx
 {
@@ -611,6 +612,36 @@ namespace fe::dx
 			default:
 				return 0;
 		}
+	}
+
+	std::optional<CommandContext> Device::CreateCommandContext(const EQueueType targetQueueType)
+	{
+		ComPtr<ID3D12CommandAllocator>	   newCmdAllocator;
+		ComPtr<ID3D12GraphicsCommandList7> newCmdList;
+
+		D3D12_COMMAND_LIST_TYPE cmdListType = D3D12_COMMAND_LIST_TYPE_NONE;
+		switch (targetQueueType)
+		{
+			case EQueueType::Direct:
+				cmdListType = D3D12_COMMAND_LIST_TYPE_DIRECT;
+				break;
+
+			case EQueueType::AsyncCompute:
+				cmdListType = D3D12_COMMAND_LIST_TYPE_COMPUTE;
+				break;
+
+			case EQueueType::Copy:
+				cmdListType = D3D12_COMMAND_LIST_TYPE_COPY;
+				break;
+		}
+
+		// #todo 스레드 당 Command Allocator 할당
+		verify_succeeded(device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator)));
+
+		verify_succeeded(
+			device->CreateCommandList1(0, cmdListType, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&newCmdList)));
+
+		return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), cmdListType };
 	}
 
 } // namespace fe::dx
