@@ -31,19 +31,7 @@ namespace fe::dx
 		return *this;
 	}
 
-	void Fence::Signal(ID3D12CommandQueue& cmdQueue)
-	{
-		check(fence);
-		verify_succeeded(cmdQueue.Signal(fence.Get(), counter));
-	}
-
-	void Fence::GpuWaitForFence(ID3D12CommandQueue& cmdQueue)
-	{
-		check(fence);
-		verify_succeeded(cmdQueue.Wait(fence.Get(), counter));
-	}
-
-	void Fence::CpuWaitForFence()
+	void Fence::WaitOnCPU()
 	{
 		check(fence);
 		check(eventHandle != NULL);

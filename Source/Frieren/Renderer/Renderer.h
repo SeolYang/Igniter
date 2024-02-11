@@ -7,7 +7,7 @@ namespace fe::dx
 	class Device;
 	class DescriptorHeap;
 	class Swapchain;
-}
+} // namespace fe::dx
 
 namespace fe
 {
@@ -15,7 +15,7 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning);
 	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal);
 
-	constexpr uint8_t MaxFramesInFlight = 2;
+	constexpr uint8_t NumFramesInFlight = 2;
 
 	class Window;
 	class FrameResource;
@@ -28,13 +28,12 @@ namespace fe
 		void Render();
 
 	private:
-		void BeginFrame();
-		void EndFrame();
-
-	private:
 		std::unique_ptr<dx::Device>	   device;
 		std::unique_ptr<dx::Swapchain> swapchain;
-		std::vector<FrameResource> frameResources; // reserved #'MaxFramesInFlight'
+
+		std::vector<FrameResource> frameResources; // reserved #'NumFramesInFlight'
+		size_t					   globalFrames;
+		size_t					   localFrames;
 
 	};
 } // namespace fe

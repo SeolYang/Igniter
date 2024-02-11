@@ -12,18 +12,15 @@ namespace fe
 	class FrameResource
 	{
 	public:
-		FrameResource(dx::Device& device, const size_t numInflightFrames);
+		FrameResource(dx::Device& device);
+		FrameResource(FrameResource&& other) noexcept;
 		~FrameResource();
 
-		void BeginFrame(const size_t currentGlobalFrameIdx);
+		FrameResource& operator=(FrameResource&& other) noexcept;
 
-		size_t GetGlobalFrameIndex() const { return globalFrameIdx; }
-		size_t GetLocalFrameIndex() const { return localFrameIdx; }
+		dx::Fence& GetFence();
 
 	private:
-		const size_t numInflightFrames;
-		size_t		 globalFrameIdx = 0;
-		size_t		 localFrameIdx = 0;
 		std::unique_ptr<dx::Fence> fence;
 	};
 } // namespace fe

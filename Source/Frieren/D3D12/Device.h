@@ -9,6 +9,13 @@ namespace fe::dx
 	FE_DECLARE_LOG_CATEGORY(D3D12Warn, ELogVerbosiy::Warning);
 	FE_DECLARE_LOG_CATEGORY(D3D12Fatal, ELogVerbosiy::Fatal);
 
+	enum class EQueueType
+	{
+		Direct,
+		AsyncCompute,
+		Copy
+	};
+
 	class DescriptorHeap;
 	class GPUBufferDesc;
 	class GPUBuffer;
@@ -34,37 +41,10 @@ namespace fe::dx
 		Device& operator=(Device&) = delete;
 		Device& operator=(Device&&) noexcept = delete;
 
-		auto&				GetDirectQueue() { return *directQueue.Get(); }
-		auto&				GetAsyncComputeQueue() { return *asyncComputeQueue.Get(); }
-		auto&				GetCopyQueue() { return *copyQueue.Get(); }
 		[[nodiscard]] auto& GetNative() { return *device.Get(); }
 
-		uint32_t GetCbvSrvUavDescriptorHandleIncrementSize() const { return cbvSrvUavDescriptorHandleIncrementSize; }
-		uint32_t GetSamplerDescriptorHandleIncrementSize() const { return samplerDescritorHandleIncrementSize; }
-		uint32_t GetDsvDescriptorHandleIncrementSize() const { return dsvDescriptorHandleIncrementSize; }
-		uint32_t GetRtvDescriptorHandleIncrementSize() const { return rtvDescriptorHandleIncrementSize; }
-		uint32_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type) const
-		{
-			switch (type)
-			{
-				case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
-					return cbvSrvUavDescriptorHandleIncrementSize;
-				case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
-					return samplerDescritorHandleIncrementSize;
-				case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
-					return dsvDescriptorHandleIncrementSize;
-				case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
-					return rtvDescriptorHandleIncrementSize;
-				default:
-					return 0;
-			}
-		}
-
-		// #todo Execute Command Context	(Immediate)
-		// #todo Execute Command Contexts	(Immediate)
-
-		void FlushQueue(D3D12_COMMAND_LIST_TYPE queueType);
-		void FlushGPU();
+		ID3D12CommandQueue&	 GetCommandQueue(const EQueueType queueType);
+		uint32_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type) const;
 
 		std::optional<GPUBuffer>  CreateBuffer(const GPUBufferDesc& bufferDesc);
 		std::optional<GPUTexture> CreateTexture(const GPUTextureDesc& textureDesc);
@@ -86,6 +66,13 @@ namespace fe::dx
 
 		std::optional<RootSignature> CreateBindlessRootSignature();
 
+		void Signal(Fence& fence, const EQueueType targetQueueType);
+		void NextSignal(Fence& fence, const EQueueType targetQueueType);
+		void Wait(Fence& fence, const EQueueType targetQueueTytpe);
+
+		void FlushQueue(EQueueType queueType);
+		void FlushGPU();
+
 	private:
 		bool AcquireAdapterFromFactory();
 		void LogAdapterInformations();
@@ -97,7 +84,7 @@ namespace fe::dx
 		bool CreateCommandQueues();
 		void CreateDescriptorHeaps();
 
-	public:
+	private:
 		static constexpr uint32_t NumCbvSrvUavDescriptors = 2048;
 		static constexpr uint32_t NumSamplerDescriptors = 512;
 		static constexpr uint32_t NumRtvDescriptors = 256;

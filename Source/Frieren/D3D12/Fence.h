@@ -34,11 +34,7 @@ namespace fe::dx
 		}
 
 		void Next() { ++counter; }
-
-		// #todo 각 함수를 적재적소에 배치/분배
-		void Signal(ID3D12CommandQueue& cmdQueue);
-		void GpuWaitForFence(ID3D12CommandQueue& cmdQueue);
-		void CpuWaitForFence();
+		void WaitOnCPU();
 
 	private:
 		Fence(ComPtr<ID3D12Fence> newFence);

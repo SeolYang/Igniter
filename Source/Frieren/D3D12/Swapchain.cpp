@@ -51,8 +51,8 @@ namespace fe::dx
 		desc.Flags = bIsTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		ComPtr<IDXGISwapChain1> swapchain1;
-		verify_succeeded(factory->CreateSwapChainForHwnd(&device.GetDirectQueue(), window.GetNative(), &desc, nullptr,
-														 nullptr, &swapchain1));
+		verify_succeeded(factory->CreateSwapChainForHwnd(&device.GetCommandQueue(EQueueType::Direct),
+														 window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
 
 		// Disable Alt+Enter full-screen toggle.
 		verify_succeeded(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
@@ -93,7 +93,7 @@ namespace fe::dx
 
 	void Swapchain::Present()
 	{
-		swapchain->Present(0, 0);
+		swapchain->Present(0, 1);
 	}
 
 	const GPUTexture& Swapchain::GetBackBuffer() const

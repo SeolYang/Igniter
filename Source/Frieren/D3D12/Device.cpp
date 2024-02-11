@@ -76,42 +76,37 @@ namespace fe::dx
 #endif
 	}
 
-	void Device::FlushQueue(const D3D12_COMMAND_LIST_TYPE queueType)
+	void Device::FlushQueue(const EQueueType queueType)
 	{
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_BUNDLE, "Invalid queue type to flush.");
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_NONE, "Invalid queue type to flush.");
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE,
-						   "Invalid queue type to flush.");
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE,
-						   "Invalid queue type to flush.");
-		FE_CONDITIONAL_LOG(D3D12Fatal, queueType != D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS,
-						   "Invalid queue type to flush.");
-
 		ComPtr<ID3D12Fence> fence;
 		if (SUCCEEDED(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
 		{
 			ID3D12CommandQueue* queue = nullptr;
 			switch (queueType)
 			{
-				case D3D12_COMMAND_LIST_TYPE_DIRECT:
-					queue = &GetDirectQueue();
+				case EQueueType::Direct:
+					check(directQueue);
+					queue = directQueue.Get();
 					break;
-				case D3D12_COMMAND_LIST_TYPE_COMPUTE:
-					queue = &GetAsyncComputeQueue();
+				case EQueueType::AsyncCompute:
+					check(asyncComputeQueue);
+					queue = asyncComputeQueue.Get();
 					break;
-				case D3D12_COMMAND_LIST_TYPE_COPY:
-					queue = &GetCopyQueue();
+				case EQueueType::Copy:
+					check(copyQueue);
+					queue = copyQueue.Get();
 					break;
 			}
-
-			verify(queue != nullptr);
 
 			if (SUCCEEDED(queue->Signal(fence.Get(), 1)))
 			{
 				const HANDLE handleFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-				fence->SetEventOnCompletion(1, handleFenceEvent);
-				WaitForSingleObject(handleFenceEvent, INFINITE);
-				CloseHandle(handleFenceEvent);
+				if (handleFenceEvent != NULL)
+				{
+					fence->SetEventOnCompletion(1, handleFenceEvent);
+					WaitForSingleObject(handleFenceEvent, INFINITE);
+					CloseHandle(handleFenceEvent);
+				}
 			}
 			else
 			{
@@ -126,9 +121,9 @@ namespace fe::dx
 
 	void Device::FlushGPU()
 	{
-		FlushQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		FlushQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		FlushQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+		FlushQueue(EQueueType::Direct);
+		FlushQueue(EQueueType::AsyncCompute);
+		FlushQueue(EQueueType::Copy);
 	}
 
 	std::optional<Descriptor> Device::CreateShaderResourceView(GPUBuffer& gpuBuffer)
@@ -564,6 +559,58 @@ namespace fe::dx
 		}
 
 		return RootSignature{ std::move(newRootSignature) };
+	}
+
+	ID3D12CommandQueue& Device::GetCommandQueue(const EQueueType queueType)
+	{
+		switch (queueType)
+		{
+			default:
+			case EQueueType::Direct:
+				return *directQueue.Get();
+			case EQueueType::AsyncCompute:
+				return *asyncComputeQueue.Get();
+			case EQueueType::Copy:
+				return *copyQueue.Get();
+		}
+	}
+
+	void Device::Signal(Fence& fence, const EQueueType targetQueueType)
+	{
+		check(fence);
+		auto& commandQueue = GetCommandQueue(targetQueueType);
+		verify_succeeded(commandQueue.Signal(&fence.GetNative(), fence.GetCounter()));
+	}
+
+	void Device::Wait(Fence& fence, const EQueueType targetQueueTytpe)
+	{
+		check(fence);
+		auto& commandQueue = GetCommandQueue(targetQueueTytpe);
+		verify_succeeded(commandQueue.Wait(&fence.GetNative(), fence.GetCounter()));
+	}
+
+	void Device::NextSignal(Fence& fence, const EQueueType targetQueueType)
+	{
+		check(fence);
+		fence.Next();
+		Signal(fence, targetQueueType);
+	}
+
+	uint32_t Device::GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type) const
+	{
+		switch (type)
+		{
+			case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
+				return cbvSrvUavDescriptorHandleIncrementSize;
+			case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
+				return samplerDescritorHandleIncrementSize;
+			case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
+				return dsvDescriptorHandleIncrementSize;
+			case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
+				return rtvDescriptorHandleIncrementSize;
+			default:
+				return 0;
+		}
 	}
 
 } // namespace fe::dx

@@ -4,21 +4,24 @@
 
 namespace fe
 {
-	FrameResource::FrameResource(dx::Device& device, const size_t numInflightFrames)
-		: numInflightFrames(numInflightFrames)
-		, fence(std::make_unique<dx::Fence>(device.CreateFence("FrameFence").value()))
+	FrameResource::FrameResource(dx::Device& device)
+		: fence(std::make_unique<dx::Fence>(device.CreateFence("FrameFence").value()))
 	{
 	}
 
+	FrameResource::FrameResource(FrameResource&& other) noexcept : fence(std::move(other.fence)) {}
+
 	FrameResource::~FrameResource() {}
 
-	void FrameResource::BeginFrame(const size_t currentGlobalFrameIdx)
+	FrameResource& FrameResource::operator=(FrameResource&& other) noexcept
 	{
-		check(globalFrameIdx < currentGlobalFrameIdx);
-		globalFrameIdx = currentGlobalFrameIdx;
-		localFrameIdx = currentGlobalFrameIdx % numInflightFrames;
+		fence = std::move(other.fence);
+		return *this;
+	}
 
+	dx::Fence& FrameResource::GetFence()
+	{
 		check(fence);
-		fence->Next();
+		return *fence;
 	}
 } // namespace fe
