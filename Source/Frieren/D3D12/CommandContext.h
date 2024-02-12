@@ -49,7 +49,12 @@ namespace fe::dx
 																								 0 });
 		void FlushPendingTextureBarriers();
 
-		void ClearRenderTarget(const Descriptor& renderTargetView, float r = 0.f, float g = 0.f, float b = 0.f, float a = 1.f);
+		void ClearRenderTarget(const Descriptor& renderTargetView, float r = 0.f, float g = 0.f, float b = 0.f,
+							   float a = 1.f);
+		void ClearDepthStencil(const Descriptor& depthStencilView, float depth, uint8_t stencil);
+		void ClearDepth(const Descriptor& depthStencilView, float depth = 1.f);
+		void ClearStencil(const Descriptor& depthStencilView, uint8_t stencil = 0);
+
 		void SetRenderTarget(const Descriptor&								   renderTargetView,
 							 std::optional<std::reference_wrapper<Descriptor>> depthStencilView = std::nullopt);
 		void SetDescriptorHeap(DescriptorHeap& descriptorHeap);

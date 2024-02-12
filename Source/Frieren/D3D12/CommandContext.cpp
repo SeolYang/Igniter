@@ -61,6 +61,7 @@ namespace fe::dx
 												  const D3D12_BARRIER_LAYOUT			layoutAfter,
 												  const D3D12_BARRIER_SUBRESOURCE_RANGE subresourceRange)
 	{
+		check(IsValid());
 		check(targetTexture);
 		check(syncBefore != syncAfter || accessBefore != accessAfter || layoutBefore != layoutAfter);
 		// #todo 서브리소스 범위 체크
@@ -83,6 +84,7 @@ namespace fe::dx
 
 	void CommandContext::FlushPendingTextureBarriers()
 	{
+		check(IsValid());
 		const D3D12_BARRIER_GROUP barrierGroup{ .Type = D3D12_BARRIER_TYPE_TEXTURE,
 												.NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()),
 												.pTextureBarriers = pendingTextureBarriers.data() };
@@ -90,19 +92,50 @@ namespace fe::dx
 		pendingTextureBarriers.clear();
 	}
 
-	void CommandContext::ClearRenderTarget(const Descriptor& renderTargetView, float r, float g, float b, float a) 
+	void CommandContext::ClearRenderTarget(const Descriptor& renderTargetView, float r, float g, float b, float a)
 	{
-		check(cmdList);
+		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
 		check(renderTargetView && (renderTargetView.GetType() == EDescriptorType::RenderTargetView));
 		const float rgba[4] = { r, g, b, a };
 		cmdList->ClearRenderTargetView(renderTargetView.GetCPUDescriptorHandle(), rgba, 0, nullptr);
 	}
 
+	void CommandContext::ClearDepthStencil(const Descriptor& depthStencilView, float depth, uint8_t stencil)
+	{
+		check(IsValid());
+		check(cmdListTargetQueueType == EQueueType::Direct);
+		check(depthStencilView && (depthStencilView.GetType() == EDescriptorType::DepthStencilView));
+
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = depthStencilView.GetCPUDescriptorHandle();
+		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil,
+									   0, nullptr);
+	}
+
+	void CommandContext::ClearDepth(const Descriptor& depthStencilView, float depth /*= 1.f*/)
+	{
+		check(IsValid());
+		check(cmdListTargetQueueType == EQueueType::Direct);
+		check(depthStencilView && (depthStencilView.GetType() == EDescriptorType::DepthStencilView));
+
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = depthStencilView.GetCPUDescriptorHandle();
+		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
+	}
+
+	void CommandContext::ClearStencil(const Descriptor& depthStencilView, uint8_t stencil /*= 0*/)
+	{
+		check(IsValid());
+		check(cmdListTargetQueueType == EQueueType::Direct);
+		check(depthStencilView && (depthStencilView.GetType() == EDescriptorType::DepthStencilView));
+
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = depthStencilView.GetCPUDescriptorHandle();
+		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, nullptr);
+	}
+
 	void CommandContext::SetRenderTarget(const Descriptor&								   renderTargetView,
 										 std::optional<std::reference_wrapper<Descriptor>> depthStencilView)
 	{
-		check(cmdList);
+		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
 		check(renderTargetView && (renderTargetView.GetType() == EDescriptorType::RenderTargetView));
 		check(!depthStencilView ||
@@ -112,7 +145,7 @@ namespace fe::dx
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle =
 			depthStencilView ? depthStencilView->get().GetCPUDescriptorHandle() : D3D12_CPU_DESCRIPTOR_HANDLE{};
 
-		cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, depthStencilView ?  &dsvCpuHandle : nullptr);
+		cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, depthStencilView ? &dsvCpuHandle : nullptr);
 	}
 
 	void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
@@ -122,5 +155,4 @@ namespace fe::dx
 		ID3D12DescriptorHeap* descriptorHeaps[] = { &descriptorHeap.GetNative() };
 		cmdList->SetDescriptorHeaps(1, descriptorHeaps);
 	}
-
 } // namespace fe::dx

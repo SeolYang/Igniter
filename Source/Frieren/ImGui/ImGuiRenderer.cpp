@@ -64,6 +64,7 @@ namespace fe
 		cmdCtx.FlushPendingTextureBarriers();
 
 		const dx::Descriptor& backBufferRTV = swapchain.GetRenderTargetView();
+		// #test Test code for clear render target
 		cmdCtx.ClearRenderTarget(backBufferRTV);
 		cmdCtx.SetRenderTarget(backBufferRTV);
 		cmdCtx.SetDescriptorHeap(*descriptorHeap);

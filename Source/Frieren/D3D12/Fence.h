@@ -20,13 +20,11 @@ namespace fe::dx
 		operator bool() const noexcept { return IsValid(); }
 
 		uint64_t GetCounter() const { return counter; }
-
-		auto& GetNative()
+		auto&	 GetNative()
 		{
 			check(fence);
 			return *fence.Get();
 		}
-
 		const auto& GetNative() const
 		{
 			check(fence);
