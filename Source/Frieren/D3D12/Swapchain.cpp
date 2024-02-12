@@ -53,12 +53,11 @@ namespace fe::dx
 		desc.Flags = bIsTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		ComPtr<IDXGISwapChain1> swapchain1;
-		verify_succeeded(factory->CreateSwapChainForHwnd(&directCmdQueue.GetNative(),
-														 window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
+		verify_succeeded(factory->CreateSwapChainForHwnd(&directCmdQueue.GetNative(), window.GetNative(), &desc,
+														 nullptr, nullptr, &swapchain1));
 
 		// Disable Alt+Enter full-screen toggle.
 		verify_succeeded(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
-
 		verify_succeeded(swapchain1.As(&swapchain));
 	}
 
@@ -95,6 +94,6 @@ namespace fe::dx
 
 	void Swapchain::Present()
 	{
-		swapchain->Present(1, 0);
+		verify_succeeded(swapchain->Present(0, bIsTearingSupport ? DXGI_PRESENT_ALLOW_TEARING : 0));
 	}
 } // namespace fe::dx

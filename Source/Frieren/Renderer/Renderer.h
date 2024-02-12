@@ -32,21 +32,23 @@ namespace fe
 		void Render(World& world);
 		void EndFrame();
 
-		dx::Device&	   GetDevice() { return *device; }
-		dx::Swapchain& GetSwapchain() { return *swapchain; }
+		dx::Device&		  GetDevice() { return *device; }
+		dx::Swapchain&	  GetSwapchain() { return *swapchain; }
 		dx::CommandQueue& GetDirectCommandQueue() { return *directCmdQueue; }
-		size_t		   GetGlobalFrameIndex() const { return globalFrameIdx; }
-		size_t		   GetLocalFrameIndex() const { return localFrameIdx; }
+		size_t			  GetGlobalFrameIndex() const { return globalFrameIdx; }
+		size_t			  GetLocalFrameIndex() const { return localFrameIdx; }
 
 	private:
 		std::unique_ptr<dx::Device>		  device;
 		std::unique_ptr<dx::CommandQueue> directCmdQueue;
 
+		// num of cmd ctx = numThreads * numFramesInFlight
+
 		std::unique_ptr<dx::Swapchain> swapchain;
 
-		std::vector<FrameResource> frameResources; // reserved #'NumFramesInFlight'
-		size_t					   globalFrameIdx;
-		size_t					   localFrameIdx;
+		std::vector<std::unique_ptr<dx::Fence>> frameFences;
+		size_t									globalFrameIdx;
+		size_t									localFrameIdx;
 
 		// #todo command context pool?
 	};

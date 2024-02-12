@@ -14,10 +14,11 @@ namespace fe
 		, globalFrameIdx(0)
 		, localFrameIdx(0)
 	{
-		frameResources.reserve(NumFramesInFlight);
+		frameFences.reserve(NumFramesInFlight);
 		for (uint8_t idx = 0; idx < NumFramesInFlight; ++idx)
 		{
-			frameResources.emplace_back(*device);
+			frameFences.emplace_back(
+				std::make_unique<dx::Fence>(device->CreateFence(std::format("FrameFence_{}", localFrameIdx)).value()));
 		}
 	}
 
@@ -28,18 +29,18 @@ namespace fe
 
 	void Renderer::BeginFrame()
 	{
-		auto& localFrameFence = frameResources[localFrameIdx].GetFence();
-		localFrameFence.WaitOnCPU();
+		frameFences[localFrameIdx]->WaitOnCPU();
 	}
 
 	void Renderer::Render() {}
 
 	void Renderer::EndFrame()
 	{
-		auto& localFrameFence = frameResources[localFrameIdx].GetFence();
+		directCmdQueue->FlushPendingContexts();
 		swapchain->Present();
+		directCmdQueue->NextSignalTo(*frameFences[localFrameIdx]);
+
 		++globalFrameIdx;
 		localFrameIdx = globalFrameIdx % NumFramesInFlight;
-		directCmdQueue->NextSignalTo(localFrameFence);
 	}
 } // namespace fe
