@@ -10,19 +10,24 @@ namespace fe
 namespace fe::dx
 {
 	class Device;
+	class CommandQueue;
 	class DescriptorHeap;
 	class Descriptor;
 	class GPUTexture;
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, Device& device, const uint32_t numInflightFrames);
+		Swapchain(const Window& window, Device& device, CommandQueue& directCmdQueue, const uint32_t numInflightFrames);
 		~Swapchain();
 
 		bool IsTearingSupport() const { return bIsTearingSupport; }
 
-		const GPUTexture& GetBackBuffer() const;
-		const Descriptor& GetRenderTargetView() const;
+		GPUTexture& GetBackBuffer() { return *backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
+		const GPUTexture& GetBackBuffer() const { return *backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
+		const Descriptor& GetRenderTargetView() const
+		{
+			return renderTargetViews[swapchain->GetCurrentBackBufferIndex()];
+		}
 
 		// #todo Impl Resize Swapchain!
 		// void Resize(const uint32_t width, const uint32_t height);
@@ -32,7 +37,7 @@ namespace fe::dx
 		void Present();
 
 	private:
-		void InitSwapchain(const Window& window, Device& device);
+		void InitSwapchain(const Window& window, CommandQueue& directCmdQueue);
 		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
 		void InitRenderTargetViews(Device& device);
 

@@ -5,6 +5,22 @@
 #include <Gameplay/World.h>
 #include <PlayerArchetype.h>
 #include <BasicGameFlow.h>
+#include <ImGui/ImGuiLayer.h>
+#include <ImGui/ImGuiCanvas.h>
+
+// #test Test for imgui integration
+class TestLayer : public fe::ImGuiLayer
+{
+public:
+	TestLayer(const fe::String layerName) : fe::ImGuiLayer(layerName) {}
+
+	virtual void Render() override
+	{
+		bool bIsOpend = IsVisible();
+		ImGui::ShowDemoWindow(&bIsOpend);
+		SetVisibility(bIsOpend);
+	}
+};
 
 int main()
 {
@@ -23,6 +39,9 @@ int main()
 		PlayerArchetype::Create(*defaultWorld);
 		gameInstance.SetWorld(std::move(defaultWorld));
 		gameInstance.SetGameFlow(std::make_unique<BasicGameFlow>());
+
+		fe::ImGuiCanvas& canvas = engine.GetImGuiCanvas();
+		canvas.AddLayer<TestLayer>(fe::String("DemoUI"));
 
 		result = engine.Execute();
 	}

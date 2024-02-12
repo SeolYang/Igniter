@@ -5,7 +5,7 @@
 namespace fe::dx
 {
 	PipelineState::PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO)
-		: pso(std::move(newPSO)), bIsGraphics(bIsGraphicsPSO)
+		: native(std::move(newPSO)), bIsGraphics(bIsGraphicsPSO)
 	{
 	}
 

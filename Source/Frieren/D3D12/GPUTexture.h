@@ -19,14 +19,15 @@ namespace fe::dx
 		GPUTexture& operator=(const GPUTexture&) = delete;
 		GPUTexture& operator=(GPUTexture&& other) noexcept;
 
-		const GPUTextureDesc& GetDesc() const { return desc; }
+		bool IsValid() const { return allocation || resource; }
+		operator bool() const { return IsValid(); }
 
-		const auto& GetNative() const
+		const GPUTextureDesc& GetDesc() const { return desc; }
+		const auto&			  GetNative() const
 		{
 			check(resource);
 			return *resource.Get();
 		}
-
 		auto& GetNative()
 		{
 			check(resource);

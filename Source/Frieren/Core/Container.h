@@ -2,6 +2,8 @@
 #include <queue>
 #include <vector>
 #include <array>
+#include <span>
+#include <optional>
 
 #pragma warning(push)
 #pragma warning(disable : 26800)

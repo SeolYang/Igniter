@@ -6,6 +6,7 @@
 #include <Core/InputManager.h>
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
+#include <D3D12/Device.h>
 #include <Renderer/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
@@ -36,7 +37,7 @@ namespace fe
 
 			renderer = std::make_unique<Renderer>(*window);
 
-			imguiRenderer = std::make_unique<ImGuiRenderer>();
+			imguiRenderer = std::make_unique<ImGuiRenderer>(renderer->GetDevice(), *window);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
 
 			gameInstance = std::make_unique<GameInstance>();
@@ -139,7 +140,7 @@ namespace fe
 
 			renderer->BeginFrame();
 			renderer->Render();
-			imguiRenderer->Render(*imguiCanvas);
+			imguiRenderer->Render(*imguiCanvas, *renderer);
 			renderer->EndFrame();
 
 			timer->End();

@@ -17,7 +17,7 @@ namespace fe::dx
 	public:
 		~PipelineState();
 
-		auto& GetNative() { return *pso.Get(); }
+		auto& GetNative() { return *native.Get(); }
 
 		bool IsGraphics() const { return bIsGraphics; }
 		bool IsCompute() const { return !bIsGraphics; }
@@ -26,7 +26,7 @@ namespace fe::dx
 		PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO);
 
 	private:
-		ComPtr<ID3D12PipelineState> pso;
+		ComPtr<ID3D12PipelineState> native;
 		const bool					bIsGraphics;
 		// const size_t pipelineStateHash;
 	};

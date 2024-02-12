@@ -27,6 +27,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\CommandQueue.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Common.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Device.h" />
@@ -61,6 +62,7 @@
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContext.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\CommandQueue.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\D3D12Common.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />

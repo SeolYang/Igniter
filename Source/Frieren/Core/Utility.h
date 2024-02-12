@@ -27,4 +27,43 @@ namespace fe
 	{
 		return ((bits & flag) == flag) && BitFlagContains(bits, args...);
 	}
+
+	template <typename T>
+	auto TransformToNative(const std::span<T> items)
+	{
+		std::vector<typename T::NativeType*> natives;
+		natives.resize(items.size());
+		std::transform(items.begin(), items.end(), natives.begin(), [](T& native) { return &native.GetNative(); });
+		return natives;
+	}
+
+	template <typename T>
+	auto TransformToNative(const std::span<const T> items)
+	{
+		std::vector<const typename T::NativeType*> natives;
+		natives.resize(items.size());
+		std::transform(items.cbegin(), items.cend(), natives.begin(),
+					   [](const T& native) { return &native.GetNative(); });
+		return natives;
+	}
+
+	template <typename T>
+	auto TransformToNative(const std::span<std::reference_wrapper<T>> items)
+	{
+		std::vector<typename T::NativeType*> natives;
+		natives.resize(items.size());
+		std::transform(items.begin(), items.end(), natives.begin(),
+					   [](std::reference_wrapper<T>& nativeRef) { return &nativeRef.get().GetNative(); });
+		return natives;
+	}
+
+	template <typename T>
+	auto TransformToNative(const std::span<std::reference_wrapper<const T>> items)
+	{
+		std::vector<const typename T::NativeType*> natives;
+		natives.resize(items.size());
+		std::transform(items.cbegin(), items.cend(), natives.begin(),
+					   [](std::reference_wrapper<const T>& nativeRef) { return &nativeRef.get().GetNative(); });
+		return natives;
+	}
 } // namespace fe

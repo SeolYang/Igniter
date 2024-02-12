@@ -1,5 +1,4 @@
 #include <dxgidebug.h>
-
 #include <Core/Assert.h>
 #include <Engine.h>
 #include <D3D12/Device.h>
@@ -12,6 +11,7 @@
 #include <D3D12/PipelineState.h>
 #include <D3D12/PipelineStateDesc.h>
 #include <D3D12/RootSignature.h>
+#include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 
 namespace fe::dx
@@ -37,30 +37,16 @@ namespace fe::dx
 					CacheDescriptorHandleIncrementSize();
 					CreateBindlessDescriptorHeaps();
 				}
-
-				if (CreateCommandQueues())
-				{
-					FE_LOG(D3D12Info, "Command Queues are successfully created.");
-					SetObjectName(directQueue.Get(), "DirectQueue");
-					SetObjectName(asyncComputeQueue.Get(), "AsyncComputeQueue");
-					SetObjectName(copyQueue.Get(), "CopyQueue");
-				}
 			}
 		}
 	}
 
 	Device::~Device()
 	{
-		FlushGPU();
-
 		cbvSrvUavDescriptorHeap.reset();
 		samplerDescriptorHeap.reset();
 		rtvDescriptorHeap.reset();
 		dsvDescriptorHeap.reset();
-
-		copyQueue.Reset();
-		asyncComputeQueue.Reset();
-		directQueue.Reset();
 
 		allocator->Release();
 
@@ -77,63 +63,14 @@ namespace fe::dx
 #endif
 	}
 
-	void Device::FlushQueue(const EQueueType queueType)
-	{
-		ComPtr<ID3D12Fence> fence;
-		if (SUCCEEDED(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
-		{
-			ID3D12CommandQueue* queue = nullptr;
-			switch (queueType)
-			{
-				case EQueueType::Direct:
-					check(directQueue);
-					queue = directQueue.Get();
-					break;
-				case EQueueType::AsyncCompute:
-					check(asyncComputeQueue);
-					queue = asyncComputeQueue.Get();
-					break;
-				case EQueueType::Copy:
-					check(copyQueue);
-					queue = copyQueue.Get();
-					break;
-			}
-
-			if (SUCCEEDED(queue->Signal(fence.Get(), 1)))
-			{
-				const HANDLE handleFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-				if (handleFenceEvent != NULL)
-				{
-					fence->SetEventOnCompletion(1, handleFenceEvent);
-					WaitForSingleObject(handleFenceEvent, INFINITE);
-					CloseHandle(handleFenceEvent);
-				}
-			}
-			else
-			{
-				FE_LOG(D3D12Fatal, "Failed to signal fence.");
-			}
-		}
-		else
-		{
-			FE_LOG(D3D12Fatal, "Failed to create fence for flush.");
-		}
-	}
-
-	void Device::FlushGPU()
-	{
-		FlushQueue(EQueueType::Direct);
-		FlushQueue(EQueueType::AsyncCompute);
-		FlushQueue(EQueueType::Copy);
-	}
-
 	std::optional<Descriptor> Device::CreateShaderResourceView(GPUBuffer& gpuBuffer)
 	{
 		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
 		if (srvDesc)
 		{
-			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor =
+				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::ShaderResourceView);
 			device->CreateShaderResourceView(&gpuBuffer.GetNative(), &srvDesc.value(),
 											 descriptor->GetCPUDescriptorHandle());
 
@@ -149,7 +86,8 @@ namespace fe::dx
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
 		if (uavDesc)
 		{
-			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor =
+				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::UnorderedResourceView);
 			device->CreateUnorderedAccessView(&gpuBuffer.GetNative(), nullptr, &uavDesc.value(),
 											  descriptor->GetCPUDescriptorHandle());
 
@@ -167,7 +105,8 @@ namespace fe::dx
 			desc.ToConstantBufferViewDesc(gpuBuffer.GetNative().GetGPUVirtualAddress());
 		if (cbvDesc)
 		{
-			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor =
+				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::ConstantBufferView);
 			device->CreateConstantBufferView(&cbvDesc.value(), descriptor->GetCPUDescriptorHandle());
 
 			return descriptor;
@@ -176,14 +115,15 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateShaderResourceView(GPUTexture&				   texture,
-															   const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateShaderResourceView(GPUTexture&					texture,
+															   const GPUTextureSubresource& subresource)
 	{
 		const GPUTextureDesc&						   desc = texture.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
 		if (srvDesc)
 		{
-			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor =
+				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::ShaderResourceView);
 			device->CreateShaderResourceView(&texture.GetNative(), &srvDesc.value(),
 											 descriptor->GetCPUDescriptorHandle());
 
@@ -193,14 +133,15 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateUnorderedAccessView(GPUTexture&					texture,
-																const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateUnorderedAccessView(GPUTexture&					 texture,
+																const GPUTextureSubresource& subresource)
 	{
 		const GPUTextureDesc&							desc = texture.GetDesc();
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
 		if (uavDesc)
 		{
-			std::optional<Descriptor> descriptor = cbvSrvUavDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor =
+				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::UnorderedResourceView);
 			device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &uavDesc.value(),
 											  descriptor->GetCPUDescriptorHandle());
 
@@ -210,14 +151,14 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateRenderTargetView(GPUTexture&				 texture,
-															 const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateRenderTargetView(GPUTexture&				  texture,
+															 const GPUTextureSubresource& subresource)
 	{
 		const GPUTextureDesc&						 desc = texture.GetDesc();
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
 		if (rtvDesc)
 		{
-			std::optional<Descriptor> descriptor = rtvDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor = rtvDescriptorHeap->Allocate(EDescriptorType::RenderTargetView);
 			device->CreateRenderTargetView(&texture.GetNative(), &rtvDesc.value(),
 										   descriptor->GetCPUDescriptorHandle());
 
@@ -227,14 +168,14 @@ namespace fe::dx
 		return std::nullopt;
 	}
 
-	std::optional<Descriptor> Device::CreateDepthStencilView(GPUTexture&				 texture,
-															 const GPUTextureSubresource subresource)
+	std::optional<Descriptor> Device::CreateDepthStencilView(GPUTexture&				  texture,
+															 const GPUTextureSubresource& subresource)
 	{
 		const GPUTextureDesc&						 desc = texture.GetDesc();
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
 		if (dsvDesc)
 		{
-			std::optional<Descriptor> descriptor = dsvDescriptorHeap->AllocateDescriptor();
+			std::optional<Descriptor> descriptor = dsvDescriptorHeap->Allocate(EDescriptorType::DepthStencilView);
 			device->CreateDepthStencilView(&texture.GetNative(), &dsvDesc.value(),
 										   descriptor->GetCPUDescriptorHandle());
 
@@ -405,47 +346,6 @@ namespace fe::dx
 		return bSucceeded;
 	}
 
-	bool Device::CreateCommandQueues()
-	{
-		{
-			D3D12_COMMAND_QUEUE_DESC desc = {};
-			desc.NodeMask = 0;
-			desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-			desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-			if (!SUCCEEDED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&directQueue))))
-			{
-				FE_CONDITIONAL_LOG(D3D12Fatal, false, "Failed to create the direct command queue.");
-				return false;
-			}
-		}
-
-		{
-			D3D12_COMMAND_QUEUE_DESC desc = {};
-			desc.NodeMask = 0;
-			desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-			desc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-			if (!SUCCEEDED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&asyncComputeQueue))))
-			{
-				FE_CONDITIONAL_LOG(D3D12Fatal, false, "Failed to create the async compute command queue.");
-				return false;
-			}
-		}
-
-		{
-			D3D12_COMMAND_QUEUE_DESC desc = {};
-			desc.NodeMask = 0;
-			desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-			desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
-			if (!SUCCEEDED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&copyQueue))))
-			{
-				FE_CONDITIONAL_LOG(D3D12Fatal, false, "Failed to create the copy command queue.");
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	void Device::CreateBindlessDescriptorHeaps()
 	{
 		cbvSrvUavDescriptorHeap = std::make_unique<DescriptorHeap>(
@@ -552,56 +452,38 @@ namespace fe::dx
 		return RootSignature{ std::move(newRootSignature) };
 	}
 
-	ID3D12CommandQueue& Device::GetCommandQueue(const EQueueType queueType)
-	{
-		switch (queueType)
-		{
-			default:
-			case EQueueType::Direct:
-				return *directQueue.Get();
-			case EQueueType::AsyncCompute:
-				return *asyncComputeQueue.Get();
-			case EQueueType::Copy:
-				return *copyQueue.Get();
-		}
-	}
-
-	void Device::Signal(Fence& fence, const EQueueType targetQueueType)
-	{
-		check(fence);
-		auto& commandQueue = GetCommandQueue(targetQueueType);
-		verify_succeeded(commandQueue.Signal(&fence.GetNative(), fence.GetCounter()));
-	}
-
-	void Device::Wait(Fence& fence, const EQueueType targetQueueTytpe)
-	{
-		check(fence);
-		auto& commandQueue = GetCommandQueue(targetQueueTytpe);
-		verify_succeeded(commandQueue.Wait(&fence.GetNative(), fence.GetCounter()));
-	}
-
-	void Device::NextSignal(Fence& fence, const EQueueType targetQueueType)
-	{
-		check(fence);
-		fence.Next();
-		Signal(fence, targetQueueType);
-	}
-
-	uint32_t Device::GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE type) const
+	uint32_t Device::GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const
 	{
 		switch (type)
 		{
-			case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
-				return cbvSrvUavDescriptorHandleIncrementSize;
-			case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
-				return samplerDescritorHandleIncrementSize;
-			case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
-				return dsvDescriptorHandleIncrementSize;
-			case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
-				return rtvDescriptorHandleIncrementSize;
 			default:
-				return 0;
+			case EDescriptorHeapType::CBV_SRV_UAV:
+				return cbvSrvUavDescriptorHandleIncrementSize;
+			case EDescriptorHeapType::Sampler:
+				return samplerDescritorHandleIncrementSize;
+			case EDescriptorHeapType::DSV:
+				return dsvDescriptorHandleIncrementSize;
+			case EDescriptorHeapType::RTV:
+				return rtvDescriptorHandleIncrementSize;
 		}
+	}
+
+	std::optional<CommandQueue> Device::CreateCommandQueue(const EQueueType queueType)
+	{
+		ComPtr<ID3D12CommandQueue>	  newCmdQueue;
+		const D3D12_COMMAND_LIST_TYPE cmdListType = ToNativeCommandListType(queueType);
+		check(cmdListType != D3D12_COMMAND_LIST_TYPE_NONE);
+
+		const D3D12_COMMAND_QUEUE_DESC desc = { .Type = cmdListType,
+												.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
+												.NodeMask = 0 };
+
+		if (!SUCCEEDED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue))))
+		{
+			return std::nullopt;
+		}
+
+		return CommandQueue{ std::move(newCmdQueue), queueType };
 	}
 
 	std::optional<CommandContext> Device::CreateCommandContext(const EQueueType targetQueueType)
@@ -609,29 +491,22 @@ namespace fe::dx
 		ComPtr<ID3D12CommandAllocator>	   newCmdAllocator;
 		ComPtr<ID3D12GraphicsCommandList7> newCmdList;
 
-		D3D12_COMMAND_LIST_TYPE cmdListType = D3D12_COMMAND_LIST_TYPE_NONE;
-		switch (targetQueueType)
-		{
-			case EQueueType::Direct:
-				cmdListType = D3D12_COMMAND_LIST_TYPE_DIRECT;
-				break;
+		const D3D12_COMMAND_LIST_TYPE cmdListType = ToNativeCommandListType(targetQueueType);
+		check(cmdListType != D3D12_COMMAND_LIST_TYPE_NONE);
 
-			case EQueueType::AsyncCompute:
-				cmdListType = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-				break;
-
-			case EQueueType::Copy:
-				cmdListType = D3D12_COMMAND_LIST_TYPE_COPY;
-				break;
-		}
+		const D3D12_COMMAND_LIST_FLAGS flags = D3D12_COMMAND_LIST_FLAG_NONE;
 
 		// #todo 스레드 당 Command Allocator 할당
-		verify_succeeded(device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator)));
+		if (!SUCCEEDED(device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator))))
+		{
+			return {};
+		}
+		if (!SUCCEEDED(device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList))))
+		{
+			return {};
+		}
 
-		verify_succeeded(
-			device->CreateCommandList1(0, cmdListType, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&newCmdList)));
-
-		return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), cmdListType };
+		return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), targetQueueType };
 	}
 
 	std::optional<DescriptorHeap> Device::CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType,
@@ -670,8 +545,8 @@ namespace fe::dx
 			return std::nullopt;
 		}
 
-		return DescriptorHeap{ std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
-							   GetDescriptorHandleIncrementSize(targetDescriptorHeapType) };
+		return DescriptorHeap{ descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap,
+							   numDescriptors, GetDescriptorHandleIncrementSize(descriptorHeapType) };
 	}
 
 } // namespace fe::dx

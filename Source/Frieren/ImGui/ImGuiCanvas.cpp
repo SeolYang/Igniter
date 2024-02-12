@@ -9,7 +9,10 @@ namespace fe
 	{
 		for (auto& layer : layers)
 		{
-			layer->Render();
+			if (layer->IsVisible())
+			{
+				layer->Render();
+			}
 		}
 	}
 }

@@ -2,6 +2,7 @@
 #include <Core/Assert.h>
 #include <Core/EmbededSettings.h>
 #include <Core/InputManager.h>
+#include <ImGui/Common.h>
 #include <Engine.h>
 
 namespace fe
@@ -50,6 +51,11 @@ namespace fe
 
 	LRESULT CALLBACK Window::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 	{
+		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+		{
+			return true;
+		}
+
 		switch (uMsg)
 		{
 			case WM_DESTROY:

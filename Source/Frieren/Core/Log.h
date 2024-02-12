@@ -104,7 +104,7 @@ namespace fe
 	{                                                                        \
 		static constexpr fe::ELogVerbosiy Verbosity = VERBOSITY_LEVEL;       \
 		static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
-	}
+	};
 
 #define FE_LOG(LOG_CATEGORY, ...) fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
 
@@ -118,10 +118,10 @@ namespace fe
 
 namespace fe
 {
-	FE_DECLARE_LOG_CATEGORY(LogTemp, ELogVerbosiy::Temp);
-	FE_DECLARE_LOG_CATEGORY(LogInfo, ELogVerbosiy::Info);
-	FE_DECLARE_LOG_CATEGORY(LogDebug, ELogVerbosiy::Debug);
-	FE_DECLARE_LOG_CATEGORY(LogWarn, ELogVerbosiy::Warning);
-	FE_DECLARE_LOG_CATEGORY(LogError, ELogVerbosiy::Error);
-	FE_DECLARE_LOG_CATEGORY(LogFatal, ELogVerbosiy::Fatal);
+	FE_DECLARE_LOG_CATEGORY(LogTemp, ELogVerbosiy::Temp)
+	FE_DECLARE_LOG_CATEGORY(LogInfo, ELogVerbosiy::Info)
+	FE_DECLARE_LOG_CATEGORY(LogDebug, ELogVerbosiy::Debug)
+	FE_DECLARE_LOG_CATEGORY(LogWarn, ELogVerbosiy::Warning)
+	FE_DECLARE_LOG_CATEGORY(LogError, ELogVerbosiy::Error)
+	FE_DECLARE_LOG_CATEGORY(LogFatal, ELogVerbosiy::Fatal)
 } // namespace fe

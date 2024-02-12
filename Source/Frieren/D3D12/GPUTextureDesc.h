@@ -12,77 +12,6 @@ namespace fe::dx
 	bool	 IsDepthStencilFormat(const DXGI_FORMAT format);
 	bool	 IsTypelessFormat(const DXGI_FORMAT format);
 
-	class GPUTextureSubresource
-	{
-	public:
-		union
-		{
-			/**
-			 * Available for
-			 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
-			 */
-			uint16_t MostDetailedMip;
-
-			/**
-			 * Available for
-			 * Unordered Access View: 3D
-			 * Render Target View: 3D
-			 */
-			uint16_t FirstWSlice = 0;
-		};
-
-		union
-		{
-			/**
-			 * Available for
-			 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
-			 */
-			uint16_t MipLevels;
-
-			/**
-			 * Available for
-			 * Unordered Access View: 3D
-			 * Render Target View: 3D
-			 */
-			uint16_t WSize = 0;
-		};
-
-		/**
-		 * Available for
-		 * Unordered Access View: 1D, 1D Array, 2D, 2D Array, 3D
-		 * Render Target View: 1D, 1D Array, 2D, 2D Array, 3D
-		 * Depth Stencil View: 1D, 1D Array, 2D, 2D Array
-		 */
-		uint16_t MipSlice = 0;
-
-		/**
-		 * Available for
-		 * Shader Resource View: 2D, 2D Array
-		 * Unordered Access View: 2D, 2D Array
-		 * Render Target View: 2D, 2D Array
-		 */
-		uint16_t PlaneSlice = 0;
-
-		/**
-		 *
-		 * Available for
-		 * Shader Resource View: 1D Array, 2D Array, 2DMS Array
-		 * Unordered Access View: 1D Array, 2D Array, 2DMS Array
-		 * Render Target View: 1D Array, 2D Array, 2DMS Array
-		 * Depth Stencil View: 1D Array, 2D Array, 2DMS Array
-		 */
-		uint16_t FirstArraySlice = 0;
-
-		/**
-		 * Available for
-		 * Shader Resource View: 1D Array, 2D Array, 2DMS Array
-		 * Unordered Access View: 1D Array, 2D Array, 2DMS Array
-		 * Render Target View: 1D Array, 2D Array, 2DMS Array
-		 * Depth Stencil View: 1D Array, 2D Array, 2DMS Array
-		 */
-		uint16_t ArraySize = 0;
-	};
-
 	// #todo Simultaneous Access flag for resource aka. D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS
 	class GPUTextureDesc : public D3D12_RESOURCE_DESC1
 	{
@@ -136,13 +65,13 @@ namespace fe::dx
 
 		D3D12MA::ALLOCATION_DESC ToAllocationDesc() const;
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>
-		ToShaderResourceViewDesc(const GPUTextureSubresource subresource) const;
+		ToShaderResourceViewDesc(const GPUTextureSubresource& subresource) const;
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC>
-		ToUnorderedAccessViewDesc(const GPUTextureSubresource subresource) const;
+		ToUnorderedAccessViewDesc(const GPUTextureSubresource& subresource) const;
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC>
-		ToRenderTargetViewDesc(const GPUTextureSubresource subresource) const;
+		ToRenderTargetViewDesc(const GPUTextureSubresource& subresource) const;
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>
-		ToDepthStencilViewDesc(const GPUTextureSubresource subresource) const;
+		ToDepthStencilViewDesc(const GPUTextureSubresource& subresource) const;
 
 		// #todo Typeless 포맷에 대한 typed 포맷을 지정한 view 생성
 

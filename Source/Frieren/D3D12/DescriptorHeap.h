@@ -10,25 +10,33 @@ namespace fe::dx
 	class DescriptorHeap;
 	class Descriptor
 	{
+		friend class DescriptorHeap;
+
 	public:
-		Descriptor(Descriptor&& rhs) noexcept;
+		Descriptor(Descriptor&& other) noexcept;
 		~Descriptor();
 
-		Descriptor& operator=(Descriptor&& rhs) noexcept;
+		Descriptor& operator=(Descriptor&& other) noexcept;
 
-		uint32_t					GetDescriptorIndex() const { return index; }
+		bool IsValid() const { return ownedDescriptorHeap != nullptr && index != InvalidIndexU32; }
+		operator bool() const { return IsValid(); }
+
+		uint32_t					GetIndex() const { return index; }
+		EDescriptorType				GetType() const { return type; }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle() const { return cpuHandle; }
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() const { return gpuHandle; }
 
 	private:
-		explicit Descriptor(DescriptorHeap& descriptorHeap);
+		Descriptor(DescriptorHeap& owner, const EDescriptorType descriptorType, const uint32_t allocatedIndex,
+				   const D3D12_CPU_DESCRIPTOR_HANDLE indexedCpuHandle,
+				   const D3D12_GPU_DESCRIPTOR_HANDLE indexedGpuHandle);
 
 	public:
 		static constexpr uint32_t InvalidIndex = InvalidIndexU32;
 
 	private:
-		friend DescriptorHeap;
 		DescriptorHeap*				ownedDescriptorHeap = nullptr;
+		EDescriptorType				type;
 		uint32_t					index;
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
@@ -37,14 +45,10 @@ namespace fe::dx
 	class DescriptorHeap
 	{
 		friend class Device;
-		friend class Descriptor;
 
 	private:
 		uint32_t AllocateIndex();
-		void	 ReleaseIndex(const uint32_t index);
-
-		D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
-		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
+		void	 DeallocateIndex(const uint32_t index);
 
 	public:
 		DescriptorHeap(const DescriptorHeap&) = delete;
@@ -52,15 +56,26 @@ namespace fe::dx
 		~DescriptorHeap();
 
 		DescriptorHeap& operator=(const DescriptorHeap&) = delete;
-		DescriptorHeap& operator=(DescriptorHeap&& other) noexcept;
+		DescriptorHeap& operator=(DescriptorHeap&&) noexcept = delete;
 
-		Descriptor AllocateDescriptor() { return Descriptor{ *this }; }
+		bool IsValid() const { return descriptorHeap; }
+		operator bool() const { return IsValid(); }
+
+		ID3D12DescriptorHeap&		GetNative() { return *descriptorHeap.Get(); }
+		EDescriptorHeapType			GetType() const { return descriptorHeapType; }
+		D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
+		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
+
+		Descriptor Allocate(const EDescriptorType requestDescriptorType);
+		void	   Deallocate(Descriptor& descriptor);
 
 	private:
-		DescriptorHeap(ComPtr<ID3D12DescriptorHeap> newDescriptorHeap, const bool bIsShaderVisibleHeap,
-					   const uint32_t numDescriptorsInHeap, const uint32_t descriptorHandleIncSizeInHeap);
+		DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
+					   const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap,
+					   const uint32_t descriptorHandleIncSizeInHeap);
 
 	private:
+		EDescriptorHeapType			 descriptorHeapType;
 		ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 		uint32_t					 descriptorHandleIncrementSize = 0;
 		uint32_t					 numInitialDescriptors = 0;

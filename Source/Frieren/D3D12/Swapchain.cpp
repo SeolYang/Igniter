@@ -1,16 +1,18 @@
 #include <D3D12/Swapchain.h>
 #include <D3D12/Device.h>
+#include <D3D12/CommandQueue.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTexture.h>
 #include <Core/Window.h>
 
 namespace fe::dx
 {
-	Swapchain::Swapchain(const Window& window, Device& device, const uint32_t numInflightFrames)
+	Swapchain::Swapchain(const Window& window, Device& device, CommandQueue& directCmdQueue,
+						 const uint32_t numInflightFrames)
 		: numInflightFrames(numInflightFrames)
 	{
 		check(numInflightFrames > 0);
-		InitSwapchain(window, device);
+		InitSwapchain(window, directCmdQueue);
 		InitRenderTargetViews(device);
 	}
 
@@ -20,7 +22,7 @@ namespace fe::dx
 		backBuffers.clear();
 	}
 
-	void Swapchain::InitSwapchain(const Window& window, Device& device)
+	void Swapchain::InitSwapchain(const Window& window, CommandQueue& directCmdQueue)
 	{
 		ComPtr<IDXGIFactory5> factory;
 
@@ -51,7 +53,7 @@ namespace fe::dx
 		desc.Flags = bIsTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		ComPtr<IDXGISwapChain1> swapchain1;
-		verify_succeeded(factory->CreateSwapChainForHwnd(&device.GetCommandQueue(EQueueType::Direct),
+		verify_succeeded(factory->CreateSwapChainForHwnd(&directCmdQueue.GetNative(),
 														 window.GetNative(), &desc, nullptr, nullptr, &swapchain1));
 
 		// Disable Alt+Enter full-screen toggle.
@@ -93,17 +95,6 @@ namespace fe::dx
 
 	void Swapchain::Present()
 	{
-		swapchain->Present(0, 1);
+		swapchain->Present(1, 0);
 	}
-
-	const GPUTexture& Swapchain::GetBackBuffer() const
-	{
-		return *backBuffers[swapchain->GetCurrentBackBufferIndex()];
-	}
-
-	const Descriptor& Swapchain::GetRenderTargetView() const
-	{
-		return renderTargetViews[swapchain->GetCurrentBackBufferIndex()];
-	}
-
 } // namespace fe::dx

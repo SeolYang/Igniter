@@ -34,5 +34,102 @@ namespace fe::dx
 	template <typename Ty>
 	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
 
+	enum class EQueueType
+	{
+		Direct,
+		AsyncCompute,
+		Copy
+	};
+	D3D12_COMMAND_LIST_TYPE ToNativeCommandListType(const EQueueType type);
+
+	enum class EDescriptorHeapType
+	{
+		CBV_SRV_UAV,
+		Sampler,
+		RTV,
+		DSV
+	};
+
+	enum class EDescriptorType
+	{
+		ConstantBufferView,
+		ShaderResourceView,
+		UnorderedResourceView,
+		Sampler,
+		RenderTargetView,
+		DepthStencilView
+	};
+	bool IsSupportDescriptor(const EDescriptorHeapType descriptorHeapType, const EDescriptorType descriptorType);
+
+	struct GPUTextureSubresource
+	{
+		union
+		{
+			/**
+			 * Available for
+			 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
+			 */
+			uint16_t MostDetailedMip;
+
+			/**
+			 * Available for
+			 * Unordered Access View: 3D
+			 * Render Target View: 3D
+			 */
+			uint16_t FirstWSlice = 0;
+		};
+
+		union
+		{
+			/**
+			 * Available for
+			 * Shader Resource View: 1D, 1D Array, 2D, 2D Array, 3D, Cubemap
+			 */
+			uint16_t MipLevels;
+
+			/**
+			 * Available for
+			 * Unordered Access View: 3D
+			 * Render Target View: 3D
+			 */
+			uint16_t WSize = 0;
+		};
+
+		/**
+		 * Available for
+		 * Unordered Access View: 1D, 1D Array, 2D, 2D Array, 3D
+		 * Render Target View: 1D, 1D Array, 2D, 2D Array, 3D
+		 * Depth Stencil View: 1D, 1D Array, 2D, 2D Array
+		 */
+		uint16_t MipSlice = 0;
+
+		/**
+		 * Available for
+		 * Shader Resource View: 2D, 2D Array
+		 * Unordered Access View: 2D, 2D Array
+		 * Render Target View: 2D, 2D Array
+		 */
+		uint16_t PlaneSlice = 0;
+
+		/**
+		 *
+		 * Available for
+		 * Shader Resource View: 1D Array, 2D Array, 2DMS Array
+		 * Unordered Access View: 1D Array, 2D Array, 2DMS Array
+		 * Render Target View: 1D Array, 2D Array, 2DMS Array
+		 * Depth Stencil View: 1D Array, 2D Array, 2DMS Array
+		 */
+		uint16_t FirstArraySlice = 0;
+
+		/**
+		 * Available for
+		 * Shader Resource View: 1D Array, 2D Array, 2DMS Array
+		 * Unordered Access View: 1D Array, 2D Array, 2DMS Array
+		 * Render Target View: 1D Array, 2D Array, 2DMS Array
+		 * Depth Stencil View: 1D Array, 2D Array, 2DMS Array
+		 */
+		uint16_t ArraySize = 0;
+	};
+
 	void SetObjectName(ID3D12Object* object, const std::string_view name);
 } // namespace fe::dx
