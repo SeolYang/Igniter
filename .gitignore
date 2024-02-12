@@ -368,3 +368,4 @@ Contents/
 # vcpkg
 Thirdparty/VcpkgInstalled
 Project/log.txt
+Project/imgui.ini
