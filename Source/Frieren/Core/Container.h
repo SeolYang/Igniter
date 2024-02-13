@@ -4,6 +4,8 @@
 #include <array>
 #include <span>
 #include <optional>
+#include <bitset>
+#include <functional>
 
 #pragma warning(push)
 #pragma warning(disable : 26800)

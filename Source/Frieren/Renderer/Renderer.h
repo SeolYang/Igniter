@@ -1,6 +1,5 @@
 #pragma once
-#include <Core/Log.h>
-#include <Renderer/FrameResource.h>
+#include <Renderer/Common.h>
 
 namespace fe::dx
 {
@@ -8,24 +7,23 @@ namespace fe::dx
 	class CommandQueue;
 	class DescriptorHeap;
 	class Swapchain;
+	class Fence;
 } // namespace fe::dx
 
 namespace fe
 {
-	FE_DECLARE_LOG_CATEGORY(RendererInfo, ELogVerbosiy::Info)
-	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
-	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
-
-	constexpr uint8_t NumFramesInFlight = 2;
-
 	class Window;
-	class FrameResource;
 	class World;
 	class Renderer
 	{
 	public:
-		Renderer(const Window& window);
+		Renderer(const FrameManager& engineFrameManager, Window& window);
+		Renderer(const Renderer&) = delete;
+		Renderer(Renderer&&) noexcept = delete;
 		~Renderer();
+
+		Renderer& operator=(const Renderer&) = delete;
+		Renderer& operator=(Renderer&&) noexcept = delete;
 
 		void BeginFrame();
 		void Render();
@@ -35,21 +33,12 @@ namespace fe
 		dx::Device&		  GetDevice() { return *device; }
 		dx::Swapchain&	  GetSwapchain() { return *swapchain; }
 		dx::CommandQueue& GetDirectCommandQueue() { return *directCmdQueue; }
-		size_t			  GetGlobalFrameIndex() const { return globalFrameIdx; }
-		size_t			  GetLocalFrameIndex() const { return localFrameIdx; }
 
 	private:
-		std::unique_ptr<dx::Device>		  device;
-		std::unique_ptr<dx::CommandQueue> directCmdQueue;
-
-		// num of cmd ctx = numThreads * numFramesInFlight
-
-		std::unique_ptr<dx::Swapchain> swapchain;
-
+		const FrameManager&						frameManager;
+		std::unique_ptr<dx::Device>				device;
+		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
+		std::unique_ptr<dx::Swapchain>			swapchain;
 		std::vector<std::unique_ptr<dx::Fence>> frameFences;
-		size_t									globalFrameIdx;
-		size_t									localFrameIdx;
-
-		// #todo command context pool?
 	};
 } // namespace fe

@@ -14,6 +14,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\Source\Frieren\Core\Container.h" />
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
+    <ClInclude Include="..\Source\Frieren\Core\FrameManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Hash.h" />
     <ClInclude Include="..\Source\Frieren\Core\InputManager.h" />
@@ -52,7 +53,9 @@
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Frieren\Math\Common.h" />
-    <ClInclude Include="..\Source\Frieren\Renderer\FrameResource.h" />
+    <ClInclude Include="..\Source\Frieren\Renderer\CommandContextPool.h" />
+    <ClInclude Include="..\Source\Frieren\Renderer\Common.h" />
+    <ClInclude Include="..\Source\Frieren\Renderer\DeferredFrameDeallocator.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
   </ItemGroup>
@@ -82,8 +85,9 @@
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCommon.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiRenderer.cpp" />
-    <ClCompile Include="..\Source\Frieren\Renderer\FrameResource.cpp" />
+    <ClCompile Include="..\Source\Frieren\Renderer\DeferredFrameDeallocator.cpp" />
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp" />
+    <ClCompile Include="..\Source\Frieren\Renderer\RendererCommon.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TurnOffAllWarnings</WarningLevel>

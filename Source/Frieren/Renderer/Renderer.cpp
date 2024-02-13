@@ -7,15 +7,18 @@
 
 namespace fe
 {
-	Renderer::Renderer(const Window& window)
-		: device(std::make_unique<dx::Device>())
+	FE_DECLARE_LOG_CATEGORY(RendererInfo, ELogVerbosiy::Info)
+	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
+	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
+
+	Renderer::Renderer(const FrameManager& engineFrameManager, Window& window)
+		: frameManager(engineFrameManager)
+		, device(std::make_unique<dx::Device>())
 		, directCmdQueue(std::make_unique<dx::CommandQueue>(device->CreateCommandQueue(dx::EQueueType::Direct).value()))
 		, swapchain(std::make_unique<dx::Swapchain>(window, *device, *directCmdQueue, NumFramesInFlight))
-		, globalFrameIdx(0)
-		, localFrameIdx(0)
 	{
 		frameFences.reserve(NumFramesInFlight);
-		for (uint8_t idx = 0; idx < NumFramesInFlight; ++idx)
+		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
 		{
 			frameFences.emplace_back(
 				std::make_unique<dx::Fence>(device->CreateFence(std::format("FrameFence_{}", localFrameIdx)).value()));
@@ -29,7 +32,7 @@ namespace fe
 
 	void Renderer::BeginFrame()
 	{
-		frameFences[localFrameIdx]->WaitOnCPU();
+		frameFences[frameManager.GetLocalFrameIndex()]->WaitOnCPU();
 	}
 
 	void Renderer::Render() {}
@@ -38,9 +41,6 @@ namespace fe
 	{
 		directCmdQueue->FlushPendingContexts();
 		swapchain->Present();
-		directCmdQueue->NextSignalTo(*frameFences[localFrameIdx]);
-
-		++globalFrameIdx;
-		localFrameIdx = globalFrameIdx % NumFramesInFlight;
+		directCmdQueue->NextSignalTo(*frameFences[frameManager.GetLocalFrameIndex()]);
 	}
 } // namespace fe

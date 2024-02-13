@@ -1,6 +1,5 @@
 #include <Engine.h>
 #include <Core/Assert.h>
-#include <Core/Timer.h>
 #include <Core/Log.h>
 #include <Core/HandleManager.h>
 #include <Core/InputManager.h>
@@ -15,18 +14,20 @@
 
 namespace fe
 {
-	Engine* Engine::instance = nullptr;
+	FE_DECLARE_LOG_CATEGORY(EngineInfo, ELogVerbosiy::Info)
 
+	Engine* Engine::instance = nullptr;
 	Engine::Engine()
 	{
 		const bool bIsFirstEngineCreation = instance == nullptr;
 		check(bIsFirstEngineCreation);
 		if (bIsFirstEngineCreation)
 		{
+			logger.Log<EngineInfo>("Initialize Engine Runtime...");
+			logger.Log<EngineInfo>("Engine version: {}", version::Version);
+
 			instance = this;
 
-			timer = std::make_unique<Timer>();
-			logger = std::make_unique<Logger>();
 			handleManager = std::make_unique<HandleManager>();
 
 			/* @test temp window descriptor */
@@ -35,17 +36,20 @@ namespace fe
 			window = std::make_unique<Window>(windowDesc);
 			inputManager = std::make_unique<InputManager>();
 
-			renderer = std::make_unique<Renderer>(*window);
+			renderer = std::make_unique<Renderer>(frameManager, *window);
 
-			imguiRenderer = std::make_unique<ImGuiRenderer>(renderer->GetDevice(), *window);
+			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, renderer->GetDevice(), *window);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
 
 			gameInstance = std::make_unique<GameInstance>();
+
+			logger.Log<EngineInfo>("Engine Runtime Initialized.");
 		}
 	}
 
 	Engine::~Engine()
 	{
+		logger.Log<EngineInfo>("De-initialize Engine Runtime...");
 		gameInstance.reset();
 		imguiCanvas.reset();
 		imguiRenderer.reset();
@@ -53,25 +57,30 @@ namespace fe
 		inputManager.reset();
 		window.reset();
 		handleManager.reset();
-		logger.reset();
-		timer.reset();
 
 		if (instance == this)
 		{
 			instance = nullptr;
 		}
+		logger.Log<EngineInfo>("Engine Runtime De-initialized.");
+	}
+
+	FrameManager& Engine::GetFrameManager()
+	{
+		check(instance != nullptr);
+		return instance->frameManager;
 	}
 
 	Timer& Engine::GetTimer()
 	{
 		check(instance != nullptr);
-		return *(instance->timer);
+		return instance->timer;
 	}
 
 	Logger& Engine::GetLogger()
 	{
 		check(instance != nullptr);
-		return *(instance->logger);
+		return instance->logger;
 	}
 
 	HandleManager& Engine::GetHandleManager()
@@ -98,13 +107,13 @@ namespace fe
 		return *(instance->renderer);
 	}
 
-	ImGuiRenderer& Engine::GetImGuiRenderer() 
+	ImGuiRenderer& Engine::GetImGuiRenderer()
 	{
 		check(instance != nullptr);
 		return *(instance->imguiRenderer);
 	}
 
-	ImGuiCanvas& Engine::GetImGuiCanvas() 
+	ImGuiCanvas& Engine::GetImGuiCanvas()
 	{
 		check(instance != nullptr);
 		return *(instance->imguiCanvas);
@@ -118,9 +127,12 @@ namespace fe
 
 	int Engine::Execute()
 	{
+		logger.Log<EngineInfo>("Begin => Engine Main Loop");
+
 		while (!bShouldExit)
 		{
-			timer->Begin();
+			frameManager.NextFrame();
+			timer.Begin();
 
 			MSG msg;
 			ZeroMemory(&msg, sizeof(msg));
@@ -143,9 +155,10 @@ namespace fe
 			imguiRenderer->Render(*imguiCanvas, *renderer);
 			renderer->EndFrame();
 
-			timer->End();
+			timer.End();
 		}
 
+		logger.Log<EngineInfo>("End => Engine Main Loop");
 		return 0;
 	}
 

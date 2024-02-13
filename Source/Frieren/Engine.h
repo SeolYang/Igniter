@@ -1,11 +1,12 @@
 #pragma once
 #include <memory>
 #include <Core/Version.h>
+#include <Core/FrameManager.h>
+#include <Core/Timer.h>
+#include <Core/Log.h>
 
 namespace fe
 {
-	constexpr Version EngineVersion = CreateVersion(0, 2, 1);
-
 	class Timer;
 	class Logger;
 	class HandleManager;
@@ -21,6 +22,7 @@ namespace fe
 		Engine();
 		~Engine();
 
+		[[nodiscard]] static FrameManager&	GetFrameManager();
 		[[nodiscard]] static Timer&			GetTimer();
 		[[nodiscard]] static Logger&		GetLogger();
 		[[nodiscard]] static HandleManager& GetHandleManager();
@@ -37,8 +39,9 @@ namespace fe
 	private:
 		static Engine*				   instance;
 		bool						   bShouldExit = false;
-		std::unique_ptr<Timer>		   timer;
-		std::unique_ptr<Logger>		   logger;
+		FrameManager				   frameManager;
+		Timer						   timer;
+		Logger						   logger;
 		std::unique_ptr<HandleManager> handleManager;
 		std::unique_ptr<Window>		   window;
 		std::unique_ptr<InputManager>  inputManager;
