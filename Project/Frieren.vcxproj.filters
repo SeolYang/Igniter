@@ -165,13 +165,10 @@
     <ClInclude Include="..\Source\Frieren\Renderer\Common.h">
       <Filter>Source\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Renderer\CommandContextPool.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Renderer\DeferredFrameDeallocator.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\FrameManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\FrameResourceManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -260,8 +257,8 @@
     <ClCompile Include="..\Source\Frieren\Renderer\RendererCommon.cpp">
       <Filter>Source\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Renderer\DeferredFrameDeallocator.cpp">
-      <Filter>Source\Renderer</Filter>
+    <ClCompile Include="..\Source\Frieren\Core\FrameResourceManager.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

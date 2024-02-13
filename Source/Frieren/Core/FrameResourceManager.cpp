@@ -1,14 +1,14 @@
-#include <Renderer/DeferredFrameDeallocator.h>
+#include <Core/FrameResourceManager.h>
 
 namespace fe
 {
 
-	DeferredFrameDeallocator::DeferredFrameDeallocator(const FrameManager& engineFrameManager)
+	FrameResourceManager::FrameResourceManager(const FrameManager& engineFrameManager)
 		: frameManager(engineFrameManager)
 	{
 	}
 
-	DeferredFrameDeallocator::~DeferredFrameDeallocator()
+	FrameResourceManager::~FrameResourceManager()
 	{
 		for (uint8_t frameIdx = 0; frameIdx < NumFramesInFlight; ++frameIdx)
 		{
@@ -16,19 +16,19 @@ namespace fe
 		}
 	}
 
-	void DeferredFrameDeallocator::RequestDeallocation(DeleterType&& deleter)
+	void FrameResourceManager::RequestDeallocation(DeleterType&& deleter)
 	{
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 		RecursiveLock lock{ mutexes[localFrameIdx] };
 		pendingDeleters[localFrameIdx].emplace_back(std::move(deleter));
 	}
 
-	void DeferredFrameDeallocator::BeginFrame()
+	void FrameResourceManager::BeginFrame()
 	{
 		BeginFrame(frameManager.GetLocalFrameIndex());
 	}
 
-	void DeferredFrameDeallocator::BeginFrame(const uint8_t localFrameIdx)
+	void FrameResourceManager::BeginFrame(const uint8_t localFrameIdx)
 	{
 		RecursiveLock lock{ mutexes[localFrameIdx] };
 		for (auto& deleter : pendingDeleters[localFrameIdx])
