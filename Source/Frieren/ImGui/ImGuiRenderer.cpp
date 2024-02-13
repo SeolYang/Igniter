@@ -1,6 +1,7 @@
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <Core/Window.h>
+#include <Core/FrameManager.h>
 #include <D3D12/Device.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/Swapchain.h>
@@ -10,9 +11,8 @@
 
 namespace fe
 {
-	ImGuiRenderer::ImGuiRenderer(dx::Device& device, Window& window)
-		: descriptorHeap(std::make_unique<dx::DescriptorHeap>(
-			  device.CreateDescriptorHeap(dx::EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
+	ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, dx::Device& device, Window& window)
+		: frameManager(engineFrameManager), descriptorHeap(std::make_unique<dx::DescriptorHeap>(device.CreateDescriptorHeap(dx::EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -23,15 +23,13 @@ namespace fe
 		ImGui::StyleColorsDark();
 
 		ImGui_ImplWin32_Init(window.GetNative());
-		ImGui_ImplDX12_Init(&device.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM,
-							&descriptorHeap->GetNative(), descriptorHeap->GetIndexedCPUDescriptorHandle(0),
-							descriptorHeap->GetIndexedGPUDescriptorHandle(0));
+		ImGui_ImplDX12_Init(&device.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM, &descriptorHeap->GetNative(),
+							descriptorHeap->GetIndexedCPUDescriptorHandle(0), descriptorHeap->GetIndexedGPUDescriptorHandle(0));
 
 		commandContexts.reserve(NumFramesInFlight);
 		for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
 		{
-			commandContexts.emplace_back(
-				std::make_unique<dx::CommandContext>(device.CreateCommandContext(dx::EQueueType::Direct).value()));
+			commandContexts.emplace_back(std::make_unique<dx::CommandContext>(device.CreateCommandContext(dx::EQueueType::Direct).value()));
 		}
 	}
 
@@ -54,13 +52,15 @@ namespace fe
 		canvas.Render();
 		ImGui::Render();
 
-		dx::CommandContext& cmdCtx = *commandContexts[renderer.GetLocalFrameIndex()];
+		dx::CommandContext& cmdCtx = *commandContexts[frameManager.GetLocalFrameIndex()];
 		cmdCtx.Begin();
 		dx::Swapchain&	swapchain = renderer.GetSwapchain();
 		dx::GPUTexture& backBuffer = swapchain.GetBackBuffer();
-		cmdCtx.AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_ALL, D3D12_BARRIER_SYNC_RENDER_TARGET,
-										D3D12_BARRIER_ACCESS_COMMON, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+		cmdCtx.AddPendingTextureBarrier(backBuffer,
+										D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+										D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
 										D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+
 		cmdCtx.FlushPendingTextureBarriers();
 
 		const dx::Descriptor& backBufferRTV = swapchain.GetRenderTargetView();
@@ -71,14 +71,15 @@ namespace fe
 
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx.GetNative());
 
-		cmdCtx.AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_ALL,
-										D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_COMMON,
+		cmdCtx.AddPendingTextureBarrier(backBuffer,
+										D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+										D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
 										D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+
 		cmdCtx.FlushPendingTextureBarriers();
 		cmdCtx.End();
 
 		dx::CommandQueue& directCmdQueue = renderer.GetDirectCommandQueue();
 		directCmdQueue.AddPendingContext(cmdCtx);
-		directCmdQueue.FlushPendingContexts();
 	}
 } // namespace fe
