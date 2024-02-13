@@ -4,6 +4,7 @@
 #include <Core/HandleManager.h>
 #include <Core/InputManager.h>
 #include <Core/Window.h>
+#include <Core/FrameResourceManager.h>
 #include <Core/EmbededSettings.h>
 #include <D3D12/Device.h>
 #include <Renderer/Renderer.h>
@@ -36,6 +37,8 @@ namespace fe
 			window = std::make_unique<Window>(windowDesc);
 			inputManager = std::make_unique<InputManager>();
 
+			frameResourceManager = std::make_unique<FrameResourceManager>(frameManager);
+
 			renderer = std::make_unique<Renderer>(frameManager, *window);
 
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, renderer->GetDevice(), *window);
@@ -50,6 +53,9 @@ namespace fe
 	Engine::~Engine()
 	{
 		logger.Log<EngineInfo>("De-initialize Engine Runtime...");
+
+		frameResourceManager.reset();
+
 		gameInstance.reset();
 		imguiCanvas.reset();
 		imguiRenderer.reset();
@@ -131,7 +137,6 @@ namespace fe
 
 		while (!bShouldExit)
 		{
-			frameManager.NextFrame();
 			timer.Begin();
 
 			MSG msg;
@@ -151,11 +156,15 @@ namespace fe
 			inputManager->PostUpdate();
 
 			renderer->BeginFrame();
+			frameResourceManager->BeginFrame();
+
 			renderer->Render();
 			imguiRenderer->Render(*imguiCanvas, *renderer);
+
 			renderer->EndFrame();
 
 			timer.End();
+			frameManager.NextFrame();
 		}
 
 		logger.Log<EngineInfo>("End => Engine Main Loop");

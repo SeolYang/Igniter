@@ -8,10 +8,9 @@
 namespace fe::dx
 {
 	Swapchain::Swapchain(const Window& window, Device& device, CommandQueue& directCmdQueue,
-						 const uint32_t numInflightFrames)
-		: numInflightFrames(numInflightFrames)
+						 const uint8_t desiredNumBackBuffers)
+		: numBackBuffers(desiredNumBackBuffers)
 	{
-		check(numInflightFrames > 0);
 		InitSwapchain(window, directCmdQueue);
 		InitRenderTargetViews(device);
 	}
@@ -44,7 +43,7 @@ namespace fe::dx
 		desc.Stereo = false;
 		desc.SampleDesc = { 1, 0 };
 		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		desc.BufferCount = numInflightFrames;
+		desc.BufferCount = numBackBuffers;
 		desc.Scaling = DXGI_SCALING_STRETCH;
 		desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
@@ -77,9 +76,9 @@ namespace fe::dx
 
 	void Swapchain::InitRenderTargetViews(Device& device)
 	{
-		renderTargetViews.reserve(numInflightFrames);
-		backBuffers.reserve(numInflightFrames);
-		for (uint32_t idx = 0; idx < numInflightFrames; ++idx)
+		renderTargetViews.reserve(numBackBuffers);
+		backBuffers.reserve(numBackBuffers);
+		for (uint32_t idx = 0; idx < numBackBuffers; ++idx)
 		{
 			ComPtr<ID3D12Resource1> resource;
 			verify_succeeded(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));

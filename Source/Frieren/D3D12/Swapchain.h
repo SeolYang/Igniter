@@ -17,7 +17,7 @@ namespace fe::dx
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, Device& device, CommandQueue& directCmdQueue, const uint32_t numInflightFrames);
+		Swapchain(const Window& window, Device& device, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
 		~Swapchain();
 
 		bool IsTearingSupport() const { return bIsTearingSupport; }
@@ -45,7 +45,7 @@ namespace fe::dx
 		ComPtr<IDXGISwapChain4> swapchain;
 		bool					bIsTearingSupport = false;
 
-		const uint32_t							 numInflightFrames;
+		const uint8_t							 numBackBuffers;
 		std::vector<std::unique_ptr<GPUTexture>> backBuffers;
 		std::vector<Descriptor>					 renderTargetViews;
 	};

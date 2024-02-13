@@ -1,8 +1,8 @@
 #include <Core/FrameResourceManager.h>
+#include <Core/FrameManager.h>
 
 namespace fe
 {
-
 	FrameResourceManager::FrameResourceManager(const FrameManager& engineFrameManager)
 		: frameManager(engineFrameManager)
 	{
@@ -16,11 +16,11 @@ namespace fe
 		}
 	}
 
-	void FrameResourceManager::RequestDeallocation(DeleterType&& deleter)
+	void FrameResourceManager::RequestDeallocation(Requester&& requester)
 	{
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 		RecursiveLock lock{ mutexes[localFrameIdx] };
-		pendingDeleters[localFrameIdx].emplace_back(std::move(deleter));
+		pendingRequesters[localFrameIdx].emplace_back(std::move(requester));
 	}
 
 	void FrameResourceManager::BeginFrame()
@@ -31,11 +31,11 @@ namespace fe
 	void FrameResourceManager::BeginFrame(const uint8_t localFrameIdx)
 	{
 		RecursiveLock lock{ mutexes[localFrameIdx] };
-		for (auto& deleter : pendingDeleters[localFrameIdx])
+		for (auto& deleter : pendingRequesters[localFrameIdx])
 		{
 			deleter();
 		}
-		pendingDeleters[localFrameIdx].clear();
+		pendingRequesters[localFrameIdx].clear();
 	}
 
 } // namespace fe

@@ -12,6 +12,7 @@ namespace fe
 	class HandleManager;
 	class Window;
 	class InputManager;
+	class FrameResourceManager;
 	class Renderer;
 	class GameInstance;
 	class ImGuiCanvas;
@@ -37,17 +38,18 @@ namespace fe
 		int Execute();
 
 	private:
-		static Engine*				   instance;
-		bool						   bShouldExit = false;
-		FrameManager				   frameManager;
-		Timer						   timer;
-		Logger						   logger;
-		std::unique_ptr<HandleManager> handleManager;
-		std::unique_ptr<Window>		   window;
-		std::unique_ptr<InputManager>  inputManager;
-		std::unique_ptr<Renderer>	   renderer;
-		std::unique_ptr<ImGuiRenderer> imguiRenderer;
-		std::unique_ptr<ImGuiCanvas>   imguiCanvas;
-		std::unique_ptr<GameInstance>  gameInstance;
+		static Engine*						  instance;
+		bool								  bShouldExit = false;
+		FrameManager						  frameManager;
+		Timer								  timer;
+		Logger								  logger;
+		std::unique_ptr<HandleManager>		  handleManager;
+		std::unique_ptr<Window>				  window;
+		std::unique_ptr<InputManager>		  inputManager;
+		std::unique_ptr<FrameResourceManager> frameResourceManager;
+		std::unique_ptr<Renderer>			  renderer;
+		std::unique_ptr<ImGuiRenderer>		  imguiRenderer;
+		std::unique_ptr<ImGuiCanvas>		  imguiCanvas;
+		std::unique_ptr<GameInstance>		  gameInstance;
 	};
 } // namespace fe

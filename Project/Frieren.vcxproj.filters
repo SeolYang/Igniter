@@ -171,6 +171,9 @@
     <ClInclude Include="..\Source\Frieren\Core\FrameResourceManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\FrameResource.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -258,6 +261,9 @@
       <Filter>Source\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\FrameResourceManager.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\FrameResource.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
