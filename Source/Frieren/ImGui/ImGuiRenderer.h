@@ -19,7 +19,7 @@ namespace fe
 	class ImGuiRenderer
 	{
 	public:
-		ImGuiRenderer(const FrameManager& engineFrameManager, dx::Device& device, Window& window);
+		ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, dx::Device& device);
 		~ImGuiRenderer();
 
 		void Render(ImGuiCanvas& canvas, Renderer& renderer);

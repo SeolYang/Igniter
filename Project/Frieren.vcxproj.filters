@@ -174,8 +174,8 @@
     <ClInclude Include="..\Source\Frieren\Core\FrameResource.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Renderer\CommandContextPool.h">
-      <Filter>Source\Renderer</Filter>
+    <ClInclude Include="..\Source\Frieren\D3D12\CommandContextPool.h">
+      <Filter>Source\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -268,6 +268,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\FrameResource.cpp">
       <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\CommandContextPool.cpp">
+      <Filter>Source\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

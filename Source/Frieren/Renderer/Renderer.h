@@ -5,6 +5,8 @@ namespace fe::dx
 {
 	class Device;
 	class CommandQueue;
+	class CommandContext;
+	class CommandContextPool;
 	class DescriptorHeap;
 	class Swapchain;
 	class Fence;
@@ -14,10 +16,11 @@ namespace fe
 {
 	class Window;
 	class World;
+	class FrameResourceManager;
 	class Renderer
 	{
 	public:
-		Renderer(const FrameManager& engineFrameManager, Window& window);
+		Renderer(const FrameManager& engineFrameManager, Window& window, dx::Device& device);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
 		~Renderer();
@@ -26,18 +29,18 @@ namespace fe
 		Renderer& operator=(Renderer&&) noexcept = delete;
 
 		void BeginFrame();
-		void Render();
+		void Render(FrameResourceManager& frameResourceManager);
 		void Render(World& world);
 		void EndFrame();
 
-		dx::Device&		  GetDevice() { return *device; }
 		dx::Swapchain&	  GetSwapchain() { return *swapchain; }
 		dx::CommandQueue& GetDirectCommandQueue() { return *directCmdQueue; }
 
 	private:
 		const FrameManager&						frameManager;
-		std::unique_ptr<dx::Device>				device;
+		dx::Device&								renderDevice;
 		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
+		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
 		std::unique_ptr<dx::Swapchain>			swapchain;
 		std::vector<std::unique_ptr<dx::Fence>> frameFences;
 	};

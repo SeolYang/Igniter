@@ -17,6 +17,7 @@ namespace fe
 {
 	FE_DECLARE_LOG_CATEGORY(EngineInfo, ELogVerbosiy::Info)
 
+
 	Engine* Engine::instance = nullptr;
 	Engine::Engine()
 	{
@@ -28,22 +29,16 @@ namespace fe
 			logger.Log<EngineInfo>("Engine version: {}", version::Version);
 
 			instance = this;
-
-			handleManager = std::make_unique<HandleManager>();
-
-			/* @test temp window descriptor */
+			/* #test temp window descriptor */
 			const WindowDescription windowDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
-
 			window = std::make_unique<Window>(windowDesc);
-			inputManager = std::make_unique<InputManager>();
-
+			renderDevice = std::make_unique<dx::Device>();
+			handleManager = std::make_unique<HandleManager>();
 			frameResourceManager = std::make_unique<FrameResourceManager>(frameManager);
-
-			renderer = std::make_unique<Renderer>(frameManager, *window);
-
-			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, renderer->GetDevice(), *window);
+			inputManager = std::make_unique<InputManager>();
+			renderer = std::make_unique<Renderer>(frameManager, *window, *renderDevice);
+			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, * renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
-
 			gameInstance = std::make_unique<GameInstance>();
 
 			logger.Log<EngineInfo>("Engine Runtime Initialized.");
@@ -52,23 +47,22 @@ namespace fe
 
 	Engine::~Engine()
 	{
-		logger.Log<EngineInfo>("De-initialize Engine Runtime...");
-
-		frameResourceManager.reset();
+		logger.Log<EngineInfo>("Cleanup...");
 
 		gameInstance.reset();
 		imguiCanvas.reset();
 		imguiRenderer.reset();
 		renderer.reset();
 		inputManager.reset();
-		window.reset();
+		frameResourceManager.reset();
 		handleManager.reset();
+		renderDevice.reset();
+		window.reset();
 
 		if (instance == this)
 		{
 			instance = nullptr;
 		}
-		logger.Log<EngineInfo>("Engine Runtime De-initialized.");
 	}
 
 	FrameManager& Engine::GetFrameManager()
@@ -158,7 +152,7 @@ namespace fe
 			renderer->BeginFrame();
 			frameResourceManager->BeginFrame();
 
-			renderer->Render();
+			renderer->Render(*frameResourceManager);
 			imguiRenderer->Render(*imguiCanvas, *renderer);
 
 			renderer->EndFrame();
@@ -170,5 +164,4 @@ namespace fe
 		logger.Log<EngineInfo>("End => Engine Main Loop");
 		return 0;
 	}
-
 } // namespace fe

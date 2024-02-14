@@ -11,7 +11,7 @@
 
 namespace fe
 {
-	ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, dx::Device& device, Window& window)
+	ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, dx::Device& device)
 		: frameManager(engineFrameManager), descriptorHeap(std::make_unique<dx::DescriptorHeap>(device.CreateDescriptorHeap(dx::EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
 	{
 		IMGUI_CHECKVERSION();
