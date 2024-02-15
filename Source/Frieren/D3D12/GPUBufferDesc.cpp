@@ -180,12 +180,8 @@ namespace fe::dx
 
 	D3D12MA::ALLOCATION_DESC GPUBufferDesc::ToAllocationDesc() const
 	{
-		D3D12MA::ALLOCATION_DESC desc{};
-		if (IsShaderResourceCompatible() || IsConstantBufferCompatible() || IsUnorderedAccessCompatible())
-		{
-			desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
-		}
-		else if (IsUploadCompatible())
+		D3D12MA::ALLOCATION_DESC desc{ .HeapType = D3D12_HEAP_TYPE_DEFAULT };
+		if (IsUploadCompatible())
 		{
 			desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
 		}

@@ -59,10 +59,9 @@ namespace fe::dx
 		uint32_t GetStructureByteStride() const { return structureByteStride; }
 		uint32_t GetNumElements() const { return numElements; }
 
-		D3D12MA::ALLOCATION_DESC					   ToAllocationDesc() const;
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ToShaderResourceViewDesc() const;
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>
-		ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
+		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc() const;
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>	ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc() const;
 
 		void From(const D3D12_RESOURCE_DESC& desc);

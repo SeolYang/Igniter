@@ -7,6 +7,16 @@
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/Swapchain.h>
 
+// #test
+#include <D3D12/GPUBuffer.h>
+#include <D3D12/GPUBufferDesc.h>
+struct SimpleVertex
+{
+	float x = 0.f;
+	float y = 0.f;
+	float z = 0.f;
+};
+
 namespace fe
 {
 	FE_DECLARE_LOG_CATEGORY(RendererInfo, ELogVerbosiy::Info)
@@ -22,6 +32,14 @@ namespace fe
 			frameFences.emplace_back(
 				std::make_unique<dx::Fence>(device.CreateFence(std::format("FrameFence_{}", localFrameIdx)).value()));
 		}
+
+		dx::GPUBufferDesc vbDesc{};
+		vbDesc.AsVertexBuffer<SimpleVertex>(4);
+		quadVB = std::make_unique<dx::GPUBuffer>(renderDevice.CreateBuffer(vbDesc).value());
+
+		dx::GPUBufferDesc ibDesc{};
+		ibDesc.AsIndexBuffer<uint16_t>(6);
+		quadIB = std::make_unique<dx::GPUBuffer>(renderDevice.CreateBuffer(ibDesc).value());
 	}
 
 	Renderer::~Renderer()

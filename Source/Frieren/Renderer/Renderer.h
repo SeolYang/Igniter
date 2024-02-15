@@ -10,6 +10,9 @@ namespace fe::dx
 	class DescriptorHeap;
 	class Swapchain;
 	class Fence;
+
+	// #test
+	class GPUBuffer;
 } // namespace fe::dx
 
 namespace fe
@@ -43,5 +46,9 @@ namespace fe
 		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
 		std::unique_ptr<dx::Swapchain>			swapchain;
 		std::vector<std::unique_ptr<dx::Fence>> frameFences;
+
+		// #test
+		std::unique_ptr<dx::GPUBuffer> quadVB;
+		std::unique_ptr<dx::GPUBuffer> quadIB;
 	};
 } // namespace fe
