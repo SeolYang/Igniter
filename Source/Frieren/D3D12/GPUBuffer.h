@@ -19,6 +19,9 @@ namespace fe::dx
 		GPUBuffer& operator=(const GPUBuffer&) = delete;
 		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
 
+		bool IsValid() const { return (allocation != nullptr && resource != nullptr) || resource != nullptr; }
+		operator bool() const { return IsValid(); }
+
 		const GPUBufferDesc& GetDesc() const { return desc; }
 
 		const auto& GetNative() const
@@ -32,6 +35,11 @@ namespace fe::dx
 			check(resource);
 			return *resource.Get();
 		}
+
+		GPUResourceMapGuard Map(const uint32_t subresource = 0, const CD3DX12_RANGE readRange = { 0, 0 });
+
+	private:
+		void Unmap();
 
 	private:
 		GPUBuffer(const GPUBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,

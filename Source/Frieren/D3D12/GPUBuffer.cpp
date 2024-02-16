@@ -14,7 +14,8 @@ namespace fe::dx
 	{
 	}
 
-	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> bufferResource) : resource(std::move(bufferResource))
+	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> bufferResource)
+		: resource(std::move(bufferResource))
 	{
 		check(resource);
 		desc.From(resource->GetDesc());
@@ -28,4 +29,24 @@ namespace fe::dx
 		resource = std::move(other.resource);
 		return *this;
 	}
+
+	GPUResourceMapGuard GPUBuffer::Map(const uint32_t subresource /*= 0*/, const CD3DX12_RANGE readRange /*= {0, 0}*/)
+	{
+		check(resource);
+		uint8_t* mappedPtr = nullptr;
+		if (!SUCCEEDED(resource->Map(subresource, &readRange, reinterpret_cast<void**>(&mappedPtr))))
+		{
+			return nullptr;
+		}
+
+		return {
+			mappedPtr, [this](uint8_t* /* ptr */) { Unmap(); }
+		};
+	}
+
+	void GPUBuffer::Unmap()
+	{
+		resource->Unmap(0, nullptr);
+	}
+
 } // namespace fe::dx

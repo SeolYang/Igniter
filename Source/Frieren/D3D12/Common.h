@@ -29,10 +29,15 @@
 #include <D3D12MemAlloc.h>
 #pragma warning(pop)
 
+#include <memory>
+#include <functional>
+
 namespace fe::dx
 {
 	template <typename Ty>
 	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
+
+	using GPUResourceMapGuard = std::unique_ptr<uint8_t, std::function<void(uint8_t*)>>;
 
 	enum class EQueueType
 	{
