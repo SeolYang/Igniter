@@ -8,6 +8,7 @@ namespace fe::dx
 	class Device;
 	class PipelineState;
 	class GPUTexture;
+	class GPUBuffer;
 	class Descriptor;
 	class DescriptorHeap;
 	class CommandContext
@@ -41,13 +42,19 @@ namespace fe::dx
 		void End();
 
 		// https://microsoft.github.io/DirectX-Specs/d3d/D3D12EnhancedBarriers.html#equivalent-d3d12_barrier_sync-bit-for-each-d3d12_resource_states-bit
-		void AddPendingTextureBarrier(GPUTexture& targetTexture, const D3D12_BARRIER_SYNC syncBefore,
-									  const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore,
-									  const D3D12_BARRIER_ACCESS accessAfter, const D3D12_BARRIER_LAYOUT layoutBefore,
-									  const D3D12_BARRIER_LAYOUT			layoutAfter,
+		void AddPendingTextureBarrier(GPUTexture&			   targetTexture,
+									  const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter,
+									  D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter,
+									  const D3D12_BARRIER_LAYOUT layoutBefore, const D3D12_BARRIER_LAYOUT layoutAfter,
 									  const D3D12_BARRIER_SUBRESOURCE_RANGE subresourceRange = { 0xffffffff, 0, 0, 0, 0,
 																								 0 });
 		void FlushPendingTextureBarriers();
+		void AddPendingBufferBarrier(GPUBuffer&				  targetBuffer,
+									 const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter,
+									 D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter,
+									 const size_t offset = 0, const size_t sizeAsBytes = std::numeric_limits<size_t>::max());
+		void FlushPendingBufferBarriers();
+		void FlushBarriers();
 
 		void ClearRenderTarget(const Descriptor& renderTargetView, float r = 0.f, float g = 0.f, float b = 0.f,
 							   float a = 1.f);
@@ -58,6 +65,9 @@ namespace fe::dx
 		void SetRenderTarget(const Descriptor&								   renderTargetView,
 							 std::optional<std::reference_wrapper<Descriptor>> depthStencilView = std::nullopt);
 		void SetDescriptorHeap(DescriptorHeap& descriptorHeap);
+
+		void CopyBuffer(GPUBuffer& from, GPUBuffer& to);
+		void CopyBuffer(GPUBuffer& from, const size_t srcOffset, const size_t numBytes, GPUBuffer& to, const size_t dstOffset);
 
 	private:
 		CommandContext(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList,

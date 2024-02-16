@@ -2,6 +2,8 @@
 #include <D3D12/Device.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
+#include <D3D12/GPUBufferDesc.h>
+#include <D3D12/GPUBuffer.h>
 #include <D3D12/PipelineState.h>
 #include <D3D12/DescriptorHeap.h>
 #include <Core/Assert.h>
@@ -92,6 +94,46 @@ namespace fe::dx
 		pendingTextureBarriers.clear();
 	}
 
+	void CommandContext::AddPendingBufferBarrier(GPUBuffer& targetBuffer, const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter, const size_t offset, const size_t sizeAsBytes)
+	{
+		check(IsValid());
+		check(targetBuffer);
+		check(syncBefore != syncAfter || accessBefore != accessAfter);
+
+		pendingBufferBarriers.emplace_back(D3D12_BUFFER_BARRIER{ .SyncBefore = syncBefore,
+																 .SyncAfter = syncAfter,
+																 .AccessBefore = accessBefore,
+																 .AccessAfter = accessAfter,
+																 .pResource = &targetBuffer.GetNative(),
+																 .Offset = offset,
+																 .Size = sizeAsBytes });
+	}
+
+	void CommandContext::FlushPendingBufferBarriers()
+	{
+		check(IsValid());
+		const D3D12_BARRIER_GROUP barrierGroup{ .Type = D3D12_BARRIER_TYPE_BUFFER,
+												.NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()),
+												.pBufferBarriers = pendingBufferBarriers.data() };
+		cmdList->Barrier(1, &barrierGroup);
+		pendingBufferBarriers.clear();
+	}
+
+	void CommandContext::FlushBarriers()
+	{
+		check(IsValid());
+		const D3D12_BARRIER_GROUP barrierGroups[3] = {
+			{ .Type = D3D12_BARRIER_TYPE_GLOBAL, .NumBarriers = static_cast<uint32_t>(pendingGlobalBarriers.size()), .pGlobalBarriers = pendingGlobalBarriers.data() },
+			{ .Type = D3D12_BARRIER_TYPE_TEXTURE, .NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()), .pTextureBarriers = pendingTextureBarriers.data() },
+			{ .Type = D3D12_BARRIER_TYPE_BUFFER, .NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()), .pBufferBarriers = pendingBufferBarriers.data() }
+		};
+
+		cmdList->Barrier(3, barrierGroups);
+		pendingGlobalBarriers.clear();
+		pendingTextureBarriers.clear();
+		pendingBufferBarriers.clear();
+	}
+
 	void CommandContext::ClearRenderTarget(const Descriptor& renderTargetView, float r, float g, float b, float a)
 	{
 		check(IsValid());
@@ -150,9 +192,28 @@ namespace fe::dx
 
 	void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
 	{
+		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
 		check(descriptorHeap);
 		ID3D12DescriptorHeap* descriptorHeaps[] = { &descriptorHeap.GetNative() };
 		cmdList->SetDescriptorHeaps(1, descriptorHeaps);
+	}
+
+	void CommandContext::CopyBuffer(GPUBuffer& from, const size_t srcOffset, const size_t numBytes, GPUBuffer& to, const size_t dstOffset)
+	{
+		check(IsValid());
+		check(from);
+		check(to);
+		check(numBytes > 0);
+		check(dstOffset + numBytes <= to.GetDesc().GetSizeAsBytes());
+		check(srcOffset + numBytes <= from.GetDesc().GetSizeAsBytes());
+
+		cmdList->CopyBufferRegion(&to.GetNative(), dstOffset, &from.GetNative(), srcOffset, numBytes);
+	}
+
+	void CommandContext::CopyBuffer(GPUBuffer& from, GPUBuffer& to)
+	{
+		const auto& srcDesc = from.GetDesc();
+		CopyBuffer(from, 0, srcDesc.GetSizeAsBytes(), to, 0);
 	}
 } // namespace fe::dx

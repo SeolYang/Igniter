@@ -58,6 +58,7 @@ namespace fe::dx
 
 		uint32_t GetStructureByteStride() const { return structureByteStride; }
 		uint32_t GetNumElements() const { return numElements; }
+		uint64_t GetSizeAsBytes() const { return Width; }
 
 		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc() const;
@@ -70,11 +71,10 @@ namespace fe::dx
 		String DebugName = String{ "Unknown Buffer" };
 
 	private:
-		bool				 bIsShaderReadWritable = false;
-		bool				 bIsCPUAccessible = false;
-		D3D12_BUFFER_BARRIER standardBarrier = {};
-
 		uint32_t structureByteStride = 1;
 		uint32_t numElements = 1;
+		D3D12_BUFFER_BARRIER standardBarrier = {};
+		bool bIsShaderReadWritable = false;
+		bool bIsCPUAccessible = false;
 	};
 } // namespace fe::dx
