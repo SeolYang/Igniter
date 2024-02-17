@@ -34,7 +34,7 @@ namespace fe::dx
 			case EDescriptorHeapType::CBV_SRV_UAV:
 				return descriptorType == EDescriptorType::ShaderResourceView ||
 					   descriptorType == EDescriptorType::ConstantBufferView ||
-					   descriptorType == EDescriptorType::UnorderedResourceView;
+					   descriptorType == EDescriptorType::UnorderedAccessView;
 			case EDescriptorHeapType::Sampler:
 				return descriptorType == EDescriptorType::Sampler;
 			case EDescriptorHeapType::RTV:

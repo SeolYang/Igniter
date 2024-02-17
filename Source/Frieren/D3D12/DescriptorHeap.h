@@ -3,43 +3,26 @@
 #include <Core/Misc.h>
 #include <Core/Mutex.h>
 #include <Core/Container.h>
+#include <Core/FrameResource.h>
 
 namespace fe::dx
 {
 	class Device;
-	class DescriptorHeap;
-	class Descriptor
+	class GPUView
 	{
-		friend class DescriptorHeap;
-
 	public:
-		Descriptor(Descriptor&& other) noexcept;
-		~Descriptor();
-
-		Descriptor& operator=(Descriptor&& other) noexcept;
-
-		bool IsValid() const { return ownedDescriptorHeap != nullptr && index != InvalidIndexU32; }
+		bool IsValid() const { return Index != std::numeric_limits<decltype(Index)>::max(); }
 		operator bool() const { return IsValid(); }
 
-		uint32_t					GetIndex() const { return index; }
-		EDescriptorType				GetType() const { return type; }
-		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle() const { return cpuHandle; }
-		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() const { return gpuHandle; }
-
-	private:
-		Descriptor(DescriptorHeap& owner, const EDescriptorType descriptorType, const uint32_t allocatedIndex,
-				   const D3D12_CPU_DESCRIPTOR_HANDLE indexedCpuHandle,
-				   const D3D12_GPU_DESCRIPTOR_HANDLE indexedGpuHandle);
+		bool HasValidCPUHandle() const { return CPUHandle.ptr != std::numeric_limits<decltype(CPUHandle.ptr)>::max(); }
+		bool HasValidGPUHandle() const { return GPUHandle.ptr != std::numeric_limits<decltype(GPUHandle.ptr)>::max(); }
 
 	public:
-		static constexpr uint32_t InvalidIndex = InvalidIndexU32;
+		const EDescriptorType			  Type;		 /* Type of descriptor. */
+		const uint32_t					  Index;	 /* Index of descriptor in Descriptor Heap. */
+		const D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle; /* CPU Handle of descriptor. */
+		const D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle; /* GPU Handle of descriptor. */
 
-	private:
-		DescriptorHeap*				ownedDescriptorHeap = nullptr;
-		EDescriptorType				type;
-		uint32_t					index;
-		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 	};
 
 	class DescriptorHeap
@@ -65,17 +48,15 @@ namespace fe::dx
 		EDescriptorHeapType			GetType() const { return descriptorHeapType; }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
 		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
-		
-		// #todo Descriptor의 FrameResource 화?
-		// ex using ResourceView = FrameResource<Descriptor>?
-		// MakeFrameResource<Descriptor>(new Descriptor(...), [](...){...{ descriptorHeap.Deallocate(idx); delete ptr; }}
-		Descriptor Allocate(const EDescriptorType requestDescriptorType);
-		void	   Deallocate(Descriptor& descriptor);
+
+		FrameResource<GPUView> Request(FrameResourceManager& frameResourceManager, const EDescriptorType desiredType);
 
 	private:
 		DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
 					   const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap,
 					   const uint32_t descriptorHandleIncSizeInHeap);
+
+		void Release(const uint32_t indexOfDescriptor);
 
 	private:
 		EDescriptorHeapType			 descriptorHeapType;

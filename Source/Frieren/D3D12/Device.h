@@ -1,6 +1,6 @@
 #pragma once
 #include <Core/Log.h>
-#include <Core/HandleManager.h>
+#include <Core/FrameResource.h>
 #include <D3D12/Common.h>
 
 namespace fe::dx
@@ -12,7 +12,7 @@ namespace fe::dx
 	class CommandQueue;
 	class CommandContext;
 	class DescriptorHeap;
-	class Descriptor;
+	class GPUView;
 	class GPUBufferDesc;
 	class GPUBuffer;
 	class GPUTextureDesc;
@@ -46,15 +46,14 @@ namespace fe::dx
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType,
 														   const uint32_t			 numDescriptors);
 
-		std::optional<Descriptor> CreateShaderResourceView(GPUBuffer& gpuBuffer);
-		std::optional<Descriptor> CreateConstantBufferView(GPUBuffer& gpuBuffer);
-		std::optional<Descriptor> CreateUnorderedAccessView(GPUBuffer& gpuBuffer);
-		std::optional<Descriptor> CreateShaderResourceView(GPUTexture&					texture,
-														   const GPUTextureSubresource& subresource);
-		std::optional<Descriptor> CreateUnorderedAccessView(GPUTexture&					 texture,
-															const GPUTextureSubresource& subresource);
-		std::optional<Descriptor> CreateRenderTargetView(GPUTexture& texture, const GPUTextureSubresource& subresource);
-		std::optional<Descriptor> CreateDepthStencilView(GPUTexture& texture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateConstantBufferView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer);
+		FrameResource<GPUView> CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer);
+		FrameResource<GPUView> CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer);
+
+		FrameResource<GPUView> CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateRenderTargetView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateDepthStencilView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 
 		std::optional<Fence> CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
 
@@ -86,16 +85,20 @@ namespace fe::dx
 		ComPtr<IDXGIAdapter>   adapter;
 		ComPtr<ID3D12Device10> device;
 
+		D3D12MA::Allocator*				allocator = nullptr;
+		std::unique_ptr<DescriptorHeap> cbvSrvUavDescriptorHeap;
+		std::unique_ptr<DescriptorHeap> samplerDescriptorHeap;
+		std::unique_ptr<DescriptorHeap> rtvDescriptorHeap;
+		std::unique_ptr<DescriptorHeap> dsvDescriptorHeap;
+
 		uint32_t cbvSrvUavDescriptorHandleIncrementSize = 0;
 		uint32_t samplerDescritorHandleIncrementSize = 0;
 		uint32_t dsvDescriptorHandleIncrementSize = 0;
 		uint32_t rtvDescriptorHandleIncrementSize = 0;
 
-		D3D12MA::Allocator* allocator = nullptr;
-
-		std::unique_ptr<DescriptorHeap> cbvSrvUavDescriptorHeap;
-		std::unique_ptr<DescriptorHeap> samplerDescriptorHeap;
-		std::unique_ptr<DescriptorHeap> rtvDescriptorHeap;
-		std::unique_ptr<DescriptorHeap> dsvDescriptorHeap;
+		bool bEnhancedBarriersSupported = false;
+		bool bRaytracing10Supported = false;
+		bool bRaytracing11Supported = false;
+		bool bShaderModel66Supported = false;
 	};
 } // namespace fe::dx

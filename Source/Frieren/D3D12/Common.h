@@ -59,7 +59,7 @@ namespace fe::dx
 	{
 		ConstantBufferView,
 		ShaderResourceView,
-		UnorderedResourceView,
+		UnorderedAccessView,
 		Sampler,
 		RenderTargetView,
 		DepthStencilView

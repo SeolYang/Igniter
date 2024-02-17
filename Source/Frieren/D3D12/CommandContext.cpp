@@ -85,16 +85,6 @@ namespace fe::dx
 																   .Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE });
 	}
 
-	void CommandContext::FlushPendingTextureBarriers()
-	{
-		check(IsValid());
-		const D3D12_BARRIER_GROUP barrierGroup{ .Type = D3D12_BARRIER_TYPE_TEXTURE,
-												.NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()),
-												.pTextureBarriers = pendingTextureBarriers.data() };
-		cmdList->Barrier(1, &barrierGroup);
-		pendingTextureBarriers.clear();
-	}
-
 	void CommandContext::AddPendingBufferBarrier(GPUBuffer& targetBuffer, const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter, const size_t offset, const size_t sizeAsBytes)
 	{
 		check(IsValid());
@@ -108,16 +98,6 @@ namespace fe::dx
 																 .pResource = &targetBuffer.GetNative(),
 																 .Offset = offset,
 																 .Size = sizeAsBytes });
-	}
-
-	void CommandContext::FlushPendingBufferBarriers()
-	{
-		check(IsValid());
-		const D3D12_BARRIER_GROUP barrierGroup{ .Type = D3D12_BARRIER_TYPE_BUFFER,
-												.NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()),
-												.pBufferBarriers = pendingBufferBarriers.data() };
-		cmdList->Barrier(1, &barrierGroup);
-		pendingBufferBarriers.clear();
 	}
 
 	void CommandContext::FlushBarriers()
@@ -135,93 +115,44 @@ namespace fe::dx
 		pendingBufferBarriers.clear();
 	}
 
-	void CommandContext::ClearRenderTarget(const Descriptor& renderTargetView, float r, float g, float b, float a)
+	void CommandContext::ClearRenderTarget(const GPUView& rtv, float r /*= 0.f*/, float g /*= 0.f*/, float b /*= 0.f*/, float a /*= 1.f*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(renderTargetView && (renderTargetView.GetType() == EDescriptorType::RenderTargetView));
+		check(rtv && (rtv.Type == EDescriptorType::RenderTargetView));
 		const float rgba[4] = { r, g, b, a };
-		cmdList->ClearRenderTargetView(renderTargetView.GetCPUDescriptorHandle(), rgba, 0, nullptr);
+		cmdList->ClearRenderTargetView(rtv.CPUHandle, rgba, 0, nullptr);
 	}
 
-	void CommandContext::ClearDepthStencil(const Descriptor& depthStencilView, float depth, uint8_t stencil)
+	void CommandContext::ClearDepthStencil(const GPUView& dsv, float depth /*= 1.f*/, uint8_t stencil /*= 0*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(depthStencilView && (depthStencilView.GetType() == EDescriptorType::DepthStencilView));
+		check(dsv && (dsv.Type == EDescriptorType::DepthStencilView));
 
-		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = depthStencilView.GetCPUDescriptorHandle();
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil,
 									   0, nullptr);
 	}
 
-	void CommandContext::ClearDepth(const Descriptor& depthStencilView, float depth /*= 1.f*/)
+	void CommandContext::ClearDepth(const GPUView& dsv, float depth /*= 1.f*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(depthStencilView && (depthStencilView.GetType() == EDescriptorType::DepthStencilView));
+		check(dsv && (dsv.Type == EDescriptorType::DepthStencilView));
 
-		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = depthStencilView.GetCPUDescriptorHandle();
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 	}
 
-	void CommandContext::ClearStencil(const Descriptor& depthStencilView, uint8_t stencil /*= 0*/)
+	void CommandContext::ClearStencil(const GPUView& dsv, uint8_t stencil /*= 0*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(depthStencilView && (depthStencilView.GetType() == EDescriptorType::DepthStencilView));
+		check(dsv && (dsv.Type == EDescriptorType::DepthStencilView));
 
-		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = depthStencilView.GetCPUDescriptorHandle();
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, nullptr);
-	}
-
-	void CommandContext::SetRenderTarget(const Descriptor&								   renderTargetView,
-										 std::optional<std::reference_wrapper<Descriptor>> depthStencilView)
-	{
-		check(IsValid());
-		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(renderTargetView && (renderTargetView.GetType() == EDescriptorType::RenderTargetView));
-		check(!depthStencilView ||
-			  (depthStencilView->get() && (depthStencilView->get().GetType() == EDescriptorType::DepthStencilView)));
-
-		const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = renderTargetView.GetCPUDescriptorHandle();
-		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle =
-			depthStencilView ? depthStencilView->get().GetCPUDescriptorHandle() : D3D12_CPU_DESCRIPTOR_HANDLE{};
-
-		cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, depthStencilView ? &dsvCpuHandle : nullptr);
-	}
-
-	void CommandContext::SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps)
-	{
-		check(IsValid());
-		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
-		std::vector<ID3D12DescriptorHeap*> descriptorHeaps(targetDescriptorHeaps.size());
-		std::transform(targetDescriptorHeaps.begin(), targetDescriptorHeaps.end(), descriptorHeaps.begin(),
-					   [](DescriptorHeap& descriptorHeap) { check(descriptorHeap); return &descriptorHeap.GetNative(); });
-		cmdList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()), descriptorHeaps.data());
-	}
-
-	void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
-	{
-		std::reference_wrapper<DescriptorHeap> descriptorHeaps[] = { std::ref(descriptorHeap) };
-		SetDescriptorHeaps(descriptorHeaps);
-	}
-
-	void CommandContext::SetRootSignature(RootSignature& rootSignature)
-	{
-		check(IsValid());
-		check(rootSignature);
-		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
-		switch (cmdListTargetQueueType)
-		{
-			case EQueueType::Direct:
-				cmdList->SetGraphicsRootSignature(&rootSignature.GetNative());
-				break;
-
-			case EQueueType::AsyncCompute:
-				cmdList->SetComputeRootSignature(&rootSignature.GetNative());
-				break;
-		}
 	}
 
 	void CommandContext::CopyBuffer(GPUBuffer& from, const size_t srcOffset, const size_t numBytes, GPUBuffer& to, const size_t dstOffset)
@@ -242,6 +173,39 @@ namespace fe::dx
 		CopyBuffer(from, 0, srcDesc.GetSizeAsBytes(), to, 0);
 	}
 
+	void CommandContext::SetRootSignature(RootSignature& rootSignature)
+	{
+		check(IsValid());
+		check(rootSignature);
+		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
+		switch (cmdListTargetQueueType)
+		{
+			case EQueueType::Direct:
+				cmdList->SetGraphicsRootSignature(&rootSignature.GetNative());
+				break;
+
+			case EQueueType::AsyncCompute:
+				cmdList->SetComputeRootSignature(&rootSignature.GetNative());
+				break;
+		}
+	}
+
+	void CommandContext::SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps)
+	{
+		check(IsValid());
+		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
+		std::vector<ID3D12DescriptorHeap*> descriptorHeaps(targetDescriptorHeaps.size());
+		std::transform(targetDescriptorHeaps.begin(), targetDescriptorHeaps.end(), descriptorHeaps.begin(),
+					   [](DescriptorHeap& descriptorHeap) { check(descriptorHeap); return &descriptorHeap.GetNative(); });
+		cmdList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()), descriptorHeaps.data());
+	}
+
+	void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
+	{
+		std::reference_wrapper<DescriptorHeap> descriptorHeaps[] = { std::ref(descriptorHeap) };
+		SetDescriptorHeaps(descriptorHeaps);
+	}
+
 	void CommandContext::SetVertexBuffer(GPUBuffer& vertexBuffer)
 	{
 		check(IsValid());
@@ -260,16 +224,25 @@ namespace fe::dx
 		cmdList->IASetIndexBuffer(&ibView.value());
 	}
 
+	void CommandContext::SetRenderTarget(const GPUView& rtv, std::optional<std::reference_wrapper<GPUView>> dsv /*= std::nullopt*/)
+	{
+		check(IsValid());
+		check(cmdListTargetQueueType == EQueueType::Direct);
+		check(rtv && (rtv.Type == EDescriptorType::RenderTargetView));
+		check(!dsv ||
+			  (dsv->get() && (dsv->get().Type == EDescriptorType::DepthStencilView)));
+
+		const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = rtv.CPUHandle;
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle =
+			dsv ? dsv->get().CPUHandle : D3D12_CPU_DESCRIPTOR_HANDLE{};
+
+		cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, dsv ? &dsvCpuHandle : nullptr);
+	}
+
 	void CommandContext::SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology)
 	{
 		check(IsValid());
 		cmdList->IASetPrimitiveTopology(primitiveTopology);
-	}
-
-	void CommandContext::DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset, const uint32_t vertexOffset)
-	{
-		check(IsValid());
-		cmdList->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
 	}
 
 	void CommandContext::SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth /*= 0.f*/, const float maxDepth /*= 1.f*/)
@@ -284,5 +257,11 @@ namespace fe::dx
 		check(IsValid());
 		const D3D12_RECT rect{ left, top, right, bottom };
 		cmdList->RSSetScissorRects(1, &rect);
+	}
+
+	void CommandContext::DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset, const uint32_t vertexOffset)
+	{
+		check(IsValid());
+		cmdList->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
 	}
 } // namespace fe::dx

@@ -19,7 +19,7 @@ namespace fe::dx
 	class ShaderBlob;
 	class RootSignature;
 	class PipelineState;
-	class Descriptor;
+	class GPUView;
 #pragma endregion
 } // namespace fe::dx
 
@@ -66,7 +66,7 @@ namespace fe
 		std::unique_ptr<dx::RootSignature> bindlessRootSignature;
 		std::unique_ptr<dx::PipelineState> pso;
 		std::unique_ptr<dx::GPUTexture>	   depthStencilBuffer;
-		FrameResource<dx::Descriptor>	   dsv;
+		FrameResource<dx::GPUView>		   dsv;
 #pragma endregion
 	};
 } // namespace fe

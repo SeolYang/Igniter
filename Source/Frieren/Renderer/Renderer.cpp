@@ -33,7 +33,7 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
 
 	Renderer::Renderer(const FrameManager& engineFrameManager, FrameResourceManager& frameResourceManager, Window& window, dx::Device& device)
-		: frameManager(engineFrameManager), frameResourceManager(frameResourceManager), renderDevice(device), directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())), directCmdCtxPool(std::make_unique<dx::CommandContextPool>(device, dx::EQueueType::Direct)), swapchain(std::make_unique<dx::Swapchain>(window, device, *directCmdQueue, NumFramesInFlight))
+		: frameManager(engineFrameManager), frameResourceManager(frameResourceManager), renderDevice(device), directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())), directCmdCtxPool(std::make_unique<dx::CommandContextPool>(device, dx::EQueueType::Direct)), swapchain(std::make_unique<dx::Swapchain>(window, device, frameResourceManager, *directCmdQueue, NumFramesInFlight))
 	{
 		frameFences.reserve(NumFramesInFlight);
 		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
@@ -120,7 +120,7 @@ namespace fe
 		depthStencilDesc.DebugName = String("DepthStencilBufferTex");
 		depthStencilDesc.AsDepthStencil(1280, 642, DXGI_FORMAT_D32_FLOAT);
 		depthStencilBuffer = std::make_unique<dx::GPUTexture>(device.CreateTexture(depthStencilDesc).value());
-		dsv = MakeFrameResource<dx::Descriptor>(frameResourceManager, device.CreateDepthStencilView(*depthStencilBuffer, { .MipSlice = 0 }).value());
+		dsv = device.CreateDepthStencilView(frameResourceManager, *depthStencilBuffer, { .MipSlice = 0 });
 
 		uploadCtx.Begin();
 		uploadCtx.AddPendingBufferBarrier(
@@ -159,7 +159,7 @@ namespace fe
 			D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_INDEX_INPUT,
 			D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_INDEX_BUFFER);
 
-		uploadCtx.FlushPendingBufferBarriers();
+		uploadCtx.FlushBarriers();
 		uploadCtx.End();
 
 		directCmdQueue->AddPendingContext(uploadCtx);
@@ -193,6 +193,8 @@ namespace fe
 		// 더 발전된 형태로는 수시로 CmdQueue에 CmdCtx를 제출하고, 필요하다면 서로다른
 		// 형태의 CmdQueue와 병렬적으로 동작하며 동기화 될 수 있도록 하는 것이 최적.
 		// 이 때, frame fences의 signal은 present 직전에 back buffer에 그리기 직전에 수행하는 것이 좋을 것 같음.
+		check(directCmdQueue);
+		check(directCmdCtxPool);
 		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(frameResourceManager);
 		renderCmdCtx->Begin(pso.get());
 		{
@@ -202,13 +204,14 @@ namespace fe
 			renderCmdCtx->SetVertexBuffer(*quadVB);
 			renderCmdCtx->SetIndexBuffer(*quadIB);
 
-			dx::GPUTexture&		  backBuffer = swapchain->GetBackBuffer();
-			const dx::Descriptor& backBufferRTV = swapchain->GetRenderTargetView();
+			check(swapchain);
+			dx::GPUTexture&	   backBuffer = swapchain->GetBackBuffer();
+			const dx::GPUView& backBufferRTV = swapchain->GetRenderTargetView();
 			renderCmdCtx->AddPendingTextureBarrier(backBuffer,
 												   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
 												   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
 												   D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-			renderCmdCtx->FlushPendingTextureBarriers();
+			renderCmdCtx->FlushBarriers();
 
 			renderCmdCtx->ClearRenderTarget(backBufferRTV);
 			renderCmdCtx->ClearDepth(*dsv);

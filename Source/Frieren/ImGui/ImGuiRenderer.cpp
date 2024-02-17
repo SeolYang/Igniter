@@ -57,7 +57,7 @@ namespace fe
 		dx::Swapchain&	swapchain = renderer.GetSwapchain();
 		dx::GPUTexture& backBuffer = swapchain.GetBackBuffer();
 
-		const dx::Descriptor& backBufferRTV = swapchain.GetRenderTargetView();
+		const dx::GPUView& backBufferRTV = swapchain.GetRenderTargetView();
 		// #test Test code for clear render target
 		cmdCtx.SetRenderTarget(backBufferRTV);
 		cmdCtx.SetDescriptorHeap(*descriptorHeap);
@@ -69,7 +69,7 @@ namespace fe
 										D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
 										D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
 
-		cmdCtx.FlushPendingTextureBarriers();
+		cmdCtx.FlushBarriers();
 		cmdCtx.End();
 
 		dx::CommandQueue& directCmdQueue = renderer.GetDirectCommandQueue();

@@ -6,12 +6,12 @@
 namespace fe::dx
 {
 	class Device;
-	class PipelineState;
+	class DescriptorHeap;
 	class GPUTexture;
 	class GPUBuffer;
-	class Descriptor;
-	class DescriptorHeap;
+	class GPUView;
 	class RootSignature;
+	class PipelineState;
 	class CommandContext
 	{
 		friend class Device;
@@ -49,37 +49,31 @@ namespace fe::dx
 									  const D3D12_BARRIER_LAYOUT layoutBefore, const D3D12_BARRIER_LAYOUT layoutAfter,
 									  const D3D12_BARRIER_SUBRESOURCE_RANGE subresourceRange = { 0xffffffff, 0, 0, 0, 0,
 																								 0 });
-		void FlushPendingTextureBarriers();
 		void AddPendingBufferBarrier(GPUBuffer&				  targetBuffer,
 									 const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter,
 									 D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter,
 									 const size_t offset = 0, const size_t sizeAsBytes = std::numeric_limits<size_t>::max());
-		void FlushPendingBufferBarriers();
 		void FlushBarriers();
 
-		void ClearRenderTarget(const Descriptor& renderTargetView, float r = 0.f, float g = 0.f, float b = 0.f,
-							   float a = 1.f);
-		void ClearDepthStencil(const Descriptor& depthStencilView, float depth, uint8_t stencil);
-		void ClearDepth(const Descriptor& depthStencilView, float depth = 1.f);
-		void ClearStencil(const Descriptor& depthStencilView, uint8_t stencil = 0);
-
-		void SetRenderTarget(const Descriptor&								   renderTargetView,
-							 std::optional<std::reference_wrapper<Descriptor>> depthStencilView = std::nullopt);
-		void SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps);
-		void SetDescriptorHeap(DescriptorHeap& descriptorHeap);
-		void SetRootSignature(RootSignature& rootSignature);
+		void ClearRenderTarget(const GPUView& rtv, float r = 0.f, float g = 0.f, float b = 0.f, float a = 1.f);
+		void ClearDepthStencil(const GPUView& dsv, float depth = 1.f, uint8_t stencil = 0);
+		void ClearDepth(const GPUView& dsv, float depth = 1.f);
+		void ClearStencil(const GPUView& dsv, uint8_t stencil = 0);
 
 		void CopyBuffer(GPUBuffer& from, GPUBuffer& to);
 		void CopyBuffer(GPUBuffer& from, const size_t srcOffset, const size_t numBytes, GPUBuffer& to, const size_t dstOffset);
 
+		void SetRootSignature(RootSignature& rootSignature);
+		void SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps);
+		void SetDescriptorHeap(DescriptorHeap& descriptorHeap);
 		void SetVertexBuffer(GPUBuffer& vertexBuffer);
 		void SetIndexBuffer(GPUBuffer& indexBuffer);
-
+		void SetRenderTarget(const GPUView& rtv, std::optional<std::reference_wrapper<GPUView>> dsv = std::nullopt);
 		void SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology);
-		void DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset = 0, const uint32_t vertexOffset = 0);
-
 		void SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth = 0.f, const float maxDepth = 1.f);
 		void SetScissorRect(const long left, const long top, const long right, const long bottom);
+
+		void DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset = 0, const uint32_t vertexOffset = 0);
 
 	private:
 		CommandContext(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList,

@@ -16,7 +16,7 @@ namespace fe::dx
 		, bIsShaderVisible(bIsShaderVisibleHeap)
 		, cpuDescriptorHandleForHeapStart(descriptorHeap->GetCPUDescriptorHandleForHeapStart())
 		, gpuDescriptorHandleForHeapStart(bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart()
-														   : D3D12_GPU_DESCRIPTOR_HANDLE{})
+														   : D3D12_GPU_DESCRIPTOR_HANDLE{ std::numeric_limits<decltype(D3D12_GPU_DESCRIPTOR_HANDLE::ptr)>::max() })
 		, indexPool(CreateIndexQueue(numDescriptorsInHeap))
 	{
 		check(newDescriptorHeap);
@@ -53,89 +53,44 @@ namespace fe::dx
 				   : gpuDescriptorHandleForHeapStart;
 	}
 
-	uint32_t DescriptorHeap::AllocateIndex()
+	FrameResource<GPUView> DescriptorHeap::Request(FrameResourceManager& frameResourceManager, const EDescriptorType desiredType)
 	{
+		check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
+			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (desiredType == EDescriptorType::ConstantBufferView ||
+																		  desiredType == EDescriptorType::ShaderResourceView ||
+																		  desiredType == EDescriptorType::UnorderedAccessView)));
+
+		check(descriptorHeapType != EDescriptorHeapType::Sampler ||
+			  (descriptorHeapType == EDescriptorHeapType::Sampler && (desiredType == EDescriptorType::Sampler)));
+
+		check(descriptorHeapType != EDescriptorHeapType::RTV ||
+			  (descriptorHeapType == EDescriptorHeapType::RTV && (desiredType == EDescriptorType::RenderTargetView)));
+
+		check(descriptorHeapType != EDescriptorHeapType::DSV ||
+			  (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EDescriptorType::DepthStencilView)));
+
 		RecursiveLock lock{ mutex };
 		if (indexPool.empty())
 		{
-			FE_LOG(D3D12Warn, "There are no more remaining descriptors.");
-			return Descriptor::InvalidIndex;
+			return {};
 		}
 
-		const uint32_t index = indexPool.front();
+		const uint32_t newDescriptorIdx = indexPool.front();
 		indexPool.pop();
-		return index;
+
+		return MakeFrameResourceCustom<GPUView>(
+			frameResourceManager,
+			[this](GPUView* ptr) { check(ptr && ptr->IsValid());  this->Release(ptr->Index); delete ptr; },
+			GPUView{ desiredType, newDescriptorIdx, GetIndexedCPUDescriptorHandle(newDescriptorIdx), GetIndexedGPUDescriptorHandle(newDescriptorIdx) });
 	}
 
-	void DescriptorHeap::DeallocateIndex(const uint32_t index)
+	void DescriptorHeap::Release(const uint32_t indexOfDescriptor)
 	{
-		verify(index < numInitialDescriptors);
-		verify(index != Descriptor::InvalidIndex);
+		check(indexOfDescriptor < numInitialDescriptors);
+		check(indexOfDescriptor != std::numeric_limits<decltype(GPUView::Index)>::max());
+		check(indexPool.size() < numInitialDescriptors);
 
 		RecursiveLock lock{ mutex };
-		verify(indexPool.size() <= numInitialDescriptors);
-		if (index != Descriptor::InvalidIndex)
-		{
-			indexPool.push(index);
-		}
+		indexPool.push(indexOfDescriptor);
 	}
-
-	Descriptor DescriptorHeap::Allocate(const EDescriptorType requestDescriptorType)
-	{
-		check(IsSupportDescriptor(descriptorHeapType, requestDescriptorType));
-		const uint32_t allocatedIndex = AllocateIndex();
-		return Descriptor{ *this, requestDescriptorType, allocatedIndex, GetIndexedCPUDescriptorHandle(allocatedIndex),
-						   GetIndexedGPUDescriptorHandle(allocatedIndex) };
-	}
-
-	void DescriptorHeap::Deallocate(Descriptor& descriptor)
-	{
-		if (descriptor.ownedDescriptorHeap == this && descriptor.index != InvalidIndexU32)
-		{
-			DeallocateIndex(descriptor.index);
-			descriptor.ownedDescriptorHeap = nullptr;
-			descriptor.index = InvalidIndexU32;
-			descriptor.cpuHandle = {};
-			descriptor.gpuHandle = {};
-		}
-	}
-
-	Descriptor::Descriptor(DescriptorHeap& owner, const EDescriptorType descriptorType, const uint32_t allocatedIndex,
-						   const D3D12_CPU_DESCRIPTOR_HANDLE indexedCpuHandle,
-						   const D3D12_GPU_DESCRIPTOR_HANDLE indexedGpuHandle)
-		: ownedDescriptorHeap(&owner)
-		, type(descriptorType)
-		, index(allocatedIndex)
-		, cpuHandle(indexedCpuHandle)
-		, gpuHandle(indexedGpuHandle)
-	{
-	}
-
-	Descriptor::Descriptor(Descriptor&& other) noexcept
-		: ownedDescriptorHeap(std::exchange(other.ownedDescriptorHeap, nullptr))
-		, type(other.type)
-		, index(std::exchange(other.index, Descriptor::InvalidIndex))
-		, cpuHandle(std::exchange(other.cpuHandle, {}))
-		, gpuHandle(std::exchange(other.gpuHandle, {}))
-	{
-	}
-
-	Descriptor::~Descriptor()
-	{
-		if (ownedDescriptorHeap != nullptr && index != InvalidIndex)
-		{
-			ownedDescriptorHeap->Deallocate(*this);
-		}
-	}
-
-	Descriptor& Descriptor::operator=(Descriptor&& other) noexcept
-	{
-		this->ownedDescriptorHeap = std::exchange(other.ownedDescriptorHeap, nullptr);
-		this->type = other.type;
-		this->index = std::exchange(other.index, Descriptor::InvalidIndex);
-		this->cpuHandle = std::exchange(other.cpuHandle, {});
-		this->gpuHandle = std::exchange(other.gpuHandle, {});
-		return *this;
-	}
-
 } // namespace fe::dx

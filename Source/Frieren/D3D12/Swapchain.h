@@ -1,32 +1,34 @@
 #pragma once
 #include <D3D12/Common.h>
+#include <Core/FrameResource.h>
 #include <Core/Assert.h>
 
 namespace fe
 {
 	class Window;
-}
+	class FrameResourceManager;
+} // namespace fe
 
 namespace fe::dx
 {
 	class Device;
 	class CommandQueue;
 	class DescriptorHeap;
-	class Descriptor;
 	class GPUTexture;
+	class GPUView;
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, Device& device, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
+		Swapchain(const Window& window, Device& device, FrameResourceManager& frameResourceManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
 		~Swapchain();
 
 		bool IsTearingSupport() const { return bIsTearingSupport; }
 
-		GPUTexture& GetBackBuffer() { return *backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
+		GPUTexture&		  GetBackBuffer() { return *backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
 		const GPUTexture& GetBackBuffer() const { return *backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
-		const Descriptor& GetRenderTargetView() const
+		const GPUView&	  GetRenderTargetView() const
 		{
-			return renderTargetViews[swapchain->GetCurrentBackBufferIndex()];
+			return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()];
 		}
 
 		// #todo Impl Resize Swapchain!
@@ -39,7 +41,7 @@ namespace fe::dx
 	private:
 		void InitSwapchain(const Window& window, CommandQueue& directCmdQueue);
 		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
-		void InitRenderTargetViews(Device& device);
+		void InitRenderTargetViews(Device& device, FrameResourceManager& frameResourceManager);
 
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;
@@ -47,6 +49,6 @@ namespace fe::dx
 
 		const uint8_t							 numBackBuffers;
 		std::vector<std::unique_ptr<GPUTexture>> backBuffers;
-		std::vector<Descriptor>					 renderTargetViews;
+		std::vector<FrameResource<GPUView>>		 renderTargetViews;
 	};
 } // namespace fe::dx

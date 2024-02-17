@@ -21,12 +21,10 @@ namespace fe::dx
 		const bool bIsAcquiredAdapter = AcquireAdapterFromFactory();
 		if (bIsAcquiredAdapter)
 		{
-			FE_LOG(D3D12Info, "The Adapter successfully acuiqred from factory.");
 			LogAdapterInformations();
 
 			if (CreateDevice())
 			{
-				FE_LOG(D3D12Info, "The Device successfully created from the adapter.");
 				SetObjectName(device.Get(), "Device");
 				SetSeverityLevel();
 
@@ -63,126 +61,151 @@ namespace fe::dx
 #endif
 	}
 
-	std::optional<Descriptor> Device::CreateShaderResourceView(GPUBuffer& gpuBuffer)
+	FrameResource<GPUView> Device::CreateConstantBufferView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer)
 	{
+		check(gpuBuffer);
 		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
-		if (srvDesc)
-		{
-			std::optional<Descriptor> descriptor =
-				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::ShaderResourceView);
-			device->CreateShaderResourceView(&gpuBuffer.GetNative(), &srvDesc.value(),
-											 descriptor->GetCPUDescriptorHandle());
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(gpuBuffer.GetNative().GetGPUVirtualAddress());
 
-			return descriptor;
-		}
-
-		return std::nullopt;
-	}
-
-	std::optional<Descriptor> Device::CreateUnorderedAccessView(GPUBuffer& gpuBuffer)
-	{
-		const GPUBufferDesc&							desc = gpuBuffer.GetDesc();
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
-		if (uavDesc)
-		{
-			std::optional<Descriptor> descriptor =
-				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::UnorderedResourceView);
-			device->CreateUnorderedAccessView(&gpuBuffer.GetNative(), nullptr, &uavDesc.value(),
-											  descriptor->GetCPUDescriptorHandle());
-
-			return descriptor;
-		}
-
-		return std::nullopt;
-	}
-
-	std::optional<Descriptor> Device::CreateConstantBufferView(GPUBuffer& gpuBuffer)
-	{
-		const GPUBufferDesc& desc = gpuBuffer.GetDesc();
-
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc =
-			desc.ToConstantBufferViewDesc(gpuBuffer.GetNative().GetGPUVirtualAddress());
+		FrameResource<GPUView> newCbv{};
 		if (cbvDesc)
 		{
-			std::optional<Descriptor> descriptor =
-				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::ConstantBufferView);
-			device->CreateConstantBufferView(&cbvDesc.value(), descriptor->GetCPUDescriptorHandle());
+			check(cbvSrvUavDescriptorHeap);
+			newCbv = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::ConstantBufferView);
 
-			return descriptor;
+			check(newCbv && newCbv->IsValid());
+			check(newCbv->HasValidCPUHandle());
+			check(newCbv->Type == EDescriptorType::ConstantBufferView);
+			device->CreateConstantBufferView(&cbvDesc.value(), newCbv->CPUHandle);
 		}
 
-		return std::nullopt;
+		return newCbv;
 	}
 
-	std::optional<Descriptor> Device::CreateShaderResourceView(GPUTexture&					texture,
-															   const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer)
 	{
-		const GPUTextureDesc&						   desc = texture.GetDesc();
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
+		check(gpuBuffer);
+		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
+
+		FrameResource<GPUView> newSrv{};
 		if (srvDesc)
 		{
-			std::optional<Descriptor> descriptor =
-				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::ShaderResourceView);
-			device->CreateShaderResourceView(&texture.GetNative(), &srvDesc.value(),
-											 descriptor->GetCPUDescriptorHandle());
+			check(cbvSrvUavDescriptorHeap);
+			newSrv = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::ShaderResourceView);
 
-			return descriptor;
+			check(newSrv && newSrv->IsValid());
+			check(newSrv->HasValidCPUHandle());
+			check(newSrv->Type == EDescriptorType::ShaderResourceView);
+			device->CreateShaderResourceView(&gpuBuffer.GetNative(), &srvDesc.value(), newSrv->CPUHandle);
 		}
 
-		return std::nullopt;
+		return newSrv;
 	}
 
-	std::optional<Descriptor> Device::CreateUnorderedAccessView(GPUTexture&					 texture,
-																const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer)
 	{
-		const GPUTextureDesc&							desc = texture.GetDesc();
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
+		check(gpuBuffer);
+		const GPUBufferDesc&							desc = gpuBuffer.GetDesc();
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
+
+		FrameResource<GPUView> newUav{};
 		if (uavDesc)
 		{
-			std::optional<Descriptor> descriptor =
-				cbvSrvUavDescriptorHeap->Allocate(EDescriptorType::UnorderedResourceView);
-			device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &uavDesc.value(),
-											  descriptor->GetCPUDescriptorHandle());
+			check(cbvSrvUavDescriptorHeap);
+			newUav = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::UnorderedAccessView);
 
-			return descriptor;
+			check(newUav && newUav->IsValid());
+			check(newUav->HasValidCPUHandle());
+			check(newUav->Type == EDescriptorType::UnorderedAccessView);
+			device->CreateUnorderedAccessView(&gpuBuffer.GetNative(), nullptr, &uavDesc.value(), newUav->CPUHandle);
 		}
 
-		return std::nullopt;
+		return newUav;
 	}
 
-	std::optional<Descriptor> Device::CreateRenderTargetView(GPUTexture&				  texture,
-															 const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
 	{
-		const GPUTextureDesc&						 desc = texture.GetDesc();
+		check(gpuTexture);
+		const GPUTextureDesc&						   desc = gpuTexture.GetDesc();
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
+
+		FrameResource<GPUView> newSrv{};
+		if (srvDesc)
+		{
+			check(cbvSrvUavDescriptorHeap);
+			newSrv = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::ShaderResourceView);
+
+			check(newSrv && newSrv->IsValid());
+			check(newSrv->HasValidCPUHandle());
+			check(newSrv->Type == EDescriptorType::ShaderResourceView);
+			device->CreateShaderResourceView(&gpuTexture.GetNative(), &srvDesc.value(), newSrv->CPUHandle);
+		}
+
+		return newSrv;
+	}
+
+	FrameResource<GPUView> Device::CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	{
+		check(gpuTexture);
+		const GPUTextureDesc&							desc = gpuTexture.GetDesc();
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
+
+		FrameResource<GPUView> newUav{};
+		if (uavDesc)
+		{
+			check(cbvSrvUavDescriptorHeap);
+			newUav = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::UnorderedAccessView);
+
+			check(newUav && newUav->IsValid());
+			check(newUav->HasValidCPUHandle());
+			check(newUav->Type == EDescriptorType::UnorderedAccessView);
+			device->CreateUnorderedAccessView(&gpuTexture.GetNative(), nullptr, &uavDesc.value(), newUav->CPUHandle);
+		}
+
+		return newUav;
+	}
+
+	FrameResource<GPUView> Device::CreateRenderTargetView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	{
+		check(gpuTexture);
+		const GPUTextureDesc&						 desc = gpuTexture.GetDesc();
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
+
+		FrameResource<GPUView> newRtv{};
 		if (rtvDesc)
 		{
-			std::optional<Descriptor> descriptor = rtvDescriptorHeap->Allocate(EDescriptorType::RenderTargetView);
-			device->CreateRenderTargetView(&texture.GetNative(), &rtvDesc.value(),
-										   descriptor->GetCPUDescriptorHandle());
+			check(rtvDescriptorHeap);
+			newRtv = rtvDescriptorHeap->Request(frameResourceManager, EDescriptorType::RenderTargetView);
 
-			return descriptor;
+			check(newRtv && newRtv->IsValid());
+			check(newRtv->HasValidCPUHandle());
+			check(newRtv->Type == EDescriptorType::RenderTargetView);
+			device->CreateRenderTargetView(&gpuTexture.GetNative(), &rtvDesc.value(), newRtv->CPUHandle);
 		}
 
-		return std::nullopt;
+		return newRtv;
 	}
 
-	std::optional<Descriptor> Device::CreateDepthStencilView(GPUTexture&				  texture,
-															 const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateDepthStencilView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
 	{
-		const GPUTextureDesc&						 desc = texture.GetDesc();
+		check(gpuTexture);
+		const GPUTextureDesc&						 desc = gpuTexture.GetDesc();
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
+
+		FrameResource<GPUView> newDsv{};
 		if (dsvDesc)
 		{
-			std::optional<Descriptor> descriptor = dsvDescriptorHeap->Allocate(EDescriptorType::DepthStencilView);
-			device->CreateDepthStencilView(&texture.GetNative(), &dsvDesc.value(),
-										   descriptor->GetCPUDescriptorHandle());
+			check(dsvDescriptorHeap);
+			newDsv = dsvDescriptorHeap->Request(frameResourceManager, EDescriptorType::DepthStencilView);
 
-			return descriptor;
+			check(newDsv && newDsv->IsValid());
+			check(newDsv->HasValidCPUHandle());
+			check(newDsv->Type == EDescriptorType::DepthStencilView);
+			device->CreateDepthStencilView(&gpuTexture.GetNative(), &dsvDesc.value(), newDsv->CPUHandle);
 		}
 
-		return std::nullopt;
+		return newDsv;
 	}
 
 	bool Device::AcquireAdapterFromFactory()
@@ -267,14 +290,7 @@ namespace fe::dx
 		CD3DX12FeatureSupport features;
 		features.Init(device.Get());
 
-		if (features.EnhancedBarriersSupported())
-		{
-			FE_LOG(D3D12Info, "Enhanced Barriers supported.");
-		}
-		else
-		{
-			FE_LOG(D3D12Fatal, "Enhanced Barriers does not supported.");
-		}
+		bEnhancedBarriersSupported = features.EnhancedBarriersSupported();
 
 		/**
 		 * Ray-tracing Tier:
@@ -282,25 +298,16 @@ namespace fe::dx
 		 */
 		switch (features.RaytracingTier())
 		{
-			case D3D12_RAYTRACING_TIER_NOT_SUPPORTED:
-				FE_LOG(D3D12Info, "Raytracing does not supported.");
-				break;
 			case D3D12_RAYTRACING_TIER_1_0:
-				FE_LOG(D3D12Info, "Raytracing Tier 1.0 supported.");
+				bRaytracing10Supported = true;
 				break;
 			case D3D12_RAYTRACING_TIER_1_1:
-				FE_LOG(D3D12Info, "Raytracing Tier 1.1 supported.");
+				bRaytracing11Supported = true;
 				break;
 		}
 
-		if (features.HighestShaderModel() >= D3D_SHADER_MODEL_6_6)
-		{
-			FE_LOG(D3D12Info, "Least Shader model 6.6 supported.");
-		}
-		else
-		{
-			FE_LOG(D3D12Fatal, "Shader Model 6.6 does not supported.");
-		}
+		bRaytracing10Supported = bRaytracing11Supported ? true : bRaytracing10Supported;
+		bShaderModel66Supported = features.HighestShaderModel() >= D3D_SHADER_MODEL_6_6;
 
 		/**
 		 * Resource Binding Tier:
@@ -329,11 +336,6 @@ namespace fe::dx
 			device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 		dsvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 		rtvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-		FE_LOG(D3D12Info, "* CBV-SRV-UAV Descriptor Handle Increment Size: {}", cbvSrvUavDescriptorHandleIncrementSize);
-		FE_LOG(D3D12Info, "* Sampler Descriptor Handle Increment Size: {}", samplerDescritorHandleIncrementSize);
-		FE_LOG(D3D12Info, "* DSV Descriptor Handle Increment Size: {}", dsvDescriptorHandleIncrementSize);
-		FE_LOG(D3D12Info, "* RTV Descriptor Handle Increment Size: {}", rtvDescriptorHandleIncrementSize);
 	}
 
 	bool Device::CreateMemoryAllcator()
@@ -381,7 +383,6 @@ namespace fe::dx
 		std::optional<D3D12_CLEAR_VALUE> clearValue{};
 		if (textureDesc.IsRenderTargetCompatible())
 		{
-			// #todo additional for render target/depth stencil creation
 			clearValue = D3D12_CLEAR_VALUE{
 				.Format = textureDesc.Format,
 				.Color = { 0.f, 0.f, 0.f, 1.f }
@@ -423,7 +424,9 @@ namespace fe::dx
 	std::optional<PipelineState> Device::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
 	{
 		ComPtr<ID3D12PipelineState> newPipelineState{};
-		if (!SUCCEEDED(device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState))))
+
+		const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
+		if (!SUCCEEDED(result))
 		{
 			return std::nullopt;
 		}
@@ -447,18 +450,20 @@ namespace fe::dx
 	std::optional<RootSignature> Device::CreateBindlessRootSignature()
 	{
 		// WITH THOSE FLAGS, IT MUST BIND DESCRIPTOR HEAP FIRST BEFORE BINDING ROOT SIGNATURE
-		// D3D12_DESCRIPTOR_RANGE			texture2DRange{};
-		// texture2DRange.BaseShaderRegister = 0;
-		// texture2DRange.NumDescriptors = 1024;
-		// texture2DRange.OffsetInDescriptorsFromTableStart = 0;
-		// texture2DRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-		// texture2DRange.RegisterSpace = 0;
+		/*
+		  D3D12_DESCRIPTOR_RANGE			texture2DRange{};
+		  texture2DRange.BaseShaderRegister = 0;
+		  texture2DRange.NumDescriptors = 1024;
+		  texture2DRange.OffsetInDescriptorsFromTableStart = 0;
+		  texture2DRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+		  texture2DRange.RegisterSpace = 0;
 
-		// D3D12_ROOT_PARAMETER texture2DTable{};
-		// texture2DTable.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-		// texture2DTable.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-		// texture2DTable.DescriptorTable.NumDescriptorRanges = 1;
-		// texture2DTable.DescriptorTable.pDescriptorRanges = &texture2DRange;
+		  D3D12_ROOT_PARAMETER texture2DTable{};
+		  texture2DTable.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+		  texture2DTable.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+		  texture2DTable.DescriptorTable.NumDescriptorRanges = 1;
+		  texture2DTable.DescriptorTable.pDescriptorRanges = &texture2DRange;
+		*/
 
 		const D3D12_ROOT_SIGNATURE_DESC desc{ .NumParameters = 0,
 											  .pParameters = nullptr,
