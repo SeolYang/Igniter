@@ -38,8 +38,7 @@ namespace fe
 		frameFences.reserve(NumFramesInFlight);
 		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
 		{
-			frameFences.emplace_back(
-				std::make_unique<dx::Fence>(device.CreateFence(std::format("FrameFence_{}", localFrameIdx)).value()));
+			frameFences.emplace_back(device.CreateFence(std::format("FrameFence_{}", localFrameIdx)).value());
 		}
 
 #pragma region test
@@ -51,7 +50,7 @@ namespace fe
 		ibDesc.AsIndexBuffer<uint16_t>(6);
 		quadIB = std::make_unique<dx::GPUBuffer>(renderDevice.CreateBuffer(ibDesc).value());
 
-		dx::Fence		   initialFence = device.CreateFence("InitialFence").value();
+		dx::Fence initialFence = device.CreateFence("InitialFence").value();
 		dx::CommandContext uploadCtx = device.CreateCommandContext(dx::EQueueType::Direct).value();
 
 		dx::GPUBufferDesc quadUploadDesc{};
@@ -179,13 +178,13 @@ namespace fe
 	{
 		for (auto& fence : frameFences)
 		{
-			fence->WaitOnCPU();
+			fence.WaitOnCPU();
 		}
 	}
 
 	void Renderer::BeginFrame()
 	{
-		frameFences[frameManager.GetLocalFrameIndex()]->WaitOnCPU();
+		frameFences[frameManager.GetLocalFrameIndex()].WaitOnCPU();
 	}
 
 	void Renderer::Render()
@@ -230,6 +229,6 @@ namespace fe
 	{
 		directCmdQueue->FlushPendingContexts();
 		swapchain->Present();
-		directCmdQueue->NextSignalTo(*frameFences[frameManager.GetLocalFrameIndex()]);
+		directCmdQueue->NextSignalTo(frameFences[frameManager.GetLocalFrameIndex()]);
 	}
 } // namespace fe

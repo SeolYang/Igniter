@@ -22,14 +22,10 @@ namespace fe::dx
 		Swapchain(const Window& window, Device& device, FrameResourceManager& frameResourceManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
 		~Swapchain();
 
-		bool IsTearingSupport() const { return bIsTearingSupport; }
-
-		GPUTexture&		  GetBackBuffer() { return *backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
-		const GPUTexture& GetBackBuffer() const { return *backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
-		const GPUView&	  GetRenderTargetView() const
-		{
-			return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()];
-		}
+		bool			  IsTearingSupport() const { return bIsTearingSupport; }
+		GPUTexture&		  GetBackBuffer();
+		const GPUTexture& GetBackBuffer() const;
+		const GPUView&	  GetRenderTargetView() const { return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
 
 		// #todo Impl Resize Swapchain!
 		// void Resize(const uint32_t width, const uint32_t height);
@@ -45,10 +41,11 @@ namespace fe::dx
 
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;
-		bool					bIsTearingSupport = false;
 
-		const uint8_t							 numBackBuffers;
-		std::vector<std::unique_ptr<GPUTexture>> backBuffers;
-		std::vector<FrameResource<GPUView>>		 renderTargetViews;
+		const uint8_t						numBackBuffers;
+		std::vector<GPUTexture>				backBuffers;
+		std::vector<FrameResource<GPUView>> renderTargetViews;
+
+		bool bIsTearingSupport = false;
 	};
 } // namespace fe::dx

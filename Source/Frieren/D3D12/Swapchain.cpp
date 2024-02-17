@@ -20,6 +20,16 @@ namespace fe::dx
 		backBuffers.clear();
 	}
 
+	GPUTexture& Swapchain::GetBackBuffer()
+	{
+		return backBuffers[swapchain->GetCurrentBackBufferIndex()];
+	}
+
+	const GPUTexture& Swapchain::GetBackBuffer() const
+	{
+		return backBuffers[swapchain->GetCurrentBackBufferIndex()];
+	}
+
 	void Swapchain::InitSwapchain(const Window& window, CommandQueue& directCmdQueue)
 	{
 		ComPtr<IDXGIFactory5> factory;
@@ -82,9 +92,9 @@ namespace fe::dx
 			ComPtr<ID3D12Resource1> resource;
 			verify_succeeded(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
 			SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
-			backBuffers.emplace_back(std::make_unique<GPUTexture>(resource));
+			backBuffers.emplace_back(GPUTexture(resource));
 
-			FrameResource<GPUView> rtv = device.CreateRenderTargetView(frameResourceManager, *backBuffers[idx], {});
+			FrameResource<GPUView> rtv = device.CreateRenderTargetView(frameResourceManager, backBuffers[idx], {});
 			check(rtv);
 			renderTargetViews.emplace_back(std::move(rtv));
 		}

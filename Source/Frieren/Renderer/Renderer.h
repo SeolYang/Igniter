@@ -55,7 +55,7 @@ namespace fe
 		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
 		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
 		std::unique_ptr<dx::Swapchain>			swapchain;
-		std::vector<std::unique_ptr<dx::Fence>> frameFences;
+		std::vector<dx::Fence>					frameFences;
 
 #pragma region test
 		// #test
