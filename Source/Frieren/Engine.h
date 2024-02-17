@@ -43,9 +43,6 @@ namespace fe
 		int Execute();
 
 	private:
-		void Destroy();
-
-	private:
 		static Engine*						  instance;
 		bool								  bShouldExit = false;
 		FrameManager						  frameManager;

@@ -24,8 +24,8 @@ namespace fe
 		check(bIsFirstEngineCreation);
 		if (bIsFirstEngineCreation)
 		{
-			logger.Log<EngineInfo>("Initialize Engine Runtime...");
 			logger.Log<EngineInfo>("Engine version: {}", version::Version);
+			logger.Log<EngineInfo>("Initializing Engine Runtime...");
 
 			instance = this;
 			/* #test temp window descriptor */
@@ -39,16 +39,12 @@ namespace fe
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
 			gameInstance = std::make_unique<GameInstance>();
-
-			logger.Log<EngineInfo>("Engine Runtime Initialized.");
 		}
 	}
 
 	Engine::~Engine()
 	{
-		logger.Log<EngineInfo>("Cleanup...");
-
-		frameResourceManager->ForceClear();
+		logger.Log<EngineInfo>("* Cleanup sub-systems");
 
 		gameInstance.reset();
 		imguiCanvas.reset();
@@ -128,7 +124,7 @@ namespace fe
 
 	int Engine::Execute()
 	{
-		logger.Log<EngineInfo>("Begin => Engine Main Loop");
+		logger.Log<EngineInfo>("* Start Engine main loop");
 
 		while (!bShouldExit)
 		{
@@ -163,7 +159,8 @@ namespace fe
 		}
 
 		renderer->WaitForFences();
-		logger.Log<EngineInfo>("End => Engine Main Loop");
+		frameResourceManager->ForceClear();
+		logger.Log<EngineInfo>("* End Engine main loop");
 		return 0;
 	}
 } // namespace fe
