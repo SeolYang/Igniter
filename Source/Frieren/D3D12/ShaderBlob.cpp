@@ -1,8 +1,13 @@
 #include <D3D12/ShaderBlob.h>
 #include <Core/Container.h>
+#include <Core/Log.h>
+#include <Engine.h>
 
 namespace fe::dx
 {
+	FE_DECLARE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosiy::Fatal)
+
+
 	// #todo 쉐이더 컴파일 후 파일로 저장
 	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc) : type(desc.Type)
 	{
@@ -76,7 +81,7 @@ namespace fe::dx
 
 		if (desc.bTreatWarningAsErrors)
 		{
-			arguments.push_back(TEXT("WX"));
+			arguments.push_back(TEXT("-WX"));
 		}
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -110,18 +115,18 @@ namespace fe::dx
 								.Size = sourceBlob->GetBufferSize(),
 								.Encoding = codePage };
 
-		ComPtr<IDxcResult> result;
 		verify_succeeded(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
-										   IID_PPV_ARGS(result.GetAddressOf())));
+										   IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
 		// #todo 별도의 error handling 구현 https://youtu.be/tyyKeTsdtmo?si=gERRzeRVmqxAcPT7&t=1158
-		// ComPtr<IDxcBlobUtf8> errors;
-		// result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
-		// if (errors && errors->GetStringLength() > 0)
-		//{
-		//	Logging(Error, (char*)errors->GetBufferPointer());
-		//}
+		ComPtr<IDxcBlobUtf8> errors;
+		compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
+		if (errors && errors->GetStringLength() > 0)
+		{
+			FE_LOG(ShaderBlobFatal, errors->GetStringPointer());
+			errors;
+		}
 
-		verify_succeeded(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
+		verify_succeeded(compiledResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
 	}
 } // namespace fe::dx

@@ -38,6 +38,20 @@ namespace fe::dx
 
 		GPUResourceMapGuard Map(const uint32_t subresource = 0, const CD3DX12_RANGE readRange = { 0, 0 });
 
+		std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
+		{
+			return desc.IsVertexBuffer() ? std::make_optional(D3D12_VERTEX_BUFFER_VIEW{
+											   .BufferLocation = resource->GetGPUVirtualAddress(), .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()), .StrideInBytes = desc.GetStructureByteStride() })
+										 : std::nullopt;
+		}
+
+		std::optional<D3D12_INDEX_BUFFER_VIEW> GetIndexBufferView() const
+		{
+			return desc.IsIndexBuffer() ? std::make_optional(D3D12_INDEX_BUFFER_VIEW{
+											   .BufferLocation = resource->GetGPUVirtualAddress(), .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()), .Format = desc.GetIndexFormat() })
+										 : std::nullopt;
+		}
+
 	private:
 		void Unmap();
 

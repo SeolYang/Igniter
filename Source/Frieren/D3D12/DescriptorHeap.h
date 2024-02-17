@@ -65,7 +65,10 @@ namespace fe::dx
 		EDescriptorHeapType			GetType() const { return descriptorHeapType; }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
 		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
-
+		
+		// #todo Descriptor의 FrameResource 화?
+		// ex using ResourceView = FrameResource<Descriptor>?
+		// MakeFrameResource<Descriptor>(new Descriptor(...), [](...){...{ descriptorHeap.Deallocate(idx); delete ptr; }}
 		Descriptor Allocate(const EDescriptorType requestDescriptorType);
 		void	   Deallocate(Descriptor& descriptor);
 
@@ -84,6 +87,7 @@ namespace fe::dx
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandleForHeapStart{};
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
 
+		// #todo queue -> concurrent_queue
 		RecursiveMutex		 mutex;
 		std::queue<uint32_t> indexPool;
 	};

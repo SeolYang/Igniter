@@ -21,14 +21,14 @@ namespace fe
 
 		void RequestDeallocation(Requester&& requester);
 		void BeginFrame();
+		void ForceClear();
 
 	private:
 		void BeginFrame(const uint8_t localFrameIdx);
 
 	private:
-		const FrameManager&										frameManager;
-		std::array<RecursiveMutex, NumFramesInFlight>			mutexes;
-		// #todo replace to concurret_queue?
-		std::array<std::vector<Requester>, NumFramesInFlight>	pendingRequesters;
+		const FrameManager&														frameManager;
+		std::array<RecursiveMutex, NumFramesInFlight>							mutexes;
+		std::array<concurrency::concurrent_queue<Requester>, NumFramesInFlight> pendingRequesters;
 	};
 } // namespace fe

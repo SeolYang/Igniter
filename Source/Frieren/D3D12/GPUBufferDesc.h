@@ -1,8 +1,8 @@
 #pragma once
 #include <span>
 #include <optional>
-
 #include <Core/String.h>
+#include <Core/Utility.h>
 #include <D3D12/Common.h>
 
 namespace fe::dx
@@ -22,7 +22,6 @@ namespace fe::dx
 		void AsUploadBuffer(const uint32_t sizeOfBufferInBytes);
 		void AsReadbackBuffer(const uint32_t sizeOfBufferInBytes);
 		void AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices);
-		void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
 
 		template <typename T>
 		void AsConstantBuffer()
@@ -43,9 +42,30 @@ namespace fe::dx
 		}
 
 		template <typename T>
+			requires std::same_as<T, uint8_t> || std::same_as<T, uint16_t> || std::same_as<T, uint32_t>
 		void AsIndexBuffer(const uint32_t numIndices)
 		{
 			AsIndexBuffer(sizeof(T), numIndices);
+		}
+
+		DXGI_FORMAT GetIndexFormat() const
+		{
+			if (!IsIndexBuffer())
+			{
+				return DXGI_FORMAT_UNKNOWN;
+			}
+
+			switch (structureByteStride)
+			{
+				default:
+					return DXGI_FORMAT_UNKNOWN;
+				case 1:
+					return DXGI_FORMAT_R8_UINT;
+				case 2:
+					return DXGI_FORMAT_R16_UINT;
+				case 4:
+					return DXGI_FORMAT_R32_UINT;
+			}
 		}
 
 		bool				 IsConstantBufferCompatible() const;
@@ -54,6 +74,8 @@ namespace fe::dx
 		bool				 IsUploadCompatible() const;
 		bool				 IsReadbackCompatible() const;
 		bool				 IsCPUAccessible() const { return bIsCPUAccessible; }
+		bool				 IsVertexBuffer() const { return BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_VERTEX_BUFFER); }
+		bool				 IsIndexBuffer() const { return BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_INDEX_BUFFER); }
 		D3D12_BUFFER_BARRIER GetStandardBarrier() const { return standardBarrier; }
 
 		uint32_t GetStructureByteStride() const { return structureByteStride; }
@@ -67,14 +89,19 @@ namespace fe::dx
 
 		void From(const D3D12_RESOURCE_DESC& desc);
 
+	private:
+		void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
+
 	public:
 		String DebugName = String{ "Unknown Buffer" };
 
 	private:
 		uint32_t structureByteStride = 1;
 		uint32_t numElements = 1;
+		// #todo Standard Barrier 없애고, Enumerator로 Buffer 타입 관리, bIsShader..., bIsCPUAccessible 도 enumerator에 대한
+		// query method를 통해 얻을 수 있도록하기
 		D3D12_BUFFER_BARRIER standardBarrier = {};
-		bool bIsShaderReadWritable = false;
-		bool bIsCPUAccessible = false;
+		bool				 bIsShaderReadWritable = false;
+		bool				 bIsCPUAccessible = false;
 	};
 } // namespace fe::dx

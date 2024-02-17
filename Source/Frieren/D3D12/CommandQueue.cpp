@@ -41,6 +41,7 @@ namespace fe::dx
 		verify_succeeded(native->Wait(&fence.GetNative(), fence.GetCounter()));
 	}
 
+	// #todo get frameresource<cmd ctx>?
 	void CommandQueue::AddPendingContext(CommandContext& cmdCtx)
 	{
 		check(cmdCtx);

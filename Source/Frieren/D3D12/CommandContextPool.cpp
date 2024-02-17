@@ -36,7 +36,11 @@ namespace fe::dx
 		}
 
 		return { cmdCtxPtr,
-				 [&frameResourceManager, this](CommandContext* ptr) { frameResourceManager.RequestDeallocation([ptr, this]() { this->Return(ptr); }); } };
+				 [&frameResourceManager, this](CommandContext* ptr) {
+				frameResourceManager.RequestDeallocation([ptr, this]() 
+					{ 
+						this->Return(ptr); }); 
+			} };
 	}
 
 	void CommandContextPool::Return(CommandContext* cmdContext)

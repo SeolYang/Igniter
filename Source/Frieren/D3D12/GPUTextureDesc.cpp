@@ -201,6 +201,7 @@ namespace fe::dx
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	void GPUTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
@@ -229,6 +230,7 @@ namespace fe::dx
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth,
@@ -258,6 +260,7 @@ namespace fe::dx
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	void GPUTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
@@ -285,6 +288,7 @@ namespace fe::dx
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	void GPUTextureDesc::AsDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format)
@@ -308,6 +312,7 @@ namespace fe::dx
 		SampleDesc.Quality = 0;
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	void GPUTextureDesc::AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels,
@@ -333,6 +338,7 @@ namespace fe::dx
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	void GPUTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength,
@@ -362,6 +368,7 @@ namespace fe::dx
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	void GPUTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
@@ -389,6 +396,7 @@ namespace fe::dx
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		Flags = bIsShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}
 
 	bool GPUTextureDesc::IsUnorderedAccessCompatible() const

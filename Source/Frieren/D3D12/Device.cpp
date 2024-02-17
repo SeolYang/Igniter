@@ -192,7 +192,7 @@ namespace fe::dx
 #if defined(DEBUG) || defined(_DEBUG)
 			factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
 			ComPtr<ID3D12Debug5> debugController;
-			const bool bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
+			const bool			 bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 			FE_CONDITIONAL_LOG(D3D12Fatal, bDebugControllerAcquired, "Failed to get debug controller.");
 			if (bDebugControllerAcquired)
 			{
@@ -208,7 +208,7 @@ namespace fe::dx
 		}
 
 		ComPtr<IDXGIFactory6> factory;
-		const bool bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
+		const bool			  bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
 		FE_CONDITIONAL_LOG(D3D12Fatal, bFactoryCreated, "Failed to create factory.");
 
 		if (bFactoryCreated)
@@ -377,13 +377,34 @@ namespace fe::dx
 		const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.ToAllocationDesc();
 		ComPtr<D3D12MA::Allocation>	   allocation{};
 		ComPtr<ID3D12Resource>		   resource{};
-		if (!SUCCEEDED(allocator->CreateResource3(&allocationDesc, &textureDesc, D3D12_BARRIER_LAYOUT_UNDEFINED,
-												  nullptr, 0, nullptr, allocation.GetAddressOf(),
-												  IID_PPV_ARGS(&resource))))
+
+		std::optional<D3D12_CLEAR_VALUE> clearValue{};
+		if (textureDesc.IsRenderTargetCompatible())
+		{
+			// #todo additional for render target/depth stencil creation
+			clearValue = D3D12_CLEAR_VALUE{
+				.Format = textureDesc.Format,
+				.Color = { 0.f, 0.f, 0.f, 1.f }
+			};
+		}
+		else if (textureDesc.IsDepthStencilCompatible())
+		{
+			clearValue = D3D12_CLEAR_VALUE{
+				.Format = textureDesc.Format,
+				.DepthStencil = { .Depth = 1.f, .Stencil = 0 }
+			};
+		}
+
+		if (!SUCCEEDED(allocator->CreateResource3(&allocationDesc, &textureDesc,
+												  D3D12_BARRIER_LAYOUT_UNDEFINED,
+												  clearValue ? &clearValue.value() : nullptr,
+												  0, nullptr,
+												  allocation.GetAddressOf(), IID_PPV_ARGS(&resource))))
 		{
 			return std::nullopt;
 		}
 
+		SetObjectName(resource.Get(), textureDesc.DebugName);
 		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
@@ -407,7 +428,7 @@ namespace fe::dx
 			return std::nullopt;
 		}
 
-		SetObjectName(newPipelineState.Get(), desc.Name);
+		// SetObjectName(newPipelineState.Get(), desc.Name);
 		return PipelineState{ std::move(newPipelineState), true };
 	}
 
@@ -426,18 +447,33 @@ namespace fe::dx
 	std::optional<RootSignature> Device::CreateBindlessRootSignature()
 	{
 		// WITH THOSE FLAGS, IT MUST BIND DESCRIPTOR HEAP FIRST BEFORE BINDING ROOT SIGNATURE
+		// D3D12_DESCRIPTOR_RANGE			texture2DRange{};
+		// texture2DRange.BaseShaderRegister = 0;
+		// texture2DRange.NumDescriptors = 1024;
+		// texture2DRange.OffsetInDescriptorsFromTableStart = 0;
+		// texture2DRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+		// texture2DRange.RegisterSpace = 0;
+
+		// D3D12_ROOT_PARAMETER texture2DTable{};
+		// texture2DTable.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+		// texture2DTable.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+		// texture2DTable.DescriptorTable.NumDescriptorRanges = 1;
+		// texture2DTable.DescriptorTable.pDescriptorRanges = &texture2DRange;
+
 		const D3D12_ROOT_SIGNATURE_DESC desc{ .NumParameters = 0,
 											  .pParameters = nullptr,
 											  .NumStaticSamplers = 0,
 											  .pStaticSamplers = nullptr,
 											  .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED |
-													   D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED };
+													   D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED |
+													   D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT };
 
 		ComPtr<ID3DBlob> rootSignatureBlob;
 		ComPtr<ID3DBlob> errorBlob;
-		if (!SUCCEEDED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_1,
+		if (!SUCCEEDED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0,
 												   rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf())))
 		{
+			FE_LOG(D3D12Fatal, (const char*)errorBlob->GetBufferPointer());
 			return std::nullopt;
 		}
 
@@ -547,6 +583,11 @@ namespace fe::dx
 
 		return DescriptorHeap{ descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap,
 							   numDescriptors, GetDescriptorHandleIncrementSize(descriptorHeapType) };
+	}
+
+	std::array<std::reference_wrapper<DescriptorHeap>, 2> Device::GetBindlessDescriptorHeaps()
+	{
+		return { *cbvSrvUavDescriptorHeap, *samplerDescriptorHeap };
 	}
 
 } // namespace fe::dx

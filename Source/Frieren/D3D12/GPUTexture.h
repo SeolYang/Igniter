@@ -23,7 +23,8 @@ namespace fe::dx
 		operator bool() const { return IsValid(); }
 
 		const GPUTextureDesc& GetDesc() const { return desc; }
-		const auto&			  GetNative() const
+
+		const auto& GetNative() const
 		{
 			check(resource);
 			return *resource.Get();

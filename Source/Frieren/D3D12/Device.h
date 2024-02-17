@@ -35,9 +35,11 @@ namespace fe::dx
 		Device& operator=(const Device&) = delete;
 		Device& operator=(Device&&) noexcept = delete;
 
-		[[nodiscard]] auto& GetNative() { return *device.Get(); }
-		uint32_t			GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
+		[[nodiscard]] auto&									  GetNative() { return *device.Get(); }
+		std::array<std::reference_wrapper<DescriptorHeap>, 2> GetBindlessDescriptorHeaps();
+		uint32_t											  GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
+		// #todo std::optional -> FrameResource
 		std::optional<GPUBuffer>  CreateBuffer(const GPUBufferDesc& bufferDesc);
 		std::optional<GPUTexture> CreateTexture(const GPUTextureDesc& textureDesc);
 

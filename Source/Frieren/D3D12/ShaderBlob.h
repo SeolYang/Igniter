@@ -49,7 +49,8 @@ namespace fe::dx
 		auto&		GetNative() { return *shader.Get(); }
 
 	private:
-		const EShaderType type;
-		ComPtr<IDxcBlob>  shader;
+		const EShaderType  type;
+		ComPtr<IDxcResult> compiledResult;
+		ComPtr<IDxcBlob>   shader;
 	};
 } // namespace fe::dx

@@ -17,7 +17,6 @@ namespace fe
 {
 	FE_DECLARE_LOG_CATEGORY(EngineInfo, ELogVerbosiy::Info)
 
-
 	Engine* Engine::instance = nullptr;
 	Engine::Engine()
 	{
@@ -36,8 +35,8 @@ namespace fe
 			handleManager = std::make_unique<HandleManager>();
 			frameResourceManager = std::make_unique<FrameResourceManager>(frameManager);
 			inputManager = std::make_unique<InputManager>();
-			renderer = std::make_unique<Renderer>(frameManager, *window, *renderDevice);
-			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, * renderDevice);
+			renderer = std::make_unique<Renderer>(frameManager, *frameResourceManager, *window, *renderDevice);
+			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
 			gameInstance = std::make_unique<GameInstance>();
 
@@ -48,6 +47,8 @@ namespace fe
 	Engine::~Engine()
 	{
 		logger.Log<EngineInfo>("Cleanup...");
+
+		frameResourceManager->ForceClear();
 
 		gameInstance.reset();
 		imguiCanvas.reset();
@@ -152,7 +153,7 @@ namespace fe
 			renderer->BeginFrame();
 			frameResourceManager->BeginFrame();
 
-			renderer->Render(*frameResourceManager);
+			renderer->Render();
 			imguiRenderer->Render(*imguiCanvas, *renderer);
 
 			renderer->EndFrame();
@@ -161,6 +162,7 @@ namespace fe
 			frameManager.NextFrame();
 		}
 
+		renderer->WaitForFences();
 		logger.Log<EngineInfo>("End => Engine Main Loop");
 		return 0;
 	}

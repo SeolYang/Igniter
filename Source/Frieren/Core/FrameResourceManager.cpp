@@ -10,17 +10,14 @@ namespace fe
 
 	FrameResourceManager::~FrameResourceManager()
 	{
-		for (uint8_t frameIdx = 0; frameIdx < NumFramesInFlight; ++frameIdx)
-		{
-			BeginFrame(frameIdx);
-		}
+		ForceClear();
 	}
 
 	void FrameResourceManager::RequestDeallocation(Requester&& requester)
 	{
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 		RecursiveLock lock{ mutexes[localFrameIdx] };
-		pendingRequesters[localFrameIdx].emplace_back(std::move(requester));
+		pendingRequesters[localFrameIdx].push(std::move(requester));
 	}
 
 	void FrameResourceManager::BeginFrame()
@@ -31,11 +28,20 @@ namespace fe
 	void FrameResourceManager::BeginFrame(const uint8_t localFrameIdx)
 	{
 		RecursiveLock lock{ mutexes[localFrameIdx] };
-		for (auto& deleter : pendingRequesters[localFrameIdx])
+		Requester	  requester;
+		while (pendingRequesters[localFrameIdx].try_pop(requester))
 		{
-			deleter();
+			requester();
 		}
 		pendingRequesters[localFrameIdx].clear();
+	}
+
+	void FrameResourceManager::ForceClear()
+	{
+		for (uint8_t frameIdx = 0; frameIdx < NumFramesInFlight; ++frameIdx)
+		{
+			BeginFrame(frameIdx);
+		}
 	}
 
 } // namespace fe

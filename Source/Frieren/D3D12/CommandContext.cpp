@@ -6,6 +6,7 @@
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/PipelineState.h>
 #include <D3D12/DescriptorHeap.h>
+#include <D3D12/RootSignature.h>
 #include <Core/Assert.h>
 
 namespace fe::dx
@@ -28,6 +29,17 @@ namespace fe::dx
 	{
 	}
 
+	CommandContext& CommandContext::operator=(CommandContext&& other) noexcept
+	{
+		cmdAllocator = std::move(other.cmdAllocator);
+		cmdList = std::move(other.cmdList);
+		cmdListTargetQueueType = other.cmdListTargetQueueType;
+		pendingGlobalBarriers = std::move(other.pendingGlobalBarriers);
+		pendingTextureBarriers = std::move(other.pendingTextureBarriers);
+		pendingBufferBarriers = std::move(other.pendingBufferBarriers);
+		return *this;
+	}
+
 	void CommandContext::Begin(PipelineState* const initStatePtr)
 	{
 		verify(cmdAllocator.Get() != nullptr);
@@ -43,17 +55,6 @@ namespace fe::dx
 	{
 		verify(cmdList.Get() != nullptr);
 		verify_succeeded(cmdList->Close());
-	}
-
-	CommandContext& CommandContext::operator=(CommandContext&& other) noexcept
-	{
-		cmdAllocator = std::move(other.cmdAllocator);
-		cmdList = std::move(other.cmdList);
-		cmdListTargetQueueType = other.cmdListTargetQueueType;
-		pendingGlobalBarriers = std::move(other.pendingGlobalBarriers);
-		pendingTextureBarriers = std::move(other.pendingTextureBarriers);
-		pendingBufferBarriers = std::move(other.pendingBufferBarriers);
-		return *this;
 	}
 
 	void CommandContext::AddPendingTextureBarrier(GPUTexture& targetTexture, const D3D12_BARRIER_SYNC syncBefore,
@@ -190,13 +191,37 @@ namespace fe::dx
 		cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, depthStencilView ? &dsvCpuHandle : nullptr);
 	}
 
-	void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
+	void CommandContext::SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
-		check(descriptorHeap);
-		ID3D12DescriptorHeap* descriptorHeaps[] = { &descriptorHeap.GetNative() };
-		cmdList->SetDescriptorHeaps(1, descriptorHeaps);
+		std::vector<ID3D12DescriptorHeap*> descriptorHeaps(targetDescriptorHeaps.size());
+		std::transform(targetDescriptorHeaps.begin(), targetDescriptorHeaps.end(), descriptorHeaps.begin(),
+					   [](DescriptorHeap& descriptorHeap) { check(descriptorHeap); return &descriptorHeap.GetNative(); });
+		cmdList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()), descriptorHeaps.data());
+	}
+
+	void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
+	{
+		std::reference_wrapper<DescriptorHeap> descriptorHeaps[] = { std::ref(descriptorHeap) };
+		SetDescriptorHeaps(descriptorHeaps);
+	}
+
+	void CommandContext::SetRootSignature(RootSignature& rootSignature)
+	{
+		check(IsValid());
+		check(rootSignature);
+		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
+		switch (cmdListTargetQueueType)
+		{
+			case EQueueType::Direct:
+				cmdList->SetGraphicsRootSignature(&rootSignature.GetNative());
+				break;
+
+			case EQueueType::AsyncCompute:
+				cmdList->SetComputeRootSignature(&rootSignature.GetNative());
+				break;
+		}
 	}
 
 	void CommandContext::CopyBuffer(GPUBuffer& from, const size_t srcOffset, const size_t numBytes, GPUBuffer& to, const size_t dstOffset)
@@ -215,5 +240,49 @@ namespace fe::dx
 	{
 		const auto& srcDesc = from.GetDesc();
 		CopyBuffer(from, 0, srcDesc.GetSizeAsBytes(), to, 0);
+	}
+
+	void CommandContext::SetVertexBuffer(GPUBuffer& vertexBuffer)
+	{
+		check(IsValid());
+		check(vertexBuffer);
+		const std::optional<D3D12_VERTEX_BUFFER_VIEW> vbView = vertexBuffer.GetVertexBufferView();
+		check(vbView);
+		cmdList->IASetVertexBuffers(0, 1, &vbView.value());
+	}
+
+	void CommandContext::SetIndexBuffer(GPUBuffer& indexBuffer)
+	{
+		check(IsValid());
+		check(indexBuffer);
+		const std::optional<D3D12_INDEX_BUFFER_VIEW> ibView = indexBuffer.GetIndexBufferView();
+		check(ibView);
+		cmdList->IASetIndexBuffer(&ibView.value());
+	}
+
+	void CommandContext::SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology)
+	{
+		check(IsValid());
+		cmdList->IASetPrimitiveTopology(primitiveTopology);
+	}
+
+	void CommandContext::DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset, const uint32_t vertexOffset)
+	{
+		check(IsValid());
+		cmdList->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
+	}
+
+	void CommandContext::SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth /*= 0.f*/, const float maxDepth /*= 1.f*/)
+	{
+		check(IsValid());
+		const D3D12_VIEWPORT viewport{ topLeftX, topLeftY, width, height, minDepth, maxDepth };
+		cmdList->RSSetViewports(1, &viewport);
+	}
+
+	void CommandContext::SetScissorRect(const long left, const long top, const long right, const long bottom)
+	{
+		check(IsValid());
+		const D3D12_RECT rect{ left, top, right, bottom };
+		cmdList->RSSetScissorRects(1, &rect);
 	}
 } // namespace fe::dx

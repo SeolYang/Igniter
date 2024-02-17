@@ -16,6 +16,9 @@ namespace fe::dx
 		RootSignature& operator=(const RootSignature&) = delete;
 		RootSignature& operator=(RootSignature&& other) noexcept;
 
+		bool IsValid() const { return rootSignature; }
+		operator bool() const { return IsValid(); }
+
 		[[nodiscard]] auto& GetNative() { return *rootSignature.Get(); }
 
 	private:

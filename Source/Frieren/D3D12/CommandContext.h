@@ -11,6 +11,7 @@ namespace fe::dx
 	class GPUBuffer;
 	class Descriptor;
 	class DescriptorHeap;
+	class RootSignature;
 	class CommandContext
 	{
 		friend class Device;
@@ -64,10 +65,21 @@ namespace fe::dx
 
 		void SetRenderTarget(const Descriptor&								   renderTargetView,
 							 std::optional<std::reference_wrapper<Descriptor>> depthStencilView = std::nullopt);
+		void SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps);
 		void SetDescriptorHeap(DescriptorHeap& descriptorHeap);
+		void SetRootSignature(RootSignature& rootSignature);
 
 		void CopyBuffer(GPUBuffer& from, GPUBuffer& to);
 		void CopyBuffer(GPUBuffer& from, const size_t srcOffset, const size_t numBytes, GPUBuffer& to, const size_t dstOffset);
+
+		void SetVertexBuffer(GPUBuffer& vertexBuffer);
+		void SetIndexBuffer(GPUBuffer& indexBuffer);
+
+		void SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology);
+		void DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset = 0, const uint32_t vertexOffset = 0);
+
+		void SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth = 0.f, const float maxDepth = 1.f);
+		void SetScissorRect(const long left, const long top, const long right, const long bottom);
 
 	private:
 		CommandContext(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList,
