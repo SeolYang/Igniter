@@ -126,6 +126,7 @@ namespace fe::dx
 
 	void Device::LogAdapterInformations()
 	{
+		check(adapter);
 		DXGI_ADAPTER_DESC adapterDesc;
 		adapter->GetDesc(&adapterDesc);
 		FE_LOG(DeviceInfo, "----------- The GPU Infos -----------");
@@ -139,15 +140,17 @@ namespace fe::dx
 
 	bool Device::CreateDevice()
 	{
+		check(adapter);
 		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
-		const bool					bIsDeviceCreated =
-			SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
+		const bool					bIsDeviceCreated = SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
 		FE_CONDITIONAL_LOG(DeviceFatal, bIsDeviceCreated, "Failed to create the device from the adapter.");
+		check(device);
 		return bIsDeviceCreated;
 	}
 
 	void Device::SetSeverityLevel()
 	{
+		check(device);
 #if defined(_DEBUG) || defined(ENABLE_GPU_VALIDATION)
 		ComPtr<ID3D12InfoQueue> infoQueue;
 		if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
@@ -165,7 +168,7 @@ namespace fe::dx
 
 	void Device::CheckSupportedFeatures()
 	{
-
+		check(device);
 		CD3DX12FeatureSupport features;
 		features.Init(device.Get());
 
@@ -219,6 +222,7 @@ namespace fe::dx
 
 	bool Device::CreateMemoryAllcator()
 	{
+		check(device);
 		D3D12MA::ALLOCATOR_DESC desc{};
 		desc.pAdapter = adapter.Get();
 		desc.pDevice = device.Get();
@@ -241,20 +245,27 @@ namespace fe::dx
 
 	std::optional<Fence> Device::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/)
 	{
-		// #log 2024/02/18 02:41 #todo  실패했을때 HRESULT->String 변환해서 로그로 출력
+		check(device);
+
 		ComPtr<ID3D12Fence> newFence{};
-		if (!SUCCEEDED(device->CreateFence(initialCounter, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence))))
+		if (const HRESULT result = device->CreateFence(initialCounter, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence));
+			!SUCCEEDED(result))
 		{
+			// #todo 가능하다면, HRESULT -> String 으로 변환 구현
+			FE_LOG(DeviceFatal, "Failed to create fence. HRESULT: {}", result);
 			return {};
 		}
 
+		check(newFence);
 		SetObjectName(newFence.Get(), debugName);
+
 		return Fence{ std::move(newFence) };
 	}
 
 	std::optional<CommandQueue> Device::CreateCommandQueue(const EQueueType queueType)
 	{
-		ComPtr<ID3D12CommandQueue>	  newCmdQueue;
+		check(device);
+
 		const D3D12_COMMAND_LIST_TYPE cmdListType = ToNativeCommandListType(queueType);
 		check(cmdListType != D3D12_COMMAND_LIST_TYPE_NONE);
 
@@ -262,38 +273,51 @@ namespace fe::dx
 												.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
 												.NodeMask = 0 };
 
-		if (!SUCCEEDED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue))))
+		ComPtr<ID3D12CommandQueue> newCmdQueue;
+		if (const HRESULT result = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue));
+			!SUCCEEDED(result))
 		{
-			return std::nullopt;
+			FE_LOG(DeviceFatal, "Failed to create command queue. HRESULT: {}", result);
+			return {};
 		}
 
+		check(newCmdQueue);
 		return CommandQueue{ std::move(newCmdQueue), queueType };
 	}
 
 	std::optional<CommandContext> Device::CreateCommandContext(const EQueueType targetQueueType)
 	{
-		ComPtr<ID3D12CommandAllocator>	   newCmdAllocator;
-		ComPtr<ID3D12GraphicsCommandList7> newCmdList;
+		check(device);
 
 		const D3D12_COMMAND_LIST_TYPE cmdListType = ToNativeCommandListType(targetQueueType);
 		check(cmdListType != D3D12_COMMAND_LIST_TYPE_NONE);
 
-		const D3D12_COMMAND_LIST_FLAGS flags = D3D12_COMMAND_LIST_FLAG_NONE;
-
-		if (!SUCCEEDED(device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator))))
+		ComPtr<ID3D12CommandAllocator> newCmdAllocator;
+		if (const HRESULT result = device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator));
+			!SUCCEEDED(result))
 		{
-			return {};
-		}
-		if (!SUCCEEDED(device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList))))
-		{
+			FE_LOG(DeviceFatal, "Failed to create command allocator. HRESULT: {}", result);
 			return {};
 		}
 
+		ComPtr<ID3D12GraphicsCommandList7> newCmdList;
+		const D3D12_COMMAND_LIST_FLAGS	   flags = D3D12_COMMAND_LIST_FLAG_NONE;
+		if (const HRESULT result = device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList));
+			!SUCCEEDED(result))
+		{
+			FE_LOG(DeviceFatal, "Failed to create command list. HRESULT: {}", result);
+			return {};
+		}
+
+		check(newCmdAllocator);
+		check(newCmdList);
 		return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), targetQueueType };
 	}
 
 	std::optional<RootSignature> Device::CreateBindlessRootSignature()
 	{
+		check(device);
+
 		// WITH THOSE FLAGS, IT MUST BIND DESCRIPTOR HEAP FIRST BEFORE BINDING ROOT SIGNATURE
 		/*
 		  D3D12_DESCRIPTOR_RANGE			texture2DRange{};
@@ -318,73 +342,72 @@ namespace fe::dx
 													   D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED |
 													   D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT };
 
-		ComPtr<ID3DBlob> rootSignatureBlob;
 		ComPtr<ID3DBlob> errorBlob;
-		if (!SUCCEEDED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0,
-												   rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf())))
+		ComPtr<ID3DBlob> rootSignatureBlob;
+		if (const HRESULT result = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
+			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, (const char*)errorBlob->GetBufferPointer());
-			return std::nullopt;
+			FE_LOG(DeviceFatal, "Failed to serialize root signature. HRESULT: {}, Message: {}", result, errorBlob->GetBufferPointer());
+			return {};
 		}
 
 		ComPtr<ID3D12RootSignature> newRootSignature;
-		if (!SUCCEEDED(device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(),
-												   rootSignatureBlob->GetBufferSize(),
-												   IID_PPV_ARGS(&newRootSignature))))
+		if (const HRESULT result = device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
+			!SUCCEEDED(result))
 		{
-			return std::nullopt;
+			FE_LOG(DeviceFatal, "Failed to create root signature. HRESULT: {}", result);
+			return {};
 		}
 
+		check(newRootSignature);
 		return RootSignature{ std::move(newRootSignature) };
 	}
 
 	std::optional<PipelineState> Device::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
 	{
+		check(device);
+
 		ComPtr<ID3D12PipelineState> newPipelineState{};
 
-		const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
-		if (!SUCCEEDED(result))
+		if (const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
+			!SUCCEEDED(result))
 		{
-			return std::nullopt;
+			FE_LOG(DeviceFatal, "Failed to create graphics pipeline state. HRESULT: {}", result);
+			return {};
 		}
 
+		check(newPipelineState);
 		SetObjectName(newPipelineState.Get(), desc.Name);
+
 		return PipelineState{ std::move(newPipelineState), true };
 	}
 
 	std::optional<PipelineState> Device::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
 	{
+		check(device);
+
 		ComPtr<ID3D12PipelineState> newPipelineState{};
-		if (!SUCCEEDED(device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState))))
+		if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
+			!SUCCEEDED(result))
 		{
-			return std::nullopt;
+			FE_LOG(DeviceFatal, "Failed to create compute pipeline state. HRESULT: {}", result);
+			return {};
 		}
 
+		check(newPipelineState);
 		SetObjectName(newPipelineState.Get(), desc.Name);
+
 		return PipelineState{ std::move(newPipelineState), false };
 	}
 
 	std::optional<DescriptorHeap> Device::CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
 	{
-		D3D12_DESCRIPTOR_HEAP_TYPE targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
-		switch (descriptorHeapType)
-		{
-			case EDescriptorHeapType::CBV_SRV_UAV:
-				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-				break;
-			case EDescriptorHeapType::Sampler:
-				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-				break;
-			case EDescriptorHeapType::DSV:
-				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-				break;
-			case EDescriptorHeapType::RTV:
-				targetDescriptorHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-				break;
-		}
+		check(device);
+
+		const D3D12_DESCRIPTOR_HEAP_TYPE targetDescriptorHeapType = ToNativeDescriptorHeapType(descriptorHeapType);
 		check(targetDescriptorHeapType != D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES);
-		const bool bIsShaderVisibleDescriptorHeap = descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV ||
-													descriptorHeapType == EDescriptorHeapType::Sampler;
+
+		const bool bIsShaderVisibleDescriptorHeap = IsShaderVisibleDescriptorHeapType(descriptorHeapType);
 
 		const D3D12_DESCRIPTOR_HEAP_DESC desc{ .Type = targetDescriptorHeapType,
 											   .NumDescriptors = numDescriptors,
@@ -394,35 +417,52 @@ namespace fe::dx
 											   .NodeMask = 0 };
 
 		ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
-		if (!SUCCEEDED(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap))))
+		if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap));
+			!SUCCEEDED(result))
 		{
-			return std::nullopt;
+			FE_LOG(DeviceFatal, "Failed to create descriptor heap. HRESULT: {}", result);
+			return {};
 		}
 
-		return DescriptorHeap{ descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap,
-							   numDescriptors, GetDescriptorHandleIncrementSize(descriptorHeapType) };
+		check(newDescriptorHeap);
+		return DescriptorHeap{
+			descriptorHeapType,
+			std::move(newDescriptorHeap),
+			bIsShaderVisibleDescriptorHeap,
+			numDescriptors, GetDescriptorHandleIncrementSize(descriptorHeapType)
+		};
 	}
 
 	std::optional<GPUBuffer> Device::CreateBuffer(const GPUBufferDesc& bufferDesc)
 	{
+		check(device);
+		check(allocator);
+
 		const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.ToAllocationDesc();
 		ComPtr<D3D12MA::Allocation>	   allocation{};
 		ComPtr<ID3D12Resource>		   resource{};
-		if (!SUCCEEDED(allocator->CreateResource3(&allocationDesc, &bufferDesc, D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr,
-												  0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource))))
+		if (const HRESULT result = allocator->CreateResource3(
+				&allocationDesc, &bufferDesc,
+				D3D12_BARRIER_LAYOUT_UNDEFINED,
+				nullptr, 0, nullptr,
+				allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+			!SUCCEEDED(result))
 		{
-			return std::nullopt;
+			FE_LOG(DeviceFatal, "Failed to create buffer. HRESULT")
+			return {};
 		}
 
+		check(allocation);
+		check(resource);
 		return GPUBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
 	}
 
 	std::optional<GPUTexture> Device::CreateTexture(const GPUTextureDesc& textureDesc)
 	{
-		const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.ToAllocationDesc();
-		ComPtr<D3D12MA::Allocation>	   allocation{};
-		ComPtr<ID3D12Resource>		   resource{};
+		check(device);
+		check(allocator);
 
+		const D3D12MA::ALLOCATION_DESC	 allocationDesc = textureDesc.ToAllocationDesc();
 		std::optional<D3D12_CLEAR_VALUE> clearValue{};
 		if (textureDesc.IsRenderTargetCompatible())
 		{
@@ -439,16 +479,22 @@ namespace fe::dx
 			};
 		}
 
-		if (!SUCCEEDED(allocator->CreateResource3(&allocationDesc, &textureDesc,
-												  D3D12_BARRIER_LAYOUT_UNDEFINED,
-												  clearValue ? &clearValue.value() : nullptr,
-												  0, nullptr,
-												  allocation.GetAddressOf(), IID_PPV_ARGS(&resource))))
+		ComPtr<D3D12MA::Allocation> allocation{};
+		ComPtr<ID3D12Resource>		resource{};
+		if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc,
+															  D3D12_BARRIER_LAYOUT_UNDEFINED,
+															  clearValue ? &clearValue.value() : nullptr,
+															  0, nullptr,
+															  allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+			!SUCCEEDED(result))
 		{
-			return std::nullopt;
+			return {};
 		}
 
+		check(allocation);
+		check(resource);
 		SetObjectName(resource.Get(), textureDesc.DebugName);
+
 		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
@@ -470,6 +516,7 @@ namespace fe::dx
 			device->CreateConstantBufferView(&cbvDesc.value(), newCbv->CPUHandle);
 		}
 
+		check(newCbv);
 		return newCbv;
 	}
 

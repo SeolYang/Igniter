@@ -54,6 +54,31 @@ namespace fe::dx
 		RTV,
 		DSV
 	};
+	inline D3D12_DESCRIPTOR_HEAP_TYPE ToNativeDescriptorHeapType(const EDescriptorHeapType type)
+	{
+		switch (type)
+		{
+			case EDescriptorHeapType::CBV_SRV_UAV:
+				return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+
+			case EDescriptorHeapType::Sampler:
+				return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+
+			case EDescriptorHeapType::RTV:
+				return D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+
+			case EDescriptorHeapType::DSV:
+				return D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+
+		}
+
+		return D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+	}
+
+	inline bool IsShaderVisibleDescriptorHeapType(const EDescriptorHeapType type)
+	{
+		return type == EDescriptorHeapType::CBV_SRV_UAV || type == EDescriptorHeapType::Sampler;
+	}
 
 	enum class EDescriptorType
 	{
