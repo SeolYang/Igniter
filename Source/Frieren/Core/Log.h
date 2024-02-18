@@ -1,8 +1,8 @@
 #pragma once
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #pragma warning(push)
-#pragma warning(disable:26800)
-#pragma warning(disable:26498)
+#pragma warning(disable : 26800)
+#pragma warning(disable : 26498)
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -12,6 +12,7 @@
 #include <Core/String.h>
 #include <Core/Hash.h>
 #include <Core/Mutex.h>
+#include <Core/Assert.h>
 
 namespace fe
 {
@@ -106,7 +107,16 @@ namespace fe
 		static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
 	};
 
-#define FE_LOG(LOG_CATEGORY, ...) fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
+#if defined(DEBUG) || defined(_DEBUG)
+	#define FE_LOG(LOG_CATEGORY, ...)                                     \
+		fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__);           \
+		if constexpr (LOG_CATEGORY::Verbosity == fe::ELogVerbosiy::Fatal) \
+		{                                                                 \
+			check(false);                                                 \
+		}
+#else
+	#define FE_LOG(LOG_CATEGORY, ...) fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
+#endif
 
 #define FE_CONDITIONAL_LOG(LOG_CATEGORY, CONDITION, ...) \
 	do                                                   \
