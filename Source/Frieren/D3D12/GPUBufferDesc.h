@@ -13,6 +13,47 @@ namespace fe::dx
 		return ((originalSizeInBytes / MinimumConstantBufferSizeInBytes) + 1) * MinimumConstantBufferSizeInBytes;
 	}
 
+	enum class EBufferType
+	{
+		ConstantBuffer,
+		StructuredBuffer,
+		UploadBuffer,
+		ReadbackBuffer,
+		VertexBuffer,
+		IndexBuffer,
+		Unknown
+	};
+
+	constexpr bool IsCPUAccessCompatibleBuffer(const EBufferType type)
+	{
+		return type == EBufferType::ConstantBuffer || type == EBufferType::UploadBuffer || type == EBufferType::ReadbackBuffer;
+	}
+
+	constexpr bool IsConstantBufferViewCompatibleBuffer(const EBufferType type)
+	{
+		return type == EBufferType::ConstantBuffer;
+	}
+
+	constexpr bool IsShaderResourceViewCompatibleBuffer(const EBufferType type)
+	{
+		return type == EBufferType::StructuredBuffer;
+	}
+
+	constexpr bool IsUnorderdAccessViewCompatibleBuffer(const EBufferType type)
+	{
+		return type == EBufferType::StructuredBuffer;
+	}
+
+	constexpr bool IsUploadCompatibleBuffer(const EBufferType type)
+	{
+		return type == EBufferType::UploadBuffer;
+	}
+
+	constexpr bool IsReadbackCompatibleBuffer(const EBufferType type)
+	{
+		return type == EBufferType::ReadbackBuffer;
+	}
+
 	class GPUBufferDesc : public D3D12_RESOURCE_DESC1
 	{
 	public:
@@ -21,7 +62,6 @@ namespace fe::dx
 								const bool bEnableShaderReadWrtie = false);
 		void AsUploadBuffer(const uint32_t sizeOfBufferInBytes);
 		void AsReadbackBuffer(const uint32_t sizeOfBufferInBytes);
-		void AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices);
 
 		template <typename T>
 		void AsConstantBuffer()
@@ -50,7 +90,7 @@ namespace fe::dx
 
 		DXGI_FORMAT GetIndexFormat() const
 		{
-			if (!IsIndexBuffer())
+			if (bufferType != EBufferType::IndexBuffer)
 			{
 				return DXGI_FORMAT_UNKNOWN;
 			}
@@ -68,40 +108,31 @@ namespace fe::dx
 			}
 		}
 
-		bool				 IsConstantBufferCompatible() const;
-		bool				 IsShaderResourceCompatible() const;
-		bool				 IsUnorderedAccessCompatible() const;
-		bool				 IsUploadCompatible() const;
-		bool				 IsReadbackCompatible() const;
-		bool				 IsCPUAccessible() const { return bIsCPUAccessible; }
-		bool				 IsVertexBuffer() const { return BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_VERTEX_BUFFER); }
-		bool				 IsIndexBuffer() const { return BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_INDEX_BUFFER); }
-		D3D12_BUFFER_BARRIER GetStandardBarrier() const { return standardBarrier; }
-
-		uint32_t GetStructureByteStride() const { return structureByteStride; }
-		uint32_t GetNumElements() const { return numElements; }
-		uint64_t GetSizeAsBytes() const { return Width; }
+		bool		IsCPUAccessible() const { return bIsCPUAccessible; }
+		EBufferType GetBufferType() const { return bufferType; }
+		uint32_t	GetStructureByteStride() const { return structureByteStride; }
+		uint32_t	GetNumElements() const { return numElements; }
+		uint64_t	GetSizeAsBytes() const { return Width; }
 
 		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc() const;
 		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>	ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc() const;
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc() const;
 
 		void From(const D3D12_RESOURCE_DESC& desc);
 
 	private:
+		void AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices);
 		void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
 
 	public:
 		String DebugName = String{ "Unknown Buffer" };
 
 	private:
-		uint32_t structureByteStride = 1;
-		uint32_t numElements = 1;
-		// #todo Standard Barrier 없애고, Enumerator로 Buffer 타입 관리, bIsShader..., bIsCPUAccessible 도 enumerator에 대한
-		// query method를 통해 얻을 수 있도록하기
-		D3D12_BUFFER_BARRIER standardBarrier = {};
-		bool				 bIsShaderReadWritable = false;
-		bool				 bIsCPUAccessible = false;
+		uint32_t	structureByteStride = 1;
+		uint32_t	numElements = 1;
+		EBufferType bufferType = EBufferType::Unknown;
+		bool		bIsShaderReadWritable = false;
+		bool		bIsCPUAccessible = false;
 	};
 } // namespace fe::dx

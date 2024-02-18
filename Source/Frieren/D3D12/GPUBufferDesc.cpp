@@ -8,10 +8,7 @@ namespace fe::dx
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
-							.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
-							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-							.AccessAfter = D3D12_BARRIER_ACCESS_CONSTANT_BUFFER };
+		bufferType = EBufferType::ConstantBuffer;
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -27,19 +24,13 @@ namespace fe::dx
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
 
-	void GPUBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements,
-										   const bool bEnableShaderReadWrtie /*= false*/)
+	void GPUBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
 	{
 		verify(sizeOfElementInBytes > 0);
 		verify(numOfElements > 0);
 		bIsShaderReadWritable = bEnableShaderReadWrtie;
 		bIsCPUAccessible = false;
-		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
-							.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
-							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-							.AccessAfter = bIsShaderReadWritable ? (D3D12_BARRIER_ACCESS_SHADER_RESOURCE |
-																	D3D12_BARRIER_ACCESS_UNORDERED_ACCESS)
-																 : D3D12_BARRIER_ACCESS_SHADER_RESOURCE };
+		bufferType = EBufferType::StructuredBuffer;
 
 		structureByteStride = sizeOfElementInBytes;
 		numElements = numOfElements;
@@ -60,10 +51,7 @@ namespace fe::dx
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
-							.SyncAfter = D3D12_BARRIER_SYNC_COPY,
-							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-							.AccessAfter = D3D12_BARRIER_ACCESS_COPY_SOURCE };
+		bufferType = EBufferType::UploadBuffer;
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -84,10 +72,7 @@ namespace fe::dx
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
-							.SyncAfter = D3D12_BARRIER_SYNC_RESOLVE,
-							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-							.AccessAfter = D3D12_BARRIER_ACCESS_RESOLVE_SOURCE };
+		bufferType = EBufferType::ReadbackBuffer;
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -109,10 +94,7 @@ namespace fe::dx
 		verify(numVertices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
-		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
-							.SyncAfter = D3D12_BARRIER_SYNC_ALL_SHADING,
-							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-							.AccessAfter = D3D12_BARRIER_ACCESS_VERTEX_BUFFER };
+		bufferType = EBufferType::VertexBuffer;
 
 		structureByteStride = sizeOfVertexInBytes;
 		numElements = numVertices;
@@ -134,10 +116,7 @@ namespace fe::dx
 		verify(numIndices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
-		standardBarrier = { .SyncBefore = D3D12_BARRIER_SYNC_NONE,
-							.SyncAfter = D3D12_BARRIER_SYNC_INDEX_INPUT,
-							.AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS,
-							.AccessAfter = D3D12_BARRIER_ACCESS_INDEX_BUFFER };
+		bufferType = EBufferType::IndexBuffer;
 
 		structureByteStride = sizeOfIndexInBytes;
 		numElements = numIndices;
@@ -153,41 +132,34 @@ namespace fe::dx
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
 
-	bool GPUBufferDesc::IsConstantBufferCompatible() const
-	{
-		return BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_CONSTANT_BUFFER);
-	}
-
-	bool GPUBufferDesc::IsShaderResourceCompatible() const
-	{
-		return BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_SHADER_RESOURCE);
-	}
-
-	bool GPUBufferDesc::IsUnorderedAccessCompatible() const
-	{
-		return BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
-	}
-
-	bool GPUBufferDesc::IsUploadCompatible() const
-	{
-		return bIsCPUAccessible && BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_COPY_SOURCE);
-	}
-
-	bool GPUBufferDesc::IsReadbackCompatible() const
-	{
-		return bIsCPUAccessible && BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_RESOLVE_SOURCE);
-	}
-
 	D3D12MA::ALLOCATION_DESC GPUBufferDesc::ToAllocationDesc() const
 	{
+		check(bufferType != EBufferType::Unknown);
 		D3D12MA::ALLOCATION_DESC desc{ .HeapType = D3D12_HEAP_TYPE_DEFAULT };
-		if (IsUploadCompatible())
+		switch (bufferType)
 		{
-			desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
+			case EBufferType::UploadBuffer:
+				desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
+				break;
+			case EBufferType::ReadbackBuffer:
+				desc.HeapType = D3D12_HEAP_TYPE_READBACK;
+				break;
 		}
-		else if (IsReadbackCompatible())
+
+		return desc;
+	}
+
+	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> GPUBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
+	{
+		check(bufferType != EBufferType::Unknown);
+
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{};
+		if (IsConstantBufferViewCompatibleBuffer(bufferType))
 		{
-			desc.HeapType = D3D12_HEAP_TYPE_READBACK;
+			desc = D3D12_CONSTANT_BUFFER_VIEW_DESC{
+				.BufferLocation = bufferLocation,
+				.SizeInBytes = static_cast<uint32_t>(Width)
+			};
 		}
 
 		return desc;
@@ -195,50 +167,44 @@ namespace fe::dx
 
 	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUBufferDesc::ToShaderResourceViewDesc() const
 	{
-		if (BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_SHADER_RESOURCE))
+		check(bufferType != EBufferType::Unknown);
+
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> desc{};
+		if (IsShaderResourceViewCompatibleBuffer(bufferType))
 		{
-			D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
-			desc.Format = DXGI_FORMAT_UNKNOWN;
-			desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			desc.Buffer.FirstElement = 0;
-			desc.Buffer.NumElements = numElements;
-			desc.Buffer.StructureByteStride = structureByteStride;
-			return desc;
+			desc = D3D12_SHADER_RESOURCE_VIEW_DESC{
+				.Format = DXGI_FORMAT_UNKNOWN,
+				.ViewDimension = D3D12_SRV_DIMENSION_BUFFER,
+				.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+				.Buffer = {
+					.FirstElement = 0,
+					.NumElements = numElements,
+					.StructureByteStride = structureByteStride }
+			};
 		}
 
-		return std::nullopt;
-	}
-
-	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>
-	GPUBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
-	{
-		if (BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_CONSTANT_BUFFER))
-		{
-			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
-			desc.BufferLocation = bufferLocation;
-			desc.SizeInBytes = static_cast<uint32_t>(Width);
-			return desc;
-		}
-
-		return std::nullopt;
+		return desc;
 	}
 
 	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUBufferDesc::ToUnorderedAccessViewDesc() const
 	{
-		if (BitFlagContains(standardBarrier.AccessAfter, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS))
+		check(bufferType != EBufferType::Unknown);
+
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> desc{};
+		if (IsUnorderdAccessViewCompatibleBuffer(bufferType) && bIsShaderReadWritable)
 		{
-			D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
-			desc.Format = DXGI_FORMAT_UNKNOWN;
-			desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-			desc.Buffer.FirstElement = 0;
-			desc.Buffer.NumElements = numElements;
-			desc.Buffer.StructureByteStride = structureByteStride;
-			desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-			return desc;
+			desc = D3D12_UNORDERED_ACCESS_VIEW_DESC{
+				.Format = DXGI_FORMAT_UNKNOWN,
+				.ViewDimension = D3D12_UAV_DIMENSION_BUFFER,
+				.Buffer = {
+					.FirstElement = 0,
+					.NumElements = numElements,
+					.StructureByteStride = structureByteStride,
+					.Flags = D3D12_BUFFER_UAV_FLAG_NONE }
+			};
 		}
 
-		return std::nullopt;
+		return desc;
 	}
 
 	void GPUBufferDesc::From(const D3D12_RESOURCE_DESC& desc)

@@ -40,16 +40,32 @@ namespace fe::dx
 
 		std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
 		{
-			return desc.IsVertexBuffer() ? std::make_optional(D3D12_VERTEX_BUFFER_VIEW{
-											   .BufferLocation = resource->GetGPUVirtualAddress(), .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()), .StrideInBytes = desc.GetStructureByteStride() })
-										 : std::nullopt;
+			std::optional<D3D12_VERTEX_BUFFER_VIEW> view{};
+			if (desc.GetBufferType() == EBufferType::VertexBuffer)
+			{
+				view = D3D12_VERTEX_BUFFER_VIEW{
+					.BufferLocation = resource->GetGPUVirtualAddress(),
+					.SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
+					.StrideInBytes = desc.GetStructureByteStride()
+				};
+			}
+
+			return view;
 		}
 
 		std::optional<D3D12_INDEX_BUFFER_VIEW> GetIndexBufferView() const
 		{
-			return desc.IsIndexBuffer() ? std::make_optional(D3D12_INDEX_BUFFER_VIEW{
-											   .BufferLocation = resource->GetGPUVirtualAddress(), .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()), .Format = desc.GetIndexFormat() })
-										 : std::nullopt;
+			std::optional<D3D12_INDEX_BUFFER_VIEW> view{};
+			if (desc.GetBufferType() == EBufferType::IndexBuffer)
+			{
+				view = D3D12_INDEX_BUFFER_VIEW{
+					.BufferLocation = resource->GetGPUVirtualAddress(),
+					.SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
+					.Format = desc.GetIndexFormat()
+				};
+			}
+
+			return view;
 		}
 
 	private:
