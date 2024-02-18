@@ -41,6 +41,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\MeshComponent.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />

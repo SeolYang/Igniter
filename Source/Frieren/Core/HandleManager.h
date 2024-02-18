@@ -25,7 +25,8 @@ namespace fe
 			friend class fe::HandleManager;
 
 		public:
-			GenericHandleRepository() : HandleRepository() {}
+			GenericHandleRepository()
+				: HandleRepository() {}
 
 			virtual ~GenericHandleRepository()
 			{
@@ -49,8 +50,7 @@ namespace fe
 				constexpr uint64_t MaximumIndexRange = 0x00000000ffffffff;
 				verify(allocation.ChunkIndex < MaximumIndexRange || allocation.ElementIndex < MaximumIndexRange);
 				uint64_t result = 0;
-				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32)
-						 | (allocation.ElementIndex & MaximumIndexRange);
+				result = ((allocation.ChunkIndex & MaximumIndexRange) << 32) | (allocation.ElementIndex & MaximumIndexRange);
 				return result;
 			}
 
@@ -161,9 +161,14 @@ namespace fe
 		};
 	} // namespace Private
 
-	// @dependency	None
 	class HandleManager final
 	{
+		template <typename T>
+		friend class WeakHandle;
+
+		template <typename T>
+		friend class UniqueHandle;
+
 	public:
 		HandleManager() = default;
 		~HandleManager()
@@ -180,170 +185,6 @@ namespace fe
 		HandleManager& operator=(const HandleManager&) = delete;
 		HandleManager& operator=(HandleManager&&) = delete;
 
-		template <typename T>
-		class WeakHandle
-		{
-		public:
-			using AlterConstnessType = std::conditional_t<std::is_const_v<T>, std::remove_const_t<T>, const T>;
-			friend WeakHandle<AlterConstnessType>;
-
-			WeakHandle() = default;
-			WeakHandle(const WeakHandle&) = default;
-			WeakHandle(WeakHandle&&) noexcept = default;
-			virtual ~WeakHandle()
-			{
-				rHandleManager = nullptr;
-				index = InvalidIndex;
-			}
-
-			WeakHandle& operator=(const WeakHandle&) = default;
-			WeakHandle& operator=(WeakHandle&&) noexcept = default;
-
-			operator bool() const { return IsValid(); }
-
-			bool operator==(const WeakHandle& rhs) const { return this->index == rhs.index; }
-
-			bool operator!=(const WeakHandle& rhs) const { return !(*this == rhs); }
-
-			T& operator*()
-			{
-				T* const addressOfInstance = QueryAddressOfInstance();
-				verify(addressOfInstance != nullptr);
-				return *addressOfInstance;
-			}
-
-			const T& operator*() const
-			{
-				T* const addressOfInstance = QueryAddressOfInstance();
-				verify(addressOfInstance != nullptr);
-				return *addressOfInstance;
-			}
-
-			T* operator->()
-			{
-				T* const addressOfInstance = QueryAddressOfInstance();
-				verify(addressOfInstance != nullptr);
-				return addressOfInstance;
-			}
-
-			const T* operator->() const
-			{
-				const T* const addressOfInstance = QueryAddressOfInstance();
-				verify(addressOfInstance != nullptr);
-				return addressOfInstance;
-			}
-
-			bool IsValid() const
-			{
-				return rHandleManager != nullptr && index != InvalidIndex && rHandleManager->IsValidIndex<T>(index);
-			}
-
-			String QueryName() const
-			{
-				if (rHandleManager == nullptr || index == InvalidIndex)
-				{
-					return {};
-				}
-
-				return rHandleManager->QueryName<T>(index);
-			}
-
-			void Rename(const String newName)
-			{
-				if (rHandleManager != nullptr && index != InvalidIndex)
-				{
-					rHandleManager->Rename<T>(index, newName);
-				}
-			}
-
-			WeakHandle<T> DeriveWeak()
-			{
-				if (this->IsValid())
-				{
-					return WeakHandle<T>{ *(this->rHandleManager), this->index };
-				}
-
-				return {};
-			}
-
-			WeakHandle<const T> DeriveWeak() const
-			{
-				if (this->IsValid())
-				{
-					return WeakHandle<const T>{ *(this->rHandleManager), this->index };
-				}
-
-				return WeakHandle<const T>{};
-			}
-
-		protected:
-			WeakHandle(HandleManager& handleManager, const uint64_t index)
-				: rHandleManager(&handleManager), index(index)
-			{
-			}
-
-		private:
-			T* QueryAddressOfInstance() const
-			{
-				if (rHandleManager == nullptr || index == InvalidIndex)
-				{
-					return nullptr;
-				}
-
-				return rHandleManager->QueryAddressOfInstance<T>(index);
-			}
-
-		protected:
-			HandleManager* rHandleManager = nullptr;
-			uint64_t	   index = InvalidIndex;
-		};
-
-		template <typename T>
-		class OwnedHandle : public WeakHandle<T>
-		{
-		public:
-			OwnedHandle() = default;
-			OwnedHandle(OwnedHandle&& other) noexcept
-				: WeakHandle<T>(std::exchange(other.rHandleManager, nullptr), std::exchange(other.index, InvalidIndex))
-			{
-			}
-			virtual ~OwnedHandle() override { Destroy(); }
-
-			OwnedHandle& operator=(const OwnedHandle&) = delete;
-			OwnedHandle& operator=(OwnedHandle&& other) noexcept
-			{
-				this->rHandleManager = std::exchange(other.rHandleManager, nullptr);
-				this->index = std::exchange(other.index, InvalidIndex);
-				return *this;
-			}
-
-			void Destroy()
-			{
-				if (this->IsValid())
-				{
-					this->rHandleManager->Destroy<T>(this->index);
-					this->rHandleManager = nullptr;
-					this->index = InvalidIndex;
-				}
-			}
-
-		public:
-			template <typename... Args>
-			static OwnedHandle Create(HandleManager& handleManager, const String name, Args&&... args)
-			{
-				return OwnedHandle(handleManager, handleManager.Create<T>(name, std::forward<Args>(args)...));
-			}
-
-			template <typename... Args>
-			static OwnedHandle Create(HandleManager& handleManager, const std::string_view name, Args&&... args)
-			{
-				return Create(handleManager, String(name), std::forward<Args>(args)...);
-			}
-
-		private:
-			OwnedHandle(HandleManager& handleManager, const uint64_t index) : WeakHandle<T>(handleManager, index) {}
-		};
-
 	private:
 		template <typename T, typename... Args>
 		uint64_t Create(const String name, Args&&... args)
@@ -353,8 +194,7 @@ namespace fe
 				WriteLock lock{ repositoryMapMutex };
 				if (!repositoryMap.contains(hashOfType))
 				{
-					repositoryMap[hashOfType]
-						= static_cast<Private::HandleRepository*>(new Private::GenericHandleRepository<T>());
+					repositoryMap[hashOfType] = static_cast<Private::HandleRepository*>(new Private::GenericHandleRepository<T>());
 				}
 			}
 
@@ -421,18 +261,164 @@ namespace fe
 		robin_hood::unordered_map<uint64_t, Private::HandleRepository*> repositoryMap;
 	};
 
-	/**
-	 * Auto-managed Handle based on Pool allocation.
-	 * It provides a memory-safe access to avoid undefined behavior caused by invalid dynamic memory access.
-	 * Owned Handle follows the 'RAII (Resource Acquisition Is Initialization)' principle for allocation management.
-	 * Additionally, it minimizes deallocation of memory for unmanaged (or out-of-management) allocation during manager
-	 * destruction. (Due to its simple structure, it is able to identify which type of instances have become unmanaged.)
-	 * In general, it is recommended to destroy owned handles upon the destruction of the object that allocated the
-	 * handle.
-	 */
 	template <typename T>
-	using OwnedHandle = HandleManager::OwnedHandle<T>;
+	class WeakHandle
+	{
+	public:
+		using AlterConstnessType = std::conditional_t<std::is_const_v<T>, std::remove_const_t<T>, const T>;
+		friend WeakHandle<AlterConstnessType>;
+
+		WeakHandle() = default;
+		WeakHandle(const WeakHandle&) = default;
+		WeakHandle(WeakHandle&&) noexcept = default;
+		~WeakHandle() = default;
+
+		WeakHandle& operator=(const WeakHandle&) = default;
+		WeakHandle& operator=(WeakHandle&&) noexcept = default;
+
+		operator bool() const { return IsValid(); }
+
+		bool operator==(const WeakHandle& rhs) const { return this->index == rhs.index; }
+
+		bool operator!=(const WeakHandle& rhs) const { return !(*this == rhs); }
+
+		T& operator*()
+		{
+			T* const addressOfInstance = QueryAddressOfInstance();
+			verify(addressOfInstance != nullptr);
+			return *addressOfInstance;
+		}
+
+		const T& operator*() const
+		{
+			T* const addressOfInstance = QueryAddressOfInstance();
+			verify(addressOfInstance != nullptr);
+			return *addressOfInstance;
+		}
+
+		T* operator->()
+		{
+			T* const addressOfInstance = QueryAddressOfInstance();
+			verify(addressOfInstance != nullptr);
+			return addressOfInstance;
+		}
+
+		const T* operator->() const
+		{
+			const T* const addressOfInstance = QueryAddressOfInstance();
+			verify(addressOfInstance != nullptr);
+			return addressOfInstance;
+		}
+
+		bool IsValid() const
+		{
+			return handleManager != nullptr && index != InvalidIndex && handleManager->IsValidIndex<T>(index);
+		}
+
+		String QueryName() const
+		{
+			if (handleManager == nullptr || index == InvalidIndex)
+			{
+				return {};
+			}
+
+			return handleManager->QueryName<T>(index);
+		}
+
+		void Rename(const String newName)
+		{
+			if (handleManager != nullptr && index != InvalidIndex)
+			{
+				handleManager->Rename<T>(index, newName);
+			}
+		}
+
+		WeakHandle<T> DeriveWeak()
+		{
+			if (this->IsValid())
+			{
+				return WeakHandle<T>{ *(this->handleManager), this->index };
+			}
+
+			return {};
+		}
+
+		WeakHandle<const T> DeriveWeak() const
+		{
+			if (this->IsValid())
+			{
+				return WeakHandle<const T>{ *(this->handleManager), this->index };
+			}
+
+			return WeakHandle<const T>{};
+		}
+
+	protected:
+		WeakHandle(HandleManager& owner, const uint64_t index)
+			: handleManager(&owner), index(index)
+		{
+		}
+
+	private:
+		T* QueryAddressOfInstance() const
+		{
+			if (handleManager == nullptr || index == InvalidIndex)
+			{
+				return nullptr;
+			}
+
+			return handleManager->QueryAddressOfInstance<T>(index);
+		}
+
+	protected:
+		HandleManager* handleManager = nullptr;
+		uint64_t	   index = InvalidIndex;
+	};
 
 	template <typename T>
-	using WeakHandle = HandleManager::WeakHandle<T>;
+	class UniqueHandle : public WeakHandle<T>
+	{
+	public:
+		UniqueHandle() = default;
+		UniqueHandle(UniqueHandle&& other) noexcept
+			: WeakHandle<T>(std::exchange(other.handleManager, nullptr), std::exchange(other.index, InvalidIndex))
+		{
+		}
+		~UniqueHandle() { Destroy(); }
+
+		UniqueHandle& operator=(const UniqueHandle&) = delete;
+		UniqueHandle& operator=(UniqueHandle&& other) noexcept
+		{
+			this->handleManager = std::exchange(other.handleManager, nullptr);
+			this->index = std::exchange(other.index, InvalidIndex);
+			return *this;
+		}
+
+		void Destroy()
+		{
+			if (this->IsValid())
+			{
+				this->handleManager->Destroy<T>(this->index);
+				this->handleManager = nullptr;
+				this->index = InvalidIndex;
+			}
+		}
+
+	public:
+		template <typename... Args>
+		static UniqueHandle Create(HandleManager& handleManager, const String name, Args&&... args)
+		{
+			return UniqueHandle(handleManager, handleManager.Create<T>(name, std::forward<Args>(args)...));
+		}
+
+		template <typename... Args>
+		static UniqueHandle Create(HandleManager& handleManager, const std::string_view name, Args&&... args)
+		{
+			return Create(handleManager, String(name), std::forward<Args>(args)...);
+		}
+
+	private:
+		UniqueHandle(HandleManager& owner, const uint64_t index)
+			: WeakHandle<T>(owner, index) {}
+	};
 } // namespace fe

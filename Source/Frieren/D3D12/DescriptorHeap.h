@@ -63,7 +63,6 @@ namespace fe::dx
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandleForHeapStart{};
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
 
-		// #todo queue -> concurrent_queue
 		concurrency::concurrent_queue<uint32_t> descsriptorIdxPool;
 	};
 } // namespace fe::dx

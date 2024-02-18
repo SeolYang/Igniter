@@ -180,6 +180,9 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContextPool.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\MeshComponent.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">

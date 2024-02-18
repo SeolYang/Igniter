@@ -365,6 +365,7 @@ namespace fe::dx
 
 	std::optional<PipelineState> Device::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
 	{
+		// #todo 파이프라인 상태 객체 캐싱 구현 (해시 기반)
 		check(device);
 
 		ComPtr<ID3D12PipelineState> newPipelineState{};
@@ -384,6 +385,7 @@ namespace fe::dx
 
 	std::optional<PipelineState> Device::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
 	{
+		// #todo 파이프라인 상태 객체 캐싱 구현 (해시 기반)
 		check(device);
 
 		ComPtr<ID3D12PipelineState> newPipelineState{};

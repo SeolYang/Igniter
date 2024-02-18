@@ -5,6 +5,7 @@
 
 namespace fe
 {
+	// Handle의 Frame Resource 대신 (FrameResource<Handle>...), Frame Resource의 Handle을 사용 할 것 (Handle<FrameResource>).
 	class FrameResourceManager final
 	{
 	public:

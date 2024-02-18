@@ -12,7 +12,6 @@ namespace fe::dx
 	class GPUBuffer;
 	class GPUTextureDesc;
 	class GPUTexture;
-	struct GPUTextureSubresource;
 	class Fence;
 	class GraphicsPipelineStateDesc;
 	class ComputePipelineStateDesc;
@@ -38,6 +37,7 @@ namespace fe::dx
 		std::optional<CommandQueue>	  CreateCommandQueue(const EQueueType queueType);
 		std::optional<CommandContext> CreateCommandContext(const EQueueType targetQueueType);
 
+		// #todo 일반화된 루트 시그니처 생성 및 캐싱 구현(해시 기반)
 		std::optional<RootSignature> CreateBindlessRootSignature();
 		std::optional<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
 		std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
@@ -76,8 +76,6 @@ namespace fe::dx
 		ComPtr<ID3D12Device10> device;
 
 		D3D12MA::Allocator*				allocator = nullptr;
-		// #todo descriptor heap -> 독립?; Device의 상위 레이어로? ex. DescriptorManager::RequestCBV(frameResourceManager)... -> descriptorHeap... device.SetDescriptorAsConstantBufferView(*cbv) returtn cbv...
-		// cmdctx pool 비슷하게
 		std::unique_ptr<DescriptorHeap> cbvSrvUavDescriptorHeap;
 		std::unique_ptr<DescriptorHeap> samplerDescriptorHeap;
 		std::unique_ptr<DescriptorHeap> rtvDescriptorHeap;

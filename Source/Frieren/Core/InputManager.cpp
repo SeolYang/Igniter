@@ -48,7 +48,7 @@ namespace fe
 		inputActionNameMap[input].insert(nameOfAction);
 		if (!actionMap.contains(nameOfAction))
 		{
-			actionMap[nameOfAction] = OwnedHandle<Action>::Create(Engine::GetHandleManager(), nameOfAction);
+			actionMap[nameOfAction] = UniqueHandle<Action>::Create(Engine::GetHandleManager(), nameOfAction);
 		}
 	}
 
@@ -59,7 +59,7 @@ namespace fe
 		if (!axisMap.contains(nameOfAxis))
 		{
 			inputAxisNameScaleMap[input][nameOfAxis] = scale;
-			axisMap[nameOfAxis] = OwnedHandle<Axis>::Create(Engine::GetHandleManager(), nameOfAxis);
+			axisMap[nameOfAxis] = UniqueHandle<Axis>::Create(Engine::GetHandleManager(), nameOfAxis);
 		}
 	}
 
