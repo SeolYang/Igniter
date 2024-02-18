@@ -20,9 +20,6 @@
 	#define check(CONDITION) ((void)0)
 #endif
 
-#define checkNoEntry()			 check(false)
-#define checkNoReentry()		 check(false)
-#define checkNoRecursion()		 check(false)
 #define unimplemented()			 check(false)
 
 #define verify_succeeded(RESULT) verify(SUCCEEDED(RESULT))

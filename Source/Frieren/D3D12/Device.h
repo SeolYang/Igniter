@@ -34,8 +34,6 @@ namespace fe::dx
 		std::array<std::reference_wrapper<DescriptorHeap>, 2> GetBindlessDescriptorHeaps();
 		uint32_t											  GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
-		// #todo std::optional -> FrameResource
-
 		std::optional<Fence>		  CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
 		std::optional<CommandQueue>	  CreateCommandQueue(const EQueueType queueType);
 		std::optional<CommandContext> CreateCommandContext(const EQueueType targetQueueType);
@@ -78,6 +76,8 @@ namespace fe::dx
 		ComPtr<ID3D12Device10> device;
 
 		D3D12MA::Allocator*				allocator = nullptr;
+		// #todo descriptor heap -> 독립?; Device의 상위 레이어로? ex. DescriptorManager::RequestCBV(frameResourceManager)... -> descriptorHeap... device.SetDescriptorAsConstantBufferView(*cbv) returtn cbv...
+		// cmdctx pool 비슷하게
 		std::unique_ptr<DescriptorHeap> cbvSrvUavDescriptorHeap;
 		std::unique_ptr<DescriptorHeap> samplerDescriptorHeap;
 		std::unique_ptr<DescriptorHeap> rtvDescriptorHeap;

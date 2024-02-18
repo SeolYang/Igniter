@@ -238,9 +238,10 @@ namespace fe::dx
 		dsvDescriptorHeap =
 			std::make_unique<DescriptorHeap>(CreateDescriptorHeap(EDescriptorHeapType::DSV, NumDsvDescriptors).value());
 	}
-	
+
 	std::optional<Fence> Device::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/)
 	{
+		// #log 2024/02/18 02:41 #todo  실패했을때 HRESULT->String 변환해서 로그로 출력
 		ComPtr<ID3D12Fence> newFence{};
 		if (!SUCCEEDED(device->CreateFence(initialCounter, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence))))
 		{
@@ -279,7 +280,6 @@ namespace fe::dx
 
 		const D3D12_COMMAND_LIST_FLAGS flags = D3D12_COMMAND_LIST_FLAG_NONE;
 
-		// #todo 스레드 당 Command Allocator 할당
 		if (!SUCCEEDED(device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator))))
 		{
 			return {};

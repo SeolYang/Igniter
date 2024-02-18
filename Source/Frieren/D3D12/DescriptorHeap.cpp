@@ -17,9 +17,12 @@ namespace fe::dx
 		, cpuDescriptorHandleForHeapStart(descriptorHeap->GetCPUDescriptorHandleForHeapStart())
 		, gpuDescriptorHandleForHeapStart(bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart()
 														   : D3D12_GPU_DESCRIPTOR_HANDLE{ std::numeric_limits<decltype(D3D12_GPU_DESCRIPTOR_HANDLE::ptr)>::max() })
-		, indexPool(CreateIndexQueue(numDescriptorsInHeap))
 	{
 		check(newDescriptorHeap);
+		for (uint32_t idx = 0; idx < numDescriptorsInHeap; ++idx)
+		{
+			this->descsriptorIdxPool.push(idx);
+		}
 	}
 
 	DescriptorHeap::DescriptorHeap(DescriptorHeap&& other) noexcept
@@ -30,13 +33,13 @@ namespace fe::dx
 		, cpuDescriptorHandleForHeapStart(std::exchange(other.cpuDescriptorHandleForHeapStart, {}))
 		, gpuDescriptorHandleForHeapStart(std::exchange(other.gpuDescriptorHandleForHeapStart, {}))
 		, bIsShaderVisible(other.bIsShaderVisible)
-		, indexPool(std::move(other.indexPool))
+		, descsriptorIdxPool(std::move(other.descsriptorIdxPool))
 	{
 	}
 
 	DescriptorHeap::~DescriptorHeap()
 	{
-		check(numInitialDescriptors == indexPool.size());
+		check(numInitialDescriptors == descsriptorIdxPool.unsafe_size());
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const uint32_t index) const
@@ -69,14 +72,11 @@ namespace fe::dx
 		check(descriptorHeapType != EDescriptorHeapType::DSV ||
 			  (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EDescriptorType::DepthStencilView)));
 
-		RecursiveLock lock{ mutex };
-		if (indexPool.empty())
+		uint32_t newDescriptorIdx = std::numeric_limits<uint32_t>::max();
+		if (descsriptorIdxPool.empty() || !descsriptorIdxPool.try_pop(newDescriptorIdx))
 		{
 			return {};
 		}
-
-		const uint32_t newDescriptorIdx = indexPool.front();
-		indexPool.pop();
 
 		return MakeFrameResourceCustom<GPUView>(
 			frameResourceManager,
@@ -84,13 +84,11 @@ namespace fe::dx
 			GPUView{ desiredType, newDescriptorIdx, GetIndexedCPUDescriptorHandle(newDescriptorIdx), GetIndexedGPUDescriptorHandle(newDescriptorIdx) });
 	}
 
-	void DescriptorHeap::Release(const uint32_t indexOfDescriptor)
+	void DescriptorHeap::Release(const uint32_t descriptorIdx)
 	{
-		check(indexOfDescriptor < numInitialDescriptors);
-		check(indexOfDescriptor != std::numeric_limits<decltype(GPUView::Index)>::max());
-		check(indexPool.size() < numInitialDescriptors);
-
-		RecursiveLock lock{ mutex };
-		indexPool.push(indexOfDescriptor);
+		check(descriptorIdx < numInitialDescriptors);
+		check(descriptorIdx != std::numeric_limits<decltype(GPUView::Index)>::max());
+		descsriptorIdxPool.push(descriptorIdx);
+		check(descsriptorIdxPool.unsafe_size() <= numInitialDescriptors);
 	}
 } // namespace fe::dx

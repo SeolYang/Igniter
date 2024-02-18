@@ -41,13 +41,9 @@ namespace fe::dx
 		verify_succeeded(native->Wait(&fence.GetNative(), fence.GetCounter()));
 	}
 
-	// #todo get frameresource<cmd ctx>?
 	void CommandQueue::AddPendingContext(CommandContext& cmdCtx)
 	{
 		check(cmdCtx);
-		// #todo Assertion on Nvidia do and dont's limitations
-		// ifdef FE_ASSERT_ON_NVIDIA_DO_AND_DONTS_LIMITS
-		// check(pendingContexts.size() < RecommendedMaxNumCommandContexts);
 		pendingContexts.emplace_back(cmdCtx);
 	}
 

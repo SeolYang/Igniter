@@ -42,7 +42,6 @@ namespace fe::dx
 		verify_succeeded(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
 
 		DXGI_SWAP_CHAIN_DESC1 desc = {};
-		/** #todo Customizable(or preset)Swapchain Resolution */
 		desc.Width = 0;
 		desc.Height = 0;
 

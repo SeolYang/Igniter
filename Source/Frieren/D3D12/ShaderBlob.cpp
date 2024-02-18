@@ -7,9 +7,9 @@ namespace fe::dx
 {
 	FE_DECLARE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosiy::Fatal)
 
-
-	// #todo 쉐이더 컴파일 후 파일로 저장
-	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc) : type(desc.Type)
+	// #todo 쉐이더 컴파일 후 파일로 저장/캐싱
+	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)
+		: type(desc.Type)
 	{
 		std::vector<const wchar_t*> arguments;
 		arguments.push_back(TEXT("-E"));
@@ -118,13 +118,11 @@ namespace fe::dx
 		verify_succeeded(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
 										   IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
-		// #todo 별도의 error handling 구현 https://youtu.be/tyyKeTsdtmo?si=gERRzeRVmqxAcPT7&t=1158
 		ComPtr<IDxcBlobUtf8> errors;
 		compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
 		if (errors && errors->GetStringLength() > 0)
 		{
-			FE_LOG(ShaderBlobFatal, errors->GetStringPointer());
-			errors;
+			FE_LOG(ShaderBlobFatal, "Failed to compile shader {}; {}", desc.SourcePath.AsStringView(), errors->GetStringPointer());
 		}
 
 		verify_succeeded(compiledResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));

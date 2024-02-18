@@ -16,6 +16,7 @@
 namespace fe
 {
 	FE_DECLARE_LOG_CATEGORY(EngineInfo, ELogVerbosiy::Info)
+	FE_DECLARE_LOG_CATEGORY(EngineFatal, ELogVerbosiy::Fatal);
 
 	Engine* Engine::instance = nullptr;
 	Engine::Engine()

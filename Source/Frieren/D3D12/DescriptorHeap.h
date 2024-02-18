@@ -22,16 +22,11 @@ namespace fe::dx
 		const uint32_t					  Index;	 /* Index of descriptor in Descriptor Heap. */
 		const D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle; /* CPU Handle of descriptor. */
 		const D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle; /* GPU Handle of descriptor. */
-
 	};
 
 	class DescriptorHeap
 	{
 		friend class Device;
-
-	private:
-		uint32_t AllocateIndex();
-		void	 DeallocateIndex(const uint32_t index);
 
 	public:
 		DescriptorHeap(const DescriptorHeap&) = delete;
@@ -56,7 +51,7 @@ namespace fe::dx
 					   const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap,
 					   const uint32_t descriptorHandleIncSizeInHeap);
 
-		void Release(const uint32_t indexOfDescriptor);
+		void Release(const uint32_t descriptirIdx);
 
 	private:
 		EDescriptorHeapType			 descriptorHeapType;
@@ -69,7 +64,6 @@ namespace fe::dx
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
 
 		// #todo queue -> concurrent_queue
-		RecursiveMutex		 mutex;
-		std::queue<uint32_t> indexPool;
+		concurrency::concurrent_queue<uint32_t> descsriptorIdxPool;
 	};
 } // namespace fe::dx
