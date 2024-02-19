@@ -148,7 +148,7 @@ namespace fe
 			const uint16_t elementIdx = MaskElementIndex(handle);
 
 			check(chunkIdx < chunks.size());
-			check(elementIdx < chunks.size());
+			check(elementIdx < numInitialElementPerChunk);
 			return chunks[chunkIdx].GetAddress(elementIdx * sizeOfElement);
 		}
 
