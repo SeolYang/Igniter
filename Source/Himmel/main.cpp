@@ -24,6 +24,7 @@ public:
 
 int main()
 {
+	// #todo #log 2024/02/19 10:48, 새로운 HandleManager 테스트 + 벤치마킹 -> GPUView 전부 FrameHandle화
 	int result = 0;
 	{
 		fe::Engine engine;

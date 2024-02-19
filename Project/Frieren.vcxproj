@@ -28,7 +28,6 @@
     <ClInclude Include="..\Source\Frieren\Core\Misc.h" />
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h" />
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
-    <ClInclude Include="..\Source\Frieren\Core\Pool.h" />
     <ClInclude Include="..\Source\Frieren\Core\Timer.h" />
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
@@ -58,7 +57,6 @@
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiRenderer.h" />
-    <ClInclude Include="..\Source\Frieren\Math\Common.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Common.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\StaticMeshComponent.h" />

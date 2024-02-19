@@ -36,7 +36,7 @@ namespace fe
 	{
 		if (hashOfString == InvalidHashVal)
 		{
-			return std::string();
+			return {};
 		}
 
 		ReadOnlyLock lock{ hashStringMapMutex };

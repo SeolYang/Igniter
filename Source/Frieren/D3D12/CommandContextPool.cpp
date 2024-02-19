@@ -2,7 +2,7 @@
 #include <D3D12/Device.h>
 #include <D3D12/CommandContext.h>
 #include <Core/FrameManager.h>
-#include <Core/FrameResourceManager.h>
+#include <Core/Assert.h>
 
 namespace fe::dx
 {
@@ -37,10 +37,8 @@ namespace fe::dx
 
 		return { cmdCtxPtr,
 				 [&frameResourceManager, this](CommandContext* ptr) {
-				frameResourceManager.RequestDeallocation([ptr, this]() 
-					{ 
-						this->Return(ptr); }); 
-			} };
+					 Private::RequestDeallocation(frameResourceManager, [ptr, this]() { this->Return(ptr); });
+				 } };
 	}
 
 	void CommandContextPool::Return(CommandContext* cmdContext)

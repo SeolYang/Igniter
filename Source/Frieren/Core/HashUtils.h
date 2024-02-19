@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string_view>
-#include <Math/Common.h>
+#include <Core/MathUtils.h>
 
 //#ifdef _M_X64
 //	#define ENABLE_SSE_CRC32 1

@@ -1,5 +1,6 @@
-#include <Core/Container.h>
 #include <D3D12/GPUBufferDesc.h>
+#include <Core/Container.h>
+#include <Core/Assert.h>
 
 namespace fe::dx
 {

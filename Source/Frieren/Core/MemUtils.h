@@ -13,4 +13,20 @@ namespace fe
 		const size_t misalignment = size & mask;
 		return (alignment - misalignment);
 	}
+
+		template <typename T>
+	__forceinline T AlignUp(T value, const size_t alignment)
+	{
+		check(IsPow2(value));
+		const size_t mask = alignment - 1;
+		return (T)((size_t)(value + mask) & ~mask);
+	}
+
+	template <typename T>
+	__forceinline T AlignDown(T value, const size_t alignment)
+	{
+		check(IsPow2(value));
+		const size_t mask = alignment - 1;
+		return (T)((size_t)value & ~mask);
+	}
 }

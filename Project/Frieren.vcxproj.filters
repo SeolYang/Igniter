@@ -19,9 +19,6 @@
     <Filter Include="Thirdparty\D3D12MemAlloc">
       <UniqueIdentifier>{d6c45c0b-c442-4eac-90cf-dcc17c5d6e29}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Math">
-      <UniqueIdentifier>{678be2b1-c00f-418d-a544-a1a472855147}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\ImGui">
       <UniqueIdentifier>{13d19af1-2a32-4de0-96a7-7a2dfced32f5}</UniqueIdentifier>
     </Filter>
@@ -49,9 +46,6 @@
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\String.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\Pool.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Log.h">
@@ -131,9 +125,6 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h">
       <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Math\Common.h">
-      <Filter>Source\Math</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h">
       <Filter>Source\D3D12</Filter>
