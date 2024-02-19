@@ -69,9 +69,7 @@ namespace fe
 	{
 		check(numElementPerChunk > 0);
 		check(numInitialChunk > 0);
-
 		chunks.reserve(numInitialChunk);
-		pools.reserve(numInitialChunk);
 
 		for (uint32_t chunkIdx = 0; chunkIdx < numInitialChunk; ++chunkIdx)
 		{
@@ -80,43 +78,37 @@ namespace fe
 	}
 
 	MemoryPool::MemoryPool(MemoryPool&& other) noexcept
-		: sizeOfElement(std::exchange(other.sizeOfElement, 0)), alignOfElement(std::exchange(other.alignOfElement, 0)), numInitialElementPerChunk(std::exchange(other.numInitialElementPerChunk, 0Ui16)), magicNumber(std::exchange(other.magicNumber, InvalidMagicNumber)), chunks(std::move(other.chunks)), pools(std::move(other.pools))
+		: sizeOfElement(std::exchange(other.sizeOfElement, 0)), alignOfElement(std::exchange(other.alignOfElement, 0)), numInitialElementPerChunk(std::exchange(other.numInitialElementPerChunk, 0Ui16)), magicNumber(std::exchange(other.magicNumber, InvalidMagicNumber)), chunks(std::move(other.chunks)), pool(std::move(other.pool)), used(std::move(other.used))
 	{
 	}
 
 	MemoryPool::~MemoryPool()
 	{
-		check((magicNumber == InvalidMagicNumber) || IsFull());
-		pools.clear();
-		chunks.clear();
+		check((magicNumber == InvalidMagicNumber) || IsFull() && used.empty());
 	}
 
 	uint64_t MemoryPool::Allocate()
 	{
-		check(chunks.size() < MaxNumChunk);
-		check(chunks.size() == pools.size());
-		for (uint32_t chunkIdx = 0; chunkIdx < chunks.size(); ++chunkIdx)
+		if (pool.empty() && !CreateNewChunk())
 		{
-			auto& pool = pools[chunkIdx];
-			if (!pool.empty())
-			{
-				return CreateNewHandle(chunkIdx);
-			}
+			checkNoEntry();
+			return InvalidHandle;
 		}
 
-		return CreateNewHandle(CreateNewChunk());
+		const uint64_t newHandle = pool.front();
+		pool.pop();
+		check(newHandle != InvalidHandle && !used.contains(newHandle));
+		used.insert(newHandle);
+		return newHandle;
 	}
 
 	void MemoryPool::Deallocate(const uint64_t handle)
 	{
 		if (IsAlive(handle))
 		{
-			const uint32_t chunkIdx = MaskChunkIndex(handle);
-			const uint16_t elementIdx = MaskElementIndex(handle);
-			check(elementIdx < numInitialElementPerChunk);
-			check(chunkIdx < chunks.size() && chunks.size() == pools.size());
-			check(!pools[chunkIdx].contains(elementIdx));
-			pools[chunkIdx].insert(elementIdx);
+			check(handle != InvalidHandle);
+			pool.push(handle);
+			used.erase(handle);
 		}
 		else
 		{
@@ -126,13 +118,12 @@ namespace fe
 
 	uint8_t* MemoryPool::GetAddressOf(const uint64_t handle)
 	{
-		if (IsAlive(handle))
-		{
-			const uint32_t chunkIdx = MaskChunkIndex(handle);
-			const uint16_t elementIdx = MaskElementIndex(handle);
+		check(IsAlive(handle));
 
-			check(chunkIdx < chunks.size());
-			check(elementIdx < numInitialElementPerChunk);
+		const uint32_t chunkIdx = MaskChunkIndex(handle);
+		const uint16_t elementIdx = MaskElementIndex(handle);
+		if (chunkIdx < chunks.size() && elementIdx < numInitialElementPerChunk)
+		{
 			return chunks[chunkIdx].GetAddress(elementIdx * sizeOfElement);
 		}
 
@@ -142,13 +133,12 @@ namespace fe
 
 	const uint8_t* MemoryPool::GetAddressOf(const uint64_t handle) const
 	{
-		if (IsAlive(handle))
-		{
-			const uint32_t chunkIdx = MaskChunkIndex(handle);
-			const uint16_t elementIdx = MaskElementIndex(handle);
+		check(IsAlive(handle));
 
-			check(chunkIdx < chunks.size());
-			check(elementIdx < numInitialElementPerChunk);
+		const uint32_t chunkIdx = MaskChunkIndex(handle);
+		const uint16_t elementIdx = MaskElementIndex(handle);
+		if (chunkIdx < chunks.size() && elementIdx < numInitialElementPerChunk)
+		{
 			return chunks[chunkIdx].GetAddress(elementIdx * sizeOfElement);
 		}
 
@@ -156,78 +146,33 @@ namespace fe
 		return nullptr;
 	}
 
-	bool MemoryPool::IsAlive(const uint64_t handle) const
-	{
-		if (MaskMagicNumber(handle) == magicNumber)
-		{
-			if (const uint32_t chunkIdx = MaskChunkIndex(handle);
-				chunkIdx < chunks.size())
-			{
-				check(chunks.size() == pools.size());
-				const uint16_t elementIdx = MaskElementIndex(handle);
-				return elementIdx < numInitialElementPerChunk && !pools[chunkIdx].contains(elementIdx);
-			}
-		}
-
-		return false;
-	}
-
-	uint64_t MemoryPool::CreateNewHandle(const uint32_t chunkIdx)
-	{
-		check(chunkIdx < MaxNumChunk && chunkIdx < chunks.size());
-		check(chunks.size() == pools.size());
-		auto& pool = pools[chunkIdx];
-
-		const auto	   elementIdxItr = pool.begin();
-		const uint16_t elementIdx = static_cast<uint16_t>(*elementIdxItr);
-		check(elementIdx < MaxNumElement);
-		pool.erase(elementIdxItr);
-
-		const uint64_t newHandle = MakeHandle(magicNumber, chunkIdx, elementIdx);
-		check(newHandle != InvalidHandle);
-		return newHandle;
-	}
-
-	uint32_t MemoryPool::CreateNewChunk()
-	{
-		if (chunks.size() + 1 == MaxNumChunk)
-		{
-			return MaxNumChunk;
-		}
-
-		const uint32_t newChunkIdx = static_cast<uint32_t>(chunks.size());
-		chunks.emplace_back(sizeOfElement * numInitialElementPerChunk, alignOfElement);
-
-		robin_hood::unordered_set<uint16_t> newPool;
-		for (uint16_t elementIdx = 0; elementIdx < numInitialElementPerChunk; ++elementIdx)
-		{
-			newPool.insert(elementIdx);
-		}
-
-		pools.emplace_back(std::move(newPool));
-
-		check(newChunkIdx + 1 == chunks.size());
-		check(chunks.size() == pools.size());
-		return newChunkIdx;
-	}
-
 	bool MemoryPool::IsFull() const
 	{
-		for (auto& pool : pools)
+		return pool.size() == (chunks.size() * numInitialElementPerChunk);
+	}
+
+	bool MemoryPool::CreateNewChunk()
+	{
+		if (chunks.size() + 1 != MaxNumChunk)
 		{
-			if (pool.size() != numInitialElementPerChunk)
+			const uint32_t newChunkIdx = static_cast<uint32_t>(chunks.size());
+			chunks.emplace_back(sizeOfElement * numInitialElementPerChunk, alignOfElement);
+			for (uint16_t elementIdx = 0; elementIdx < numInitialElementPerChunk; ++elementIdx)
 			{
-				return false;
+				pool.push(MakeHandle(magicNumber, newChunkIdx, elementIdx));
 			}
+
+			return true;
 		}
 
-		return true;
+		checkNoEntry();
+		return false;
 	}
 
 	uint16_t MemoryPool::GenerateMagicNumber()
 	{
-		static std::mt19937_64 generator{ std::random_device{}() };
-		std::uniform_int_distribution<uint16_t> dist{ };
+		static std::mt19937_64					generator{ std::random_device{}() };
+		std::uniform_int_distribution<uint16_t> dist{};
 		return dist(generator);
 	}
 

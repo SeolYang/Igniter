@@ -28,14 +28,12 @@ namespace fe
 		uint8_t*	   GetAddressOf(const uint64_t handle);
 		const uint8_t* GetAddressOf(const uint64_t handle) const;
 
-		bool IsAlive(const uint64_t handle) const;
-
-		bool IsValid() const { return magicNumber != InvalidMagicNumber; }
+		bool IsAlive(const uint64_t handle) const { return handle != InvalidHandle && used.contains(handle); }
 
 	private:
-		uint64_t CreateNewHandle(const uint32_t chunkIdx);
-		uint32_t CreateNewChunk();
-		bool	 IsFull() const;
+		bool IsFull() const;
+
+		bool CreateNewChunk();
 
 		static uint16_t GenerateMagicNumber();
 		static uint16_t MaskMagicNumber(const uint64_t handle);
@@ -44,12 +42,13 @@ namespace fe
 		static uint64_t MakeHandle(const uint16_t magicNumber, const uint32_t chunkIdx, const uint32_t elementIdx);
 
 	private:
-		size_t											 sizeOfElement;
-		size_t											 alignOfElement;
-		uint16_t										 numInitialElementPerChunk;
-		uint16_t										 magicNumber;
-		std::vector<MemoryChunk>						 chunks;
-		std::vector<robin_hood::unordered_set<uint16_t>> pools;
+		size_t								sizeOfElement;
+		size_t								alignOfElement;
+		uint16_t							numInitialElementPerChunk;
+		uint16_t							magicNumber;
+		std::vector<MemoryChunk>			chunks;
+		std::queue<uint64_t>				pool;
+		robin_hood::unordered_set<uint64_t> used;
 
 		static constexpr size_t	  MagicNumberOffset = 48;
 		static constexpr size_t	  ChunkIndexOffset = 16;
