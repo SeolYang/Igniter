@@ -1,5 +1,5 @@
 #include <Core/String.h>
-#include <Core/Hash.h>
+#include <Core/HashUtils.h>
 #include <Core/Assert.h>
 
 namespace fe
@@ -7,7 +7,7 @@ namespace fe
 	String::HashStringMap String::hashStringMap = {};
 	SharedMutex			  String::hashStringMapMutex;
 
-	String::String(const std::string_view stringView) : hashOfString(InvalidHash)
+	String::String(const std::string_view stringView) : hashOfString(InvalidHashVal)
 	{
 		SetString(stringView);
 	}
@@ -18,7 +18,7 @@ namespace fe
 	{
 		if (!stringView.empty() && IsValidUTF8(stringView))
 		{
-			hashOfString = HashStringCRC64(stringView);
+			hashOfString = EvalCRC64(stringView);
 
 			WriteLock lock{ hashStringMapMutex };
 			if (!hashStringMap.contains(hashOfString))
@@ -28,13 +28,13 @@ namespace fe
 		}
 		else
 		{
-			hashOfString = InvalidHash;
+			hashOfString = InvalidHashVal;
 		}
 	}
 
 	std::string String::AsString() const
 	{
-		if (hashOfString == InvalidHash)
+		if (hashOfString == InvalidHashVal)
 		{
 			return std::string();
 		}
@@ -45,7 +45,7 @@ namespace fe
 
 	std::string_view String::AsStringView() const
 	{
-		if (hashOfString == InvalidHash)
+		if (hashOfString == InvalidHashVal)
 		{
 			return {};
 		}

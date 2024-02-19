@@ -2,7 +2,7 @@
 #include <Core/String.h>
 #include <Core/Pool.h>
 #include <Core/Mutex.h>
-#include <Core/Hash.h>
+#include <Core/HashUtils.h>
 #include <Core/Misc.h>
 
 namespace fe

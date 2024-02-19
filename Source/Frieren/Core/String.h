@@ -10,7 +10,7 @@
  */
 #include <Core/Container.h>
 #include <Core/Mutex.h>
-#include <Core/Hash.h>
+#include <Core/HashUtils.h>
 #include <string>
 #ifndef UTF_CPP_CPLUSPLUS
 	#define UTF_CPP_CPLUSPLUS 201703L
@@ -64,7 +64,7 @@ namespace fe
 
 		void SetString(std::string_view string);
 
-		bool	 IsValid() const { return hashOfString != InvalidHash; }
+		bool	 IsValid() const { return hashOfString != InvalidHashVal; }
 		uint64_t GetHash() const { return hashOfString; }
 
 		operator std::string() const { return AsString(); }
@@ -92,7 +92,7 @@ namespace fe
 		static SharedMutex	 hashStringMapMutex;
 
 	private:
-		uint64_t hashOfString = InvalidHash;
+		uint64_t hashOfString = InvalidHashVal;
 	};
 
 } // namespace fe

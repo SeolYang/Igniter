@@ -10,7 +10,7 @@
 #include <format>
 #include <Core/Container.h>
 #include <Core/String.h>
-#include <Core/Hash.h>
+#include <Core/HashUtils.h>
 #include <Core/Mutex.h>
 #include <Core/Assert.h>
 
