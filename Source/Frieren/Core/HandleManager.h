@@ -31,7 +31,7 @@ namespace fe
 		robin_hood::unordered_map<uint64_t, MemoryPool> memPools{};
 		robin_hood::unordered_set<uint64_t>				deferredDeallocationHandles{};
 
-		constexpr static size_t	  SizeOfChunkBytes = 4096;
+		constexpr static size_t	  SizeOfChunkBytes = 65536;
 		constexpr static uint32_t NumInitialChunkPerPool = 2;
 	};
 } // namespace fe
