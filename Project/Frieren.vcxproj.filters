@@ -39,10 +39,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\HandleManager.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\Hash.h">
+    <ClInclude Include="..\Source\Frieren\Core\HashUtils.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Misc.h">
@@ -123,9 +120,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\Utility.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\Common.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
@@ -180,8 +174,23 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContextPool.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\MeshComponent.h">
+    <ClInclude Include="..\Source\Frieren\Renderer\StaticMeshComponent.h">
       <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\HandleManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\Handle.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\MemoryPool.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\MemUtils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\MathUtils.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -277,6 +286,15 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContextPool.cpp">
       <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\MemoryPool.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\Handle.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

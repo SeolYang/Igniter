@@ -18,15 +18,18 @@
     <ClInclude Include="..\Source\Frieren\Core\FrameResource.h" />
     <ClInclude Include="..\Source\Frieren\Core\FrameResourceManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h" />
-    <ClInclude Include="..\Source\Frieren\Core\Hash.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Handle.h" />
+    <ClInclude Include="..\Source\Frieren\Core\HashUtils.h" />
     <ClInclude Include="..\Source\Frieren\Core\InputManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Log.h" />
+    <ClInclude Include="..\Source\Frieren\Core\MathUtils.h" />
+    <ClInclude Include="..\Source\Frieren\Core\MemoryPool.h" />
+    <ClInclude Include="..\Source\Frieren\Core\MemUtils.h" />
     <ClInclude Include="..\Source\Frieren\Core\Misc.h" />
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h" />
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
     <ClInclude Include="..\Source\Frieren\Core\Pool.h" />
     <ClInclude Include="..\Source\Frieren\Core\Timer.h" />
-    <ClInclude Include="..\Source\Frieren\Core\Utility.h" />
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
@@ -41,7 +44,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\MeshComponent.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />
@@ -59,13 +61,17 @@
     <ClInclude Include="..\Source\Frieren\Math\Common.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Common.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
+    <ClInclude Include="..\Source\Frieren\Renderer\StaticMeshComponent.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\FrameResource.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\FrameResourceManager.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\MemoryPool.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContext.cpp" />
