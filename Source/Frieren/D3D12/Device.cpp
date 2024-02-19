@@ -450,7 +450,7 @@ namespace fe::dx
 				allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create buffer. HRESULT")
+			FE_LOG(DeviceFatal, "Failed to create buffer. HRESULT");
 			return {};
 		}
 
