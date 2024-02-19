@@ -13,13 +13,14 @@
 	#define verify(EXPRESSION) \
 		do                     \
 		{                      \
-			(EXPRESSION);        \
+			(EXPRESSION);      \
 		}                      \
 		while (false)
 
 	#define check(CONDITION) ((void)0)
 #endif
 
+#define checkNoEntry()			 check(false)
 #define unimplemented()			 check(false)
 
 #define verify_succeeded(RESULT) verify(SUCCEEDED(RESULT))

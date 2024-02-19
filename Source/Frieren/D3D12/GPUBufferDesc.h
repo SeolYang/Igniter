@@ -1,8 +1,6 @@
 #pragma once
-#include <span>
-#include <optional>
+#include <Core/Container.h>
 #include <Core/String.h>
-#include <Core/Utility.h>
 #include <D3D12/Common.h>
 
 namespace fe::dx

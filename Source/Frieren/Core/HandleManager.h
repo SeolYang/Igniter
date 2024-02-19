@@ -80,7 +80,7 @@ namespace fe
 
 			void Destroy(const uint64_t index)
 			{
-				verify(index != InvalidIndex);
+				check(index != InvalidIndex);
 				if (IsValid(index))
 				{
 					{
@@ -276,21 +276,28 @@ namespace fe
 		WeakHandle& operator=(const WeakHandle&) = default;
 		WeakHandle& operator=(WeakHandle&&) noexcept = default;
 
+		bool IsValid() const
+		{
+			return handleManager != nullptr && index != InvalidIndex && handleManager->IsValidIndex<T>(index);
+		}
+
 		operator bool() const { return IsValid(); }
 
-		bool operator==(const WeakHandle& rhs) const { return this->index == rhs.index; }
+		bool operator==(const WeakHandle& rhs) const { return index != InvalidIndex && this->index == rhs.index; }
 
-		bool operator!=(const WeakHandle& rhs) const { return !(*this == rhs); }
+		bool operator!=(const WeakHandle& rhs) const { return index != InvalidIndex && !(*this == rhs); }
 
 		T& operator*()
 		{
+			check(IsValid());
 			T* const addressOfInstance = QueryAddressOfInstance();
-			verify(addressOfInstance != nullptr);
+			check(addressOfInstance != nullptr);
 			return *addressOfInstance;
 		}
 
 		const T& operator*() const
 		{
+			check(IsValid());
 			T* const addressOfInstance = QueryAddressOfInstance();
 			verify(addressOfInstance != nullptr);
 			return *addressOfInstance;
@@ -298,36 +305,35 @@ namespace fe
 
 		T* operator->()
 		{
+			check(IsValid());
 			T* const addressOfInstance = QueryAddressOfInstance();
-			verify(addressOfInstance != nullptr);
+			check(addressOfInstance != nullptr);
 			return addressOfInstance;
 		}
 
 		const T* operator->() const
 		{
+			check(IsValid());
 			const T* const addressOfInstance = QueryAddressOfInstance();
-			verify(addressOfInstance != nullptr);
+			check(addressOfInstance != nullptr);
 			return addressOfInstance;
-		}
-
-		bool IsValid() const
-		{
-			return handleManager != nullptr && index != InvalidIndex && handleManager->IsValidIndex<T>(index);
 		}
 
 		String QueryName() const
 		{
-			if (handleManager == nullptr || index == InvalidIndex)
+			check(IsValid() && "Trying to query name of invalid handle.");
+			if (IsValid())
 			{
-				return {};
+				return handleManager->QueryName<T>(index);
 			}
 
-			return handleManager->QueryName<T>(index);
+			return {};
 		}
 
 		void Rename(const String newName)
 		{
-			if (handleManager != nullptr && index != InvalidIndex)
+			check(IsValid() && "Trying to rename invalid handle.");
+			if (IsValid())
 			{
 				handleManager->Rename<T>(index, newName);
 			}
@@ -335,6 +341,7 @@ namespace fe
 
 		WeakHandle<T> DeriveWeak()
 		{
+			check(IsValid() && "Trying to derive new weak handle from invalid handle.");
 			if (this->IsValid())
 			{
 				return WeakHandle<T>{ *(this->handleManager), this->index };
@@ -345,6 +352,7 @@ namespace fe
 
 		WeakHandle<const T> DeriveWeak() const
 		{
+			check(IsValid() && "Trying to derive new weak handle from invalid handle.");
 			if (this->IsValid())
 			{
 				return WeakHandle<const T>{ *(this->handleManager), this->index };
