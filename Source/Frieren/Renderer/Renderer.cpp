@@ -17,6 +17,8 @@
 #include <D3D12/RootSignature.h>
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUTextureDesc.h>
+#include <Gameplay/World.h>
+#include <Renderer/StaticMeshComponent.h>
 
 struct SimpleVertex
 {
@@ -50,7 +52,7 @@ namespace fe
 		ibDesc.AsIndexBuffer<uint16_t>(6);
 		quadIB = std::make_unique<dx::GPUBuffer>(renderDevice.CreateBuffer(ibDesc).value());
 
-		dx::Fence initialFence = device.CreateFence("InitialFence").value();
+		dx::Fence		   initialFence = device.CreateFence("InitialFence").value();
 		dx::CommandContext uploadCtx = device.CreateCommandContext(dx::EQueueType::Direct).value();
 
 		dx::GPUBufferDesc quadUploadDesc{};
@@ -219,6 +221,48 @@ namespace fe
 			renderCmdCtx->SetScissorRect(0, 0, 1280, 642);
 			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			renderCmdCtx->DrawIndexed(6);
+		}
+		renderCmdCtx->End();
+
+		directCmdQueue->AddPendingContext(*renderCmdCtx);
+	}
+
+	void Renderer::Render(World& world)
+	{
+		check(directCmdQueue);
+		check(directCmdCtxPool);
+
+		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(frameResourceManager);
+		renderCmdCtx->Begin(pso.get());
+		{
+			auto bindlessDescriptorHeaps = renderDevice.GetBindlessDescriptorHeaps();
+			renderCmdCtx->SetDescriptorHeaps(bindlessDescriptorHeaps);
+			renderCmdCtx->SetRootSignature(*bindlessRootSignature);
+
+			check(swapchain);
+			dx::GPUTexture&	   backBuffer = swapchain->GetBackBuffer();
+			const dx::GPUView& backBufferRTV = swapchain->GetRenderTargetView();
+			renderCmdCtx->AddPendingTextureBarrier(backBuffer,
+												   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+												   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+												   D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+			renderCmdCtx->FlushBarriers();
+
+			renderCmdCtx->ClearRenderTarget(backBufferRTV);
+			renderCmdCtx->ClearDepth(*dsv);
+			renderCmdCtx->SetRenderTarget(backBufferRTV, *dsv);
+			renderCmdCtx->SetViewport(0.f, 0.f, 1280.f, 642.f);
+			renderCmdCtx->SetScissorRect(0, 0, 1280, 642);
+			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			world.Each<StaticMeshComponent>([&renderCmdCtx](StaticMeshComponent& component) {
+				renderCmdCtx->SetVertexBuffer(*component.VertexBufferHandle);
+				renderCmdCtx->SetIndexBuffer(*component.IndexBufferHandle);
+				renderCmdCtx->DrawIndexed(6);
+			});
+
+			renderCmdCtx->SetVertexBuffer(*quadVB);
+			renderCmdCtx->SetIndexBuffer(*quadIB);
 		}
 		renderCmdCtx->End();
 

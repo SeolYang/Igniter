@@ -1,18 +1,18 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 #include <string_view>
 #include <Math/Common.h>
 
-#ifdef _M_X64
-	#define ENABLE_SSE_CRC32 1
-#else
-	#define ENABLE_SSE_CRC32 0
-#endif
-
-#if ENABLE_SSE_CRC32
-	#pragma intrinsic(_mm_crc32_u32)
-	#pragma intrinsic(_mm_crc32_u64)
-#endif
+//#ifdef _M_X64
+//	#define ENABLE_SSE_CRC32 1
+//#else
+//	#define ENABLE_SSE_CRC32 0
+//#endif
+//
+//#if ENABLE_SSE_CRC32
+//	#pragma intrinsic(_mm_crc32_u32)
+//	#pragma intrinsic(_mm_crc32_u64)
+//#endif
 
 namespace fe::table
 {
@@ -345,11 +345,11 @@ namespace fe
 
 	/** https://stackoverflow.com/questions/56292104/hashing-types-at-compile-time-in-c17-c2a */
 	template <typename T>
-	constexpr uint64_t EvalTypeHash()
+	constexpr uint64_t EvalHashOfType()
 	{
 		return EvalCRC64(__FUNCSIG__);
 	}
 
 	template <typename T>
-	constexpr uint64_t HashOfType = EvalTypeHash<std::decay_t<T>>();
+	constexpr uint64_t HashOfType = EvalHashOfType<std::decay_t<T>>();
 } // namespace fe

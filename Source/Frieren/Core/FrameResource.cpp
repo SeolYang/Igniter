@@ -3,9 +3,8 @@
 
 namespace fe::Private
 {
-	void RequestDeallocation(FrameResourceManager& frameResourceManger, Requester&& requester)
+	void RequestDeallocation(FrameResourceManager& frameResourceManger, DefaultCallback&& requester)
 	{
-		static_assert(std::is_same_v<FrameResourceManager::Requester, Requester>);
 		frameResourceManger.RequestDeallocation(std::move(requester));
 	}
 } // namespace fe::Private

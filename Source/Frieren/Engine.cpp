@@ -35,7 +35,7 @@ namespace fe
 			renderDevice = std::make_unique<dx::Device>();
 			handleManager = std::make_unique<HandleManager>();
 			frameResourceManager = std::make_unique<FrameResourceManager>(frameManager);
-			inputManager = std::make_unique<InputManager>();
+			inputManager = std::make_unique<InputManager>(*handleManager);
 			renderer = std::make_unique<Renderer>(frameManager, *frameResourceManager, *window, *renderDevice);
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();

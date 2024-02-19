@@ -45,7 +45,7 @@ namespace fe
 			spdlog::logger* logger = QueryCategory<C>();
 			if (logger == nullptr)
 			{
-				WriteLock lock{ mutex };
+				ReadWriteLock lock{ mutex };
 				logger = new spdlog::logger(C::CategoryName.data(), { consoleSink, fileSink });
 				logger->set_level(spdlog::level::trace);
 			}

@@ -13,10 +13,9 @@ namespace fe
 		ForceClear();
 	}
 
-	void FrameResourceManager::RequestDeallocation(Requester&& requester)
+	void FrameResourceManager::RequestDeallocation(DefaultCallback&& requester)
 	{
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
-		RecursiveLock lock{ mutexes[localFrameIdx] };
 		pendingRequesters[localFrameIdx].push(std::move(requester));
 	}
 
@@ -27,8 +26,7 @@ namespace fe
 
 	void FrameResourceManager::BeginFrame(const uint8_t localFrameIdx)
 	{
-		RecursiveLock lock{ mutexes[localFrameIdx] };
-		Requester	  requester;
+		DefaultCallback requester;
 		while (pendingRequesters[localFrameIdx].try_pop(requester))
 		{
 			requester();

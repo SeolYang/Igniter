@@ -14,8 +14,7 @@ namespace fe
 	class FrameResourceManager;
 	namespace Private
 	{
-		using Requester = std::function<void(void)>;
-		void RequestDeallocation(FrameResourceManager& frameResourceManger, Requester&& requester);
+		void RequestDeallocation(FrameResourceManager& frameResourceManger, DefaultCallback&& requester);
 	} // namespace Private
 
 	template <typename T, typename... Args>

@@ -59,6 +59,11 @@ namespace fe
 		const size_t size;
 	};
 
+	MemoryPool::MemoryPool()
+		: sizeOfElement(0), alignOfElement(0), numInitialElementPerChunk(0), magicNumber(InvalidMagicNumber)
+	{
+	}
+
 	MemoryPool::MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk)
 		: sizeOfElement(newSizeOfElement), alignOfElement(newAlignOfElement), numInitialElementPerChunk(numElementPerChunk), magicNumber(GenerateMagicNumber())
 	{
@@ -75,13 +80,13 @@ namespace fe
 	}
 
 	MemoryPool::MemoryPool(MemoryPool&& other) noexcept
-		: sizeOfElement(std::exchange(other.sizeOfElement, 0)), alignOfElement(std::exchange(other.alignOfElement, 0)), numInitialElementPerChunk(std::exchange(other.numInitialElementPerChunk, 0Ui16)), magicNumber(std::exchange(other.magicNumber, 0Ui16)), chunks(std::move(other.chunks)), pools(std::move(other.pools))
+		: sizeOfElement(std::exchange(other.sizeOfElement, 0)), alignOfElement(std::exchange(other.alignOfElement, 0)), numInitialElementPerChunk(std::exchange(other.numInitialElementPerChunk, 0Ui16)), magicNumber(std::exchange(other.magicNumber, InvalidMagicNumber)), chunks(std::move(other.chunks)), pools(std::move(other.pools))
 	{
 	}
 
 	MemoryPool::~MemoryPool()
 	{
-		check(IsFull());
+		check((magicNumber == InvalidMagicNumber) || IsFull());
 		pools.clear();
 		chunks.clear();
 	}
@@ -127,7 +132,7 @@ namespace fe
 			const uint16_t elementIdx = MaskElementIndex(handle);
 
 			check(chunkIdx < chunks.size());
-			check(elementIdx < chunks.size());
+			check(elementIdx < numInitialElementPerChunk);
 			return chunks[chunkIdx].GetAddress(elementIdx * sizeOfElement);
 		}
 
@@ -222,9 +227,8 @@ namespace fe
 	uint16_t MemoryPool::GenerateMagicNumber()
 	{
 		static std::mt19937_64 generator{ std::random_device{}() };
-		const uint64_t		   r0 = generator();
-		const uint64_t		   r1 = generator();
-		return static_cast<uint16_t>(r0 ^ r1);
+		std::uniform_int_distribution<uint16_t> dist{ };
+		return dist(generator);
 	}
 
 	uint16_t MemoryPool::MaskMagicNumber(const uint64_t handle)
@@ -248,4 +252,4 @@ namespace fe
 			   static_cast<uint64_t>(chunkIdx) << ChunkIndexOffset |
 			   static_cast<uint64_t>(elementIdx);
 	}
-}
+} // namespace fe

@@ -6,12 +6,14 @@ namespace fe
 	class MemoryChunk;
 
 	/*
+	 * POD 64 bits unsigned integer handle based dynamic memory pool.
 	 * Does not guarantee thread-safety.
 	 * Does not guarantee the invocation of a constructor or destructor. It must be called manually only if necessary.
 	 */
 	class MemoryPool final
 	{
 	public:
+		MemoryPool();
 		MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk);
 		MemoryPool(const MemoryPool&) = delete;
 		MemoryPool(MemoryPool&& other) noexcept;
@@ -27,6 +29,8 @@ namespace fe
 		const uint8_t* GetAddressOf(const uint64_t handle) const;
 
 		bool IsAlive(const uint64_t handle) const;
+
+		bool IsValid() const { return magicNumber != InvalidMagicNumber; }
 
 	private:
 		uint64_t CreateNewHandle(const uint32_t chunkIdx);
@@ -52,6 +56,7 @@ namespace fe
 		static constexpr size_t	  ElementIndexOffset = 0;
 		static constexpr uint32_t MaxNumChunk = 0xffffffff;
 		static constexpr uint16_t MaxNumElement = 0xffff;
+		static constexpr uint16_t InvalidMagicNumber = 0xffff;
 		static constexpr uint64_t InvalidHandle = 0xffffffffffffffffUi64;
 	};
 
@@ -60,4 +65,4 @@ namespace fe
 	{
 		return { sizeof(T), alignof(T), numElementPerChunk, numInitialChunk };
 	}
-}
+} // namespace fe

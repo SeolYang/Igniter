@@ -41,6 +41,11 @@ namespace fe
 		}
 	}
 
+	InputManager::InputManager(HandleManager& handleManager)
+		: handleManager(handleManager)
+	{
+	}
+
 	void InputManager::BindAction(const String nameOfAction, const EInput input)
 	{
 		check(nameOfAction);
@@ -48,7 +53,7 @@ namespace fe
 		inputActionNameMap[input].insert(nameOfAction);
 		if (!actionMap.contains(nameOfAction))
 		{
-			actionMap[nameOfAction] = UniqueHandle<Action>::Create(Engine::GetHandleManager(), nameOfAction);
+			actionMap[nameOfAction] = UniqueHandle<Action>{ handleManager };
 		}
 	}
 
@@ -59,20 +64,20 @@ namespace fe
 		if (!axisMap.contains(nameOfAxis))
 		{
 			inputAxisNameScaleMap[input][nameOfAxis] = scale;
-			axisMap[nameOfAxis] = UniqueHandle<Axis>::Create(Engine::GetHandleManager(), nameOfAxis);
+			axisMap[nameOfAxis] = UniqueHandle<Axis>{ handleManager };
 		}
 	}
 
-	WeakHandle<const Action> InputManager::QueryAction(const String nameOfAction) const
+	WeakHandle<Action> InputManager::QueryAction(const String nameOfAction) const
 	{
 		auto actionMapItr = actionMap.find(nameOfAction);
-		return actionMapItr != actionMap.cend() ? actionMapItr->second.DeriveWeak() : WeakHandle<const Action>{};
+		return actionMapItr != actionMap.cend() ? actionMapItr->second.DeriveWeak() : WeakHandle<Action>{};
 	}
 
-	WeakHandle<const Axis> InputManager::QueryAxis(const String nameOfAxis) const
+	WeakHandle<Axis> InputManager::QueryAxis(const String nameOfAxis) const
 	{
 		auto axisMapItr = axisMap.find(nameOfAxis);
-		return axisMapItr != axisMap.cend() ? axisMapItr->second.DeriveWeak() : WeakHandle<const Axis>{};
+		return axisMapItr != axisMap.cend() ? axisMapItr->second.DeriveWeak() : WeakHandle<Axis>{};
 	}
 
 	float InputManager::QueryScaleOfAxis(const String nameOfAxis, const EInput input) const
@@ -231,7 +236,7 @@ namespace fe
 		{
 			for (const auto& [axisName, axisScale] : inputAxisNameScaleMapItr->second)
 			{
-				WeakHandle<Axis> axis = axisMap[axisName];
+				WeakHandle<Axis> axis = axisMap[axisName].DeriveWeak();
 				axis->Value = value * axisScale;
 			}
 		}

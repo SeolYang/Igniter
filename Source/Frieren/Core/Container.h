@@ -1,7 +1,8 @@
 #pragma once
-#include <queue>
-#include <vector>
 #include <array>
+#include <vector>
+#include <queue>
+#include <unordered_set>
 #include <span>
 #include <optional>
 #include <bitset>
@@ -19,6 +20,8 @@
 
 namespace fe
 {
+	using DefaultCallback = std::function<void()>;
+
 	template <typename IndexType>
 	std::queue<IndexType> CreateIndexQueue(const IndexType numIndices)
 	{

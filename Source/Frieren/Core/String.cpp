@@ -20,7 +20,7 @@ namespace fe
 		{
 			hashOfString = EvalCRC64(stringView);
 
-			WriteLock lock{ hashStringMapMutex };
+			ReadWriteLock lock{ hashStringMapMutex };
 			if (!hashStringMap.contains(hashOfString))
 			{
 				hashStringMap[hashOfString] = stringView;
@@ -61,7 +61,7 @@ namespace fe
 
 	void String::ClearCache()
 	{
-		WriteLock lock{ hashStringMapMutex };
+		ReadWriteLock lock{ hashStringMapMutex };
 		hashStringMap.clear();
 	}
 

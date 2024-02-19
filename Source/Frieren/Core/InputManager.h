@@ -1,7 +1,7 @@
 #pragma once
 #include <Core/String.h>
-#include <Core/HandleManager.h>
 #include <Core/Win32API.h>
+#include <Core/Handle.h>
 
 namespace fe
 {
@@ -49,35 +49,37 @@ namespace fe
 		float Value = 0.0f;
 	};
 
-	// @dependency	fe::Engine, fe::Logger, fe::HandleManager, fe::Window
+	class HandleManager;
 	class InputManager
 	{
+		using NameSet = robin_hood::unordered_set<String>;
+		using InputNameMap = robin_hood::unordered_map<EInput, NameSet>;
+		using ScaleMap = robin_hood::unordered_map<String, float>;
+		using InputNameScaleMap = robin_hood::unordered_map<EInput, ScaleMap>;
+		template <typename T>
+		using EventMap = robin_hood::unordered_map<String, UniqueHandle<T>>;
+
 	public:
-		InputManager() = default;
+		InputManager(HandleManager& handleManager);
 		InputManager(const InputManager&) = delete;
 		InputManager(InputManager&&) noexcept = delete;
 
 		InputManager& operator=(const InputManager&) = delete;
 		InputManager& operator=(InputManager&&) noexcept = delete;
 
-		// @todo HOW TO HANDLE MULTIPLE INPUTS? -> Average of input?, priority? LIFO?
+		// #todo 한번에 여러개의 input이 들어올 때 어떻게 처리하지?
 		void BindAction(String nameOfAction, EInput input);
 		void BindAxis(String nameOfAxis, EInput input, float scale);
 
-		// @todo should i release the input binding?
-		// void ReleaseAction(String nameOfAction)...
+		// #todo UnbindAction/Axis
 
-		// @todo should i release input from action?
-		// void ReleaseInputFromAction(String nameOfAction, EInput key)...
-
-		WeakHandle<const Action> QueryAction(String nameOfAction) const;
-		WeakHandle<const Axis>	 QueryAxis(String nameOfAxis) const;
+		WeakHandle<Action> QueryAction(String nameOfAction) const;
+		WeakHandle<Axis>	 QueryAxis(String nameOfAxis) const;
 		float					 QueryScaleOfAxis(String nameOfAxis, EInput input) const;
 
 		void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);
 
 		void HandleEvent(UINT message, WPARAM wParam, LPARAM lParam);
-
 		void PostUpdate();
 
 	private:
@@ -90,22 +92,17 @@ namespace fe
 		void HandleAxis(EInput input, float value);
 
 	private:
-		using NameSet = robin_hood::unordered_set<String>;
-		using InputNameMap = robin_hood::unordered_map<EInput, NameSet>;
-		using ScaleMap = robin_hood::unordered_map<String, float>;
-		using InputNameScaleMap = robin_hood::unordered_map<EInput, ScaleMap>;
-		template <typename T>
-		using EventMap = robin_hood::unordered_map<String, UniqueHandle<T>>;
+		HandleManager& handleManager;
 
-		InputNameMap	  inputActionNameMap;
-		InputNameScaleMap inputAxisNameScaleMap;
+		InputNameMap	  inputActionNameMap{};
+		InputNameScaleMap inputAxisNameScaleMap{};
 
-		EventMap<Action> actionMap;
-		EventMap<Axis>	 axisMap;
+		EventMap<Action> actionMap{};
+		EventMap<Axis>	 axisMap{};
 
 		float latestMouseX = std::numeric_limits<float>::infinity();
 		float latestMouseY = std::numeric_limits<float>::infinity();
 
-		robin_hood::unordered_set<EInput> preesedInputSet;
+		robin_hood::unordered_set<EInput> preesedInputSet{};
 	};
 } // namespace fe
