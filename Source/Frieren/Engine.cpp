@@ -174,7 +174,7 @@ namespace fe
 				DispatchMessage(&msg);
 			}
 
-			deferredDeallocator->BeginFrame();
+			deferredDeallocator->FlushCurrentFrame();
 
 			gameInstance->Update();
 			inputManager->PostUpdate();
@@ -210,7 +210,7 @@ namespace fe
 		}
 
 		renderer->WaitForFences();
-		deferredDeallocator->ForceClear();
+		deferredDeallocator->FlushAllFrames();
 		logger.Log<EngineInfo>("* End Engine main loop");
 		return 0;
 	}

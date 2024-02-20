@@ -18,11 +18,11 @@ namespace fe
 		DeferredDeallocator& operator=(DeferredDeallocator&&) = delete;
 
 		void RequestDeallocation(DefaultCallback&& requester);
-		void BeginFrame();
-		void ForceClear();
+		void FlushCurrentFrame();
+		void FlushAllFrames();
 
 	private:
-		void BeginFrame(const uint8_t localFrameIdx);
+		void FlushFrame(const uint8_t localFrameIdx);
 
 	private:
 		const FrameManager&															  frameManager;

@@ -10,7 +10,7 @@ namespace fe
 
 	DeferredDeallocator::~DeferredDeallocator()
 	{
-		ForceClear();
+		FlushAllFrames();
 	}
 
 	void DeferredDeallocator::RequestDeallocation(DefaultCallback&& requester)
@@ -19,12 +19,12 @@ namespace fe
 		pendingRequesters[localFrameIdx].push(std::move(requester));
 	}
 
-	void DeferredDeallocator::BeginFrame()
+	void DeferredDeallocator::FlushCurrentFrame()
 	{
-		BeginFrame(frameManager.GetLocalFrameIndex());
+		FlushFrame(frameManager.GetLocalFrameIndex());
 	}
 
-	void DeferredDeallocator::BeginFrame(const uint8_t localFrameIdx)
+	void DeferredDeallocator::FlushFrame(const uint8_t localFrameIdx)
 	{
 		DefaultCallback requester;
 		while (pendingRequesters[localFrameIdx].try_pop(requester))
@@ -34,11 +34,11 @@ namespace fe
 		pendingRequesters[localFrameIdx].clear();
 	}
 
-	void DeferredDeallocator::ForceClear()
+	void DeferredDeallocator::FlushAllFrames()
 	{
 		for (uint8_t frameIdx = 0; frameIdx < NumFramesInFlight; ++frameIdx)
 		{
-			BeginFrame(frameIdx);
+			FlushFrame(frameIdx);
 		}
 	}
 
