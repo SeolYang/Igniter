@@ -8,6 +8,7 @@
 #include <ImGui/ImGuiLayer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <Core/Handle.h>
+#include <Core/Event.h>
 #include <iostream>
 // #test Test for imgui integration
 class TestLayer : public fe::ImGuiLayer
@@ -27,7 +28,7 @@ public:
 int main()
 {
 	// #todo #log 2024/02/19 10:48, GPUView 전부 FrameHandle화
-	int result = 0;
+	 int result = 0;
 	{
 		fe::Engine engine;
 
@@ -49,5 +50,5 @@ int main()
 		result = engine.Execute();
 	}
 
-	return result;
+	 return result;
 }
