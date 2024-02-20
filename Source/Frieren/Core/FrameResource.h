@@ -11,25 +11,25 @@ namespace fe
 	template <typename T>
 	using FrameResource = std::unique_ptr<T, Deleter<T>>;
 
-	class FrameResourceManager;
+	class DeferredDeallocator;
 	namespace Private
 	{
-		void RequestDeallocation(FrameResourceManager& frameResourceManger, DefaultCallback&& requester);
+		void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester);
 	} // namespace Private
 
 	template <typename T, typename... Args>
-	FrameResource<T> MakeFrameResourceCustom(FrameResourceManager& frameResourceManager,
+	FrameResource<T> MakeFrameResourceCustom(DeferredDeallocator& deferredDeallocator,
 											 Deleter<T>			   customDeleter,
 											 Args&&... args)
 	{
 		return FrameResource<T>{ new T(std::forward<Args>(args)...),
-								 [&frameResourceManager, customDeleter](T* ptr) { Private::RequestDeallocation(frameResourceManager, [ptr, customDeleter]() { customDeleter(ptr); }); } };
+								 [&deferredDeallocator, customDeleter](T* ptr) { Private::RequestDeallocation(deferredDeallocator, [ptr, customDeleter]() { customDeleter(ptr); }); } };
 	};
 
 	template <typename T, typename... Args>
-	FrameResource<T> MakeFrameResource(FrameResourceManager& frameResourceManager, Args&&... args)
+	FrameResource<T> MakeFrameResource(DeferredDeallocator& deferredDeallocator, Args&&... args)
 	{
 		return FrameResource<T>{ new T(std::forward<Args>(args)...),
-								 [&frameResourceManager](T* ptr) { Private::RequestDeallocation(frameResourceManager, [ptr]() { delete ptr; }); } };
+								 [&deferredDeallocator](T* ptr) { Private::RequestDeallocation(deferredDeallocator, [ptr]() { delete ptr; }); } };
 	}
 } // namespace fe

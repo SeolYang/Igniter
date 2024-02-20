@@ -27,7 +27,7 @@ namespace fe::dx
 		pool.clear();
 	}
 
-	FrameResource<CommandContext> CommandContextPool::Request(FrameResourceManager& frameResourceManager)
+	FrameResource<CommandContext> CommandContextPool::Request(DeferredDeallocator& deferredDeallocator)
 	{
 		CommandContext* cmdCtxPtr = nullptr;
 		if (!pool.try_pop(cmdCtxPtr))
@@ -36,8 +36,8 @@ namespace fe::dx
 		}
 
 		return { cmdCtxPtr,
-				 [&frameResourceManager, this](CommandContext* ptr) {
-					 Private::RequestDeallocation(frameResourceManager, [ptr, this]() { this->Return(ptr); });
+				 [&deferredDeallocator, this](CommandContext* ptr) {
+					 Private::RequestDeallocation(deferredDeallocator, [ptr, this]() { this->Return(ptr); });
 				 } };
 	}
 

@@ -7,11 +7,11 @@
 
 namespace fe::dx
 {
-	Swapchain::Swapchain(const Window& window, Device& device, FrameResourceManager& frameResourceManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers)
+	Swapchain::Swapchain(const Window& window, Device& device, DeferredDeallocator& deferredDeallocator, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers)
 		: numBackBuffers(desiredNumBackBuffers)
 	{
 		InitSwapchain(window, directCmdQueue);
-		InitRenderTargetViews(device, frameResourceManager);
+		InitRenderTargetViews(device, deferredDeallocator);
 	}
 
 	Swapchain::~Swapchain()
@@ -82,7 +82,7 @@ namespace fe::dx
 		}
 	}
 
-	void Swapchain::InitRenderTargetViews(Device& device, FrameResourceManager& frameResourceManager)
+	void Swapchain::InitRenderTargetViews(Device& device, DeferredDeallocator& deferredDeallocator)
 	{
 		renderTargetViews.reserve(numBackBuffers);
 		backBuffers.reserve(numBackBuffers);
@@ -93,7 +93,7 @@ namespace fe::dx
 			SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
 			backBuffers.emplace_back(GPUTexture(resource));
 
-			FrameResource<GPUView> rtv = device.CreateRenderTargetView(frameResourceManager, backBuffers[idx], {});
+			FrameResource<GPUView> rtv = device.CreateRenderTargetView(deferredDeallocator, backBuffers[idx], {});
 			check(rtv);
 			renderTargetViews.emplace_back(std::move(rtv));
 		}

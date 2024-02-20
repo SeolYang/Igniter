@@ -56,7 +56,7 @@ namespace fe::dx
 				   : gpuDescriptorHandleForHeapStart;
 	}
 
-	FrameResource<GPUView> DescriptorHeap::Request(FrameResourceManager& frameResourceManager, const EDescriptorType desiredType)
+	FrameResource<GPUView> DescriptorHeap::Request(DeferredDeallocator& deferredDeallocator, const EDescriptorType desiredType)
 	{
 		check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
 			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (desiredType == EDescriptorType::ConstantBufferView ||
@@ -79,7 +79,7 @@ namespace fe::dx
 		}
 
 		return MakeFrameResourceCustom<GPUView>(
-			frameResourceManager,
+			deferredDeallocator,
 			[this](GPUView* ptr) { check(ptr && ptr->IsValid());  this->Release(ptr->Index); delete ptr; },
 			GPUView{ desiredType, newDescriptorIdx, GetIndexedCPUDescriptorHandle(newDescriptorIdx), GetIndexedGPUDescriptorHandle(newDescriptorIdx) });
 	}

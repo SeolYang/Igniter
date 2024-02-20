@@ -500,7 +500,7 @@ namespace fe::dx
 		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
-	FrameResource<GPUView> Device::CreateConstantBufferView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer)
+	FrameResource<GPUView> Device::CreateConstantBufferView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer)
 	{
 		check(gpuBuffer);
 		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
@@ -510,7 +510,7 @@ namespace fe::dx
 		if (cbvDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newCbv = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::ConstantBufferView);
+			newCbv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::ConstantBufferView);
 
 			check(newCbv && newCbv->IsValid());
 			check(newCbv->HasValidCPUHandle());
@@ -522,7 +522,7 @@ namespace fe::dx
 		return newCbv;
 	}
 
-	FrameResource<GPUView> Device::CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer)
+	FrameResource<GPUView> Device::CreateShaderResourceView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer)
 	{
 		check(gpuBuffer);
 		const GPUBufferDesc&						   desc = gpuBuffer.GetDesc();
@@ -532,7 +532,7 @@ namespace fe::dx
 		if (srvDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newSrv = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::ShaderResourceView);
+			newSrv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::ShaderResourceView);
 
 			check(newSrv && newSrv->IsValid());
 			check(newSrv->HasValidCPUHandle());
@@ -543,7 +543,7 @@ namespace fe::dx
 		return newSrv;
 	}
 
-	FrameResource<GPUView> Device::CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer)
+	FrameResource<GPUView> Device::CreateUnorderedAccessView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer)
 	{
 		check(gpuBuffer);
 		const GPUBufferDesc&							desc = gpuBuffer.GetDesc();
@@ -553,7 +553,7 @@ namespace fe::dx
 		if (uavDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newUav = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::UnorderedAccessView);
+			newUav = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::UnorderedAccessView);
 
 			check(newUav && newUav->IsValid());
 			check(newUav->HasValidCPUHandle());
@@ -564,7 +564,7 @@ namespace fe::dx
 		return newUav;
 	}
 
-	FrameResource<GPUView> Device::CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateShaderResourceView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
 	{
 		check(gpuTexture);
 		const GPUTextureDesc&						   desc = gpuTexture.GetDesc();
@@ -574,7 +574,7 @@ namespace fe::dx
 		if (srvDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newSrv = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::ShaderResourceView);
+			newSrv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::ShaderResourceView);
 
 			check(newSrv && newSrv->IsValid());
 			check(newSrv->HasValidCPUHandle());
@@ -585,7 +585,7 @@ namespace fe::dx
 		return newSrv;
 	}
 
-	FrameResource<GPUView> Device::CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateUnorderedAccessView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
 	{
 		check(gpuTexture);
 		const GPUTextureDesc&							desc = gpuTexture.GetDesc();
@@ -595,7 +595,7 @@ namespace fe::dx
 		if (uavDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newUav = cbvSrvUavDescriptorHeap->Request(frameResourceManager, EDescriptorType::UnorderedAccessView);
+			newUav = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::UnorderedAccessView);
 
 			check(newUav && newUav->IsValid());
 			check(newUav->HasValidCPUHandle());
@@ -606,7 +606,7 @@ namespace fe::dx
 		return newUav;
 	}
 
-	FrameResource<GPUView> Device::CreateRenderTargetView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateRenderTargetView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
 	{
 		check(gpuTexture);
 		const GPUTextureDesc&						 desc = gpuTexture.GetDesc();
@@ -616,7 +616,7 @@ namespace fe::dx
 		if (rtvDesc)
 		{
 			check(rtvDescriptorHeap);
-			newRtv = rtvDescriptorHeap->Request(frameResourceManager, EDescriptorType::RenderTargetView);
+			newRtv = rtvDescriptorHeap->Request(deferredDeallocator, EDescriptorType::RenderTargetView);
 
 			check(newRtv && newRtv->IsValid());
 			check(newRtv->HasValidCPUHandle());
@@ -627,7 +627,7 @@ namespace fe::dx
 		return newRtv;
 	}
 
-	FrameResource<GPUView> Device::CreateDepthStencilView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	FrameResource<GPUView> Device::CreateDepthStencilView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
 	{
 		check(gpuTexture);
 		const GPUTextureDesc&						 desc = gpuTexture.GetDesc();
@@ -637,7 +637,7 @@ namespace fe::dx
 		if (dsvDesc)
 		{
 			check(dsvDescriptorHeap);
-			newDsv = dsvDescriptorHeap->Request(frameResourceManager, EDescriptorType::DepthStencilView);
+			newDsv = dsvDescriptorHeap->Request(deferredDeallocator, EDescriptorType::DepthStencilView);
 
 			check(newDsv && newDsv->IsValid());
 			check(newDsv->HasValidCPUHandle());

@@ -47,13 +47,13 @@ namespace fe::dx
 
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
-		FrameResource<GPUView> CreateConstantBufferView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer);
-		FrameResource<GPUView> CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer);
-		FrameResource<GPUView> CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUBuffer& gpuBuffer);
-		FrameResource<GPUView> CreateShaderResourceView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		FrameResource<GPUView> CreateUnorderedAccessView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		FrameResource<GPUView> CreateRenderTargetView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		FrameResource<GPUView> CreateDepthStencilView(FrameResourceManager& frameResourceManager, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateConstantBufferView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer);
+		FrameResource<GPUView> CreateShaderResourceView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer);
+		FrameResource<GPUView> CreateUnorderedAccessView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer);
+		FrameResource<GPUView> CreateShaderResourceView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateUnorderedAccessView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateRenderTargetView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		FrameResource<GPUView> CreateDepthStencilView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 
 	private:
 		bool AcquireAdapterFromFactory();

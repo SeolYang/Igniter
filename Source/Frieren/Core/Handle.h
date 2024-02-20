@@ -5,10 +5,10 @@
 
 namespace fe
 {
-	class FrameResourceManager;
+	class DeferredDeallocator;
 	namespace Private
 	{
-		void RequestDeallocation(FrameResourceManager& frameResourceManger, DefaultCallback&& requester);
+		void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester);
 	} // namespace Private
 
 	template <typename T>
@@ -223,8 +223,8 @@ namespace fe
 		}
 
 		template <typename... Args>
-		FrameHandle(FrameResourceManager& frameResourceManager, HandleManager& handleManager, Args&&... args)
-			: frameResourceManager(frameResourceManager), handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
+		FrameHandle(DeferredDeallocator& deferredDeallocator, HandleManager& handleManager, Args&&... args)
+			: deferredDeallocator(deferredDeallocator), handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
 		{
 			check(IsValid());
 			T* instancePtr = reinterpret_cast<T*>(GetAddressOf(EvaluatedTypeHashVal));
@@ -285,7 +285,7 @@ namespace fe
 			if (IsValid())
 			{
 				handle.RequestDeferredDeallocation(EvaluatedTypeHashVal);
-				Private::RequestDeallocation(frameResourceManager,
+				Private::RequestDeallocation(deferredDeallocator,
 											 [handle]() {
 												 check(handle.IsAlive(EvaluatedTypeHashVal));
 												 T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
@@ -305,7 +305,7 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		FrameResourceManager& frameResourceManager;
-		HandleImpl			  handle;
+		DeferredDeallocator& deferredDeallocator;
+		HandleImpl			 handle;
 	};
 } // namespace fe

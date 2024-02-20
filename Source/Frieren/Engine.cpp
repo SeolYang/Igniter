@@ -34,9 +34,9 @@ namespace fe
 			window = std::make_unique<Window>(windowDesc);
 			renderDevice = std::make_unique<dx::Device>();
 			handleManager = std::make_unique<HandleManager>();
-			frameResourceManager = std::make_unique<FrameResourceManager>(frameManager);
+			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
 			inputManager = std::make_unique<InputManager>(*handleManager);
-			renderer = std::make_unique<Renderer>(frameManager, *frameResourceManager, *window, *renderDevice);
+			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice);
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
 			gameInstance = std::make_unique<GameInstance>();
@@ -52,7 +52,7 @@ namespace fe
 		imguiRenderer.reset();
 		renderer.reset();
 		inputManager.reset();
-		frameResourceManager.reset();
+		deferredDeallocator.reset();
 		handleManager.reset();
 		renderDevice.reset();
 		window.reset();
@@ -148,7 +148,7 @@ namespace fe
 			inputManager->PostUpdate();
 
 			renderer->BeginFrame();
-			frameResourceManager->BeginFrame();
+			deferredDeallocator->BeginFrame();
 
 			renderer->Render();
 			imguiRenderer->Render(*imguiCanvas, *renderer);
@@ -160,7 +160,7 @@ namespace fe
 		}
 
 		renderer->WaitForFences();
-		frameResourceManager->ForceClear();
+		deferredDeallocator->ForceClear();
 		logger.Log<EngineInfo>("* End Engine main loop");
 		return 0;
 	}

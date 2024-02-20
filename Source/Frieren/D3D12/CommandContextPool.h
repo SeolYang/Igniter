@@ -12,7 +12,7 @@ namespace fe::dx
 		CommandContextPool(dx::Device& device, const dx::EQueueType queueType);
 		~CommandContextPool();
 
-		FrameResource<dx::CommandContext> Request(FrameResourceManager& frameResourceManager);
+		FrameResource<dx::CommandContext> Request(DeferredDeallocator& deferredDeallocator);
 
 	private:
 		void Return(dx::CommandContext* cmdContext);

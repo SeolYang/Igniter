@@ -34,8 +34,8 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
 	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
 
-	Renderer::Renderer(const FrameManager& engineFrameManager, FrameResourceManager& frameResourceManager, Window& window, dx::Device& device)
-		: frameManager(engineFrameManager), frameResourceManager(frameResourceManager), renderDevice(device), directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())), directCmdCtxPool(std::make_unique<dx::CommandContextPool>(device, dx::EQueueType::Direct)), swapchain(std::make_unique<dx::Swapchain>(window, device, frameResourceManager, *directCmdQueue, NumFramesInFlight))
+	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device)
+		: frameManager(engineFrameManager), deferredDeallocator(engineDefferedDeallocator), renderDevice(device), directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())), directCmdCtxPool(std::make_unique<dx::CommandContextPool>(device, dx::EQueueType::Direct)), swapchain(std::make_unique<dx::Swapchain>(window, device, deferredDeallocator, *directCmdQueue, NumFramesInFlight))
 	{
 		frameFences.reserve(NumFramesInFlight);
 		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
@@ -121,7 +121,7 @@ namespace fe
 		depthStencilDesc.DebugName = String("DepthStencilBufferTex");
 		depthStencilDesc.AsDepthStencil(1280, 642, DXGI_FORMAT_D32_FLOAT);
 		depthStencilBuffer = std::make_unique<dx::GPUTexture>(device.CreateTexture(depthStencilDesc).value());
-		dsv = device.CreateDepthStencilView(frameResourceManager, *depthStencilBuffer, { .MipSlice = 0 });
+		dsv = device.CreateDepthStencilView(deferredDeallocator, *depthStencilBuffer, { .MipSlice = 0 });
 
 		uploadCtx.Begin();
 		uploadCtx.AddPendingBufferBarrier(
@@ -196,7 +196,7 @@ namespace fe
 		// 이 때, frame fences의 signal은 present 직전에 back buffer에 그리기 직전에 수행하는 것이 좋을 것 같음.
 		check(directCmdQueue);
 		check(directCmdCtxPool);
-		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(frameResourceManager);
+		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(deferredDeallocator);
 		renderCmdCtx->Begin(pso.get());
 		{
 			auto bindlessDescriptorHeaps = renderDevice.GetBindlessDescriptorHeaps();
@@ -232,7 +232,7 @@ namespace fe
 		check(directCmdQueue);
 		check(directCmdCtxPool);
 
-		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(frameResourceManager);
+		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(deferredDeallocator);
 		renderCmdCtx->Begin(pso.get());
 		{
 			auto bindlessDescriptorHeaps = renderDevice.GetBindlessDescriptorHeaps();

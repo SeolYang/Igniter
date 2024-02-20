@@ -17,7 +17,7 @@ namespace fe
 	class HandleManager;
 	class Window;
 	class InputManager;
-	class FrameResourceManager;
+	class DeferredDeallocator;
 	class Renderer;
 	class GameInstance;
 	class ImGuiCanvas;
@@ -51,7 +51,7 @@ namespace fe
 		std::unique_ptr<Window>				  window;
 		std::unique_ptr<dx::Device>			  renderDevice;
 		std::unique_ptr<HandleManager>		  handleManager;
-		std::unique_ptr<FrameResourceManager> frameResourceManager;
+		std::unique_ptr<DeferredDeallocator>  deferredDeallocator;
 		std::unique_ptr<InputManager>		  inputManager;
 		std::unique_ptr<Renderer>			  renderer;
 		std::unique_ptr<ImGuiRenderer>		  imguiRenderer;

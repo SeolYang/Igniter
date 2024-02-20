@@ -3,8 +3,8 @@
 
 namespace fe::Private
 {
-	void RequestDeallocation(FrameResourceManager& frameResourceManger, DefaultCallback&& requester)
+	void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester)
 	{
-		frameResourceManger.RequestDeallocation(std::move(requester));
+		deferredDeallocator.RequestDeallocation(std::move(requester));
 	}
 } // namespace fe::Private

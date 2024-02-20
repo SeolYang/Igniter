@@ -3,28 +3,28 @@
 
 namespace fe
 {
-	FrameResourceManager::FrameResourceManager(const FrameManager& engineFrameManager)
+	DeferredDeallocator::DeferredDeallocator(const FrameManager& engineFrameManager)
 		: frameManager(engineFrameManager)
 	{
 	}
 
-	FrameResourceManager::~FrameResourceManager()
+	DeferredDeallocator::~DeferredDeallocator()
 	{
 		ForceClear();
 	}
 
-	void FrameResourceManager::RequestDeallocation(DefaultCallback&& requester)
+	void DeferredDeallocator::RequestDeallocation(DefaultCallback&& requester)
 	{
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 		pendingRequesters[localFrameIdx].push(std::move(requester));
 	}
 
-	void FrameResourceManager::BeginFrame()
+	void DeferredDeallocator::BeginFrame()
 	{
 		BeginFrame(frameManager.GetLocalFrameIndex());
 	}
 
-	void FrameResourceManager::BeginFrame(const uint8_t localFrameIdx)
+	void DeferredDeallocator::BeginFrame(const uint8_t localFrameIdx)
 	{
 		DefaultCallback requester;
 		while (pendingRequesters[localFrameIdx].try_pop(requester))
@@ -34,7 +34,7 @@ namespace fe
 		pendingRequesters[localFrameIdx].clear();
 	}
 
-	void FrameResourceManager::ForceClear()
+	void DeferredDeallocator::ForceClear()
 	{
 		for (uint8_t frameIdx = 0; frameIdx < NumFramesInFlight; ++frameIdx)
 		{

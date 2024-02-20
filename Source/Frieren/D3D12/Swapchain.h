@@ -6,7 +6,7 @@
 namespace fe
 {
 	class Window;
-	class FrameResourceManager;
+	class DeferredDeallocator;
 } // namespace fe
 
 namespace fe::dx
@@ -19,7 +19,7 @@ namespace fe::dx
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, Device& device, FrameResourceManager& frameResourceManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
+		Swapchain(const Window& window, Device& device, DeferredDeallocator& deferredDeallocator, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
 		~Swapchain();
 
 		bool			  IsTearingSupport() const { return bIsTearingSupport; }
@@ -37,7 +37,7 @@ namespace fe::dx
 	private:
 		void InitSwapchain(const Window& window, CommandQueue& directCmdQueue);
 		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
-		void InitRenderTargetViews(Device& device, FrameResourceManager& frameResourceManager);
+		void InitRenderTargetViews(Device& device, DeferredDeallocator& deferredDeallocator);
 
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;

@@ -6,16 +6,16 @@
 namespace fe
 {
 	// Handle의 Frame Resource 대신 (FrameResource<Handle>...), Frame Resource의 Handle을 사용 할 것 (Handle<FrameResource>).
-	class FrameResourceManager final
+	class DeferredDeallocator final
 	{
 	public:
-		FrameResourceManager(const FrameManager& engineFrameManager);
-		FrameResourceManager(const FrameResourceManager&) = delete;
-		FrameResourceManager(FrameResourceManager&&) noexcept = delete;
-		~FrameResourceManager();
+		DeferredDeallocator(const FrameManager& engineFrameManager);
+		DeferredDeallocator(const DeferredDeallocator&) = delete;
+		DeferredDeallocator(DeferredDeallocator&&) noexcept = delete;
+		~DeferredDeallocator();
 
-		FrameResourceManager& operator=(const FrameResourceManager&) = delete;
-		FrameResourceManager& operator=(FrameResourceManager&&) = delete;
+		DeferredDeallocator&  operator=(const DeferredDeallocator&) = delete;
+		DeferredDeallocator& operator=(DeferredDeallocator&&) = delete;
 
 		void RequestDeallocation(DefaultCallback&& requester);
 		void BeginFrame();

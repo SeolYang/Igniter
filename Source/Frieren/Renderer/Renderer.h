@@ -27,11 +27,11 @@ namespace fe
 {
 	class Window;
 	class World;
-	class FrameResourceManager;
+	class DeferredDeallocator;
 	class Renderer
 	{
 	public:
-		Renderer(const FrameManager& engineFrameManager, FrameResourceManager& frameResourceManager, Window& window, dx::Device& device);
+		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
 		~Renderer();
@@ -50,7 +50,7 @@ namespace fe
 
 	private:
 		const FrameManager&						frameManager;
-		FrameResourceManager&					frameResourceManager;
+		DeferredDeallocator&					deferredDeallocator;
 		dx::Device&								renderDevice;
 		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
 		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
