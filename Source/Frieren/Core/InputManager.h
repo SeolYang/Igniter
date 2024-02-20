@@ -42,11 +42,18 @@ namespace fe
 
 	public:
 		EInputState State = EInputState::None;
+
+	private:
+		float pad = 0.f;
 	};
 
 	struct Axis
 	{
+	public:
 		float Value = 0.0f;
+
+	private:
+		float pad = 0.f;
 	};
 
 	class HandleManager;
@@ -74,8 +81,8 @@ namespace fe
 		// #todo UnbindAction/Axis
 
 		WeakHandle<Action> QueryAction(String nameOfAction) const;
-		WeakHandle<Axis>	 QueryAxis(String nameOfAxis) const;
-		float					 QueryScaleOfAxis(String nameOfAxis, EInput input) const;
+		WeakHandle<Axis>   QueryAxis(String nameOfAxis) const;
+		float			   QueryScaleOfAxis(String nameOfAxis, EInput input) const;
 
 		void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);
 

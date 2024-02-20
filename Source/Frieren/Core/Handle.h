@@ -11,16 +11,19 @@ namespace fe
 		void RequestDeallocation(FrameResourceManager& frameResourceManger, DefaultCallback&& requester);
 	} // namespace Private
 
+	template <typename T>
+	concept HandleDataType = sizeof(T) >= sizeof(uint64_t);
+
 	class HandleManager;
 	class HandleImpl
 	{
-		template <typename T>
+		template <HandleDataType T>
 		friend class WeakHandle;
 
-		template <typename T>
+		template <HandleDataType T>
 		friend class UniqueHandle;
 
-		template <typename T>
+		template <HandleDataType T>
 		friend class FrameHandle;
 
 	public:
@@ -53,7 +56,7 @@ namespace fe
 		uint64_t	   handle = InvalidHandle;
 	};
 
-	template <typename T>
+	template <HandleDataType T>
 	class WeakHandle
 	{
 	public:
@@ -113,7 +116,7 @@ namespace fe
 		HandleImpl handle{};
 	};
 
-	template <typename T>
+	template <HandleDataType T>
 	class UniqueHandle
 	{
 	public:
@@ -208,7 +211,7 @@ namespace fe
 		HandleImpl handle;
 	};
 
-	template <typename T>
+	template <HandleDataType T>
 	class FrameHandle
 	{
 	public:

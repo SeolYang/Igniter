@@ -6,58 +6,6 @@
 
 namespace fe
 {
-	class MemoryChunk final
-	{
-	public:
-		MemoryChunk(const size_t sizeOfChunk, const size_t alignment)
-			: size(sizeOfChunk), chunk(reinterpret_cast<uint8_t*>(_aligned_malloc(sizeOfChunk, alignment)))
-		{
-			check(size > 0);
-			check(alignment > 0 && IsPowOf2(alignment));
-			check((size % alignment) == 0);
-			check(chunk != nullptr);
-		}
-
-		MemoryChunk(MemoryChunk&& other) noexcept
-			: chunk(std::exchange(other.chunk, nullptr)), size(other.size)
-		{
-		}
-
-		~MemoryChunk()
-		{
-			if (chunk != nullptr)
-			{
-				_aligned_free(reinterpret_cast<void*>(chunk));
-			}
-		}
-
-		MemoryChunk(const MemoryChunk&) = delete;
-		MemoryChunk& operator=(const MemoryChunk&) = delete;
-		MemoryChunk& operator=(MemoryChunk&&) noexcept = delete;
-
-		size_t GetSize() const
-		{
-			return size;
-		}
-
-		uint8_t* GetAddress(const size_t offset = 0)
-		{
-			check(chunk != nullptr);
-			check(offset < size);
-			return chunk + offset;
-		}
-
-		const uint8_t* GetAddress(const size_t offset = 0) const
-		{
-			check(chunk != nullptr);
-			check(offset < size);
-			return chunk + offset;
-		}
-
-	private:
-		uint8_t*	 chunk = nullptr;
-		const size_t size;
-	};
 
 	MemoryPool::MemoryPool()
 		: sizeOfElement(0), alignOfElement(0), numInitialElementPerChunk(0), magicNumber(InvalidMagicNumber)
@@ -67,6 +15,7 @@ namespace fe
 	MemoryPool::MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk)
 		: sizeOfElement(newSizeOfElement), alignOfElement(newAlignOfElement), numInitialElementPerChunk(numElementPerChunk), magicNumber(GenerateMagicNumber())
 	{
+		check(sizeOfElement >= sizeof(uint64_t) && "The size of element must be at least sizeof(uint64_t) due to 'a element aliveness ensuring mechanism'.");
 		check(numElementPerChunk > 0);
 		check(numInitialChunk > 0);
 		chunks.reserve(numInitialChunk);
@@ -78,13 +27,13 @@ namespace fe
 	}
 
 	MemoryPool::MemoryPool(MemoryPool&& other) noexcept
-		: sizeOfElement(std::exchange(other.sizeOfElement, 0)), alignOfElement(std::exchange(other.alignOfElement, 0)), numInitialElementPerChunk(std::exchange(other.numInitialElementPerChunk, 0Ui16)), magicNumber(std::exchange(other.magicNumber, InvalidMagicNumber)), chunks(std::move(other.chunks)), pool(std::move(other.pool)), used(std::move(other.used))
+		: sizeOfElement(std::exchange(other.sizeOfElement, 0)), alignOfElement(std::exchange(other.alignOfElement, 0)), numInitialElementPerChunk(std::exchange(other.numInitialElementPerChunk, 0Ui16)), magicNumber(std::exchange(other.magicNumber, InvalidMagicNumber)), chunks(std::move(other.chunks)), pool(std::move(other.pool))
 	{
 	}
 
 	MemoryPool::~MemoryPool()
 	{
-		check((magicNumber == InvalidMagicNumber) || IsFull() && used.empty());
+		check((magicNumber == InvalidMagicNumber) || IsFull());
 	}
 
 	uint64_t MemoryPool::Allocate()
@@ -97,8 +46,18 @@ namespace fe
 
 		const uint64_t newHandle = pool.front();
 		pool.pop();
-		check(newHandle != InvalidHandle && !used.contains(newHandle));
-		used.insert(newHandle);
+
+		uint64_t* handleInUseFlagPtr = GetHandleInUseFlagPtr(newHandle);
+		if (handleInUseFlagPtr != nullptr && (*handleInUseFlagPtr == HandleCurrentlyNotInUseFlag))
+		{
+			*handleInUseFlagPtr = 0;
+		}
+		else
+		{
+			checkNoEntry();
+			return InvalidHandle;
+		}
+
 		return newHandle;
 	}
 
@@ -106,44 +65,12 @@ namespace fe
 	{
 		if (IsAlive(handle))
 		{
-			check(handle != InvalidHandle);
 			pool.push(handle);
-			used.erase(handle);
 		}
 		else
 		{
 			checkNoEntry();
 		}
-	}
-
-	uint8_t* MemoryPool::GetAddressOf(const uint64_t handle)
-	{
-		check(IsAlive(handle));
-
-		const uint32_t chunkIdx = MaskChunkIndex(handle);
-		const uint16_t elementIdx = MaskElementIndex(handle);
-		if (chunkIdx < chunks.size() && elementIdx < numInitialElementPerChunk)
-		{
-			return chunks[chunkIdx].GetAddress(elementIdx * sizeOfElement);
-		}
-
-		checkNoEntry();
-		return nullptr;
-	}
-
-	const uint8_t* MemoryPool::GetAddressOf(const uint64_t handle) const
-	{
-		check(IsAlive(handle));
-
-		const uint32_t chunkIdx = MaskChunkIndex(handle);
-		const uint16_t elementIdx = MaskElementIndex(handle);
-		if (chunkIdx < chunks.size() && elementIdx < numInitialElementPerChunk)
-		{
-			return chunks[chunkIdx].GetAddress(elementIdx * sizeOfElement);
-		}
-
-		checkNoEntry();
-		return nullptr;
 	}
 
 	bool MemoryPool::IsFull() const
@@ -159,13 +86,17 @@ namespace fe
 			chunks.emplace_back(sizeOfElement * numInitialElementPerChunk, alignOfElement);
 			for (uint16_t elementIdx = 0; elementIdx < numInitialElementPerChunk; ++elementIdx)
 			{
-				pool.push(MakeHandle(magicNumber, newChunkIdx, elementIdx));
+				const uint64_t newHandle = MakeHandle(magicNumber, newChunkIdx, elementIdx);
+				check(newHandle != InvalidHandle);
+				pool.push(newHandle);
+
+				uint64_t* handleInUseFlagPtr = GetHandleInUseFlagPtr(newHandle);
+				*handleInUseFlagPtr = HandleCurrentlyNotInUseFlag;
 			}
 
 			return true;
 		}
 
-		checkNoEntry();
 		return false;
 	}
 
@@ -174,27 +105,5 @@ namespace fe
 		static std::mt19937_64					generator{ std::random_device{}() };
 		std::uniform_int_distribution<uint16_t> dist{};
 		return dist(generator);
-	}
-
-	uint16_t MemoryPool::MaskMagicNumber(const uint64_t handle)
-	{
-		return static_cast<uint16_t>(handle >> MagicNumberOffset);
-	}
-
-	uint32_t MemoryPool::MaskChunkIndex(const uint64_t handle)
-	{
-		return static_cast<uint32_t>((handle >> ChunkIndexOffset) & 0xffffffffUi64);
-	}
-
-	uint16_t MemoryPool::MaskElementIndex(const uint64_t handle)
-	{
-		return static_cast<uint16_t>(handle & 0xffffUi64);
-	}
-
-	uint64_t MemoryPool::MakeHandle(const uint16_t magicNumber, const uint32_t chunkIdx, const uint32_t elementIdx)
-	{
-		return static_cast<uint64_t>(magicNumber) << MagicNumberOffset |
-			   static_cast<uint64_t>(chunkIdx) << ChunkIndexOffset |
-			   static_cast<uint64_t>(elementIdx);
 	}
 } // namespace fe
