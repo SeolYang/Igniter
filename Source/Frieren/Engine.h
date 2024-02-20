@@ -4,7 +4,6 @@
 #include <Core/FrameManager.h>
 #include <Core/Timer.h>
 #include <Core/Log.h>
-#include <Core/Handle.h>
 
 namespace fe::dx
 {
@@ -13,8 +12,6 @@ namespace fe::dx
 
 namespace fe
 {
-	// #test FrameHandle 테스트
-	class FrameHandleTestClass;
 	class Timer;
 	class Logger;
 	class HandleManager;
@@ -61,7 +58,5 @@ namespace fe
 		std::unique_ptr<ImGuiCanvas>		 imguiCanvas;
 		std::unique_ptr<GameInstance>		 gameInstance;
 
-		// #test	FrameHandle 테스트
-		FrameHandle<FrameHandleTestClass> frameHandle;
 	};
 } // namespace fe
