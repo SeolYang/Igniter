@@ -65,7 +65,6 @@ namespace fe
 
 	private:
 		bool IsFull() const;
-
 		bool CreateNewChunk();
 
 		static uint16_t MaskMagicNumber(const uint64_t handle) { return static_cast<uint16_t>(handle >> MagicNumberOffset); }
