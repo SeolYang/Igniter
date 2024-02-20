@@ -31,6 +31,10 @@ namespace fe
 	MemoryPool::~MemoryPool()
 	{
 		check((magicNumber == InvalidMagicNumber) || IsFull());
+		for (uint8_t* chunk : chunks)
+		{
+			_aligned_free(chunk);
+		}
 	}
 
 	uint64_t MemoryPool::Allocate()
@@ -80,7 +84,7 @@ namespace fe
 		if (chunks.size() + 1 != MaxNumChunk)
 		{
 			const uint32_t newChunkIdx = static_cast<uint32_t>(chunks.size());
-			chunks.emplace_back(sizeOfElement * numInitialElementPerChunk, alignOfElement);
+			chunks.emplace_back(reinterpret_cast<uint8_t*>(_aligned_malloc(sizeOfElement * numInitialElementPerChunk, alignOfElement)));
 			for (uint16_t elementIdx = 0; elementIdx < numInitialElementPerChunk; ++elementIdx)
 			{
 				const uint64_t newHandle = MakeHandle(magicNumber, newChunkIdx, elementIdx);

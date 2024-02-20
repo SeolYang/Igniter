@@ -5,59 +5,6 @@
 
 namespace fe
 {
-	class MemoryChunk final
-	{
-	public:
-		MemoryChunk(const size_t sizeOfChunk, const size_t alignment)
-			: size(sizeOfChunk), chunk(reinterpret_cast<uint8_t*>(_aligned_malloc(sizeOfChunk, alignment)))
-		{
-			check(size > 0);
-			check(alignment > 0 && IsPowOf2(alignment));
-			check((size % alignment) == 0);
-			check(chunk != nullptr);
-		}
-
-		MemoryChunk(MemoryChunk&& other) noexcept
-			: chunk(std::exchange(other.chunk, nullptr)), size(other.size)
-		{
-		}
-
-		~MemoryChunk()
-		{
-			if (chunk != nullptr)
-			{
-				_aligned_free(reinterpret_cast<void*>(chunk));
-			}
-		}
-
-		MemoryChunk(const MemoryChunk&) = delete;
-		MemoryChunk& operator=(const MemoryChunk&) = delete;
-		MemoryChunk& operator=(MemoryChunk&&) noexcept = delete;
-
-		size_t GetSize() const
-		{
-			return size;
-		}
-
-		uint8_t* GetAddress(const size_t offset = 0)
-		{
-			check(chunk != nullptr);
-			check(offset < size);
-			return chunk + offset;
-		}
-
-		const uint8_t* GetAddress(const size_t offset = 0) const
-		{
-			check(chunk != nullptr);
-			check(offset < size);
-			return chunk + offset;
-		}
-
-	private:
-		uint8_t*	 chunk = nullptr;
-		const size_t size;
-	};
-
 	/*
 	 * POD 64 bits unsigned integer handle based dynamic memory pool.
 	 * Does not guarantee thread-safety.
@@ -93,12 +40,14 @@ namespace fe
 
 		uint8_t* GetAddressOf(const uint64_t handle)
 		{
-			return IsValid(handle) ? chunks[MaskChunkIndex(handle)].GetAddress(GetElementOffset(MaskElementIndex(handle))) : nullptr;
+			return IsValid(handle) ? (chunks[MaskChunkIndex(handle)] + GetElementOffset(MaskElementIndex(handle)))
+				: nullptr;
 		}
 
 		const uint8_t* GetAddressOf(const uint64_t handle) const
 		{
-			return IsValid(handle) ? chunks[MaskChunkIndex(handle)].GetAddress(GetElementOffset(MaskElementIndex(handle))) : nullptr;
+			return IsValid(handle) ? (chunks[MaskChunkIndex(handle)] + GetElementOffset(MaskElementIndex(handle)))
+				: nullptr;
 		}
 
 		bool IsValid(const uint64_t handle) const
@@ -135,12 +84,12 @@ namespace fe
 		const uint64_t* GetHandleInUseFlagPtr(const uint64_t handle) const { return reinterpret_cast<const uint64_t*>(GetAddressOf(handle)); }
 
 	private:
-		size_t								sizeOfElement;
-		size_t								alignOfElement;
-		uint16_t							numInitialElementPerChunk;
-		uint16_t							magicNumber;
-		std::vector<MemoryChunk>			chunks;
-		std::queue<uint64_t>				pool;
+		size_t					 sizeOfElement;
+		size_t					 alignOfElement;
+		uint16_t				 numInitialElementPerChunk;
+		uint16_t				 magicNumber;
+		std::vector<uint8_t*>	 chunks;
+		std::queue<uint64_t>	 pool;
 
 		static constexpr size_t	  MagicNumberOffset = 48;
 		static constexpr size_t	  ChunkIndexOffset = 16;

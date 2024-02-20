@@ -1,5 +1,5 @@
 #include <Core/FrameResource.h>
-#include <Core/FrameResourceManager.h>
+#include <Core/DeferredDeallocator.h>
 
 namespace fe::Private
 {

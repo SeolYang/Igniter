@@ -7,7 +7,8 @@
 #include <BasicGameFlow.h>
 #include <ImGui/ImGuiLayer.h>
 #include <ImGui/ImGuiCanvas.h>
-
+#include <Core/Handle.h>
+#include <iostream>
 // #test Test for imgui integration
 class TestLayer : public fe::ImGuiLayer
 {
@@ -29,6 +30,22 @@ int main()
 	int result = 0;
 	{
 		fe::Engine engine;
+
+		auto& hm = engine.GetHandleManager();
+
+		constexpr size_t Iters = 10000000;
+		std::vector<fe::UniqueHandle<uint64_t>> handles;
+		handles.reserve(Iters);
+
+		namespace chrono = std::chrono;
+		auto begin = chrono::high_resolution_clock::now();
+		for (size_t idx = 0; idx < Iters; ++idx)
+		{
+			handles.emplace_back(hm, rand());
+		}
+
+		auto end = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - begin);
+		std::cout << end.count() << std::endl;
 
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
