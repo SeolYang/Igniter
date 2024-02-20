@@ -1,4 +1,4 @@
-#include <Core/FrameResourceManager.h>
+#include <Core/DeferredDeallocator.h>
 #include <Core/FrameManager.h>
 
 namespace fe

@@ -11,19 +11,16 @@ namespace fe
 		void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester);
 	} // namespace Private
 
-	template <typename T>
-	concept HandleDataType = sizeof(T) >= sizeof(uint64_t);
-
 	class HandleManager;
 	class HandleImpl
 	{
-		template <HandleDataType T>
+		template <typename T>
 		friend class WeakHandle;
 
-		template <HandleDataType T>
+		template <typename T>
 		friend class UniqueHandle;
 
-		template <HandleDataType T>
+		template <typename T>
 		friend class FrameHandle;
 
 	public:
@@ -43,6 +40,7 @@ namespace fe
 
 		bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
 		bool IsAlive(const uint64_t typeHashValue) const;
+		bool IsPendingDeferredDeallocation() const;
 
 		void Deallocate(const uint64_t typeHashValue);
 
@@ -56,7 +54,7 @@ namespace fe
 		uint64_t	   handle = InvalidHandle;
 	};
 
-	template <HandleDataType T>
+	template <typename T>
 	class WeakHandle
 	{
 	public:
@@ -76,7 +74,7 @@ namespace fe
 
 		T& operator*()
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
@@ -84,7 +82,7 @@ namespace fe
 
 		const T& operator*() const
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
@@ -92,7 +90,7 @@ namespace fe
 
 		T* operator->()
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
@@ -100,14 +98,14 @@ namespace fe
 
 		const T* operator->() const
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}
 
-		bool IsValid() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
-		operator bool() const { return IsValid(); }
+		bool IsAlive() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
+		operator bool() const { return IsAlive(); }
 
 	public:
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
@@ -116,7 +114,7 @@ namespace fe
 		HandleImpl handle{};
 	};
 
-	template <HandleDataType T>
+	template <typename T>
 	class UniqueHandle
 	{
 	public:
@@ -131,7 +129,7 @@ namespace fe
 		UniqueHandle(HandleManager& handleManager, Args&&... args)
 			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			new (instancePtr) T(std::forward<Args>(args)...);
@@ -145,13 +143,18 @@ namespace fe
 		UniqueHandle& operator=(const UniqueHandle&) = delete;
 		UniqueHandle& operator=(UniqueHandle&& other) noexcept
 		{
+			if (IsAlive())
+			{
+				Destroy();
+			}
+
 			handle = std::move(other.handle);
 			return *this;
 		}
 
 		T& operator*()
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
@@ -159,7 +162,7 @@ namespace fe
 
 		const T& operator*() const
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
@@ -167,7 +170,7 @@ namespace fe
 
 		T* operator->()
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
@@ -175,18 +178,18 @@ namespace fe
 
 		const T* operator->() const
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}
 
-		bool IsValid() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
-		operator bool() const { return IsValid(); }
+		bool IsAlive() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
+		operator bool() const { return IsAlive(); }
 
 		void Destroy()
 		{
-			if (IsValid())
+			if (IsAlive())
 			{
 				T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 				if (instancePtr != nullptr)
@@ -211,23 +214,27 @@ namespace fe
 		HandleImpl handle;
 	};
 
-	template <HandleDataType T>
+	template <typename T>
 	class FrameHandle
 	{
 	public:
-		FrameHandle() = default;
+		FrameHandle()
+			: handle(), deferredDeallocator(nullptr)
+		{
+		}
+
 		FrameHandle(const FrameHandle&) = delete;
 		FrameHandle(FrameHandle&& other) noexcept
-			: handle(std::move(other.handle))
+			: handle(std::move(other.handle)), deferredDeallocator(std::exchange(other.deferredDeallocator, nullptr))
 		{
 		}
 
 		template <typename... Args>
-		FrameHandle(DeferredDeallocator& deferredDeallocator, HandleManager& handleManager, Args&&... args)
-			: deferredDeallocator(deferredDeallocator), handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
+		FrameHandle(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Args&&... args)
+			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)), deferredDeallocator(&deferredDeallocator)
 		{
-			check(IsValid());
-			T* instancePtr = reinterpret_cast<T*>(GetAddressOf(EvaluatedTypeHashVal));
+			check(IsAlive());
+			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 
 			new (instancePtr) T(std::forward<Args>(args)...);
@@ -241,13 +248,19 @@ namespace fe
 		FrameHandle& operator=(const FrameHandle&) = delete;
 		FrameHandle& operator=(FrameHandle&& other) noexcept
 		{
+			if (IsAlive())
+			{
+				Destroy();
+			}
+
 			handle = std::move(other.handle);
+			deferredDeallocator = std::exchange(other.deferredDeallocator, nullptr);
 			return *this;
 		}
 
 		T& operator*()
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
@@ -255,7 +268,7 @@ namespace fe
 
 		const T& operator*() const
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
@@ -263,7 +276,7 @@ namespace fe
 
 		T* operator->()
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
@@ -271,28 +284,28 @@ namespace fe
 
 		const T* operator->() const
 		{
-			check(IsValid());
+			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}
 
-		bool IsValid() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
-		operator bool() const { return IsValid(); }
+		bool IsAlive() const { return deferredDeallocator != nullptr && handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
+		operator bool() const { return IsAlive(); }
 
 		void Destroy()
 		{
-			if (IsValid())
+			if (IsAlive())
 			{
+				T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 				handle.RequestDeferredDeallocation(EvaluatedTypeHashVal);
-				Private::RequestDeallocation(deferredDeallocator,
-											 [handle]() {
-												 check(handle.IsAlive(EvaluatedTypeHashVal));
-												 T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-												 check(instancePtr != nullptr);
-												 instancePtr->~T();
-												 handle.Deallocate(EvaluatedTypeHashVal);
-											 });
+				Private::RequestDeallocation(*deferredDeallocator, [instancePtr, handle = std::move(handle)]() {
+					HandleImpl targetHandle = handle;
+					check(targetHandle.IsPendingDeferredDeallocation());
+					check(instancePtr != nullptr);
+					instancePtr->~T();
+					targetHandle.Deallocate(EvaluatedTypeHashVal);
+				});
 			}
 		}
 
@@ -305,7 +318,7 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		DeferredDeallocator& deferredDeallocator;
 		HandleImpl			 handle;
+		DeferredDeallocator* deferredDeallocator = nullptr;
 	};
 } // namespace fe

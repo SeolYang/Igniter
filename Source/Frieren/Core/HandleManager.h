@@ -22,6 +22,10 @@ namespace fe
 		const uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
 
 		bool IsAlive(const uint64_t typeHashVal, const uint64_t handle) const;
+		bool IsPendingDeferredDeallocation(const uint64_t handle) const;
+
+		bool IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
+		bool IsPendingDeferredDeallocationUnsafe(const uint64_t handle) const;
 
 	private:
 		// #todo Guarantee thread-safety using shared mutex

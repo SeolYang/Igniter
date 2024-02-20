@@ -36,6 +36,11 @@ namespace fe
 		return IsValid() && owner->IsAlive(typeHashValue, handle);
 	}
 
+	bool HandleImpl::IsPendingDeferredDeallocation() const
+	{
+		return owner != nullptr && owner->IsPendingDeferredDeallocation(handle);
+	}
+
 	void HandleImpl::Deallocate(const uint64_t typeHashValue)
 	{
 		if (IsValid())
@@ -57,7 +62,6 @@ namespace fe
 
 	void HandleImpl::RequestDeferredDeallocation(const uint64_t typeHashVal)
 	{
-		check(IsValid());
 		check(typeHashVal != InvalidHandle);
 		owner->RequestDeferredDeallocation(typeHashVal, handle);
 	}

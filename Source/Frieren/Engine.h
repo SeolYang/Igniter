@@ -4,6 +4,7 @@
 #include <Core/FrameManager.h>
 #include <Core/Timer.h>
 #include <Core/Log.h>
+#include <Core/Handle.h>
 
 namespace fe::dx
 {
@@ -12,6 +13,8 @@ namespace fe::dx
 
 namespace fe
 {
+	// #test FrameHandle 테스트
+	class FrameHandleTestClass;
 	class Timer;
 	class Logger;
 	class HandleManager;
@@ -43,19 +46,22 @@ namespace fe
 		int Execute();
 
 	private:
-		static Engine*						  instance;
-		bool								  bShouldExit = false;
-		FrameManager						  frameManager;
-		Timer								  timer;
-		Logger								  logger;
-		std::unique_ptr<Window>				  window;
-		std::unique_ptr<dx::Device>			  renderDevice;
-		std::unique_ptr<HandleManager>		  handleManager;
-		std::unique_ptr<DeferredDeallocator>  deferredDeallocator;
-		std::unique_ptr<InputManager>		  inputManager;
-		std::unique_ptr<Renderer>			  renderer;
-		std::unique_ptr<ImGuiRenderer>		  imguiRenderer;
-		std::unique_ptr<ImGuiCanvas>		  imguiCanvas;
-		std::unique_ptr<GameInstance>		  gameInstance;
+		static Engine*						 instance;
+		bool								 bShouldExit = false;
+		FrameManager						 frameManager;
+		Timer								 timer;
+		Logger								 logger;
+		std::unique_ptr<Window>				 window;
+		std::unique_ptr<dx::Device>			 renderDevice;
+		std::unique_ptr<HandleManager>		 handleManager;
+		std::unique_ptr<DeferredDeallocator> deferredDeallocator;
+		std::unique_ptr<InputManager>		 inputManager;
+		std::unique_ptr<Renderer>			 renderer;
+		std::unique_ptr<ImGuiRenderer>		 imguiRenderer;
+		std::unique_ptr<ImGuiCanvas>		 imguiCanvas;
+		std::unique_ptr<GameInstance>		 gameInstance;
+
+		// #test	FrameHandle 테스트
+		FrameHandle<FrameHandleTestClass> frameHandle;
 	};
 } // namespace fe

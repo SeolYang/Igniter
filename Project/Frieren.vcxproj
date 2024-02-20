@@ -16,7 +16,7 @@
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Frieren\Core\FrameManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\FrameResource.h" />
-    <ClInclude Include="..\Source\Frieren\Core\FrameResourceManager.h" />
+    <ClInclude Include="..\Source\Frieren\Core\DeferredDeallocator.h" />
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Handle.h" />
     <ClInclude Include="..\Source\Frieren\Core\HashUtils.h" />
@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\FrameResource.cpp" />
-    <ClCompile Include="..\Source\Frieren\Core\FrameResourceManager.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\InputManager.cpp" />

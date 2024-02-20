@@ -156,7 +156,7 @@
     <ClInclude Include="..\Source\Frieren\Core\FrameManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\FrameResourceManager.h">
+    <ClInclude Include="..\Source\Frieren\Core\DeferredDeallocator.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\FrameResource.h">
@@ -269,7 +269,7 @@
     <ClCompile Include="..\Source\Frieren\Renderer\RendererCommon.cpp">
       <Filter>Source\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Core\FrameResourceManager.cpp">
+    <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\FrameResource.cpp">

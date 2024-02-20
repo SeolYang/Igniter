@@ -76,11 +76,21 @@ namespace fe
 
 	bool HandleManager::IsAlive(const uint64_t typeHashVal, const uint64_t handle) const
 	{
+		ReadOnlyLock lock{ mutex };
+		return IsAliveUnsafe(typeHashVal, handle);
+	}
+
+	bool HandleManager::IsPendingDeferredDeallocation(const uint64_t handle) const
+	{
+		ReadOnlyLock lock{ mutex };
+		return IsPendingDeferredDeallocationUnsafe(handle);
+	}
+
+	bool HandleManager::IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
+	{
 		check(typeHashVal != InvalidHashVal);
 		check(handle != HandleImpl::InvalidHandle);
-
-		ReadOnlyLock lock{ mutex };
-		if (memPools.contains(typeHashVal))
+		if (!deferredDeallocationHandles.contains(handle) && memPools.contains(typeHashVal))
 		{
 			const MemoryPool& pool = memPools.at(typeHashVal);
 			return pool.IsAlive(handle);
@@ -89,10 +99,16 @@ namespace fe
 		return false;
 	}
 
+	bool HandleManager::IsPendingDeferredDeallocationUnsafe(const uint64_t handle) const
+	{
+		check(handle != HandleImpl::InvalidHandle);
+		return deferredDeallocationHandles.contains(handle);
+	}
+
 	void HandleManager::RequestDeferredDeallocation(const uint64_t typeHashVal, const uint64_t handle)
 	{
 		ReadWriteLock lock{ mutex };
-		if (IsAlive(typeHashVal, handle))
+		if (IsAliveUnsafe(typeHashVal, handle))
 		{
 			deferredDeallocationHandles.insert(handle);
 		}
