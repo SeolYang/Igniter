@@ -1,19 +1,16 @@
 #include <Core/MemoryPool.h>
-#include <Core/MathUtils.h>
 #include <Core/MemUtils.h>
 #include <Core/Assert.h>
-#include <random>
 
 namespace fe
 {
-
 	MemoryPool::MemoryPool()
 		: sizeOfElement(0), alignOfElement(0), numInitialElementPerChunk(0), magicNumber(InvalidMagicNumber)
 	{
 	}
 
 	MemoryPool::MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk)
-		: sizeOfElement(newSizeOfElement), alignOfElement(newAlignOfElement), numInitialElementPerChunk(numElementPerChunk), magicNumber(GenerateMagicNumber())
+		: sizeOfElement(newSizeOfElement), alignOfElement(newAlignOfElement), numInitialElementPerChunk(numElementPerChunk), magicNumber(Random<uint16_t>(0, (0xffff - 1)))
 	{
 		check(sizeOfElement >= sizeof(uint64_t) && "The size of element must be at least sizeof(uint64_t) due to 'a element aliveness ensuring mechanism'.");
 		check(numElementPerChunk > 0);
@@ -98,12 +95,5 @@ namespace fe
 		}
 
 		return false;
-	}
-
-	uint16_t MemoryPool::GenerateMagicNumber()
-	{
-		static std::mt19937_64					generator{ std::random_device{}() };
-		std::uniform_int_distribution<uint16_t> dist{};
-		return dist(generator);
 	}
 } // namespace fe
