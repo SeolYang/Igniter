@@ -120,7 +120,7 @@ namespace fe::dx
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(rtv && (rtv.Type == EDescriptorType::RenderTargetView));
+		check(rtv && (rtv.Type == EGPUViewType::RenderTargetView));
 		const float rgba[4] = { r, g, b, a };
 		cmdList->ClearRenderTargetView(rtv.CPUHandle, rgba, 0, nullptr);
 	}
@@ -129,7 +129,7 @@ namespace fe::dx
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(dsv && (dsv.Type == EDescriptorType::DepthStencilView));
+		check(dsv && (dsv.Type == EGPUViewType::DepthStencilView));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil,
@@ -140,7 +140,7 @@ namespace fe::dx
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(dsv && (dsv.Type == EDescriptorType::DepthStencilView));
+		check(dsv && (dsv.Type == EGPUViewType::DepthStencilView));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
@@ -150,7 +150,7 @@ namespace fe::dx
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(dsv && (dsv.Type == EDescriptorType::DepthStencilView));
+		check(dsv && (dsv.Type == EGPUViewType::DepthStencilView));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, nullptr);
@@ -229,9 +229,9 @@ namespace fe::dx
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(rtv && (rtv.Type == EDescriptorType::RenderTargetView));
+		check(rtv && (rtv.Type == EGPUViewType::RenderTargetView));
 		check(!dsv ||
-			  (dsv->get() && (dsv->get().Type == EDescriptorType::DepthStencilView)));
+			  (dsv->get() && (dsv->get().Type == EGPUViewType::DepthStencilView)));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = rtv.CPUHandle;
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle =

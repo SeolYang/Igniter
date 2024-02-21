@@ -27,20 +27,20 @@ namespace fe::dx
 		return D3D12_COMMAND_LIST_TYPE_NONE;
 	}
 
-	bool IsSupportDescriptor(const EDescriptorHeapType descriptorHeapType, const EDescriptorType descriptorType)
+	bool IsSupportGPUView(const EDescriptorHeapType descriptorHeapType, const EGPUViewType gpuViewType)
 	{
 		switch (descriptorHeapType)
 		{
 			case EDescriptorHeapType::CBV_SRV_UAV:
-				return descriptorType == EDescriptorType::ShaderResourceView ||
-					   descriptorType == EDescriptorType::ConstantBufferView ||
-					   descriptorType == EDescriptorType::UnorderedAccessView;
+				return gpuViewType == EGPUViewType::ShaderResourceView ||
+					   gpuViewType == EGPUViewType::ConstantBufferView ||
+					   gpuViewType == EGPUViewType::UnorderedAccessView;
 			case EDescriptorHeapType::Sampler:
-				return descriptorType == EDescriptorType::Sampler;
+				return gpuViewType == EGPUViewType::Sampler;
 			case EDescriptorHeapType::RTV:
-				return descriptorType == EDescriptorType::RenderTargetView;
+				return gpuViewType == EGPUViewType::RenderTargetView;
 			case EDescriptorHeapType::DSV:
-				return descriptorType == EDescriptorType::DepthStencilView;
+				return gpuViewType == EGPUViewType::DepthStencilView;
 		}
 
 		return false;

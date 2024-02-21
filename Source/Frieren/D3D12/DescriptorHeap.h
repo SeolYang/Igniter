@@ -32,7 +32,7 @@ namespace fe::dx
 		D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
 		D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
 
-		FrameResource<GPUView> Request(DeferredDeallocator& deferredDeallocator, const EDescriptorType desiredType);
+		FrameResource<GPUView> Request(DeferredDeallocator& deferredDeallocator, const EGPUViewType desiredType);
 
 	private:
 		DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
@@ -42,7 +42,7 @@ namespace fe::dx
 		void Release(const uint32_t descriptirIdx);
 
 		// #wip_features
-		std::optional<GPUView> Allocate(const EDescriptorType desiredDescriptorType);
+		std::optional<GPUView> Allocate(const EGPUViewType desiredType);
 		void				   Deallocate(const uint32_t descriptirIdx) { Release(descriptirIdx); }
 
 	private:

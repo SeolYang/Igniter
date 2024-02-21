@@ -511,11 +511,11 @@ namespace fe::dx
 		if (cbvDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newCbv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::ConstantBufferView);
+			newCbv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EGPUViewType::ConstantBufferView);
 
 			check(newCbv && newCbv->IsValid());
 			check(newCbv->HasValidCPUHandle());
-			check(newCbv->Type == EDescriptorType::ConstantBufferView);
+			check(newCbv->Type == EGPUViewType::ConstantBufferView);
 			device->CreateConstantBufferView(&cbvDesc.value(), newCbv->CPUHandle);
 		}
 
@@ -533,11 +533,11 @@ namespace fe::dx
 		if (srvDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newSrv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::ShaderResourceView);
+			newSrv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EGPUViewType::ShaderResourceView);
 
 			check(newSrv && newSrv->IsValid());
 			check(newSrv->HasValidCPUHandle());
-			check(newSrv->Type == EDescriptorType::ShaderResourceView);
+			check(newSrv->Type == EGPUViewType::ShaderResourceView);
 			device->CreateShaderResourceView(&gpuBuffer.GetNative(), &srvDesc.value(), newSrv->CPUHandle);
 		}
 
@@ -554,11 +554,11 @@ namespace fe::dx
 		if (uavDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newUav = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::UnorderedAccessView);
+			newUav = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EGPUViewType::UnorderedAccessView);
 
 			check(newUav && newUav->IsValid());
 			check(newUav->HasValidCPUHandle());
-			check(newUav->Type == EDescriptorType::UnorderedAccessView);
+			check(newUav->Type == EGPUViewType::UnorderedAccessView);
 			device->CreateUnorderedAccessView(&gpuBuffer.GetNative(), nullptr, &uavDesc.value(), newUav->CPUHandle);
 		}
 
@@ -575,11 +575,11 @@ namespace fe::dx
 		if (srvDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newSrv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::ShaderResourceView);
+			newSrv = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EGPUViewType::ShaderResourceView);
 
 			check(newSrv && newSrv->IsValid());
 			check(newSrv->HasValidCPUHandle());
-			check(newSrv->Type == EDescriptorType::ShaderResourceView);
+			check(newSrv->Type == EGPUViewType::ShaderResourceView);
 			device->CreateShaderResourceView(&gpuTexture.GetNative(), &srvDesc.value(), newSrv->CPUHandle);
 		}
 
@@ -596,11 +596,11 @@ namespace fe::dx
 		if (uavDesc)
 		{
 			check(cbvSrvUavDescriptorHeap);
-			newUav = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EDescriptorType::UnorderedAccessView);
+			newUav = cbvSrvUavDescriptorHeap->Request(deferredDeallocator, EGPUViewType::UnorderedAccessView);
 
 			check(newUav && newUav->IsValid());
 			check(newUav->HasValidCPUHandle());
-			check(newUav->Type == EDescriptorType::UnorderedAccessView);
+			check(newUav->Type == EGPUViewType::UnorderedAccessView);
 			device->CreateUnorderedAccessView(&gpuTexture.GetNative(), nullptr, &uavDesc.value(), newUav->CPUHandle);
 		}
 
@@ -617,11 +617,11 @@ namespace fe::dx
 		if (rtvDesc)
 		{
 			check(rtvDescriptorHeap);
-			newRtv = rtvDescriptorHeap->Request(deferredDeallocator, EDescriptorType::RenderTargetView);
+			newRtv = rtvDescriptorHeap->Request(deferredDeallocator, EGPUViewType::RenderTargetView);
 
 			check(newRtv && newRtv->IsValid());
 			check(newRtv->HasValidCPUHandle());
-			check(newRtv->Type == EDescriptorType::RenderTargetView);
+			check(newRtv->Type == EGPUViewType::RenderTargetView);
 			device->CreateRenderTargetView(&gpuTexture.GetNative(), &rtvDesc.value(), newRtv->CPUHandle);
 		}
 
@@ -638,11 +638,11 @@ namespace fe::dx
 		if (dsvDesc)
 		{
 			check(dsvDescriptorHeap);
-			newDsv = dsvDescriptorHeap->Request(deferredDeallocator, EDescriptorType::DepthStencilView);
+			newDsv = dsvDescriptorHeap->Request(deferredDeallocator, EGPUViewType::DepthStencilView);
 
 			check(newDsv && newDsv->IsValid());
 			check(newDsv->HasValidCPUHandle());
-			check(newDsv->Type == EDescriptorType::DepthStencilView);
+			check(newDsv->Type == EGPUViewType::DepthStencilView);
 			device->CreateDepthStencilView(&gpuTexture.GetNative(), &dsvDesc.value(), newDsv->CPUHandle);
 		}
 

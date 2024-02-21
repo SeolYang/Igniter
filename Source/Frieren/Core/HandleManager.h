@@ -21,6 +21,7 @@ namespace fe
 		uint8_t*	   GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle);
 		const uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
 
+		/* If handle.alived == address existed. */
 		uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle)
 		{
 			ReadOnlyLock lock{ mutex };
@@ -33,6 +34,7 @@ namespace fe
 			return GetAddressOfUnsafe(typeHashVal, handle);
 		}
 
+		/* Validated Address = handle.alived && !pending-deallocation */
 		uint8_t*	   GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle);
 		const uint8_t* GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
 
