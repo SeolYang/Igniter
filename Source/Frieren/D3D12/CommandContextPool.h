@@ -31,15 +31,15 @@ namespace fe::dx
 				}
 			};
 
-			using return_t = std::unique_ptr<CommandContext, decltype(deleter)>;
+			using ReturnType = std::unique_ptr<CommandContext, decltype(deleter)>;
 
 			CommandContext* cmdCtxPtr = nullptr;
 			if (!pool.try_pop(cmdCtxPtr))
 			{
-				return return_t{ nullptr, deleter };
+				return ReturnType{ nullptr, deleter };
 			}
 
-			return return_t{ cmdCtxPtr, deleter };
+			return ReturnType{ cmdCtxPtr, deleter };
 		}
 
 	private:
