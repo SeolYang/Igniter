@@ -45,6 +45,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUView.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUViewManager.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
@@ -87,6 +88,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GPUViewManager.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineStateDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineState.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\RootSignature.cpp" />

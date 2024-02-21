@@ -4,6 +4,7 @@
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
+#include <D3D12/GPUView.h>
 #include <D3D12/Fence.h>
 #include <D3D12/PipelineState.h>
 #include <D3D12/PipelineStateDesc.h>
