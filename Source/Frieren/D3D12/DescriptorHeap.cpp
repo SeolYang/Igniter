@@ -59,6 +59,20 @@ namespace fe::dx
 
 	FrameResource<GPUView> DescriptorHeap::Request(DeferredDeallocator& deferredDeallocator, const EGPUViewType desiredType)
 	{
+		std::optional<GPUView> gpuView = Allocate(desiredType);
+		if (!gpuView)
+		{
+			return {};
+		}
+
+		return MakeFrameResourceCustom<GPUView>(
+			deferredDeallocator,
+			[this](GPUView* ptr) { check(ptr && ptr->IsValid());  this->Release(ptr->Index); delete ptr; },
+			*gpuView);
+	}
+
+	std::optional<GPUView> DescriptorHeap::Allocate(const EGPUViewType desiredType)
+	{
 		check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
 			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (desiredType == EGPUViewType::ConstantBufferView ||
 																		  desiredType == EGPUViewType::ShaderResourceView ||
@@ -76,24 +90,23 @@ namespace fe::dx
 		uint32_t newDescriptorIdx = std::numeric_limits<uint32_t>::max();
 		if (descsriptorIdxPool.empty() || !descsriptorIdxPool.try_pop(newDescriptorIdx))
 		{
-			return {};
+			return GPUView{};
 		}
 
-		return MakeFrameResourceCustom<GPUView>(
-			deferredDeallocator,
-			[this](GPUView* ptr) { check(ptr && ptr->IsValid());  this->Release(ptr->Index); delete ptr; },
-			GPUView{
-				.Type = desiredType,
-				.Index = newDescriptorIdx,
-				.CPUHandle = GetIndexedCPUDescriptorHandle(newDescriptorIdx),
-				.GPUHandle = GetIndexedGPUDescriptorHandle(newDescriptorIdx) });
+		return GPUView{
+			.Type = desiredType,
+			.Index = newDescriptorIdx,
+			.CPUHandle = GetIndexedCPUDescriptorHandle(newDescriptorIdx),
+			.GPUHandle = GetIndexedGPUDescriptorHandle(newDescriptorIdx)
+		};
 	}
 
-	void DescriptorHeap::Release(const uint32_t descriptorIdx)
+	void DescriptorHeap::Deallocate(const uint32_t descriptorIdx)
 	{
 		check(descriptorIdx < numInitialDescriptors);
 		check(descriptorIdx != std::numeric_limits<decltype(GPUView::Index)>::max());
 		descsriptorIdxPool.push(descriptorIdx);
 		check(descsriptorIdxPool.unsafe_size() <= numInitialDescriptors);
 	}
+
 } // namespace fe::dx

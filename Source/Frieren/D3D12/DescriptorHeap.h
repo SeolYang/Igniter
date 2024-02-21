@@ -39,11 +39,11 @@ namespace fe::dx
 					   const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap,
 					   const uint32_t descriptorHandleIncSizeInHeap);
 
-		void Release(const uint32_t descriptirIdx);
+		void Release(const uint32_t descriptorIdx) { Deallocate(descriptorIdx); }
 
 		// #wip_features
 		std::optional<GPUView> Allocate(const EGPUViewType desiredType);
-		void				   Deallocate(const uint32_t descriptirIdx) { Release(descriptirIdx); }
+		void				   Deallocate(const uint32_t descriptorIdx);
 
 	private:
 		EDescriptorHeapType			 descriptorHeapType;
