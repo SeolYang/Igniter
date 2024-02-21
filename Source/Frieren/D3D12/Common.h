@@ -87,7 +87,8 @@ namespace fe::dx
 		UnorderedAccessView,
 		Sampler,
 		RenderTargetView,
-		DepthStencilView
+		DepthStencilView,
+		Unknown
 	};
 	bool IsSupportDescriptor(const EDescriptorHeapType descriptorHeapType, const EDescriptorType descriptorType);
 

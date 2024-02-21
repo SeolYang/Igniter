@@ -82,7 +82,11 @@ namespace fe::dx
 		return MakeFrameResourceCustom<GPUView>(
 			deferredDeallocator,
 			[this](GPUView* ptr) { check(ptr && ptr->IsValid());  this->Release(ptr->Index); delete ptr; },
-			GPUView{ desiredType, newDescriptorIdx, GetIndexedCPUDescriptorHandle(newDescriptorIdx), GetIndexedGPUDescriptorHandle(newDescriptorIdx) });
+			GPUView{
+				.Type = desiredType,
+				.Index = newDescriptorIdx,
+				.CPUHandle = GetIndexedCPUDescriptorHandle(newDescriptorIdx),
+				.GPUHandle = GetIndexedGPUDescriptorHandle(newDescriptorIdx) });
 	}
 
 	void DescriptorHeap::Release(const uint32_t descriptorIdx)

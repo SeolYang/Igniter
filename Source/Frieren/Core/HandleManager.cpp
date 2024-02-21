@@ -7,7 +7,7 @@ namespace fe
 {
 	HandleManager::~HandleManager()
 	{
-		check(deferredDeallocationHandles.empty());
+		check(pendingDeallocations.empty());
 	}
 
 	uint64_t HandleManager::Allocate(const uint64_t typeHashVal, const size_t sizeOfElement, const size_t alignOfElement)
@@ -23,20 +23,20 @@ namespace fe
 		check(memPools.contains(typeHashVal));
 
 		const uint64_t allocatedHandle = memPools[typeHashVal].Allocate();
-		check(allocatedHandle != HandleImpl::InvalidHandle);
-		check(!deferredDeallocationHandles.contains(allocatedHandle));
+		check(allocatedHandle != Handle::InvalidHandle);
+		check(!pendingDeallocations.contains(allocatedHandle));
 		return allocatedHandle;
 	}
 
 	void HandleManager::Deallocate(const uint64_t typeHashVal, const uint64_t handle)
 	{
 		check(typeHashVal != InvalidHashVal);
-		check(handle != HandleImpl::InvalidHandle);
+		check(handle != Handle::InvalidHandle);
 
 		ReadWriteLock lock{ mutex };
 		if (memPools.contains(typeHashVal))
 		{
-			deferredDeallocationHandles.erase(handle);
+			pendingDeallocations.erase(handle);
 			memPools[typeHashVal].Deallocate(handle);
 		}
 		else
@@ -45,13 +45,12 @@ namespace fe
 		}
 	}
 
-	uint8_t* HandleManager::GetAddressOf(const uint64_t typeHashVal, const uint64_t handle)
+	uint8_t* HandleManager::GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle)
 	{
 		check(typeHashVal != InvalidHashVal);
-		check(handle != HandleImpl::InvalidHandle);
+		check(handle != Handle::InvalidHandle);
 
-		ReadOnlyLock lock{ mutex };
-		if (!deferredDeallocationHandles.contains(handle) && memPools.contains(typeHashVal))
+		if (memPools.contains(typeHashVal))
 		{
 			return memPools[typeHashVal].GetAddressOf(handle);
 		}
@@ -59,19 +58,30 @@ namespace fe
 		return nullptr;
 	}
 
-	const uint8_t* HandleManager::GetAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
+	const uint8_t* HandleManager::GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
 	{
 		check(typeHashVal != InvalidHashVal);
-		check(handle != HandleImpl::InvalidHandle);
+		check(handle != Handle::InvalidHandle);
 
-		ReadOnlyLock lock{ mutex };
-		if (!deferredDeallocationHandles.contains(handle) && memPools.contains(typeHashVal))
+		if (memPools.contains(typeHashVal))
 		{
-			const MemoryPool& pool = memPools.at(typeHashVal);
-			return pool.GetAddressOf(handle);
+			const auto& memPool = memPools.at(typeHashVal);
+			return memPool.GetAddressOf(handle);
 		}
 
 		return nullptr;
+	}
+
+	uint8_t* HandleManager::GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle)
+	{
+		ReadOnlyLock lock{ mutex };
+		return !pendingDeallocations.contains(handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
+	}
+
+	const uint8_t* HandleManager::GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
+	{
+		ReadOnlyLock lock{ mutex };
+		return !pendingDeallocations.contains(handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
 	}
 
 	bool HandleManager::IsAlive(const uint64_t typeHashVal, const uint64_t handle) const
@@ -80,17 +90,17 @@ namespace fe
 		return IsAliveUnsafe(typeHashVal, handle);
 	}
 
-	bool HandleManager::IsPendingDeferredDeallocation(const uint64_t handle) const
+	bool HandleManager::IsPendingDeallocation(const uint64_t handle) const
 	{
 		ReadOnlyLock lock{ mutex };
-		return IsPendingDeferredDeallocationUnsafe(handle);
+		return IsPendingDeallocationUnsafe(handle);
 	}
 
 	bool HandleManager::IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
 	{
 		check(typeHashVal != InvalidHashVal);
-		check(handle != HandleImpl::InvalidHandle);
-		if (!deferredDeallocationHandles.contains(handle) && memPools.contains(typeHashVal))
+		check(handle != Handle::InvalidHandle);
+		if (!pendingDeallocations.contains(handle) && memPools.contains(typeHashVal))
 		{
 			const MemoryPool& pool = memPools.at(typeHashVal);
 			return pool.IsAlive(handle);
@@ -99,18 +109,18 @@ namespace fe
 		return false;
 	}
 
-	bool HandleManager::IsPendingDeferredDeallocationUnsafe(const uint64_t handle) const
+	bool HandleManager::IsPendingDeallocationUnsafe(const uint64_t handle) const
 	{
-		check(handle != HandleImpl::InvalidHandle);
-		return deferredDeallocationHandles.contains(handle);
+		check(handle != Handle::InvalidHandle);
+		return pendingDeallocations.contains(handle);
 	}
 
-	void HandleManager::RequestDeferredDeallocation(const uint64_t typeHashVal, const uint64_t handle)
+	void HandleManager::MaskAsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle)
 	{
 		ReadWriteLock lock{ mutex };
 		if (IsAliveUnsafe(typeHashVal, handle))
 		{
-			deferredDeallocationHandles.insert(handle);
+			pendingDeallocations.insert(handle);
 		}
 		else
 		{

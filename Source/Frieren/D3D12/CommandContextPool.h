@@ -24,22 +24,22 @@ namespace fe::dx
 
 		auto Request()
 		{
-			const auto lambda = [this](CommandContext* ptr) {
+			const auto deleter = [this](CommandContext* ptr) {
 				if (ptr != nullptr)
 				{
 					Private::RequestDeallocation(deferredDeallocator, [ptr, this]() { this->Return(ptr); });
 				}
 			};
 
-			using return_t = std::unique_ptr<CommandContext, decltype(lambda)>;
+			using return_t = std::unique_ptr<CommandContext, decltype(deleter)>;
 
 			CommandContext* cmdCtxPtr = nullptr;
 			if (!pool.try_pop(cmdCtxPtr))
 			{
-				return return_t{ nullptr, lambda };
+				return return_t{ nullptr, deleter };
 			}
 
-			return return_t{ cmdCtxPtr, lambda };
+			return return_t{ cmdCtxPtr, deleter };
 		}
 
 	private:

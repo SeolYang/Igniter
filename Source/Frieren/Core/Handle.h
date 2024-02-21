@@ -11,21 +11,8 @@ namespace fe
 		void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester);
 	} // namespace Private
 
-	template <typename T>
-	class DefaultDestroyer
-	{
-	public:
-		void operator()(T* ptr) const
-		{
-			if (ptr != nullptr)
-			{
-				ptr->~T();
-			}
-		}
-	};
-
 	class HandleManager;
-	class HandleImpl
+	class Handle
 	{
 		template <typename T>
 		friend class WeakHandle;
@@ -33,31 +20,30 @@ namespace fe
 		template <typename T, typename Destroyer>
 		friend class UniqueHandle;
 
-		template <typename T, typename Destroyer>
-		friend class FrameHandle;
-
 	public:
-		~HandleImpl() = default;
+		Handle(const Handle& other) = default;
+		Handle(Handle&& other) noexcept;
+		~Handle() = default;
 
-	private:
-		HandleImpl() = default;
-		HandleImpl(const HandleImpl& other) = default;
-		HandleImpl(HandleImpl&& other) noexcept;
-		HandleImpl(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType);
-
-		HandleImpl& operator=(const HandleImpl& other) = default;
-		HandleImpl& operator=(HandleImpl&& other) noexcept;
+		Handle& operator=(const Handle& other) = default;
+		Handle& operator=(Handle&& other) noexcept;
 
 		uint8_t*	   GetAddressOf(const uint64_t typeHashValue);
 		const uint8_t* GetAddressOf(const uint64_t typeHashValue) const;
 
+		uint8_t*	   GetValidatedAddressOf(const uint64_t typeHashValue);
+		const uint8_t* GetValidatedAddressOf(const uint64_t typeHashValue) const;
+
 		bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
 		bool IsAlive(const uint64_t typeHashValue) const;
-		bool IsPendingDeferredDeallocation() const;
+		bool IsPendingDeallocation() const;
 
 		void Deallocate(const uint64_t typeHashValue);
+		void MarkAsPendingDeallocation(const uint64_t typeHashVal);
 
-		void RequestDeferredDeallocation(const uint64_t typeHashVal);
+	private:
+		Handle() = default;
+		Handle(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType);
 
 	public:
 		static constexpr uint64_t InvalidHandle = 0xffffffffffffffffUi64;
@@ -73,7 +59,7 @@ namespace fe
 	public:
 		WeakHandle() = default;
 
-		explicit WeakHandle(const HandleImpl newHandle)
+		explicit WeakHandle(const Handle newHandle)
 			: handle(newHandle)
 		{
 		}
@@ -124,7 +110,23 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		HandleImpl handle{};
+		Handle handle{};
+	};
+
+	template <typename T>
+	class DefaultDestroyer
+	{
+	public:
+		void operator()(Handle handle, const uint64_t typeHashVal) const
+		{
+			if (handle.IsValid() && typeHashVal != InvalidHashVal)
+			{
+				T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(typeHashVal));
+				check(instancePtr != nullptr);
+				instancePtr->~T();
+				handle.Deallocate(typeHashVal);
+			}
+		}
 	};
 
 	template <typename T, typename Destroyer = DefaultDestroyer<T>>
@@ -134,8 +136,23 @@ namespace fe
 		UniqueHandle() = default;
 		UniqueHandle(const UniqueHandle&) = delete;
 		UniqueHandle(UniqueHandle&& other) noexcept
-			: handle(std::move(other.handle))
+			: handle(std::move(other.handle)), destroyer(std::move(other.destroyer))
 		{
+		}
+
+		UniqueHandle(const Destroyer& destroyer)
+			: handle(), destroyer(destroyer)
+		{
+		}
+
+		template <typename... Args>
+		UniqueHandle(HandleManager& handleManager, const Destroyer& destroyer, Args&&... args)
+			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)), destroyer(destroyer)
+		{
+			check(IsAlive());
+			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+			check(instancePtr != nullptr);
+			new (instancePtr) T(std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
@@ -156,61 +173,48 @@ namespace fe
 		UniqueHandle& operator=(const UniqueHandle&) = delete;
 		UniqueHandle& operator=(UniqueHandle&& other) noexcept
 		{
-			if (IsAlive())
-			{
-				Destroy();
-			}
-
+			Destroy();
 			handle = std::move(other.handle);
 			return *this;
 		}
 
 		T& operator*()
 		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
 		}
 
 		const T& operator*() const
 		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
 		}
 
 		T* operator->()
 		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}
 
 		const T* operator->() const
 		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}
 
-		bool IsAlive() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
+		bool IsAlive() const { return handle.IsAlive(EvaluatedTypeHashVal); }
 		operator bool() const { return IsAlive(); }
 
 		void Destroy()
 		{
 			if (IsAlive())
 			{
-				T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-				if (instancePtr != nullptr)
-				{
-					destroyer(instancePtr);
-					handle.Deallocate(EvaluatedTypeHashVal);
-				}
-
+				handle.MarkAsPendingDeallocation(EvaluatedTypeHashVal);
+				destroyer(handle, EvaluatedTypeHashVal);
 				handle = {};
 			}
 		}
@@ -224,116 +228,8 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		HandleImpl						handle;
+		Handle							handle;
 		[[no_unique_address]] Destroyer destroyer;
 	};
 
-	template <typename T, typename Destroyer = DefaultDestroyer<T>>
-	class FrameHandle
-	{
-	public:
-		FrameHandle()
-			: handle(), deferredDeallocator(nullptr)
-		{
-		}
-
-		FrameHandle(const FrameHandle&) = delete;
-		FrameHandle(FrameHandle&& other) noexcept
-			: handle(std::move(other.handle)), deferredDeallocator(std::exchange(other.deferredDeallocator, nullptr))
-		{
-		}
-
-		template <typename... Args>
-		FrameHandle(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Args&&... args)
-			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)), deferredDeallocator(&deferredDeallocator)
-		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-			check(instancePtr != nullptr);
-
-			new (instancePtr) T(std::forward<Args>(args)...);
-		}
-
-		~FrameHandle()
-		{
-			Destroy();
-		}
-
-		FrameHandle& operator=(const FrameHandle&) = delete;
-		FrameHandle& operator=(FrameHandle&& other) noexcept
-		{
-			if (IsAlive())
-			{
-				Destroy();
-			}
-
-			handle = std::move(other.handle);
-			deferredDeallocator = std::exchange(other.deferredDeallocator, nullptr);
-			return *this;
-		}
-
-		T& operator*()
-		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-			check(instancePtr != nullptr);
-			return *instancePtr;
-		}
-
-		const T& operator*() const
-		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-			check(instancePtr != nullptr);
-			return *instancePtr;
-		}
-
-		T* operator->()
-		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-			check(instancePtr != nullptr);
-			return instancePtr;
-		}
-
-		const T* operator->() const
-		{
-			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-			check(instancePtr != nullptr);
-			return instancePtr;
-		}
-
-		bool IsAlive() const { return deferredDeallocator != nullptr && handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
-		operator bool() const { return IsAlive(); }
-
-		void Destroy()
-		{
-			if (IsAlive())
-			{
-				T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-				handle.RequestDeferredDeallocation(EvaluatedTypeHashVal);
-				Private::RequestDeallocation(*deferredDeallocator, [instancePtr, handle = std::move(handle)]() {
-					HandleImpl targetHandle = handle;
-					check(targetHandle.IsPendingDeferredDeallocation());
-					check(instancePtr != nullptr);
-					destroyer(instancePtr);
-					targetHandle.Deallocate(EvaluatedTypeHashVal);
-				});
-			}
-		}
-
-		WeakHandle<T> DeriveWeak() const
-		{
-			return WeakHandle<T>{ handle };
-		}
-
-	public:
-		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
-
-	private:
-		HandleImpl						handle;
-		DeferredDeallocator*			deferredDeallocator = nullptr;
-		[[no_unique_address]] Destroyer destroyer;
-	};
 } // namespace fe

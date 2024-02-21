@@ -55,6 +55,17 @@ namespace fe::dx
 		FrameResource<GPUView> CreateRenderTargetView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 		FrameResource<GPUView> CreateDepthStencilView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 
+		// #wip_features
+		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer);
+		void UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer);
+		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer);
+
+		void UpdateShaderResourceView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+
+
 	private:
 		bool AcquireAdapterFromFactory();
 		void LogAdapterInformations();

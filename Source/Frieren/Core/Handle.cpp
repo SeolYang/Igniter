@@ -3,7 +3,7 @@
 
 namespace fe
 {
-	HandleImpl::HandleImpl(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType)
+	Handle::Handle(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType)
 		: owner(&handleManager), handle(handleManager.Allocate(typeHashVal, sizeOfType, alignOfType))
 	{
 		check(owner != nullptr);
@@ -12,36 +12,42 @@ namespace fe
 		check(alignOfType > 0);
 	}
 
-	HandleImpl::HandleImpl(HandleImpl&& other) noexcept
+	Handle::Handle(Handle&& other) noexcept
 		: owner(std::exchange(other.owner, nullptr)), handle(std::exchange(other.handle, InvalidHandle))
 	{
 	}
 
-	uint8_t* HandleImpl::GetAddressOf(const uint64_t typeHashValue)
+	uint8_t* Handle::GetAddressOf(const uint64_t typeHashValue)
 	{
-		check(IsValid());
-		check(typeHashValue != InvalidHashVal);
 		return owner->GetAddressOf(typeHashValue, handle);
 	}
 
-	const uint8_t* HandleImpl::GetAddressOf(const uint64_t typeHashValue) const
+	const uint8_t* Handle::GetAddressOf(const uint64_t typeHashValue) const
 	{
-		check(IsValid());
-		check(typeHashValue != InvalidHashVal);
 		return owner->GetAddressOf(typeHashValue, handle);
 	}
 
-	bool HandleImpl::IsAlive(const uint64_t typeHashValue) const
+	uint8_t* Handle::GetValidatedAddressOf(const uint64_t typeHashValue)
+	{
+		return owner->GetValidatedAddressOf(typeHashValue, handle);
+	}
+
+	const uint8_t* Handle::GetValidatedAddressOf(const uint64_t typeHashValue) const
+	{
+		return owner->GetValidatedAddressOf(typeHashValue, handle);
+	}
+
+	bool Handle::IsAlive(const uint64_t typeHashValue) const
 	{
 		return IsValid() && owner->IsAlive(typeHashValue, handle);
 	}
 
-	bool HandleImpl::IsPendingDeferredDeallocation() const
+	bool Handle::IsPendingDeallocation() const
 	{
-		return owner != nullptr && owner->IsPendingDeferredDeallocation(handle);
+		return owner != nullptr && owner->IsPendingDeallocation(handle);
 	}
 
-	void HandleImpl::Deallocate(const uint64_t typeHashValue)
+	void Handle::Deallocate(const uint64_t typeHashValue)
 	{
 		if (IsValid())
 		{
@@ -53,16 +59,16 @@ namespace fe
 		}
 	}
 
-	HandleImpl& HandleImpl::operator=(HandleImpl&& other) noexcept
+	Handle& Handle::operator=(Handle&& other) noexcept
 	{
 		owner = std::exchange(other.owner, nullptr);
 		handle = std::exchange(other.handle, InvalidHandle);
 		return *this;
 	}
 
-	void HandleImpl::RequestDeferredDeallocation(const uint64_t typeHashVal)
+	void Handle::MarkAsPendingDeallocation(const uint64_t typeHashVal)
 	{
 		check(typeHashVal != InvalidHandle);
-		owner->RequestDeferredDeallocation(typeHashVal, handle);
+		owner->MaskAsPendingDeallocation(typeHashVal, handle);
 	}
 } // namespace fe::experimental

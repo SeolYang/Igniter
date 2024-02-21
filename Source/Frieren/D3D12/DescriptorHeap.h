@@ -13,6 +13,9 @@ namespace fe::dx
 	{
 		friend class Device;
 
+		// #wip_features
+		friend class GPUViewManager;
+
 	public:
 		DescriptorHeap(const DescriptorHeap&) = delete;
 		DescriptorHeap(DescriptorHeap&& other) noexcept;
@@ -31,15 +34,16 @@ namespace fe::dx
 
 		FrameResource<GPUView> Request(DeferredDeallocator& deferredDeallocator, const EDescriptorType desiredType);
 
-		// #wip_features
-		std::optional<GPUView> Request(const EDescriptorType desiredDescriptorType);
-
 	private:
 		DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
 					   const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap,
 					   const uint32_t descriptorHandleIncSizeInHeap);
 
 		void Release(const uint32_t descriptirIdx);
+
+		// #wip_features
+		std::optional<GPUView> Allocate(const EDescriptorType desiredDescriptorType);
+		void				   Deallocate(const uint32_t descriptirIdx) { Release(descriptirIdx); }
 
 	private:
 		EDescriptorHeapType			 descriptorHeapType;
