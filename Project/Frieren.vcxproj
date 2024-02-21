@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\Source\Frieren\Core\Container.h" />
+    <ClInclude Include="..\Source\Frieren\Core\DeferredDeallocationUtils.h" />
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Frieren\Core\Event.h" />
     <ClInclude Include="..\Source\Frieren\Core\FrameManager.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUViewManager.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />
@@ -64,6 +66,7 @@
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocationUtils.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\FrameResource.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp" />

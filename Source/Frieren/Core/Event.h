@@ -72,7 +72,7 @@ namespace fe
 
 		/*
 		 * #issues	만약에 perfect forwarding 되버려서 임의의 argument 가 특정 delegate 호출로 '이동'되어 버리면,
-		 * 이후 호출에서 해당 argument 가 의도했던 대로 작동하지 않을수도 있다.
+		 * 이후 호출에서 해당 argument 가 의도했던 대로 전달되지 않을 수 있다.
 		 */
 		template <typename... Args>
 		void Notify(Args&&... args)

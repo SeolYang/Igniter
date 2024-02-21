@@ -186,6 +186,12 @@
     <ClInclude Include="..\Source\Frieren\Core\Event.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\GPUViewManager.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\DeferredDeallocationUtils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -288,6 +294,9 @@
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\Handle.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocationUtils.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>

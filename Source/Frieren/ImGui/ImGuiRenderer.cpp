@@ -58,7 +58,6 @@ namespace fe
 		dx::GPUTexture& backBuffer = swapchain.GetBackBuffer();
 
 		const dx::GPUView& backBufferRTV = swapchain.GetRenderTargetView();
-		// #test Test code for clear render target
 		cmdCtx.SetRenderTarget(backBufferRTV);
 		cmdCtx.SetDescriptorHeap(*descriptorHeap);
 

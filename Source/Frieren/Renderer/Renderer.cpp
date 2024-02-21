@@ -35,7 +35,7 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
 
 	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device)
-		: frameManager(engineFrameManager), deferredDeallocator(engineDefferedDeallocator), renderDevice(device), directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())), directCmdCtxPool(std::make_unique<dx::CommandContextPool>(device, dx::EQueueType::Direct)), swapchain(std::make_unique<dx::Swapchain>(window, device, deferredDeallocator, *directCmdQueue, NumFramesInFlight))
+		: frameManager(engineFrameManager), deferredDeallocator(engineDefferedDeallocator), renderDevice(device), directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())), directCmdCtxPool(std::make_unique<dx::CommandContextPool>(deferredDeallocator, device, dx::EQueueType::Direct)), swapchain(std::make_unique<dx::Swapchain>(window, device, deferredDeallocator, *directCmdQueue, NumFramesInFlight))
 	{
 		frameFences.reserve(NumFramesInFlight);
 		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
@@ -196,7 +196,8 @@ namespace fe
 		// 이 때, frame fences의 signal은 present 직전에 back buffer에 그리기 직전에 수행하는 것이 좋을 것 같음.
 		check(directCmdQueue);
 		check(directCmdCtxPool);
-		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(deferredDeallocator);
+
+		auto renderCmdCtx = directCmdCtxPool->Request();
 		renderCmdCtx->Begin(pso.get());
 		{
 			auto bindlessDescriptorHeaps = renderDevice.GetBindlessDescriptorHeaps();
@@ -229,6 +230,8 @@ namespace fe
 
 	void Renderer::Render(World& world)
 	{
+		world;
+		/*
 		check(directCmdQueue);
 		check(directCmdCtxPool);
 
@@ -266,7 +269,7 @@ namespace fe
 		}
 		renderCmdCtx->End();
 
-		directCmdQueue->AddPendingContext(*renderCmdCtx);
+		directCmdQueue->AddPendingContext(*renderCmdCtx);*/
 	}
 
 	void Renderer::EndFrame()

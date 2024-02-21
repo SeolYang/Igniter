@@ -29,7 +29,7 @@ namespace fe
 			logger.Log<EngineInfo>("Initializing Engine Runtime...");
 
 			instance = this;
-			/* #test temp window descriptor */
+			/* #test 임시 윈도우 설명자 */
 			const WindowDescription windowDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
 			window = std::make_unique<Window>(windowDesc);
 			renderDevice = std::make_unique<dx::Device>();

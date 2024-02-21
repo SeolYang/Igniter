@@ -27,7 +27,7 @@ public:
 
 int main()
 {
-	// #todo #log 2024/02/19 10:48, GPUView 전부 FrameHandle화
+	// #todo #log 2024/02/21 00:01, GPUView 전부 FrameHandle화
 	 int result = 0;
 	{
 		fe::Engine engine;

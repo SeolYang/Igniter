@@ -11,16 +11,29 @@ namespace fe
 		void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester);
 	} // namespace Private
 
+	template <typename T>
+	class DefaultDestroyer
+	{
+	public:
+		void operator()(T* ptr) const
+		{
+			if (ptr != nullptr)
+			{
+				ptr->~T();
+			}
+		}
+	};
+
 	class HandleManager;
 	class HandleImpl
 	{
 		template <typename T>
 		friend class WeakHandle;
 
-		template <typename T>
+		template <typename T, typename Destroyer>
 		friend class UniqueHandle;
 
-		template <typename T>
+		template <typename T, typename Destroyer>
 		friend class FrameHandle;
 
 	public:
@@ -114,7 +127,7 @@ namespace fe
 		HandleImpl handle{};
 	};
 
-	template <typename T>
+	template <typename T, typename Destroyer = DefaultDestroyer<T>>
 	class UniqueHandle
 	{
 	public:
@@ -194,7 +207,7 @@ namespace fe
 				T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 				if (instancePtr != nullptr)
 				{
-					instancePtr->~T();
+					destroyer(instancePtr);
 					handle.Deallocate(EvaluatedTypeHashVal);
 				}
 
@@ -211,10 +224,11 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		HandleImpl handle;
+		HandleImpl						handle;
+		[[no_unique_address]] Destroyer destroyer;
 	};
 
-	template <typename T>
+	template <typename T, typename Destroyer = DefaultDestroyer<T>>
 	class FrameHandle
 	{
 	public:
@@ -303,7 +317,7 @@ namespace fe
 					HandleImpl targetHandle = handle;
 					check(targetHandle.IsPendingDeferredDeallocation());
 					check(instancePtr != nullptr);
-					instancePtr->~T();
+					destroyer(instancePtr);
 					targetHandle.Deallocate(EvaluatedTypeHashVal);
 				});
 			}
@@ -318,7 +332,8 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		HandleImpl			 handle;
-		DeferredDeallocator* deferredDeallocator = nullptr;
+		HandleImpl						handle;
+		DeferredDeallocator*			deferredDeallocator = nullptr;
+		[[no_unique_address]] Destroyer destroyer;
 	};
 } // namespace fe

@@ -28,7 +28,6 @@ namespace fe
 		bool IsPendingDeferredDeallocationUnsafe(const uint64_t handle) const;
 
 	private:
-		// #todo Guarantee thread-safety using shared mutex
 		mutable SharedMutex mutex;
 
 		/* key: Hash value of unique type.  */

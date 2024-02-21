@@ -3,12 +3,13 @@
 #include <D3D12/CommandContext.h>
 #include <Core/FrameManager.h>
 #include <Core/Assert.h>
+#include <Core/DeferredDeallocator.h>
 
 namespace fe::dx
 {
 	constexpr size_t NumExtraCommandContextsPerFrame = 4;
-	CommandContextPool::CommandContextPool(dx::Device& device, const dx::EQueueType queueType)
-		: reservedNumCmdCtxs(std::thread::hardware_concurrency() * NumFramesInFlight + (NumExtraCommandContextsPerFrame * NumFramesInFlight))
+	CommandContextPool::CommandContextPool(DeferredDeallocator& deferredDeallocator, dx::Device& device, const dx::EQueueType queueType)
+		: deferredDeallocator(deferredDeallocator), reservedNumCmdCtxs(std::thread::hardware_concurrency() * NumFramesInFlight + (NumExtraCommandContextsPerFrame * NumFramesInFlight))
 	{
 		check(reservedNumCmdCtxs > 0);
 		for (size_t idx = 0; idx < reservedNumCmdCtxs; ++idx)
@@ -27,24 +28,11 @@ namespace fe::dx
 		pool.clear();
 	}
 
-	FrameResource<CommandContext> CommandContextPool::Request(DeferredDeallocator& deferredDeallocator)
-	{
-		CommandContext* cmdCtxPtr = nullptr;
-		if (!pool.try_pop(cmdCtxPtr))
-		{
-			return {};
-		}
-
-		return { cmdCtxPtr,
-				 [&deferredDeallocator, this](CommandContext* ptr) {
-					 Private::RequestDeallocation(deferredDeallocator, [ptr, this]() { this->Return(ptr); });
-				 } };
-	}
-
 	void CommandContextPool::Return(CommandContext* cmdContext)
 	{
 		check(cmdContext != nullptr);
 		check(pool.unsafe_size() < reservedNumCmdCtxs);
 		pool.push(cmdContext);
 	}
+
 } // namespace fe::dx

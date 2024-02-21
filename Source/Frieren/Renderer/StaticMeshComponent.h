@@ -9,7 +9,6 @@ namespace fe::dx
 
 namespace fe
 {
-	// #idea Handle 의 확장을 통한 Deferred Deallocation 은?
 	struct StaticMeshComponent
 	{
 	public:
