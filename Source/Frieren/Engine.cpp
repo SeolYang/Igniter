@@ -7,6 +7,7 @@
 #include <Core/DeferredDeallocator.h>
 #include <Core/EmbededSettings.h>
 #include <D3D12/Device.h>
+#include <D3D12/GPUViewManager.h>
 #include <Renderer/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
@@ -36,7 +37,8 @@ namespace fe
 			handleManager = std::make_unique<HandleManager>();
 			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
 			inputManager = std::make_unique<InputManager>(*handleManager);
-			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice);
+			gpuViewManager = std::make_unique<dx::GPUViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
+			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *gpuViewManager);
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
 			gameInstance = std::make_unique<GameInstance>();
@@ -54,6 +56,7 @@ namespace fe
 		inputManager.reset();
 		deferredDeallocator.reset();
 		handleManager.reset();
+		gpuViewManager.reset();
 		renderDevice.reset();
 		window.reset();
 

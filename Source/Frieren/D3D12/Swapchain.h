@@ -1,12 +1,12 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <Core/FrameResource.h>
+#include <D3D12/GPUView.h>
 #include <Core/Assert.h>
+#include <Core/Handle.h>
 
 namespace fe
 {
 	class Window;
-	class DeferredDeallocator;
 } // namespace fe
 
 namespace fe::dx
@@ -14,12 +14,12 @@ namespace fe::dx
 	class Device;
 	class CommandQueue;
 	class DescriptorHeap;
+	class GPUViewManager;
 	class GPUTexture;
-	class GPUView;
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, Device& device, DeferredDeallocator& deferredDeallocator, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
+		Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
 		~Swapchain();
 
 		bool			  IsTearingSupport() const { return bIsTearingSupport; }
@@ -37,14 +37,14 @@ namespace fe::dx
 	private:
 		void InitSwapchain(const Window& window, CommandQueue& directCmdQueue);
 		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
-		void InitRenderTargetViews(Device& device, DeferredDeallocator& deferredDeallocator);
+		void InitRenderTargetViews(GPUViewManager& gpuViewManager);
 
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;
 
-		const uint8_t						numBackBuffers;
-		std::vector<GPUTexture>				backBuffers;
-		std::vector<FrameResource<GPUView>> renderTargetViews;
+		const uint8_t											   numBackBuffers;
+		std::vector<GPUTexture>									   backBuffers;
+		std::vector<UniqueHandle<GPUView, GPUViewHandleDestroyer>> renderTargetViews;
 
 		bool bIsTearingSupport = false;
 	};

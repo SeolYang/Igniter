@@ -187,7 +187,7 @@ namespace fe
 
 		const T& operator*() const
 		{
-			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
+			const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
 		}
@@ -201,7 +201,7 @@ namespace fe
 
 		const T* operator->() const
 		{
-			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
+			const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}

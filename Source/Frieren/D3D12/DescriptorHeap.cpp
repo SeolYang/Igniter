@@ -57,20 +57,6 @@ namespace fe::dx
 				   : gpuDescriptorHandleForHeapStart;
 	}
 
-	FrameResource<GPUView> DescriptorHeap::Request(DeferredDeallocator& deferredDeallocator, const EGPUViewType desiredType)
-	{
-		std::optional<GPUView> gpuView = Allocate(desiredType);
-		if (!gpuView)
-		{
-			return {};
-		}
-
-		return MakeFrameResourceCustom<GPUView>(
-			deferredDeallocator,
-			[this](GPUView* ptr) { check(ptr && ptr->IsValid());  this->Release(ptr->Index); delete ptr; },
-			*gpuView);
-	}
-
 	std::optional<GPUView> DescriptorHeap::Allocate(const EGPUViewType desiredType)
 	{
 		check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
@@ -101,11 +87,25 @@ namespace fe::dx
 		};
 	}
 
-	void DescriptorHeap::Deallocate(const uint32_t descriptorIdx)
+	void DescriptorHeap::Deallocate(const GPUView& gpuView)
 	{
-		check(descriptorIdx < numInitialDescriptors);
-		check(descriptorIdx != std::numeric_limits<decltype(GPUView::Index)>::max());
-		descsriptorIdxPool.push(descriptorIdx);
+		check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
+			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (gpuView.Type == EGPUViewType::ConstantBufferView ||
+																		  gpuView.Type == EGPUViewType::ShaderResourceView ||
+																		  gpuView.Type == EGPUViewType::UnorderedAccessView)));
+
+		check(descriptorHeapType != EDescriptorHeapType::Sampler ||
+			  (descriptorHeapType == EDescriptorHeapType::Sampler && (gpuView.Type == EGPUViewType::Sampler)));
+
+		check(descriptorHeapType != EDescriptorHeapType::RTV ||
+			  (descriptorHeapType == EDescriptorHeapType::RTV && (gpuView.Type == EGPUViewType::RenderTargetView)));
+
+		check(descriptorHeapType != EDescriptorHeapType::DSV ||
+			  (descriptorHeapType == EDescriptorHeapType::DSV && (gpuView.Type == EGPUViewType::DepthStencilView)));
+
+		check(gpuView.Index < numInitialDescriptors);
+		check(gpuView.Index != std::numeric_limits<decltype(GPUView::Index)>::max());
+		descsriptorIdxPool.push(gpuView.Index);
 		check(descsriptorIdxPool.unsafe_size() <= numInitialDescriptors);
 	}
 

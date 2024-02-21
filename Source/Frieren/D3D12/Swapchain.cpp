@@ -3,15 +3,16 @@
 #include <D3D12/CommandQueue.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTexture.h>
+#include <D3D12/GPUViewManager.h>
 #include <Core/Window.h>
 
 namespace fe::dx
 {
-	Swapchain::Swapchain(const Window& window, Device& device, DeferredDeallocator& deferredDeallocator, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers)
+	Swapchain::Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers)
 		: numBackBuffers(desiredNumBackBuffers)
 	{
 		InitSwapchain(window, directCmdQueue);
-		InitRenderTargetViews(device, deferredDeallocator);
+		InitRenderTargetViews(gpuViewManager);
 	}
 
 	Swapchain::~Swapchain()
@@ -82,7 +83,7 @@ namespace fe::dx
 		}
 	}
 
-	void Swapchain::InitRenderTargetViews(Device& device, DeferredDeallocator& deferredDeallocator)
+	void Swapchain::InitRenderTargetViews(GPUViewManager& gpuViewManager)
 	{
 		renderTargetViews.reserve(numBackBuffers);
 		backBuffers.reserve(numBackBuffers);
@@ -91,11 +92,8 @@ namespace fe::dx
 			ComPtr<ID3D12Resource1> resource;
 			verify_succeeded(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
 			SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
-			backBuffers.emplace_back(GPUTexture(resource));
-
-			FrameResource<GPUView> rtv = device.CreateRenderTargetView(deferredDeallocator, backBuffers[idx], {});
-			check(rtv);
-			renderTargetViews.emplace_back(std::move(rtv));
+			backBuffers.emplace_back(resource);
+			renderTargetViews.emplace_back(gpuViewManager.RequestRenderTargetView(backBuffers[idx], {}));
 		}
 	}
 

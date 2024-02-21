@@ -1,6 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <Core/FrameResource.h>
+#include <Core/Container.h>
 
 namespace fe::dx
 {
@@ -30,7 +30,6 @@ namespace fe::dx
 		Device& operator=(Device&&) noexcept = delete;
 
 		[[nodiscard]] auto&									  GetNative() { return *device.Get(); }
-		std::array<std::reference_wrapper<DescriptorHeap>, 2> GetBindlessDescriptorHeaps();
 		uint32_t											  GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
 		std::optional<Fence>		  CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
@@ -47,23 +46,15 @@ namespace fe::dx
 
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
-		FrameResource<GPUView> CreateConstantBufferView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer);
-		FrameResource<GPUView> CreateShaderResourceView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer);
-		FrameResource<GPUView> CreateUnorderedAccessView(DeferredDeallocator& deferredDeallocator, GPUBuffer& gpuBuffer);
-		FrameResource<GPUView> CreateShaderResourceView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		FrameResource<GPUView> CreateUnorderedAccessView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		FrameResource<GPUView> CreateRenderTargetView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		FrameResource<GPUView> CreateDepthStencilView(DeferredDeallocator& deferredDeallocator, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-
 		// #wip_features
 		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer);
 		void UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer);
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer);
 
-		void UpdateShaderResourceView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		void UpdateShaderResourceView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
+		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
+		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
+		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
 
 
 	private:
@@ -74,23 +65,12 @@ namespace fe::dx
 		void CheckSupportedFeatures();
 		void CacheDescriptorHandleIncrementSize();
 		bool CreateMemoryAllcator();
-		void CreateBindlessDescriptorHeaps();
-
-	private:
-		static constexpr uint32_t NumCbvSrvUavDescriptors = 2048;
-		static constexpr uint32_t NumSamplerDescriptors = 512;
-		static constexpr uint32_t NumRtvDescriptors = 256;
-		static constexpr uint32_t NumDsvDescriptors = NumRtvDescriptors;
 
 	private:
 		ComPtr<IDXGIAdapter>   adapter;
 		ComPtr<ID3D12Device10> device;
 
 		D3D12MA::Allocator*				allocator = nullptr;
-		std::unique_ptr<DescriptorHeap> cbvSrvUavDescriptorHeap;
-		std::unique_ptr<DescriptorHeap> samplerDescriptorHeap;
-		std::unique_ptr<DescriptorHeap> rtvDescriptorHeap;
-		std::unique_ptr<DescriptorHeap> dsvDescriptorHeap;
 
 		uint32_t cbvSrvUavDescriptorHandleIncrementSize = 0;
 		uint32_t samplerDescritorHandleIncrementSize = 0;

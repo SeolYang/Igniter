@@ -1,6 +1,6 @@
 #pragma once
 #include <Renderer/Common.h>
-#include <Core/FrameResource.h>
+#include <D3D12/GPUView.h>
 
 namespace fe::dx
 {
@@ -20,6 +20,8 @@ namespace fe::dx
 	class RootSignature;
 	class PipelineState;
 	class GPUView;
+	class GPUViewManager;
+	class GPUViewHandleDestroyer;
 #pragma endregion
 } // namespace fe::dx
 
@@ -31,7 +33,7 @@ namespace fe
 	class Renderer
 	{
 	public:
-		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device);
+		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, dx::GPUViewManager& gpuViewManager);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
 		~Renderer();
@@ -49,9 +51,11 @@ namespace fe
 		dx::CommandQueue& GetDirectCommandQueue() { return *directCmdQueue; }
 
 	private:
-		const FrameManager&						frameManager;
-		DeferredDeallocator&					deferredDeallocator;
-		dx::Device&								renderDevice;
+		const FrameManager&	 frameManager;
+		DeferredDeallocator& deferredDeallocator;
+		dx::Device&			 renderDevice;
+		dx::GPUViewManager&	 gpuViewManager;
+
 		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
 		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
 		std::unique_ptr<dx::Swapchain>			swapchain;
@@ -66,7 +70,7 @@ namespace fe
 		std::unique_ptr<dx::RootSignature> bindlessRootSignature;
 		std::unique_ptr<dx::PipelineState> pso;
 		std::unique_ptr<dx::GPUTexture>	   depthStencilBuffer;
-		FrameResource<dx::GPUView>		   dsv;
+		UniqueHandle<dx::GPUView, dx::GPUViewHandleDestroyer> dsv;
 #pragma endregion
 	};
 } // namespace fe

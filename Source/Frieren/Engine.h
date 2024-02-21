@@ -8,6 +8,7 @@
 namespace fe::dx
 {
 	class Device;
+	class GPUViewManager;
 }
 
 namespace fe
@@ -53,10 +54,10 @@ namespace fe
 		std::unique_ptr<HandleManager>		 handleManager;
 		std::unique_ptr<DeferredDeallocator> deferredDeallocator;
 		std::unique_ptr<InputManager>		 inputManager;
+		std::unique_ptr<dx::GPUViewManager>	 gpuViewManager;
 		std::unique_ptr<Renderer>			 renderer;
 		std::unique_ptr<ImGuiRenderer>		 imguiRenderer;
 		std::unique_ptr<ImGuiCanvas>		 imguiCanvas;
 		std::unique_ptr<GameInstance>		 gameInstance;
-
 	};
 } // namespace fe
