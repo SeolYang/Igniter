@@ -52,40 +52,6 @@ namespace fe
 		}
 
 #pragma region test
-		dx::GPUBufferDesc vbDesc{};
-		vbDesc.AsVertexBuffer<SimpleVertex>(4);
-		quadVB = std::make_unique<dx::GPUBuffer>(renderDevice.CreateBuffer(vbDesc).value());
-
-		dx::GPUBufferDesc ibDesc{};
-		ibDesc.AsIndexBuffer<uint16_t>(6);
-		quadIB = std::make_unique<dx::GPUBuffer>(renderDevice.CreateBuffer(ibDesc).value());
-
-		dx::Fence		   initialFence = device.CreateFence("InitialFence").value();
-		dx::CommandContext uploadCtx = device.CreateCommandContext(dx::EQueueType::Direct).value();
-
-		dx::GPUBufferDesc quadUploadDesc{};
-		quadUploadDesc.AsUploadBuffer(static_cast<uint32_t>(vbDesc.GetSizeAsBytes() + ibDesc.GetSizeAsBytes()));
-		dx::GPUBuffer	   quadUploadBuffer = renderDevice.CreateBuffer(quadUploadDesc).value();
-		const SimpleVertex vertices[4] = {
-			{ -.5f, 0.f, 0.f },
-			{ -0.5f, 0.5f, 0.f },
-			{ .5f, 0.5f, 0.f },
-			{ .5f, 0.f, 0.f }
-		};
-		const uint16_t indices[6] = {
-			0,
-			1,
-			2,
-			2,
-			3,
-			0
-		};
-		{
-			dx::GPUResourceMapGuard mappedUploadBuffer = quadUploadBuffer.Map();
-			std::memcpy(mappedUploadBuffer.get(), vertices, vbDesc.GetSizeAsBytes());
-			std::memcpy(mappedUploadBuffer.get() + vbDesc.GetSizeAsBytes(), indices, ibDesc.GetSizeAsBytes());
-		}
-
 		bindlessRootSignature = std::make_unique<dx::RootSignature>(device.CreateBindlessRootSignature().value());
 
 		const dx::ShaderCompileDesc vsDesc{
@@ -131,51 +97,21 @@ namespace fe
 		depthStencilBuffer = std::make_unique<dx::GPUTexture>(device.CreateTexture(depthStencilDesc).value());
 		dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, { .MipSlice = 0 });
 
-		uploadCtx.Begin();
-		uploadCtx.AddPendingBufferBarrier(
-			*quadVB,
-			D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-			D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
-
-		uploadCtx.AddPendingBufferBarrier(
-			*quadIB,
-			D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-			D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
-
-		uploadCtx.AddPendingBufferBarrier(
-			quadUploadBuffer,
-			D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-			D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
-
-		uploadCtx.AddPendingTextureBarrier(
+		/* #todo 배리어만 적용하는 방법 찾아보기
+		* D3D12 WARNING: ID3D12CommandQueue::ExecuteCommandLists: ExecuteCommandLists references command lists that have recorded only Barrier commands. Since there is no other GPU work to synchronize against, all barriers should use AccessAfter / AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS and SyncBefore / SyncAfter = D3D12_BARRIER_SYNC_NONE. This information can be used as an optimization hint by some drivers. [ EXECUTION WARNING #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS]
+		D3D12: **BREAK** enabled for the previous message, which was: [ WARNING EXECUTION #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS ]
+		*/
+		auto cmdCtx = directCmdCtxPool->Request();
+		cmdCtx->Begin();
+		cmdCtx->AddPendingTextureBarrier(
 			*depthStencilBuffer,
 			D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
 			D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
 			D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
+		cmdCtx->FlushBarriers();
+		cmdCtx->End();
 
-		uploadCtx.FlushBarriers();
-
-		uploadCtx.CopyBuffer(quadUploadBuffer, 0, vbDesc.GetSizeAsBytes(), *quadVB, 0);
-		uploadCtx.CopyBuffer(quadUploadBuffer, vbDesc.GetSizeAsBytes(), ibDesc.GetSizeAsBytes(), *quadIB, 0);
-
-		uploadCtx.AddPendingBufferBarrier(
-			*quadVB,
-			D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_VERTEX_SHADING,
-			D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_VERTEX_BUFFER);
-
-		uploadCtx.AddPendingBufferBarrier(
-			*quadIB,
-			D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_INDEX_INPUT,
-			D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_INDEX_BUFFER);
-
-		uploadCtx.FlushBarriers();
-		uploadCtx.End();
-
-		directCmdQueue->AddPendingContext(uploadCtx);
-		directCmdQueue->FlushPendingContexts();
-		directCmdQueue->NextSignalTo(initialFence);
-		initialFence.WaitOnCPU();
-
+		directCmdQueue->AddPendingContext(*cmdCtx);
 #pragma endregion
 	}
 
@@ -197,11 +133,9 @@ namespace fe
 		frameFences[frameManager.GetLocalFrameIndex()].WaitOnCPU();
 	}
 
-	void Renderer::Render()
+	void Renderer::Render(World& world)
 	{
-		// 더 발전된 형태로는 수시로 CmdQueue에 CmdCtx를 제출하고, 필요하다면 서로다른
-		// 형태의 CmdQueue와 병렬적으로 동작하며 동기화 될 수 있도록 하는 것이 최적.
-		// 이 때, frame fences의 signal은 present 직전에 back buffer에 그리기 직전에 수행하는 것이 좋을 것 같음.
+
 		check(directCmdQueue);
 		check(directCmdCtxPool);
 
@@ -209,44 +143,6 @@ namespace fe
 		renderCmdCtx->Begin(pso.get());
 		{
 			auto bindlessDescriptorHeaps = gpuViewManager.GetBindlessDescriptorHeaps();
-			renderCmdCtx->SetDescriptorHeaps(bindlessDescriptorHeaps);
-			renderCmdCtx->SetRootSignature(*bindlessRootSignature);
-			renderCmdCtx->SetVertexBuffer(*quadVB);
-			renderCmdCtx->SetIndexBuffer(*quadIB);
-
-			check(swapchain);
-			dx::GPUTexture&	   backBuffer = swapchain->GetBackBuffer();
-			const dx::GPUView& backBufferRTV = swapchain->GetRenderTargetView();
-			renderCmdCtx->AddPendingTextureBarrier(backBuffer,
-												   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-												   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-												   D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-			renderCmdCtx->FlushBarriers();
-
-			renderCmdCtx->ClearRenderTarget(backBufferRTV);
-			renderCmdCtx->ClearDepth(*dsv);
-			renderCmdCtx->SetRenderTarget(backBufferRTV, *dsv);
-			renderCmdCtx->SetViewport(0.f, 0.f, 1280.f, 642.f);
-			renderCmdCtx->SetScissorRect(0, 0, 1280, 642);
-			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			renderCmdCtx->DrawIndexed(6);
-		}
-		renderCmdCtx->End();
-
-		directCmdQueue->AddPendingContext(*renderCmdCtx);
-	}
-
-	void Renderer::Render(World& world)
-	{
-		world;
-		/*
-		check(directCmdQueue);
-		check(directCmdCtxPool);
-
-		FrameResource<dx::CommandContext> renderCmdCtx = directCmdCtxPool->Request(deferredDeallocator);
-		renderCmdCtx->Begin(pso.get());
-		{
-			auto bindlessDescriptorHeaps = renderDevice.GetBindlessDescriptorHeaps();
 			renderCmdCtx->SetDescriptorHeaps(bindlessDescriptorHeaps);
 			renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
@@ -269,15 +165,12 @@ namespace fe
 			world.Each<StaticMeshComponent>([&renderCmdCtx](StaticMeshComponent& component) {
 				renderCmdCtx->SetVertexBuffer(*component.VertexBufferHandle);
 				renderCmdCtx->SetIndexBuffer(*component.IndexBufferHandle);
-				renderCmdCtx->DrawIndexed(6);
+				renderCmdCtx->DrawIndexed(component.NumIndices);
 			});
-
-			renderCmdCtx->SetVertexBuffer(*quadVB);
-			renderCmdCtx->SetIndexBuffer(*quadIB);
 		}
 		renderCmdCtx->End();
 
-		directCmdQueue->AddPendingContext(*renderCmdCtx);*/
+		directCmdQueue->AddPendingContext(*renderCmdCtx);
 	}
 
 	void Renderer::EndFrame()

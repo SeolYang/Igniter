@@ -34,6 +34,7 @@ namespace fe
 		[[nodiscard]] static Logger&		GetLogger();
 		[[nodiscard]] static HandleManager& GetHandleManager();
 		[[nodiscard]] static Window&		GetWindow();
+		[[nodiscard]] static dx::Device&	GetRenderDevice();
 		[[nodiscard]] static InputManager&	GetInputManager();
 		[[nodiscard]] static Renderer&		GetRenderer();
 		[[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();

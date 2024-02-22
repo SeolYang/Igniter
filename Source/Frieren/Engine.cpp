@@ -96,6 +96,12 @@ namespace fe
 		return *(instance->window);
 	}
 
+	dx::Device& Engine::GetRenderDevice()
+	{
+		check(instance != nullptr);
+		return *(instance->renderDevice);
+	}
+
 	InputManager& Engine::GetInputManager()
 	{
 		check(instance != nullptr);
@@ -154,7 +160,10 @@ namespace fe
 
 			renderer->BeginFrame();
 
-			renderer->Render();
+			if (gameInstance->HasWorld())
+			{
+				renderer->Render(gameInstance->GetWorld());
+			}
 			imguiRenderer->Render(*imguiCanvas, *renderer);
 
 			renderer->EndFrame();

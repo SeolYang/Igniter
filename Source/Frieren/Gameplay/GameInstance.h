@@ -22,6 +22,9 @@ namespace fe
 		void SetWorld(std::unique_ptr<World> newWorld);
 		void SetGameFlow(std::unique_ptr<GameFlow> newGameFlow);
 
+		bool HasWorld() const { return world != nullptr; }
+		World& GetWorld() { return *world; }
+
 	private:
 		std::unique_ptr<World>	  world;
 		std::unique_ptr<GameFlow> gameFlow;

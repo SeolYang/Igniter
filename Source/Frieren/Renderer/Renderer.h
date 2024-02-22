@@ -62,8 +62,6 @@ namespace fe
 
 #pragma region test
 		// #test
-		std::unique_ptr<dx::GPUBuffer>				   quadVB;
-		std::unique_ptr<dx::GPUBuffer>				   quadIB;
 		std::unique_ptr<dx::ShaderBlob>				   vs;
 		std::unique_ptr<dx::ShaderBlob>				   ps;
 		std::unique_ptr<dx::RootSignature>			   bindlessRootSignature;
