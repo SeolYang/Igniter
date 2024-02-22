@@ -5,6 +5,8 @@
 
 namespace fe
 {
+	constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
+	constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
 	constexpr size_t CalculateAlignAdjustment(const size_t size, const size_t alignment)
 	{
 		check(size >= sizeof(void*));

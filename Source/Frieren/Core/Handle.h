@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Assert.h>
 #include <Core/HashUtils.h>
+#include <Core/MemUtils.h>
 #include <Core/Container.h>
 
 namespace fe

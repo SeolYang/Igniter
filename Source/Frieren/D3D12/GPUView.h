@@ -1,7 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
 #include <Core/Handle.h>
-#include <Core/Misc.h>
 
 namespace fe::dx
 {

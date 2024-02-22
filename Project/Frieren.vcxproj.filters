@@ -39,9 +39,6 @@
     <ClInclude Include="..\Source\Frieren\Core\HashUtils.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\Misc.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h">
       <Filter>Source\Core</Filter>
     </ClInclude>

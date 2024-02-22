@@ -1,6 +1,5 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <Core/Misc.h>
 #include <Core/Mutex.h>
 #include <Core/Container.h>
 
