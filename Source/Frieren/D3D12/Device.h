@@ -46,7 +46,6 @@ namespace fe::dx
 
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
-		// #wip_features
 		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer);
 		void UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer);
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer);
@@ -55,7 +54,6 @@ namespace fe::dx
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
 		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
 		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
-
 
 	private:
 		bool AcquireAdapterFromFactory();

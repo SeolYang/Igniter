@@ -18,6 +18,7 @@
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUViewManager.h>
+#include <D3D12/GPUView.h>
 #include <Gameplay/World.h>
 #include <Renderer/StaticMeshComponent.h>
 

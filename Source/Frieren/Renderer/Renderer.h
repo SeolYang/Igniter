@@ -1,6 +1,6 @@
 #pragma once
 #include <Renderer/Common.h>
-#include <D3D12/GPUView.h>
+#include <Core/Handle.h>
 
 namespace fe::dx
 {
@@ -21,7 +21,6 @@ namespace fe::dx
 	class PipelineState;
 	class GPUView;
 	class GPUViewManager;
-	class GPUViewHandleDestroyer;
 #pragma endregion
 } // namespace fe::dx
 
@@ -63,14 +62,14 @@ namespace fe
 
 #pragma region test
 		// #test
-		std::unique_ptr<dx::GPUBuffer>	   quadVB;
-		std::unique_ptr<dx::GPUBuffer>	   quadIB;
-		std::unique_ptr<dx::ShaderBlob>	   vs;
-		std::unique_ptr<dx::ShaderBlob>	   ps;
-		std::unique_ptr<dx::RootSignature> bindlessRootSignature;
-		std::unique_ptr<dx::PipelineState> pso;
-		std::unique_ptr<dx::GPUTexture>	   depthStencilBuffer;
-		UniqueHandle<dx::GPUView, dx::GPUViewHandleDestroyer> dsv;
+		std::unique_ptr<dx::GPUBuffer>				   quadVB;
+		std::unique_ptr<dx::GPUBuffer>				   quadIB;
+		std::unique_ptr<dx::ShaderBlob>				   vs;
+		std::unique_ptr<dx::ShaderBlob>				   ps;
+		std::unique_ptr<dx::RootSignature>			   bindlessRootSignature;
+		std::unique_ptr<dx::PipelineState>			   pso;
+		std::unique_ptr<dx::GPUTexture>				   depthStencilBuffer;
+		UniqueHandle<dx::GPUView, dx::GPUViewManager*> dsv;
 #pragma endregion
 	};
 } // namespace fe

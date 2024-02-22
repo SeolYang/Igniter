@@ -4,6 +4,7 @@
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUViewManager.h>
+#include <D3D12/GPUView.h>
 #include <Core/Window.h>
 
 namespace fe::dx

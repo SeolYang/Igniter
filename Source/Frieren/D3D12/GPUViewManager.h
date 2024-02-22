@@ -15,14 +15,9 @@ namespace fe::dx
 	class GPUTexture;
 	class Device;
 	class DescriptorHeap;
-	class GPUViewManager;
-	// #todo 아예 GPUViewManager로 합쳐버리기 -> UniqueHandle Destroyer 좀더 손보기
-
-
-	// #wip_features
 	class GPUViewManager
 	{
-		friend class GPUViewHandleDestroyer;
+		friend class UniqueHandle<GPUView, GPUViewManager*>;
 
 	public:
 		GPUViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Device& device);
@@ -155,7 +150,7 @@ namespace fe::dx
 		}
 
 	private:
-		UniqueHandle<GPUView, GPUViewHandleDestroyer> MakeHandle(const GPUView view);
+		UniqueHandle<GPUView, GPUViewManager*> MakeHandle(const GPUView& view);
 
 		std::optional<GPUView> Allocate(const EGPUViewType type);
 		void				   Deallocate(const GPUView& gpuView);
@@ -168,6 +163,7 @@ namespace fe::dx
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
+		void operator()(Handle handle, const uint64_t evaluatedTypeHash);
 
 	private:
 		HandleManager&		 handleManager;

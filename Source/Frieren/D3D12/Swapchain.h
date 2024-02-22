@@ -1,6 +1,5 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <D3D12/GPUView.h>
 #include <Core/Assert.h>
 #include <Core/Handle.h>
 
@@ -15,6 +14,7 @@ namespace fe::dx
 	class CommandQueue;
 	class DescriptorHeap;
 	class GPUViewManager;
+	class GPUView;
 	class GPUTexture;
 	class Swapchain
 	{
@@ -42,9 +42,9 @@ namespace fe::dx
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;
 
-		const uint8_t											   numBackBuffers;
-		std::vector<GPUTexture>									   backBuffers;
-		std::vector<UniqueHandle<GPUView, GPUViewHandleDestroyer>> renderTargetViews;
+		const uint8_t										numBackBuffers;
+		std::vector<GPUTexture>								backBuffers;
+		std::vector<UniqueHandle<GPUView, GPUViewManager*>> renderTargetViews;
 
 		bool bIsTearingSupport = false;
 	};

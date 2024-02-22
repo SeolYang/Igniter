@@ -16,12 +16,10 @@ namespace fe::dx
 		  rtvHeap(std::make_unique<DescriptorHeap>(device.CreateDescriptorHeap(EDescriptorHeapType::RTV, NumRtvDescriptors).value())),
 		  dsvHeap(std::make_unique<DescriptorHeap>(device.CreateDescriptorHeap(EDescriptorHeapType::DSV, NumDsvDescriptors).value()))
 	{
-		GPUViewHandleDestroyer::InitialGlobalData(&deferredDeallocator, this);
 	}
 
 	GPUViewManager::~GPUViewManager()
 	{
-		GPUViewHandleDestroyer::InitialGlobalData(nullptr, nullptr);
 	}
 
 	std::array<std::reference_wrapper<DescriptorHeap>, 2> GPUViewManager::GetBindlessDescriptorHeaps()
@@ -64,9 +62,17 @@ namespace fe::dx
 		device.UpdateDepthStencilView(gpuView, gpuTexture, subresource);
 	}
 
-	UniqueHandle<GPUView, GPUViewHandleDestroyer> GPUViewManager::MakeHandle(const GPUView view)
+	UniqueHandle<GPUView, GPUViewManager*> GPUViewManager::MakeHandle(const GPUView& view)
 	{
-		return view.IsValid() ? UniqueHandle<GPUView, GPUViewHandleDestroyer>{ handleManager, view } : UniqueHandle<GPUView, GPUViewHandleDestroyer>{};
+		UniqueHandle<GPUView, GPUViewManager*> res;
+		if (view.IsValid())
+		{
+			res = UniqueHandle<GPUView, GPUViewManager*>{
+				handleManager, this, view
+			};
+		}
+		
+		return res;
 	}
 	
 	std::optional<GPUView> GPUViewManager::Allocate(const EGPUViewType type)
@@ -115,27 +121,14 @@ namespace fe::dx
 		checkNoEntry();
 	}
 
-	DeferredDeallocator* GPUViewHandleDestroyer::deferredDeallocator = nullptr;
-	GPUViewManager* GPUViewHandleDestroyer::gpuViewManager = nullptr;
-
-	void GPUViewHandleDestroyer::operator()(Handle handle, const uint64_t evaluatedTypeHash) const
+	void GPUViewManager::operator()(Handle handle, const uint64_t evaluatedTypeHash)
 	{
-		check(GPUViewHandleDestroyer::deferredDeallocator != nullptr);
-		Private::RequestDeallocation(*deferredDeallocator, [handle, evaluatedTypeHash]() {
+		Private::RequestDeallocation(deferredDeallocator, [this, handle, evaluatedTypeHash]() {
 			const GPUView* view = reinterpret_cast<const GPUView*>(handle.GetAddressOf(evaluatedTypeHash));
 			check(view != nullptr && view->IsValid());
-
-			check(GPUViewHandleDestroyer::gpuViewManager != nullptr);
-			GPUViewHandleDestroyer::gpuViewManager->Deallocate(*view);
-
+			this->Deallocate(*view);
 			Handle targetHandle = handle;
 			targetHandle.Deallocate(evaluatedTypeHash);
 		});
-	}
-
-	void GPUViewHandleDestroyer::InitialGlobalData(DeferredDeallocator* deallocator, GPUViewManager* manager)
-	{
-		GPUViewHandleDestroyer::deferredDeallocator = deallocator;
-		GPUViewHandleDestroyer::gpuViewManager = manager;
 	}
 } // namespace fe::dx

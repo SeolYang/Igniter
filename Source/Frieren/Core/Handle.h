@@ -5,12 +5,6 @@
 
 namespace fe
 {
-	class DeferredDeallocator;
-	namespace Private
-	{
-		void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester);
-	} // namespace Private
-
 	class HandleManager;
 	class Handle
 	{
@@ -133,21 +127,68 @@ namespace fe
 	class UniqueHandle
 	{
 	public:
-		UniqueHandle() = default;
-		UniqueHandle(const UniqueHandle&) = delete;
-		UniqueHandle(UniqueHandle&& other) noexcept
-			: handle(std::move(other.handle)), destroyer(std::move(other.destroyer))
+		template <typename D = Destroyer>
+			requires(!std::is_pointer_v<D> && std::is_constructible_v<D>)
+		UniqueHandle()
 		{
 		}
 
-		UniqueHandle(const Destroyer& destroyer)
-			: handle(), destroyer(destroyer)
+		template <typename D = Destroyer>
+			requires(std::is_pointer_v<D>)
+		UniqueHandle()
+			: destroyer(nullptr)
+		{
+		}
+
+		UniqueHandle(const UniqueHandle&) = delete;
+
+		template <typename D = Destroyer>
+			requires(!std::is_pointer_v<D>)
+		UniqueHandle(UniqueHandle&& other) noexcept
+			: handle(std::move(other.handle)),
+			  destroyer(std::move(other.destroyer))
+		{
+		}
+
+		template <typename D = Destroyer>
+			requires(std::is_pointer_v<D>)
+		UniqueHandle(UniqueHandle&& other) noexcept
+			: handle(std::move(other.handle)),
+			  destroyer(std::exchange(other.destroyer, nullptr))
 		{
 		}
 
 		template <typename... Args>
+			requires(!std::is_pointer_v<Destroyer>)
+		UniqueHandle(const Destroyer& destroyer)
+			: destroyer(destroyer)
+		{
+		}
+
+		template <typename... Args>
+			requires(std::is_pointer_v<Destroyer>)
+		UniqueHandle(const Destroyer destroyer)
+			: destroyer(destroyer)
+		{
+		}
+
+		template <typename... Args>
+			requires(!std::is_pointer_v<Destroyer>)
 		UniqueHandle(HandleManager& handleManager, const Destroyer& destroyer, Args&&... args)
-			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)), destroyer(destroyer)
+			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
+			  destroyer(destroyer)
+		{
+			check(IsAlive());
+			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+			check(instancePtr != nullptr);
+			new (instancePtr) T(std::forward<Args>(args)...);
+		}
+
+		template <typename... Args >
+			requires(std::is_pointer_v<Destroyer>)
+		UniqueHandle(HandleManager& handleManager, const Destroyer destroyer, Args&&... args)
+			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
+			  destroyer(destroyer)
 		{
 			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
@@ -156,6 +197,7 @@ namespace fe
 		}
 
 		template <typename... Args>
+			requires(!std::is_pointer_v<Destroyer> && std::is_constructible_v<Destroyer>)
 		UniqueHandle(HandleManager& handleManager, Args&&... args)
 			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
 		{
@@ -171,10 +213,24 @@ namespace fe
 		}
 
 		UniqueHandle& operator=(const UniqueHandle&) = delete;
+
+		template <typename... Args, typename D = Destroyer>
+			requires(!std::is_pointer_v<D>)
 		UniqueHandle& operator=(UniqueHandle&& other) noexcept
 		{
 			Destroy();
 			handle = std::move(other.handle);
+			destroyer = std::move(other.destroyer);
+			return *this;
+		}
+
+		template <typename... Args>
+			requires(std::is_pointer_v<Destroyer>)
+		UniqueHandle& operator=(UniqueHandle&& other) noexcept
+		{
+			Destroy();
+			handle = std::move(other.handle);
+			destroyer = std::exchange(other.destroyer, nullptr);
 			return *this;
 		}
 
@@ -209,6 +265,21 @@ namespace fe
 		bool IsAlive() const { return handle.IsAlive(EvaluatedTypeHashVal); }
 		operator bool() const { return IsAlive(); }
 
+		template <typename D = Destroyer>
+			requires(std::is_pointer_v<D>)
+		void Destroy()
+		{
+			if (IsAlive())
+			{
+				check(destroyer != nullptr);
+				handle.MarkAsPendingDeallocation(EvaluatedTypeHashVal);
+				(*destroyer)(handle, EvaluatedTypeHashVal);
+				handle = {};
+			}
+		}
+
+		template <typename D = Destroyer>
+			requires(!std::is_pointer_v<D>)
 		void Destroy()
 		{
 			if (IsAlive())
