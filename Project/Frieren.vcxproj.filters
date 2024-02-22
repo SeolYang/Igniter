@@ -159,9 +159,6 @@
     <ClInclude Include="..\Source\Frieren\Core\DeferredDeallocator.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\FrameResource.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContextPool.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
@@ -279,9 +276,6 @@
       <Filter>Source\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Core\FrameResource.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContextPool.cpp">

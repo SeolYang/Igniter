@@ -13,7 +13,7 @@ namespace fe
 		FlushAllFrames();
 	}
 
-	void DeferredDeallocator::RequestDeallocation(DefaultCallback&& requester)
+	void DeferredDeallocator::RequestDeallocation(DefaultCallback requester)
 	{
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 		pendingRequesters[localFrameIdx].push(std::move(requester));
@@ -42,4 +42,8 @@ namespace fe
 		}
 	}
 
+	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester)
+	{
+		deferredDeallocator.RequestDeallocation(std::move(requester));
+	}
 } // namespace fe

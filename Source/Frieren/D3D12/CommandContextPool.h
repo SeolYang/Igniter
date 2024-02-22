@@ -5,11 +5,7 @@
 namespace fe
 {
 	class DeferredDeallocator;
-}
-
-namespace fe::Private
-{
-	void RequestDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback&& requester);
+	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
 }
 
 namespace fe::dx
@@ -27,7 +23,7 @@ namespace fe::dx
 			const auto deleter = [this](CommandContext* ptr) {
 				if (ptr != nullptr)
 				{
-					Private::RequestDeallocation(deferredDeallocator, [ptr, this]() { this->Return(ptr); });
+					RequestDeferredDeallocation(deferredDeallocator, [ptr, this]() { this->Return(ptr); });
 				}
 			};
 

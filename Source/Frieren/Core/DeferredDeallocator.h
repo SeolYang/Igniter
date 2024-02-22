@@ -17,7 +17,7 @@ namespace fe
 		DeferredDeallocator&  operator=(const DeferredDeallocator&) = delete;
 		DeferredDeallocator& operator=(DeferredDeallocator&&) = delete;
 
-		void RequestDeallocation(DefaultCallback&& requester);
+		void RequestDeallocation(DefaultCallback requester);
 		void FlushCurrentFrame();
 		void FlushAllFrames();
 
@@ -28,4 +28,6 @@ namespace fe
 		const FrameManager&															  frameManager;
 		std::array<concurrency::concurrent_queue<DefaultCallback>, NumFramesInFlight> pendingRequesters;
 	};
+
+	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
 } // namespace fe

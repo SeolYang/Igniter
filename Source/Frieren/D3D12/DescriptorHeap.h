@@ -3,7 +3,6 @@
 #include <Core/Misc.h>
 #include <Core/Mutex.h>
 #include <Core/Container.h>
-#include <Core/FrameResource.h>
 
 namespace fe::dx
 {

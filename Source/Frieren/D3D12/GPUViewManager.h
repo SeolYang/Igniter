@@ -7,6 +7,7 @@ namespace fe
 {
 	class HandleManager;
 	class DeferredDeallocator;
+	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
 } // namespace fe
 
 namespace fe::dx

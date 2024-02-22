@@ -1,5 +1,4 @@
 #pragma once
-#include <Core/FrameResource.h>
 #include <Core/Handle.h>
 
 namespace fe::dx

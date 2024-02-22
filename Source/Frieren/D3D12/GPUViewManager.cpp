@@ -123,7 +123,7 @@ namespace fe::dx
 
 	void GPUViewManager::operator()(Handle handle, const uint64_t evaluatedTypeHash)
 	{
-		Private::RequestDeallocation(deferredDeallocator, [this, handle, evaluatedTypeHash]() {
+		RequestDeferredDeallocation(deferredDeallocator, [this, handle, evaluatedTypeHash]() {
 			const GPUView* view = reinterpret_cast<const GPUView*>(handle.GetAddressOf(evaluatedTypeHash));
 			check(view != nullptr && view->IsValid());
 			this->Deallocate(*view);
