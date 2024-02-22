@@ -20,7 +20,7 @@ namespace fe::dx
 		GPUBuffer& operator=(const GPUBuffer&) = delete;
 		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
 
-		bool IsValid() const { return (allocation != nullptr && resource != nullptr) || resource != nullptr; }
+		bool IsValid() const { return (allocation && resource) || resource; }
 		operator bool() const { return IsValid(); }
 
 		const GPUBufferDesc& GetDesc() const { return desc; }

@@ -20,7 +20,7 @@ namespace fe::dx
 		GPUTexture& operator=(const GPUTexture&) = delete;
 		GPUTexture& operator=(GPUTexture&& other) noexcept;
 
-		bool IsValid() const { return allocation || resource; }
+		bool IsValid() const { return (allocation && resource) || resource; }
 		operator bool() const { return IsValid(); }
 
 		const GPUTextureDesc& GetDesc() const { return desc; }
@@ -30,6 +30,7 @@ namespace fe::dx
 			check(resource);
 			return *resource.Get();
 		}
+
 		auto& GetNative()
 		{
 			check(resource);
