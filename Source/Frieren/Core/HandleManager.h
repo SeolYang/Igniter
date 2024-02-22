@@ -11,7 +11,12 @@ namespace fe
 
 	public:
 		HandleManager() = default;
+		HandleManager(const HandleManager&) = delete;
+		HandleManager(HandleManager&&) noexcept = delete;
 		~HandleManager();
+
+		HandleManager& operator=(const HandleManager&) = delete;
+		HandleManager& operator=(HandleManager&&) = delete;
 
 	private:
 		uint64_t Allocate(const uint64_t typeHashVal, const size_t sizeOfElement, const size_t alignOfElement);
