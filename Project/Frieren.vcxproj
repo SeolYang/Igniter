@@ -50,9 +50,11 @@
     <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
+    <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\Common.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiCanvas.h" />
@@ -79,6 +81,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp" />

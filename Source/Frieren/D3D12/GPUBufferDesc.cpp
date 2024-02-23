@@ -23,6 +23,7 @@ namespace fe::dx
 		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_NONE;
+		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
 	void GPUBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
@@ -45,6 +46,7 @@ namespace fe::dx
 		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = bIsShaderReadWritable ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
 	void GPUBufferDesc::AsUploadBuffer(const uint32_t sizeOfBufferInBytes)
@@ -66,6 +68,7 @@ namespace fe::dx
 		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
+		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
 	void GPUBufferDesc::AsReadbackBuffer(const uint32_t sizeOfBufferInBytes)
@@ -87,6 +90,7 @@ namespace fe::dx
 		SampleDesc = { .Count = 1, .Quality = 0 };
 		Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		Flags = D3D12_RESOURCE_FLAG_NONE;
+		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
 	void GPUBufferDesc::AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices)
@@ -139,6 +143,9 @@ namespace fe::dx
 		D3D12MA::ALLOCATION_DESC desc{ .HeapType = D3D12_HEAP_TYPE_DEFAULT };
 		switch (bufferType)
 		{
+			case EBufferType::ConstantBuffer:
+				desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+				break;
 			case EBufferType::UploadBuffer:
 				desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
 				break;

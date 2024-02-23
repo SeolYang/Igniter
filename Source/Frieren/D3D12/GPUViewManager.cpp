@@ -32,6 +32,11 @@ namespace fe::dx
 		device.UpdateConstantBufferView(gpuView, buffer);
 	}
 
+	void GPUViewManager::UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
+	{
+		device.UpdateConstantBufferView(gpuView, buffer, offset, sizeInBytes);
+	}
+
 	void GPUViewManager::UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer)
 	{
 		device.UpdateShaderResourceView(gpuView, buffer);

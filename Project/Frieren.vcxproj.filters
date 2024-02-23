@@ -186,6 +186,12 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GPUView.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -288,6 +294,9 @@
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\GPUViewManager.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
   </ItemGroup>

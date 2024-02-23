@@ -66,6 +66,16 @@ namespace fe
 	{
 		if (IsAlive(handle))
 		{
+			uint64_t* handleInUseFlagPtr = GetHandleInUseFlagPtr(handle);
+			if (handleInUseFlagPtr != nullptr)
+			{
+				*handleInUseFlagPtr = HandleCurrentlyNotInUseFlag;
+			}
+			else
+			{
+				checkNoEntry();
+			}
+
 			pool.push(handle);
 		}
 		else

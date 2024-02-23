@@ -47,6 +47,7 @@ namespace fe::dx
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
 		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer);
+		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
 		void UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer);
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer);
 
@@ -54,6 +55,8 @@ namespace fe::dx
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
 		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
 		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
+
+		ComPtr<D3D12MA::Pool> CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc);
 
 	private:
 		bool AcquireAdapterFromFactory();

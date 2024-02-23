@@ -3,9 +3,9 @@
 #include <Core/Timer.h>
 #include <Core/Log.h>
 #include <Gameplay/World.h>
+#include <Gameplay/PositionComponent.h>
 #include <HealthComponent.h>
 #include <HealthRecoveryBuff.h>
-#include <PositionComponent.h>
 #include <PlayerComponent.h>
 #include <ControllableTag.h>
 
@@ -32,8 +32,8 @@ void PlayerControllSystem::HandleMoveAction(fe::World& world)
 	{
 		if (moveLeftAction->IsAnyPressing())
 		{
-			world.Each<Player, PositionComponent, Controllable>(
-				[this](Player& player, PositionComponent& position) {
+			world.Each<Player, fe::PositionComponent, Controllable>(
+				[this](Player& player, fe::PositionComponent& position) {
 					position.x -= player.movementPower * timer.GetDeltaTime();
 				});
 		}
@@ -43,8 +43,8 @@ void PlayerControllSystem::HandleMoveAction(fe::World& world)
 	{
 		if (moveRightAction->IsAnyPressing())
 		{
-			world.Each<Player, Controllable, PositionComponent>(
-				[this](Player& player, PositionComponent& position) {
+			world.Each<Player, Controllable, fe::PositionComponent>(
+				[this](Player& player, fe::PositionComponent& position) {
 					position.x += player.movementPower * timer.GetDeltaTime();
 				});
 		}
@@ -77,8 +77,8 @@ void PlayerControllSystem::HandleDisplayPlayerInfoAction(fe::World& world)
 	{
 		if (displayPlayerInfoAction->State == fe::EInputState::Pressed)
 		{
-			world.Each<Player, HealthComponent, PositionComponent>(
-				[](const Player& player, const HealthComponent& healthComponent, const PositionComponent& position) {
+			world.Each<Player, HealthComponent, fe::PositionComponent>(
+				[](const Player& player, const HealthComponent& healthComponent, const fe::PositionComponent& position) {
 					FE_LOG(fe::LogInfo, "Health Recovery Buff remains: {}, Health: {}", player.remainHealthRecoveryBuff, healthComponent.value);
 					FE_LOG(fe::LogInfo, "Position: {}", position.x);
 				});

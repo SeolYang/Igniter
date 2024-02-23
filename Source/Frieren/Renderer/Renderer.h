@@ -21,6 +21,7 @@ namespace fe::dx
 	class PipelineState;
 	class GPUView;
 	class GPUViewManager;
+	class TempConstantBufferAllocator;
 #pragma endregion
 } // namespace fe::dx
 
@@ -32,7 +33,7 @@ namespace fe
 	class Renderer
 	{
 	public:
-		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, dx::GPUViewManager& gpuViewManager);
+		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GPUViewManager& gpuViewManager);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
 		~Renderer();
@@ -42,7 +43,6 @@ namespace fe
 
 		void WaitForFences();
 		void BeginFrame();
-		void Render();
 		void Render(World& world);
 		void EndFrame();
 
@@ -53,12 +53,15 @@ namespace fe
 		const FrameManager&	 frameManager;
 		DeferredDeallocator& deferredDeallocator;
 		dx::Device&			 renderDevice;
+		HandleManager&		 handleManager;
 		dx::GPUViewManager&	 gpuViewManager;
 
 		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
 		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
 		std::unique_ptr<dx::Swapchain>			swapchain;
 		std::vector<dx::Fence>					frameFences;
+
+		std::unique_ptr<dx::TempConstantBufferAllocator> tempConstantBufferAllocator;
 
 #pragma region test
 		// #test
@@ -68,6 +71,7 @@ namespace fe
 		std::unique_ptr<dx::PipelineState>			   pso;
 		std::unique_ptr<dx::GPUTexture>				   depthStencilBuffer;
 		UniqueHandle<dx::GPUView, dx::GPUViewManager*> dsv;
+
 #pragma endregion
 	};
 } // namespace fe

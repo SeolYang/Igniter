@@ -296,24 +296,53 @@ namespace fe::dx
 	{
 		check(device);
 
+		// #todo #wip 각 타입에 맞는 Bindless Descriptor Range 설정 및 생성
 		// WITH THOSE FLAGS, IT MUST BIND DESCRIPTOR HEAP FIRST BEFORE BINDING ROOT SIGNATURE
-		/*
-		  D3D12_DESCRIPTOR_RANGE			texture2DRange{};
-		  texture2DRange.BaseShaderRegister = 0;
-		  texture2DRange.NumDescriptors = 1024;
-		  texture2DRange.OffsetInDescriptorsFromTableStart = 0;
-		  texture2DRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-		  texture2DRange.RegisterSpace = 0;
+		// ------- 참고자료 확인 전 아이디어 --------
+		// Root Signature 를 Shader Reflection 으로 생성 하는 방법도 알아낼필요가 있을 것 같음.
+		// device.CreateRootSignatureFromShader(shader) -> Reflecting shader -> create rootsignature desc -> hash roogsignature desc -> if DNE in table -> create new root signature object
+		// 쉐이더에서 bindless descriptor 를 활용하기 위해선
+		// 1. 각 View 타입에 따라 register space 할당
+		// 2. 쉐이더에서, 접근할 View 의 Index 를 알아야함.  (GPUView.Index -> Constant Buffer -> Use in shader to access specific descriptor )
+		// 3. (2)를 위해서, 특별한 Constant Buffer 가 필요함. View 의 Index 는 생성될 때 확정, 얘네를 아에 inline descriptor 로 보내버리거나.. root constant로 공급 해주는
+		// 방법도 있긴함.
+		// 쉐이더 레지스터 스페이스등에 대한 자세한 이해가 필요
+		// -----------------------------------------
+		// 참고자료 =>
+		// https://rtarun9.github.io/blogs/bindless_rendering/
+		// Raytacing Gems 2 - Chapter 17
+		// ------- 참고자료 확인 후 아이디어 -------
+		//  Root Signature 를 통해 총 64 DWORD 분량의 데이터를 제공 할 수 있다.
+		//  Root Parameter(Root Constant, Root Descriptor, Root Descriptor Table) 중에서
+		//  Root Constant = 1DWORD (4바이트) 크기이며, Set(Graphics/Compute)Root32BitsConstant 를 통해, 총 64*4 바이트의
+		//  데이터를, 한 개의 루트 시그니처의 argument 로 포함시켜서 쉐이더에 제공 할 수 있다.
+		//  즉, 이를 통해 descriptor(view)의 index 를 쉐이더에 제공 할 수 있다.
+		// 추가 참고자료 => https://microsoft.github.io/DirectX-Specs/d3d/HLSL_SM_6_6_DynamicResources.html
+		// 레이트레이싱 젬의 내용은 다소 이전 단계의 Shader Model 를 위한 것으로 보임.
+		// 현재 프로젝트의 목표가 SM 6.6+를 타겟팅 하고있는 만큼. 이는 배제할 것.
+		// 내부 index 는 uint32_t로, 즉 32 bits = 1 DWORD = 4 바이트
+		// 위의 Root Constant 로도 총 64개의 뷰 인덱스를 보낼 수 있고.
+		// 더 많은 인덱스가 필요하더라도, 추가적인 structured buffer/constant buffer 등을 통해 제공 가능
+		// 인덱스의 Uniform에 대하여
+		// https://www.asawicki.info/news_1608_direct3d_12_-_watch_out_for_non-uniform_resource_index
+		// https://www.asawicki.info/news_1734_which_values_are_scalar_in_a_shader
+		// Bindless Descriptor Heap은 volatile이여야 한다. 즉 GPU Executing 이전에는 descriptor 가 가르키는 데이터/descriptor 자체에
+		// 대한 CPU의 Read-Write가 하용된다는 것이다. (즉 root signature version != 1.1)
+		// 쉐이더와 매치되는 Root Signature를 어떻게 만들지?
+		// -----------------------------------------
 
-		  D3D12_ROOT_PARAMETER texture2DTable{};
-		  texture2DTable.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-		  texture2DTable.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-		  texture2DTable.DescriptorTable.NumDescriptorRanges = 1;
-		  texture2DTable.DescriptorTable.pDescriptorRanges = &texture2DRange;
-		*/
+		constexpr uint8_t		   NumReservedConstants = 16;
+		const D3D12_ROOT_PARAMETER rootParam{
+			.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+			.Constants = {
+				.ShaderRegister = 0,
+				.RegisterSpace = 0,
+				.Num32BitValues = NumReservedConstants },
+			.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL
+		};
 
-		const D3D12_ROOT_SIGNATURE_DESC desc{ .NumParameters = 0,
-											  .pParameters = nullptr,
+		const D3D12_ROOT_SIGNATURE_DESC desc{ .NumParameters = 1,
+											  .pParameters = &rootParam,
 											  .NumStaticSamplers = 0,
 											  .pStaticSamplers = nullptr,
 											  .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED |
@@ -428,7 +457,7 @@ namespace fe::dx
 				allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create buffer. HRESULT");
+			FE_LOG(DeviceFatal, "Failed to create buffer. HRESULT: {}", result);
 			return {};
 		}
 
@@ -478,6 +507,22 @@ namespace fe::dx
 		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
+	ComPtr<D3D12MA::Pool> Device::CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc)
+	{
+		check(device);
+		check(allocator != nullptr);
+
+		ComPtr<D3D12MA::Pool> customPool;
+		if (const HRESULT result = allocator->CreatePool(&desc, &customPool);
+			!SUCCEEDED(result))
+		{
+			FE_LOG(DeviceFatal, "Failed to create custom gpu memory pool.");
+			return {};
+		}
+
+		return customPool;
+	}
+
 	void Device::UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer)
 	{
 		check(gpuView.Type == EGPUViewType::ConstantBufferView);
@@ -488,6 +533,26 @@ namespace fe::dx
 		if (cbvDesc)
 		{
 			device->CreateConstantBufferView(&cbvDesc.value(), gpuView.CPUHandle);
+		}
+		else
+		{
+			checkNoEntry();
+		}
+	}
+
+	void Device::UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
+	{
+		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+		check(buffer);
+		const GPUBufferDesc& desc = buffer.GetDesc();
+		check((offset + sizeInBytes) < desc.GetSizeAsBytes());
+		if (gpuView.Type == EGPUViewType::ConstantBufferView)
+		{
+			const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
+				.BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset,
+				.SizeInBytes = static_cast<uint32_t>(sizeInBytes)
+			};
+			device->CreateConstantBufferView(&cbvDesc, gpuView.CPUHandle);
 		}
 		else
 		{
@@ -601,4 +666,5 @@ namespace fe::dx
 			checkNoEntry();
 		}
 	}
+
 } // namespace fe::dx

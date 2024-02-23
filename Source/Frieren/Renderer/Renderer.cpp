@@ -6,6 +6,7 @@
 #include <D3D12/Fence.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/Swapchain.h>
+#include <D3D12/TempConstantBufferAllocator.h>
 
 #pragma region test
 // #test
@@ -20,13 +21,13 @@
 #include <D3D12/GPUViewManager.h>
 #include <D3D12/GPUView.h>
 #include <Gameplay/World.h>
+#include <Gameplay/PositionComponent.h>
 #include <Renderer/StaticMeshComponent.h>
-
-struct SimpleVertex
+#include <ranges>
+#include <Engine.h>
+struct PositionBuffer
 {
-	float x = 0.f;
-	float y = 0.f;
-	float z = 0.f;
+	float Position[3] = { 0.f, 0.f, 0.f };
 };
 #pragma endregion
 
@@ -36,14 +37,16 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
 	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
 
-	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, dx::GPUViewManager& gpuViewManager)
+	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GPUViewManager& gpuViewManager)
 		: frameManager(engineFrameManager),
 		  deferredDeallocator(engineDefferedDeallocator),
 		  renderDevice(device),
+		  handleManager(handleManager),
 		  gpuViewManager(gpuViewManager),
 		  directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())),
 		  directCmdCtxPool(std::make_unique<dx::CommandContextPool>(deferredDeallocator, device, dx::EQueueType::Direct)),
-		  swapchain(std::make_unique<dx::Swapchain>(window, gpuViewManager, *directCmdQueue, NumFramesInFlight))
+		  swapchain(std::make_unique<dx::Swapchain>(window, gpuViewManager, *directCmdQueue, NumFramesInFlight)),
+		  tempConstantBufferAllocator(std::make_unique<dx::TempConstantBufferAllocator>(frameManager, device, handleManager, gpuViewManager))
 	{
 		frameFences.reserve(NumFramesInFlight);
 		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
@@ -76,7 +79,7 @@ namespace fe
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
-		// #todo encapsulate input layout?
+		// #todo encapsulate input layout? or #idea Vertex Pulling?
 		const D3D12_INPUT_ELEMENT_DESC inputElement{
 			.SemanticName = "POSITION",
 			.SemanticIndex = 0,
@@ -103,12 +106,14 @@ namespace fe
 		*/
 		auto cmdCtx = directCmdCtxPool->Request();
 		cmdCtx->Begin();
-		cmdCtx->AddPendingTextureBarrier(
-			*depthStencilBuffer,
-			D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
-			D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
-			D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
-		cmdCtx->FlushBarriers();
+		{
+			cmdCtx->AddPendingTextureBarrier(
+				*depthStencilBuffer,
+				D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
+				D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
+				D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
+			cmdCtx->FlushBarriers();
+		}
 		cmdCtx->End();
 
 		directCmdQueue->AddPendingContext(*cmdCtx);
@@ -131,11 +136,11 @@ namespace fe
 	void Renderer::BeginFrame()
 	{
 		frameFences[frameManager.GetLocalFrameIndex()].WaitOnCPU();
+		tempConstantBufferAllocator->DeallocateCurrentFrame();
 	}
 
 	void Renderer::Render(World& world)
 	{
-
 		check(directCmdQueue);
 		check(directCmdCtxPool);
 
@@ -162,14 +167,22 @@ namespace fe
 			renderCmdCtx->SetScissorRect(0, 0, 1280, 642);
 			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			world.Each<StaticMeshComponent>([&renderCmdCtx](StaticMeshComponent& component) {
-				renderCmdCtx->SetVertexBuffer(*component.VertexBufferHandle);
-				renderCmdCtx->SetIndexBuffer(*component.IndexBufferHandle);
-				renderCmdCtx->DrawIndexed(component.NumIndices);
+			size_t idx = 0;
+			world.Each<StaticMeshComponent, fe::PositionComponent>([&renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {
+				renderCmdCtx->SetVertexBuffer(*staticMesh.VertexBufferHandle);
+				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
+
+				dx::GPUBufferDesc posBufferDesc;
+				posBufferDesc.AsConstantBuffer<PositionBuffer>();
+				{
+					dx::TempConstantBuffer posBuffer = tempConstantBufferAllocator->Allocate(posBufferDesc);
+					std::memcpy(posBuffer.Mapping->get(), &position, sizeof(fe::PositionComponent));
+					renderCmdCtx->SetRoot32BitConstants<uint32_t>(0, posBuffer.View->Index, 0);
+				}
+				renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
 			});
 		}
 		renderCmdCtx->End();
-
 		directCmdQueue->AddPendingContext(*renderCmdCtx);
 	}
 

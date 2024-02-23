@@ -2,6 +2,6 @@
 
 struct Player
 {
-	float movementPower = 50.f;
+	float movementPower = 1.f;
 	size_t remainHealthRecoveryBuff = 3;
 };

@@ -38,7 +38,26 @@ namespace fe::dx
 			{
 				check(newCBV->Type == EGPUViewType::ConstantBufferView);
 				check(newCBV->Index != InvalidIndexU32);
-				UpdateShaderResourceView(*newCBV, gpuBuffer);
+				UpdateConstantBufferView(*newCBV, gpuBuffer);
+			}
+			else
+			{
+				checkNoEntry();
+			}
+
+			return MakeHandle(*newCBV);
+		}
+
+		auto RequestConstantBufferView(GPUBuffer& gpuBuffer, const uint64_t offset, const uint64_t sizeInBytes)
+		{
+			std::optional<GPUView> newCBV = Allocate(EGPUViewType::ConstantBufferView);
+			if (newCBV)
+			{
+				check(newCBV->Type == EGPUViewType::ConstantBufferView);
+				check(newCBV->Index != InvalidIndexU32);
+				check(offset % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
+				check(sizeInBytes % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
+				UpdateConstantBufferView(*newCBV, gpuBuffer, offset, sizeInBytes);
 			}
 			else
 			{
@@ -157,6 +176,7 @@ namespace fe::dx
 		void				   Deallocate(const GPUView& gpuView);
 
 		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer);
+		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
 		void UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer);
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer);
 

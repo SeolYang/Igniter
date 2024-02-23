@@ -73,6 +73,16 @@ namespace fe::dx
 		void SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth = 0.f, const float maxDepth = 1.f);
 		void SetScissorRect(const long left, const long top, const long right, const long bottom);
 
+		void SetRoot32BitConstants(const uint32_t registerSlot, const uint32_t num32BitValuesToSet, const void* srcData, const uint32_t destOffsetIn32BitValues);
+
+		template <typename T>
+			requires(std::is_pod_v<T>)
+		void SetRoot32BitConstants(const uint32_t registerSlot, const T& data, const uint32_t destOffsetIn32BitValues)
+		{
+			check(sizeof(T) % 4 == 0 && "Data loss may occur specific conditions.");
+			SetRoot32BitConstants(registerSlot, sizeof(T) / 4, reinterpret_cast<const void*>(&data), destOffsetIn32BitValues);
+		}
+
 		void DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset = 0, const uint32_t vertexOffset = 0);
 
 	private:

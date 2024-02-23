@@ -3,6 +3,7 @@
 #include <D3D12/Device.h>
 #include <Gameplay/GameInstance.h>
 #include <Gameplay/World.h>
+#include <Gameplay/PositionComponent.h>
 #include <PlayerArchetype.h>
 #include <BasicGameFlow.h>
 #include <ImGui/ImGuiLayer.h>
@@ -207,8 +208,9 @@ int main()
 			.NumIndices = NumTriIndices
 		};
 		defaultWorld->Attach<StaticMeshComponent>(enemy, triStaticMeshComp);
+		defaultWorld->Attach<PositionComponent>(enemy);
 
-		// #wip 이제 PositionComponent 값을 가져와서, Constant Buffer로 데이터 넘겨서, 쉐이더에서 실시간으로 위치 변경해서
+		// #wip 이제 PositionComponent 값을 가져와서, Constant Buffer 로 데이터 넘겨서, 쉐이더에서 실시간으로 위치 변경해서
 		// 렌더링 되도록 만들기
 
 		gameInstance.SetWorld(std::move(defaultWorld));

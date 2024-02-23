@@ -13,20 +13,20 @@
 namespace fe::dx
 {
 	CommandContext::CommandContext(CommandContext&& other) noexcept
-		: cmdAllocator(std::move(other.cmdAllocator))
-		, cmdList(std::move(other.cmdList))
-		, cmdListTargetQueueType(other.cmdListTargetQueueType)
-		, pendingGlobalBarriers(std::move(other.pendingGlobalBarriers))
-		, pendingTextureBarriers(std::move(other.pendingTextureBarriers))
-		, pendingBufferBarriers(std::move(other.pendingBufferBarriers))
+		: cmdAllocator(std::move(other.cmdAllocator)),
+		  cmdList(std::move(other.cmdList)),
+		  cmdListTargetQueueType(other.cmdListTargetQueueType),
+		  pendingGlobalBarriers(std::move(other.pendingGlobalBarriers)),
+		  pendingTextureBarriers(std::move(other.pendingTextureBarriers)),
+		  pendingBufferBarriers(std::move(other.pendingBufferBarriers))
 	{
 	}
 
 	CommandContext::CommandContext(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList,
 								   const EQueueType targetQueueType)
-		: cmdAllocator(std::move(newCmdAllocator))
-		, cmdList(std::move(newCmdList))
-		, cmdListTargetQueueType(targetQueueType)
+		: cmdAllocator(std::move(newCmdAllocator)),
+		  cmdList(std::move(newCmdList)),
+		  cmdListTargetQueueType(targetQueueType)
 	{
 	}
 
@@ -265,4 +265,32 @@ namespace fe::dx
 		check(IsValid());
 		cmdList->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
 	}
+
+	void CommandContext::SetRoot32BitConstants(const uint32_t registerSlot, const uint32_t num32BitValuesToSet, const void* srcData, const uint32_t destOffsetIn32BitValues)
+	{
+		constexpr uint32_t NumMaximumRootConstants = 64;
+		verify(num32BitValuesToSet < NumMaximumRootConstants);
+		check((destOffsetIn32BitValues + num32BitValuesToSet) < NumMaximumRootConstants);
+
+		if (srcData != nullptr)
+		{
+			switch (cmdListTargetQueueType)
+			{
+				case EQueueType::Direct:
+					cmdList->SetGraphicsRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData, destOffsetIn32BitValues);
+					break;
+				case EQueueType::AsyncCompute:
+					cmdList->SetComputeRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData, destOffsetIn32BitValues);
+					break;
+				default:
+					checkNoEntry();
+					break;
+			}
+		}
+		else
+		{
+			checkNoEntry();
+		}
+	}
+
 } // namespace fe::dx

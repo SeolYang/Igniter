@@ -113,7 +113,6 @@
     <ClInclude Include="..\Source\Himmel\PlayerArchetype.h" />
     <ClInclude Include="..\Source\Himmel\PlayerControllSystem.h" />
     <ClInclude Include="..\Source\Himmel\PlayerComponent.h" />
-    <ClInclude Include="..\Source\Himmel\PositionComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

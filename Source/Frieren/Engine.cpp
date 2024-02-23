@@ -38,7 +38,7 @@ namespace fe
 			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
 			inputManager = std::make_unique<InputManager>(*handleManager);
 			gpuViewManager = std::make_unique<dx::GPUViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
-			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *gpuViewManager);
+			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
 			gameInstance = std::make_unique<GameInstance>();

@@ -100,6 +100,7 @@ namespace fe::dx
 
 	void Swapchain::Present()
 	{
+		// #todo DXGI Swapchain에 대한 더 자세한 이해 필요
 		verify_succeeded(swapchain->Present(0, bIsTearingSupport ? DXGI_PRESENT_ALLOW_TEARING : 0));
 	}
 } // namespace fe::dx

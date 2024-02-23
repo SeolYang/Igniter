@@ -7,8 +7,7 @@ namespace fe::dx
 {
 	inline uint32_t AdjustSizeForConstantBuffer(const uint32_t originalSizeInBytes)
 	{
-		constexpr uint32_t MinimumConstantBufferSizeInBytes = 256;
-		return ((originalSizeInBytes / MinimumConstantBufferSizeInBytes) + 1) * MinimumConstantBufferSizeInBytes;
+		return ((originalSizeInBytes / D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) + 1) * D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 	}
 
 	enum class EBufferType
@@ -127,10 +126,11 @@ namespace fe::dx
 		String DebugName = String{ "Unknown Buffer" };
 
 	private:
-		uint32_t	structureByteStride = 1;
-		uint32_t	numElements = 1;
-		EBufferType bufferType = EBufferType::Unknown;
-		bool		bIsShaderReadWritable = false;
-		bool		bIsCPUAccessible = false;
+		uint32_t	   structureByteStride = 1;
+		uint32_t	   numElements = 1;
+		EBufferType	   bufferType = EBufferType::Unknown;
+		bool		   bIsShaderReadWritable = false;
+		bool		   bIsCPUAccessible = false;
+		D3D12MA::Pool* customPool = nullptr;
 	};
 } // namespace fe::dx
