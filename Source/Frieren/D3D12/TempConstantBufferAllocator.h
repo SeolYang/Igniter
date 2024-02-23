@@ -13,7 +13,6 @@ namespace fe::dx
 	class GPUViewManager;
 	class CommandContext;
 
-	// #wip
 	struct TempConstantBuffer
 	{
 	public:
@@ -24,7 +23,6 @@ namespace fe::dx
 	class TempConstantBufferAllocator
 	{
 	public:
-		// FrameConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice);
 		TempConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice, HandleManager& handleManager, GPUViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
 		TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
 		TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
@@ -35,14 +33,13 @@ namespace fe::dx
 
 		TempConstantBuffer Allocate(const GPUBufferDesc& desc);
 
-		// 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다.
+		// 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다. 프레임 시작시 반드시 호출해야함.
 		void DeallocateCurrentFrame();
 
 		void InitBufferStateTransition(CommandContext& cmdCtx);
 
 	public:
-		// 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋음.
-		// 기본 값 == 64 MB
+		// 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값 == 64 MB)
 		static constexpr uint32_t DefaultReservedBufferSizeInBytes = 67108864;
 
 	private:

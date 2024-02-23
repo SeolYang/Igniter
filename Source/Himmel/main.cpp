@@ -85,17 +85,17 @@ int main()
 		dx::GPUBuffer uploadBuffer{ renderDevice.CreateBuffer(uploadBufferDesc).value() };
 
 		const SimpleVertex quadVertices[4] = {
-			{ -.75f, 0.f, 0.f },
-			{ -.75f, 0.25f, 0.f },
-			{ -.50f, 0.25f, 0.f },
-			{ -.50f, 0.f, 0.f },
+			{ -.1f, 0.f, 0.f },
+			{ -.1f, 0.5f, 0.f },
+			{ .10f, 0.5f, 0.f },
+			{ .10f, 0.f, 0.f },
 		};
 		const uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
 
 		const SimpleVertex triVertices[3] = {
-			{ 0.5f, 0.f, 0.f },
-			{ 0.6f, 0.5f, 0.f },
-			{ 0.7f, 0.f, 0.f }
+			{ -0.1f, 0.f, 0.f },
+			{ 0.0f, 0.45f, 0.f },
+			{ 0.1f, 0.f, 0.f }
 		};
 		const uint16_t triIndices[3] = { 0, 1, 2 };
 
@@ -209,9 +209,6 @@ int main()
 		};
 		defaultWorld->Attach<StaticMeshComponent>(enemy, triStaticMeshComp);
 		defaultWorld->Attach<PositionComponent>(enemy);
-
-		// #wip 이제 PositionComponent 값을 가져와서, Constant Buffer 로 데이터 넘겨서, 쉐이더에서 실시간으로 위치 변경해서
-		// 렌더링 되도록 만들기
 
 		gameInstance.SetWorld(std::move(defaultWorld));
 		gameInstance.SetGameFlow(std::make_unique<BasicGameFlow>());
