@@ -112,13 +112,15 @@ namespace fe
 	class DefaultDestroyer
 	{
 	public:
-		void operator()(Handle handle, const uint64_t typeHashVal) const
+		void operator()(Handle handle, const uint64_t typeHashVal, T* instance) const
 		{
+			check(instance != nullptr);
 			if (handle.IsValid() && typeHashVal != InvalidHashVal)
 			{
-				T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(typeHashVal));
-				check(instancePtr != nullptr);
-				instancePtr->~T();
+				if (instance != nullptr)
+				{
+					instance->~T();
+				}
 				handle.Deallocate(typeHashVal);
 			}
 		}
@@ -274,7 +276,9 @@ namespace fe
 			{
 				check(destroyer != nullptr);
 				handle.MarkAsPendingDeallocation(EvaluatedTypeHashVal);
-				(*destroyer)(handle, EvaluatedTypeHashVal);
+				T* instance = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+				check(instance != nullptr);
+				(*destroyer)(handle, EvaluatedTypeHashVal, instance);
 				handle = {};
 			}
 		}
@@ -286,7 +290,9 @@ namespace fe
 			if (IsAlive())
 			{
 				handle.MarkAsPendingDeallocation(EvaluatedTypeHashVal);
-				destroyer(handle, EvaluatedTypeHashVal);
+				T* instance = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+				check(instance != nullptr);
+				destroyer(handle, EvaluatedTypeHashVal, instance);
 				handle = {};
 			}
 		}

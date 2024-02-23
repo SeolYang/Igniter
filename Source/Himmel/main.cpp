@@ -110,7 +110,7 @@ int main()
 		const size_t triIndicesOffset = triVerticesOffset + triVerticesSize;
 		const size_t triIndicesSize = triIBDesc.GetSizeAsBytes();
 		{
-			dx::GPUResourceMapGuard mappedBuffer = uploadBuffer.Map();
+			dx::GPUResourceMapGuard mappedBuffer = uploadBuffer.MapGuard();
 			std::memcpy(mappedBuffer.get() + quadVerticesOffset, quadVertices, quadVerticesSize);
 			std::memcpy(mappedBuffer.get() + quadIndicesOffset, quadIndices, quadIndicesSize);
 

@@ -40,11 +40,11 @@ namespace fe::dx
 		const uint64_t allocSizeInBytes = desc.GetSizeAsBytes();
 		const uint64_t offset = allocatedSizeInBytes[currentLocalFrameIdx].fetch_add(allocSizeInBytes);
 		check(offset <= reservedSizeInBytesPerFrame);
-		mapGuards[currentLocalFrameIdx].emplace_back(handleManager, buffers[currentLocalFrameIdx].Map(0, { offset, allocSizeInBytes }));
+		mappedBuffers[currentLocalFrameIdx].emplace_back(buffers[currentLocalFrameIdx].MapHandle(handleManager, 0, { offset, allocSizeInBytes }));
 		allocatedViews[currentLocalFrameIdx].emplace_back(gpuViewManager.RequestConstantBufferView(buffers[currentLocalFrameIdx], offset, allocSizeInBytes));
 
 		return TempConstantBuffer{
-			.Mapping = mapGuards[currentLocalFrameIdx].back().DeriveWeak(),
+			.Mapping = mappedBuffers[currentLocalFrameIdx].back().DeriveWeak(),
 			.View = allocatedViews[currentLocalFrameIdx].back().DeriveWeak()
 		};
 	}
@@ -53,7 +53,7 @@ namespace fe::dx
 	{
 		const size_t currentLocalFrameIdx = frameManager.GetLocalFrameIndex();
 		check(currentLocalFrameIdx < NumFramesInFlight);
-		mapGuards[currentLocalFrameIdx].clear();
+		mappedBuffers[currentLocalFrameIdx].clear();
 		allocatedViews[currentLocalFrameIdx].clear();
 		allocatedSizeInBytes[currentLocalFrameIdx].store(0);
 	}

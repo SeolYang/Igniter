@@ -184,7 +184,7 @@ namespace fe::dx
 		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
 		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource);
-		void operator()(Handle handle, const uint64_t evaluatedTypeHash);
+		void operator()(Handle handle, const uint64_t evaluatedTypeHash, GPUView* view);
 
 	private:
 		HandleManager&		 handleManager;

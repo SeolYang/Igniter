@@ -176,7 +176,7 @@ namespace fe
 				posBufferDesc.AsConstantBuffer<PositionBuffer>();
 				{
 					dx::TempConstantBuffer posBuffer = tempConstantBufferAllocator->Allocate(posBufferDesc);
-					std::memcpy(posBuffer.Mapping->get(), &position, sizeof(fe::PositionComponent));
+					std::memcpy(posBuffer.Mapping->MappedPtr, &position, sizeof(fe::PositionComponent));
 					renderCmdCtx->SetRoot32BitConstants<uint32_t>(0, posBuffer.View->Index, 0);
 				}
 				renderCmdCtx->DrawIndexed(staticMesh.NumIndices);

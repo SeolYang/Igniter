@@ -7,6 +7,7 @@ namespace fe::dx
 {
 	class Device;
 	class GPUBuffer;
+	struct MappedGPUBuffer;
 	class GPUBufferDesc;
 	class GPUView;
 	class GPUViewManager;
@@ -15,8 +16,8 @@ namespace fe::dx
 	struct TempConstantBuffer
 	{
 	public:
-		WeakHandle<GPUResourceMapGuard> Mapping = {};
-		WeakHandle<GPUView>				View = {};
+		WeakHandle<MappedGPUBuffer> Mapping = {};
+		WeakHandle<GPUView>			View = {};
 	};
 
 	class TempConstantBufferAllocator
@@ -49,9 +50,9 @@ namespace fe::dx
 
 		const uint32_t reservedSizeInBytesPerFrame;
 
-		std::vector<dx::GPUBuffer>														   buffers;
-		std::array<std::atomic_uint64_t, NumFramesInFlight>								   allocatedSizeInBytes;
-		std::array<std::vector<UniqueHandle<GPUResourceMapGuard>>, NumFramesInFlight>	   mapGuards;
-		std::array<std::vector<UniqueHandle<GPUView, GPUViewManager*>>, NumFramesInFlight> allocatedViews;
+		std::vector<dx::GPUBuffer>															  buffers;
+		std::array<std::atomic_uint64_t, NumFramesInFlight>									  allocatedSizeInBytes;
+		std::array<std::vector<UniqueHandle<MappedGPUBuffer, GPUBuffer*>>, NumFramesInFlight> mappedBuffers;
+		std::array<std::vector<UniqueHandle<GPUView, GPUViewManager*>>, NumFramesInFlight>	  allocatedViews;
 	};
 } // namespace fe::dx

@@ -126,10 +126,9 @@ namespace fe::dx
 		checkNoEntry();
 	}
 
-	void GPUViewManager::operator()(Handle handle, const uint64_t evaluatedTypeHash)
+	void GPUViewManager::operator()(Handle handle, const uint64_t evaluatedTypeHash, GPUView* view)
 	{
-		RequestDeferredDeallocation(deferredDeallocator, [this, handle, evaluatedTypeHash]() {
-			const GPUView* view = reinterpret_cast<const GPUView*>(handle.GetAddressOf(evaluatedTypeHash));
+		RequestDeferredDeallocation(deferredDeallocator, [this, handle, evaluatedTypeHash, view]() {
 			check(view != nullptr && view->IsValid());
 			this->Deallocate(*view);
 			Handle targetHandle = handle;
