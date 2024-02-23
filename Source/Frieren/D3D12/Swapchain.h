@@ -19,10 +19,10 @@ namespace fe::dx
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers);
+		Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync = true);
 		~Swapchain();
 
-		bool			  IsTearingSupport() const { return bIsTearingSupport; }
+		bool			  IsTearingSupport() const { return bTearingEnabled; }
 		GPUTexture&		  GetBackBuffer();
 		const GPUTexture& GetBackBuffer() const;
 		const GPUView&	  GetRenderTargetView() const { return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
@@ -42,10 +42,12 @@ namespace fe::dx
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;
 
-		const uint8_t										numBackBuffers;
+		const uint8_t numBackBuffers;
+		const bool	  bVSyncEnabled;
+		bool		  bTearingEnabled = false;
+
 		std::vector<GPUTexture>								backBuffers;
 		std::vector<UniqueHandle<GPUView, GPUViewManager*>> renderTargetViews;
 
-		bool bIsTearingSupport = false;
 	};
 } // namespace fe::dx

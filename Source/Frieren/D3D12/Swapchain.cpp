@@ -9,8 +9,9 @@
 
 namespace fe::dx
 {
-	Swapchain::Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers)
-		: numBackBuffers(desiredNumBackBuffers)
+	Swapchain::Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync)
+		: numBackBuffers(desiredNumBackBuffers),
+		  bVSyncEnabled(bEnableVSync)
 	{
 		InitSwapchain(window, directCmdQueue);
 		InitRenderTargetViews(gpuViewManager);
@@ -59,7 +60,7 @@ namespace fe::dx
 		desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
 		CheckTearingSupport(factory);
-		desc.Flags = bIsTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+		desc.Flags = bTearingEnabled ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		ComPtr<IDXGISwapChain1> swapchain1;
 		verify_succeeded(factory->CreateSwapChainForHwnd(&directCmdQueue.GetNative(), window.GetNative(), &desc,
@@ -76,11 +77,11 @@ namespace fe::dx
 		if (FAILED(
 				factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing))))
 		{
-			bIsTearingSupport = false;
+			bTearingEnabled = false;
 		}
 		else
 		{
-			bIsTearingSupport = allowTearing == TRUE;
+			bTearingEnabled = allowTearing == TRUE;
 		}
 	}
 
@@ -101,6 +102,8 @@ namespace fe::dx
 	void Swapchain::Present()
 	{
 		// #todo DXGI Swapchain에 대한 더 자세한 이해 필요
-		verify_succeeded(swapchain->Present(0, bIsTearingSupport ? DXGI_PRESENT_ALLOW_TEARING : 0));
+		const uint32_t syncInterval = bVSyncEnabled ? 1 : 0;
+		const uint32_t presentFlags = bTearingEnabled && !bVSyncEnabled ? DXGI_PRESENT_ALLOW_TEARING : 0;
+		verify_succeeded(swapchain->Present(syncInterval, presentFlags));
 	}
 } // namespace fe::dx
