@@ -3,6 +3,7 @@
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/GPUViewManager.h>
+#include <D3D12/CommandContext.h>
 #include <Core/Assert.h>
 #include <ranges>
 
@@ -25,8 +26,6 @@ namespace fe::dx
 			allocatedSizeInBytes[localFrameIdx].store(0);
 			buffers.emplace_back(renderDevice.CreateBuffer(desc).value());
 		}
-
-		// #wip_todo State transition 은 어떻게 처리하지?
 	}
 
 	TempConstantBufferAllocator::~TempConstantBufferAllocator()
@@ -57,4 +56,17 @@ namespace fe::dx
 		allocatedViews[currentLocalFrameIdx].clear();
 		allocatedSizeInBytes[currentLocalFrameIdx].store(0);
 	}
+
+	void TempConstantBufferAllocator::InitBufferStateTransition(CommandContext& cmdCtx)
+	{
+		for (auto& buffer : buffers)
+		{
+			cmdCtx.AddPendingBufferBarrier(buffer,
+										   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_ALL_SHADING,
+										   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_CONSTANT_BUFFER);
+		}
+
+		cmdCtx.FlushBarriers();
+	}
+
 } // namespace fe::dx

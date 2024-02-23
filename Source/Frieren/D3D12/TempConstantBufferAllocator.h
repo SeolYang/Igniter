@@ -11,6 +11,7 @@ namespace fe::dx
 	class GPUBufferDesc;
 	class GPUView;
 	class GPUViewManager;
+	class CommandContext;
 
 	// #wip
 	struct TempConstantBuffer
@@ -32,15 +33,17 @@ namespace fe::dx
 		TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&) = delete;
 		TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
-		// type == constant buffer && size%256 == 0 && size <= 1024)
 		TempConstantBuffer Allocate(const GPUBufferDesc& desc);
 
 		// 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다.
 		void DeallocateCurrentFrame();
 
+		void InitBufferStateTransition(CommandContext& cmdCtx);
+
 	public:
 		// 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋음.
-		static constexpr uint32_t DefaultReservedBufferSizeInBytes = 4096;
+		// 기본 값 == 64 MB
+		static constexpr uint32_t DefaultReservedBufferSizeInBytes = 67108864;
 
 	private:
 		const FrameManager& frameManager;
