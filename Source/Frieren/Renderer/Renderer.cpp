@@ -85,20 +85,6 @@ namespace fe
 		psoDesc.NumRenderTargets = 1;
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-
-		// #todo encapsulate input layout? or #idea Vertex Pulling?
-		const D3D12_INPUT_ELEMENT_DESC inputElement{
-			.SemanticName = "POSITION",
-			.SemanticIndex = 0,
-			.Format = DXGI_FORMAT_R32G32B32_FLOAT,
-			.InputSlot = 0,
-			.AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT,
-			.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
-			.InstanceDataStepRate = 0
-		};
-
-		psoDesc.InputLayout.NumElements = 1;
-		psoDesc.InputLayout.pInputElementDescs = &inputElement;
 		pso = std::make_unique<dx::PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
 
 		dx::GPUTextureDesc depthStencilDesc;
