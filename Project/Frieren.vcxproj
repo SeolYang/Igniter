@@ -25,6 +25,7 @@
     <ClInclude Include="..\Source\Frieren\Core\MemoryPool.h" />
     <ClInclude Include="..\Source\Frieren\Core\MemUtils.h" />
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Profile.h" />
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
     <ClInclude Include="..\Source\Frieren\Core\Timer.h" />
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
