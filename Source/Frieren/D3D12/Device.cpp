@@ -427,6 +427,7 @@ namespace fe::dx
 
 		check(allocation);
 		check(resource);
+		SetObjectName(resource.Get(), bufferDesc.DebugName);
 		return GPUBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
 	}
 
@@ -467,7 +468,6 @@ namespace fe::dx
 		check(allocation);
 		check(resource);
 		SetObjectName(resource.Get(), textureDesc.DebugName);
-
 		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 

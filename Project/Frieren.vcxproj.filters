@@ -31,6 +31,9 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{d0dbc9e3-27a4-412c-a6ed-51cd6c470d0a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{9d4ce617-53be-49f6-975c-fe5bea76b823}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -174,9 +177,6 @@
     <ClInclude Include="..\Source\Frieren\Core\MemUtils.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Core\MathUtils.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\Event.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -191,6 +191,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.h">
       <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Math\Common.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Math\Utils.h">
+      <Filter>Source\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

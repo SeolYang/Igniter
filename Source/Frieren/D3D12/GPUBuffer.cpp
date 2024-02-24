@@ -34,16 +34,19 @@ namespace fe::dx
 		return *this;
 	}
 
-	uint8_t* GPUBuffer::Map(const uint32_t subresource /*= 0*/, const CD3DX12_RANGE range /*= {0, 0}*/)
+	uint8_t* GPUBuffer::Map(const uint64_t offset)
 	{
 		check(resource);
+		check(offset < desc.GetSizeAsBytes());
+		// #todo offset % desc.GetAlignment() == 0
+
 		uint8_t* mappedPtr = nullptr;
-		if (!SUCCEEDED(resource->Map(subresource, &range, reinterpret_cast<void**>(&mappedPtr))))
+		if (!SUCCEEDED(resource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPtr))))
 		{
 			return nullptr;
 		}
 
-		return mappedPtr;
+		return mappedPtr + offset;
 	}
 
 	void GPUBuffer::Unmap()
@@ -51,22 +54,22 @@ namespace fe::dx
 		resource->Unmap(0, nullptr);
 	}
 
-	GPUResourceMapGuard GPUBuffer::MapGuard(const uint32_t subresource /*= 0*/, const CD3DX12_RANGE range /*= {0, 0}*/)
+	GPUResourceMapGuard GPUBuffer::MapGuard(const uint64_t offset)
 	{
-		uint8_t* mappedPtr = Map(subresource, range);
+		uint8_t* mappedPtr = Map(offset);
 		if (mappedPtr == nullptr)
 		{
 			return nullptr;
 		}
 
 		return {
-			mappedPtr, [this](uint8_t* /* ptr */) { Unmap(); }
+			mappedPtr, [this](uint8_t* ptr) { if (ptr != nullptr) Unmap(); }
 		};
 	}
 
-	UniqueHandle<MappedGPUBuffer, GPUBuffer*> GPUBuffer::MapHandle(HandleManager& handleManager, const uint32_t subresource /* = 0 */, const CD3DX12_RANGE range /* = */)
+	UniqueHandle<MappedGPUBuffer, GPUBuffer*> GPUBuffer::MapHandle(HandleManager& handleManager, const uint64_t offset)
 	{
-		uint8_t* mappedPtr = Map(subresource, range);
+		uint8_t* mappedPtr = Map(offset);
 		if (mappedPtr != nullptr)
 		{
 			return UniqueHandle<MappedGPUBuffer, GPUBuffer*>{

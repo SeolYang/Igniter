@@ -162,22 +162,22 @@ namespace fe
 			renderCmdCtx->SetScissorRect(0, 0, 1280, 642);
 			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			size_t idx = 0;
-			world.Each<StaticMeshComponent, fe::PositionComponent>([&renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {
-				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
+			size_t			  idx = 0;
+			dx::GPUBufferDesc posBufferDesc;
+			posBufferDesc.AsConstantBuffer<PositionBuffer>();
 
-				dx::GPUBufferDesc posBufferDesc;
-				posBufferDesc.AsConstantBuffer<PositionBuffer>();
+			world.Each<StaticMeshComponent, fe::PositionComponent>([&posBufferDesc, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {
+				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
 				{
 					dx::TempConstantBuffer posBuffer = tempConstantBufferAllocator->Allocate(posBufferDesc);
 					std::memcpy(posBuffer.Mapping->MappedPtr, &position, sizeof(fe::PositionComponent));
-
 					const BasicRenderResources params{
 						.PosBufferIdx = posBuffer.View->Index,
 						.VertexBufferIdx = staticMesh.VerticesBufferSRV->Index
 					};
 					renderCmdCtx->SetRoot32BitConstants(0, params, 0);
 				}
+
 				renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
 			});
 		}

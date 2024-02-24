@@ -56,9 +56,9 @@ int main()
 		inputManager.BindAction(fe::String("UseHealthRecovery"), fe::EInput::Space);
 		inputManager.BindAction(fe::String("DisplayPlayerInfo"), fe::EInput::MouseLB);
 
-		fe::dx::Device&	  renderDevice = engine.GetRenderDevice();
-		fe::GameInstance& gameInstance = engine.GetGameInstance();
-		HandleManager&	  handleManager = engine.GetHandleManager();
+		fe::dx::Device&		renderDevice = engine.GetRenderDevice();
+		fe::GameInstance&	gameInstance = engine.GetGameInstance();
+		HandleManager&		handleManager = engine.GetHandleManager();
 		dx::GPUViewManager& gpuViewManager = engine.GetGPUViewManager();
 
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
@@ -71,14 +71,17 @@ int main()
 
 		dx::GPUBufferDesc quadIBDesc{};
 		quadIBDesc.AsIndexBuffer<uint16_t>(NumQuadIndices);
+		quadIBDesc.DebugName = String("QuadMeshIB");
 		UniqueHandle<dx::GPUBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
 
 		dx::GPUBufferDesc triIBDesc{};
 		triIBDesc.AsIndexBuffer<uint16_t>(NumTriIndices);
+		triIBDesc.DebugName = String("TriMeshIB");
 		UniqueHandle<dx::GPUBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
 
 		dx::GPUBufferDesc verticesBufferDesc{};
 		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
+		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
 		UniqueHandle<dx::GPUBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
 
 		const SimpleVertex vertices[7] = {
@@ -192,7 +195,7 @@ int main()
 			.NumIndices = NumTriIndices
 		};
 		defaultWorld->Attach<StaticMeshComponent>(enemy, triStaticMeshComp);
-		defaultWorld->Attach<PositionComponent>(enemy);
+		defaultWorld->Attach<PositionComponent>(enemy, PositionComponent{ .x = .5f, .y = -0.2f });
 
 		gameInstance.SetWorld(std::move(defaultWorld));
 		gameInstance.SetGameFlow(std::make_unique<BasicGameFlow>());

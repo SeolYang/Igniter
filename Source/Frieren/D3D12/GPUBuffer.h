@@ -44,11 +44,11 @@ namespace fe::dx
 			return *resource.Get();
 		}
 
-		uint8_t* Map(const uint32_t subresource = 0, const CD3DX12_RANGE range = { 0, 0 });
+		uint8_t* Map(const uint64_t offset = 0);
 		void	 Unmap();
 
-		GPUResourceMapGuard						  MapGuard(const uint32_t subresource = 0, const CD3DX12_RANGE range = { 0, 0 });
-		UniqueHandle<MappedGPUBuffer, GPUBuffer*> MapHandle(HandleManager& handleManager, const uint32_t subresource /* = 0 */, const CD3DX12_RANGE range /* = */);
+		GPUResourceMapGuard						  MapGuard(const uint64_t offset = 0);
+		UniqueHandle<MappedGPUBuffer, GPUBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
 
 		std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
 		{

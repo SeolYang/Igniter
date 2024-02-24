@@ -6,6 +6,7 @@
 #include <D3D12/CommandContext.h>
 #include <Core/Assert.h>
 #include <ranges>
+#include <format>
 
 namespace fe::dx
 {
@@ -24,6 +25,7 @@ namespace fe::dx
 		for (const uint8_t localFrameIdx : std::views::iota(0Ui8, NumFramesInFlight))
 		{
 			allocatedSizeInBytes[localFrameIdx].store(0);
+			desc.DebugName = String(std::format("TempConstantBuffer.LocalFrame{}", localFrameIdx));
 			buffers.emplace_back(renderDevice.CreateBuffer(desc).value());
 		}
 	}
@@ -39,7 +41,7 @@ namespace fe::dx
 		const uint64_t allocSizeInBytes = desc.GetSizeAsBytes();
 		const uint64_t offset = allocatedSizeInBytes[currentLocalFrameIdx].fetch_add(allocSizeInBytes);
 		check(offset <= reservedSizeInBytesPerFrame);
-		mappedBuffers[currentLocalFrameIdx].emplace_back(buffers[currentLocalFrameIdx].MapHandle(handleManager, 0, { offset, allocSizeInBytes }));
+		mappedBuffers[currentLocalFrameIdx].emplace_back(buffers[currentLocalFrameIdx].MapHandle(handleManager, offset));
 		allocatedViews[currentLocalFrameIdx].emplace_back(gpuViewManager.RequestConstantBufferView(buffers[currentLocalFrameIdx], offset, allocSizeInBytes));
 
 		return TempConstantBuffer{
