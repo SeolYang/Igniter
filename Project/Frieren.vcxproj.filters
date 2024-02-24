@@ -34,6 +34,9 @@
     <Filter Include="Source\Math">
       <UniqueIdentifier>{9d4ce617-53be-49f6-975c-fe5bea76b823}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thirdparty\SimpleMath">
+      <UniqueIdentifier>{0e94695b-79b7-4b7f-8524-6543ee102861}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -201,6 +204,9 @@
     <ClInclude Include="..\Source\Frieren\Core\Profile.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -308,6 +314,9 @@
     <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
@@ -316,5 +325,10 @@
     <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </None>
   </ItemGroup>
 </Project>
