@@ -48,7 +48,7 @@ namespace fe
 	Engine::~Engine()
 	{
 		logger.Log<EngineInfo>("* Cleanup sub-systems");
-
+		deferredDeallocator->FlushAllFrames();
 		gameInstance.reset();
 		imguiCanvas.reset();
 		imguiRenderer.reset();
@@ -106,6 +106,12 @@ namespace fe
 	{
 		check(instance != nullptr);
 		return *(instance->inputManager);
+	}
+
+	dx::GPUViewManager& Engine::GetGPUViewManager()
+	{
+		check(instance != nullptr);
+		return *(instance->gpuViewManager);
 	}
 
 	Renderer& Engine::GetRenderer()
@@ -173,7 +179,6 @@ namespace fe
 		}
 
 		renderer->WaitForFences();
-		deferredDeallocator->FlushAllFrames();
 		logger.Log<EngineInfo>("* End Engine main loop");
 		return 0;
 	}

@@ -25,9 +25,16 @@
 #include <Renderer/StaticMeshComponent.h>
 #include <ranges>
 #include <Engine.h>
+
 struct PositionBuffer
 {
 	float Position[3] = { 0.f, 0.f, 0.f };
+};
+
+struct BasicRenderResources
+{
+	uint32_t PosBufferIdx;
+	uint32_t VertexBufferIdx;
 };
 #pragma endregion
 
@@ -171,7 +178,6 @@ namespace fe
 
 			size_t idx = 0;
 			world.Each<StaticMeshComponent, fe::PositionComponent>([&renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {
-				renderCmdCtx->SetVertexBuffer(*staticMesh.VertexBufferHandle);
 				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
 
 				dx::GPUBufferDesc posBufferDesc;
@@ -179,7 +185,12 @@ namespace fe
 				{
 					dx::TempConstantBuffer posBuffer = tempConstantBufferAllocator->Allocate(posBufferDesc);
 					std::memcpy(posBuffer.Mapping->MappedPtr, &position, sizeof(fe::PositionComponent));
-					renderCmdCtx->SetRoot32BitConstants<uint32_t>(0, posBuffer.View->Index, 0);
+
+					const BasicRenderResources params{
+						.PosBufferIdx = posBuffer.View->Index,
+						.VertexBufferIdx = staticMesh.VerticesBufferSRV->Index
+					};
+					renderCmdCtx->SetRoot32BitConstants(0, params, 0);
 				}
 				renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
 			});

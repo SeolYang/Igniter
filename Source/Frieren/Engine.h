@@ -9,7 +9,7 @@ namespace fe::dx
 {
 	class Device;
 	class GPUViewManager;
-}
+} // namespace fe::dx
 
 namespace fe
 {
@@ -29,18 +29,19 @@ namespace fe
 		Engine();
 		~Engine();
 
-		[[nodiscard]] static FrameManager&	GetFrameManager();
-		[[nodiscard]] static Timer&			GetTimer();
-		[[nodiscard]] static Logger&		GetLogger();
-		[[nodiscard]] static HandleManager& GetHandleManager();
-		[[nodiscard]] static Window&		GetWindow();
-		[[nodiscard]] static dx::Device&	GetRenderDevice();
-		[[nodiscard]] static InputManager&	GetInputManager();
-		[[nodiscard]] static Renderer&		GetRenderer();
-		[[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
-		[[nodiscard]] static ImGuiCanvas&	GetImGuiCanvas();
-		[[nodiscard]] static GameInstance&	GetGameInstance();
-		bool								IsValid() const { return this == instance; }
+		[[nodiscard]] static FrameManager&		 GetFrameManager();
+		[[nodiscard]] static Timer&				 GetTimer();
+		[[nodiscard]] static Logger&			 GetLogger();
+		[[nodiscard]] static HandleManager&		 GetHandleManager();
+		[[nodiscard]] static Window&			 GetWindow();
+		[[nodiscard]] static dx::Device&		 GetRenderDevice();
+		[[nodiscard]] static InputManager&		 GetInputManager();
+		[[nodiscard]] static dx::GPUViewManager& GetGPUViewManager();
+		[[nodiscard]] static Renderer&			 GetRenderer();
+		[[nodiscard]] static ImGuiRenderer&		 GetImGuiRenderer();
+		[[nodiscard]] static ImGuiCanvas&		 GetImGuiCanvas();
+		[[nodiscard]] static GameInstance&		 GetGameInstance();
+		bool									 IsValid() const { return this == instance; }
 
 		int Execute();
 

@@ -4,6 +4,7 @@
 namespace fe::dx
 {
 	class GPUBuffer;
+	class GPUView;
 }
 
 namespace fe
@@ -11,7 +12,7 @@ namespace fe
 	struct StaticMeshComponent
 	{
 	public:
-		WeakHandle<dx::GPUBuffer> VertexBufferHandle = {};
+		WeakHandle<dx::GPUView>	  VerticesBufferSRV = {};
 		WeakHandle<dx::GPUBuffer> IndexBufferHandle = {};
 		uint32_t				  NumIndices = 0;
 	};

@@ -6,12 +6,14 @@ struct PositionBuffer
 struct BasicRenderResources
 {
 	uint positionBufferIdx;
+	uint vertexBufferIdx;
 };
 
 ConstantBuffer<BasicRenderResources> renderResource : register(b0);
 
-float4 main( float3 pos : POSITION ) : SV_POSITION
+float4 main( uint vertexID : SV_VertexID ) : SV_POSITION
 {
 	ConstantBuffer<PositionBuffer> posBuffer = ResourceDescriptorHeap[renderResource.positionBufferIdx];
-	return float4((pos + posBuffer.aPosition), 1.f);
+	StructuredBuffer<PositionBuffer> vertexBuffer = ResourceDescriptorHeap[renderResource.vertexBufferIdx];
+	return float4((vertexBuffer[vertexID].aPosition + posBuffer.aPosition), 1.f);
 }
