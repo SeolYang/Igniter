@@ -323,6 +323,9 @@
     <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Asset\AssetManager.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">

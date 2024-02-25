@@ -9,7 +9,7 @@ namespace fe
 	class HandleManager;
 	class Handle
 	{
-		template <typename T>
+		template <typename T, typename Finalizer>
 		friend class WeakHandle;
 
 		template <typename T, typename Destroyer>
@@ -50,7 +50,20 @@ namespace fe
 		uint64_t	   handle = InvalidHandle;
 	};
 
+	template <typename T, typename Finalizer>
+	class WeakHandle;
+
 	template <typename T>
+	class DefaultFinalizer
+	{
+	public:
+		void operator()(const WeakHandle<T, DefaultFinalizer>&, T*)
+		{
+			/* Empty */
+		}
+	};
+
+	template <typename T, typename Finalizer = DefaultFinalizer<T>>
 	class WeakHandle
 	{
 	public:
@@ -59,11 +72,50 @@ namespace fe
 		explicit WeakHandle(const Handle newHandle)
 			: handle(newHandle)
 		{
+			check(IsAlive());
+			if constexpr (std::is_pointer_v<Finalizer>)
+			{
+				finalizer = nullptr;
+			}
+		}
+
+		template <typename Fn>
+			requires(std::is_same_v<std::decay_t<Fn>, Finalizer>)
+		explicit WeakHandle(const Handle newHandle, Fn&& finalizer)
+			: handle(newHandle),
+			  finalizer(std::forward<Fn>(finalizer))
+		{
+			check(IsAlive());
 		}
 
 		WeakHandle(const WeakHandle& other) = default;
-		WeakHandle(WeakHandle&& other) noexcept = default;
-		~WeakHandle() = default;
+		WeakHandle(WeakHandle&& other) noexcept
+			: handle(std::move(other.handle)),
+			  finalizer(std::move(other.finalizer))
+		{
+			if constexpr (std::is_pointer_v<Finalizer>)
+			{
+				this->finalizer = nullptr;
+			}
+		}
+
+		~WeakHandle()
+		{
+			if (IsAlive())
+			{
+				if constexpr (std::is_pointer_v<Finalizer>)
+				{
+					if (finalizer != nullptr)
+					{
+						(*finalizer)(*this, reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
+					}
+				}
+				else
+				{
+					finalizer(*this, reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
+				}
+			}
+		}
 
 		WeakHandle& operator=(const WeakHandle& other) = default;
 		WeakHandle& operator=(WeakHandle&& other) noexcept = default;
@@ -109,7 +161,8 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		Handle handle{};
+		Handle							handle{};
+		[[no_unique_address]] Finalizer finalizer;
 	};
 
 	template <typename T>
@@ -144,37 +197,34 @@ namespace fe
 
 		UniqueHandle(const UniqueHandle&) = delete;
 
-		template <typename D = Destroyer>
-			requires(!std::is_pointer_v<D>)
 		UniqueHandle(UniqueHandle&& other) noexcept
 			: handle(std::move(other.handle)),
 			  destroyer(std::move(other.destroyer))
 		{
+			if constexpr (std::is_pointer_v<Destroyer>)
+			{
+				other.destroyer = nullptr;
+			}
 		}
 
-		template <typename D = Destroyer>
-			requires(std::is_pointer_v<D>)
-		UniqueHandle(UniqueHandle&& other) noexcept
-			: handle(std::move(other.handle)),
-			  destroyer(std::exchange(other.destroyer, nullptr))
+		template <typename Dx>
+		UniqueHandle(Dx&& destroyer)
+			: destroyer(std::forward<Dx>(destroyer))
 		{
 		}
 
-		UniqueHandle(const Destroyer& destroyer)
-			: destroyer(destroyer)
-		{
-		}
-
-		template <typename... Args>
-		UniqueHandle(HandleManager& handleManager, const Destroyer& destroyer, Args&&... args)
+		template <typename... Args, typename Dx>
+			requires(std::is_same_v<std::decay_t<Dx>, Destroyer>)
+		UniqueHandle(HandleManager& handleManager, Dx&& destroyer, Args&&... args)
 			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
-			  destroyer(destroyer)
+			  destroyer(std::forward<Dx>(destroyer))
 		{
 			check(IsAlive());
 			if constexpr (std::is_pointer_v<Destroyer>)
 			{
 				check(destroyer != nullptr);
 			}
+
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			new (instancePtr) T(std::forward<Args>(args)...);
@@ -274,6 +324,12 @@ namespace fe
 			return WeakHandle<T>{ handle };
 		}
 
+		template <typename Finalizer>
+		WeakHandle<T, Finalizer> DeriveWeak(Finalizer&& finalizer) const
+		{
+			return WeakHandle<T, Finalizer>{ handle, finalizer };
+		}
+
 		size_t GetHash() const { return handle.GetHash(); }
 
 	public:
@@ -290,7 +346,7 @@ namespace std
 	template <typename T, typename Dx>
 	class hash<fe::UniqueHandle<T, Dx>>
 	{
-		public:
+	public:
 		size_t operator()(const fe::UniqueHandle<T, Dx>& handle) const { return handle.GetHash(); }
 	};
 
@@ -300,4 +356,4 @@ namespace std
 	public:
 		size_t operator()(const fe::WeakHandle<T>& handle) const { return handle.GetHash(); }
 	};
-}
+} // namespace std

@@ -70,6 +70,7 @@
     <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Frieren\Asset\AssetManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Handle.cpp" />
