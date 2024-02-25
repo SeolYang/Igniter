@@ -134,17 +134,12 @@ namespace fe
 	class UniqueHandle
 	{
 	public:
-		template <typename D = Destroyer>
-			requires(!std::is_pointer_v<D> && std::is_constructible_v<D>)
 		UniqueHandle()
 		{
-		}
-
-		template <typename D = Destroyer>
-			requires(std::is_pointer_v<D>)
-		UniqueHandle()
-			: destroyer(nullptr)
-		{
+			if constexpr (std::is_pointer_v<Destroyer>)
+			{
+				this->destroyer = nullptr;
+			}
 		}
 
 		UniqueHandle(const UniqueHandle&) = delete;
@@ -165,39 +160,21 @@ namespace fe
 		{
 		}
 
-		template <typename... Args>
-			requires(!std::is_pointer_v<Destroyer>)
 		UniqueHandle(const Destroyer& destroyer)
 			: destroyer(destroyer)
 		{
 		}
 
 		template <typename... Args>
-			requires(std::is_pointer_v<Destroyer>)
-		UniqueHandle(const Destroyer destroyer)
-			: destroyer(destroyer)
-		{
-		}
-
-		template <typename... Args>
-			requires(!std::is_pointer_v<Destroyer>)
 		UniqueHandle(HandleManager& handleManager, const Destroyer& destroyer, Args&&... args)
 			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
 			  destroyer(destroyer)
 		{
 			check(IsAlive());
-			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-			check(instancePtr != nullptr);
-			new (instancePtr) T(std::forward<Args>(args)...);
-		}
-
-		template <typename... Args >
-			requires(std::is_pointer_v<Destroyer>)
-		UniqueHandle(HandleManager& handleManager, const Destroyer destroyer, Args&&... args)
-			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
-			  destroyer(destroyer)
-		{
-			check(IsAlive());
+			if constexpr (std::is_pointer_v<Destroyer>)
+			{
+				check(destroyer != nullptr);
+			}
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			new (instancePtr) T(std::forward<Args>(args)...);
@@ -272,23 +249,6 @@ namespace fe
 		bool IsAlive() const { return handle.IsAlive(EvaluatedTypeHashVal); }
 		operator bool() const { return IsAlive(); }
 
-		template <typename D = Destroyer>
-			requires(std::is_pointer_v<D>)
-		void Destroy()
-		{
-			if (IsAlive())
-			{
-				check(destroyer != nullptr);
-				handle.MarkAsPendingDeallocation(EvaluatedTypeHashVal);
-				T* instance = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-				check(instance != nullptr);
-				(*destroyer)(handle, EvaluatedTypeHashVal, instance);
-				handle = {};
-			}
-		}
-
-		template <typename D = Destroyer>
-			requires(!std::is_pointer_v<D>)
 		void Destroy()
 		{
 			if (IsAlive())
@@ -296,7 +256,15 @@ namespace fe
 				handle.MarkAsPendingDeallocation(EvaluatedTypeHashVal);
 				T* instance = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
 				check(instance != nullptr);
-				destroyer(handle, EvaluatedTypeHashVal, instance);
+				if constexpr (std::is_pointer_v<Destroyer>)
+				{
+					check(destroyer != nullptr);
+					(*destroyer)(handle, EvaluatedTypeHashVal, instance);
+				}
+				else
+				{
+					destroyer(handle, EvaluatedTypeHashVal, instance);
+				}
 				handle = {};
 			}
 		}
