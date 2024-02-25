@@ -16,6 +16,8 @@
 #include <robin_hood.h>
 #pragma warning(pop)
 
+#include <crossguid/guid.hpp>
+
 #define UNUSED(x) (x)
 
 namespace fe

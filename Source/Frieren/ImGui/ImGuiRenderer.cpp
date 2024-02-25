@@ -55,9 +55,9 @@ namespace fe
 		dx::CommandContext& cmdCtx = *commandContexts[frameManager.GetLocalFrameIndex()];
 		cmdCtx.Begin();
 		dx::Swapchain&	swapchain = renderer.GetSwapchain();
-		dx::GPUTexture& backBuffer = swapchain.GetBackBuffer();
+		dx::GpuTexture& backBuffer = swapchain.GetBackBuffer();
 
-		const dx::GPUView& backBufferRTV = swapchain.GetRenderTargetView();
+		const dx::GpuView& backBufferRTV = swapchain.GetRenderTargetView();
 		cmdCtx.SetRenderTarget(backBufferRTV);
 		cmdCtx.SetDescriptorHeap(*descriptorHeap);
 

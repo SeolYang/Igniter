@@ -37,6 +37,9 @@
     <Filter Include="Thirdparty\SimpleMath">
       <UniqueIdentifier>{0e94695b-79b7-4b7f-8524-6543ee102861}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Asset">
+      <UniqueIdentifier>{8aacdbc1-74bc-4926-a5bf-59582fa6132c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -93,13 +96,13 @@
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h">
       <Filter>Source\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuBuffer.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuTexture.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h">
@@ -120,13 +123,13 @@
     <ClInclude Include="..\Source\Frieren\D3D12\Common.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDesc.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuBufferDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
       <Filter>Thirdparty\D3D12MemAlloc</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuTextureDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h">
@@ -183,10 +186,10 @@
     <ClInclude Include="..\Source\Frieren\Core\Event.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUViewManager.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuViewManager.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUView.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuView.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h">
@@ -206,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h">
       <Filter>Thirdparty\SimpleMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Asset\AssetManager.h">
+      <Filter>Source\Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -242,13 +248,13 @@
     <ClCompile Include="..\Source\Frieren\D3D12\D3D12Common.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuBufferDesc.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <Filter>Thirdparty\D3D12MemAlloc</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuBuffer.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp">
@@ -275,7 +281,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContext.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuTexture.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCommon.cpp">
@@ -308,7 +314,7 @@
     <ClCompile Include="..\Source\Frieren\Core\Handle.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUViewManager.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuViewManager.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp">

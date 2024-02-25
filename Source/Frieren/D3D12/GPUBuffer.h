@@ -1,36 +1,36 @@
 #pragma once
 #include <D3D12/Common.h>
 #include <D3D12/DescriptorHeap.h>
-#include <D3D12/GPUBufferDesc.h>
+#include <D3D12/GpuBufferDesc.h>
 #include <Core/Assert.h>
 #include <Core/Handle.h>
 
 namespace fe::dx
 {
-	struct MappedGPUBuffer
+	struct MappedGpuBuffer
 	{
 		uint8_t* const MappedPtr = nullptr;
 	};
 
 	class Device;
-	class GPUBuffer
+	class GpuBuffer
 	{
 		friend class Device;
-		friend class UniqueHandle<MappedGPUBuffer, GPUBuffer*>;
+		friend class UniqueHandle<MappedGpuBuffer, GpuBuffer*>;
 
 	public:
-		GPUBuffer(ComPtr<ID3D12Resource> bufferResource);
-		GPUBuffer(const GPUBuffer&) = delete;
-		GPUBuffer(GPUBuffer&& other) noexcept;
-		~GPUBuffer() = default;
+		GpuBuffer(ComPtr<ID3D12Resource> bufferResource);
+		GpuBuffer(const GpuBuffer&) = delete;
+		GpuBuffer(GpuBuffer&& other) noexcept;
+		~GpuBuffer() = default;
 
-		GPUBuffer& operator=(const GPUBuffer&) = delete;
-		GPUBuffer& operator=(GPUBuffer&& other) noexcept;
+		GpuBuffer& operator=(const GpuBuffer&) = delete;
+		GpuBuffer& operator=(GpuBuffer&& other) noexcept;
 
 		bool IsValid() const { return (allocation && resource) || resource; }
 		operator bool() const { return IsValid(); }
 
-		const GPUBufferDesc& GetDesc() const { return desc; }
+		const GpuBufferDesc& GetDesc() const { return desc; }
 
 		const auto& GetNative() const
 		{
@@ -48,12 +48,12 @@ namespace fe::dx
 		void	 Unmap();
 
 		GPUResourceMapGuard						  MapGuard(const uint64_t offset = 0);
-		UniqueHandle<MappedGPUBuffer, GPUBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
+		UniqueHandle<MappedGpuBuffer, GpuBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
 
 		std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
 		{
 			std::optional<D3D12_VERTEX_BUFFER_VIEW> view{};
-			if (desc.GetBufferType() == EBufferType::VertexBuffer)
+			if (desc.GetBufferType() == EGpuBufferType::VertexBuffer)
 			{
 				view = D3D12_VERTEX_BUFFER_VIEW{
 					.BufferLocation = resource->GetGPUVirtualAddress(),
@@ -68,7 +68,7 @@ namespace fe::dx
 		std::optional<D3D12_INDEX_BUFFER_VIEW> GetIndexBufferView() const
 		{
 			std::optional<D3D12_INDEX_BUFFER_VIEW> view{};
-			if (desc.GetBufferType() == EBufferType::IndexBuffer)
+			if (desc.GetBufferType() == EGpuBufferType::IndexBuffer)
 			{
 				view = D3D12_INDEX_BUFFER_VIEW{
 					.BufferLocation = resource->GetGPUVirtualAddress(),
@@ -81,13 +81,13 @@ namespace fe::dx
 		}
 
 	private:
-		GPUBuffer(const GPUBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+		GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
 				  ComPtr<ID3D12Resource> newResource);
 
-		void operator()(Handle handle, const uint64_t evaluatedTypeHash, MappedGPUBuffer* mappedGPUBuffer);
+		void operator()(Handle handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer);
 
 	private:
-		GPUBufferDesc				desc;
+		GpuBufferDesc				desc;
 		ComPtr<D3D12MA::Allocation> allocation;
 		ComPtr<ID3D12Resource>		resource;
 	};

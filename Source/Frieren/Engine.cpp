@@ -37,7 +37,7 @@ namespace fe
 			handleManager = std::make_unique<HandleManager>();
 			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
 			inputManager = std::make_unique<InputManager>(*handleManager);
-			gpuViewManager = std::make_unique<dx::GPUViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
+			gpuViewManager = std::make_unique<dx::GpuViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
 			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
@@ -108,7 +108,7 @@ namespace fe
 		return *(instance->inputManager);
 	}
 
-	dx::GPUViewManager& Engine::GetGPUViewManager()
+	dx::GpuViewManager& Engine::GetGPUViewManager()
 	{
 		check(instance != nullptr);
 		return *(instance->gpuViewManager);

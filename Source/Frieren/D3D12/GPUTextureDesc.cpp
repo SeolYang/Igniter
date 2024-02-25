@@ -1,5 +1,5 @@
 #include <Core/Assert.h>
-#include <D3D12/GPUTextureDesc.h>
+#include <D3D12/GpuTextureDesc.h>
 
 namespace fe::dx
 {
@@ -422,7 +422,7 @@ namespace fe::dx
 	}
 
 	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>
-	GPUTextureDesc::ToShaderResourceViewDesc(const GPUTextureSubresource& subresource) const
+	GPUTextureDesc::ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (!IsTypelessFormat(Format))
 		{
@@ -507,7 +507,7 @@ namespace fe::dx
 	}
 
 	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC>
-	GPUTextureDesc::ToUnorderedAccessViewDesc(const GPUTextureSubresource& subresource) const
+	GPUTextureDesc::ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (IsUnorderedAccessCompatible() && !IsTypelessFormat(Format))
 		{
@@ -581,7 +581,7 @@ namespace fe::dx
 	}
 
 	std::optional<D3D12_RENDER_TARGET_VIEW_DESC>
-	GPUTextureDesc::ToRenderTargetViewDesc(const GPUTextureSubresource& subresource) const
+	GPUTextureDesc::ToRenderTargetViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (IsRenderTargetCompatible() && !IsTypelessFormat(Format))
 		{
@@ -655,7 +655,7 @@ namespace fe::dx
 	}
 
 	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>
-	GPUTextureDesc::ToDepthStencilViewDesc(const GPUTextureSubresource& subresource) const
+	GPUTextureDesc::ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (IsDepthStencilCompatible())
 		{

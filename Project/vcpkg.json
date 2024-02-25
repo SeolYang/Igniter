@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "frieren",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "dependencies": [
     {
     "name": "imgui",
@@ -24,7 +24,8 @@
       "name": "directxtex",
       "features": ["dx12"]  
       },
-    "entt"
+    "entt",
+    "crossguid"
   ],
   "builtin-baseline": "c8696863d371ab7f46e213d8f5ca923c4aef2a00",
   "overrides": [

@@ -58,7 +58,7 @@ namespace fe::dx
 		verify_succeeded(cmdList->Close());
 	}
 
-	void CommandContext::AddPendingTextureBarrier(GPUTexture& targetTexture, const D3D12_BARRIER_SYNC syncBefore,
+	void CommandContext::AddPendingTextureBarrier(GpuTexture& targetTexture, const D3D12_BARRIER_SYNC syncBefore,
 												  const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore,
 												  const D3D12_BARRIER_ACCESS			accessAfter,
 												  const D3D12_BARRIER_LAYOUT			layoutBefore,
@@ -86,7 +86,7 @@ namespace fe::dx
 																   .Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE });
 	}
 
-	void CommandContext::AddPendingBufferBarrier(GPUBuffer& targetBuffer, const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter, const size_t offset, const size_t sizeAsBytes)
+	void CommandContext::AddPendingBufferBarrier(GpuBuffer& targetBuffer, const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter, const size_t offset, const size_t sizeAsBytes)
 	{
 		check(IsValid());
 		check(targetBuffer);
@@ -116,47 +116,47 @@ namespace fe::dx
 		pendingBufferBarriers.clear();
 	}
 
-	void CommandContext::ClearRenderTarget(const GPUView& rtv, float r /*= 0.f*/, float g /*= 0.f*/, float b /*= 0.f*/, float a /*= 1.f*/)
+	void CommandContext::ClearRenderTarget(const GpuView& rtv, float r /*= 0.f*/, float g /*= 0.f*/, float b /*= 0.f*/, float a /*= 1.f*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(rtv && (rtv.Type == EGPUViewType::RenderTargetView));
+		check(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
 		const float rgba[4] = { r, g, b, a };
 		cmdList->ClearRenderTargetView(rtv.CPUHandle, rgba, 0, nullptr);
 	}
 
-	void CommandContext::ClearDepthStencil(const GPUView& dsv, float depth /*= 1.f*/, uint8_t stencil /*= 0*/)
+	void CommandContext::ClearDepthStencil(const GpuView& dsv, float depth /*= 1.f*/, uint8_t stencil /*= 0*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(dsv && (dsv.Type == EGPUViewType::DepthStencilView));
+		check(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil,
 									   0, nullptr);
 	}
 
-	void CommandContext::ClearDepth(const GPUView& dsv, float depth /*= 1.f*/)
+	void CommandContext::ClearDepth(const GpuView& dsv, float depth /*= 1.f*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(dsv && (dsv.Type == EGPUViewType::DepthStencilView));
+		check(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 	}
 
-	void CommandContext::ClearStencil(const GPUView& dsv, uint8_t stencil /*= 0*/)
+	void CommandContext::ClearStencil(const GpuView& dsv, uint8_t stencil /*= 0*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(dsv && (dsv.Type == EGPUViewType::DepthStencilView));
+		check(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, nullptr);
 	}
 
-	void CommandContext::CopyBuffer(GPUBuffer& from, const size_t srcOffset, const size_t numBytes, GPUBuffer& to, const size_t dstOffset)
+	void CommandContext::CopyBuffer(GpuBuffer& from, const size_t srcOffset, const size_t numBytes, GpuBuffer& to, const size_t dstOffset)
 	{
 		check(IsValid());
 		check(from);
@@ -168,7 +168,7 @@ namespace fe::dx
 		cmdList->CopyBufferRegion(&to.GetNative(), dstOffset, &from.GetNative(), srcOffset, numBytes);
 	}
 
-	void CommandContext::CopyBuffer(GPUBuffer& from, GPUBuffer& to)
+	void CommandContext::CopyBuffer(GpuBuffer& from, GpuBuffer& to)
 	{
 		const auto& srcDesc = from.GetDesc();
 		CopyBuffer(from, 0, srcDesc.GetSizeAsBytes(), to, 0);
@@ -207,7 +207,7 @@ namespace fe::dx
 		SetDescriptorHeaps(descriptorHeaps);
 	}
 
-	void CommandContext::SetVertexBuffer(GPUBuffer& vertexBuffer)
+	void CommandContext::SetVertexBuffer(GpuBuffer& vertexBuffer)
 	{
 		check(IsValid());
 		check(vertexBuffer);
@@ -216,7 +216,7 @@ namespace fe::dx
 		cmdList->IASetVertexBuffers(0, 1, &vbView.value());
 	}
 
-	void CommandContext::SetIndexBuffer(GPUBuffer& indexBuffer)
+	void CommandContext::SetIndexBuffer(GpuBuffer& indexBuffer)
 	{
 		check(IsValid());
 		check(indexBuffer);
@@ -225,13 +225,13 @@ namespace fe::dx
 		cmdList->IASetIndexBuffer(&ibView.value());
 	}
 
-	void CommandContext::SetRenderTarget(const GPUView& rtv, std::optional<std::reference_wrapper<GPUView>> dsv /*= std::nullopt*/)
+	void CommandContext::SetRenderTarget(const GpuView& rtv, std::optional<std::reference_wrapper<GpuView>> dsv /*= std::nullopt*/)
 	{
 		check(IsValid());
 		check(cmdListTargetQueueType == EQueueType::Direct);
-		check(rtv && (rtv.Type == EGPUViewType::RenderTargetView));
+		check(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
 		check(!dsv ||
-			  (dsv->get() && (dsv->get().Type == EGPUViewType::DepthStencilView)));
+			  (dsv->get() && (dsv->get().Type == EGpuViewType::DepthStencilView)));
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = rtv.CPUHandle;
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle =

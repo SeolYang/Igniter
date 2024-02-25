@@ -1,5 +1,5 @@
-#include <D3D12/GPUViewManager.h>
-#include <D3D12/GPUView.h>
+#include <D3D12/GpuViewManager.h>
+#include <D3D12/GpuView.h>
 #include <D3D12/Device.h>
 #include <D3D12/DescriptorHeap.h>
 #include <Core/Assert.h>
@@ -7,7 +7,7 @@
 
 namespace fe::dx
 {
-	GPUViewManager::GPUViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Device& device)
+	GpuViewManager::GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Device& device)
 		: handleManager(handleManager),
 		  deferredDeallocator(deferredDeallocator),
 		  device(device),
@@ -18,61 +18,61 @@ namespace fe::dx
 	{
 	}
 
-	GPUViewManager::~GPUViewManager()
+	GpuViewManager::~GpuViewManager()
 	{
 	}
 
-	std::array<std::reference_wrapper<DescriptorHeap>, 2> GPUViewManager::GetBindlessDescriptorHeaps()
+	std::array<std::reference_wrapper<DescriptorHeap>, 2> GpuViewManager::GetBindlessDescriptorHeaps()
 	{
 		return { *cbvSrvUavHeap, *samplerHeap };
 	}
 
-	void GPUViewManager::UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer)
+	void GpuViewManager::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
 		device.UpdateConstantBufferView(gpuView, buffer);
 	}
 
-	void GPUViewManager::UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
+	void GpuViewManager::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
 	{
 		device.UpdateConstantBufferView(gpuView, buffer, offset, sizeInBytes);
 	}
 
-	void GPUViewManager::UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer)
+	void GpuViewManager::UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
 		device.UpdateShaderResourceView(gpuView, buffer);
 	}
 
-	void GPUViewManager::UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer)
+	void GpuViewManager::UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
 		device.UpdateUnorderedAccessView(gpuView, buffer);
 	}
 
-	void GPUViewManager::UpdateShaderResourceView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	void GpuViewManager::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
 	{
 		device.UpdateShaderResourceView(gpuView, gpuTexture, subresource);
 	}
 
-	void GPUViewManager::UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	void GpuViewManager::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
 	{
 		device.UpdateUnorderedAccessView(gpuView, gpuTexture, subresource);
 	}
 
-	void GPUViewManager::UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	void GpuViewManager::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
 	{
 		device.UpdateRenderTargetView(gpuView, gpuTexture, subresource);
 	}
 
-	void GPUViewManager::UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& gpuTexture, const GPUTextureSubresource& subresource)
+	void GpuViewManager::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
 	{
 		device.UpdateDepthStencilView(gpuView, gpuTexture, subresource);
 	}
 
-	UniqueHandle<GPUView, GPUViewManager*> GPUViewManager::MakeHandle(const GPUView& view)
+	UniqueHandle<GpuView, GpuViewManager*> GpuViewManager::MakeHandle(const GpuView& view)
 	{
-		UniqueHandle<GPUView, GPUViewManager*> res;
+		UniqueHandle<GpuView, GpuViewManager*> res;
 		if (view.IsValid())
 		{
-			res = UniqueHandle<GPUView, GPUViewManager*>{
+			res = UniqueHandle<GpuView, GpuViewManager*>{
 				handleManager, this, view
 			};
 		}
@@ -80,22 +80,22 @@ namespace fe::dx
 		return res;
 	}
 	
-	std::optional<GPUView> GPUViewManager::Allocate(const EGPUViewType type)
+	std::optional<GpuView> GpuViewManager::Allocate(const EGpuViewType type)
 	{
 		check(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
 		switch (type)
 		{
-			case EGPUViewType::ConstantBufferView:
+			case EGpuViewType::ConstantBufferView:
 				return cbvSrvUavHeap->Allocate(type);
-			case EGPUViewType::ShaderResourceView:
+			case EGpuViewType::ShaderResourceView:
 				return cbvSrvUavHeap->Allocate(type);
-			case EGPUViewType::UnorderedAccessView:
+			case EGpuViewType::UnorderedAccessView:
 				return cbvSrvUavHeap->Allocate(type);
-			case EGPUViewType::Sampler:
+			case EGpuViewType::Sampler:
 				return samplerHeap->Allocate(type);
-			case EGPUViewType::RenderTargetView:
+			case EGpuViewType::RenderTargetView:
 				return rtvHeap->Allocate(type);
-			case EGPUViewType::DepthStencilView:
+			case EGpuViewType::DepthStencilView:
 				return dsvHeap->Allocate(type);
 		}
 
@@ -103,30 +103,30 @@ namespace fe::dx
 		return {};
 	}
 
-	void GPUViewManager::Deallocate(const GPUView& gpuView)
+	void GpuViewManager::Deallocate(const GpuView& gpuView)
 	{
 		check(gpuView.IsValid());
 		check(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
 		switch (gpuView.Type)
 		{
-			case EGPUViewType::ConstantBufferView:
+			case EGpuViewType::ConstantBufferView:
 				return cbvSrvUavHeap->Deallocate(gpuView);
-			case EGPUViewType::ShaderResourceView:
+			case EGpuViewType::ShaderResourceView:
 				return cbvSrvUavHeap->Deallocate(gpuView);
-			case EGPUViewType::UnorderedAccessView:
+			case EGpuViewType::UnorderedAccessView:
 				return cbvSrvUavHeap->Deallocate(gpuView);
-			case EGPUViewType::Sampler:
+			case EGpuViewType::Sampler:
 				return samplerHeap->Deallocate(gpuView);
-			case EGPUViewType::RenderTargetView:
+			case EGpuViewType::RenderTargetView:
 				return rtvHeap->Deallocate(gpuView);
-			case EGPUViewType::DepthStencilView:
+			case EGpuViewType::DepthStencilView:
 				return dsvHeap->Deallocate(gpuView);
 		}
 
 		checkNoEntry();
 	}
 
-	void GPUViewManager::operator()(Handle handle, const uint64_t evaluatedTypeHash, GPUView* view)
+	void GpuViewManager::operator()(Handle handle, const uint64_t evaluatedTypeHash, GpuView* view)
 	{
 		RequestDeferredDeallocation(deferredDeallocator, [this, handle, evaluatedTypeHash, view]() {
 			check(view != nullptr && view->IsValid());

@@ -80,7 +80,7 @@ namespace fe::dx
 		return type == EDescriptorHeapType::CBV_SRV_UAV || type == EDescriptorHeapType::Sampler;
 	}
 
-	enum class EGPUViewType
+	enum class EGpuViewType
 	{
 		ConstantBufferView,
 		ShaderResourceView,
@@ -90,9 +90,9 @@ namespace fe::dx
 		DepthStencilView,
 		Unknown
 	};
-	bool IsSupportGPUView(const EDescriptorHeapType descriptorHeapType, const EGPUViewType gpuViewType);
+	bool IsSupportGPUView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType);
 
-	struct GPUTextureSubresource
+	struct GpuViewTextureSubresource
 	{
 		union
 		{

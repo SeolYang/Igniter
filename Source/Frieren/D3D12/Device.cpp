@@ -406,7 +406,7 @@ namespace fe::dx
 		};
 	}
 
-	std::optional<GPUBuffer> Device::CreateBuffer(const GPUBufferDesc& bufferDesc)
+	std::optional<GpuBuffer> Device::CreateBuffer(const GpuBufferDesc& bufferDesc)
 	{
 		check(device);
 		check(allocator);
@@ -428,10 +428,10 @@ namespace fe::dx
 		check(allocation);
 		check(resource);
 		SetObjectName(resource.Get(), bufferDesc.DebugName);
-		return GPUBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
+		return GpuBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
 	}
 
-	std::optional<GPUTexture> Device::CreateTexture(const GPUTextureDesc& textureDesc)
+	std::optional<GpuTexture> Device::CreateTexture(const GPUTextureDesc& textureDesc)
 	{
 		check(device);
 		check(allocator);
@@ -468,7 +468,7 @@ namespace fe::dx
 		check(allocation);
 		check(resource);
 		SetObjectName(resource.Get(), textureDesc.DebugName);
-		return GPUTexture{ textureDesc, std::move(allocation), std::move(resource) };
+		return GpuTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
 	ComPtr<D3D12MA::Pool> Device::CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc)
@@ -487,12 +487,12 @@ namespace fe::dx
 		return customPool;
 	}
 
-	void Device::UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer)
+	void Device::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
-		check(gpuView.Type == EGPUViewType::ConstantBufferView);
+		check(gpuView.Type == EGpuViewType::ConstantBufferView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GPUBufferDesc&						   desc = buffer.GetDesc();
+		const GpuBufferDesc&						   desc = buffer.GetDesc();
 		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
 		if (cbvDesc)
 		{
@@ -504,13 +504,13 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
+	void Device::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
 	{
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GPUBufferDesc& desc = buffer.GetDesc();
+		const GpuBufferDesc& desc = buffer.GetDesc();
 		check((offset + sizeInBytes) < desc.GetSizeAsBytes());
-		if (gpuView.Type == EGPUViewType::ConstantBufferView)
+		if (gpuView.Type == EGpuViewType::ConstantBufferView)
 		{
 			const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
 				.BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset,
@@ -524,12 +524,12 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer)
+	void Device::UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
-		check(gpuView.Type == EGPUViewType::ShaderResourceView);
+		check(gpuView.Type == EGpuViewType::ShaderResourceView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GPUBufferDesc&						   desc = buffer.GetDesc();
+		const GpuBufferDesc&						   desc = buffer.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
 		if (srvDesc)
 		{
@@ -541,12 +541,12 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer)
+	void Device::UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
-		check(gpuView.Type == EGPUViewType::UnorderedAccessView);
+		check(gpuView.Type == EGpuViewType::UnorderedAccessView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GPUBufferDesc&							desc = buffer.GetDesc();
+		const GpuBufferDesc&							desc = buffer.GetDesc();
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
 
 		if (uavDesc)
@@ -559,9 +559,9 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateShaderResourceView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource)
+	void Device::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
-		check(gpuView.Type == EGPUViewType::ShaderResourceView);
+		check(gpuView.Type == EGpuViewType::ShaderResourceView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc&						   desc = texture.GetDesc();
@@ -577,9 +577,9 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource)
+	void Device::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
-		check(gpuView.Type == EGPUViewType::UnorderedAccessView);
+		check(gpuView.Type == EGpuViewType::UnorderedAccessView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc&							desc = texture.GetDesc();
@@ -595,9 +595,9 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource)
+	void Device::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
-		check(gpuView.Type == EGPUViewType::RenderTargetView);
+		check(gpuView.Type == EGpuViewType::RenderTargetView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc&						 desc = texture.GetDesc();
@@ -613,9 +613,9 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource)
+	void Device::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
-		check(gpuView.Type == EGPUViewType::DepthStencilView);
+		check(gpuView.Type == EGpuViewType::DepthStencilView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc&						 desc = texture.GetDesc();

@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\Frieren\Asset\AssetManager.h" />
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\Source\Frieren\Core\Container.h" />
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
@@ -37,13 +38,13 @@
     <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Device.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Fence.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUBuffer.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUBufferDesc.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuBuffer.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuBufferDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUTexture.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUTextureDesc.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUView.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GPUViewManager.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuTexture.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuTextureDesc.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuView.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuViewManager.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />
@@ -85,11 +86,11 @@
     <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUBuffer.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUBufferDesc.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUTexture.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuBuffer.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuBufferDesc.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuTexture.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GPUViewManager.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineStateDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineState.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\RootSignature.cpp" />

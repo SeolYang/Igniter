@@ -7,11 +7,11 @@ namespace fe::dx
 	class CommandQueue;
 	class CommandContext;
 	class DescriptorHeap;
-	class GPUView;
-	class GPUBufferDesc;
-	class GPUBuffer;
+	class GpuView;
+	class GpuBufferDesc;
+	class GpuBuffer;
 	class GPUTextureDesc;
-	class GPUTexture;
+	class GpuTexture;
 	class Fence;
 	class GraphicsPipelineStateDesc;
 	class ComputePipelineStateDesc;
@@ -41,20 +41,20 @@ namespace fe::dx
 		std::optional<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
 		std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
 
-		std::optional<GPUBuffer>  CreateBuffer(const GPUBufferDesc& bufferDesc);
-		std::optional<GPUTexture> CreateTexture(const GPUTextureDesc& textureDesc);
+		std::optional<GpuBuffer>  CreateBuffer(const GpuBufferDesc& bufferDesc);
+		std::optional<GpuTexture> CreateTexture(const GPUTextureDesc& textureDesc);
 
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
-		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer);
-		void UpdateConstantBufferView(const GPUView& gpuView, GPUBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
-		void UpdateShaderResourceView(const GPUView& gpuView, GPUBuffer& buffer);
-		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUBuffer& buffer);
+		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer);
+		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
+		void UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer);
+		void UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer);
 
-		void UpdateShaderResourceView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
-		void UpdateUnorderedAccessView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
-		void UpdateRenderTargetView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
-		void UpdateDepthStencilView(const GPUView& gpuView, GPUTexture& texture, const GPUTextureSubresource& subresource);
+		void UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource);
+		void UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource);
+		void UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource);
+		void UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource);
 
 		ComPtr<D3D12MA::Pool> CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc);
 

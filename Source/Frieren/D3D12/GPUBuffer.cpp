@@ -1,9 +1,9 @@
-#include <D3D12/GPUBuffer.h>
+#include <D3D12/GpuBuffer.h>
 #include <D3D12/Device.h>
 
 namespace fe::dx
 {
-	GPUBuffer::GPUBuffer(const GPUBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+	GpuBuffer::GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
 						 ComPtr<ID3D12Resource> newResource)
 		: desc(newDesc),
 		  allocation(std::move(newAllocation)),
@@ -11,14 +11,14 @@ namespace fe::dx
 	{
 	}
 
-	GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept
+	GpuBuffer::GpuBuffer(GpuBuffer&& other) noexcept
 		: desc(other.desc),
 		  allocation(std::move(other.allocation)),
 		  resource(std::move(other.resource))
 	{
 	}
 
-	GPUBuffer::GPUBuffer(ComPtr<ID3D12Resource> bufferResource)
+	GpuBuffer::GpuBuffer(ComPtr<ID3D12Resource> bufferResource)
 		: resource(std::move(bufferResource))
 	{
 		check(resource);
@@ -26,7 +26,7 @@ namespace fe::dx
 		check(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
 	}
 
-	GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept
+	GpuBuffer& GpuBuffer::operator=(GpuBuffer&& other) noexcept
 	{
 		desc = other.desc;
 		allocation = std::move(other.allocation);
@@ -34,7 +34,7 @@ namespace fe::dx
 		return *this;
 	}
 
-	uint8_t* GPUBuffer::Map(const uint64_t offset)
+	uint8_t* GpuBuffer::Map(const uint64_t offset)
 	{
 		check(resource);
 		check(offset < desc.GetSizeAsBytes());
@@ -49,12 +49,12 @@ namespace fe::dx
 		return mappedPtr + offset;
 	}
 
-	void GPUBuffer::Unmap()
+	void GpuBuffer::Unmap()
 	{
 		resource->Unmap(0, nullptr);
 	}
 
-	GPUResourceMapGuard GPUBuffer::MapGuard(const uint64_t offset)
+	GPUResourceMapGuard GpuBuffer::MapGuard(const uint64_t offset)
 	{
 		uint8_t* mappedPtr = Map(offset);
 		if (mappedPtr == nullptr)
@@ -67,14 +67,14 @@ namespace fe::dx
 		};
 	}
 
-	UniqueHandle<MappedGPUBuffer, GPUBuffer*> GPUBuffer::MapHandle(HandleManager& handleManager, const uint64_t offset)
+	UniqueHandle<MappedGpuBuffer, GpuBuffer*> GpuBuffer::MapHandle(HandleManager& handleManager, const uint64_t offset)
 	{
 		uint8_t* mappedPtr = Map(offset);
 		if (mappedPtr != nullptr)
 		{
-			return UniqueHandle<MappedGPUBuffer, GPUBuffer*>{
+			return UniqueHandle<MappedGpuBuffer, GpuBuffer*>{
 				handleManager, this,
-				MappedGPUBuffer{ mappedPtr }
+				MappedGpuBuffer{ mappedPtr }
 			};
 		}
 
@@ -82,7 +82,7 @@ namespace fe::dx
 		return {};
 	}
 
-	void GPUBuffer::operator()(Handle handle, const uint64_t evaluatedTypeHash, MappedGPUBuffer* mappedGPUBuffer)
+	void GpuBuffer::operator()(Handle handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer)
 	{
 		check(mappedGPUBuffer != nullptr);
 		handle.Deallocate(evaluatedTypeHash);

@@ -6,11 +6,11 @@
 namespace fe::dx
 {
 	class Device;
-	class GPUView;
+	class GpuView;
 	class DescriptorHeap
 	{
 		friend class Device;
-		friend class GPUViewManager;
+		friend class GpuViewManager;
 
 	public:
 		DescriptorHeap(const DescriptorHeap&) = delete;
@@ -33,8 +33,8 @@ namespace fe::dx
 					   const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap,
 					   const uint32_t descriptorHandleIncSizeInHeap);
 
-		std::optional<GPUView> Allocate(const EGPUViewType desiredType);
-		void				   Deallocate(const GPUView& gpuView);
+		std::optional<GpuView> Allocate(const EGpuViewType desiredType);
+		void				   Deallocate(const GpuView& gpuView);
 
 	private:
 		EDescriptorHeapType			 descriptorHeapType;

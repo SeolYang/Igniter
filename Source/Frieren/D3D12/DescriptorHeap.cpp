@@ -57,29 +57,29 @@ namespace fe::dx
 				   : gpuDescriptorHandleForHeapStart;
 	}
 
-	std::optional<GPUView> DescriptorHeap::Allocate(const EGPUViewType desiredType)
+	std::optional<GpuView> DescriptorHeap::Allocate(const EGpuViewType desiredType)
 	{
 		check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
-			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (desiredType == EGPUViewType::ConstantBufferView ||
-																		  desiredType == EGPUViewType::ShaderResourceView ||
-																		  desiredType == EGPUViewType::UnorderedAccessView)));
+			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (desiredType == EGpuViewType::ConstantBufferView ||
+																		  desiredType == EGpuViewType::ShaderResourceView ||
+																		  desiredType == EGpuViewType::UnorderedAccessView)));
 
 		check(descriptorHeapType != EDescriptorHeapType::Sampler ||
-			  (descriptorHeapType == EDescriptorHeapType::Sampler && (desiredType == EGPUViewType::Sampler)));
+			  (descriptorHeapType == EDescriptorHeapType::Sampler && (desiredType == EGpuViewType::Sampler)));
 
 		check(descriptorHeapType != EDescriptorHeapType::RTV ||
-			  (descriptorHeapType == EDescriptorHeapType::RTV && (desiredType == EGPUViewType::RenderTargetView)));
+			  (descriptorHeapType == EDescriptorHeapType::RTV && (desiredType == EGpuViewType::RenderTargetView)));
 
 		check(descriptorHeapType != EDescriptorHeapType::DSV ||
-			  (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EGPUViewType::DepthStencilView)));
+			  (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EGpuViewType::DepthStencilView)));
 
 		uint32_t newDescriptorIdx = std::numeric_limits<uint32_t>::max();
 		if (descsriptorIdxPool.empty() || !descsriptorIdxPool.try_pop(newDescriptorIdx))
 		{
-			return GPUView{};
+			return GpuView{};
 		}
 
-		return GPUView{
+		return GpuView{
 			.Type = desiredType,
 			.Index = newDescriptorIdx,
 			.CPUHandle = GetIndexedCPUDescriptorHandle(newDescriptorIdx),
@@ -87,24 +87,24 @@ namespace fe::dx
 		};
 	}
 
-	void DescriptorHeap::Deallocate(const GPUView& gpuView)
+	void DescriptorHeap::Deallocate(const GpuView& gpuView)
 	{
 		check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
-			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (gpuView.Type == EGPUViewType::ConstantBufferView ||
-																		  gpuView.Type == EGPUViewType::ShaderResourceView ||
-																		  gpuView.Type == EGPUViewType::UnorderedAccessView)));
+			  (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (gpuView.Type == EGpuViewType::ConstantBufferView ||
+																		  gpuView.Type == EGpuViewType::ShaderResourceView ||
+																		  gpuView.Type == EGpuViewType::UnorderedAccessView)));
 
 		check(descriptorHeapType != EDescriptorHeapType::Sampler ||
-			  (descriptorHeapType == EDescriptorHeapType::Sampler && (gpuView.Type == EGPUViewType::Sampler)));
+			  (descriptorHeapType == EDescriptorHeapType::Sampler && (gpuView.Type == EGpuViewType::Sampler)));
 
 		check(descriptorHeapType != EDescriptorHeapType::RTV ||
-			  (descriptorHeapType == EDescriptorHeapType::RTV && (gpuView.Type == EGPUViewType::RenderTargetView)));
+			  (descriptorHeapType == EDescriptorHeapType::RTV && (gpuView.Type == EGpuViewType::RenderTargetView)));
 
 		check(descriptorHeapType != EDescriptorHeapType::DSV ||
-			  (descriptorHeapType == EDescriptorHeapType::DSV && (gpuView.Type == EGPUViewType::DepthStencilView)));
+			  (descriptorHeapType == EDescriptorHeapType::DSV && (gpuView.Type == EGpuViewType::DepthStencilView)));
 
 		check(gpuView.Index < numInitialDescriptors);
-		check(gpuView.Index != std::numeric_limits<decltype(GPUView::Index)>::max());
+		check(gpuView.Index != std::numeric_limits<decltype(GpuView::Index)>::max());
 		descsriptorIdxPool.push(gpuView.Index);
 		check(descsriptorIdxPool.unsafe_size() <= numInitialDescriptors);
 	}

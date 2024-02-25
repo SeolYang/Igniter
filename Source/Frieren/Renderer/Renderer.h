@@ -14,13 +14,13 @@ namespace fe::dx
 
 #pragma region test
 	// #test
-	class GPUBuffer;
-	class GPUTexture;
+	class GpuBuffer;
+	class GpuTexture;
 	class ShaderBlob;
 	class RootSignature;
 	class PipelineState;
-	class GPUView;
-	class GPUViewManager;
+	class GpuView;
+	class GpuViewManager;
 	class TempConstantBufferAllocator;
 #pragma endregion
 } // namespace fe::dx
@@ -33,7 +33,7 @@ namespace fe
 	class Renderer
 	{
 	public:
-		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GPUViewManager& gpuViewManager);
+		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GpuViewManager& gpuViewManager);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
 		~Renderer();
@@ -54,7 +54,7 @@ namespace fe
 		DeferredDeallocator& deferredDeallocator;
 		dx::Device&			 renderDevice;
 		HandleManager&		 handleManager;
-		dx::GPUViewManager&	 gpuViewManager;
+		dx::GpuViewManager&	 gpuViewManager;
 
 		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
 		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
@@ -69,8 +69,8 @@ namespace fe
 		std::unique_ptr<dx::ShaderBlob>				   ps;
 		std::unique_ptr<dx::RootSignature>			   bindlessRootSignature;
 		std::unique_ptr<dx::PipelineState>			   pso;
-		std::unique_ptr<dx::GPUTexture>				   depthStencilBuffer;
-		UniqueHandle<dx::GPUView, dx::GPUViewManager*> dsv;
+		std::unique_ptr<dx::GpuTexture>				   depthStencilBuffer;
+		UniqueHandle<dx::GpuView, dx::GpuViewManager*> dsv;
 
 #pragma endregion
 	};

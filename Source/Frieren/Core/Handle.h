@@ -36,6 +36,8 @@ namespace fe
 		void Deallocate(const uint64_t typeHashValue);
 		void MarkAsPendingDeallocation(const uint64_t typeHashVal);
 
+		size_t GetHash() const { return handle; }
+
 	private:
 		Handle() = default;
 		Handle(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType);
@@ -100,6 +102,8 @@ namespace fe
 
 		bool IsAlive() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
 		operator bool() const { return IsAlive(); }
+
+		size_t GetHash() const { return handle.GetHash(); }
 
 	public:
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
@@ -302,6 +306,8 @@ namespace fe
 			return WeakHandle<T>{ handle };
 		}
 
+		size_t GetHash() const { return handle.GetHash(); }
+
 	public:
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
@@ -309,5 +315,21 @@ namespace fe
 		Handle							handle;
 		[[no_unique_address]] Destroyer destroyer;
 	};
-
 } // namespace fe
+
+namespace std
+{
+	template <typename T, typename Dx>
+	class hash<fe::UniqueHandle<T, Dx>>
+	{
+		public:
+		size_t operator()(const fe::UniqueHandle<T, Dx>& handle) const { return handle.GetHash(); }
+	};
+
+	template <typename T>
+	class hash<fe::WeakHandle<T>>
+	{
+	public:
+		size_t operator()(const fe::WeakHandle<T>& handle) const { return handle.GetHash(); }
+	};
+}

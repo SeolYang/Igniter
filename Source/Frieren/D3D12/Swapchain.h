@@ -13,19 +13,19 @@ namespace fe::dx
 	class Device;
 	class CommandQueue;
 	class DescriptorHeap;
-	class GPUViewManager;
-	class GPUView;
-	class GPUTexture;
+	class GpuViewManager;
+	class GpuView;
+	class GpuTexture;
 	class Swapchain
 	{
 	public:
-		Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync = true);
+		Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync = true);
 		~Swapchain();
 
 		bool			  IsTearingSupport() const { return bTearingEnabled; }
-		GPUTexture&		  GetBackBuffer();
-		const GPUTexture& GetBackBuffer() const;
-		const GPUView&	  GetRenderTargetView() const { return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
+		GpuTexture&		  GetBackBuffer();
+		const GpuTexture& GetBackBuffer() const;
+		const GpuView&	  GetRenderTargetView() const { return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
 
 		// #todo Impl Resize Swapchain!
 		// void Resize(const uint32_t width, const uint32_t height);
@@ -37,7 +37,7 @@ namespace fe::dx
 	private:
 		void InitSwapchain(const Window& window, CommandQueue& directCmdQueue);
 		void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
-		void InitRenderTargetViews(GPUViewManager& gpuViewManager);
+		void InitRenderTargetViews(GpuViewManager& gpuViewManager);
 
 	private:
 		ComPtr<IDXGISwapChain4> swapchain;
@@ -46,8 +46,8 @@ namespace fe::dx
 		const bool	  bVSyncEnabled;
 		bool		  bTearingEnabled = false;
 
-		std::vector<GPUTexture>								backBuffers;
-		std::vector<UniqueHandle<GPUView, GPUViewManager*>> renderTargetViews;
+		std::vector<GpuTexture>								backBuffers;
+		std::vector<UniqueHandle<GpuView, GpuViewManager*>> renderTargetViews;
 
 	};
 } // namespace fe::dx

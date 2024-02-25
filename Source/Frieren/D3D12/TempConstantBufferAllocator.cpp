@@ -1,8 +1,8 @@
 #include <D3D12/TempConstantBufferAllocator.h>
 #include <D3D12/Device.h>
-#include <D3D12/GPUBuffer.h>
-#include <D3D12/GPUBufferDesc.h>
-#include <D3D12/GPUViewManager.h>
+#include <D3D12/GpuBuffer.h>
+#include <D3D12/GpuBufferDesc.h>
+#include <D3D12/GpuViewManager.h>
 #include <D3D12/CommandContext.h>
 #include <Core/Assert.h>
 #include <ranges>
@@ -10,7 +10,7 @@
 
 namespace fe::dx
 {
-	TempConstantBufferAllocator::TempConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice, HandleManager& handleManager, GPUViewManager& gpuViewManager, const uint32_t reservedSizeInBytesPerFrame)
+	TempConstantBufferAllocator::TempConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedSizeInBytesPerFrame)
 		: frameManager(frameManager),
 		  renderDevice(renderDevice),
 		  handleManager(handleManager),
@@ -19,7 +19,7 @@ namespace fe::dx
 	{
 		check(reservedSizeInBytesPerFrame % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
 
-		GPUBufferDesc desc{};
+		GpuBufferDesc desc{};
 		desc.AsConstantBuffer(reservedSizeInBytesPerFrame);
 
 		for (const uint8_t localFrameIdx : std::views::iota(0Ui8, NumFramesInFlight))
@@ -34,7 +34,7 @@ namespace fe::dx
 	{
 	}
 
-	TempConstantBuffer TempConstantBufferAllocator::Allocate(const GPUBufferDesc& desc)
+	TempConstantBuffer TempConstantBufferAllocator::Allocate(const GpuBufferDesc& desc)
 	{
 		const size_t currentLocalFrameIdx = frameManager.GetLocalFrameIndex();
 		check(currentLocalFrameIdx < NumFramesInFlight);

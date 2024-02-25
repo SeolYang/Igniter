@@ -6,24 +6,24 @@
 namespace fe::dx
 {
 	class Device;
-	class GPUBuffer;
-	struct MappedGPUBuffer;
-	class GPUBufferDesc;
-	class GPUView;
-	class GPUViewManager;
+	class GpuBuffer;
+	struct MappedGpuBuffer;
+	class GpuBufferDesc;
+	class GpuView;
+	class GpuViewManager;
 	class CommandContext;
 
 	struct TempConstantBuffer
 	{
 	public:
-		WeakHandle<MappedGPUBuffer> Mapping = {};
-		WeakHandle<GPUView>			View = {};
+		WeakHandle<MappedGpuBuffer> Mapping = {};
+		WeakHandle<GpuView>			View = {};
 	};
 
 	class TempConstantBufferAllocator
 	{
 	public:
-		TempConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice, HandleManager& handleManager, GPUViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
+		TempConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
 		TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
 		TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
 		~TempConstantBufferAllocator();
@@ -31,7 +31,7 @@ namespace fe::dx
 		TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&) = delete;
 		TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
-		TempConstantBuffer Allocate(const GPUBufferDesc& desc);
+		TempConstantBuffer Allocate(const GpuBufferDesc& desc);
 
 		// 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다. 프레임 시작시 반드시 호출해야함.
 		void DeallocateCurrentFrame();
@@ -46,13 +46,13 @@ namespace fe::dx
 		const FrameManager& frameManager;
 		Device&				renderDevice;
 		HandleManager&		handleManager;
-		GPUViewManager&		gpuViewManager;
+		GpuViewManager&		gpuViewManager;
 
 		const uint32_t reservedSizeInBytesPerFrame;
 
-		std::vector<dx::GPUBuffer>															  buffers;
+		std::vector<dx::GpuBuffer>															  buffers;
 		std::array<std::atomic_uint64_t, NumFramesInFlight>									  allocatedSizeInBytes;
-		std::array<std::vector<UniqueHandle<MappedGPUBuffer, GPUBuffer*>>, NumFramesInFlight> mappedBuffers;
-		std::array<std::vector<UniqueHandle<GPUView, GPUViewManager*>>, NumFramesInFlight>	  allocatedViews;
+		std::array<std::vector<UniqueHandle<MappedGpuBuffer, GpuBuffer*>>, NumFramesInFlight> mappedBuffers;
+		std::array<std::vector<UniqueHandle<GpuView, GpuViewManager*>>, NumFramesInFlight>	  allocatedViews;
 	};
 } // namespace fe::dx

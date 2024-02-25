@@ -44,7 +44,7 @@ namespace fe
 	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
 	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
 
-	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GPUViewManager& gpuViewManager)
+	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GpuViewManager& gpuViewManager)
 		: frameManager(engineFrameManager),
 		  deferredDeallocator(engineDefferedDeallocator),
 		  renderDevice(device),
@@ -90,7 +90,7 @@ namespace fe
 		dx::GPUTextureDesc depthStencilDesc;
 		depthStencilDesc.DebugName = String("DepthStencilBufferTex");
 		depthStencilDesc.AsDepthStencil(1280, 642, DXGI_FORMAT_D32_FLOAT);
-		depthStencilBuffer = std::make_unique<dx::GPUTexture>(device.CreateTexture(depthStencilDesc).value());
+		depthStencilBuffer = std::make_unique<dx::GpuTexture>(device.CreateTexture(depthStencilDesc).value());
 		dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, { .MipSlice = 0 });
 
 		/* #todo 배리어만 적용하는 방법 찾아보기
@@ -147,8 +147,8 @@ namespace fe
 			renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
 			check(swapchain);
-			dx::GPUTexture&	   backBuffer = swapchain->GetBackBuffer();
-			const dx::GPUView& backBufferRTV = swapchain->GetRenderTargetView();
+			dx::GpuTexture&	   backBuffer = swapchain->GetBackBuffer();
+			const dx::GpuView& backBufferRTV = swapchain->GetRenderTargetView();
 			renderCmdCtx->AddPendingTextureBarrier(backBuffer,
 												   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
 												   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
@@ -163,7 +163,7 @@ namespace fe
 			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			size_t			  idx = 0;
-			dx::GPUBufferDesc posBufferDesc;
+			dx::GpuBufferDesc posBufferDesc;
 			posBufferDesc.AsConstantBuffer<PositionBuffer>();
 
 			world.Each<StaticMeshComponent, fe::PositionComponent>([&posBufferDesc, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {

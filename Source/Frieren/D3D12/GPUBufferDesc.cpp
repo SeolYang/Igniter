@@ -1,15 +1,15 @@
-#include <D3D12/GPUBufferDesc.h>
+#include <D3D12/GpuBufferDesc.h>
 #include <Core/Container.h>
 #include <Core/Assert.h>
 
 namespace fe::dx
 {
-	void GPUBufferDesc::AsConstantBuffer(const uint32_t sizeOfBufferInBytes)
+	void GpuBufferDesc::AsConstantBuffer(const uint32_t sizeOfBufferInBytes)
 	{
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		bufferType = EBufferType::ConstantBuffer;
+		bufferType = EGpuBufferType::ConstantBuffer;
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -26,13 +26,13 @@ namespace fe::dx
 		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
-	void GPUBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
+	void GpuBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
 	{
 		verify(sizeOfElementInBytes > 0);
 		verify(numOfElements > 0);
 		bIsShaderReadWritable = bEnableShaderReadWrtie;
 		bIsCPUAccessible = false;
-		bufferType = EBufferType::StructuredBuffer;
+		bufferType = EGpuBufferType::StructuredBuffer;
 
 		structureByteStride = sizeOfElementInBytes;
 		numElements = numOfElements;
@@ -49,12 +49,12 @@ namespace fe::dx
 		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
-	void GPUBufferDesc::AsUploadBuffer(const uint32_t sizeOfBufferInBytes)
+	void GpuBufferDesc::AsUploadBuffer(const uint32_t sizeOfBufferInBytes)
 	{
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		bufferType = EBufferType::UploadBuffer;
+		bufferType = EGpuBufferType::UploadBuffer;
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -71,12 +71,12 @@ namespace fe::dx
 		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
-	void GPUBufferDesc::AsReadbackBuffer(const uint32_t sizeOfBufferInBytes)
+	void GpuBufferDesc::AsReadbackBuffer(const uint32_t sizeOfBufferInBytes)
 	{
 		verify(sizeOfBufferInBytes > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = true;
-		bufferType = EBufferType::ReadbackBuffer;
+		bufferType = EGpuBufferType::ReadbackBuffer;
 
 		structureByteStride = sizeOfBufferInBytes;
 		numElements = 1;
@@ -93,13 +93,13 @@ namespace fe::dx
 		Format = DXGI_FORMAT_UNKNOWN;
 	}
 
-	void GPUBufferDesc::AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices)
+	void GpuBufferDesc::AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices)
 	{
 		verify(sizeOfVertexInBytes > 0);
 		verify(numVertices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
-		bufferType = EBufferType::VertexBuffer;
+		bufferType = EGpuBufferType::VertexBuffer;
 
 		structureByteStride = sizeOfVertexInBytes;
 		numElements = numVertices;
@@ -115,13 +115,13 @@ namespace fe::dx
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
 
-	void GPUBufferDesc::AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices)
+	void GpuBufferDesc::AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices)
 	{
 		verify(sizeOfIndexInBytes > 0);
 		verify(numIndices > 0);
 		bIsShaderReadWritable = false;
 		bIsCPUAccessible = false;
-		bufferType = EBufferType::IndexBuffer;
+		bufferType = EGpuBufferType::IndexBuffer;
 
 		structureByteStride = sizeOfIndexInBytes;
 		numElements = numIndices;
@@ -137,19 +137,19 @@ namespace fe::dx
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
 
-	D3D12MA::ALLOCATION_DESC GPUBufferDesc::ToAllocationDesc() const
+	D3D12MA::ALLOCATION_DESC GpuBufferDesc::ToAllocationDesc() const
 	{
-		check(bufferType != EBufferType::Unknown);
+		check(bufferType != EGpuBufferType::Unknown);
 		D3D12MA::ALLOCATION_DESC desc{ .HeapType = D3D12_HEAP_TYPE_DEFAULT };
 		switch (bufferType)
 		{
-			case EBufferType::ConstantBuffer:
+			case EGpuBufferType::ConstantBuffer:
 				desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
 				break;
-			case EBufferType::UploadBuffer:
+			case EGpuBufferType::UploadBuffer:
 				desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
 				break;
-			case EBufferType::ReadbackBuffer:
+			case EGpuBufferType::ReadbackBuffer:
 				desc.HeapType = D3D12_HEAP_TYPE_READBACK;
 				break;
 		}
@@ -157,9 +157,9 @@ namespace fe::dx
 		return desc;
 	}
 
-	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> GPUBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
+	std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> GpuBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
 	{
-		check(bufferType != EBufferType::Unknown);
+		check(bufferType != EGpuBufferType::Unknown);
 
 		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{};
 		if (IsConstantBufferViewCompatibleBuffer(bufferType))
@@ -173,9 +173,9 @@ namespace fe::dx
 		return desc;
 	}
 
-	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUBufferDesc::ToShaderResourceViewDesc() const
+	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GpuBufferDesc::ToShaderResourceViewDesc() const
 	{
-		check(bufferType != EBufferType::Unknown);
+		check(bufferType != EGpuBufferType::Unknown);
 
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> desc{};
 		if (IsShaderResourceViewCompatibleBuffer(bufferType))
@@ -194,9 +194,9 @@ namespace fe::dx
 		return desc;
 	}
 
-	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUBufferDesc::ToUnorderedAccessViewDesc() const
+	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GpuBufferDesc::ToUnorderedAccessViewDesc() const
 	{
-		check(bufferType != EBufferType::Unknown);
+		check(bufferType != EGpuBufferType::Unknown);
 
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> desc{};
 		if (IsUnorderdAccessViewCompatibleBuffer(bufferType) && bIsShaderReadWritable)
@@ -215,7 +215,7 @@ namespace fe::dx
 		return desc;
 	}
 
-	void GPUBufferDesc::From(const D3D12_RESOURCE_DESC& desc)
+	void GpuBufferDesc::From(const D3D12_RESOURCE_DESC& desc)
 	{
 		verify(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
 		Dimension = desc.Dimension;

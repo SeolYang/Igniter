@@ -7,18 +7,18 @@
 namespace fe::dx
 {
 	class Device;
-	class GPUTexture
+	class GpuTexture
 	{
 		friend class Device;
 
 	public:
-		GPUTexture(ComPtr<ID3D12Resource> textureResource);
-		GPUTexture(const GPUTexture&) = delete;
-		GPUTexture(GPUTexture&& other) noexcept;
-		~GPUTexture() = default;
+		GpuTexture(ComPtr<ID3D12Resource> textureResource);
+		GpuTexture(const GpuTexture&) = delete;
+		GpuTexture(GpuTexture&& other) noexcept;
+		~GpuTexture() = default;
 
-		GPUTexture& operator=(const GPUTexture&) = delete;
-		GPUTexture& operator=(GPUTexture&& other) noexcept;
+		GpuTexture& operator=(const GpuTexture&) = delete;
+		GpuTexture& operator=(GpuTexture&& other) noexcept;
 
 		bool IsValid() const { return (allocation && resource) || resource; }
 		operator bool() const { return IsValid(); }
@@ -38,7 +38,7 @@ namespace fe::dx
 		}
 
 	private:
-		GPUTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+		GpuTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
 				   ComPtr<ID3D12Resource> newResource);
 
 	private:

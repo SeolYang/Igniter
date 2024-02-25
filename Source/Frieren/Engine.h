@@ -8,7 +8,7 @@
 namespace fe::dx
 {
 	class Device;
-	class GPUViewManager;
+	class GpuViewManager;
 } // namespace fe::dx
 
 namespace fe
@@ -36,7 +36,7 @@ namespace fe
 		[[nodiscard]] static Window&			 GetWindow();
 		[[nodiscard]] static dx::Device&		 GetRenderDevice();
 		[[nodiscard]] static InputManager&		 GetInputManager();
-		[[nodiscard]] static dx::GPUViewManager& GetGPUViewManager();
+		[[nodiscard]] static dx::GpuViewManager& GetGPUViewManager();
 		[[nodiscard]] static Renderer&			 GetRenderer();
 		[[nodiscard]] static ImGuiRenderer&		 GetImGuiRenderer();
 		[[nodiscard]] static ImGuiCanvas&		 GetImGuiCanvas();
@@ -56,7 +56,7 @@ namespace fe
 		std::unique_ptr<HandleManager>		 handleManager;
 		std::unique_ptr<DeferredDeallocator> deferredDeallocator;
 		std::unique_ptr<InputManager>		 inputManager;
-		std::unique_ptr<dx::GPUViewManager>	 gpuViewManager;
+		std::unique_ptr<dx::GpuViewManager>	 gpuViewManager;
 		std::unique_ptr<Renderer>			 renderer;
 		std::unique_ptr<ImGuiRenderer>		 imguiRenderer;
 		std::unique_ptr<ImGuiCanvas>		 imguiCanvas;

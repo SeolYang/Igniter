@@ -10,7 +10,7 @@ namespace fe::dx
 		return ((originalSizeInBytes / D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) + 1) * D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 	}
 
-	enum class EBufferType
+	enum class EGpuBufferType
 	{
 		ConstantBuffer,
 		StructuredBuffer,
@@ -21,37 +21,37 @@ namespace fe::dx
 		Unknown
 	};
 
-	constexpr bool IsCPUAccessCompatibleBuffer(const EBufferType type)
+	constexpr bool IsCPUAccessCompatibleBuffer(const EGpuBufferType type)
 	{
-		return type == EBufferType::ConstantBuffer || type == EBufferType::UploadBuffer || type == EBufferType::ReadbackBuffer;
+		return type == EGpuBufferType::ConstantBuffer || type == EGpuBufferType::UploadBuffer || type == EGpuBufferType::ReadbackBuffer;
 	}
 
-	constexpr bool IsConstantBufferViewCompatibleBuffer(const EBufferType type)
+	constexpr bool IsConstantBufferViewCompatibleBuffer(const EGpuBufferType type)
 	{
-		return type == EBufferType::ConstantBuffer;
+		return type == EGpuBufferType::ConstantBuffer;
 	}
 
-	constexpr bool IsShaderResourceViewCompatibleBuffer(const EBufferType type)
+	constexpr bool IsShaderResourceViewCompatibleBuffer(const EGpuBufferType type)
 	{
-		return type == EBufferType::StructuredBuffer;
+		return type == EGpuBufferType::StructuredBuffer;
 	}
 
-	constexpr bool IsUnorderdAccessViewCompatibleBuffer(const EBufferType type)
+	constexpr bool IsUnorderdAccessViewCompatibleBuffer(const EGpuBufferType type)
 	{
-		return type == EBufferType::StructuredBuffer;
+		return type == EGpuBufferType::StructuredBuffer;
 	}
 
-	constexpr bool IsUploadCompatibleBuffer(const EBufferType type)
+	constexpr bool IsUploadCompatibleBuffer(const EGpuBufferType type)
 	{
-		return type == EBufferType::UploadBuffer;
+		return type == EGpuBufferType::UploadBuffer;
 	}
 
-	constexpr bool IsReadbackCompatibleBuffer(const EBufferType type)
+	constexpr bool IsReadbackCompatibleBuffer(const EGpuBufferType type)
 	{
-		return type == EBufferType::ReadbackBuffer;
+		return type == EGpuBufferType::ReadbackBuffer;
 	}
 
-	class GPUBufferDesc : public D3D12_RESOURCE_DESC1
+	class GpuBufferDesc : public D3D12_RESOURCE_DESC1
 	{
 	public:
 		void AsConstantBuffer(const uint32_t sizeOfBufferInBytes);
@@ -87,7 +87,7 @@ namespace fe::dx
 
 		DXGI_FORMAT GetIndexFormat() const
 		{
-			if (bufferType != EBufferType::IndexBuffer)
+			if (bufferType != EGpuBufferType::IndexBuffer)
 			{
 				return DXGI_FORMAT_UNKNOWN;
 			}
@@ -106,7 +106,7 @@ namespace fe::dx
 		}
 
 		bool		IsCPUAccessible() const { return bIsCPUAccessible; }
-		EBufferType GetBufferType() const { return bufferType; }
+		EGpuBufferType GetBufferType() const { return bufferType; }
 		uint32_t	GetStructureByteStride() const { return structureByteStride; }
 		uint32_t	GetNumElements() const { return numElements; }
 		uint64_t	GetSizeAsBytes() const { return Width; }
@@ -128,7 +128,7 @@ namespace fe::dx
 	private:
 		uint32_t	   structureByteStride = 1;
 		uint32_t	   numElements = 1;
-		EBufferType	   bufferType = EBufferType::Unknown;
+		EGpuBufferType	   bufferType = EGpuBufferType::Unknown;
 		bool		   bIsShaderReadWritable = false;
 		bool		   bIsCPUAccessible = false;
 		D3D12MA::Pool* customPool = nullptr;

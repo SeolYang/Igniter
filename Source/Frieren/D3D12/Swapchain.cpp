@@ -9,7 +9,7 @@
 
 namespace fe::dx
 {
-	Swapchain::Swapchain(const Window& window, GPUViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync)
+	Swapchain::Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync)
 		: numBackBuffers(desiredNumBackBuffers),
 		  bVSyncEnabled(bEnableVSync)
 	{
@@ -23,12 +23,12 @@ namespace fe::dx
 		backBuffers.clear();
 	}
 
-	GPUTexture& Swapchain::GetBackBuffer()
+	GpuTexture& Swapchain::GetBackBuffer()
 	{
 		return backBuffers[swapchain->GetCurrentBackBufferIndex()];
 	}
 
-	const GPUTexture& Swapchain::GetBackBuffer() const
+	const GpuTexture& Swapchain::GetBackBuffer() const
 	{
 		return backBuffers[swapchain->GetCurrentBackBufferIndex()];
 	}
@@ -85,7 +85,7 @@ namespace fe::dx
 		}
 	}
 
-	void Swapchain::InitRenderTargetViews(GPUViewManager& gpuViewManager)
+	void Swapchain::InitRenderTargetViews(GpuViewManager& gpuViewManager)
 	{
 		renderTargetViews.reserve(numBackBuffers);
 		backBuffers.reserve(numBackBuffers);

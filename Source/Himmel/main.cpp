@@ -59,7 +59,7 @@ int main()
 		fe::dx::Device&		renderDevice = engine.GetRenderDevice();
 		fe::GameInstance&	gameInstance = engine.GetGameInstance();
 		HandleManager&		handleManager = engine.GetHandleManager();
-		dx::GPUViewManager& gpuViewManager = engine.GetGPUViewManager();
+		dx::GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
 
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
 		const auto				   player = PlayerArchetype::Create(*defaultWorld);
@@ -69,20 +69,20 @@ int main()
 		constexpr uint16_t NumQuadIndices = 6;
 		constexpr uint16_t NumTriIndices = 3;
 
-		dx::GPUBufferDesc quadIBDesc{};
+		dx::GpuBufferDesc quadIBDesc{};
 		quadIBDesc.AsIndexBuffer<uint16_t>(NumQuadIndices);
 		quadIBDesc.DebugName = String("QuadMeshIB");
-		UniqueHandle<dx::GPUBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
+		UniqueHandle<dx::GpuBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
 
-		dx::GPUBufferDesc triIBDesc{};
+		dx::GpuBufferDesc triIBDesc{};
 		triIBDesc.AsIndexBuffer<uint16_t>(NumTriIndices);
 		triIBDesc.DebugName = String("TriMeshIB");
-		UniqueHandle<dx::GPUBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
+		UniqueHandle<dx::GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
 
-		dx::GPUBufferDesc verticesBufferDesc{};
+		dx::GpuBufferDesc verticesBufferDesc{};
 		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
 		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
-		UniqueHandle<dx::GPUBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
+		UniqueHandle<dx::GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
 
 		const SimpleVertex vertices[7] = {
 			{ -.1f, 0.f, 0.f },
@@ -94,9 +94,9 @@ int main()
 			{ 0.1f, 0.f, 0.f }
 		};
 
-		dx::GPUBufferDesc uploadBufferDesc{};
+		dx::GpuBufferDesc uploadBufferDesc{};
 		uploadBufferDesc.AsUploadBuffer(static_cast<uint32_t>(sizeof(vertices) + quadIBDesc.GetSizeAsBytes() + triIBDesc.GetSizeAsBytes()));
-		dx::GPUBuffer uploadBuffer{ renderDevice.CreateBuffer(uploadBufferDesc).value() };
+		dx::GpuBuffer uploadBuffer{ renderDevice.CreateBuffer(uploadBufferDesc).value() };
 
 		const uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		const uint16_t triIndices[3] = { 4, 5, 6 };
@@ -180,7 +180,7 @@ int main()
 			fence.WaitOnCPU();
 		}
 
-		UniqueHandle<dx::GPUView, dx::GPUViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
+		UniqueHandle<dx::GpuView, dx::GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
 
 		const StaticMeshComponent quadStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.DeriveWeak(),

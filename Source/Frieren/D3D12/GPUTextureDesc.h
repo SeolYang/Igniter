@@ -64,10 +64,10 @@ namespace fe::dx
 		bool IsAllowSimultaneousAccess() const { return bIsAllowSimultaneousAccess; }
 
 		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc(const GPUTextureSubresource& subresource) const;
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc(const GPUTextureSubresource& subresource) const;
-		std::optional<D3D12_RENDER_TARGET_VIEW_DESC>	ToRenderTargetViewDesc(const GPUTextureSubresource& subresource) const;
-		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>	ToDepthStencilViewDesc(const GPUTextureSubresource& subresource) const;
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const;
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const;
+		std::optional<D3D12_RENDER_TARGET_VIEW_DESC>	ToRenderTargetViewDesc(const GpuViewTextureSubresource& subresource) const;
+		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>	ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const;
 
 		// #todo Typeless 포맷에 대한 typed 포맷을 지정한 view 생성
 
