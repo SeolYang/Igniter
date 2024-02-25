@@ -84,7 +84,7 @@ namespace fe::dx
 
 	void GpuBuffer::operator()(Handle handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer)
 	{
-		check(mappedGPUBuffer != nullptr);
+		verify(mappedGPUBuffer != nullptr);
 		handle.Deallocate(evaluatedTypeHash);
 	}
 

@@ -120,7 +120,7 @@ namespace fe
 		WeakHandle& operator=(const WeakHandle& other) = default;
 		WeakHandle& operator=(WeakHandle&& other) noexcept = default;
 
-		T& operator*()
+		[[nodiscard]] T& operator*()
 		{
 			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
@@ -128,7 +128,7 @@ namespace fe
 			return *instancePtr;
 		}
 
-		const T& operator*() const
+		[[nodiscard]] const T& operator*() const
 		{
 			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
@@ -136,7 +136,7 @@ namespace fe
 			return *instancePtr;
 		}
 
-		T* operator->()
+		[[nodiscard]] T* operator->()
 		{
 			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
@@ -144,7 +144,7 @@ namespace fe
 			return instancePtr;
 		}
 
-		const T* operator->() const
+		[[nodiscard]] const T* operator->() const
 		{
 			check(IsAlive());
 			T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
@@ -152,10 +152,10 @@ namespace fe
 			return instancePtr;
 		}
 
-		bool IsAlive() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
-		operator bool() const { return IsAlive(); }
+		[[nodiscard]] bool IsAlive() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
+		[[nodiscard]] operator bool() const { return IsAlive(); }
 
-		size_t GetHash() const { return handle.GetHash(); }
+		[[nodiscard]] size_t GetHash() const { return handle.GetHash(); }
 
 	public:
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
@@ -268,36 +268,36 @@ namespace fe
 			return *this;
 		}
 
-		T& operator*()
+		[[nodiscard]] T& operator*()
 		{
 			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
 		}
 
-		const T& operator*() const
+		[[nodiscard]] const T& operator*() const
 		{
 			const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return *instancePtr;
 		}
 
-		T* operator->()
+		[[nodiscard]] T* operator->()
 		{
 			T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}
 
-		const T* operator->() const
+		[[nodiscard]] const T* operator->() const
 		{
 			const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
 			check(instancePtr != nullptr);
 			return instancePtr;
 		}
 
-		bool IsAlive() const { return handle.IsAlive(EvaluatedTypeHashVal); }
-		operator bool() const { return IsAlive(); }
+		[[nodiscard]] bool IsAlive() const { return handle.IsAlive(EvaluatedTypeHashVal); }
+		[[nodiscard]] operator bool() const { return IsAlive(); }
 
 		void Destroy()
 		{
@@ -319,18 +319,18 @@ namespace fe
 			}
 		}
 
-		WeakHandle<T> DeriveWeak() const
+		[[nodiscard]] WeakHandle<T> DeriveWeak() const
 		{
 			return WeakHandle<T>{ handle };
 		}
 
 		template <typename Finalizer>
-		WeakHandle<T, Finalizer> DeriveWeak(Finalizer&& finalizer) const
+		[[nodiscard]] WeakHandle<T, Finalizer> DeriveWeak(Finalizer&& finalizer) const
 		{
 			return WeakHandle<T, Finalizer>{ handle, finalizer };
 		}
 
-		size_t GetHash() const { return handle.GetHash(); }
+		[[nodiscard]] size_t GetHash() const { return handle.GetHash(); }
 
 	public:
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;

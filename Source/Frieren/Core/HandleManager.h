@@ -23,8 +23,20 @@ namespace fe
 		void	 Deallocate(const uint64_t typeHashVal, const uint64_t handle);
 		void	 MaskAsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle);
 
-		uint8_t*	   GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle);
-		const uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
+		uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle)
+		{
+			check(typeHashVal != InvalidHashVal);
+			check(memPools.contains(typeHashVal));
+			return memPools[typeHashVal].GetAddressOf(handle);
+		}
+
+		const uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
+		{
+			check(typeHashVal != InvalidHashVal);
+			check(memPools.contains(typeHashVal));
+			const auto& memPool = memPools.at(typeHashVal);
+			return memPool.GetAddressOf(handle);
+		}
 
 		/* If handle.alived == address existed. */
 		uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle)
@@ -40,8 +52,18 @@ namespace fe
 		}
 
 		/* Validated Address = handle.alived && !pending-deallocation */
-		uint8_t*	   GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle);
-		const uint8_t* GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
+		uint8_t* GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle)
+		{
+			ReadOnlyLock lock{ mutex };
+			check(memPools.contains(typeHashVal));
+			return !pendingDeallocations.contains(handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
+		}
+
+		const uint8_t* GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
+		{
+			ReadOnlyLock lock{ mutex };
+			return !pendingDeallocations.contains(handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
+		}
 
 		bool IsAlive(const uint64_t typeHashVal, const uint64_t handle) const;
 		bool IsPendingDeallocation(const uint64_t handle) const;

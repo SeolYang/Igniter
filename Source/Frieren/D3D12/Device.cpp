@@ -508,8 +508,7 @@ namespace fe::dx
 	{
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GpuBufferDesc& desc = buffer.GetDesc();
-		check((offset + sizeInBytes) < desc.GetSizeAsBytes());
+		check((offset + sizeInBytes) < buffer.GetDesc().GetSizeAsBytes());
 		if (gpuView.Type == EGpuViewType::ConstantBufferView)
 		{
 			const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{

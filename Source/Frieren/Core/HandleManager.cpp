@@ -45,47 +45,6 @@ namespace fe
 		}
 	}
 
-	uint8_t* HandleManager::GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle)
-	{
-		if (typeHashVal != InvalidHashVal && handle != Handle::InvalidHandle)
-		{
-			if (memPools.contains(typeHashVal))
-			{
-				return memPools[typeHashVal].GetAddressOf(handle);
-			}
-		}
-
-		checkNoEntry();
-		return nullptr;
-	}
-
-	const uint8_t* HandleManager::GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
-	{
-		if (typeHashVal != InvalidHashVal && handle != Handle::InvalidHandle)
-		{
-			if (memPools.contains(typeHashVal))
-			{
-				const auto& memPool = memPools.at(typeHashVal);
-				return memPool.GetAddressOf(handle);
-			}
-		}
-
-		checkNoEntry();
-		return nullptr;
-	}
-
-	uint8_t* HandleManager::GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle)
-	{
-		ReadOnlyLock lock{ mutex };
-		return !IsPendingDeallocationUnsafe(handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
-	}
-
-	const uint8_t* HandleManager::GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
-	{
-		ReadOnlyLock lock{ mutex };
-		return !IsPendingDeallocationUnsafe(handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
-	}
-
 	bool HandleManager::IsAlive(const uint64_t typeHashVal, const uint64_t handle) const
 	{
 		ReadOnlyLock lock{ mutex };
