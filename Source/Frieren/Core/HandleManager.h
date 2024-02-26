@@ -2,6 +2,7 @@
 #include <Core/MemoryPool.h>
 #include <Core/Mutex.h>
 #include <Core/Container.h>
+#include <Core/HashUtils.h>
 
 namespace fe
 {

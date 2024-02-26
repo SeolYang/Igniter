@@ -15,8 +15,8 @@
 #pragma warning(disable : 6305)
 #include <robin_hood.h>
 #pragma warning(pop)
-
 #include <crossguid/guid.hpp>
+#include <nlohmann/json.hpp>
 
 #define UNUSED(x) (x)
 
