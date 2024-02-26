@@ -18,7 +18,7 @@ namespace fe::dx
 	class DescriptorHeap;
 	class GpuViewManager
 	{
-		friend class UniqueHandle<GpuView, GpuViewManager*>;
+		friend class Handle<GpuView, GpuViewManager*>;
 
 	public:
 		GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Device& device);
@@ -170,7 +170,7 @@ namespace fe::dx
 		}
 
 	private:
-		UniqueHandle<GpuView, GpuViewManager*> MakeHandle(const GpuView& view);
+		Handle<GpuView, GpuViewManager*> MakeHandle(const GpuView& view);
 
 		std::optional<GpuView> Allocate(const EGpuViewType type);
 		void				   Deallocate(const GpuView& gpuView);

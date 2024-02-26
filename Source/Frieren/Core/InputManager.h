@@ -64,7 +64,7 @@ namespace fe
 		using ScaleMap = robin_hood::unordered_map<String, float>;
 		using InputNameScaleMap = robin_hood::unordered_map<EInput, ScaleMap>;
 		template <typename T>
-		using EventMap = robin_hood::unordered_map<String, UniqueHandle<T>>;
+		using EventMap = robin_hood::unordered_map<String, Handle<T>>;
 
 	public:
 		InputManager(HandleManager& handleManager);

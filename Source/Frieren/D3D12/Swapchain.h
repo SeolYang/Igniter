@@ -47,7 +47,7 @@ namespace fe::dx
 		bool		  bTearingEnabled = false;
 
 		std::vector<GpuTexture>								backBuffers;
-		std::vector<UniqueHandle<GpuView, GpuViewManager*>> renderTargetViews;
+		std::vector<Handle<GpuView, GpuViewManager*>> renderTargetViews;
 
 	};
 } // namespace fe::dx

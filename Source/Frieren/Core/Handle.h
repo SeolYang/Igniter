@@ -9,7 +9,7 @@ namespace fe
 	template <typename T, typename Finalizer>
 	class WeakHandle;
 	template <typename T, typename Destroyer>
-	class UniqueHandle;
+	class Handle;
 
 	class HandleManager;
 	namespace details
@@ -20,7 +20,7 @@ namespace fe
 			friend class WeakHandle;
 
 			template <typename T, typename Destroyer>
-			friend class UniqueHandle;
+			friend class Handle;
 
 		public:
 			HandleImpl(const HandleImpl& other) = default;
@@ -189,10 +189,10 @@ namespace fe
 	};
 
 	template <typename T, typename Destroyer = DefaultDestroyer<T>>
-	class UniqueHandle
+	class Handle
 	{
 	public:
-		UniqueHandle()
+		Handle()
 		{
 			if constexpr (std::is_pointer_v<Destroyer>)
 			{
@@ -200,9 +200,9 @@ namespace fe
 			}
 		}
 
-		UniqueHandle(const UniqueHandle&) = delete;
+		Handle(const Handle&) = delete;
 
-		UniqueHandle(UniqueHandle&& other) noexcept
+		Handle(Handle&& other) noexcept
 			: handle(std::move(other.handle)),
 			  destroyer(std::move(other.destroyer))
 		{
@@ -213,14 +213,14 @@ namespace fe
 		}
 
 		template <typename Dx>
-		UniqueHandle(Dx&& destroyer)
+		Handle(Dx&& destroyer)
 			: destroyer(std::forward<Dx>(destroyer))
 		{
 		}
 
 		template <typename... Args, typename Dx>
 			requires(std::is_same_v<std::decay_t<Dx>, Destroyer>)
-		UniqueHandle(HandleManager& handleManager, Dx&& destroyer, Args&&... args)
+		Handle(HandleManager& handleManager, Dx&& destroyer, Args&&... args)
 			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
 			  destroyer(std::forward<Dx>(destroyer))
 		{
@@ -237,7 +237,7 @@ namespace fe
 
 		template <typename... Args>
 			requires(!std::is_pointer_v<Destroyer> && std::is_constructible_v<Destroyer>)
-		UniqueHandle(HandleManager& handleManager, Args&&... args)
+		Handle(HandleManager& handleManager, Args&&... args)
 			: handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
 		{
 			check(IsAlive());
@@ -246,16 +246,16 @@ namespace fe
 			new (instancePtr) T(std::forward<Args>(args)...);
 		}
 
-		~UniqueHandle()
+		~Handle()
 		{
 			Destroy();
 		}
 
-		UniqueHandle& operator=(const UniqueHandle&) = delete;
+		Handle& operator=(const Handle&) = delete;
 
 		template <typename... Args, typename D = Destroyer>
 			requires(!std::is_pointer_v<D>)
-		UniqueHandle& operator=(UniqueHandle&& other) noexcept
+		Handle& operator=(Handle&& other) noexcept
 		{
 			Destroy();
 			handle = std::move(other.handle);
@@ -265,7 +265,7 @@ namespace fe
 
 		template <typename... Args>
 			requires(std::is_pointer_v<Destroyer>)
-		UniqueHandle& operator=(UniqueHandle&& other) noexcept
+		Handle& operator=(Handle&& other) noexcept
 		{
 			Destroy();
 			handle = std::move(other.handle);
@@ -349,10 +349,10 @@ namespace fe
 namespace std
 {
 	template <typename T, typename Dx>
-	class hash<fe::UniqueHandle<T, Dx>>
+	class hash<fe::Handle<T, Dx>>
 	{
 	public:
-		size_t operator()(const fe::UniqueHandle<T, Dx>& handle) const { return handle.GetHash(); }
+		size_t operator()(const fe::Handle<T, Dx>& handle) const { return handle.GetHash(); }
 	};
 
 	template <typename T>

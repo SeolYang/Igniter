@@ -67,12 +67,12 @@ namespace fe::dx
 		};
 	}
 
-	UniqueHandle<MappedGpuBuffer, GpuBuffer*> GpuBuffer::MapHandle(HandleManager& handleManager, const uint64_t offset)
+	Handle<MappedGpuBuffer, GpuBuffer*> GpuBuffer::MapHandle(HandleManager& handleManager, const uint64_t offset)
 	{
 		uint8_t* mappedPtr = Map(offset);
 		if (mappedPtr != nullptr)
 		{
-			return UniqueHandle<MappedGpuBuffer, GpuBuffer*>{
+			return Handle<MappedGpuBuffer, GpuBuffer*>{
 				handleManager, this,
 				MappedGpuBuffer{ mappedPtr }
 			};

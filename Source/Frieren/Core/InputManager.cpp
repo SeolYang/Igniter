@@ -53,7 +53,7 @@ namespace fe
 		inputActionNameMap[input].insert(nameOfAction);
 		if (!actionMap.contains(nameOfAction))
 		{
-			actionMap[nameOfAction] = UniqueHandle<Action>{ handleManager };
+			actionMap[nameOfAction] = Handle<Action>{ handleManager };
 		}
 	}
 
@@ -64,7 +64,7 @@ namespace fe
 		if (!axisMap.contains(nameOfAxis))
 		{
 			inputAxisNameScaleMap[input][nameOfAxis] = scale;
-			axisMap[nameOfAxis] = UniqueHandle<Axis>{ handleManager };
+			axisMap[nameOfAxis] = Handle<Axis>{ handleManager };
 		}
 	}
 

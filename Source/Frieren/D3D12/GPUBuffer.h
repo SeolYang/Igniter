@@ -16,7 +16,7 @@ namespace fe::dx
 	class GpuBuffer
 	{
 		friend class Device;
-		friend class UniqueHandle<MappedGpuBuffer, GpuBuffer*>;
+		friend class Handle<MappedGpuBuffer, GpuBuffer*>;
 
 	public:
 		GpuBuffer(ComPtr<ID3D12Resource> bufferResource);
@@ -48,7 +48,7 @@ namespace fe::dx
 		void	 Unmap();
 
 		GPUResourceMapGuard						  MapGuard(const uint64_t offset = 0);
-		UniqueHandle<MappedGpuBuffer, GpuBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
+		Handle<MappedGpuBuffer, GpuBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
 
 		std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
 		{

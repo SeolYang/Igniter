@@ -70,7 +70,7 @@ namespace fe
 		std::unique_ptr<dx::RootSignature>			   bindlessRootSignature;
 		std::unique_ptr<dx::PipelineState>			   pso;
 		std::unique_ptr<dx::GpuTexture>				   depthStencilBuffer;
-		UniqueHandle<dx::GpuView, dx::GpuViewManager*> dsv;
+		Handle<dx::GpuView, dx::GpuViewManager*> dsv;
 
 #pragma endregion
 	};

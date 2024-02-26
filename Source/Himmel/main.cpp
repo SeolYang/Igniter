@@ -72,17 +72,17 @@ int main()
 		dx::GpuBufferDesc quadIBDesc{};
 		quadIBDesc.AsIndexBuffer<uint16_t>(NumQuadIndices);
 		quadIBDesc.DebugName = String("QuadMeshIB");
-		UniqueHandle<dx::GpuBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
+		Handle<dx::GpuBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
 
 		dx::GpuBufferDesc triIBDesc{};
 		triIBDesc.AsIndexBuffer<uint16_t>(NumTriIndices);
 		triIBDesc.DebugName = String("TriMeshIB");
-		UniqueHandle<dx::GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
+		Handle<dx::GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
 
 		dx::GpuBufferDesc verticesBufferDesc{};
 		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
 		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
-		UniqueHandle<dx::GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
+		Handle<dx::GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
 
 		const SimpleVertex vertices[7] = {
 			{ -.1f, 0.f, 0.f },
@@ -180,7 +180,7 @@ int main()
 			fence.WaitOnCPU();
 		}
 
-		UniqueHandle<dx::GpuView, dx::GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
+		Handle<dx::GpuView, dx::GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
 
 		const StaticMeshComponent quadStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.DeriveWeak(),

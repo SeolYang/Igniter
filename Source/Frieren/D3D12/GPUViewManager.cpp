@@ -67,12 +67,12 @@ namespace fe::dx
 		device.UpdateDepthStencilView(gpuView, gpuTexture, subresource);
 	}
 
-	UniqueHandle<GpuView, GpuViewManager*> GpuViewManager::MakeHandle(const GpuView& view)
+	Handle<GpuView, GpuViewManager*> GpuViewManager::MakeHandle(const GpuView& view)
 	{
-		UniqueHandle<GpuView, GpuViewManager*> res;
+		Handle<GpuView, GpuViewManager*> res;
 		if (view.IsValid())
 		{
-			res = UniqueHandle<GpuView, GpuViewManager*>{
+			res = Handle<GpuView, GpuViewManager*>{
 				handleManager, this, view
 			};
 		}

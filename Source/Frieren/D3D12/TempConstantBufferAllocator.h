@@ -52,7 +52,7 @@ namespace fe::dx
 
 		std::vector<dx::GpuBuffer>															  buffers;
 		std::array<std::atomic_uint64_t, NumFramesInFlight>									  allocatedSizeInBytes;
-		std::array<std::vector<UniqueHandle<MappedGpuBuffer, GpuBuffer*>>, NumFramesInFlight> mappedBuffers;
-		std::array<std::vector<UniqueHandle<GpuView, GpuViewManager*>>, NumFramesInFlight>	  allocatedViews;
+		std::array<std::vector<Handle<MappedGpuBuffer, GpuBuffer*>>, NumFramesInFlight> mappedBuffers;
+		std::array<std::vector<Handle<GpuView, GpuViewManager*>>, NumFramesInFlight>	  allocatedViews;
 	};
 } // namespace fe::dx
