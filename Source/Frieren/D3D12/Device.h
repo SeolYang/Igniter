@@ -36,7 +36,6 @@ namespace fe::dx
 		std::optional<CommandQueue>	  CreateCommandQueue(const EQueueType queueType);
 		std::optional<CommandContext> CreateCommandContext(const EQueueType targetQueueType);
 
-		// #todo 일반화된 루트 시그니처 생성 및 캐싱 구현(해시 기반)
 		std::optional<RootSignature> CreateBindlessRootSignature();
 		std::optional<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
 		std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);

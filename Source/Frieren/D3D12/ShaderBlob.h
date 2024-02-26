@@ -25,6 +25,7 @@ namespace fe::dx
 		O3 // Default
 	};
 
+	// #todo 매크로 정의 지원
 	class ShaderCompileDesc
 	{
 	public:
@@ -35,10 +36,9 @@ namespace fe::dx
 		bool					 bDisableValidation = false;					   // -Vd
 		bool					 bTreatWarningAsErrors = false;					   // -WX
 		bool					 bForceEnableDebugInformation = false;			   // -Zi
-																				   // #todo Define Macros
 	};
 
-	// from compiled binary
+	// #todo dxil.dll 빌드 후 이벤트로 옮겨주기
 	class ShaderBlob
 	{
 	public:

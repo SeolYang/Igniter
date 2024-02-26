@@ -178,9 +178,9 @@ namespace fe
 	{
 		constexpr float Infinity = std::numeric_limits<float>::infinity();
 
-		const WindowDescription windowDesc = Engine::GetWindow().GetDescription();
-		const float				mouseX = static_cast<float>(LOWORD(lParam)) / windowDesc.Width;
-		const float				mouseY = static_cast<float>(HIWORD(lParam)) / windowDesc.Height;
+		const WindowDescription winDesc = Engine::GetWindow().GetDescription();
+		const float				mouseX = static_cast<float>(LOWORD(lParam)) / winDesc.Width;
+		const float				mouseY = static_cast<float>(HIWORD(lParam)) / winDesc.Height;
 		HandleAxis(EInput::MouseX, mouseX);
 		HandleAxis(EInput::MouseY, mouseY);
 

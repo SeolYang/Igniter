@@ -2,6 +2,11 @@
 
 namespace fe
 {
+	World::~World()
+	{
+		registry.clear();
+	}
+
 	void World::Destroy(const Entity entity)
 	{
 		registry.destroy(entity);

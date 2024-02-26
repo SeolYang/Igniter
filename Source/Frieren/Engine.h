@@ -3,7 +3,6 @@
 #include <Core/Version.h>
 #include <Core/FrameManager.h>
 #include <Core/Timer.h>
-#include <Core/Log.h>
 
 namespace fe::dx
 {
@@ -50,7 +49,7 @@ namespace fe
 		bool								 bShouldExit = false;
 		FrameManager						 frameManager;
 		Timer								 timer;
-		Logger								 logger;
+		std::unique_ptr<Logger>				 logger;
 		std::unique_ptr<Window>				 window;
 		std::unique_ptr<dx::Device>			 renderDevice;
 		std::unique_ptr<HandleManager>		 handleManager;

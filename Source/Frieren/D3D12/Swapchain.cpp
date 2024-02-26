@@ -101,7 +101,6 @@ namespace fe::dx
 
 	void Swapchain::Present()
 	{
-		// #todo DXGI Swapchain에 대한 더 자세한 이해 필요
 		const uint32_t syncInterval = bVSyncEnabled ? 1 : 0;
 		const uint32_t presentFlags = bTearingEnabled && !bVSyncEnabled ? DXGI_PRESENT_ALLOW_TEARING : 0;
 		verify_succeeded(swapchain->Present(syncInterval, presentFlags));

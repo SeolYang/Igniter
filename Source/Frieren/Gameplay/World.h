@@ -16,6 +16,8 @@ namespace fe
 		World& operator=(const World&) = delete;
 		World& operator=(World&&) noexcept = delete;
 
+		virtual ~World();
+
 		[[nodiscard]] inline Entity Create() { return registry.create(); }
 
 		void Destroy(Entity entity);

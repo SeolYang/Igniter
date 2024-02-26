@@ -26,13 +26,14 @@ namespace fe
 		check(bIsFirstEngineCreation);
 		if (bIsFirstEngineCreation)
 		{
-			logger.Log<EngineInfo>("Engine version: {}", version::Version);
-			logger.Log<EngineInfo>("Initializing Engine Runtime...");
-
 			instance = this;
+			logger = std::make_unique<Logger>();
+			logger->Log<EngineInfo>("Engine version: {}", version::Version);
+			logger->Log<EngineInfo>("Initializing Engine Runtime...");
+
 			/* #test 임시 윈도우 설명자 */
-			const WindowDescription windowDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
-			window = std::make_unique<Window>(windowDesc);
+			const WindowDescription winDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
+			window = std::make_unique<Window>(winDesc);
 			renderDevice = std::make_unique<dx::Device>();
 			handleManager = std::make_unique<HandleManager>();
 			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
@@ -47,7 +48,7 @@ namespace fe
 
 	Engine::~Engine()
 	{
-		logger.Log<EngineInfo>("* Cleanup sub-systems");
+		logger->Log<EngineInfo>("* Cleanup sub-systems");
 		deferredDeallocator->FlushAllFrames();
 		gameInstance.reset();
 		imguiCanvas.reset();
@@ -59,11 +60,14 @@ namespace fe
 		gpuViewManager.reset();
 		renderDevice.reset();
 		window.reset();
+		logger.reset();
 
 		if (instance == this)
 		{
 			instance = nullptr;
 		}
+
+		String::ClearCache();
 	}
 
 	FrameManager& Engine::GetFrameManager()
@@ -81,7 +85,7 @@ namespace fe
 	Logger& Engine::GetLogger()
 	{
 		check(instance != nullptr);
-		return instance->logger;
+		return *instance->logger;
 	}
 
 	HandleManager& Engine::GetHandleManager()
@@ -140,7 +144,7 @@ namespace fe
 
 	int Engine::Execute()
 	{
-		logger.Log<EngineInfo>("* Start Engine main loop");
+		logger->Log<EngineInfo>("* Start Engine main loop");
 
 		while (!bShouldExit)
 		{
@@ -179,7 +183,7 @@ namespace fe
 		}
 
 		renderer->WaitForFences();
-		logger.Log<EngineInfo>("* End Engine main loop");
+		logger->Log<EngineInfo>("* End Engine main loop");
 		return 0;
 	}
 } // namespace fe
