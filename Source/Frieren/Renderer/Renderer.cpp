@@ -40,9 +40,9 @@ struct BasicRenderResources
 
 namespace fe
 {
-	FE_DECLARE_LOG_CATEGORY(RendererInfo, ELogVerbosiy::Info)
-	FE_DECLARE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
-	FE_DECLARE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(RendererInfo, ELogVerbosiy::Info)
+	FE_DEFINE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
+	FE_DEFINE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
 
 	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GpuViewManager& gpuViewManager)
 		: frameManager(engineFrameManager),

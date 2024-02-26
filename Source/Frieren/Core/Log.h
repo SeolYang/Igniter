@@ -100,7 +100,7 @@ namespace fe
 	};
 } // namespace fe
 
-#define FE_DECLARE_LOG_CATEGORY(LOG_CATEGORY_NAME, VERBOSITY_LEVEL)          \
+#define FE_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME, VERBOSITY_LEVEL)          \
 	struct LOG_CATEGORY_NAME                                                 \
 	{                                                                        \
 		static constexpr fe::ELogVerbosiy Verbosity = VERBOSITY_LEVEL;       \
@@ -128,10 +128,10 @@ namespace fe
 
 namespace fe
 {
-	FE_DECLARE_LOG_CATEGORY(LogTemp, ELogVerbosiy::Temp)
-	FE_DECLARE_LOG_CATEGORY(LogInfo, ELogVerbosiy::Info)
-	FE_DECLARE_LOG_CATEGORY(LogDebug, ELogVerbosiy::Debug)
-	FE_DECLARE_LOG_CATEGORY(LogWarn, ELogVerbosiy::Warning)
-	FE_DECLARE_LOG_CATEGORY(LogError, ELogVerbosiy::Error)
-	FE_DECLARE_LOG_CATEGORY(LogFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(LogTemp, ELogVerbosiy::Temp)
+	FE_DEFINE_LOG_CATEGORY(LogInfo, ELogVerbosiy::Info)
+	FE_DEFINE_LOG_CATEGORY(LogDebug, ELogVerbosiy::Debug)
+	FE_DEFINE_LOG_CATEGORY(LogWarn, ELogVerbosiy::Warning)
+	FE_DEFINE_LOG_CATEGORY(LogError, ELogVerbosiy::Error)
+	FE_DEFINE_LOG_CATEGORY(LogFatal, ELogVerbosiy::Fatal)
 } // namespace fe

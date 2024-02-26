@@ -18,9 +18,9 @@
 
 namespace fe::dx
 {
-	FE_DECLARE_LOG_CATEGORY(DeviceInfo, ELogVerbosiy::Info)
-	FE_DECLARE_LOG_CATEGORY(DeviceWarn, ELogVerbosiy::Warning)
-	FE_DECLARE_LOG_CATEGORY(DeviceFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(DeviceInfo, ELogVerbosiy::Info)
+	FE_DEFINE_LOG_CATEGORY(DeviceWarn, ELogVerbosiy::Warning)
+	FE_DEFINE_LOG_CATEGORY(DeviceFatal, ELogVerbosiy::Fatal)
 
 	Device::Device()
 	{
