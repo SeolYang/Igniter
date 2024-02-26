@@ -9,8 +9,7 @@ namespace fe
 {
 	Window::Window(const WindowDescription& description) : windowDesc(description)
 	{
-		std::wstring wideCharTitle = description.Title.AsWideString();
-
+		windowTitle = description.Title.AsWideString();
 		check(description.Width > 0 && description.Height > 0);
 		windowClass = { sizeof(WNDCLASSEX),
 						CS_OWNDC,
@@ -22,7 +21,7 @@ namespace fe
 						LoadCursor(NULL, IDC_ARROW),
 						NULL,
 						NULL,
-						wideCharTitle.c_str(),
+						windowTitle.c_str(),
 						NULL };
 
 		verify(SUCCEEDED(RegisterClassEx(&windowClass)));
@@ -35,7 +34,7 @@ namespace fe
 		RECT winRect{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
 		verify(AdjustWindowRectEx(&winRect, windowStyle, false, exWindowStyle) != FALSE);
 
-		windowHandle = CreateWindowEx(exWindowStyle, windowClass.lpszClassName, wideCharTitle.c_str(), windowStyle,
+		windowHandle = CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle,
 									  (screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
 									  winRect.right - winRect.left, winRect.top - winRect.bottom, NULL, NULL,
 									  windowClass.hInstance, NULL);

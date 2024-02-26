@@ -35,7 +35,8 @@ namespace fe
 	private:
 		WindowDescription windowDesc;
 
-		WNDCLASSEX windowClass;
-		HWND	   windowHandle = NULL;
+		std::wstring windowTitle;
+		WNDCLASSEX	 windowClass;
+		HWND		 windowHandle = NULL;
 	};
 } // namespace fe
