@@ -45,8 +45,8 @@ namespace fe::dx
 		allocatedViews[currentLocalFrameIdx].emplace_back(gpuViewManager.RequestConstantBufferView(buffers[currentLocalFrameIdx], offset, allocSizeInBytes));
 
 		return TempConstantBuffer{
-			.Mapping = mappedBuffers[currentLocalFrameIdx].back().DeriveWeak(),
-			.View = allocatedViews[currentLocalFrameIdx].back().DeriveWeak()
+			.Mapping = mappedBuffers[currentLocalFrameIdx].back().MakeRef(),
+			.View = allocatedViews[currentLocalFrameIdx].back().MakeRef()
 		};
 	}
 

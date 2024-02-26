@@ -68,16 +68,16 @@ namespace fe
 		}
 	}
 
-	WeakHandle<Action> InputManager::QueryAction(const String nameOfAction) const
+	RefHandle<Action> InputManager::QueryAction(const String nameOfAction) const
 	{
 		auto actionMapItr = actionMap.find(nameOfAction);
-		return actionMapItr != actionMap.cend() ? actionMapItr->second.DeriveWeak() : WeakHandle<Action>{};
+		return actionMapItr != actionMap.cend() ? actionMapItr->second.MakeRef() : RefHandle<Action>{};
 	}
 
-	WeakHandle<Axis> InputManager::QueryAxis(const String nameOfAxis) const
+	RefHandle<Axis> InputManager::QueryAxis(const String nameOfAxis) const
 	{
 		auto axisMapItr = axisMap.find(nameOfAxis);
-		return axisMapItr != axisMap.cend() ? axisMapItr->second.DeriveWeak() : WeakHandle<Axis>{};
+		return axisMapItr != axisMap.cend() ? axisMapItr->second.MakeRef() : RefHandle<Axis>{};
 	}
 
 	float InputManager::QueryScaleOfAxis(const String nameOfAxis, const EInput input) const
@@ -203,7 +203,7 @@ namespace fe
 		{
 			for (const String& actionName : inputActionNameItr->second)
 			{
-				WeakHandle<Action> action = actionMap[actionName].DeriveWeak();
+				RefHandle<Action> action = actionMap[actionName].MakeRef();
 				switch (action->State)
 				{
 					case EInputState::None:
@@ -223,7 +223,7 @@ namespace fe
 		{
 			for (const String& actionName : inputActionNameItr->second)
 			{
-				WeakHandle<Action> action = actionMap[actionName].DeriveWeak();
+				RefHandle<Action> action = actionMap[actionName].MakeRef();
 				action->State = EInputState::None;
 			}
 		}
@@ -236,7 +236,7 @@ namespace fe
 		{
 			for (const auto& [axisName, axisScale] : inputAxisNameScaleMapItr->second)
 			{
-				WeakHandle<Axis> axis = axisMap[axisName].DeriveWeak();
+				RefHandle<Axis> axis = axisMap[axisName].MakeRef();
 				axis->Value = value * axisScale;
 			}
 		}

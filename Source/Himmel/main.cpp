@@ -183,15 +183,15 @@ int main()
 		Handle<dx::GpuView, dx::GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
 
 		const StaticMeshComponent quadStaticMeshComp{
-			.VerticesBufferSRV = verticesBufferSRV.DeriveWeak(),
-			.IndexBufferHandle = quadIB.DeriveWeak(),
+			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
+			.IndexBufferHandle = quadIB.MakeRef(),
 			.NumIndices = NumQuadIndices
 		};
 		defaultWorld->Attach<StaticMeshComponent>(player, quadStaticMeshComp);
 
 		const StaticMeshComponent triStaticMeshComp{
-			.VerticesBufferSRV = verticesBufferSRV.DeriveWeak(),
-			.IndexBufferHandle = triIB.DeriveWeak(),
+			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
+			.IndexBufferHandle = triIB.MakeRef(),
 			.NumIndices = NumTriIndices
 		};
 		defaultWorld->Attach<StaticMeshComponent>(enemy, triStaticMeshComp);

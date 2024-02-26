@@ -22,8 +22,8 @@ private:
 private:
 	const fe::Timer& timer;
 
-	fe::WeakHandle<fe::Action> moveLeftAction;
-	fe::WeakHandle<fe::Action> moveRightAction;
-	fe::WeakHandle<fe::Action> healthRecoveryAction;
-	fe::WeakHandle<fe::Action> displayPlayerInfoAction;
+	fe::RefHandle<fe::Action> moveLeftAction;
+	fe::RefHandle<fe::Action> moveRightAction;
+	fe::RefHandle<fe::Action> healthRecoveryAction;
+	fe::RefHandle<fe::Action> displayPlayerInfoAction;
 };

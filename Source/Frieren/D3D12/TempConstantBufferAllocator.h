@@ -16,8 +16,8 @@ namespace fe::dx
 	struct TempConstantBuffer
 	{
 	public:
-		WeakHandle<MappedGpuBuffer> Mapping = {};
-		WeakHandle<GpuView>			View = {};
+		RefHandle<MappedGpuBuffer> Mapping = {};
+		RefHandle<GpuView>			View = {};
 	};
 
 	class TempConstantBufferAllocator

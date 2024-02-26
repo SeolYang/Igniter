@@ -80,8 +80,8 @@ namespace fe
 
 		// #todo UnbindAction/Axis
 
-		WeakHandle<Action> QueryAction(String nameOfAction) const;
-		WeakHandle<Axis>   QueryAxis(String nameOfAxis) const;
+		RefHandle<Action> QueryAction(String nameOfAction) const;
+		RefHandle<Axis>   QueryAxis(String nameOfAxis) const;
 		float			   QueryScaleOfAxis(String nameOfAxis, EInput input) const;
 
 		void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);

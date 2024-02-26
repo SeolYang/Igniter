@@ -7,7 +7,7 @@
 namespace fe
 {
 	template <typename T, typename Finalizer>
-	class WeakHandle;
+	class RefHandle;
 	template <typename T, typename Destroyer>
 	class Handle;
 
@@ -17,7 +17,7 @@ namespace fe
 		class HandleImpl
 		{
 			template <typename T, typename Finalizer>
-			friend class WeakHandle;
+			friend class RefHandle;
 
 			template <typename T, typename Destroyer>
 			friend class Handle;
@@ -62,19 +62,19 @@ namespace fe
 	class DefaultFinalizer
 	{
 	public:
-		void operator()(const WeakHandle<T, DefaultFinalizer>&, T*)
+		void operator()(const RefHandle<T, DefaultFinalizer>&, T*)
 		{
 			/* Empty */
 		}
 	};
 
 	template <typename T, typename Finalizer = DefaultFinalizer<T>>
-	class WeakHandle
+	class RefHandle
 	{
 	public:
-		WeakHandle() = default;
+		RefHandle() = default;
 
-		explicit WeakHandle(const details::HandleImpl newHandle)
+		explicit RefHandle(const details::HandleImpl newHandle)
 			: handle(newHandle)
 		{
 			check(IsAlive());
@@ -86,15 +86,15 @@ namespace fe
 
 		template <typename Fn>
 			requires(std::is_same_v<std::decay_t<Fn>, Finalizer>)
-		explicit WeakHandle(const details::HandleImpl& newHandle, Fn&& finalizer)
+		explicit RefHandle(const details::HandleImpl& newHandle, Fn&& finalizer)
 			: handle(newHandle),
 			  finalizer(std::forward<Fn>(finalizer))
 		{
 			check(IsAlive());
 		}
 
-		WeakHandle(const WeakHandle& other) = default;
-		WeakHandle(WeakHandle&& other) noexcept
+		RefHandle(const RefHandle& other) = default;
+		RefHandle(RefHandle&& other) noexcept
 			: handle(std::move(other.handle)),
 			  finalizer(std::move(other.finalizer))
 		{
@@ -104,7 +104,7 @@ namespace fe
 			}
 		}
 
-		~WeakHandle()
+		~RefHandle()
 		{
 			if (IsAlive())
 			{
@@ -122,8 +122,8 @@ namespace fe
 			}
 		}
 
-		WeakHandle& operator=(const WeakHandle& other) = default;
-		WeakHandle& operator=(WeakHandle&& other) noexcept = default;
+		RefHandle& operator=(const RefHandle& other) = default;
+		RefHandle& operator=(RefHandle&& other) noexcept = default;
 
 		[[nodiscard]] T& operator*()
 		{
@@ -324,15 +324,15 @@ namespace fe
 			}
 		}
 
-		[[nodiscard]] WeakHandle<T> DeriveWeak() const
+		[[nodiscard]] RefHandle<T> MakeRef() const
 		{
-			return WeakHandle<T>{ handle };
+			return RefHandle<T>{ handle };
 		}
 
 		template <typename Finalizer>
-		[[nodiscard]] WeakHandle<T, Finalizer> DeriveWeak(Finalizer&& finalizer) const
+		[[nodiscard]] RefHandle<T, Finalizer> MakeRef(Finalizer&& finalizer) const
 		{
-			return WeakHandle<T, Finalizer>{ handle, finalizer };
+			return RefHandle<T, Finalizer>{ handle, finalizer };
 		}
 
 		[[nodiscard]] size_t GetHash() const { return handle.GetHash(); }
@@ -356,9 +356,9 @@ namespace std
 	};
 
 	template <typename T>
-	class hash<fe::WeakHandle<T>>
+	class hash<fe::RefHandle<T>>
 	{
 	public:
-		size_t operator()(const fe::WeakHandle<T>& handle) const { return handle.GetHash(); }
+		size_t operator()(const fe::RefHandle<T>& handle) const { return handle.GetHash(); }
 	};
 } // namespace std
