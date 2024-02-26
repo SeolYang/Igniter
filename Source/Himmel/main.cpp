@@ -101,7 +101,7 @@ int main()
 		const uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		const uint16_t triIndices[3] = { 4, 5, 6 };
 
-		/* #idea Upload 용 독자적인 CmdCtx와 CmdQueue?, 데이터 한번에 쌓아뒀다가 최대 크기 버퍼 할당후 한번에 업로드 */
+		/* #todo Upload 용 독자적인 CmdCtx와 CmdQueue?, 데이터 한번에 쌓아뒀다가 최대 크기 버퍼 할당후 한번에 업로드 */
 		/* Upload data to gpu(upload buffer; cpu->gpu) */
 		const size_t quadIndicesOffset = sizeof(vertices);
 		const size_t quadIndicesSize = quadIBDesc.GetSizeAsBytes();

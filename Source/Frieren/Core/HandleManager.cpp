@@ -23,7 +23,7 @@ namespace fe
 		check(memPools.contains(typeHashVal));
 
 		const uint64_t allocatedHandle = memPools[typeHashVal].Allocate();
-		check(allocatedHandle != Handle::InvalidHandle);
+		check(allocatedHandle != HandleImpl::InvalidHandle);
 		check(!pendingDeallocations.contains(allocatedHandle));
 		return allocatedHandle;
 	}
@@ -31,7 +31,7 @@ namespace fe
 	void HandleManager::Deallocate(const uint64_t typeHashVal, const uint64_t handle)
 	{
 		check(typeHashVal != InvalidHashVal);
-		check(handle != Handle::InvalidHandle);
+		check(handle != HandleImpl::InvalidHandle);
 
 		ReadWriteLock lock{ mutex };
 		if (memPools.contains(typeHashVal))
@@ -60,7 +60,7 @@ namespace fe
 	bool HandleManager::IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
 	{
 		check(typeHashVal != InvalidHashVal);
-		check(handle != Handle::InvalidHandle);
+		check(handle != HandleImpl::InvalidHandle);
 		if (!pendingDeallocations.contains(handle) && memPools.contains(typeHashVal))
 		{
 			const MemoryPool& pool = memPools.at(typeHashVal);
@@ -72,7 +72,7 @@ namespace fe
 
 	bool HandleManager::IsPendingDeallocationUnsafe(const uint64_t handle) const
 	{
-		check(handle != Handle::InvalidHandle);
+		check(handle != HandleImpl::InvalidHandle);
 		return pendingDeallocations.contains(handle);
 	}
 

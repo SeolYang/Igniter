@@ -5,9 +5,14 @@
 
 namespace fe
 {
+	namespace details
+	{
+		class HandleImpl;
+	}
+
 	class HandleManager
 	{
-		friend class Handle;
+		friend class details::HandleImpl;
 
 	public:
 		HandleManager() = default;

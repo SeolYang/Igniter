@@ -84,7 +84,7 @@ namespace fe::dx
 		GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
 				  ComPtr<ID3D12Resource> newResource);
 
-		void operator()(Handle handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer);
+		void operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer);
 
 	private:
 		GpuBufferDesc				desc;

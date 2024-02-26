@@ -82,7 +82,7 @@ namespace fe::dx
 		return {};
 	}
 
-	void GpuBuffer::operator()(Handle handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer)
+	void GpuBuffer::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer)
 	{
 		verify(mappedGPUBuffer != nullptr);
 		handle.Deallocate(evaluatedTypeHash);

@@ -6,52 +6,57 @@
 
 namespace fe
 {
-	class HandleManager;
-	class Handle
-	{
-		template <typename T, typename Finalizer>
-		friend class WeakHandle;
-
-		template <typename T, typename Destroyer>
-		friend class UniqueHandle;
-
-	public:
-		Handle(const Handle& other) = default;
-		Handle(Handle&& other) noexcept;
-		~Handle() = default;
-
-		Handle& operator=(const Handle& other) = default;
-		Handle& operator=(Handle&& other) noexcept;
-
-		uint8_t*	   GetAddressOf(const uint64_t typeHashValue);
-		const uint8_t* GetAddressOf(const uint64_t typeHashValue) const;
-
-		uint8_t*	   GetValidatedAddressOf(const uint64_t typeHashValue);
-		const uint8_t* GetValidatedAddressOf(const uint64_t typeHashValue) const;
-
-		bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
-		bool IsAlive(const uint64_t typeHashValue) const;
-		bool IsPendingDeallocation() const;
-
-		void Deallocate(const uint64_t typeHashValue);
-		void MarkAsPendingDeallocation(const uint64_t typeHashVal);
-
-		size_t GetHash() const { return handle; }
-
-	private:
-		Handle() = default;
-		Handle(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType);
-
-	public:
-		static constexpr uint64_t InvalidHandle = 0xffffffffffffffffUi64;
-
-	private:
-		HandleManager* owner = nullptr;
-		uint64_t	   handle = InvalidHandle;
-	};
-
 	template <typename T, typename Finalizer>
 	class WeakHandle;
+	template <typename T, typename Destroyer>
+	class UniqueHandle;
+
+	class HandleManager;
+	namespace details
+	{
+		class HandleImpl
+		{
+			template <typename T, typename Finalizer>
+			friend class WeakHandle;
+
+			template <typename T, typename Destroyer>
+			friend class UniqueHandle;
+
+		public:
+			HandleImpl(const HandleImpl& other) = default;
+			HandleImpl(HandleImpl&& other) noexcept;
+			~HandleImpl() = default;
+
+			HandleImpl& operator=(const HandleImpl& other) = default;
+			HandleImpl& operator=(HandleImpl&& other) noexcept;
+
+			uint8_t*	   GetAddressOf(const uint64_t typeHashValue);
+			const uint8_t* GetAddressOf(const uint64_t typeHashValue) const;
+
+			uint8_t*	   GetValidatedAddressOf(const uint64_t typeHashValue);
+			const uint8_t* GetValidatedAddressOf(const uint64_t typeHashValue) const;
+
+			bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
+			bool IsAlive(const uint64_t typeHashValue) const;
+			bool IsPendingDeallocation() const;
+
+			void Deallocate(const uint64_t typeHashValue);
+			void MarkAsPendingDeallocation(const uint64_t typeHashVal);
+
+			size_t GetHash() const { return handle; }
+
+		private:
+			HandleImpl() = default;
+			HandleImpl(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType);
+
+		public:
+			static constexpr uint64_t InvalidHandle = 0xffffffffffffffffUi64;
+
+		private:
+			HandleManager* owner = nullptr;
+			uint64_t	   handle = InvalidHandle;
+		};
+	} // namespace details
 
 	template <typename T>
 	class DefaultFinalizer
@@ -69,7 +74,7 @@ namespace fe
 	public:
 		WeakHandle() = default;
 
-		explicit WeakHandle(const Handle newHandle)
+		explicit WeakHandle(const details::HandleImpl newHandle)
 			: handle(newHandle)
 		{
 			check(IsAlive());
@@ -81,7 +86,7 @@ namespace fe
 
 		template <typename Fn>
 			requires(std::is_same_v<std::decay_t<Fn>, Finalizer>)
-		explicit WeakHandle(const Handle newHandle, Fn&& finalizer)
+		explicit WeakHandle(const details::HandleImpl& newHandle, Fn&& finalizer)
 			: handle(newHandle),
 			  finalizer(std::forward<Fn>(finalizer))
 		{
@@ -161,7 +166,7 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		Handle							handle{};
+		details::HandleImpl				handle{};
 		[[no_unique_address]] Finalizer finalizer;
 	};
 
@@ -169,7 +174,7 @@ namespace fe
 	class DefaultDestroyer
 	{
 	public:
-		void operator()(Handle handle, const uint64_t typeHashVal, T* instance) const
+		void operator()(details::HandleImpl handle, const uint64_t typeHashVal, T* instance) const
 		{
 			check(instance != nullptr);
 			if (handle.IsValid() && typeHashVal != InvalidHashVal)
@@ -336,7 +341,7 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		Handle							handle;
+		details::HandleImpl				handle;
 		[[no_unique_address]] Destroyer destroyer;
 	};
 } // namespace fe
