@@ -31,10 +31,9 @@ namespace fe
 	{
 	public:
 		Logger();
-		~Logger();
-
 		Logger(const Logger&) = delete;
 		Logger(Logger&&) noexcept = delete;
+		~Logger();
 
 		Logger& operator=(const Logger&) = delete;
 		Logger& operator=(Logger&&) noexcept = delete;
@@ -48,6 +47,7 @@ namespace fe
 				ReadWriteLock lock{ mutex };
 				logger = new spdlog::logger(C::CategoryName.data(), { consoleSink, fileSink });
 				logger->set_level(spdlog::level::trace);
+				categoryMap[HashOfType<C>] = logger;
 			}
 
 			const std::string formattedMessage =
