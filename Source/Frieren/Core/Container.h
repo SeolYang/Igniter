@@ -16,7 +16,8 @@
 #include <robin_hood.h>
 #pragma warning(pop)
 #include <crossguid/guid.hpp>
-#include <nlohmann/json.hpp>
+
+#include <Core/Json.h>
 
 #define UNUSED(x) (x)
 
