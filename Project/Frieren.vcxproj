@@ -1,8 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Asan|x64">
+      <Configuration>Asan</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="CheckMemLeak|x64">
+      <Configuration>CheckMemLeak</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
@@ -12,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Asset\AssetManager.h" />
+    <ClInclude Include="..\Source\Frieren\Asset\Common.h" />
+    <ClInclude Include="..\Source\Frieren\Asset\Texture.h" />
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\Source\Frieren\Core\Container.h" />
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
@@ -22,6 +32,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Handle.h" />
     <ClInclude Include="..\Source\Frieren\Core\HashUtils.h" />
     <ClInclude Include="..\Source\Frieren\Core\InputManager.h" />
+    <ClInclude Include="..\Source\Frieren\Core\Json.h" />
     <ClInclude Include="..\Source\Frieren\Core\Log.h" />
     <ClInclude Include="..\Source\Frieren\Core\MemoryPool.h" />
     <ClInclude Include="..\Source\Frieren\Core\MemUtils.h" />
@@ -71,6 +82,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Asset\AssetManager.cpp" />
+    <ClCompile Include="..\Source\Frieren\Asset\Common.cpp" />
+    <ClCompile Include="..\Source\Frieren\Asset\Texture.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Handle.cpp" />
@@ -107,6 +120,8 @@
     <ClCompile Include="..\Source\Frieren\Renderer\RendererCommon.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp" />
@@ -114,14 +129,22 @@
   <ItemGroup>
     <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
@@ -142,6 +165,21 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>true</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -149,6 +187,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -158,11 +197,25 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">
     <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -178,10 +231,72 @@
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>CHECK_MEM_LEAK;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>

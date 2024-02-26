@@ -213,6 +213,15 @@
     <ClInclude Include="..\Source\Frieren\Asset\AssetManager.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Asset\Common.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Asset\Texture.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\Json.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -324,6 +333,12 @@
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Asset\AssetManager.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Asset\Texture.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Asset\Common.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
   </ItemGroup>

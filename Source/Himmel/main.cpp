@@ -211,7 +211,7 @@ int main()
 
 #if defined(CHECK_MEM_LEAK)
 	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
+	#include <cstdlib>
 	#include <crtdbg.h>
 
 struct MemoryLeakDetector
