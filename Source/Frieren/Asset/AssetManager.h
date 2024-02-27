@@ -1,12 +1,10 @@
 #pragma once
 #include <Asset/Common.h>
-#include <Core/Assert.h>
+#include <Asset/Texture.h>
 
 namespace fe
 {
 	// #wip
-	class Texture;
-	struct TextureImportConfig;
 	class StaticMesh;
 	struct StaticMeshImportConfig;
 	class AssetManager final
@@ -26,18 +24,25 @@ namespace fe
 		AssetManager& operator=(const AssetManager&) = delete;
 		AssetManager& operator=(AssetManager&&) noexcept = delete;
 
-		std::optional<xg::Guid> QueryGuid(const String resPathStr) const;
+		std::optional<xg::Guid> QueryGuid(const String resPathStr) const
+		{
+			/* Invalid Until properly loaded. */
+			const auto itr = resPathGuidTable.find(resPathStr);
+			if (itr != resPathGuidTable.cend())
+			{
+				return itr->second;
+			}
+
+			return std::nullopt;
+		}
+
 		// std::optional<EAssetType> QueryAssetType(const xg::Guid& guid) const;
 		// std::optional<EAssetType> QueryAssetType(const String resPath) const;
 
-		bool							  ImportTexture(const String resPath, const TextureImportConfig& config);
+		// if config == nullopt ? try query config from metadata : make default config based on resource file
+		bool							  ImportTexture(const String resPath, std::optional<TextureImportConfig> config = std::nullopt);
 		RefHandle<Texture, AssetManager*> LoadTexture(const xg::Guid& guid);
 		RefHandle<Texture, AssetManager*> LoadTexture(const String resPath);
-		/*
-	{
-		const auto guid = QueryGuid(resPath);
-		return guid ? LoadTexture(*guid) : RefHandle<Texture, AssetManager*>{};
-	}*/
 
 		// bool				 ImportStaticMeseh(const String resPath, const StaticMeshImportConfig& config);
 		// AssetRef<StaticMesh> LoadStaticMesh(const xg::Guid& guid);

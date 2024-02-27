@@ -25,8 +25,10 @@ namespace fe::details
 	{
 		check(!archive.is_null());
 		check(archive.contains(dataTypeName) && archive[dataTypeName].is_object());
-		verify(archive[dataTypeName].contains(varName));
-		callback(archive, var);
+		if (archive.contains(dataTypeName) && archive[dataTypeName].contains(varName))
+		{
+			callback(archive, var);
+		}
 	}
 } // namespace fe::details
 

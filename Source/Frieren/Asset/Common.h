@@ -19,7 +19,7 @@ namespace fe
 		constexpr inline std::string_view ShaderAssetRootPath = "Assets\\Shaders";
 		constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
 		constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
-	}
+	} // namespace details
 
 	enum class EAssetType
 	{
@@ -33,28 +33,8 @@ namespace fe
 		// Scene
 	};
 
-	struct ResourceMetadata
-	{
-		friend nlohmann::json&	 operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
-		friend ResourceMetadata& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
-
-	public:
-		constexpr static uint64_t CurrentVersion = 1;
-		uint64_t				  Version = CurrentVersion;
-		uint64_t				  CreationTime = 0;
-		xg::Guid				  AssetGuid{};
-		EAssetType				  AssetType = EAssetType::Unknown;
-	};
-
-	nlohmann::json&	  operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
-	ResourceMetadata& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
-
 	bool IsSupportedTextureResource(const fs::path& textureResPath);
 	bool IsSupportedStaticMeshResource(const fs::path& staticMeshResPath);
-	// bool IsSupportedModelResource(const fs::path& modelResPath);
-	// bool IsSupportedShaderResource(const fs::path& shaderResPath);
-	// bool IsSupportedAudioResource(const fs::path& audioResPath);
-	// bool IsSupportedScriptResource(const fs::path& scriptResPath);
 
 	/* Refer to {ResourcePath}.metadata */
 	fs::path ToResourceMetadataPath(fs::path resPath);
@@ -64,4 +44,38 @@ namespace fe
 
 	/* Refer to ./Assets/{AssetType}/{GUID}.metadata */
 	fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid);
+
+	struct ResourceMetadata
+	{
+		friend nlohmann::json&		 operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
+		friend const nlohmann::json& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
+
+	public:
+		constexpr static uint64_t CurrentVersion = 1;
+		uint64_t				  Version = 0;
+		uint64_t				  CreationTime = 0;
+		xg::Guid				  AssetGuid{};
+		EAssetType				  AssetType = EAssetType::Unknown;
+		bool					  bIsPersistent = false;
+	};
+
+	nlohmann::json&		  operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
+	const nlohmann::json& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
+
+	struct AssetMetadata
+	{
+		friend nlohmann::json&		 operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
+		friend const nlohmann::json& operator>>(const nlohmann::json& archive, AssetMetadata& metadata);
+
+	public:
+		constexpr static size_t CurrentVersion = 1;
+		uint64_t				Version = 0;
+		xg::Guid				Guid{};
+		std::string				SrcResPath{};
+		EAssetType				Type = EAssetType::Unknown;
+		bool					bIsPersistent = false;
+	};
+
+	nlohmann::json&		  operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
+	const nlohmann::json& operator>>(const nlohmann::json& archive, AssetMetadata& metadata);
 } // namespace fe

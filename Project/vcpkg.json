@@ -20,10 +20,6 @@
     "tracy",
     "directxmath",
     "directx-dxc",
-    {
-      "name": "directxtex",
-      "features": ["dx12"]  
-      },
     "entt",
     "crossguid"
   ],

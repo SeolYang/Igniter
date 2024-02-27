@@ -40,6 +40,9 @@
     <Filter Include="Source\Asset">
       <UniqueIdentifier>{8aacdbc1-74bc-4926-a5bf-59582fa6132c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thirdparty\DirectXTex">
+      <UniqueIdentifier>{af091ce6-3816-42e2-9da1-b229568acb68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -222,6 +225,9 @@
     <ClInclude Include="..\Source\Frieren\Core\Json.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h">
+      <Filter>Thirdparty\DirectXTex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -353,6 +359,9 @@
   <ItemGroup>
     <None Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl">
       <Filter>Thirdparty\SimpleMath</Filter>
+    </None>
+    <None Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
+      <Filter>Thirdparty\DirectXTex</Filter>
     </None>
   </ItemGroup>
 </Project>
