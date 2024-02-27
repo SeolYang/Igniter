@@ -1,5 +1,6 @@
 #pragma once
 #include <Asset/Common.h>
+#include <D3D12/Common.h>
 #include <Core/Handle.h>
 
 namespace fe::dx
@@ -26,11 +27,18 @@ namespace fe
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
 
 	public:
-		constexpr static size_t CurrentVersion = 1;
+		constexpr static size_t CurrentVersion = 2;
 		size_t					Version = 0;
 		ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
+
 		/* 원본 이미지가 BCn 포맷이 아니며 밉맵 체인을 포함 하지 않는 경우에만 유효. */
 		bool bGenerateMips = false;
+
+		/* Sampler */
+		D3D12_FILTER			   Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+		D3D12_TEXTURE_ADDRESS_MODE AddressModeU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	};
 
 	nlohmann::json&		  operator<<(nlohmann::json& archive, const TextureImportConfig& config);
@@ -57,7 +65,7 @@ namespace fe
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
 
 	public:
-		constexpr static size_t CurrentVersion = 1;
+		constexpr static size_t CurrentVersion = 2;
 		size_t					Version = CurrentVersion;
 		DXGI_FORMAT				Format = DXGI_FORMAT_UNKNOWN;
 		uint32_t				Width = 1;
@@ -66,6 +74,12 @@ namespace fe
 		uint32_t				Mips = 1;
 		bool					bIsArray = false;
 		bool					bIsCubemap = false;
+
+		/* Sampler */
+		D3D12_FILTER			   Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+		D3D12_TEXTURE_ADDRESS_MODE AddressModeU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	};
 
 	nlohmann::json&		  operator<<(nlohmann::json& archive, const TextureLoadConfig& config);

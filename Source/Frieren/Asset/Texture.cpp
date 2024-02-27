@@ -14,6 +14,10 @@ namespace fe
 		FE_SERIALIZE_JSON(TextureImportConfig, archive, config, Version);
 		FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode);
 		FE_SERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
+		FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter);
+		FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU);
+		FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV);
+		FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW);
 
 		return archive;
 	}
@@ -24,6 +28,10 @@ namespace fe
 		FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, Version);
 		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
 		FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		check(config.Version == TextureImportConfig::CurrentVersion);
 		return archive;
@@ -63,6 +71,10 @@ namespace fe
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, bIsArray);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
+		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter);
+		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU);
+		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV);
+		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW);
 
 		return archive;
 	}
@@ -78,6 +90,10 @@ namespace fe
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsArray);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		check(config.Version == TextureLoadConfig::CurrentVersion);
 		check(config.Format != DXGI_FORMAT_UNKNOWN);
