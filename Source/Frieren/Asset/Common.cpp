@@ -2,7 +2,7 @@
 
 namespace fe
 {
-	fs::path ToResourceMetadataPath(fs::path resPath)
+	fs::path MakeResourceMetadataPath(fs::path resPath)
 	{
 		resPath += details::MetadataExt;
 		return resPath;

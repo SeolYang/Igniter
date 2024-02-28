@@ -1,11 +1,18 @@
+#include <algorithm>
 #include <Asset/Texture.h>
+#include <cctype>
+#include <Core/Container.h>
 #include <Core/Log.h>
-#include <Engine.h>
+#include <Core/Timer.h>
 #include <DirectXTex/DirectXTex.h>
+#include <Engine.h>
 
 namespace fe
 {
+	FE_DEFINE_LOG_CATEGORY(TextureImportInfo, ELogVerbosiy::Info)
 	FE_DEFINE_LOG_CATEGORY(TextureImporterWarn, ELogVerbosiy::Warning)
+	FE_DEFINE_LOG_CATEGORY(TextureImporterErr, ELogVerbosiy::Error)
+	FE_DEFINE_LOG_CATEGORY(TextureImporterFatal, ELogVerbosiy::Fatal)
 
 	nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config)
 	{
@@ -26,12 +33,17 @@ namespace fe
 	{
 		config = {};
 		FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, Version);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode,
+								 ETextureCompressionMode::None);
 		FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter,
+								 D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU,
+								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV,
+								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW,
+								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		check(config.Version == TextureImportConfig::CurrentVersion);
 		return archive;
@@ -61,15 +73,15 @@ namespace fe
 	{
 		check(config.Version == TextureLoadConfig::CurrentVersion);
 		check(config.Format != DXGI_FORMAT_UNKNOWN);
-		check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 1 && config.Mips > 1);
+		check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
 
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Version);
 		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format);
+		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Height);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
-		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, bIsArray);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
 		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter);
 		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU);
@@ -84,20 +96,23 @@ namespace fe
 		config = {};
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Version);
 		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Height);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
-		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsArray);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
 		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU,
+								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV,
+								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW,
+								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		check(config.Version == TextureLoadConfig::CurrentVersion);
 		check(config.Format != DXGI_FORMAT_UNKNOWN);
-		check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 1 && config.Mips > 1);
+		check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
 		return archive;
 	}
 
@@ -120,6 +135,355 @@ namespace fe
 		check(metadata.Version == TextureAssetMetadata::CurrentVersion);
 		return archive;
 	}
+
+	inline bool IsDDSExtnsion(const fs::path& extension)
+	{
+		std::string ext = extension.string();
+		std::transform(ext.begin(), ext.end(), ext.begin(),
+					   [](const char character)
+					   { return static_cast<char>(::tolower(static_cast<int>(character))); });
+
+		return ext == ".dds";
+	}
+
+	inline bool IsWICExtension(const fs::path& extension)
+	{
+		std::string ext = extension.string();
+		std::transform(ext.begin(), ext.end(), ext.begin(),
+					   [](const char character)
+					   { return static_cast<char>(::tolower(static_cast<int>(character))); });
+
+		return (ext == ".png") || (ext == ".jpg") || (ext == ".jpeg") || (ext == ".bmp") || (ext == ".gif") ||
+			   (ext == ".tiff");
+	}
+
+	inline bool IsHDRExtnsion(const fs::path& extension)
+	{
+		std::string ext = extension.string();
+		std::transform(ext.begin(), ext.end(), ext.begin(),
+					   [](const char character)
+					   { return static_cast<char>(::tolower(static_cast<int>(character))); });
+
+		return (ext == ".hdr");
+	}
+
+	inline DXGI_FORMAT AsBCnFormat(const ETextureCompressionMode compMode, const DXGI_FORMAT format)
+	{
+		if (compMode == ETextureCompressionMode::BC4)
+		{
+			if (dx::IsUnormFormat(format))
+			{
+				return DXGI_FORMAT_BC4_UNORM;
+			}
+
+			return DXGI_FORMAT_BC4_SNORM;
+		}
+		else if (compMode == ETextureCompressionMode::BC5)
+		{
+			if (dx::IsUnormFormat(format))
+			{
+				return DXGI_FORMAT_BC5_UNORM;
+			}
+
+			return DXGI_FORMAT_BC5_SNORM;
+		}
+		else if (compMode == ETextureCompressionMode::BC6H)
+		{
+			// #wip_todo 정확히 HDR 파일을 읽어왔을 때, 어떤 포맷으로 들어오는지
+			// 확인 필
+			if (dx::IsUnsignedFormat(format))
+			{
+				return DXGI_FORMAT_BC6H_UF16;
+			}
+
+			return DXGI_FORMAT_BC6H_SF16;
+		}
+		else if (compMode == ETextureCompressionMode::BC7)
+		{
+			return DXGI_FORMAT_BC7_UNORM;
+		}
+
+		return DXGI_FORMAT_UNKNOWN;
+	}
+
+	bool TextureImporter::ImportTexture(const String resPathStr,
+										std::optional<TextureImportConfig> config /*= std::nullopt*/,
+										const bool bIsPersistent)
+	{
+		const fs::path resPath{ resPathStr.AsStringView() };
+		if (!fs::exists(resPath))
+		{
+			FE_LOG(TextureImporterErr, "The resource does not exist at {}.", resPathStr.AsStringView());
+			return false;
+		}
+
+		const fs::path resExtension = resPath.extension();
+		DirectX::ScratchImage targetTex{};
+		DirectX::TexMetadata texMetadata{};
+
+		HRESULT loadRes = S_OK;
+		bool bIsDDSFormat = false;
+		bool bIsHDRFormat = false;
+		if (IsDDSExtnsion(resExtension))
+		{
+			// 만약 DDS 타입이면, 바로 가공 없이 에셋으로 사용한다. 이 경우,
+			// 제공된 config 은 무시된다.; 애초에 DDS로 미리 가공했는데 다시 압축을 풀고, 밉맵을 생성하고 할 필요가 없음.
+			FE_LOG(TextureImporterWarn,
+				   "For DDS files, the provided configuration values are disregarded, "
+				   "and the supplied file is used as the asset as it is. File: {}",
+				   resPathStr.AsStringView());
+
+			loadRes = DirectX::LoadFromDDSFile(
+				resPath.c_str(),
+				DirectX::DDS_FLAGS_NONE,
+				&texMetadata, targetTex);
+			bIsDDSFormat = true;
+		}
+		else if (IsWICExtension(resExtension))
+		{
+			loadRes = DirectX::LoadFromWICFile(
+				resPath.c_str(),
+				DirectX::WIC_FLAGS_FORCE_LINEAR,
+				&texMetadata, targetTex);
+		}
+		else if (IsHDRExtnsion(resExtension))
+		{
+			loadRes = DirectX::LoadFromHDRFile(resPath.c_str(), &texMetadata, targetTex);
+			bIsHDRFormat = true;
+		}
+		else
+		{
+			FE_LOG(TextureImporterErr, "Found not supported texture extension from \"{}\".",
+				   resPathStr.AsStringView());
+			return false;
+		}
+
+		if (FAILED(loadRes))
+		{
+			FE_LOG(TextureImporterErr, "Failed to load texture from {}.", resPathStr.AsStringView());
+			return false;
+		}
+
+		// #wip_todo 검증필
+		const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
+		if (!config)
+		{
+			TextureImportConfig newConfig{};
+			if (fs::exists(resMetadataPath))
+			{
+				newConfig.Version = 0;
+				std::ifstream resMetadataStream{ resMetadataPath.c_str() };
+				const json serializedResMetadata{ json::parse(resMetadataStream) };
+				resMetadataStream.close();
+				serializedResMetadata >> newConfig;
+
+				if (newConfig.Version != TextureImportConfig::CurrentVersion)
+				{
+					FE_LOG(TextureImporterWarn,
+						   "TextureImportConfig Version does not match. Found {}, "
+						   "Required "
+						   "{}. File: {}",
+						   newConfig.Version, TextureImportConfig::CurrentVersion, resMetadataPath.string());
+				}
+			}
+			config = newConfig;
+		}
+
+		if (!bIsDDSFormat)
+		{
+			check(texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
+				  texMetadata.arraySize > 0);
+			check(!texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1));
+			check(texMetadata.format != DXGI_FORMAT_UNKNOWN);
+			check(!DirectX::IsSRGB(texMetadata.format));
+
+			/* Generate full mipmap chain. */
+			if (config->bGenerateMips)
+			{
+				DirectX::ScratchImage mipChain{};
+				const HRESULT genRes = DirectX::GenerateMipMaps(
+					targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
+					bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR, 0, mipChain);
+				if (FAILED(genRes))
+				{
+					FE_LOG(TextureImporterErr, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
+						   genRes, resPathStr.AsStringView());
+
+					return false;
+				}
+
+				texMetadata = mipChain.GetMetadata();
+				targetTex = std::move(mipChain);
+			}
+
+			/* Compress Texture*/
+			if (config->CompressionMode != ETextureCompressionMode::None)
+			{
+				if (bIsHDRFormat && config->CompressionMode != ETextureCompressionMode::BC6H)
+				{
+					FE_LOG(TextureImporterWarn,
+						   "The compression method for HDR extension textures is "
+						   "enforced "
+						   "to be the 'BC6H' algorithm. File: {}",
+						   resPathStr.AsStringView());
+
+					config->CompressionMode = ETextureCompressionMode::BC6H;
+				}
+				else if (dx::IsGreyScaleFormat(texMetadata.format) &&
+						 config->CompressionMode == ETextureCompressionMode::BC4)
+				{
+					FE_LOG(TextureImporterWarn,
+						   "The compression method for greyscale-formatted "
+						   "textures is "
+						   "enforced to be the 'BC4' algorithm. File: {}",
+						   resPathStr.AsStringView());
+
+					config->CompressionMode = ETextureCompressionMode::BC4;
+				}
+
+				// # wip_todo 검증필
+				DirectX::ScratchImage compTex{};
+				const DXGI_FORMAT compFormat = AsBCnFormat(config->CompressionMode, texMetadata.format);
+				const HRESULT compRes = DirectX::Compress(
+					targetTex.GetImages(), targetTex.GetImageCount(),
+					targetTex.GetMetadata(),
+					compFormat,
+					DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
+					compTex);
+
+				if (FAILED(compRes))
+				{
+					FE_LOG(TextureImporterErr,
+						   "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
+						   "File: {}",
+						   magic_enum::enum_name(config->CompressionMode),
+						   magic_enum::enum_name(texMetadata.format), magic_enum::enum_name(compFormat),
+						   compRes,
+						   resPathStr.AsStringView());
+
+					return false;
+				}
+
+				texMetadata = compTex.GetMetadata();
+				targetTex = std::move(compTex);
+			}
+		}
+
+		// #wip_todo 리소스 메타데이터(및 파일), 에셋 메타데이터(및 파일),
+		// 그리고 에셋 파일 생성 까지 여기서 처리 texMetadata 그리고 config 사용
+		// 그리고 이 지점에서 에셋 임포트 성공했다고 가정, guid 및 생성 시간
+		// 기록
+
+		const size_t creationTime = Timer::Now();
+		const xg::Guid newGuid = xg::newGuid();
+
+		/* Configure Texture Resource Metadata */
+		config->Version = TextureImportConfig::CurrentVersion;
+		const TextureResourceMetadata newResMetadata{
+			.Common = { .CreationTime = creationTime,
+						.AssetGuid = newGuid,
+						.AssetType = EAssetType::Texture,
+						.bIsPersistent = bIsPersistent },
+
+			.TexImportConf = *config
+		};
+
+		/* Serialize Texture Resource Metadata & Save To File */
+		{
+			json serializedJson{};
+			serializedJson << newResMetadata;
+
+			std::ofstream fileStream{ resMetadataPath.c_str() };
+			fileStream << serializedJson.dump(4);
+		}
+
+		/* Configure Texture Asset Metadata */
+		texMetadata = targetTex.GetMetadata();
+		const auto convertDxTexDim = [](const DirectX::TEX_DIMENSION dim)
+		{
+			switch (dim)
+			{
+				case DirectX::TEX_DIMENSION_TEXTURE1D:
+					return ETextureDimension::Tex1D;
+				default:
+				case DirectX::TEX_DIMENSION_TEXTURE2D:
+					return ETextureDimension::Tex2D;
+				case DirectX::TEX_DIMENSION_TEXTURE3D:
+					return ETextureDimension::Tex3D;
+			}
+		};
+
+		const ETextureDimension texDim = convertDxTexDim(texMetadata.dimension);
+		const TextureAssetMetadata newAssetMetadata{
+			.Common = { .Guid = newGuid,
+						.SrcResPath = resPathStr.AsString(),
+						.Type = EAssetType::Texture,
+						.bIsPersistent = bIsPersistent },
+
+			.TexLoadConf = { .Format = texMetadata.format,
+							 .Dimension = texDim,
+							 .Width = static_cast<uint32_t>(texMetadata.width),
+							 .Height = static_cast<uint32_t>(texMetadata.height),
+							 .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize),
+							 .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
+							 .bIsCubemap = texMetadata.IsCubemap(),
+							 .Filter = config->Filter,
+							 .AddressModeU = config->AddressModeU,
+							 .AddressModeV = config->AddressModeV,
+							 .AddressModeW = config->AddressModeW }
+		};
+
+		/* Create Texture Asset root directory if does not exist */
+		{
+			const fs::path texAssetDirPath = details::TextureAssetRootPath;
+			if (!fs::exists(texAssetDirPath))
+			{
+				if (!fs::create_directories(texAssetDirPath))
+				{
+					FE_LOG(TextureImporterWarn, "Failed to create texture asset root {}.", texAssetDirPath.string());
+				}
+			}
+		}
+
+		/* Serialize Texture Asset Metadata & Save To File */
+		{
+			json serializedJson{};
+			serializedJson << newAssetMetadata;
+
+			const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newGuid);
+			std::ofstream fileStream{ assetMetadataPath.c_str() };
+			if (!fileStream.is_open())
+			{
+				FE_LOG(TextureImporterErr, "Failed to open asset metadata file {}.", assetMetadataPath.string());
+				return false;
+			}
+
+			fileStream << serializedJson.dump(4);
+		}
+
+		/* Save data to asset file */
+		{
+			const fs::path assetPath = MakeAssetPath(EAssetType::Texture, newGuid);
+			if (fs::exists(assetPath))
+			{
+				FE_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
+			}
+
+			const HRESULT res = DirectX::SaveToDDSFile(
+				targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
+				DirectX::DDS_FLAGS_NONE,
+				assetPath.c_str());
+
+			if (FAILED(res))
+			{
+				FE_LOG(TextureImporterErr, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 } // namespace fe
 
 #include <iostream>
@@ -133,7 +497,8 @@ namespace fe::details
 			const HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 			if (FAILED(hr))
 			{
-				std::cerr << "Failed to initialize DirectXTex. HRESULT: " << std::hex << hr << std::endl;
+				std::cerr << "Failed to initialize DirectXTex. HRESULT: "
+						  << std::hex << hr << std::endl;
 			}
 		}
 	};

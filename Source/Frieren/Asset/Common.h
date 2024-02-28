@@ -1,8 +1,9 @@
 #pragma once
-#include <Core/Handle.h>
 #include <Core/Container.h>
+#include <Core/Handle.h>
 #include <Core/String.h>
 #include <filesystem>
+#include <fstream>
 
 namespace fe
 {
@@ -37,7 +38,7 @@ namespace fe
 	bool IsSupportedStaticMeshResource(const fs::path& staticMeshResPath);
 
 	/* Refer to {ResourcePath}.metadata */
-	fs::path ToResourceMetadataPath(fs::path resPath);
+	fs::path MakeResourceMetadataPath(fs::path resPath);
 
 	/* Refer to ./Asset/{AssetType}/{GUID} */
 	fs::path MakeAssetPath(const EAssetType type, const xg::Guid& guid);
@@ -47,35 +48,35 @@ namespace fe
 
 	struct ResourceMetadata
 	{
-		friend nlohmann::json&		 operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
+		friend nlohmann::json& operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
 
 	public:
 		constexpr static uint64_t CurrentVersion = 1;
-		uint64_t				  Version = 0;
-		uint64_t				  CreationTime = 0;
-		xg::Guid				  AssetGuid{};
-		EAssetType				  AssetType = EAssetType::Unknown;
-		bool					  bIsPersistent = false;
+		uint64_t Version = CurrentVersion;
+		uint64_t CreationTime = 0;
+		xg::Guid AssetGuid{};
+		EAssetType AssetType = EAssetType::Unknown;
+		bool bIsPersistent = false;
 	};
 
-	nlohmann::json&		  operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
+	nlohmann::json& operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
 	const nlohmann::json& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
 
 	struct AssetMetadata
 	{
-		friend nlohmann::json&		 operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
+		friend nlohmann::json& operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, AssetMetadata& metadata);
 
 	public:
 		constexpr static size_t CurrentVersion = 1;
-		uint64_t				Version = 0;
-		xg::Guid				Guid{};
-		std::string				SrcResPath{};
-		EAssetType				Type = EAssetType::Unknown;
-		bool					bIsPersistent = false;
+		uint64_t Version = CurrentVersion;
+		xg::Guid Guid{};
+		std::string SrcResPath{};
+		EAssetType Type = EAssetType::Unknown;
+		bool bIsPersistent = false;
 	};
 
-	nlohmann::json&		  operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
+	nlohmann::json& operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
 	const nlohmann::json& operator>>(const nlohmann::json& archive, AssetMetadata& metadata);
 } // namespace fe

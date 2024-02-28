@@ -7,6 +7,11 @@
 #pragma warning(pop)
 #include <magic_enum.hpp>
 
+namespace fe
+{
+	using json = nlohmann::json;
+}
+
 namespace fe::details
 {
 	template <typename VarType>

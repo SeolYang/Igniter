@@ -84,6 +84,8 @@ namespace fe
 		bool operator==(const String& rhs) const;
 		bool operator!=(const String& rhs) const { return !(*this == rhs); }
 
+	private:
+		friend class Engine;
 		static void ClearCache();
 
 	private:

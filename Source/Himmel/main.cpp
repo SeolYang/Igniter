@@ -43,13 +43,18 @@ struct SimpleVertex
 #include <D3D12/GPUViewManager.h>
 #include <D3D12/GPUView.h>
 #include <Renderer/StaticMeshComponent.h>
+#include <Asset/Texture.h>
 
 int main()
 {
 	using namespace fe;
 	int result = 0;
 	{
-		fe::Engine		  engine;
+		fe::Engine engine;
+
+		// #test Asset System Test
+		TextureImporter::ImportTexture(String("Resources\\djmax_1st_anv.png"));
+
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
 		inputManager.BindAction(fe::String("MoveRight"), fe::EInput::D);

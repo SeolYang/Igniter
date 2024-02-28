@@ -30,6 +30,12 @@ namespace fe
 
 		[[nodiscard]] float GetDeltaTime() const { return static_cast<float>(GetDeltaTimeF64()); }
 
+		template <typename T = std::chrono::milliseconds>
+		static inline size_t Now()
+		{
+			return std::chrono::duration_cast<T>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+		}
+
 	private:
 		std::chrono::steady_clock::time_point begin = std::chrono::high_resolution_clock::now();
 		std::chrono::nanoseconds			  deltaTime = std::chrono::nanoseconds(0);
