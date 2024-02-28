@@ -17,9 +17,7 @@
 #pragma warning(pop)
 #include <crossguid/guid.hpp>
 #include <magic_enum.hpp>
-
 #include <Core/Json.h>
-
 
 #define UNUSED(x) (x)
 

@@ -19,7 +19,6 @@
     "catch2",
     "tracy",
     "directxmath",
-    "directx-dxc",
     "entt",
     "crossguid"
   ],

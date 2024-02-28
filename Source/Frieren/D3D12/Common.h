@@ -17,7 +17,7 @@
 #include <AgilitySDK/dxgiformat.h>
 #include <dxgi.h>
 #include <dxgi1_6.h>
-#include <directx-dxc/dxcapi.h>
+#include <dxc/dxcapi.h>
 
 #pragma warning(push)
 #pragma warning(disable : 26827)

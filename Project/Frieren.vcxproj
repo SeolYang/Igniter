@@ -78,6 +78,10 @@
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
     <ClInclude Include="..\Source\Frieren\Renderer\StaticMeshComponent.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcerrors.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h" />
     <ClInclude Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h" />
     <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h" />
   </ItemGroup>
@@ -249,10 +253,11 @@
       <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -261,7 +266,9 @@
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)\D3D12"
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
-xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -277,10 +284,11 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
       <PreprocessorDefinitions>CHECK_MEM_LEAK;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -289,7 +297,9 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)\D3D12"
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
-xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -305,10 +315,11 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
       <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;NOMINMAX;WIN32_MEAN_AND_LEAN;_DISABLE_VECTOR_ANNOTATION;_DISABLE_STRING_ANNOTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -317,7 +328,9 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)\D3D12"
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
-xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -335,9 +348,10 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -347,7 +361,9 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)\D3D12"
-xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>

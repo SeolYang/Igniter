@@ -43,6 +43,9 @@
     <Filter Include="Thirdparty\DirectXTex">
       <UniqueIdentifier>{af091ce6-3816-42e2-9da1-b229568acb68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thirdparty\DirectXCompiler">
+      <UniqueIdentifier>{173fb3a5-9de0-4c9b-9e2b-fec11f93dc3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -227,6 +230,18 @@
     </ClInclude>
     <ClInclude Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h">
       <Filter>Thirdparty\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcerrors.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
