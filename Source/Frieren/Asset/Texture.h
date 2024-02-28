@@ -3,6 +3,8 @@
 #include <Core/Handle.h>
 #include <D3D12/Common.h>
 
+struct ID3D11Device;
+
 namespace fe::dx
 {
 	class GpuTexture;
@@ -35,8 +37,21 @@ namespace fe
 												TextureImportConfig& config);
 
 	public:
+		[[nodiscard]]
+		static inline auto MakeDefault()
+		{
+			return TextureImportConfig{ .Version = CurrentVersion };
+		}
+
+		[[nodiscard]]
+		bool IsValidVersion() const
+		{
+			return Version == TextureImportConfig::CurrentVersion;
+		}
+
+	public:
 		constexpr static size_t CurrentVersion = 2;
-		size_t Version = CurrentVersion;
+		size_t Version = 0;
 		ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
 		bool bGenerateMips = false;
 
@@ -60,8 +75,22 @@ namespace fe
 												TextureResourceMetadata& metadata);
 
 	public:
+		[[nodiscard]]
+		static inline auto MakeDefault()
+		{
+			return TextureResourceMetadata{ .Version = CurrentVersion,
+											.Common = ResourceMetadata::MakeDefault(),
+											.TexImportConf = TextureImportConfig::MakeDefault() };
+		}
+		[[nodiscard]]
+		bool IsValidVersion() const
+		{
+			return Version == TextureResourceMetadata::CurrentVersion;
+		}
+
+	public:
 		constexpr static size_t CurrentVersion = 1;
-		size_t Version = CurrentVersion;
+		size_t Version = 0;
 		ResourceMetadata Common{};
 		TextureImportConfig TexImportConf{};
 	};
@@ -79,8 +108,21 @@ namespace fe
 												TextureLoadConfig& config);
 
 	public:
+		[[nodiscard]]
+		static inline auto MakeDefault()
+		{
+			return TextureLoadConfig{ .Version = CurrentVersion };
+		}
+
+		[[nodiscard]]
+		bool IsValidVersion() const
+		{
+			return Version == TextureLoadConfig::CurrentVersion;
+		}
+
+	public:
 		constexpr static size_t CurrentVersion = 3;
-		size_t Version = CurrentVersion;
+		size_t Version = 0;
 		DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
 		ETextureDimension Dimension = ETextureDimension::Tex2D;
 		uint32_t Width = 1;
@@ -110,8 +152,23 @@ namespace fe
 												TextureAssetMetadata& metadata);
 
 	public:
+		[[nodiscard]]
+		static inline auto MakeDefault()
+		{
+			return TextureAssetMetadata{ .Version = CurrentVersion,
+										 .Common = AssetMetadata::MakeDefault(),
+										 .TexLoadConf = TextureLoadConfig::MakeDefault() };
+		}
+
+		[[nodiscard]]
+		bool IsValidVersion() const
+		{
+			return Version == TextureAssetMetadata::CurrentVersion;
+		}
+
+	public:
 		constexpr static size_t CurrentVersion = 1;
-		size_t Version = CurrentVersion;
+		size_t Version = 0;
 		AssetMetadata Common{};
 		TextureLoadConfig TexLoadConf{};
 	};
@@ -124,10 +181,15 @@ namespace fe
 	class TextureImporter
 	{
 	public:
-		static bool
-		ImportTexture(const String resPathStr,
-					  std::optional<TextureImportConfig> config = std::nullopt,
-					  const bool bIsPersistent = false);
+		TextureImporter();
+		~TextureImporter();
+
+		bool ImportTexture(const String resPathStr,
+						   std::optional<TextureImportConfig> config = std::nullopt,
+						   const bool bIsPersistent = false);
+
+	private:
+		ID3D11Device* d3d11Device = nullptr;
 	};
 
 	// 로드 후 셋업

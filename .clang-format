@@ -52,3 +52,4 @@ PackConstructorInitializers: CurrentLine
 AllowAllParametersOfDeclarationOnNextLine: false
 AlwaysBreakTemplateDeclarations: Yes
 FixNamespaceComments: true
+BreakAfterAttributes: Leave

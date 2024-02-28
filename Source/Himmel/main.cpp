@@ -53,7 +53,8 @@ int main()
 		fe::Engine engine;
 
 		// #test Asset System Test
-		TextureImporter::ImportTexture(String("Resources\\djmax_1st_anv.png"));
+		TextureImporter importer;
+		importer.ImportTexture(String("Resources\\djmax_1st_anv.png"));
 
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);

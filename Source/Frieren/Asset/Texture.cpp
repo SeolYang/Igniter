@@ -2,8 +2,8 @@
 #include <Asset/Texture.h>
 #include <cctype>
 #include <Core/Container.h>
-#include <Core/Log.h>
 #include <Core/Timer.h>
+#include <d3d11.h>
 #include <DirectXTex/DirectXTex.h>
 #include <Engine.h>
 
@@ -206,6 +206,32 @@ namespace fe
 		return DXGI_FORMAT_UNKNOWN;
 	}
 
+	TextureImporter::TextureImporter()
+	{
+		uint32_t creationFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+		creationFlags |= static_cast<uint32_t>(D3D11_CREATE_DEVICE_DEBUG);
+#endif
+		const D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_10_0;
+		const HRESULT res = D3D11CreateDevice(nullptr,
+											  D3D_DRIVER_TYPE_HARDWARE, nullptr,
+											  creationFlags, &featureLevel, 1, D3D11_SDK_VERSION,
+											  &d3d11Device, nullptr, nullptr);
+
+		if (FAILED(res))
+		{
+			FE_LOG(TextureImporterWarn, "Failed create d3d11 device. HRESULT: {:#X}", res);
+		}
+	}
+
+	TextureImporter::~TextureImporter()
+	{
+		if (d3d11Device != nullptr)
+		{
+			d3d11Device->Release();
+		}
+	}
+
 	bool TextureImporter::ImportTexture(const String resPathStr,
 										std::optional<TextureImportConfig> config /*= std::nullopt*/,
 										const bool bIsPersistent)
@@ -264,29 +290,33 @@ namespace fe
 			return false;
 		}
 
-		// #wip_todo 검증필
+		bool bPersistencyRequired = bIsPersistent;
 		const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
 		if (!config)
 		{
-			TextureImportConfig newConfig{};
 			if (fs::exists(resMetadataPath))
 			{
-				newConfig.Version = 0;
 				std::ifstream resMetadataStream{ resMetadataPath.c_str() };
 				const json serializedResMetadata{ json::parse(resMetadataStream) };
 				resMetadataStream.close();
-				serializedResMetadata >> newConfig;
 
-				if (newConfig.Version != TextureImportConfig::CurrentVersion)
+				TextureResourceMetadata texResMetadata{};
+				serializedResMetadata >> texResMetadata;
+
+				if (!texResMetadata.TexImportConf.IsValidVersion())
 				{
-					FE_LOG(TextureImporterWarn,
-						   "TextureImportConfig Version does not match. Found {}, "
-						   "Required "
-						   "{}. File: {}",
-						   newConfig.Version, TextureImportConfig::CurrentVersion, resMetadataPath.string());
+					details::LogVersionError<TextureImportConfig, TextureImporterWarn>(
+						texResMetadata.TexImportConf,
+						resMetadataPath.string());
 				}
+
+				bPersistencyRequired |= texResMetadata.Common.bIsPersistent;
+				config = texResMetadata.TexImportConf;
 			}
-			config = newConfig;
+			else
+			{
+				config = TextureImportConfig::MakeDefault();
+			}
 		}
 
 		if (!bIsDDSFormat)
@@ -341,18 +371,43 @@ namespace fe
 					config->CompressionMode = ETextureCompressionMode::BC4;
 				}
 
-				// # wip_todo 검증필
-				DirectX::ScratchImage compTex{};
+				auto compFlags = static_cast<unsigned long>(DirectX::TEX_COMPRESS_PARALLEL);
 				const DXGI_FORMAT compFormat = AsBCnFormat(config->CompressionMode, texMetadata.format);
-				const HRESULT compRes = DirectX::Compress(
-					targetTex.GetImages(), targetTex.GetImageCount(),
-					targetTex.GetMetadata(),
-					compFormat,
-					DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
-					compTex);
+
+				const bool bIsGPUCodecAvailable = d3d11Device != nullptr &&
+												  (config->CompressionMode == ETextureCompressionMode::BC6H ||
+												   config->CompressionMode == ETextureCompressionMode::BC7);
+
+				HRESULT compRes = S_FALSE;
+				DirectX::ScratchImage compTex{};
+				if (bIsGPUCodecAvailable)
+				{
+					compRes = DirectX::Compress(
+						d3d11Device,
+						targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
+						compFormat,
+						static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags),
+						DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
+						compTex);
+				}
+				else
+				{
+					compRes = DirectX::Compress(
+						targetTex.GetImages(), targetTex.GetImageCount(),
+						targetTex.GetMetadata(),
+						compFormat,
+						static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags),
+						DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
+						compTex);
+				}
 
 				if (FAILED(compRes))
 				{
+					if (bIsGPUCodecAvailable)
+					{
+						FE_LOG(TextureImporterErr, "Failed to compress with GPU Codec.");
+					}
+
 					FE_LOG(TextureImporterErr,
 						   "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
 						   "File: {}",
@@ -369,21 +424,20 @@ namespace fe
 			}
 		}
 
-		// #wip_todo 리소스 메타데이터(및 파일), 에셋 메타데이터(및 파일),
-		// 그리고 에셋 파일 생성 까지 여기서 처리 texMetadata 그리고 config 사용
-		// 그리고 이 지점에서 에셋 임포트 성공했다고 가정, guid 및 생성 시간
-		// 기록
-
+		/*************************** Configures output ***************************/
 		const size_t creationTime = Timer::Now();
 		const xg::Guid newGuid = xg::newGuid();
 
 		/* Configure Texture Resource Metadata */
 		config->Version = TextureImportConfig::CurrentVersion;
 		const TextureResourceMetadata newResMetadata{
-			.Common = { .CreationTime = creationTime,
-						.AssetGuid = newGuid,
-						.AssetType = EAssetType::Texture,
-						.bIsPersistent = bIsPersistent },
+			.Version = TextureResourceMetadata::CurrentVersion,
+			.Common = {
+				.Version = ResourceMetadata::CurrentVersion,
+				.CreationTime = creationTime,
+				.AssetGuid = newGuid,
+				.AssetType = EAssetType::Texture,
+				.bIsPersistent = bPersistencyRequired },
 
 			.TexImportConf = *config
 		};
@@ -415,22 +469,14 @@ namespace fe
 
 		const ETextureDimension texDim = convertDxTexDim(texMetadata.dimension);
 		const TextureAssetMetadata newAssetMetadata{
-			.Common = { .Guid = newGuid,
-						.SrcResPath = resPathStr.AsString(),
-						.Type = EAssetType::Texture,
-						.bIsPersistent = bIsPersistent },
-
-			.TexLoadConf = { .Format = texMetadata.format,
-							 .Dimension = texDim,
-							 .Width = static_cast<uint32_t>(texMetadata.width),
-							 .Height = static_cast<uint32_t>(texMetadata.height),
-							 .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize),
-							 .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
-							 .bIsCubemap = texMetadata.IsCubemap(),
-							 .Filter = config->Filter,
-							 .AddressModeU = config->AddressModeU,
-							 .AddressModeV = config->AddressModeV,
-							 .AddressModeW = config->AddressModeW }
+			.Version = TextureAssetMetadata::CurrentVersion,
+			.Common = {
+				.Version = AssetMetadata::CurrentVersion,
+				.Guid = newGuid,
+				.SrcResPath = resPathStr.AsString(),
+				.Type = EAssetType::Texture,
+				.bIsPersistent = bPersistencyRequired },
+			.TexLoadConf = { .Version = TextureLoadConfig::CurrentVersion, .Format = texMetadata.format, .Dimension = texDim, .Width = static_cast<uint32_t>(texMetadata.width), .Height = static_cast<uint32_t>(texMetadata.height), .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize), .Mips = static_cast<uint16_t>(texMetadata.mipLevels), .bIsCubemap = texMetadata.IsCubemap(), .Filter = config->Filter, .AddressModeU = config->AddressModeU, .AddressModeV = config->AddressModeV, .AddressModeW = config->AddressModeW }
 		};
 
 		/* Create Texture Asset root directory if does not exist */
