@@ -43,13 +43,13 @@ namespace fe::dx
 		void End();
 
 		// https://microsoft.github.io/DirectX-Specs/d3d/D3D12EnhancedBarriers.html#equivalent-d3d12_barrier_sync-bit-for-each-d3d12_resource_states-bit
-		void AddPendingTextureBarrier(GpuTexture&			   targetTexture,
+		void AddPendingTextureBarrier(GpuTexture& targetTexture,
 									  const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter,
 									  D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter,
 									  const D3D12_BARRIER_LAYOUT layoutBefore, const D3D12_BARRIER_LAYOUT layoutAfter,
 									  const D3D12_BARRIER_SUBRESOURCE_RANGE subresourceRange = { 0xffffffff, 0, 0, 0, 0,
 																								 0 });
-		void AddPendingBufferBarrier(GpuBuffer&				  targetBuffer,
+		void AddPendingBufferBarrier(GpuBuffer& targetBuffer,
 									 const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter,
 									 D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter,
 									 const size_t offset = 0, const size_t sizeAsBytes = std::numeric_limits<size_t>::max());
@@ -91,11 +91,11 @@ namespace fe::dx
 
 	private:
 		ComPtr<ID3D12CommandAllocator> cmdAllocator;
-		ComPtr<NativeType>			   cmdList;
-		EQueueType					   cmdListTargetQueueType;
+		ComPtr<NativeType> cmdList;
+		EQueueType cmdListTargetQueueType;
 
-		std::vector<D3D12_GLOBAL_BARRIER>  pendingGlobalBarriers;
+		std::vector<D3D12_GLOBAL_BARRIER> pendingGlobalBarriers;
 		std::vector<D3D12_TEXTURE_BARRIER> pendingTextureBarriers;
-		std::vector<D3D12_BUFFER_BARRIER>  pendingBufferBarriers;
+		std::vector<D3D12_BUFFER_BARRIER> pendingBufferBarriers;
 	};
 } // namespace fe::dx

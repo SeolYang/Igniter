@@ -234,7 +234,7 @@ namespace fe
 
 	bool TextureImporter::ImportTexture(const String resPathStr,
 										std::optional<TextureImportConfig> config /*= std::nullopt*/,
-										const bool bIsPersistent)
+										const bool bIsPersistent /*= false*/)
 	{
 		const fs::path resPath{ resPathStr.AsStringView() };
 		if (!fs::exists(resPath))
@@ -529,7 +529,6 @@ namespace fe
 
 		return true;
 	}
-
 } // namespace fe
 
 #include <iostream>

@@ -302,7 +302,7 @@ xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetD
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;NOMINMAX;WIN32_MEAN_AND_LEAN;_DISABLE_VECTOR_ANNOTATION;_DISABLE_STRING_ANNOTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

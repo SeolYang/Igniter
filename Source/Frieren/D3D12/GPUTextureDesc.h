@@ -55,11 +55,11 @@ namespace fe::dx
 		bool IsTexture1D() const { return Width > 0 && Height == 1 && DepthOrArraySize == 1; }
 		bool IsTexture2D() const { return Width > 0 && Height > 0 && DepthOrArraySize == 1; }
 		bool IsTexture3D() const { return Width > 0 && Height > 0 && DepthOrArraySize > 0; }
-
 		bool IsTextureArray() const { return bIsArray; }
 		bool IsTexture1DArray() const { return IsTextureArray() && Width > 0 && Height == 1 && DepthOrArraySize > 0; }
 		bool IsTexture2DArray() const { return IsTextureArray() && Width > 0 && Height > 0 && DepthOrArraySize > 0; }
 		bool IsTextureCube() const { return bIsCubemap; }
+
 		bool IsMSAAEnabled() const { return bIsMSAAEnabled; }
 		bool IsAllowSimultaneousAccess() const { return bIsAllowSimultaneousAccess; }
 
