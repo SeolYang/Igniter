@@ -7,7 +7,7 @@
 #include <fstream>
 
 #ifndef FE_TEXT
-#define FE_TEXT(x) #x
+	#define FE_TEXT(x) #x
 #endif
 
 namespace fe
@@ -28,7 +28,8 @@ namespace fe
 		template <typename T, typename LogCategory>
 		void LogVersionError(const T& instance, const std::string_view infoMessage = "")
 		{
-			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n" "\tFound: {}\n\tRequied: {}\n\tInformations: {}",
+			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n"
+										   "\tFound: {}\n\tRequied: {}\n\tInformations: {}",
 				   instance.Version, T::CurrentVersion, infoMessage);
 		}
 	} // namespace details
@@ -44,9 +45,6 @@ namespace fe
 		Script,
 		// Scene
 	};
-
-	bool IsSupportedTextureResource(const fs::path& textureResPath);
-	bool IsSupportedStaticMeshResource(const fs::path& staticMeshResPath);
 
 	/* Refer to {ResourcePath}.metadata */
 	fs::path MakeResourceMetadataPath(fs::path resPath);

@@ -31,10 +31,8 @@ namespace fe
 
 	struct TextureImportConfig
 	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive,
-										  const TextureImportConfig& config);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive,
-												TextureImportConfig& config);
+		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config);
+		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
 
 	public:
 		[[nodiscard]]
@@ -62,17 +60,13 @@ namespace fe
 		D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	};
 
-	nlohmann::json& operator<<(nlohmann::json& archive,
-							   const TextureImportConfig& config);
-	const nlohmann::json& operator>>(const nlohmann::json& archive,
-									 TextureImportConfig& config);
+	nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config);
+	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
 
 	struct TextureResourceMetadata
 	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive,
-										  const TextureResourceMetadata& metadata);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive,
-												TextureResourceMetadata& metadata);
+		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureResourceMetadata& metadata);
+		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureResourceMetadata& metadata);
 
 	public:
 		[[nodiscard]]
@@ -95,17 +89,13 @@ namespace fe
 		TextureImportConfig TexImportConf{};
 	};
 
-	nlohmann::json& operator<<(nlohmann::json& archive,
-							   const TextureResourceMetadata& metadata);
-	const nlohmann::json& operator>>(const nlohmann::json& archive,
-									 TextureResourceMetadata& metadata);
+	nlohmann::json& operator<<(nlohmann::json& archive, const TextureResourceMetadata& metadata);
+	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureResourceMetadata& metadata);
 
 	struct TextureLoadConfig
 	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive,
-										  const TextureLoadConfig& config);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive,
-												TextureLoadConfig& config);
+		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config);
+		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
 
 	public:
 		[[nodiscard]]
@@ -139,17 +129,13 @@ namespace fe
 		D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	};
 
-	nlohmann::json& operator<<(nlohmann::json& archive,
-							   const TextureLoadConfig& config);
-	const nlohmann::json& operator>>(const nlohmann::json& archive,
-									 TextureLoadConfig& config);
+	nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config);
+	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
 
 	struct TextureAssetMetadata
 	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive,
-										  const TextureAssetMetadata& metadata);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive,
-												TextureAssetMetadata& metadata);
+		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureAssetMetadata& metadata);
+		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureAssetMetadata& metadata);
 
 	public:
 		[[nodiscard]]
@@ -173,10 +159,8 @@ namespace fe
 		TextureLoadConfig TexLoadConf{};
 	};
 
-	nlohmann::json& operator<<(nlohmann::json& archive,
-							   const TextureAssetMetadata& metadata);
-	const nlohmann::json& operator>>(const nlohmann::json& archive,
-									 TextureAssetMetadata& metadata);
+	nlohmann::json& operator<<(nlohmann::json& archive, const TextureAssetMetadata& metadata);
+	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureAssetMetadata& metadata);
 
 	class TextureImporter
 	{
