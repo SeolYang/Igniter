@@ -182,7 +182,7 @@ namespace fe
 			frameManager.NextFrame();
 		}
 
-		renderer->WaitForFences();
+		renderer->FlushQueues();
 		logger->Log<EngineInfo>("* End Engine main loop");
 		return 0;
 	}

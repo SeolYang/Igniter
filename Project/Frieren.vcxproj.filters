@@ -93,10 +93,7 @@
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h">
       <Filter>Source\Gameplay</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\Device.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\Fence.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\RenderDevice.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h">
@@ -243,6 +240,9 @@
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h">
       <Filter>Thirdparty\DirectXCompiler</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\D3D12\CircularUploader.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -263,10 +263,7 @@
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp">
       <Filter>Source\Gameplay</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp">
+    <ClCompile Include="..\Source\Frieren\D3D12\RenderDevice.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp">

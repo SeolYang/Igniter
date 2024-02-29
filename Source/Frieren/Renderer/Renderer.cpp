@@ -1,12 +1,7 @@
 #include <Renderer/Renderer.h>
 #include <D3D12/RenderDevice.h>
-#include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
-#include <D3D12/CommandContextPool.h>
-#include <D3D12/Fence.h>
 #include <D3D12/DescriptorHeap.h>
-#include <D3D12/Swapchain.h>
-#include <D3D12/TempConstantBufferAllocator.h>
 
 #pragma region test
 // #test
@@ -50,17 +45,11 @@ namespace fe
 		  renderDevice(device),
 		  handleManager(handleManager),
 		  gpuViewManager(gpuViewManager),
-		  directCmdQueue(std::make_unique<CommandQueue>(device.CreateCommandQueue("Main Gfx Queue", EQueueType::Direct).value())),
-		  directCmdCtxPool(std::make_unique<CommandContextPool>(deferredDeallocator, device, EQueueType::Direct)),
-		  swapchain(std::make_unique<Swapchain>(window, gpuViewManager, *directCmdQueue, NumFramesInFlight)),
-		  tempConstantBufferAllocator(std::make_unique<TempConstantBufferAllocator>(frameManager, device, handleManager, gpuViewManager))
+		  mainGfxQueue(device.CreateCommandQueue("Main Gfx Queue", EQueueType::Direct).value()),
+		  gfxCmdCtxPool(deferredDeallocator, device, EQueueType::Direct),
+		  swapchain(window, gpuViewManager, mainGfxQueue, NumFramesInFlight),
+		  tempConstantBufferAllocator(frameManager, device, handleManager, gpuViewManager)
 	{
-		frameFences.reserve(NumFramesInFlight);
-		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
-		{
-			frameFences.emplace_back(device.CreateFence(std::format("FrameFence_{}", localFrameIdx)).value());
-		}
-
 #pragma region test
 		bindlessRootSignature = std::make_unique<RootSignature>(device.CreateBindlessRootSignature().value());
 
@@ -97,7 +86,7 @@ namespace fe
 		* D3D12 WARNING: ID3D12CommandQueue::ExecuteCommandLists: ExecuteCommandLists references command lists that have recorded only Barrier commands. Since there is no other GPU work to synchronize against, all barriers should use AccessAfter / AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS and SyncBefore / SyncAfter = D3D12_BARRIER_SYNC_NONE. This information can be used as an optimization hint by some drivers. [ EXECUTION WARNING #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS]
 		D3D12: **BREAK** enabled for the previous message, which was: [ WARNING EXECUTION #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS ]
 		*/
-		auto cmdCtx = directCmdCtxPool->Request();
+		auto cmdCtx = gfxCmdCtxPool.Request();
 		cmdCtx->Begin();
 		{
 			cmdCtx->AddPendingTextureBarrier(
@@ -107,48 +96,44 @@ namespace fe
 				D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
 			cmdCtx->FlushBarriers();
 
-			tempConstantBufferAllocator->InitBufferStateTransition(*cmdCtx);
+			tempConstantBufferAllocator.InitBufferStateTransition(*cmdCtx);
 		}
 		cmdCtx->End();
 
-		directCmdQueue->AddPendingContext(*cmdCtx);
+		mainGfxQueue.AddPendingContext(*cmdCtx);
 #pragma endregion
 	}
 
 	Renderer::~Renderer()
 	{
-		directCmdQueue->FlushQueue(renderDevice);
-	}
-
-	void Renderer::WaitForFences()
-	{
-		for (auto& fence : frameFences)
-		{
-			fence.WaitOnCPU();
-		}
+		GpuSync mainGfxQueueSync = mainGfxQueue.Flush();
+		mainGfxQueueSync.WaitOnCpu();
 	}
 
 	void Renderer::BeginFrame()
 	{
-		frameFences[frameManager.GetLocalFrameIndex()].WaitOnCPU();
-		tempConstantBufferAllocator->DeallocateCurrentFrame();
+		GpuSync& mainGfxLocalFrameSync = mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()];
+		if (mainGfxLocalFrameSync)
+		{
+			mainGfxLocalFrameSync.WaitOnCpu();
+		}
+
+		tempConstantBufferAllocator.DeallocateCurrentFrame();
 	}
 
 	void Renderer::Render(World& world)
 	{
-		check(directCmdQueue);
-		check(directCmdCtxPool);
+		check(mainGfxQueue);
 
-		auto renderCmdCtx = directCmdCtxPool->Request();
+		auto renderCmdCtx = gfxCmdCtxPool.Request();
 		renderCmdCtx->Begin(pso.get());
 		{
 			auto bindlessDescriptorHeaps = gpuViewManager.GetBindlessDescriptorHeaps();
 			renderCmdCtx->SetDescriptorHeaps(bindlessDescriptorHeaps);
 			renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
-			check(swapchain);
-			GpuTexture&	   backBuffer = swapchain->GetBackBuffer();
-			const GpuView& backBufferRTV = swapchain->GetRenderTargetView();
+			GpuTexture&	   backBuffer = swapchain.GetBackBuffer();
+			const GpuView& backBufferRTV = swapchain.GetRenderTargetView();
 			renderCmdCtx->AddPendingTextureBarrier(backBuffer,
 												   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
 												   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
@@ -169,7 +154,7 @@ namespace fe
 			world.Each<StaticMeshComponent, fe::PositionComponent>([&posBufferDesc, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {
 				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
 				{
-					TempConstantBuffer posBuffer = tempConstantBufferAllocator->Allocate(posBufferDesc);
+					TempConstantBuffer posBuffer = tempConstantBufferAllocator.Allocate(posBufferDesc);
 					std::memcpy(posBuffer.Mapping->MappedPtr, &position, sizeof(fe::PositionComponent));
 					const BasicRenderResources params{
 						.PosBufferIdx = posBuffer.View->Index,
@@ -182,13 +167,18 @@ namespace fe
 			});
 		}
 		renderCmdCtx->End();
-		directCmdQueue->AddPendingContext(*renderCmdCtx);
+		mainGfxQueue.AddPendingContext(*renderCmdCtx);
 	}
 
 	void Renderer::EndFrame()
 	{
-		directCmdQueue->FlushPendingContexts();
-		swapchain->Present();
-		directCmdQueue->NextSignalTo(frameFences[frameManager.GetLocalFrameIndex()]);
+		mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()] = mainGfxQueue.Submit();
+		swapchain.Present();
+	}
+
+	void Renderer::FlushQueues()
+	{
+		GpuSync mainGfxSync = mainGfxQueue.Flush();
+		mainGfxSync.WaitOnCpu();
 	}
 } // namespace fe

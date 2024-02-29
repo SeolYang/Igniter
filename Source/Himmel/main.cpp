@@ -39,7 +39,6 @@ struct SimpleVertex
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
-#include <D3D12/Fence.h>
 #include <D3D12/GPUViewManager.h>
 #include <D3D12/GPUView.h>
 #include <Renderer/StaticMeshComponent.h>
@@ -122,7 +121,6 @@ int main()
 
 		/* Transfer data from upload buffer to each buffer. (gpu->gpu) & State transfer */
 		{
-			Fence fence = renderDevice.CreateFence("BufferInit").value();
 			CommandQueue directQueue = renderDevice.CreateCommandQueue("Init Queue", fe::EQueueType::Direct).value();
 			CommandContext cmdCtx = renderDevice.CreateCommandContext("Init Cmd Ctx", fe::EQueueType::Direct).value();
 
@@ -181,9 +179,8 @@ int main()
 			cmdCtx.End();
 
 			directQueue.AddPendingContext(cmdCtx);
-			directQueue.FlushPendingContexts();
-			directQueue.NextSignalTo(fence);
-			fence.WaitOnCPU();
+			GpuSync initSync = directQueue.Submit();
+			initSync.WaitOnCpu();
 		}
 
 		Handle<GpuView, GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);

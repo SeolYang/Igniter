@@ -9,11 +9,11 @@
 
 namespace fe
 {
-	Swapchain::Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync)
+	Swapchain::Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& mainGfxQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync)
 		: numBackBuffers(desiredNumBackBuffers),
 		  bVSyncEnabled(bEnableVSync)
 	{
-		InitSwapchain(window, directCmdQueue);
+		InitSwapchain(window, mainGfxQueue);
 		InitRenderTargetViews(gpuViewManager);
 	}
 
@@ -33,7 +33,7 @@ namespace fe
 		return backBuffers[swapchain->GetCurrentBackBufferIndex()];
 	}
 
-	void Swapchain::InitSwapchain(const Window& window, CommandQueue& directCmdQueue)
+	void Swapchain::InitSwapchain(const Window& window, CommandQueue& mainGfxQueue)
 	{
 		ComPtr<IDXGIFactory5> factory;
 
@@ -63,7 +63,7 @@ namespace fe
 		desc.Flags = bTearingEnabled ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		ComPtr<IDXGISwapChain1> swapchain1;
-		verify_succeeded(factory->CreateSwapChainForHwnd(&directCmdQueue.GetNative(), window.GetNative(), &desc,
+		verify_succeeded(factory->CreateSwapChainForHwnd(&mainGfxQueue.GetNative(), window.GetNative(), &desc,
 														 nullptr, nullptr, &swapchain1));
 
 		// Disable Alt+Enter full-screen toggle.

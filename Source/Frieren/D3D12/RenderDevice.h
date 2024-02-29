@@ -32,7 +32,6 @@ namespace fe
 		[[nodiscard]] auto& GetNative() { return *device.Get(); }
 		uint32_t GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
-		std::optional<Fence> CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
 		std::optional<CommandQueue> CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
 		std::optional<CommandContext> CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType);
 

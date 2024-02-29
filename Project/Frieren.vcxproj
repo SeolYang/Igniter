@@ -47,8 +47,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandQueue.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Common.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\Device.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\Fence.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\RenderDevice.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GpuBuffer.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GpuBufferDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContext.h" />
@@ -63,6 +62,7 @@
     <ClInclude Include="..\Source\Frieren\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.h" />
+    <ClInclude Include="..\Source\Frieren\D3D12\CircularUploader.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
@@ -102,8 +102,7 @@
     <ClCompile Include="..\Source\Frieren\D3D12\CommandQueue.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\D3D12Common.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\Device.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\Fence.cpp" />
+    <ClCompile Include="..\Source\Frieren\D3D12\RenderDevice.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GpuBuffer.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GpuBufferDesc.cpp" />

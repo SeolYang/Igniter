@@ -72,7 +72,7 @@ namespace fe
 		cmdCtx.FlushBarriers();
 		cmdCtx.End();
 
-		CommandQueue& directCmdQueue = renderer.GetDirectCommandQueue();
-		directCmdQueue.AddPendingContext(cmdCtx);
+		CommandQueue& mainGfxQueue = renderer.GetMainGfxQueue();
+		mainGfxQueue.AddPendingContext(cmdCtx);
 	}
 } // namespace fe

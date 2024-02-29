@@ -5,7 +5,6 @@
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUView.h>
-#include <D3D12/Fence.h>
 #include <D3D12/PipelineState.h>
 #include <D3D12/PipelineStateDesc.h>
 #include <D3D12/RootSignature.h>
@@ -221,24 +220,6 @@ namespace fe
 		return bSucceeded;
 	}
 
-	std::optional<Fence> RenderDevice::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/)
-	{
-		check(device);
-
-		ComPtr<ID3D12Fence> newFence{};
-		if (const HRESULT result = device->CreateFence(initialCounter, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence));
-			!SUCCEEDED(result))
-		{
-			// #todo 가능하다면, HRESULT -> String 으로 변환 구현
-			FE_LOG(DeviceFatal, "Failed to create fence. HRESULT: {}", result);
-			return {};
-		}
-
-		check(newFence);
-		SetObjectName(newFence.Get(), debugName);
-		return Fence{ std::move(newFence) };
-	}
-
 	std::optional<CommandQueue> RenderDevice::CreateCommandQueue(const std::string_view debugName, const EQueueType queueType)
 	{
 		check(device);
@@ -254,13 +235,25 @@ namespace fe
 		if (const HRESULT result = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create command queue. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create command queue. HRESULT: {:#X}", result);
 			return {};
 		}
 
 		check(newCmdQueue);
 		SetObjectName(newCmdQueue.Get(), debugName);
-		return CommandQueue{ std::move(newCmdQueue), queueType };
+		
+		ComPtr<ID3D12Fence> newFence{};
+		if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence));
+			!SUCCEEDED(result))
+		{
+			FE_LOG(DeviceFatal, "Failed to create queue sync fence. HRESULT: {:#X}", result);
+			return {};
+		}
+
+		check(newFence);
+		SetObjectName(newFence.Get(), std::format("{} Sync Fence", debugName));
+
+		return CommandQueue{ std::move(newCmdQueue), queueType, std::move(newFence) };
 	}
 
 	std::optional<CommandContext> RenderDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
@@ -274,7 +267,7 @@ namespace fe
 		if (const HRESULT result = device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create command allocator. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create command allocator. HRESULT: {:#X}", result);
 			return {};
 		}
 
@@ -283,7 +276,7 @@ namespace fe
 		if (const HRESULT result = device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create command list. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create command list. HRESULT: {:#X}", result);
 			return {};
 		}
 
@@ -319,7 +312,7 @@ namespace fe
 		if (const HRESULT result = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to serialize root signature. HRESULT: {}, Message: {}", result, errorBlob->GetBufferPointer());
+			FE_LOG(DeviceFatal, "Failed to serialize root signature. HRESULT: {:#X}, Message: {}", result, errorBlob->GetBufferPointer());
 			return {};
 		}
 
@@ -327,7 +320,7 @@ namespace fe
 		if (const HRESULT result = device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create root signature. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create root signature. HRESULT: {:#X}", result);
 			return {};
 		}
 
@@ -345,7 +338,7 @@ namespace fe
 		if (const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create graphics pipeline state. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create graphics pipeline state. HRESULT: {:#X}", result);
 			return {};
 		}
 
@@ -363,7 +356,7 @@ namespace fe
 		if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create compute pipeline state. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create compute pipeline state. HRESULT: {:#X}", result);
 			return {};
 		}
 
@@ -390,7 +383,7 @@ namespace fe
 		if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create descriptor heap. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create descriptor heap. HRESULT: {:#X}", result);
 			return {};
 		}
 
@@ -418,7 +411,7 @@ namespace fe
 				allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
 			!SUCCEEDED(result))
 		{
-			FE_LOG(DeviceFatal, "Failed to create buffer. HRESULT: {}", result);
+			FE_LOG(DeviceFatal, "Failed to create buffer. HRESULT: {:#X}", result);
 			return {};
 		}
 

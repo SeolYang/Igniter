@@ -1,15 +1,15 @@
 #pragma once
 #include <Renderer/Common.h>
+#include <D3D12/CommandQueue.h>
+#include <D3D12/CommandContextPool.h>
+#include <D3D12/Swapchain.h>
+#include <D3D12/TempConstantBufferAllocator.h>
 #include <Core/Handle.h>
 
 namespace fe
 {
 	class RenderDevice;
-	class CommandQueue;
 	class CommandContext;
-	class CommandContextPool;
-	class DescriptorHeap;
-	class Swapchain;
 	class Fence;
 
 #pragma region test
@@ -41,35 +41,36 @@ namespace fe
 		Renderer& operator=(const Renderer&) = delete;
 		Renderer& operator=(Renderer&&) noexcept = delete;
 
-		void WaitForFences();
+		CommandQueue& GetMainGfxQueue() { return mainGfxQueue; }
+		Swapchain& GetSwapchain() { return swapchain; }
+
 		void BeginFrame();
 		void Render(World& world);
 		void EndFrame();
 
-		Swapchain&	  GetSwapchain() { return *swapchain; }
-		CommandQueue& GetDirectCommandQueue() { return *directCmdQueue; }
+		void FlushQueues();
 
 	private:
-		const FrameManager&	 frameManager;
+		const FrameManager& frameManager;
 		DeferredDeallocator& deferredDeallocator;
-		RenderDevice&			 renderDevice;
-		HandleManager&		 handleManager;
-		GpuViewManager&	 gpuViewManager;
+		RenderDevice& renderDevice;
+		HandleManager& handleManager;
+		GpuViewManager& gpuViewManager;
 
-		std::unique_ptr<CommandQueue>		directCmdQueue;
-		std::unique_ptr<CommandContextPool> directCmdCtxPool;
-		std::unique_ptr<Swapchain>			swapchain;
-		std::vector<Fence>					frameFences;
+		CommandQueue mainGfxQueue;
+		CommandContextPool gfxCmdCtxPool;
+		Swapchain swapchain;
+		GpuSync mainGfxFrameSyncs[NumFramesInFlight];
 
-		std::unique_ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
+		TempConstantBufferAllocator tempConstantBufferAllocator;
 
 #pragma region test
 		// #test
-		std::unique_ptr<ShaderBlob>				   vs;
-		std::unique_ptr<ShaderBlob>				   ps;
-		std::unique_ptr<RootSignature>			   bindlessRootSignature;
-		std::unique_ptr<PipelineState>			   pso;
-		std::unique_ptr<GpuTexture>				   depthStencilBuffer;
+		std::unique_ptr<ShaderBlob> vs;
+		std::unique_ptr<ShaderBlob> ps;
+		std::unique_ptr<RootSignature> bindlessRootSignature;
+		std::unique_ptr<PipelineState> pso;
+		std::unique_ptr<GpuTexture> depthStencilBuffer;
 		Handle<GpuView, GpuViewManager*> dsv;
 
 #pragma endregion
