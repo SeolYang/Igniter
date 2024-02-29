@@ -17,7 +17,7 @@ namespace fe::dx
 	{
 	public:
 		RefHandle<MappedGpuBuffer> Mapping = {};
-		RefHandle<GpuView>			View = {};
+		RefHandle<GpuView> View = {};
 	};
 
 	class TempConstantBufferAllocator
@@ -39,20 +39,20 @@ namespace fe::dx
 		void InitBufferStateTransition(CommandContext& cmdCtx);
 
 	public:
-		// 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값 == 64 MB)
-		static constexpr uint32_t DefaultReservedBufferSizeInBytes = 67108864;
+		// 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값 == 4 MB)
+		static constexpr uint32_t DefaultReservedBufferSizeInBytes = 4194304;
 
 	private:
 		const FrameManager& frameManager;
-		Device&				renderDevice;
-		HandleManager&		handleManager;
-		GpuViewManager&		gpuViewManager;
+		Device& renderDevice;
+		HandleManager& handleManager;
+		GpuViewManager& gpuViewManager;
 
 		const uint32_t reservedSizeInBytesPerFrame;
 
-		std::vector<dx::GpuBuffer>															  buffers;
-		std::array<std::atomic_uint64_t, NumFramesInFlight>									  allocatedSizeInBytes;
+		std::vector<dx::GpuBuffer> buffers;
+		std::array<std::atomic_uint64_t, NumFramesInFlight> allocatedSizeInBytes;
 		std::array<std::vector<Handle<MappedGpuBuffer, GpuBuffer*>>, NumFramesInFlight> mappedBuffers;
-		std::array<std::vector<Handle<GpuView, GpuViewManager*>>, NumFramesInFlight>	  allocatedViews;
+		std::array<std::vector<Handle<GpuView, GpuViewManager*>>, NumFramesInFlight> allocatedViews;
 	};
 } // namespace fe::dx

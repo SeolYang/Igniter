@@ -84,7 +84,7 @@ namespace fe::dx
 #if defined(DEBUG) || defined(_DEBUG)
 			factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
 			ComPtr<ID3D12Debug5> debugController;
-			const bool			 bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
+			const bool bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 			FE_CONDITIONAL_LOG(DeviceFatal, bDebugControllerAcquired, "Failed to get debug controller.");
 			if (bDebugControllerAcquired)
 			{
@@ -100,7 +100,7 @@ namespace fe::dx
 		}
 
 		ComPtr<IDXGIFactory6> factory;
-		const bool			  bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
+		const bool bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
 		FE_CONDITIONAL_LOG(DeviceFatal, bFactoryCreated, "Failed to create factory.");
 
 		if (bFactoryCreated)
@@ -132,7 +132,7 @@ namespace fe::dx
 	{
 		check(adapter);
 		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
-		const bool					bIsDeviceCreated = SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
+		const bool bIsDeviceCreated = SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device)));
 		FE_CONDITIONAL_LOG(DeviceFatal, bIsDeviceCreated, "Failed to create the device from the adapter.");
 		check(device);
 		return bIsDeviceCreated;
@@ -236,11 +236,10 @@ namespace fe::dx
 
 		check(newFence);
 		SetObjectName(newFence.Get(), debugName);
-
 		return Fence{ std::move(newFence) };
 	}
 
-	std::optional<CommandQueue> Device::CreateCommandQueue(const EQueueType queueType)
+	std::optional<CommandQueue> Device::CreateCommandQueue(const std::string_view debugName, const EQueueType queueType)
 	{
 		check(device);
 
@@ -260,10 +259,11 @@ namespace fe::dx
 		}
 
 		check(newCmdQueue);
+		SetObjectName(newCmdQueue.Get(), debugName);
 		return CommandQueue{ std::move(newCmdQueue), queueType };
 	}
 
-	std::optional<CommandContext> Device::CreateCommandContext(const EQueueType targetQueueType)
+	std::optional<CommandContext> Device::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
 	{
 		check(device);
 
@@ -279,7 +279,7 @@ namespace fe::dx
 		}
 
 		ComPtr<ID3D12GraphicsCommandList7> newCmdList;
-		const D3D12_COMMAND_LIST_FLAGS	   flags = D3D12_COMMAND_LIST_FLAG_NONE;
+		const D3D12_COMMAND_LIST_FLAGS flags = D3D12_COMMAND_LIST_FLAG_NONE;
 		if (const HRESULT result = device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList));
 			!SUCCEEDED(result))
 		{
@@ -289,13 +289,14 @@ namespace fe::dx
 
 		check(newCmdAllocator);
 		check(newCmdList);
+		SetObjectName(newCmdList.Get(), debugName);
 		return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), targetQueueType };
 	}
 
 	std::optional<RootSignature> Device::CreateBindlessRootSignature()
 	{
 		check(device);
-		constexpr uint8_t		   NumReservedConstants = 16;
+		constexpr uint8_t NumReservedConstants = 16;
 		const D3D12_ROOT_PARAMETER rootParam{
 			.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
 			.Constants = {
@@ -350,7 +351,6 @@ namespace fe::dx
 
 		check(newPipelineState);
 		SetObjectName(newPipelineState.Get(), desc.Name);
-
 		return PipelineState{ std::move(newPipelineState), true };
 	}
 
@@ -369,7 +369,6 @@ namespace fe::dx
 
 		check(newPipelineState);
 		SetObjectName(newPipelineState.Get(), desc.Name);
-
 		return PipelineState{ std::move(newPipelineState), false };
 	}
 
@@ -384,9 +383,7 @@ namespace fe::dx
 
 		const D3D12_DESCRIPTOR_HEAP_DESC desc{ .Type = targetDescriptorHeapType,
 											   .NumDescriptors = numDescriptors,
-											   .Flags = bIsShaderVisibleDescriptorHeap
-															? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
-															: D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+											   .Flags = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 											   .NodeMask = 0 };
 
 		ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
@@ -412,8 +409,8 @@ namespace fe::dx
 		check(allocator);
 
 		const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.ToAllocationDesc();
-		ComPtr<D3D12MA::Allocation>	   allocation{};
-		ComPtr<ID3D12Resource>		   resource{};
+		ComPtr<D3D12MA::Allocation> allocation{};
+		ComPtr<ID3D12Resource> resource{};
 		if (const HRESULT result = allocator->CreateResource3(
 				&allocationDesc, &bufferDesc,
 				D3D12_BARRIER_LAYOUT_UNDEFINED,
@@ -436,7 +433,7 @@ namespace fe::dx
 		check(device);
 		check(allocator);
 
-		const D3D12MA::ALLOCATION_DESC	 allocationDesc = textureDesc.ToAllocationDesc();
+		const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.ToAllocationDesc();
 		std::optional<D3D12_CLEAR_VALUE> clearValue{};
 		if (textureDesc.IsRenderTargetCompatible())
 		{
@@ -454,7 +451,7 @@ namespace fe::dx
 		}
 
 		ComPtr<D3D12MA::Allocation> allocation{};
-		ComPtr<ID3D12Resource>		resource{};
+		ComPtr<ID3D12Resource> resource{};
 		if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc,
 															  D3D12_BARRIER_LAYOUT_UNDEFINED,
 															  clearValue ? &clearValue.value() : nullptr,
@@ -492,7 +489,7 @@ namespace fe::dx
 		check(gpuView.Type == EGpuViewType::ConstantBufferView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GpuBufferDesc&						   desc = buffer.GetDesc();
+		const GpuBufferDesc& desc = buffer.GetDesc();
 		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
 		if (cbvDesc)
 		{
@@ -528,7 +525,7 @@ namespace fe::dx
 		check(gpuView.Type == EGpuViewType::ShaderResourceView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GpuBufferDesc&						   desc = buffer.GetDesc();
+		const GpuBufferDesc& desc = buffer.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
 		if (srvDesc)
 		{
@@ -545,7 +542,7 @@ namespace fe::dx
 		check(gpuView.Type == EGpuViewType::UnorderedAccessView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
-		const GpuBufferDesc&							desc = buffer.GetDesc();
+		const GpuBufferDesc& desc = buffer.GetDesc();
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
 
 		if (uavDesc)
@@ -563,7 +560,7 @@ namespace fe::dx
 		check(gpuView.Type == EGpuViewType::ShaderResourceView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
-		const GPUTextureDesc&						   desc = texture.GetDesc();
+		const GPUTextureDesc& desc = texture.GetDesc();
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
 
 		if (srvDesc)
@@ -581,7 +578,7 @@ namespace fe::dx
 		check(gpuView.Type == EGpuViewType::UnorderedAccessView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
-		const GPUTextureDesc&							desc = texture.GetDesc();
+		const GPUTextureDesc& desc = texture.GetDesc();
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
 
 		if (uavDesc)
@@ -599,7 +596,7 @@ namespace fe::dx
 		check(gpuView.Type == EGpuViewType::RenderTargetView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
-		const GPUTextureDesc&						 desc = texture.GetDesc();
+		const GPUTextureDesc& desc = texture.GetDesc();
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
 
 		if (rtvDesc)
@@ -617,7 +614,7 @@ namespace fe::dx
 		check(gpuView.Type == EGpuViewType::DepthStencilView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
-		const GPUTextureDesc&						 desc = texture.GetDesc();
+		const GPUTextureDesc& desc = texture.GetDesc();
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
 
 		if (dsvDesc)

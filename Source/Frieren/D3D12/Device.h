@@ -29,18 +29,18 @@ namespace fe::dx
 		Device& operator=(const Device&) = delete;
 		Device& operator=(Device&&) noexcept = delete;
 
-		[[nodiscard]] auto&									  GetNative() { return *device.Get(); }
-		uint32_t											  GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
+		[[nodiscard]] auto& GetNative() { return *device.Get(); }
+		uint32_t GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
-		std::optional<Fence>		  CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
-		std::optional<CommandQueue>	  CreateCommandQueue(const EQueueType queueType);
-		std::optional<CommandContext> CreateCommandContext(const EQueueType targetQueueType);
+		std::optional<Fence> CreateFence(const std::string_view debugName, const uint64_t initialCounter = 0);
+		std::optional<CommandQueue> CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
+		std::optional<CommandContext> CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType);
 
 		std::optional<RootSignature> CreateBindlessRootSignature();
 		std::optional<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
 		std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
 
-		std::optional<GpuBuffer>  CreateBuffer(const GpuBufferDesc& bufferDesc);
+		std::optional<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
 		std::optional<GpuTexture> CreateTexture(const GPUTextureDesc& textureDesc);
 
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
@@ -67,10 +67,10 @@ namespace fe::dx
 		bool CreateMemoryAllcator();
 
 	private:
-		ComPtr<IDXGIAdapter>   adapter;
+		ComPtr<IDXGIAdapter> adapter;
 		ComPtr<ID3D12Device10> device;
 
-		D3D12MA::Allocator*				allocator = nullptr;
+		D3D12MA::Allocator* allocator = nullptr;
 
 		uint32_t cbvSrvUavDescriptorHandleIncrementSize = 0;
 		uint32_t samplerDescritorHandleIncrementSize = 0;

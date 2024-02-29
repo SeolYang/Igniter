@@ -1,5 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
+#include <D3D12/CommandContext.h>
 #include <Core/Container.h>
 
 namespace fe
@@ -11,14 +12,13 @@ namespace fe
 namespace fe::dx
 {
 	class Device;
-	class CommandContext;
 	class CommandContextPool
 	{
 	public:
 		CommandContextPool(DeferredDeallocator& deferredDeallocator, dx::Device& device, const dx::EQueueType queueType);
 		~CommandContextPool();
 
-		auto Request()
+		auto Request(const std::string_view debugName = "")
 		{
 			const auto deleter = [this](CommandContext* ptr) {
 				if (ptr != nullptr)
@@ -33,6 +33,11 @@ namespace fe::dx
 			if (!pool.try_pop(cmdCtxPtr))
 			{
 				return ReturnType{ nullptr, deleter };
+			}
+
+			if (!debugName.empty())
+			{
+				SetObjectName(&cmdCtxPtr->GetNative(), debugName);
 			}
 
 			return ReturnType{ cmdCtxPtr, deleter };

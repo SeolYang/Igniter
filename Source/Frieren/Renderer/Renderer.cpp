@@ -50,7 +50,7 @@ namespace fe
 		  renderDevice(device),
 		  handleManager(handleManager),
 		  gpuViewManager(gpuViewManager),
-		  directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue(dx::EQueueType::Direct).value())),
+		  directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue("Main Gfx Queue", dx::EQueueType::Direct).value())),
 		  directCmdCtxPool(std::make_unique<dx::CommandContextPool>(deferredDeallocator, device, dx::EQueueType::Direct)),
 		  swapchain(std::make_unique<dx::Swapchain>(window, gpuViewManager, *directCmdQueue, NumFramesInFlight)),
 		  tempConstantBufferAllocator(std::make_unique<dx::TempConstantBufferAllocator>(frameManager, device, handleManager, gpuViewManager))

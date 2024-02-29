@@ -12,7 +12,8 @@
 namespace fe
 {
 	ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, dx::Device& device)
-		: frameManager(engineFrameManager), descriptorHeap(std::make_unique<dx::DescriptorHeap>(device.CreateDescriptorHeap(dx::EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
+		: frameManager(engineFrameManager),
+		  descriptorHeap(std::make_unique<dx::DescriptorHeap>(device.CreateDescriptorHeap(dx::EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -29,7 +30,7 @@ namespace fe
 		commandContexts.reserve(NumFramesInFlight);
 		for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
 		{
-			commandContexts.emplace_back(std::make_unique<dx::CommandContext>(device.CreateCommandContext(dx::EQueueType::Direct).value()));
+			commandContexts.emplace_back(std::make_unique<dx::CommandContext>(device.CreateCommandContext("ImGui Cmd Ctx", dx::EQueueType::Direct).value()));
 		}
 	}
 
@@ -54,7 +55,7 @@ namespace fe
 
 		dx::CommandContext& cmdCtx = *commandContexts[frameManager.GetLocalFrameIndex()];
 		cmdCtx.Begin();
-		dx::Swapchain&	swapchain = renderer.GetSwapchain();
+		dx::Swapchain& swapchain = renderer.GetSwapchain();
 		dx::GpuTexture& backBuffer = swapchain.GetBackBuffer();
 
 		const dx::GpuView& backBufferRTV = swapchain.GetRenderTargetView();

@@ -62,14 +62,14 @@ int main()
 		inputManager.BindAction(fe::String("UseHealthRecovery"), fe::EInput::Space);
 		inputManager.BindAction(fe::String("DisplayPlayerInfo"), fe::EInput::MouseLB);
 
-		fe::dx::Device&		renderDevice = engine.GetRenderDevice();
-		fe::GameInstance&	gameInstance = engine.GetGameInstance();
-		HandleManager&		handleManager = engine.GetHandleManager();
+		fe::dx::Device& renderDevice = engine.GetRenderDevice();
+		fe::GameInstance& gameInstance = engine.GetGameInstance();
+		HandleManager& handleManager = engine.GetHandleManager();
 		dx::GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
 
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
-		const auto				   player = PlayerArchetype::Create(*defaultWorld);
-		const auto				   enemy = defaultWorld->Create();
+		const auto player = PlayerArchetype::Create(*defaultWorld);
+		const auto enemy = defaultWorld->Create();
 
 		/* Initialize Buffers */
 		constexpr uint16_t NumQuadIndices = 6;
@@ -122,9 +122,9 @@ int main()
 
 		/* Transfer data from upload buffer to each buffer. (gpu->gpu) & State transfer */
 		{
-			dx::Fence		   fence = renderDevice.CreateFence("BufferInit").value();
-			dx::CommandQueue   directQueue = renderDevice.CreateCommandQueue(fe::dx::EQueueType::Direct).value();
-			dx::CommandContext cmdCtx = renderDevice.CreateCommandContext(fe::dx::EQueueType::Direct).value();
+			dx::Fence fence = renderDevice.CreateFence("BufferInit").value();
+			dx::CommandQueue directQueue = renderDevice.CreateCommandQueue("Init Queue", fe::dx::EQueueType::Direct).value();
+			dx::CommandContext cmdCtx = renderDevice.CreateCommandContext("Init Cmd Ctx", fe::dx::EQueueType::Direct).value();
 
 			cmdCtx.Begin();
 			{

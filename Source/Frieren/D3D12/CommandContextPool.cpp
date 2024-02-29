@@ -14,7 +14,7 @@ namespace fe::dx
 		check(reservedNumCmdCtxs > 0);
 		for (size_t idx = 0; idx < reservedNumCmdCtxs; ++idx)
 		{
-			pool.push(new dx::CommandContext(device.CreateCommandContext(queueType).value()));
+			pool.push(new dx::CommandContext(device.CreateCommandContext("Reserved Cmd Ctx", queueType).value()));
 		}
 	}
 
