@@ -3,9 +3,9 @@
 #include <Core/Handle.h>
 #include <Core/FrameManager.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class GpuBuffer;
 	struct MappedGpuBuffer;
 	class GpuBufferDesc;
@@ -23,7 +23,7 @@ namespace fe::dx
 	class TempConstantBufferAllocator
 	{
 	public:
-		TempConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
+		TempConstantBufferAllocator(const FrameManager& frameManager, RenderDevice& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
 		TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
 		TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
 		~TempConstantBufferAllocator();
@@ -44,15 +44,15 @@ namespace fe::dx
 
 	private:
 		const FrameManager& frameManager;
-		Device& renderDevice;
+		RenderDevice& renderDevice;
 		HandleManager& handleManager;
 		GpuViewManager& gpuViewManager;
 
 		const uint32_t reservedSizeInBytesPerFrame;
 
-		std::vector<dx::GpuBuffer> buffers;
+		std::vector<GpuBuffer> buffers;
 		std::array<std::atomic_uint64_t, NumFramesInFlight> allocatedSizeInBytes;
 		std::array<std::vector<Handle<MappedGpuBuffer, GpuBuffer*>>, NumFramesInFlight> mappedBuffers;
 		std::array<std::vector<Handle<GpuView, GpuViewManager*>>, NumFramesInFlight> allocatedViews;
 	};
-} // namespace fe::dx
+} // namespace fe

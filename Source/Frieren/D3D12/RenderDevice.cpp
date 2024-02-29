@@ -1,4 +1,4 @@
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/GPUBuffer.h>
@@ -16,13 +16,13 @@
 #include <Core/Assert.h>
 #include <Core/Log.h>
 
-namespace fe::dx
+namespace fe
 {
 	FE_DEFINE_LOG_CATEGORY(DeviceInfo, ELogVerbosiy::Info)
 	FE_DEFINE_LOG_CATEGORY(DeviceWarn, ELogVerbosiy::Warning)
 	FE_DEFINE_LOG_CATEGORY(DeviceFatal, ELogVerbosiy::Fatal)
 
-	Device::Device()
+	RenderDevice::RenderDevice()
 	{
 		const bool bIsAcquiredAdapter = AcquireAdapterFromFactory();
 		if (bIsAcquiredAdapter)
@@ -44,7 +44,7 @@ namespace fe::dx
 		}
 	}
 
-	Device::~Device()
+	RenderDevice::~RenderDevice()
 	{
 		allocator->Release();
 
@@ -61,7 +61,7 @@ namespace fe::dx
 #endif
 	}
 
-	uint32_t Device::GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const
+	uint32_t RenderDevice::GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const
 	{
 		switch (type)
 		{
@@ -77,7 +77,7 @@ namespace fe::dx
 		}
 	}
 
-	bool Device::AcquireAdapterFromFactory()
+	bool RenderDevice::AcquireAdapterFromFactory()
 	{
 		uint32_t factoryCreationFlags = 0;
 		{
@@ -114,7 +114,7 @@ namespace fe::dx
 		return false;
 	}
 
-	void Device::LogAdapterInformations()
+	void RenderDevice::LogAdapterInformations()
 	{
 		check(adapter);
 		DXGI_ADAPTER_DESC adapterDesc;
@@ -128,7 +128,7 @@ namespace fe::dx
 		FE_LOG(DeviceInfo, "-------------------------------------");
 	}
 
-	bool Device::CreateDevice()
+	bool RenderDevice::CreateDevice()
 	{
 		check(adapter);
 		constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
@@ -138,7 +138,7 @@ namespace fe::dx
 		return bIsDeviceCreated;
 	}
 
-	void Device::SetSeverityLevel()
+	void RenderDevice::SetSeverityLevel()
 	{
 		check(device);
 #if defined(_DEBUG) || defined(ENABLE_GPU_VALIDATION)
@@ -156,7 +156,7 @@ namespace fe::dx
 #endif
 	}
 
-	void Device::CheckSupportedFeatures()
+	void RenderDevice::CheckSupportedFeatures()
 	{
 		check(device);
 		CD3DX12FeatureSupport features;
@@ -200,7 +200,7 @@ namespace fe::dx
 		// D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS
 	}
 
-	void Device::CacheDescriptorHandleIncrementSize()
+	void RenderDevice::CacheDescriptorHandleIncrementSize()
 	{
 		cbvSrvUavDescriptorHandleIncrementSize =
 			device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -210,7 +210,7 @@ namespace fe::dx
 		rtvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	}
 
-	bool Device::CreateMemoryAllcator()
+	bool RenderDevice::CreateMemoryAllcator()
 	{
 		check(device);
 		D3D12MA::ALLOCATOR_DESC desc{};
@@ -221,7 +221,7 @@ namespace fe::dx
 		return bSucceeded;
 	}
 
-	std::optional<Fence> Device::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/)
+	std::optional<Fence> RenderDevice::CreateFence(const std::string_view debugName, const uint64_t initialCounter /*= 0*/)
 	{
 		check(device);
 
@@ -239,7 +239,7 @@ namespace fe::dx
 		return Fence{ std::move(newFence) };
 	}
 
-	std::optional<CommandQueue> Device::CreateCommandQueue(const std::string_view debugName, const EQueueType queueType)
+	std::optional<CommandQueue> RenderDevice::CreateCommandQueue(const std::string_view debugName, const EQueueType queueType)
 	{
 		check(device);
 
@@ -263,7 +263,7 @@ namespace fe::dx
 		return CommandQueue{ std::move(newCmdQueue), queueType };
 	}
 
-	std::optional<CommandContext> Device::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
+	std::optional<CommandContext> RenderDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
 	{
 		check(device);
 
@@ -293,7 +293,7 @@ namespace fe::dx
 		return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), targetQueueType };
 	}
 
-	std::optional<RootSignature> Device::CreateBindlessRootSignature()
+	std::optional<RootSignature> RenderDevice::CreateBindlessRootSignature()
 	{
 		check(device);
 		constexpr uint8_t NumReservedConstants = 16;
@@ -335,7 +335,7 @@ namespace fe::dx
 		return RootSignature{ std::move(newRootSignature) };
 	}
 
-	std::optional<PipelineState> Device::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
+	std::optional<PipelineState> RenderDevice::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
 	{
 		// #todo 파이프라인 상태 객체 캐싱 구현 (해시 기반)
 		check(device);
@@ -354,7 +354,7 @@ namespace fe::dx
 		return PipelineState{ std::move(newPipelineState), true };
 	}
 
-	std::optional<PipelineState> Device::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
+	std::optional<PipelineState> RenderDevice::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
 	{
 		// #todo 파이프라인 상태 객체 캐싱 구현 (해시 기반)
 		check(device);
@@ -372,7 +372,7 @@ namespace fe::dx
 		return PipelineState{ std::move(newPipelineState), false };
 	}
 
-	std::optional<DescriptorHeap> Device::CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
+	std::optional<DescriptorHeap> RenderDevice::CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
 	{
 		check(device);
 
@@ -403,7 +403,7 @@ namespace fe::dx
 		};
 	}
 
-	std::optional<GpuBuffer> Device::CreateBuffer(const GpuBufferDesc& bufferDesc)
+	std::optional<GpuBuffer> RenderDevice::CreateBuffer(const GpuBufferDesc& bufferDesc)
 	{
 		check(device);
 		check(allocator);
@@ -428,7 +428,7 @@ namespace fe::dx
 		return GpuBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
 	}
 
-	std::optional<GpuTexture> Device::CreateTexture(const GPUTextureDesc& textureDesc)
+	std::optional<GpuTexture> RenderDevice::CreateTexture(const GPUTextureDesc& textureDesc)
 	{
 		check(device);
 		check(allocator);
@@ -468,7 +468,7 @@ namespace fe::dx
 		return GpuTexture{ textureDesc, std::move(allocation), std::move(resource) };
 	}
 
-	ComPtr<D3D12MA::Pool> Device::CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc)
+	ComPtr<D3D12MA::Pool> RenderDevice::CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc)
 	{
 		check(device);
 		check(allocator != nullptr);
@@ -484,7 +484,7 @@ namespace fe::dx
 		return customPool;
 	}
 
-	void Device::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
+	void RenderDevice::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
 		check(gpuView.Type == EGpuViewType::ConstantBufferView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -501,7 +501,7 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
+	void RenderDevice::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
 	{
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
@@ -520,7 +520,7 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
+	void RenderDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
 		check(gpuView.Type == EGpuViewType::ShaderResourceView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -537,7 +537,7 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
+	void RenderDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
 	{
 		check(gpuView.Type == EGpuViewType::UnorderedAccessView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -555,7 +555,7 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
 		check(gpuView.Type == EGpuViewType::ShaderResourceView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -573,7 +573,7 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
 		check(gpuView.Type == EGpuViewType::UnorderedAccessView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -591,7 +591,7 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
 		check(gpuView.Type == EGpuViewType::RenderTargetView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -609,7 +609,7 @@ namespace fe::dx
 		}
 	}
 
-	void Device::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
 	{
 		check(gpuView.Type == EGpuViewType::DepthStencilView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -627,4 +627,4 @@ namespace fe::dx
 		}
 	}
 
-} // namespace fe::dx
+} // namespace fe

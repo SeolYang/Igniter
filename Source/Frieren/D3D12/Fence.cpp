@@ -1,7 +1,7 @@
 #include <D3D12/Fence.h>
 #include <Core/Assert.h>
 
-namespace fe::dx
+namespace fe
 {
 	Fence::Fence(ComPtr<ID3D12Fence> newFence)
 		: fence(std::move(newFence)), eventHandle(CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS))
@@ -42,4 +42,4 @@ namespace fe::dx
 			WaitForSingleObject(eventHandle, INFINITE);
 		}
 	}
-} // namespace fe::dx
+} // namespace fe

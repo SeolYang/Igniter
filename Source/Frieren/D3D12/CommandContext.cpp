@@ -1,5 +1,5 @@
 #include <D3D12/CommandContext.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUBufferDesc.h>
@@ -10,7 +10,7 @@
 #include <D3D12/RootSignature.h>
 #include <Core/Assert.h>
 
-namespace fe::dx
+namespace fe
 {
 	CommandContext::CommandContext(CommandContext&& other) noexcept
 		: cmdAllocator(std::move(other.cmdAllocator)),
@@ -293,4 +293,4 @@ namespace fe::dx
 		}
 	}
 
-} // namespace fe::dx
+} // namespace fe

@@ -3,7 +3,7 @@
 #include <Core/String.h>
 #include <span>
 
-namespace fe::dx
+namespace fe
 {
 	class ShaderBlob;
 	class RootSignature;
@@ -70,4 +70,4 @@ namespace fe::dx
 		String Name;
 	};
 
-} // namespace fe::dx
+} // namespace fe

@@ -1,7 +1,7 @@
 #include <D3D12/GpuBuffer.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 
-namespace fe::dx
+namespace fe
 {
 	GpuBuffer::GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
 						 ComPtr<ID3D12Resource> newResource)
@@ -88,4 +88,4 @@ namespace fe::dx
 		handle.Deallocate(evaluatedTypeHash);
 	}
 
-} // namespace fe::dx
+} // namespace fe

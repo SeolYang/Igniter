@@ -4,15 +4,15 @@
 #include <Core/Mutex.h>
 #include <variant>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	// class PSOCache;
 	//  PipelineStateDesc -> private static 캐시를 이용한 flyweight 패턴 구현
 	//  buffer, texture 는 내부 데이터가 다를 수 있기 때문에 flyweight 불가능
 	class PipelineState
 	{
-		friend class Device;
+		friend class RenderDevice;
 
 	public:
 		~PipelineState();
@@ -30,4 +30,4 @@ namespace fe::dx
 		const bool					bIsGraphics;
 		// const size_t pipelineStateHash;
 	};
-} // namespace fe::dx
+} // namespace fe

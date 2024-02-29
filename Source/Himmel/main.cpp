@@ -1,6 +1,6 @@
 #include <Engine.h>
 #include <Core/InputManager.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <Gameplay/GameInstance.h>
 #include <Gameplay/World.h>
 #include <Gameplay/PositionComponent.h>
@@ -62,10 +62,10 @@ int main()
 		inputManager.BindAction(fe::String("UseHealthRecovery"), fe::EInput::Space);
 		inputManager.BindAction(fe::String("DisplayPlayerInfo"), fe::EInput::MouseLB);
 
-		fe::dx::Device& renderDevice = engine.GetRenderDevice();
+		fe::RenderDevice& renderDevice = engine.GetRenderDevice();
 		fe::GameInstance& gameInstance = engine.GetGameInstance();
 		HandleManager& handleManager = engine.GetHandleManager();
-		dx::GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
+		GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
 
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
 		const auto player = PlayerArchetype::Create(*defaultWorld);
@@ -75,20 +75,20 @@ int main()
 		constexpr uint16_t NumQuadIndices = 6;
 		constexpr uint16_t NumTriIndices = 3;
 
-		dx::GpuBufferDesc quadIBDesc{};
+		GpuBufferDesc quadIBDesc{};
 		quadIBDesc.AsIndexBuffer<uint16_t>(NumQuadIndices);
 		quadIBDesc.DebugName = String("QuadMeshIB");
-		Handle<dx::GpuBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
+		Handle<GpuBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
 
-		dx::GpuBufferDesc triIBDesc{};
+		GpuBufferDesc triIBDesc{};
 		triIBDesc.AsIndexBuffer<uint16_t>(NumTriIndices);
 		triIBDesc.DebugName = String("TriMeshIB");
-		Handle<dx::GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
+		Handle<GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
 
-		dx::GpuBufferDesc verticesBufferDesc{};
+		GpuBufferDesc verticesBufferDesc{};
 		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
 		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
-		Handle<dx::GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
+		Handle<GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
 
 		const SimpleVertex vertices[7] = {
 			{ -.1f, 0.f, 0.f },
@@ -100,9 +100,9 @@ int main()
 			{ 0.1f, 0.f, 0.f }
 		};
 
-		dx::GpuBufferDesc uploadBufferDesc{};
+		GpuBufferDesc uploadBufferDesc{};
 		uploadBufferDesc.AsUploadBuffer(static_cast<uint32_t>(sizeof(vertices) + quadIBDesc.GetSizeAsBytes() + triIBDesc.GetSizeAsBytes()));
-		dx::GpuBuffer uploadBuffer{ renderDevice.CreateBuffer(uploadBufferDesc).value() };
+		GpuBuffer uploadBuffer{ renderDevice.CreateBuffer(uploadBufferDesc).value() };
 
 		const uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		const uint16_t triIndices[3] = { 4, 5, 6 };
@@ -114,7 +114,7 @@ int main()
 		const size_t triIndicesOffset = quadIndicesOffset + quadIndicesSize;
 		const size_t triIndicesSize = triIBDesc.GetSizeAsBytes();
 		{
-			dx::GPUResourceMapGuard mappedBuffer = uploadBuffer.MapGuard();
+			GPUResourceMapGuard mappedBuffer = uploadBuffer.MapGuard();
 			std::memcpy(mappedBuffer.get() + 0, vertices, sizeof(vertices));
 			std::memcpy(mappedBuffer.get() + quadIndicesOffset, quadIndices, quadIndicesSize);
 			std::memcpy(mappedBuffer.get() + triIndicesOffset, triIndices, triIndicesSize);
@@ -122,9 +122,9 @@ int main()
 
 		/* Transfer data from upload buffer to each buffer. (gpu->gpu) & State transfer */
 		{
-			dx::Fence fence = renderDevice.CreateFence("BufferInit").value();
-			dx::CommandQueue directQueue = renderDevice.CreateCommandQueue("Init Queue", fe::dx::EQueueType::Direct).value();
-			dx::CommandContext cmdCtx = renderDevice.CreateCommandContext("Init Cmd Ctx", fe::dx::EQueueType::Direct).value();
+			Fence fence = renderDevice.CreateFence("BufferInit").value();
+			CommandQueue directQueue = renderDevice.CreateCommandQueue("Init Queue", fe::EQueueType::Direct).value();
+			CommandContext cmdCtx = renderDevice.CreateCommandContext("Init Cmd Ctx", fe::EQueueType::Direct).value();
 
 			cmdCtx.Begin();
 			{
@@ -186,7 +186,7 @@ int main()
 			fence.WaitOnCPU();
 		}
 
-		Handle<dx::GpuView, dx::GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
+		Handle<GpuView, GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
 
 		const StaticMeshComponent quadStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),

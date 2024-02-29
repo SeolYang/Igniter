@@ -3,12 +3,12 @@
 #include <Core/Container.h>
 #include <memory>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class DescriptorHeap;
 	class CommandContext;
-} // namespace fe::dx
+} // namespace fe
 
 namespace fe
 {
@@ -19,14 +19,14 @@ namespace fe
 	class ImGuiRenderer
 	{
 	public:
-		ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, dx::Device& device);
+		ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, RenderDevice& device);
 		~ImGuiRenderer();
 
 		void Render(ImGuiCanvas& canvas, Renderer& renderer);
 
 	private:
 		const FrameManager&								 frameManager;
-		std::unique_ptr<dx::DescriptorHeap>				 descriptorHeap;
-		std::vector<std::unique_ptr<dx::CommandContext>> commandContexts;
+		std::unique_ptr<DescriptorHeap>				 descriptorHeap;
+		std::vector<std::unique_ptr<CommandContext>> commandContexts;
 	};
 } // namespace fe

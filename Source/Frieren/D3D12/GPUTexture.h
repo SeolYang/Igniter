@@ -4,12 +4,12 @@
 #include <D3D12/GPUTextureDesc.h>
 #include <Core/Assert.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class GpuTexture
 	{
-		friend class Device;
+		friend class RenderDevice;
 
 	public:
 		GpuTexture(ComPtr<ID3D12Resource> textureResource);
@@ -46,4 +46,4 @@ namespace fe::dx
 		ComPtr<D3D12MA::Allocation> allocation;
 		ComPtr<ID3D12Resource>		resource;
 	};
-} // namespace fe::dx
+} // namespace fe

@@ -1,12 +1,12 @@
 #pragma once
 #include <D3D12/Common.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class RootSignature
 	{
-		friend class Device;
+		friend class RenderDevice;
 
 	public:
 		RootSignature(const RootSignature&) = delete;
@@ -27,4 +27,4 @@ namespace fe::dx
 	private:
 		ComPtr<ID3D12RootSignature> rootSignature;
 	};
-} // namespace fe::dx
+} // namespace fe

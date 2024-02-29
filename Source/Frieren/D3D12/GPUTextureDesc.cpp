@@ -1,7 +1,7 @@
 #include <Core/Assert.h>
 #include <D3D12/GpuTextureDesc.h>
 
-namespace fe::dx
+namespace fe
 {
 	size_t SizeOfTexelInBits(const DXGI_FORMAT format)
 	{
@@ -734,4 +734,4 @@ namespace fe::dx
 		Flags = desc.Flags;
 		SamplerFeedbackMipRegion = {};
 	}
-} // namespace fe::dx
+} // namespace fe

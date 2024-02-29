@@ -171,7 +171,7 @@ namespace fe
 	{
 		if (compMode == ETextureCompressionMode::BC4)
 		{
-			if (dx::IsUnormFormat(format))
+			if (IsUnormFormat(format))
 			{
 				return DXGI_FORMAT_BC4_UNORM;
 			}
@@ -180,7 +180,7 @@ namespace fe
 		}
 		else if (compMode == ETextureCompressionMode::BC5)
 		{
-			if (dx::IsUnormFormat(format))
+			if (IsUnormFormat(format))
 			{
 				return DXGI_FORMAT_BC5_UNORM;
 			}
@@ -191,7 +191,7 @@ namespace fe
 		{
 			// #wip_todo 정확히 HDR 파일을 읽어왔을 때, 어떤 포맷으로 들어오는지
 			// 확인 필
-			if (dx::IsUnsignedFormat(format))
+			if (IsUnsignedFormat(format))
 			{
 				return DXGI_FORMAT_BC6H_UF16;
 			}
@@ -359,7 +359,7 @@ namespace fe
 
 					config->CompressionMode = ETextureCompressionMode::BC6H;
 				}
-				else if (dx::IsGreyScaleFormat(texMetadata.format) &&
+				else if (IsGreyScaleFormat(texMetadata.format) &&
 						 config->CompressionMode == ETextureCompressionMode::BC4)
 				{
 					FE_LOG(TextureImporterWarn,

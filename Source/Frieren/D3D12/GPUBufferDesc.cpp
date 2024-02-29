@@ -2,7 +2,7 @@
 #include <Core/Container.h>
 #include <Core/Assert.h>
 
-namespace fe::dx
+namespace fe
 {
 	void GpuBufferDesc::AsConstantBuffer(const uint32_t sizeOfBufferInBytes)
 	{
@@ -230,4 +230,4 @@ namespace fe::dx
 		Flags = desc.Flags;
 		SamplerFeedbackMipRegion = {};
 	}
-} // namespace fe::dx
+} // namespace fe

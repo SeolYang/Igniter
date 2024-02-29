@@ -2,14 +2,15 @@
 #include <D3D12/Common.h>
 #include <Core/Container.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class Fence;
 	class CommandContext;
+
 	class CommandQueue
 	{
-		friend class Device;
+		friend class RenderDevice;
 
 	public:
 		CommandQueue(const CommandQueue&) = delete;
@@ -22,19 +23,17 @@ namespace fe::dx
 		bool IsValid() const { return native; }
 		operator bool() const { return IsValid(); }
 
-		auto&		GetNative() { return *native.Get(); }
-		EQueueType	GetType() const { return type; }
+		auto& GetNative() { return *native.Get(); }
+		EQueueType GetType() const { return type; }
 
 		void SignalTo(Fence& fence);
 		void NextSignalTo(Fence& fence);
 		void WaitFor(Fence& fence);
 
-		// @not-thread-safe
 		void AddPendingContext(CommandContext& cmdCtx);
-		// @not-thread-safe
 		void FlushPendingContexts();
 
-		void FlushQueue(Device& device);
+		void FlushQueue(RenderDevice& device);
 
 	private:
 		CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);
@@ -44,8 +43,8 @@ namespace fe::dx
 
 	private:
 		ComPtr<ID3D12CommandQueue> native;
-		const EQueueType		   type;
+		const EQueueType type;
 
 		std::vector<std::reference_wrapper<CommandContext>> pendingContexts;
 	};
-} // namespace fe::dx
+} // namespace fe

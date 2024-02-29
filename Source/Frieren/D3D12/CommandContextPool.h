@@ -9,13 +9,13 @@ namespace fe
 	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
 }
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class CommandContextPool
 	{
 	public:
-		CommandContextPool(DeferredDeallocator& deferredDeallocator, dx::Device& device, const dx::EQueueType queueType);
+		CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device, const EQueueType queueType);
 		~CommandContextPool();
 
 		auto Request(const std::string_view debugName = "")
@@ -44,11 +44,11 @@ namespace fe::dx
 		}
 
 	private:
-		void Return(dx::CommandContext* cmdContext);
+		void Return(CommandContext* cmdContext);
 
 	private:
 		DeferredDeallocator& deferredDeallocator;
 		const size_t reservedNumCmdCtxs;
-		concurrency::concurrent_queue<dx::CommandContext*> pool;
+		concurrency::concurrent_queue<CommandContext*> pool;
 	};
 } // namespace fe

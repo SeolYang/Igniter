@@ -10,18 +10,18 @@ namespace fe
 	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
 } // namespace fe
 
-namespace fe::dx
+namespace fe
 {
 	class GpuBuffer;
 	class GpuTexture;
-	class Device;
+	class RenderDevice;
 	class DescriptorHeap;
 	class GpuViewManager
 	{
 		friend class Handle<GpuView, GpuViewManager*>;
 
 	public:
-		GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Device& device);
+		GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, RenderDevice& device);
 		GpuViewManager(const GpuViewManager&) = delete;
 		GpuViewManager(GpuViewManager&&) noexcept = delete;
 		~GpuViewManager();
@@ -189,7 +189,7 @@ namespace fe::dx
 	private:
 		HandleManager&		 handleManager;
 		DeferredDeallocator& deferredDeallocator;
-		Device&				 device;
+		RenderDevice&				 device;
 
 		std::unique_ptr<DescriptorHeap> cbvSrvUavHeap;
 		std::unique_ptr<DescriptorHeap> samplerHeap;
@@ -201,4 +201,4 @@ namespace fe::dx
 		static constexpr uint32_t NumRtvDescriptors = 256;
 		static constexpr uint32_t NumDsvDescriptors = NumRtvDescriptors;
 	};
-} // namespace fe::dx
+} // namespace fe

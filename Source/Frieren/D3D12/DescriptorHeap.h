@@ -3,13 +3,13 @@
 #include <Core/Mutex.h>
 #include <Core/Container.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class GpuView;
 	class DescriptorHeap
 	{
-		friend class Device;
+		friend class RenderDevice;
 		friend class GpuViewManager;
 
 	public:
@@ -48,4 +48,4 @@ namespace fe::dx
 
 		concurrency::concurrent_queue<uint32_t> descsriptorIdxPool;
 	};
-} // namespace fe::dx
+} // namespace fe

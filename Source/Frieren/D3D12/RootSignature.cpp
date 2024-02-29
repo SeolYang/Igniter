@@ -1,7 +1,7 @@
 #include <D3D12/RootSignature.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 
-namespace fe::dx
+namespace fe
 {
 	RootSignature::RootSignature(ComPtr<ID3D12RootSignature> newRootSignature)
 		: rootSignature(std::move(newRootSignature))
@@ -18,4 +18,4 @@ namespace fe::dx
 		return *this;
 	}
 
-} // namespace fe::dx
+} // namespace fe

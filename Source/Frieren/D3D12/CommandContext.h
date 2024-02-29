@@ -3,9 +3,9 @@
 #include <Core/String.h>
 #include <Core/Container.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class DescriptorHeap;
 	class GpuTexture;
 	class GpuBuffer;
@@ -14,7 +14,7 @@ namespace fe::dx
 	class PipelineState;
 	class CommandContext
 	{
-		friend class Device;
+		friend class RenderDevice;
 
 	public:
 		using NativeType = ID3D12GraphicsCommandList7;
@@ -98,4 +98,4 @@ namespace fe::dx
 		std::vector<D3D12_TEXTURE_BARRIER> pendingTextureBarriers;
 		std::vector<D3D12_BUFFER_BARRIER> pendingBufferBarriers;
 	};
-} // namespace fe::dx
+} // namespace fe

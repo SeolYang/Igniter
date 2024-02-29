@@ -2,7 +2,7 @@
 #include <D3D12/Common.h>
 #include <Core/Container.h>
 
-namespace fe::dx
+namespace fe
 {
 	class CommandQueue;
 	class CommandContext;
@@ -17,17 +17,17 @@ namespace fe::dx
 	class ComputePipelineStateDesc;
 	class PipelineState;
 	class RootSignature;
-	class Device
+	class RenderDevice
 	{
 	public:
-		Device();
-		~Device();
+		RenderDevice();
+		~RenderDevice();
 
-		Device(const Device&) = delete;
-		Device(Device&&) noexcept = delete;
+		RenderDevice(const RenderDevice&) = delete;
+		RenderDevice(RenderDevice&&) noexcept = delete;
 
-		Device& operator=(const Device&) = delete;
-		Device& operator=(Device&&) noexcept = delete;
+		RenderDevice& operator=(const RenderDevice&) = delete;
+		RenderDevice& operator=(RenderDevice&&) noexcept = delete;
 
 		[[nodiscard]] auto& GetNative() { return *device.Get(); }
 		uint32_t GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
@@ -82,4 +82,4 @@ namespace fe::dx
 		bool bRaytracing11Supported = false;
 		bool bShaderModel66Supported = false;
 	};
-} // namespace fe::dx
+} // namespace fe

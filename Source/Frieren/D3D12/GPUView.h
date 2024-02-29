@@ -2,7 +2,7 @@
 #include <D3D12/Common.h>
 #include <Core/Handle.h>
 
-namespace fe::dx
+namespace fe
 {
 	class GpuView
 	{
@@ -19,4 +19,4 @@ namespace fe::dx
 		const D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle = {};				/* CPU Handle of descriptor. */
 		const D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle = {};				/* GPU Handle of descriptor. */
 	};
-} // namespace fe::dx
+} // namespace fe

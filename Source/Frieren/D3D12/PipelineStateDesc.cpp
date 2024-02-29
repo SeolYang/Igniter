@@ -3,7 +3,7 @@
 #include <D3D12/RootSignature.h>
 #include <Core/Assert.h>
 
-namespace fe::dx
+namespace fe
 {
 	void GraphicsPipelineStateDesc::SetVertexShader(ShaderBlob& vertexShader)
 	{
@@ -70,4 +70,4 @@ namespace fe::dx
 		check(nativeBlob.GetBufferSize() > 0);
 		this->CS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
 	}
-} // namespace fe::dx
+} // namespace fe

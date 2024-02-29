@@ -5,11 +5,11 @@
 
 struct ID3D11Device;
 
-namespace fe::dx
+namespace fe
 {
 	class GpuTexture;
 	class GpuView;
-} // namespace fe::dx
+} // namespace fe
 
 namespace fe
 {
@@ -181,8 +181,8 @@ namespace fe
 	{
 	public:
 		TextureAssetMetadata metadata;
-		Handle<dx::GpuTexture> texture;
-		Handle<dx::GpuView> srv;
-		RefHandle<dx::GpuView> sampler;
+		Handle<GpuTexture> texture;
+		Handle<GpuView> srv;
+		RefHandle<GpuView> sampler;
 	};
 } // namespace fe

@@ -1,5 +1,5 @@
 #include <D3D12/Swapchain.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTexture.h>
@@ -7,7 +7,7 @@
 #include <D3D12/GPUView.h>
 #include <Core/Window.h>
 
-namespace fe::dx
+namespace fe
 {
 	Swapchain::Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync)
 		: numBackBuffers(desiredNumBackBuffers),
@@ -105,4 +105,4 @@ namespace fe::dx
 		const uint32_t presentFlags = bTearingEnabled && !bVSyncEnabled ? DXGI_PRESENT_ALLOW_TEARING : 0;
 		verify_succeeded(swapchain->Present(syncInterval, presentFlags));
 	}
-} // namespace fe::dx
+} // namespace fe

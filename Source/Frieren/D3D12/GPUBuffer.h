@@ -5,17 +5,17 @@
 #include <Core/Assert.h>
 #include <Core/Handle.h>
 
-namespace fe::dx
+namespace fe
 {
 	struct MappedGpuBuffer
 	{
 		uint8_t* const MappedPtr = nullptr;
 	};
 
-	class Device;
+	class RenderDevice;
 	class GpuBuffer
 	{
-		friend class Device;
+		friend class RenderDevice;
 		friend class Handle<MappedGpuBuffer, GpuBuffer*>;
 
 	public:
@@ -92,4 +92,4 @@ namespace fe::dx
 		ComPtr<ID3D12Resource>		resource;
 	};
 
-} // namespace fe::dx
+} // namespace fe

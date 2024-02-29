@@ -2,9 +2,9 @@
 #include <Renderer/Common.h>
 #include <Core/Handle.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class CommandQueue;
 	class CommandContext;
 	class CommandContextPool;
@@ -23,7 +23,7 @@ namespace fe::dx
 	class GpuViewManager;
 	class TempConstantBufferAllocator;
 #pragma endregion
-} // namespace fe::dx
+} // namespace fe
 
 namespace fe
 {
@@ -33,7 +33,7 @@ namespace fe
 	class Renderer
 	{
 	public:
-		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GpuViewManager& gpuViewManager);
+		Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
 		~Renderer();
@@ -46,31 +46,31 @@ namespace fe
 		void Render(World& world);
 		void EndFrame();
 
-		dx::Swapchain&	  GetSwapchain() { return *swapchain; }
-		dx::CommandQueue& GetDirectCommandQueue() { return *directCmdQueue; }
+		Swapchain&	  GetSwapchain() { return *swapchain; }
+		CommandQueue& GetDirectCommandQueue() { return *directCmdQueue; }
 
 	private:
 		const FrameManager&	 frameManager;
 		DeferredDeallocator& deferredDeallocator;
-		dx::Device&			 renderDevice;
+		RenderDevice&			 renderDevice;
 		HandleManager&		 handleManager;
-		dx::GpuViewManager&	 gpuViewManager;
+		GpuViewManager&	 gpuViewManager;
 
-		std::unique_ptr<dx::CommandQueue>		directCmdQueue;
-		std::unique_ptr<dx::CommandContextPool> directCmdCtxPool;
-		std::unique_ptr<dx::Swapchain>			swapchain;
-		std::vector<dx::Fence>					frameFences;
+		std::unique_ptr<CommandQueue>		directCmdQueue;
+		std::unique_ptr<CommandContextPool> directCmdCtxPool;
+		std::unique_ptr<Swapchain>			swapchain;
+		std::vector<Fence>					frameFences;
 
-		std::unique_ptr<dx::TempConstantBufferAllocator> tempConstantBufferAllocator;
+		std::unique_ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
 
 #pragma region test
 		// #test
-		std::unique_ptr<dx::ShaderBlob>				   vs;
-		std::unique_ptr<dx::ShaderBlob>				   ps;
-		std::unique_ptr<dx::RootSignature>			   bindlessRootSignature;
-		std::unique_ptr<dx::PipelineState>			   pso;
-		std::unique_ptr<dx::GpuTexture>				   depthStencilBuffer;
-		Handle<dx::GpuView, dx::GpuViewManager*> dsv;
+		std::unique_ptr<ShaderBlob>				   vs;
+		std::unique_ptr<ShaderBlob>				   ps;
+		std::unique_ptr<RootSignature>			   bindlessRootSignature;
+		std::unique_ptr<PipelineState>			   pso;
+		std::unique_ptr<GpuTexture>				   depthStencilBuffer;
+		Handle<GpuView, GpuViewManager*> dsv;
 
 #pragma endregion
 	};

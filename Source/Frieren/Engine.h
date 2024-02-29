@@ -4,11 +4,11 @@
 #include <Core/FrameManager.h>
 #include <Core/Timer.h>
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class GpuViewManager;
-} // namespace fe::dx
+} // namespace fe
 
 namespace fe
 {
@@ -33,9 +33,9 @@ namespace fe
 		[[nodiscard]] static Logger&			 GetLogger();
 		[[nodiscard]] static HandleManager&		 GetHandleManager();
 		[[nodiscard]] static Window&			 GetWindow();
-		[[nodiscard]] static dx::Device&		 GetRenderDevice();
+		[[nodiscard]] static RenderDevice&		 GetRenderDevice();
 		[[nodiscard]] static InputManager&		 GetInputManager();
-		[[nodiscard]] static dx::GpuViewManager& GetGPUViewManager();
+		[[nodiscard]] static GpuViewManager& GetGPUViewManager();
 		[[nodiscard]] static Renderer&			 GetRenderer();
 		[[nodiscard]] static ImGuiRenderer&		 GetImGuiRenderer();
 		[[nodiscard]] static ImGuiCanvas&		 GetImGuiCanvas();
@@ -51,11 +51,11 @@ namespace fe
 		Timer								 timer;
 		std::unique_ptr<Logger>				 logger;
 		std::unique_ptr<Window>				 window;
-		std::unique_ptr<dx::Device>			 renderDevice;
+		std::unique_ptr<RenderDevice>			 renderDevice;
 		std::unique_ptr<HandleManager>		 handleManager;
 		std::unique_ptr<DeferredDeallocator> deferredDeallocator;
 		std::unique_ptr<InputManager>		 inputManager;
-		std::unique_ptr<dx::GpuViewManager>	 gpuViewManager;
+		std::unique_ptr<GpuViewManager>	 gpuViewManager;
 		std::unique_ptr<Renderer>			 renderer;
 		std::unique_ptr<ImGuiRenderer>		 imguiRenderer;
 		std::unique_ptr<ImGuiCanvas>		 imguiCanvas;

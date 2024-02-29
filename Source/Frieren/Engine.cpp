@@ -6,7 +6,7 @@
 #include <Core/Window.h>
 #include <Core/DeferredDeallocator.h>
 #include <Core/EmbededSettings.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/GPUViewManager.h>
 #include <Renderer/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
@@ -34,11 +34,11 @@ namespace fe
 			/* #test 임시 윈도우 설명자 */
 			const WindowDescription winDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
 			window = std::make_unique<Window>(winDesc);
-			renderDevice = std::make_unique<dx::Device>();
+			renderDevice = std::make_unique<RenderDevice>();
 			handleManager = std::make_unique<HandleManager>();
 			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
 			inputManager = std::make_unique<InputManager>(*handleManager);
-			gpuViewManager = std::make_unique<dx::GpuViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
+			gpuViewManager = std::make_unique<GpuViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
 			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
 			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
 			imguiCanvas = std::make_unique<ImGuiCanvas>();
@@ -100,7 +100,7 @@ namespace fe
 		return *(instance->window);
 	}
 
-	dx::Device& Engine::GetRenderDevice()
+	RenderDevice& Engine::GetRenderDevice()
 	{
 		check(instance != nullptr);
 		return *(instance->renderDevice);
@@ -112,7 +112,7 @@ namespace fe
 		return *(instance->inputManager);
 	}
 
-	dx::GpuViewManager& Engine::GetGPUViewManager()
+	GpuViewManager& Engine::GetGPUViewManager()
 	{
 		check(instance != nullptr);
 		return *(instance->gpuViewManager);

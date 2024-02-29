@@ -1,13 +1,13 @@
 #include <D3D12/GpuViewManager.h>
 #include <D3D12/GpuView.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/DescriptorHeap.h>
 #include <Core/Assert.h>
 #include <Core/HandleManager.h>
 
-namespace fe::dx
+namespace fe
 {
-	GpuViewManager::GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, Device& device)
+	GpuViewManager::GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, RenderDevice& device)
 		: handleManager(handleManager),
 		  deferredDeallocator(deferredDeallocator),
 		  device(device),
@@ -135,4 +135,4 @@ namespace fe::dx
 			targetHandle.Deallocate(evaluatedTypeHash);
 		});
 	}
-} // namespace fe::dx
+} // namespace fe

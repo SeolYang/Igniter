@@ -3,7 +3,7 @@
 #include <Core/Log.h>
 #include <Engine.h>
 
-namespace fe::dx
+namespace fe
 {
 	FE_DEFINE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosiy::Fatal)
 
@@ -127,4 +127,4 @@ namespace fe::dx
 
 		verify_succeeded(compiledResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
 	}
-} // namespace fe::dx
+} // namespace fe

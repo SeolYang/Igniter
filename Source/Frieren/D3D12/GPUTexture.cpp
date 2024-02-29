@@ -1,7 +1,7 @@
 #include <D3D12/GpuTexture.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 
-namespace fe::dx
+namespace fe
 {
 	GpuTexture::GpuTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
 						   ComPtr<ID3D12Resource> newResource)
@@ -27,4 +27,4 @@ namespace fe::dx
 		this->allocation = std::move(other.allocation);
 		return *this;
 	}
-} // namespace fe::dx
+} // namespace fe

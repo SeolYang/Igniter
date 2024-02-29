@@ -2,7 +2,7 @@
 #include <ImGui/ImGuiCanvas.h>
 #include <Core/Window.h>
 #include <Core/FrameManager.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/Swapchain.h>
 #include <D3D12/CommandQueue.h>
@@ -11,9 +11,9 @@
 
 namespace fe
 {
-	ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, dx::Device& device)
+	ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, RenderDevice& device)
 		: frameManager(engineFrameManager),
-		  descriptorHeap(std::make_unique<dx::DescriptorHeap>(device.CreateDescriptorHeap(dx::EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
+		  descriptorHeap(std::make_unique<DescriptorHeap>(device.CreateDescriptorHeap(EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -30,7 +30,7 @@ namespace fe
 		commandContexts.reserve(NumFramesInFlight);
 		for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
 		{
-			commandContexts.emplace_back(std::make_unique<dx::CommandContext>(device.CreateCommandContext("ImGui Cmd Ctx", dx::EQueueType::Direct).value()));
+			commandContexts.emplace_back(std::make_unique<CommandContext>(device.CreateCommandContext("ImGui Cmd Ctx", EQueueType::Direct).value()));
 		}
 	}
 
@@ -53,12 +53,12 @@ namespace fe
 		canvas.Render();
 		ImGui::Render();
 
-		dx::CommandContext& cmdCtx = *commandContexts[frameManager.GetLocalFrameIndex()];
+		CommandContext& cmdCtx = *commandContexts[frameManager.GetLocalFrameIndex()];
 		cmdCtx.Begin();
-		dx::Swapchain& swapchain = renderer.GetSwapchain();
-		dx::GpuTexture& backBuffer = swapchain.GetBackBuffer();
+		Swapchain& swapchain = renderer.GetSwapchain();
+		GpuTexture& backBuffer = swapchain.GetBackBuffer();
 
-		const dx::GpuView& backBufferRTV = swapchain.GetRenderTargetView();
+		const GpuView& backBufferRTV = swapchain.GetRenderTargetView();
 		cmdCtx.SetRenderTarget(backBufferRTV);
 		cmdCtx.SetDescriptorHeap(*descriptorHeap);
 
@@ -72,7 +72,7 @@ namespace fe
 		cmdCtx.FlushBarriers();
 		cmdCtx.End();
 
-		dx::CommandQueue& directCmdQueue = renderer.GetDirectCommandQueue();
+		CommandQueue& directCmdQueue = renderer.GetDirectCommandQueue();
 		directCmdQueue.AddPendingContext(cmdCtx);
 	}
 } // namespace fe

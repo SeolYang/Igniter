@@ -1,10 +1,10 @@
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/Fence.h>
 #include <Core/Container.h>
 
-namespace fe::dx
+namespace fe
 {
 	CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType)
 		: native(std::move(newNativeQueue)), type(specifiedType)
@@ -57,11 +57,11 @@ namespace fe::dx
 		pendingContexts.clear();
 	}
 
-	void CommandQueue::FlushQueue(Device& device) 
+	void CommandQueue::FlushQueue(RenderDevice& device) 
 	{
 		auto fence = device.CreateFence("Tmp");
 		check(fence);
 		NextSignalTo(*fence);
 		fence->WaitOnCPU();
 	}
-} // namespace fe::dx
+} // namespace fe

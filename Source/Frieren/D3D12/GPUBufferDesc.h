@@ -3,7 +3,7 @@
 #include <Core/String.h>
 #include <D3D12/Common.h>
 
-namespace fe::dx
+namespace fe
 {
 	inline uint32_t AdjustSizeForConstantBuffer(const uint32_t originalSizeInBytes)
 	{
@@ -133,4 +133,4 @@ namespace fe::dx
 		bool		   bIsCPUAccessible = false;
 		D3D12MA::Pool* customPool = nullptr;
 	};
-} // namespace fe::dx
+} // namespace fe

@@ -8,9 +8,9 @@ namespace fe
 	class Window;
 } // namespace fe
 
-namespace fe::dx
+namespace fe
 {
-	class Device;
+	class RenderDevice;
 	class CommandQueue;
 	class DescriptorHeap;
 	class GpuViewManager;
@@ -50,4 +50,4 @@ namespace fe::dx
 		std::vector<Handle<GpuView, GpuViewManager*>> renderTargetViews;
 
 	};
-} // namespace fe::dx
+} // namespace fe

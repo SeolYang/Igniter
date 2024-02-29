@@ -1,5 +1,5 @@
 #include <Renderer/Renderer.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/CommandContextPool.h>
@@ -44,16 +44,16 @@ namespace fe
 	FE_DEFINE_LOG_CATEGORY(RendererWarn, ELogVerbosiy::Warning)
 	FE_DEFINE_LOG_CATEGORY(RendererFatal, ELogVerbosiy::Fatal)
 
-	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, dx::Device& device, HandleManager& handleManager, dx::GpuViewManager& gpuViewManager)
+	Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager)
 		: frameManager(engineFrameManager),
 		  deferredDeallocator(engineDefferedDeallocator),
 		  renderDevice(device),
 		  handleManager(handleManager),
 		  gpuViewManager(gpuViewManager),
-		  directCmdQueue(std::make_unique<dx::CommandQueue>(device.CreateCommandQueue("Main Gfx Queue", dx::EQueueType::Direct).value())),
-		  directCmdCtxPool(std::make_unique<dx::CommandContextPool>(deferredDeallocator, device, dx::EQueueType::Direct)),
-		  swapchain(std::make_unique<dx::Swapchain>(window, gpuViewManager, *directCmdQueue, NumFramesInFlight)),
-		  tempConstantBufferAllocator(std::make_unique<dx::TempConstantBufferAllocator>(frameManager, device, handleManager, gpuViewManager))
+		  directCmdQueue(std::make_unique<CommandQueue>(device.CreateCommandQueue("Main Gfx Queue", EQueueType::Direct).value())),
+		  directCmdCtxPool(std::make_unique<CommandContextPool>(deferredDeallocator, device, EQueueType::Direct)),
+		  swapchain(std::make_unique<Swapchain>(window, gpuViewManager, *directCmdQueue, NumFramesInFlight)),
+		  tempConstantBufferAllocator(std::make_unique<TempConstantBufferAllocator>(frameManager, device, handleManager, gpuViewManager))
 	{
 		frameFences.reserve(NumFramesInFlight);
 		for (uint8_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
@@ -62,35 +62,35 @@ namespace fe
 		}
 
 #pragma region test
-		bindlessRootSignature = std::make_unique<dx::RootSignature>(device.CreateBindlessRootSignature().value());
+		bindlessRootSignature = std::make_unique<RootSignature>(device.CreateBindlessRootSignature().value());
 
-		const dx::ShaderCompileDesc vsDesc{
+		const ShaderCompileDesc vsDesc{
 			.SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
-			.Type = dx::EShaderType::Vertex,
-			.OptimizationLevel = dx::EShaderOptimizationLevel::None
+			.Type = EShaderType::Vertex,
+			.OptimizationLevel = EShaderOptimizationLevel::None
 		};
 
-		const dx::ShaderCompileDesc psDesc{
+		const ShaderCompileDesc psDesc{
 			.SourcePath = String("Assets/Shader/BasicPixelShader.hlsl"),
-			.Type = dx::EShaderType::Pixel
+			.Type = EShaderType::Pixel
 		};
 
-		vs = std::make_unique<dx::ShaderBlob>(vsDesc);
-		ps = std::make_unique<dx::ShaderBlob>(psDesc);
+		vs = std::make_unique<ShaderBlob>(vsDesc);
+		ps = std::make_unique<ShaderBlob>(psDesc);
 
-		dx::GraphicsPipelineStateDesc psoDesc;
+		GraphicsPipelineStateDesc psoDesc;
 		psoDesc.SetVertexShader(*vs);
 		psoDesc.SetPixelShader(*ps);
 		psoDesc.SetRootSignature(*bindlessRootSignature);
 		psoDesc.NumRenderTargets = 1;
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-		pso = std::make_unique<dx::PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
+		pso = std::make_unique<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
 
-		dx::GPUTextureDesc depthStencilDesc;
+		GPUTextureDesc depthStencilDesc;
 		depthStencilDesc.DebugName = String("DepthStencilBufferTex");
 		depthStencilDesc.AsDepthStencil(1280, 642, DXGI_FORMAT_D32_FLOAT);
-		depthStencilBuffer = std::make_unique<dx::GpuTexture>(device.CreateTexture(depthStencilDesc).value());
+		depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
 		dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, { .MipSlice = 0 });
 
 		/* #todo 배리어만 적용하는 방법 찾아보기
@@ -147,8 +147,8 @@ namespace fe
 			renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
 			check(swapchain);
-			dx::GpuTexture&	   backBuffer = swapchain->GetBackBuffer();
-			const dx::GpuView& backBufferRTV = swapchain->GetRenderTargetView();
+			GpuTexture&	   backBuffer = swapchain->GetBackBuffer();
+			const GpuView& backBufferRTV = swapchain->GetRenderTargetView();
 			renderCmdCtx->AddPendingTextureBarrier(backBuffer,
 												   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
 												   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
@@ -163,13 +163,13 @@ namespace fe
 			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			size_t			  idx = 0;
-			dx::GpuBufferDesc posBufferDesc;
+			GpuBufferDesc posBufferDesc;
 			posBufferDesc.AsConstantBuffer<PositionBuffer>();
 
 			world.Each<StaticMeshComponent, fe::PositionComponent>([&posBufferDesc, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {
 				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
 				{
-					dx::TempConstantBuffer posBuffer = tempConstantBufferAllocator->Allocate(posBufferDesc);
+					TempConstantBuffer posBuffer = tempConstantBufferAllocator->Allocate(posBufferDesc);
 					std::memcpy(posBuffer.Mapping->MappedPtr, &position, sizeof(fe::PositionComponent));
 					const BasicRenderResources params{
 						.PosBufferIdx = posBuffer.View->Index,

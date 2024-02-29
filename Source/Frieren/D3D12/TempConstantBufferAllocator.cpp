@@ -1,5 +1,5 @@
 #include <D3D12/TempConstantBufferAllocator.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/GpuBuffer.h>
 #include <D3D12/GpuBufferDesc.h>
 #include <D3D12/GpuViewManager.h>
@@ -8,9 +8,9 @@
 #include <ranges>
 #include <format>
 
-namespace fe::dx
+namespace fe
 {
-	TempConstantBufferAllocator::TempConstantBufferAllocator(const FrameManager& frameManager, Device& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedSizeInBytesPerFrame)
+	TempConstantBufferAllocator::TempConstantBufferAllocator(const FrameManager& frameManager, RenderDevice& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedSizeInBytesPerFrame)
 		: frameManager(frameManager),
 		  renderDevice(renderDevice),
 		  handleManager(handleManager),
@@ -71,4 +71,4 @@ namespace fe::dx
 		cmdCtx.FlushBarriers();
 	}
 
-} // namespace fe::dx
+} // namespace fe

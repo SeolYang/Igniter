@@ -2,11 +2,11 @@
 #include <D3D12/Common.h>
 #include <Core/Assert.h>
 
-namespace fe::dx
+namespace fe
 {
 	class Fence
 	{
-		friend class Device;
+		friend class RenderDevice;
 
 	public:
 		Fence(const Fence&) = delete;
@@ -42,4 +42,4 @@ namespace fe::dx
 		HANDLE				eventHandle = NULL;
 		uint64_t			counter = 0;
 	};
-} // namespace fe::dx
+} // namespace fe

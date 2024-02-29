@@ -1,7 +1,7 @@
 #pragma once
 #include <Core/Handle.h>
 
-namespace fe::dx
+namespace fe
 {
 	class GpuBuffer;
 	class GpuView;
@@ -12,8 +12,8 @@ namespace fe
 	struct StaticMeshComponent
 	{
 	public:
-		RefHandle<dx::GpuView>	  VerticesBufferSRV = {};
-		RefHandle<dx::GpuBuffer> IndexBufferHandle = {};
+		RefHandle<GpuView>	  VerticesBufferSRV = {};
+		RefHandle<GpuBuffer> IndexBufferHandle = {};
 		uint32_t				  NumIndices = 0;
 	};
 } // namespace fe

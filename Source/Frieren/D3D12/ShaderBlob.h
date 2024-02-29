@@ -2,7 +2,7 @@
 #include <D3D12/Common.h>
 #include <Core/String.h>
 
-namespace fe::dx
+namespace fe
 {
 	enum class EShaderType
 	{
@@ -53,4 +53,4 @@ namespace fe::dx
 		ComPtr<IDxcResult> compiledResult;
 		ComPtr<IDxcBlob>   shader;
 	};
-} // namespace fe::dx
+} // namespace fe

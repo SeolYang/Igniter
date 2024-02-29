@@ -1,11 +1,11 @@
 #include <D3D12/DescriptorHeap.h>
-#include <D3D12/Device.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/GPUView.h>
 #include <Core/Assert.h>
 #include <Core/Container.h>
 #include <Engine.h>
 
-namespace fe::dx
+namespace fe
 {
 	DescriptorHeap::DescriptorHeap(const EDescriptorHeapType	newDescriptorHeapType,
 								   ComPtr<ID3D12DescriptorHeap> newDescriptorHeap, const bool bIsShaderVisibleHeap,
@@ -109,4 +109,4 @@ namespace fe::dx
 		check(descsriptorIdxPool.unsafe_size() <= numInitialDescriptors);
 	}
 
-} // namespace fe::dx
+} // namespace fe

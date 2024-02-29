@@ -32,7 +32,7 @@
 #include <memory>
 #include <functional>
 
-namespace fe::dx
+namespace fe
 {
 	template <typename Ty>
 	using ComPtr = Microsoft::WRL::ComPtr<Ty>;
@@ -274,4 +274,4 @@ namespace fe::dx
 	}
 
 	void SetObjectName(ID3D12Object* object, const std::string_view name);
-} // namespace fe::dx
+} // namespace fe

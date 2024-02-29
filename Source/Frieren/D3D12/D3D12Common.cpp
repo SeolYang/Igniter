@@ -10,7 +10,7 @@ extern "C"
 	__declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
 }
 
-namespace fe::dx
+namespace fe
 {
 	D3D12_COMMAND_LIST_TYPE ToNativeCommandListType(const EQueueType type)
 	{
@@ -53,4 +53,4 @@ namespace fe::dx
 			object->SetName(Wider(name).c_str());
 		}
 	}
-} // namespace fe::dx
+} // namespace fe
