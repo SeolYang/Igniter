@@ -240,7 +240,7 @@
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h">
       <Filter>Thirdparty\DirectXCompiler</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\CircularUploader.h">
+    <ClInclude Include="..\Source\Frieren\D3D12\GpuUploader.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
@@ -358,6 +358,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Asset\Common.cpp">
       <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\D3D12\GpuUploader.cpp">
+      <Filter>Source\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

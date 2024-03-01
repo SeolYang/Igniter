@@ -7,6 +7,7 @@
 #include <Core/DeferredDeallocator.h>
 #include <Core/EmbededSettings.h>
 #include <D3D12/RenderDevice.h>
+#include <D3D12/GpuUploader.h>
 #include <D3D12/GPUViewManager.h>
 #include <Renderer/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
@@ -35,6 +36,7 @@ namespace fe
 			const WindowDescription winDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
 			window = std::make_unique<Window>(winDesc);
 			renderDevice = std::make_unique<RenderDevice>();
+			gpuUploader = std::make_unique<GpuUploader>(*renderDevice);
 			handleManager = std::make_unique<HandleManager>();
 			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
 			inputManager = std::make_unique<InputManager>(*handleManager);
@@ -58,6 +60,7 @@ namespace fe
 		deferredDeallocator.reset();
 		handleManager.reset();
 		gpuViewManager.reset();
+		gpuUploader.reset();
 		renderDevice.reset();
 		window.reset();
 		logger.reset();
@@ -104,6 +107,12 @@ namespace fe
 	{
 		check(instance != nullptr);
 		return *(instance->renderDevice);
+	}
+
+	GpuUploader& Engine::GetGpuUploader()
+	{
+		check(instance != nullptr);
+		return *(instance->gpuUploader);
 	}
 
 	InputManager& Engine::GetInputManager()

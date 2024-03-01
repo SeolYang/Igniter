@@ -16,19 +16,9 @@ namespace fe
 		return (alignment - misalignment);
 	}
 
-		template <typename T>
-	__forceinline T AlignUp(T value, const size_t alignment)
+	inline uint64_t AlignTo(const uint64_t val, const uint64_t alignment)
 	{
-		check(IsPow2(value));
-		const size_t mask = alignment - 1;
-		return (T)((size_t)(value + mask) & ~mask);
-	}
-
-	template <typename T>
-	__forceinline T AlignDown(T value, const size_t alignment)
-	{
-		check(IsPow2(value));
-		const size_t mask = alignment - 1;
-		return (T)((size_t)value & ~mask);
+		check(alignment > 0 && IsPowOf2(alignment));
+		return ((val + alignment - 1) / alignment) * alignment;
 	}
 }

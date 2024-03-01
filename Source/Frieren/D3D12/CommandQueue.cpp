@@ -64,5 +64,4 @@ namespace fe
 		ID3D12Fence& dependentQueueFence = sync.GetFence();
 		verify_succeeded(native->Wait(&dependentQueueFence, sync.GetSyncPoint()));
 	}
-
 } // namespace fe

@@ -35,5 +35,4 @@ namespace fe
 		check(pool.unsafe_size() < reservedNumCmdCtxs);
 		pool.push(cmdContext);
 	}
-
 } // namespace fe

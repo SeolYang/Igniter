@@ -86,7 +86,7 @@ namespace fe
 		* D3D12 WARNING: ID3D12CommandQueue::ExecuteCommandLists: ExecuteCommandLists references command lists that have recorded only Barrier commands. Since there is no other GPU work to synchronize against, all barriers should use AccessAfter / AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS and SyncBefore / SyncAfter = D3D12_BARRIER_SYNC_NONE. This information can be used as an optimization hint by some drivers. [ EXECUTION WARNING #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS]
 		D3D12: **BREAK** enabled for the previous message, which was: [ WARNING EXECUTION #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS ]
 		*/
-		auto cmdCtx = gfxCmdCtxPool.Request();
+		auto cmdCtx = gfxCmdCtxPool.Submit();
 		cmdCtx->Begin();
 		{
 			cmdCtx->AddPendingTextureBarrier(
@@ -125,7 +125,7 @@ namespace fe
 	{
 		check(mainGfxQueue);
 
-		auto renderCmdCtx = gfxCmdCtxPool.Request();
+		auto renderCmdCtx = gfxCmdCtxPool.Submit();
 		renderCmdCtx->Begin(pso.get());
 		{
 			auto bindlessDescriptorHeaps = gpuViewManager.GetBindlessDescriptorHeaps();

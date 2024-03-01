@@ -22,11 +22,22 @@ namespace fe
 		[[nodiscard]] operator bool() const { return IsValid(); }
 
 		[[nodiscard]] size_t GetSyncPoint() const { return syncPoint; }
+		[[nodiscard]] size_t GetCompletedSyncPoint() const
+		{
+			if (fence != nullptr)
+			{
+				return fence->GetCompletedValue();
+			}
+
+			checkNoEntry();
+			return 0;
+		}
+		[[nodiscard]] bool IsExpired() const { return syncPoint <= GetCompletedSyncPoint(); }
 
 		void WaitOnCpu()
 		{
 			check(IsValid());
-			if (fence != nullptr && syncPoint > fence->GetCompletedValue())
+			if (fence != nullptr && syncPoint > GetCompletedSyncPoint())
 			{
 				fence->SetEventOnCompletion(syncPoint, nullptr);
 			}

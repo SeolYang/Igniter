@@ -18,7 +18,7 @@ namespace fe
 		CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device, const EQueueType queueType);
 		~CommandContextPool();
 
-		auto Request(const std::string_view debugName = "")
+		auto Submit(const std::string_view debugName = "")
 		{
 			const auto deleter = [this](CommandContext* ptr) {
 				if (ptr != nullptr)
