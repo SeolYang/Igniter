@@ -39,6 +39,7 @@
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h" />
     <ClInclude Include="..\Source\Frieren\Core\Profile.h" />
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
+    <ClInclude Include="..\Source\Frieren\Core\ThreadUIDGenerator.h" />
     <ClInclude Include="..\Source\Frieren\Core\Timer.h" />
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
@@ -96,6 +97,7 @@
     <ClCompile Include="..\Source\Frieren\Core\Log.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\MemoryPool.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
+    <ClCompile Include="..\Source\Frieren\Core\ThreadUIDGenerator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContext.cpp" />

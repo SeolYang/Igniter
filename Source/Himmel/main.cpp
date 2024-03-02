@@ -37,6 +37,7 @@ struct SimpleVertex
 
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
+#include <D3D12/GpuUploader.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/GPUViewManager.h>
@@ -106,6 +107,7 @@ int main()
 		const uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		const uint16_t triIndices[3] = { 4, 5, 6 };
 
+		// #wip_todo 여기서 GpuUploader 테스트 해보기 !!!
 		/* #todo Upload 용 독자적인 CmdCtx와 CmdQueue?, 데이터 한번에 쌓아뒀다가 최대 크기 버퍼 할당후 한번에 업로드 */
 		/* Upload data to gpu(upload buffer; cpu->gpu) */
 		const size_t quadIndicesOffset = sizeof(vertices);

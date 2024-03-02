@@ -119,7 +119,7 @@ namespace fe
 		GpuUploader& operator=(const GpuUploader&) = delete;
 		GpuUploader& operator=(GpuUploader&&) noexcept = delete;
 
-		[[nodiscard]] std::optional<UploadContext> Reserve(const size_t requestSize);
+		[[nodiscard]] UploadContext Reserve(const size_t requestSize);
 
 		std::optional<GpuSync> Submit(UploadContext& context);
 
@@ -134,7 +134,9 @@ namespace fe
 	private:
 		RenderDevice& renderDevice;
 
-		SharedMutex mutex;
+		constexpr static uint64_t InvalidThreadID = std::numeric_limits<uint64_t>::max();
+		std::atomic_uint64_t reservedThreadID = InvalidThreadID;
+
 		CommandQueue copyQueue;
 
 		size_t bufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
@@ -144,7 +146,6 @@ namespace fe
 		size_t bufferUsedSizeInBytes = 0;
 
 		constexpr static size_t RequestCapacity = 16;
-		bool bIsReserved = false;
 		details::UploadRequest uploadRequests[RequestCapacity];
 		size_t requestHead = 0;
 		size_t numInFlightRequests = 0;

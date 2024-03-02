@@ -198,6 +198,10 @@ namespace fe
 			{
 				this->destroyer = nullptr;
 			}
+			else
+			{
+				this->destroyer = {};
+			}
 		}
 
 		Handle(const Handle&) = delete;

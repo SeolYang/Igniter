@@ -1,4 +1,5 @@
 #include <D3D12/GpuUploader.h>
+#include <Core/ThreadUIDGenerator.h>
 
 namespace fe
 {
@@ -26,13 +27,15 @@ namespace fe
 		}
 	}
 
-	std::optional<UploadContext> GpuUploader::Reserve(const size_t requestSize)
+	UploadContext GpuUploader::Reserve(const size_t requestSize)
 	{
-		ReadWriteLock lock{ mutex };
-		if (bIsReserved)
+		const static thread_local size_t tuid = ThreadUIDGenerator::GetUID();
+		size_t expected = InvalidThreadID;
+		while (!reservedThreadID.compare_exchange_weak(expected, tuid, std::memory_order::acq_rel))
 		{
-			checkNoEntry();
-			return {};
+			// #wip_todo 일정 시간 지나면 timeout?
+			expected = InvalidThreadID;
+			std::this_thread::yield();
 		}
 
 		check(requestSize > 0);
@@ -135,20 +138,24 @@ namespace fe
 
 	std::optional<GpuSync> GpuUploader::Submit(UploadContext& context)
 	{
-		ReadWriteLock lock{ mutex };
-		if (!bIsReserved)
+		const static thread_local size_t tuid = ThreadUIDGenerator::GetUID();
+		if (reservedThreadID.load(std::memory_order::acquire) != tuid)
 		{
 			checkNoEntry();
 			return {};
 		}
 
-		check(context.IsValid());
+		if (!context->IsValid())
+		{
+			checkNoEntry();
+			return {};
+		}
+
 		details::UploadRequest& request = context.GetRequest();
 		copyQueue.AddPendingContext(*request.CmdCtx);
 		request.Sync = copyQueue.Submit();
 		context.Reset();
-
-		bIsReserved = false;
+		reservedThreadID.store(InvalidThreadID, std::memory_order::release);
 		return request.Sync;
 	}
 

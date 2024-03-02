@@ -243,6 +243,9 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GpuUploader.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\ThreadUIDGenerator.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -361,6 +364,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\GpuUploader.cpp">
       <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Core\ThreadUIDGenerator.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
