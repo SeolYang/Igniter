@@ -131,6 +131,8 @@ namespace fe
 		/* only newSize > currentSize */
 		void ResizeUnsafe(const size_t newSize);
 
+		void FlushQueue();
+
 	private:
 		RenderDevice& renderDevice;
 
@@ -138,6 +140,7 @@ namespace fe
 		std::atomic_uint64_t reservedThreadID = InvalidThreadID;
 
 		CommandQueue copyQueue;
+		CommandContext resizeCmdCtx;
 
 		size_t bufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
 		std::unique_ptr<GpuBuffer> buffer;

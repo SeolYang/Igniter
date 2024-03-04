@@ -241,7 +241,7 @@ namespace fe
 
 		check(newCmdQueue);
 		SetObjectName(newCmdQueue.Get(), debugName);
-		
+
 		ComPtr<ID3D12Fence> newFence{};
 		if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence));
 			!SUCCEEDED(result))
@@ -445,11 +445,12 @@ namespace fe
 
 		ComPtr<D3D12MA::Allocation> allocation{};
 		ComPtr<ID3D12Resource> resource{};
-		if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc,
-															  D3D12_BARRIER_LAYOUT_UNDEFINED,
-															  clearValue ? &clearValue.value() : nullptr,
-															  0, nullptr,
-															  allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+		if (const HRESULT result = allocator->CreateResource3(
+				&allocationDesc, &textureDesc,
+				D3D12_BARRIER_LAYOUT_UNDEFINED,
+				clearValue ? &clearValue.value() : nullptr,
+				0, nullptr,
+				allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
 			!SUCCEEDED(result))
 		{
 			return {};
@@ -483,7 +484,8 @@ namespace fe
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(buffer);
 		const GpuBufferDesc& desc = buffer.GetDesc();
-		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
+		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc =
+			desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
 		if (cbvDesc)
 		{
 			device->CreateConstantBufferView(&cbvDesc.value(), gpuView.CPUHandle);
@@ -591,7 +593,6 @@ namespace fe
 		check(texture);
 		const GPUTextureDesc& desc = texture.GetDesc();
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
-
 		if (rtvDesc)
 		{
 			device->CreateRenderTargetView(&texture.GetNative(), &rtvDesc.value(), gpuView.CPUHandle);

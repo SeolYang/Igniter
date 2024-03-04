@@ -18,6 +18,41 @@ namespace fe
 		GpuSync& operator=(const GpuSync& rhs) = default;
 		GpuSync& operator=(GpuSync&&) noexcept = default;
 
+		bool operator<(const GpuSync& rhs) const
+		{
+			return (fence != nullptr && (fence == rhs.fence)) &&
+				   syncPoint < rhs.syncPoint;
+		}
+
+		bool operator>(const GpuSync& rhs) const
+		{
+			return (fence != nullptr && (fence == rhs.fence)) &&
+				   syncPoint > rhs.syncPoint;
+		}
+
+		bool operator<=(const GpuSync& rhs) const
+		{
+			return (fence != nullptr && (fence == rhs.fence)) &&
+				   syncPoint <= rhs.syncPoint;
+		}
+
+		bool operator>=(const GpuSync& rhs) const
+		{
+			return (fence != nullptr && (fence == rhs.fence)) &&
+				   syncPoint >= rhs.syncPoint;
+		}
+
+		bool operator==(const GpuSync& rhs) const
+		{
+			return (fence != nullptr && (fence == rhs.fence)) &&
+				   syncPoint == rhs.syncPoint;
+		}
+
+		bool operator!=(const GpuSync& rhs) const
+		{
+			return fence != rhs.fence;
+		}
+
 		[[nodiscard]] bool IsValid() const { return fence != nullptr && syncPoint > 0; }
 		[[nodiscard]] operator bool() const { return IsValid(); }
 

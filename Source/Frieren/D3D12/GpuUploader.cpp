@@ -18,9 +18,7 @@ namespace fe
 
 	GpuUploader::~GpuUploader()
 	{
-		GpuSync copyQueueFlushSync = copyQueue.Flush();
-		copyQueueFlushSync.WaitOnCpu();
-
+		FlushQueue();
 		if (buffer != nullptr)
 		{
 			buffer->Unmap();
@@ -133,6 +131,7 @@ namespace fe
 		check(numInFlightRequests <= RequestCapacity);
 		check(requestHead < RequestCapacity);
 		check(bufferCpuAddr != nullptr);
+
 		return UploadContext{ buffer.get(), bufferCpuAddr, newRequest };
 	}
 
@@ -145,13 +144,14 @@ namespace fe
 			return {};
 		}
 
-		if (!context->IsValid())
+		if (!context.IsValid())
 		{
 			checkNoEntry();
 			return {};
 		}
 
 		details::UploadRequest& request = context.GetRequest();
+		request.CmdCtx->End();
 		copyQueue.AddPendingContext(*request.CmdCtx);
 		request.Sync = copyQueue.Submit();
 		context.Reset();
@@ -204,6 +204,7 @@ namespace fe
 		const size_t alignedNewSize = AlignTo(newSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
 		if (alignedNewSize > bufferUsedSizeInBytes)
 		{
+			FlushQueue();
 			if (bufferCpuAddr != nullptr)
 			{
 				buffer->Unmap();
@@ -220,10 +221,19 @@ namespace fe
 
 			requestHead = 0;
 			numInFlightRequests = 0;
+
+			// #wip_todo 여기서 새로 만든 buffer 의 state transition
 		}
 		else
 		{
 			checkNoEntry();
 		}
 	}
+
+	void GpuUploader::FlushQueue()
+	{
+		GpuSync copyQueueFlushSync = copyQueue.Flush();
+		copyQueueFlushSync.WaitOnCpu();
+	}
+
 } // namespace fe
