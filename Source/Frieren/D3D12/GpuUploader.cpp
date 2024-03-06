@@ -7,7 +7,7 @@ namespace fe
 		: renderDevice(renderDevice),
 		  copyQueue(renderDevice.CreateCommandQueue("Gpu Uploader Copy Queue", EQueueType::Copy).value())
 	{
-		ResizeUnsafe(bufferCapacity);
+		ResizeUnsafe(InitialBufferCapacity);
 		for (size_t idx = 0; idx < RequestCapacity; ++idx)
 		{
 			uploadRequests[idx].Reset();
@@ -55,12 +55,10 @@ namespace fe
 		check(newRequest != nullptr);
 		if (bufferHead + alignedRequestSize <= bufferCapacity)
 		{
-			*newRequest = {
-				.OffsetInBytes = bufferHead,
-				.SizeInBytes = alignedRequestSize,
-				.PaddingInBytes = 0,
-				.Sync = {}
-			};
+			newRequest->OffsetInBytes = bufferHead;
+			newRequest->SizeInBytes = alignedRequestSize;
+			newRequest->PaddingInBytes = 0;
+			newRequest->Sync = {};
 
 			bufferHead = (bufferUsedSizeInBytes + alignedRequestSize) % bufferCapacity;
 			bufferUsedSizeInBytes += alignedRequestSize;
@@ -72,13 +70,11 @@ namespace fe
 
 			if ((bufferUsedSizeInBytes + padding + alignedRequestSize) <= bufferCapacity)
 			{
-				*newRequest = {
-					.OffsetInBytes = 0,
-					.SizeInBytes = alignedRequestSize,
-					.PaddingInBytes = padding,
-					.Sync = {}
-				};
-
+				newRequest->OffsetInBytes = 0;
+				newRequest->SizeInBytes = alignedRequestSize;
+				newRequest->PaddingInBytes = padding;
+				newRequest->Sync = {};
+				
 				bufferHead = alignedRequestSize;
 				bufferUsedSizeInBytes += (alignedRequestSize + padding);
 			}
@@ -91,12 +87,10 @@ namespace fe
 
 				if (numInFlightRequests > 1)
 				{
-					*newRequest = {
-						.OffsetInBytes = 0,
-						.SizeInBytes = alignedRequestSize,
-						.PaddingInBytes = padding,
-						.Sync = {}
-					};
+					newRequest->OffsetInBytes = 0;
+					newRequest->SizeInBytes = alignedRequestSize;
+					newRequest->PaddingInBytes = padding;
+					newRequest->Sync = {};
 
 					bufferHead = alignedRequestSize;
 					bufferUsedSizeInBytes += (alignedRequestSize + padding);
@@ -106,14 +100,12 @@ namespace fe
 					check(bufferUsedSizeInBytes == 0);
 					numInFlightRequests = 0;
 					requestHead = 0;
-					newRequest = AllocateRequestUnsafe();
 
-					*newRequest = {
-						.OffsetInBytes = 0,
-						.SizeInBytes = alignedRequestSize,
-						.PaddingInBytes = 0,
-						.Sync = {}
-					};
+					newRequest = AllocateRequestUnsafe();
+					newRequest->OffsetInBytes = 0;
+					newRequest->SizeInBytes = alignedRequestSize;
+					newRequest->PaddingInBytes = 0;
+					newRequest->Sync = {};
 
 					bufferHead = alignedRequestSize;
 					bufferUsedSizeInBytes = alignedRequestSize;
@@ -132,6 +124,7 @@ namespace fe
 		check(requestHead < RequestCapacity);
 		check(bufferCpuAddr != nullptr);
 
+		newRequest->CmdCtx->Begin();
 		return UploadContext{ buffer.get(), bufferCpuAddr, newRequest };
 	}
 
@@ -167,23 +160,23 @@ namespace fe
 			return nullptr;
 		}
 
-		details::UploadRequest* newRequest = &uploadRequests[numInFlightRequests];
-		numInFlightRequests = (numInFlightRequests + 1) % RequestCapacity;
+		details::UploadRequest* newRequest = &uploadRequests[requestHead];
+		requestHead = (requestHead + 1) % RequestCapacity;
+		++numInFlightRequests;
 		return newRequest;
 	}
 
 	void GpuUploader::WaitForRequestUnsafe(const size_t numWaitFor)
 	{
 		check(numWaitFor > 0 && numWaitFor <= numInFlightRequests);
-
 		size_t begin = 0;
 		if (numInFlightRequests < requestHead)
 		{
-			begin = (requestHead + numInFlightRequests) % RequestCapacity;
+			begin = (requestHead - numInFlightRequests) % RequestCapacity;
 		}
 		else if (numInFlightRequests > requestHead)
 		{
-			begin = (numInFlightRequests - requestHead) % RequestCapacity;
+			begin = RequestCapacity % (numInFlightRequests - requestHead);
 		}
 
 		for (size_t counter = 0; counter < numWaitFor; ++counter)
@@ -202,7 +195,7 @@ namespace fe
 	void GpuUploader::ResizeUnsafe(const size_t newSize)
 	{
 		const size_t alignedNewSize = AlignTo(newSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
-		if (alignedNewSize > bufferUsedSizeInBytes)
+		if (alignedNewSize > bufferCapacity)
 		{
 			FlushQueue();
 			if (bufferCpuAddr != nullptr)
@@ -221,8 +214,6 @@ namespace fe
 
 			requestHead = 0;
 			numInFlightRequests = 0;
-
-			// #wip_todo 여기서 새로 만든 buffer 의 state transition
 		}
 		else
 		{

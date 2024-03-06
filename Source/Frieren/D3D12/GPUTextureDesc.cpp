@@ -286,6 +286,7 @@ namespace fe
 		SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
 		SampleDesc.Quality = bIsMSAAEnabled ? sampleQuality : 0;
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		InitialLayout = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
 		Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
 		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
@@ -311,6 +312,7 @@ namespace fe
 		SampleDesc.Count = 1;
 		SampleDesc.Quality = 0;
 		Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
 		Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 		SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
 	}

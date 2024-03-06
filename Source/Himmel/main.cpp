@@ -42,6 +42,7 @@ struct SimpleVertex
 #include <D3D12/CommandContext.h>
 #include <D3D12/GPUViewManager.h>
 #include <D3D12/GPUView.h>
+#include <D3D12/GpuUploader.h>
 #include <Renderer/StaticMeshComponent.h>
 #include <Asset/Texture.h>
 
@@ -53,8 +54,8 @@ int main()
 		fe::Engine engine;
 
 		// #test Asset System Test
-		TextureImporter importer;
-		importer.ImportTexture(String("Resources\\djmax_1st_anv.png"));
+		// TextureImporter importer;
+		// importer.ImportTexture(String("Resources\\djmax_1st_anv.png"));
 
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
@@ -74,6 +75,8 @@ int main()
 		/* Initialize Buffers */
 		constexpr uint16_t NumQuadIndices = 6;
 		constexpr uint16_t NumTriIndices = 3;
+		const uint16_t quadIndices[NumQuadIndices] = { 0, 1, 2, 2, 3, 0 };
+		const uint16_t triIndices[NumTriIndices] = { 4, 5, 6 };
 
 		GpuBufferDesc quadIBDesc{};
 		quadIBDesc.AsIndexBuffer<uint16_t>(NumQuadIndices);
@@ -85,11 +88,6 @@ int main()
 		triIBDesc.DebugName = String("TriMeshIB");
 		Handle<GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
 
-		GpuBufferDesc verticesBufferDesc{};
-		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
-		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
-		Handle<GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
-
 		const SimpleVertex vertices[7] = {
 			{ -.1f, 0.f, 0.f },
 			{ -.1f, 0.5f, 0.f },
@@ -98,92 +96,142 @@ int main()
 			{ -0.1f, 0.f, 0.f },
 			{ 0.0f, 0.45f, 0.f },
 			{ 0.1f, 0.f, 0.f }
+
 		};
+		GpuBufferDesc verticesBufferDesc{};
+		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
+		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
+		Handle<GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
 
-		GpuBufferDesc uploadBufferDesc{};
-		uploadBufferDesc.AsUploadBuffer(static_cast<uint32_t>(sizeof(vertices) + quadIBDesc.GetSizeAsBytes() + triIBDesc.GetSizeAsBytes()));
-		GpuBuffer uploadBuffer{ renderDevice.CreateBuffer(uploadBufferDesc).value() };
-
-		const uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		const uint16_t triIndices[3] = { 4, 5, 6 };
-
-		// #wip_todo 여기서 GpuUploader 테스트 해보기 !!!
-		/* #todo Upload 용 독자적인 CmdCtx와 CmdQueue?, 데이터 한번에 쌓아뒀다가 최대 크기 버퍼 할당후 한번에 업로드 */
-		/* Upload data to gpu(upload buffer; cpu->gpu) */
-		const size_t quadIndicesOffset = sizeof(vertices);
-		const size_t quadIndicesSize = quadIBDesc.GetSizeAsBytes();
-		const size_t triIndicesOffset = quadIndicesOffset + quadIndicesSize;
-		const size_t triIndicesSize = triIBDesc.GetSizeAsBytes();
-		{
-			GPUResourceMapGuard mappedBuffer = uploadBuffer.MapGuard();
-			std::memcpy(mappedBuffer.get() + 0, vertices, sizeof(vertices));
-			std::memcpy(mappedBuffer.get() + quadIndicesOffset, quadIndices, quadIndicesSize);
-			std::memcpy(mappedBuffer.get() + triIndicesOffset, triIndices, triIndicesSize);
-		}
-
-		/* Transfer data from upload buffer to each buffer. (gpu->gpu) & State transfer */
-		{
-			CommandQueue directQueue = renderDevice.CreateCommandQueue("Init Queue", fe::EQueueType::Direct).value();
-			CommandContext cmdCtx = renderDevice.CreateCommandContext("Init Cmd Ctx", fe::EQueueType::Direct).value();
-
-			cmdCtx.Begin();
+		/* GPU Uploader Test */
+		GpuUploader& uploader = engine.GetGpuUploader();
+		std::thread t0(
+			[&uploader, &quadIndices, &quadIB]()
 			{
-				/* Barriers - NONE -> COPY */
+				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
+				UploadContext quadIndicesUploadCtx = uploader.Reserve(sizeof(quadIndices));
+				quadIndicesUploadCtx.WriteData(
+					reinterpret_cast<const uint8_t*>(quadIndices),
+					0, 0, sizeof(quadIndices));
+
+				quadIndicesUploadCtx->CopyBuffer(
+					quadIndicesUploadCtx.GetBuffer(),
+					quadIndicesUploadCtx.GetOffset(), sizeof(quadIndices),
+					*quadIB, 0);
+
+				std::optional<GpuSync> quadIndicesUploadSync = uploader.Submit(quadIndicesUploadCtx);
+				check(quadIndicesUploadSync);
+				quadIndicesUploadSync->WaitOnCpu();
+			});
+
+		std::thread t1(
+			[&uploader, &triIndices, &triIB]()
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
+				UploadContext triIndicesUploadCtx = uploader.Reserve(sizeof(triIndices));
 				{
-					cmdCtx.AddPendingBufferBarrier(
-						uploadBuffer,
-						D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-						D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
+					triIndicesUploadCtx.WriteData(
+						reinterpret_cast<const uint8_t*>(triIndices),
+						0, 0, sizeof(triIndices));
 
-					cmdCtx.AddPendingBufferBarrier(
-						*verticesBuffer,
-						D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-						D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
-
-					cmdCtx.AddPendingBufferBarrier(
-						*quadIB,
-						D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-						D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
-
-					cmdCtx.AddPendingBufferBarrier(
-						*quadIB,
-						D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-						D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
-
-					cmdCtx.FlushBarriers();
+					triIndicesUploadCtx->CopyBuffer(
+						triIndicesUploadCtx.GetBuffer(),
+						triIndicesUploadCtx.GetOffset(), sizeof(triIndices),
+						*triIB, 0);
 				}
+				std::optional<GpuSync> triIndicesUploadSync = uploader.Submit(triIndicesUploadCtx);
+				check(triIndicesUploadSync);
+				triIndicesUploadSync->WaitOnCpu();
+			});
 
-				/* Copy upload buffer -> each buffer(sb/ib) */
-				cmdCtx.CopyBuffer(uploadBuffer, 0, sizeof(vertices), *verticesBuffer, 0);
-
-				cmdCtx.CopyBuffer(uploadBuffer, quadIndicesOffset, quadIndicesSize, *quadIB, 0);
-				cmdCtx.CopyBuffer(uploadBuffer, triIndicesOffset, triIndicesSize, *triIB, 0);
-
+		std::thread t2(
+			[&uploader, &vertices, &verticesBuffer]()
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
+				UploadContext verticesUploadCtx = uploader.Reserve(sizeof(vertices));
 				{
-					cmdCtx.AddPendingBufferBarrier(
-						*verticesBuffer,
-						D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_VERTEX_SHADING,
-						D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_SHADER_RESOURCE);
+					verticesUploadCtx.WriteData(
+						reinterpret_cast<const uint8_t*>(vertices),
+						0, 0, sizeof(vertices));
 
-					cmdCtx.AddPendingBufferBarrier(
-						*quadIB,
-						D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_INDEX_INPUT,
-						D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_INDEX_BUFFER);
-
-					cmdCtx.AddPendingBufferBarrier(
-						*triIB,
-						D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_INDEX_INPUT,
-						D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_INDEX_BUFFER);
-
-					cmdCtx.FlushBarriers();
+					verticesUploadCtx->CopyBuffer(
+						verticesUploadCtx.GetBuffer(),
+						verticesUploadCtx.GetOffset(), sizeof(vertices),
+						*verticesBuffer, 0);
 				}
-			}
-			cmdCtx.End();
+				std::optional<GpuSync> verticesUploadSync = uploader.Submit(verticesUploadCtx);
+				check(verticesUploadSync);
+				verticesUploadSync->WaitOnCpu();
+			});
 
-			directQueue.AddPendingContext(cmdCtx);
-			GpuSync initSync = directQueue.Submit();
-			initSync.WaitOnCpu();
-		}
+		t0.join();
+		t1.join();
+		t2.join();
+
+		// UploadContext vertIndiciesUploadCtx = uploader.Reserve(sizeof());
+
+		//{
+		//	CommandQueue directQueue = renderDevice.CreateCommandQueue("Init Queue", fe::EQueueType::Direct).value();
+		//	CommandContext cmdCtx = renderDevice.CreateCommandContext("Init Cmd Ctx", fe::EQueueType::Direct).value();
+
+		//	cmdCtx.Begin();
+		//	{
+		//		/* Barriers - NONE -> COPY */
+		//		{
+		//			cmdCtx.AddPendingBufferBarrier(
+		//				uploadBuffer,
+		//				D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+		//				D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
+
+		//			cmdCtx.AddPendingBufferBarrier(
+		//				*verticesBuffer,
+		//				D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+		//				D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+
+		//			cmdCtx.AddPendingBufferBarrier(
+		//				*quadIB,
+		//				D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+		//				D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+
+		//			cmdCtx.AddPendingBufferBarrier(
+		//				*quadIB,
+		//				D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+		//				D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+
+		//			cmdCtx.FlushBarriers();
+		//		}
+
+		//		/* Copy upload buffer -> each buffer(sb/ib) */
+		//		cmdCtx.CopyBuffer(uploadBuffer, 0, sizeof(vertices), *verticesBuffer, 0);
+
+		//		cmdCtx.CopyBuffer(uploadBuffer, quadIndicesOffset, quadIndicesSize, *quadIB, 0);
+		//		cmdCtx.CopyBuffer(uploadBuffer, triIndicesOffset, triIndicesSize, *triIB, 0);
+
+		//		{
+		//			cmdCtx.AddPendingBufferBarrier(
+		//				*verticesBuffer,
+		//				D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_VERTEX_SHADING,
+		//				D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_SHADER_RESOURCE);
+
+		//			cmdCtx.AddPendingBufferBarrier(
+		//				*quadIB,
+		//				D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_INDEX_INPUT,
+		//				D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_INDEX_BUFFER);
+
+		//			cmdCtx.AddPendingBufferBarrier(
+		//				*triIB,
+		//				D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_INDEX_INPUT,
+		//				D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_INDEX_BUFFER);
+
+		//			cmdCtx.FlushBarriers();
+		//		}
+		//	}
+		//	cmdCtx.End();
+
+		//	directQueue.AddPendingContext(cmdCtx);
+		//	GpuSync initSync = directQueue.Submit();
+		//	initSync.WaitOnCpu();
+		//}
 
 		Handle<GpuView, GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
 
@@ -210,7 +258,6 @@ int main()
 
 		result = engine.Execute();
 	}
-
 	return result;
 }
 

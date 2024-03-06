@@ -51,6 +51,8 @@ namespace fe
 
 		bool IsValid() const { return (uploadBuffer != nullptr) && (offsettedCpuAddr != nullptr) && (request != nullptr); }
 
+		size_t GetSize() const { return request != nullptr ? request->SizeInBytes : 0; }
+		size_t GetOffset() const { return request != nullptr ? request->OffsetInBytes : 0; }
 		GpuBuffer& GetBuffer() { return *uploadBuffer; }
 		void WriteData(const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes)
 		{
@@ -140,15 +142,15 @@ namespace fe
 		std::atomic_uint64_t reservedThreadID = InvalidThreadID;
 
 		CommandQueue copyQueue;
-		CommandContext resizeCmdCtx;
 
-		size_t bufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
+		constexpr static size_t InitialBufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
+		size_t bufferCapacity = 0;
 		std::unique_ptr<GpuBuffer> buffer;
 		uint8_t* bufferCpuAddr = nullptr;
 		size_t bufferHead = 0;
 		size_t bufferUsedSizeInBytes = 0;
 
-		constexpr static size_t RequestCapacity = 16;
+		constexpr static size_t RequestCapacity = 2;
 		details::UploadRequest uploadRequests[RequestCapacity];
 		size_t requestHead = 0;
 		size_t numInFlightRequests = 0;

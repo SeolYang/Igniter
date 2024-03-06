@@ -95,8 +95,6 @@ namespace fe
 				D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
 				D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
 			cmdCtx->FlushBarriers();
-
-			tempConstantBufferAllocator.InitBufferStateTransition(*cmdCtx);
 		}
 		cmdCtx->End();
 
