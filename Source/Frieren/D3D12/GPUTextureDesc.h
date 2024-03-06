@@ -75,6 +75,7 @@ namespace fe
 
 	public:
 		String DebugName = String{ "Unknown Texture" };
+		D3D12_BARRIER_LAYOUT InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
 	private:
 		bool bIsArray = false;

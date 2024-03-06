@@ -447,7 +447,7 @@ namespace fe
 		ComPtr<ID3D12Resource> resource{};
 		if (const HRESULT result = allocator->CreateResource3(
 				&allocationDesc, &textureDesc,
-				D3D12_BARRIER_LAYOUT_UNDEFINED,
+				textureDesc.InitialLayout,
 				clearValue ? &clearValue.value() : nullptr,
 				0, nullptr,
 				allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
