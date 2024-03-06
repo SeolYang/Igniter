@@ -169,6 +169,8 @@ namespace fe
 	void GpuUploader::WaitForRequestUnsafe(const size_t numWaitFor)
 	{
 		check(numWaitFor > 0 && numWaitFor <= numInFlightRequests);
+
+		// uint 이기 때문에 modulo 로 계산, 의미상으론 배열에서 requestHead를 시작으로 numInFlightRequest만큼 뒤로 이동하는 것과 같음
 		size_t begin = 0;
 		if (numInFlightRequests < requestHead)
 		{
