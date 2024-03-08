@@ -1,4 +1,4 @@
-#include <Renderer/Renderer.h>
+#include <Render/Renderer.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/DescriptorHeap.h>
@@ -13,13 +13,13 @@
 #include <D3D12/RootSignature.h>
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUTextureDesc.h>
-#include <D3D12/GPUViewManager.h>
 #include <D3D12/GPUView.h>
 #include <Gameplay/World.h>
 #include <Gameplay/PositionComponent.h>
-#include <Renderer/StaticMeshComponent.h>
-#include <ranges>
+#include <Render/GPUViewManager.h>
+#include <Render/StaticMeshComponent.h>
 #include <Engine.h>
+#include <ranges>
 
 struct PositionBuffer
 {
@@ -130,7 +130,7 @@ namespace fe
 			renderCmdCtx->SetDescriptorHeaps(bindlessDescriptorHeaps);
 			renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
-			GpuTexture&	   backBuffer = swapchain.GetBackBuffer();
+			GpuTexture& backBuffer = swapchain.GetBackBuffer();
 			const GpuView& backBufferRTV = swapchain.GetRenderTargetView();
 			renderCmdCtx->AddPendingTextureBarrier(backBuffer,
 												   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
@@ -145,11 +145,12 @@ namespace fe
 			renderCmdCtx->SetScissorRect(0, 0, 1280, 642);
 			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			size_t			  idx = 0;
+			size_t idx = 0;
 			GpuBufferDesc posBufferDesc;
 			posBufferDesc.AsConstantBuffer<PositionBuffer>();
 
-			world.Each<StaticMeshComponent, fe::PositionComponent>([&posBufferDesc, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position) {
+			world.Each<StaticMeshComponent, fe::PositionComponent>([&posBufferDesc, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position)
+																   {
 				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
 				{
 					TempConstantBuffer posBuffer = tempConstantBufferAllocator.Allocate(posBufferDesc);
@@ -161,8 +162,7 @@ namespace fe
 					renderCmdCtx->SetRoot32BitConstants(0, params, 0);
 				}
 
-				renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
-			});
+				renderCmdCtx->DrawIndexed(staticMesh.NumIndices); });
 		}
 		renderCmdCtx->End();
 		mainGfxQueue.AddPendingContext(*renderCmdCtx);

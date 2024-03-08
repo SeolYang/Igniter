@@ -5,13 +5,10 @@
 
 namespace fe
 {
-	class HandleManager;
 	class DeferredDeallocator;
 	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
-} // namespace fe
 
-namespace fe
-{
+	class HandleManager;
 	class GpuBuffer;
 	class GpuTexture;
 	class RenderDevice;
@@ -196,9 +193,9 @@ namespace fe
 		std::unique_ptr<DescriptorHeap> rtvHeap;
 		std::unique_ptr<DescriptorHeap> dsvHeap;
 
-		static constexpr uint32_t NumCbvSrvUavDescriptors = 2048;
-		static constexpr uint32_t NumSamplerDescriptors = 512;
-		static constexpr uint32_t NumRtvDescriptors = 256;
+		static constexpr uint32_t NumCbvSrvUavDescriptors = 4096;
+		static constexpr uint32_t NumSamplerDescriptors = 256;
+		static constexpr uint32_t NumRtvDescriptors = 512;
 		static constexpr uint32_t NumDsvDescriptors = NumRtvDescriptors;
 	};
 } // namespace fe

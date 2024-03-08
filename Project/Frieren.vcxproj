@@ -55,15 +55,12 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GpuTexture.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GpuTextureDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\GpuView.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GpuViewManager.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\GpuUploader.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
@@ -75,9 +72,12 @@
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Frieren\Math\Common.h" />
     <ClInclude Include="..\Source\Frieren\Math\Utils.h" />
-    <ClInclude Include="..\Source\Frieren\Renderer\Common.h" />
-    <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h" />
-    <ClInclude Include="..\Source\Frieren\Renderer\StaticMeshComponent.h" />
+    <ClInclude Include="..\Source\Frieren\Render\Common.h" />
+    <ClInclude Include="..\Source\Frieren\Render\GpuUploader.h" />
+    <ClInclude Include="..\Source\Frieren\Render\GpuViewManager.h" />
+    <ClInclude Include="..\Source\Frieren\Render\Renderer.h" />
+    <ClInclude Include="..\Source\Frieren\Render\StaticMeshComponent.h" />
+    <ClInclude Include="..\Source\Frieren\Render\TempConstantBufferAllocator.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h" />
@@ -99,19 +99,16 @@
     <ClCompile Include="..\Source\Frieren\Core\String.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\ThreadUIDGenerator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\Window.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContext.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\CommandContextPool.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\CommandQueue.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\D3D12Common.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\RenderDevice.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GpuBuffer.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GpuBufferDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GpuTexture.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\GPUTextureDesc.cpp" />
-    <ClCompile Include="..\Source\Frieren\D3D12\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineStateDesc.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\PipelineState.cpp" />
     <ClCompile Include="..\Source\Frieren\D3D12\RootSignature.cpp" />
@@ -123,8 +120,11 @@
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCommon.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiRenderer.cpp" />
-    <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp" />
-    <ClCompile Include="..\Source\Frieren\Renderer\RendererCommon.cpp" />
+    <ClCompile Include="..\Source\Frieren\Render\GpuUploader.cpp" />
+    <ClCompile Include="..\Source\Frieren\Render\GpuViewManager.cpp" />
+    <ClCompile Include="..\Source\Frieren\Render\Renderer.cpp" />
+    <ClCompile Include="..\Source\Frieren\Render\RendererCommon.cpp" />
+    <ClCompile Include="..\Source\Frieren\Render\TempConstantBufferAllocator.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">TurnOffAllWarnings</WarningLevel>

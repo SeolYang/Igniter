@@ -22,9 +22,6 @@
     <Filter Include="Source\ImGui">
       <UniqueIdentifier>{13d19af1-2a32-4de0-96a7-7a2dfced32f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Renderer">
-      <UniqueIdentifier>{ebf89346-5007-4bda-ac52-6f027287c8c8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Component">
       <UniqueIdentifier>{83398e53-bb19-4274-b361-b404f0cd0e01}</UniqueIdentifier>
     </Filter>
@@ -45,6 +42,9 @@
     </Filter>
     <Filter Include="Thirdparty\DirectXCompiler">
       <UniqueIdentifier>{173fb3a5-9de0-4c9b-9e2b-fec11f93dc3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render">
+      <UniqueIdentifier>{ebf89346-5007-4bda-ac52-6f027287c8c8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +95,6 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\RenderDevice.h">
       <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Renderer\Renderer.h">
-      <Filter>Source\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\GpuBuffer.h">
       <Filter>Source\D3D12</Filter>
@@ -159,9 +156,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\CommandQueue.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Renderer\Common.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\FrameManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -170,9 +164,6 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\CommandContextPool.h">
       <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Renderer\StaticMeshComponent.h">
-      <Filter>Source\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\HandleManager.h">
       <Filter>Source\Core</Filter>
@@ -189,17 +180,11 @@
     <ClInclude Include="..\Source\Frieren\Core\Event.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GpuViewManager.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\GpuView.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h">
       <Filter>Source\Gameplay</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.h">
-      <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Math\Common.h">
       <Filter>Source\Math</Filter>
@@ -240,11 +225,26 @@
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h">
       <Filter>Thirdparty\DirectXCompiler</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\GpuUploader.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\ThreadUIDGenerator.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\Renderer.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\StaticMeshComponent.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\TempConstantBufferAllocator.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\Common.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\GpuUploader.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\GpuViewManager.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -268,9 +268,6 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\RenderDevice.cpp">
       <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Renderer\Renderer.cpp">
-      <Filter>Source\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\D3D12\DescriptorHeap.cpp">
       <Filter>Source\D3D12</Filter>
@@ -326,9 +323,6 @@
     <ClCompile Include="..\Source\Frieren\D3D12\CommandQueue.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Renderer\RendererCommon.cpp">
-      <Filter>Source\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
@@ -344,12 +338,6 @@
     <ClCompile Include="..\Source\Frieren\Core\Handle.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GpuViewManager.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\TempConstantBufferAllocator.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClCompile>
@@ -362,11 +350,23 @@
     <ClCompile Include="..\Source\Frieren\Asset\Common.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\D3D12\GpuUploader.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Frieren\Core\ThreadUIDGenerator.cpp">
       <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Render\Renderer.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Render\RendererCommon.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Render\TempConstantBufferAllocator.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Render\GpuUploader.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Render\GpuViewManager.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

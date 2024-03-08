@@ -7,9 +7,9 @@
 #include <Core/DeferredDeallocator.h>
 #include <Core/EmbededSettings.h>
 #include <D3D12/RenderDevice.h>
-#include <D3D12/GpuUploader.h>
-#include <D3D12/GPUViewManager.h>
-#include <Renderer/Renderer.h>
+#include <Render/GpuUploader.h>
+#include <Render/GPUViewManager.h>
+#include <Render/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <Gameplay/GameInstance.h>

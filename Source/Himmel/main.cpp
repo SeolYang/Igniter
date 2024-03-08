@@ -37,14 +37,13 @@ struct SimpleVertex
 
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
-#include <D3D12/GpuUploader.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
-#include <D3D12/GPUViewManager.h>
 #include <D3D12/GPUView.h>
-#include <D3D12/GpuUploader.h>
-#include <Renderer/StaticMeshComponent.h>
 #include <Asset/Texture.h>
+#include <Render/GPUViewManager.h>
+#include <Render/GpuUploader.h>
+#include <Render/StaticMeshComponent.h>
 
 int main()
 {
@@ -54,8 +53,8 @@ int main()
 		fe::Engine engine;
 
 		// #test Asset System Test
-		// TextureImporter importer;
-		// importer.ImportTexture(String("Resources\\djmax_1st_anv.png"));
+		//TextureImporter importer;
+		//importer.Import(String("Resources\\djmax_1st_anv.png"));
 
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);

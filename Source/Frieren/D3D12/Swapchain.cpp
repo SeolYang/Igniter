@@ -3,8 +3,8 @@
 #include <D3D12/CommandQueue.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTexture.h>
-#include <D3D12/GPUViewManager.h>
 #include <D3D12/GPUView.h>
+#include <Render/GPUViewManager.h>
 #include <Core/Window.h>
 
 namespace fe

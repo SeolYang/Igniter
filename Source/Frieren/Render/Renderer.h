@@ -1,9 +1,9 @@
 #pragma once
-#include <Renderer/Common.h>
+#include <Render/Common.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContextPool.h>
 #include <D3D12/Swapchain.h>
-#include <D3D12/TempConstantBufferAllocator.h>
+#include <Render/TempConstantBufferAllocator.h>
 #include <Core/Handle.h>
 
 namespace fe

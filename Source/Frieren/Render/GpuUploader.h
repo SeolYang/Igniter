@@ -130,7 +130,6 @@ namespace fe
 
 		void WaitForRequestUnsafe(const size_t numWaitFor);
 
-		/* only newSize > currentSize */
 		void ResizeUnsafe(const size_t newSize);
 
 		void FlushQueue();
