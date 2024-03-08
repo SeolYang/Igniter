@@ -17,8 +17,8 @@
 
 namespace fe
 {
-	FE_DEFINE_LOG_CATEGORY(EngineInfo, ELogVerbosiy::Info)
-	FE_DEFINE_LOG_CATEGORY(EngineFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(EngineInfo, ELogVerbosity::Info)
+	FE_DEFINE_LOG_CATEGORY(EngineFatal, ELogVerbosity::Fatal)
 
 	Engine* Engine::instance = nullptr;
 	Engine::Engine()
@@ -119,6 +119,12 @@ namespace fe
 	{
 		check(instance != nullptr);
 		return *(instance->inputManager);
+	}
+
+	DeferredDeallocator& Engine::GetDeferredDeallocator()
+	{
+		check(instance != nullptr);
+		return *(instance->deferredDeallocator);
 	}
 
 	GpuViewManager& Engine::GetGPUViewManager()

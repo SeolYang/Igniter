@@ -74,19 +74,19 @@ namespace fe
 		{
 			return TextureResourceMetadata{ .Version = CurrentVersion,
 											.Common = ResourceMetadata::MakeDefault(),
-											.TexImportConf = TextureImportConfig::MakeDefault() };
+											.ImportConfig = TextureImportConfig::MakeDefault() };
 		}
 		[[nodiscard]]
 		bool IsValidVersion() const
 		{
-			return Version == TextureResourceMetadata::CurrentVersion;
+			return Version == TextureResourceMetadata::CurrentVersion && Common.IsValidVersion() && ImportConfig.IsValidVersion();
 		}
 
 	public:
 		constexpr static size_t CurrentVersion = 1;
 		size_t Version = 0;
 		ResourceMetadata Common{};
-		TextureImportConfig TexImportConf{};
+		TextureImportConfig ImportConfig{};
 	};
 
 	nlohmann::json& operator<<(nlohmann::json& archive, const TextureResourceMetadata& metadata);
@@ -143,20 +143,20 @@ namespace fe
 		{
 			return TextureAssetMetadata{ .Version = CurrentVersion,
 										 .Common = AssetMetadata::MakeDefault(),
-										 .TexLoadConf = TextureLoadConfig::MakeDefault() };
+										 .LoadConfig = TextureLoadConfig::MakeDefault() };
 		}
 
 		[[nodiscard]]
 		bool IsValidVersion() const
 		{
-			return Version == TextureAssetMetadata::CurrentVersion;
+			return Version == TextureAssetMetadata::CurrentVersion && Common.IsValidVersion() && LoadConfig.IsValidVersion();
 		}
 
 	public:
 		constexpr static size_t CurrentVersion = 1;
 		size_t Version = 0;
 		AssetMetadata Common{};
-		TextureLoadConfig TexLoadConf{};
+		TextureLoadConfig LoadConfig{};
 	};
 
 	nlohmann::json& operator<<(nlohmann::json& archive, const TextureAssetMetadata& metadata);
@@ -168,21 +168,32 @@ namespace fe
 		TextureImporter();
 		~TextureImporter();
 
-		bool ImportTexture(const String resPathStr,
-						   std::optional<TextureImportConfig> config = std::nullopt,
-						   const bool bIsPersistent = false);
+		bool Import(const String resPathStr,
+					std::optional<TextureImportConfig> config = std::nullopt,
+					const bool bIsPersistent = false);
 
 	private:
 		ID3D11Device* d3d11Device = nullptr;
 	};
 
 	// 로드 후 셋업
+	class RenderDevice;
+	class GpuTexture;
+	class GpuView;
+	class GpuViewManager;
 	class Texture
 	{
 	public:
-		TextureAssetMetadata metadata;
-		Handle<GpuTexture> texture;
-		Handle<GpuView> srv;
-		RefHandle<GpuView> sampler;
+		TextureAssetMetadata metadata{};
+		Handle<GpuTexture, FuncPtrDestroyer<GpuTexture>> texture{}; // Using Deferred Deallocation
+		Handle<GpuView, GpuViewManager*> srv{};
+		RefHandle<GpuView> sampler{};
+	};
+
+	class GpuUploader;
+	class TextureLoader
+	{
+	public:
+		std::optional<Texture> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader);
 	};
 } // namespace fe

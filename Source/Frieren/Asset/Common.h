@@ -28,8 +28,7 @@ namespace fe
 		template <typename T, typename LogCategory>
 		void LogVersionError(const T& instance, const std::string_view infoMessage = "")
 		{
-			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n"
-										   "\tFound: {}\n\tRequied: {}\n\tInformations: {}",
+			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
 				   instance.Version, T::CurrentVersion, infoMessage);
 		}
 	} // namespace details

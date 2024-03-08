@@ -6,10 +6,10 @@
 
 namespace fe
 {
-	FE_DEFINE_LOG_CATEGORY(AssetManagerInfo, ELogVerbosiy::Info)
-	FE_DEFINE_LOG_CATEGORY(AssetManagerWarn, ELogVerbosiy::Warning)
-	FE_DEFINE_LOG_CATEGORY(AssetManagerErr, ELogVerbosiy::Error)
-	FE_DEFINE_LOG_CATEGORY(AssetManagerDbg, ELogVerbosiy::Debug)
-	FE_DEFINE_LOG_CATEGORY(AssetManagerFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(AssetManagerInfo, ELogVerbosity::Info)
+	FE_DEFINE_LOG_CATEGORY(AssetManagerWarn, ELogVerbosity::Warning)
+	FE_DEFINE_LOG_CATEGORY(AssetManagerErr, ELogVerbosity::Error)
+	FE_DEFINE_LOG_CATEGORY(AssetManagerDbg, ELogVerbosity::Debug)
+	FE_DEFINE_LOG_CATEGORY(AssetManagerFatal, ELogVerbosity::Fatal)
 
 } // namespace fe

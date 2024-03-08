@@ -4,6 +4,7 @@
 #include <D3D12/DescriptorHeap.h>
 #include <Core/Assert.h>
 #include <Core/HandleManager.h>
+#include <Core/DeferredDeallocator.h>
 
 namespace fe
 {
@@ -76,10 +77,10 @@ namespace fe
 				handleManager, this, view
 			};
 		}
-		
+
 		return res;
 	}
-	
+
 	std::optional<GpuView> GpuViewManager::Allocate(const EGpuViewType type)
 	{
 		check(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
@@ -128,11 +129,13 @@ namespace fe
 
 	void GpuViewManager::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, GpuView* view)
 	{
-		RequestDeferredDeallocation(deferredDeallocator, [this, handle, evaluatedTypeHash, view]() {
-			check(view != nullptr && view->IsValid());
-			this->Deallocate(*view);
-			details::HandleImpl targetHandle = handle;
-			targetHandle.Deallocate(evaluatedTypeHash);
-		});
+		deferredDeallocator.RequestDeallocation(
+			[this, handle, evaluatedTypeHash, view]()
+			{
+				check(view != nullptr && view->IsValid());
+				this->Deallocate(*view);
+				details::HandleImpl targetHandle = handle;
+				targetHandle.Deallocate(evaluatedTypeHash);
+			});
 	}
 } // namespace fe

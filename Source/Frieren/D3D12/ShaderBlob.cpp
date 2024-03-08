@@ -5,7 +5,7 @@
 
 namespace fe
 {
-	FE_DEFINE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosity::Fatal)
 
 	// #todo 쉐이더 컴파일 후 파일로 저장/캐싱
 	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)

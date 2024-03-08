@@ -16,7 +16,7 @@
 
 namespace fe
 {
-	enum class ELogVerbosiy
+	enum class ELogVerbosity
 	{
 		Temp,
 		Info,
@@ -55,26 +55,26 @@ namespace fe
 
 			switch (C::Verbosity)
 			{
-				case ELogVerbosiy::Info:
+				case ELogVerbosity::Info:
 					logger->info(formattedMessage);
 					break;
-				case ELogVerbosiy::Temp:
+				case ELogVerbosity::Temp:
 					logger->trace(formattedMessage);
 					break;
 
-				case ELogVerbosiy::Warning:
+				case ELogVerbosity::Warning:
 					logger->warn(formattedMessage);
 					break;
 
-				case ELogVerbosiy::Error:
+				case ELogVerbosity::Error:
 					logger->error(formattedMessage);
 					break;
 
-				case ELogVerbosiy::Fatal:
+				case ELogVerbosity::Fatal:
 					logger->critical(formattedMessage);
 					break;
 
-				case ELogVerbosiy::Debug:
+				case ELogVerbosity::Debug:
 					logger->debug(formattedMessage);
 					break;
 			}
@@ -92,7 +92,7 @@ namespace fe
 		mutable SharedMutex mutex;
 
 		std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
-		std::shared_ptr<spdlog::sinks::basic_file_sink_mt>	 fileSink;
+		std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
 		robin_hood::unordered_map<uint64_t, spdlog::logger*> categoryMap;
 
 	private:
@@ -100,19 +100,19 @@ namespace fe
 	};
 } // namespace fe
 
-#define FE_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME, VERBOSITY_LEVEL)          \
+#define FE_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME, VERBOSITY_LEVEL)           \
 	struct LOG_CATEGORY_NAME                                                 \
 	{                                                                        \
-		static constexpr fe::ELogVerbosiy Verbosity = VERBOSITY_LEVEL;       \
+		static constexpr fe::ELogVerbosity Verbosity = VERBOSITY_LEVEL;       \
 		static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
 	};
 
 #if defined(DEBUG) || defined(_DEBUG)
-	#define FE_LOG(LOG_CATEGORY, ...)                                     \
-		fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__);           \
-		if constexpr (LOG_CATEGORY::Verbosity == fe::ELogVerbosiy::Fatal) \
-		{                                                                 \
-			check(false);                                                 \
+	#define FE_LOG(LOG_CATEGORY, ...)                                                                                            \
+		fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__);                                                                  \
+		if constexpr (LOG_CATEGORY::Verbosity == fe::ELogVerbosity::Error || LOG_CATEGORY::Verbosity == fe::ELogVerbosity::Fatal) \
+		{                                                                                                                        \
+			checkNoEntry();                                                                                                      \
 		}
 #else
 	#define FE_LOG(LOG_CATEGORY, ...) fe::Engine::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
@@ -128,10 +128,10 @@ namespace fe
 
 namespace fe
 {
-	FE_DEFINE_LOG_CATEGORY(LogTemp, ELogVerbosiy::Temp)
-	FE_DEFINE_LOG_CATEGORY(LogInfo, ELogVerbosiy::Info)
-	FE_DEFINE_LOG_CATEGORY(LogDebug, ELogVerbosiy::Debug)
-	FE_DEFINE_LOG_CATEGORY(LogWarn, ELogVerbosiy::Warning)
-	FE_DEFINE_LOG_CATEGORY(LogError, ELogVerbosiy::Error)
-	FE_DEFINE_LOG_CATEGORY(LogFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(LogTemp, ELogVerbosity::Temp)
+	FE_DEFINE_LOG_CATEGORY(LogInfo, ELogVerbosity::Info)
+	FE_DEFINE_LOG_CATEGORY(LogDebug, ELogVerbosity::Debug)
+	FE_DEFINE_LOG_CATEGORY(LogWarn, ELogVerbosity::Warning)
+	FE_DEFINE_LOG_CATEGORY(LogError, ELogVerbosity::Error)
+	FE_DEFINE_LOG_CATEGORY(LogFatal, ELogVerbosity::Fatal)
 } // namespace fe

@@ -40,7 +40,7 @@ namespace fe
 		// std::optional<EAssetType> QueryAssetType(const String resPath) const;
 
 		// if config == nullopt ? try query config from metadata : make default config based on resource file
-		bool							  ImportTexture(const String resPath, std::optional<TextureImportConfig> config = std::nullopt);
+		bool							  ImportTexture(const String resPath, std::optional<TextureImportConfig> config = std::nullopt, const bool bIsPersistent = false);
 		RefHandle<Texture, AssetManager*> LoadTexture(const xg::Guid& guid);
 		RefHandle<Texture, AssetManager*> LoadTexture(const String resPath);
 

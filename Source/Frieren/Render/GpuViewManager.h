@@ -6,8 +6,6 @@
 namespace fe
 {
 	class DeferredDeallocator;
-	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
-
 	class HandleManager;
 	class GpuBuffer;
 	class GpuTexture;

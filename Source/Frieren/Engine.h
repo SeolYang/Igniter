@@ -28,11 +28,12 @@ namespace fe
 		[[nodiscard]] static FrameManager& GetFrameManager();
 		[[nodiscard]] static Timer& GetTimer();
 		[[nodiscard]] static Logger& GetLogger();
-		[[nodiscard]] static HandleManager& GetHandleManager();
 		[[nodiscard]] static Window& GetWindow();
 		[[nodiscard]] static RenderDevice& GetRenderDevice();
 		[[nodiscard]] static GpuUploader& GetGpuUploader();
+		[[nodiscard]] static HandleManager& GetHandleManager();
 		[[nodiscard]] static InputManager& GetInputManager();
+		[[nodiscard]] static DeferredDeallocator& GetDeferredDeallocator();
 		[[nodiscard]] static GpuViewManager& GetGPUViewManager();
 		[[nodiscard]] static Renderer& GetRenderer();
 		[[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();

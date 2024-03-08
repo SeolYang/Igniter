@@ -62,11 +62,15 @@ namespace fe
 	class DefaultFinalizer
 	{
 	public:
-		void operator()(const RefHandle<T, DefaultFinalizer>&, T*)
+		void operator()(const T*)
 		{
 			/* Empty */
+			// DO NOT DESTROY INSTANCE IN FINALIZER -> It caused of access after delete.
 		}
 	};
+
+	template <typename T>
+	using FuncPtrFinalizer = void(*)(const T*);
 
 	template <typename T, typename Finalizer = DefaultFinalizer<T>>
 	class RefHandle
@@ -112,12 +116,12 @@ namespace fe
 				{
 					if (finalizer != nullptr)
 					{
-						(*finalizer)(*this, reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
+						(*finalizer)(reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
 					}
 				}
 				else
 				{
-					finalizer(*this, reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
+					finalizer(reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
 				}
 			}
 		}
@@ -187,6 +191,9 @@ namespace fe
 			}
 		}
 	};
+
+	template <typename T>
+	using FuncPtrDestroyer = void(*)(details::HandleImpl, const uint64_t, T*);
 
 	template <typename T, typename Destroyer = DefaultDestroyer<T>>
 	class Handle

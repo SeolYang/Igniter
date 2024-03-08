@@ -17,9 +17,9 @@
 
 namespace fe
 {
-	FE_DEFINE_LOG_CATEGORY(DeviceInfo, ELogVerbosiy::Info)
-	FE_DEFINE_LOG_CATEGORY(DeviceWarn, ELogVerbosiy::Warning)
-	FE_DEFINE_LOG_CATEGORY(DeviceFatal, ELogVerbosiy::Fatal)
+	FE_DEFINE_LOG_CATEGORY(DeviceInfo, ELogVerbosity::Info)
+	FE_DEFINE_LOG_CATEGORY(DeviceWarn, ELogVerbosity::Warning)
+	FE_DEFINE_LOG_CATEGORY(DeviceFatal, ELogVerbosity::Fatal)
 
 	RenderDevice::RenderDevice()
 	{
