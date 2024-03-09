@@ -62,6 +62,7 @@ namespace fe
 
 		void CopyBuffer(GpuBuffer& from, GpuBuffer& to);
 		void CopyBuffer(GpuBuffer& from, const size_t srcOffset, const size_t numBytes, GpuBuffer& to, const size_t dstOffset);
+		void CopyTextureRegion(GpuBuffer& from, GpuTexture& to, const uint32_t subresource, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
 
 		void SetRootSignature(RootSignature& rootSignature);
 		void SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps);

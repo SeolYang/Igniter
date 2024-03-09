@@ -13,7 +13,7 @@ namespace fe
 {
 	ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, RenderDevice& device)
 		: frameManager(engineFrameManager),
-		  descriptorHeap(std::make_unique<DescriptorHeap>(device.CreateDescriptorHeap(EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
+		  descriptorHeap(std::make_unique<DescriptorHeap>(device.CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();

@@ -10,6 +10,7 @@
 #pragma warning(disable : 6001)
 #pragma warning(disable : 26819)
 #include <AgilitySDK/d3dx12/d3dx12.h>
+#include <AgilitySDK/d3dx12/d3dx12_resource_helpers.h>
 #include <AgilitySDK/d3d12sdklayers.h>
 #pragma warning(pop)
 
@@ -91,6 +92,7 @@ namespace fe
 	};
 	bool IsSupportGPUView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType);
 
+	/* #wip GpuViewTexture Subresource 손보기 -> variant? **/
 	struct GpuViewTextureSubresource
 	{
 		union
@@ -159,6 +161,15 @@ namespace fe
 		 * Depth Stencil View: 1D Array, 2D Array, 2DMS Array
 		 */
 		uint16_t ArraySize = 0;
+	};
+
+	struct GpuCopyableFootprints
+	{
+	public:
+		size_t RequiredSize = 0;
+		std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts;
+		std::vector<uint32_t> NumRows;
+		std::vector<size_t> RowSizesInBytes;
 	};
 
 	inline bool IsGreyScaleFormat(const DXGI_FORMAT format)

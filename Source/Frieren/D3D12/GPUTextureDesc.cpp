@@ -413,7 +413,9 @@ namespace fe
 
 	bool GPUTextureDesc::IsRenderTargetCompatible() const
 	{
-		return !IsUnorderedAccessCompatible() && !IsDepthStencilCompatible();
+		return ((Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) == D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) &&
+			   !IsUnorderedAccessCompatible() &&
+			   !IsDepthStencilCompatible();
 	}
 
 	D3D12MA::ALLOCATION_DESC GPUTextureDesc::ToAllocationDesc() const
@@ -423,8 +425,7 @@ namespace fe
 		return desc;
 	}
 
-	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>
-	GPUTextureDesc::ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (!IsTypelessFormat(Format))
 		{
@@ -508,8 +509,7 @@ namespace fe
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC>
-	GPUTextureDesc::ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (IsUnorderedAccessCompatible() && !IsTypelessFormat(Format))
 		{
@@ -582,8 +582,7 @@ namespace fe
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_RENDER_TARGET_VIEW_DESC>
-	GPUTextureDesc::ToRenderTargetViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::ToRenderTargetViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (IsRenderTargetCompatible() && !IsTypelessFormat(Format))
 		{
@@ -656,8 +655,7 @@ namespace fe
 		return std::nullopt;
 	}
 
-	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>
-	GPUTextureDesc::ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GPUTextureDesc::ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const
 	{
 		if (IsDepthStencilCompatible())
 		{

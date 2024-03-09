@@ -42,7 +42,7 @@ namespace fe
 		std::optional<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
 		std::optional<GpuTexture> CreateTexture(const GPUTextureDesc& textureDesc);
 
-		std::optional<DescriptorHeap> CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
+		std::optional<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
 		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer);
 		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
@@ -55,6 +55,8 @@ namespace fe
 		void UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource);
 
 		ComPtr<D3D12MA::Pool> CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc);
+
+		GpuCopyableFootprints GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset);
 
 	private:
 		bool AcquireAdapterFromFactory();

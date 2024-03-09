@@ -26,7 +26,7 @@ namespace fe
 						 const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
 						 const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
 		void AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth, const uint16_t mipLevels,
-						 const DXGI_FORMAT format, const bool bEnableShaderReadWrite,
+						 const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false,
 						 const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
 						 const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
 
@@ -63,6 +63,7 @@ namespace fe
 		bool IsMSAAEnabled() const { return bIsMSAAEnabled; }
 		bool IsAllowSimultaneousAccess() const { return bIsAllowSimultaneousAccess; }
 
+		/* #wip GpuViewTexture Subresource 손보기 */
 		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const;
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const;
@@ -70,8 +71,10 @@ namespace fe
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>	ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const;
 
 		// #todo Typeless 포맷에 대한 typed 포맷을 지정한 view 생성
-
+		/* #todo Texture 요구 메모리 크기 계산 구현 (Bits per pixel * numPixels + (Subresources...)) */
 		void From(const D3D12_RESOURCE_DESC& desc);
+
+		size_t GetNumSubresources() const { return (bIsArray ? static_cast<size_t>(DepthOrArraySize) : 1) * MipLevels; }
 
 	public:
 		String DebugName = String{ "Unknown Texture" };

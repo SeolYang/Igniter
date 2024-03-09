@@ -66,10 +66,15 @@ int main()
 		fe::GameInstance& gameInstance = engine.GetGameInstance();
 		HandleManager& handleManager = engine.GetHandleManager();
 		GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
+		GpuUploader& gpuUploader = engine.GetGpuUploader();
 
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
 		const auto player = PlayerArchetype::Create(*defaultWorld);
 		const auto enemy = defaultWorld->Create();
+
+		std::optional<Texture> texture = TextureLoader::Load(
+			xg::Guid("244a1936-d030-443a-88fb-32190bdf6432"),
+			handleManager, renderDevice, gpuUploader, gpuViewManager);
 
 		/* Initialize Buffers */
 		constexpr uint16_t NumQuadIndices = 6;
@@ -103,12 +108,11 @@ int main()
 		Handle<GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
 
 		/* GPU Uploader Test */
-		GpuUploader& uploader = engine.GetGpuUploader();
 		std::thread t0(
-			[&uploader, &quadIndices, &quadIB]()
+			[&gpuUploader, &quadIndices, &quadIB]()
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
-				UploadContext quadIndicesUploadCtx = uploader.Reserve(sizeof(quadIndices));
+				UploadContext quadIndicesUploadCtx = gpuUploader.Reserve(sizeof(quadIndices));
 				quadIndicesUploadCtx.WriteData(
 					reinterpret_cast<const uint8_t*>(quadIndices),
 					0, 0, sizeof(quadIndices));
@@ -118,16 +122,16 @@ int main()
 					quadIndicesUploadCtx.GetOffset(), sizeof(quadIndices),
 					*quadIB, 0);
 
-				std::optional<GpuSync> quadIndicesUploadSync = uploader.Submit(quadIndicesUploadCtx);
+				std::optional<GpuSync> quadIndicesUploadSync = gpuUploader.Submit(quadIndicesUploadCtx);
 				check(quadIndicesUploadSync);
 				quadIndicesUploadSync->WaitOnCpu();
 			});
 
 		std::thread t1(
-			[&uploader, &triIndices, &triIB]()
+			[&gpuUploader, &triIndices, &triIB]()
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
-				UploadContext triIndicesUploadCtx = uploader.Reserve(sizeof(triIndices));
+				UploadContext triIndicesUploadCtx = gpuUploader.Reserve(sizeof(triIndices));
 				{
 					triIndicesUploadCtx.WriteData(
 						reinterpret_cast<const uint8_t*>(triIndices),
@@ -138,16 +142,16 @@ int main()
 						triIndicesUploadCtx.GetOffset(), sizeof(triIndices),
 						*triIB, 0);
 				}
-				std::optional<GpuSync> triIndicesUploadSync = uploader.Submit(triIndicesUploadCtx);
+				std::optional<GpuSync> triIndicesUploadSync = gpuUploader.Submit(triIndicesUploadCtx);
 				check(triIndicesUploadSync);
 				triIndicesUploadSync->WaitOnCpu();
 			});
 
 		std::thread t2(
-			[&uploader, &vertices, &verticesBuffer]()
+			[&gpuUploader, &vertices, &verticesBuffer]()
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
-				UploadContext verticesUploadCtx = uploader.Reserve(sizeof(vertices));
+				UploadContext verticesUploadCtx = gpuUploader.Reserve(sizeof(vertices));
 				{
 					verticesUploadCtx.WriteData(
 						reinterpret_cast<const uint8_t*>(vertices),
@@ -158,7 +162,7 @@ int main()
 						verticesUploadCtx.GetOffset(), sizeof(vertices),
 						*verticesBuffer, 0);
 				}
-				std::optional<GpuSync> verticesUploadSync = uploader.Submit(verticesUploadCtx);
+				std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
 				check(verticesUploadSync);
 				verticesUploadSync->WaitOnCpu();
 			});

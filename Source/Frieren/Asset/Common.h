@@ -26,7 +26,7 @@ namespace fe
 		constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
 
 		template <typename T, typename LogCategory>
-		void LogVersionError(const T& instance, const std::string_view infoMessage = "")
+		void LogVersionMismatch(const T& instance, const std::string_view infoMessage = "")
 		{
 			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
 				   instance.Version, T::CurrentVersion, infoMessage);

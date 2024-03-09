@@ -6,8 +6,6 @@
 #include <D3D12/RenderDevice.h>
 #include <Core/Mutex.h>
 
-// 독립 Copy Queue 를 이용한 링 버퍼 기반 CPU->GPU 업로더
-// #wip_todo 알고리즘 검증 필(03/02에 소스 코드 따라가며 1차 확인)
 namespace fe
 {
 	namespace details
@@ -54,21 +52,7 @@ namespace fe
 		size_t GetSize() const { return request != nullptr ? request->SizeInBytes : 0; }
 		size_t GetOffset() const { return request != nullptr ? request->OffsetInBytes : 0; }
 		GpuBuffer& GetBuffer() { return *uploadBuffer; }
-		void WriteData(const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes)
-		{
-			check(uploadBuffer != nullptr);
-			check(offsettedCpuAddr != nullptr);
-			check(request != nullptr);
-			if (srcAddr != nullptr)
-			{
-				check(destOffsetInBytes + writeSizeInBytes <= request->SizeInBytes);
-				std::memcpy(offsettedCpuAddr + destOffsetInBytes, srcAddr + srcOffsetInBytes, writeSizeInBytes);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-		}
+		void WriteData(const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes);
 
 		CommandContext* operator->()
 		{

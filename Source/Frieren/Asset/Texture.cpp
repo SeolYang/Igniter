@@ -3,7 +3,7 @@
 #include <Core/Timer.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GpuView.h>
-#include <D3D12/GpuTexture.h>
+#include <Render/GpuUploader.h>
 #include <Render/GpuViewManager.h>
 #include <Engine.h>
 #include <cctype>
@@ -214,6 +214,20 @@ namespace fe
 		return DXGI_FORMAT_UNKNOWN;
 	}
 
+	inline ETextureDimension AsTexDimension(const DirectX::TEX_DIMENSION dim)
+	{
+		switch (dim)
+		{
+			case DirectX::TEX_DIMENSION_TEXTURE1D:
+				return ETextureDimension::Tex1D;
+			default:
+			case DirectX::TEX_DIMENSION_TEXTURE2D:
+				return ETextureDimension::Tex2D;
+			case DirectX::TEX_DIMENSION_TEXTURE3D:
+				return ETextureDimension::Tex3D;
+		}
+	}
+
 	TextureImporter::TextureImporter()
 	{
 		uint32_t creationFlags = 0;
@@ -314,7 +328,7 @@ namespace fe
 
 				if (!texResMetadata.ImportConfig.IsValidVersion())
 				{
-					details::LogVersionError<TextureImportConfig, TextureImporterWarn>(
+					details::LogVersionMismatch<TextureImportConfig, TextureImporterWarn>(
 						texResMetadata.ImportConfig,
 						resMetadataPath.string());
 				}
@@ -462,21 +476,7 @@ namespace fe
 
 		/* Configure Texture Asset Metadata */
 		texMetadata = targetTex.GetMetadata();
-		const auto convertDxTexDim = [](const DirectX::TEX_DIMENSION dim)
-		{
-			switch (dim)
-			{
-				case DirectX::TEX_DIMENSION_TEXTURE1D:
-					return ETextureDimension::Tex1D;
-				default:
-				case DirectX::TEX_DIMENSION_TEXTURE2D:
-					return ETextureDimension::Tex2D;
-				case DirectX::TEX_DIMENSION_TEXTURE3D:
-					return ETextureDimension::Tex3D;
-			}
-		};
-
-		const ETextureDimension texDim = convertDxTexDim(texMetadata.dimension);
+		const ETextureDimension texDim = AsTexDimension(texMetadata.dimension);
 		const TextureAssetMetadata newAssetMetadata{
 			.Version = TextureAssetMetadata::CurrentVersion,
 			.Common = {
@@ -539,11 +539,11 @@ namespace fe
 		return true;
 	}
 
-	std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager&, RenderDevice& renderDevice, GpuUploader&)
+	std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
 	{
 		const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::Texture, guid);
 
-		if (fs::exists(assetMetaPath))
+		if (!fs::exists(assetMetaPath))
 		{
 			FE_LOG(TextureLoaderErr, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());
 			return std::nullopt;
@@ -559,9 +559,9 @@ namespace fe
 		/* Check Asset Metadata */
 		if (!assetMetadata.IsValidVersion())
 		{
-			details::LogVersionError<TextureAssetMetadata, TextureLoaderWarn>(assetMetadata, assetMetaPath.string());
-			details::LogVersionError<AssetMetadata, TextureLoaderWarn>(assetMetadata.Common, assetMetaPath.string());
-			details::LogVersionError<TextureLoadConfig, TextureLoaderWarn>(assetMetadata.LoadConfig, assetMetaPath.string());
+			details::LogVersionMismatch<TextureAssetMetadata, TextureLoaderWarn>(assetMetadata, assetMetaPath.string());
+			details::LogVersionMismatch<AssetMetadata, TextureLoaderWarn>(assetMetadata.Common, assetMetaPath.string());
+			details::LogVersionMismatch<TextureLoadConfig, TextureLoaderWarn>(assetMetadata.LoadConfig, assetMetaPath.string());
 		}
 
 		const AssetMetadata& assetCommon = assetMetadata.Common;
@@ -596,32 +596,180 @@ namespace fe
 			return std::nullopt;
 		}
 
+		/* Load asset from file */
 		const fs::path assetPath = MakeAssetPath(EAssetType::Texture, guid);
-		if (fs::exists(assetPath))
+		if (!fs::exists(assetPath))
 		{
 			FE_LOG(TextureLoaderErr, "Texture Asset \"{}\" does not exist.", assetPath.string());
 			return std::nullopt;
 		}
 
-		// #wip_todo Texture Load 구현
-		// read asset file
-		//DirectX::LoadFromDDSFile(assetPath.c_str(), )
-		// make GpuTexture
+		DirectX::TexMetadata ddsMeta;
+		DirectX::ScratchImage scratchImage;
+		HRESULT res = DirectX::LoadFromDDSFile(assetPath.c_str(), DirectX::DDS_FLAGS_NONE, &ddsMeta, scratchImage);
+		if (FAILED(res))
+		{
+			FE_LOG(TextureLoaderErr, "Failed to load texture asset(dds) from {}.", assetPath.string());
+			return std::nullopt;
+		}
+
+		/* Check metadata mismatch */
+		if (loadConfig.Width != ddsMeta.width ||
+			loadConfig.Height != ddsMeta.height ||
+			(loadConfig.DepthOrArrayLength != ddsMeta.depth && loadConfig.DepthOrArrayLength != ddsMeta.arraySize))
+		{
+			FE_LOG(TextureLoaderErr, "DDS Metadata does not match with texture asset metadata.");
+			return std::nullopt;
+		}
+
+		if (loadConfig.bIsCubemap != loadConfig.bIsCubemap)
+		{
+			FE_LOG(TextureLoaderErr, "Texture asset cubemap flag does not match");
+			return std::nullopt;
+		}
+
+		if (loadConfig.bIsCubemap && (loadConfig.DepthOrArrayLength % 6 == 0))
+		{
+			FE_LOG(TextureLoaderErr, "Cubemap array length suppose to be multiple of \'6\'.");
+			return std::nullopt;
+		}
+
+		if (loadConfig.Dimension != AsTexDimension(ddsMeta.dimension))
+		{
+			FE_LOG(TextureLoaderErr, "Texture Asset Dimension does not match with DDS Dimension.");
+			return std::nullopt;
+		}
+
+		if (loadConfig.Format != ddsMeta.format)
+		{
+			FE_LOG(TextureLoaderErr, "Texture Asset Format does not match with DDS Format.");
+			return std::nullopt;
+		}
+
+		/* Configure Texture Description */
+		/* #todo Support MSAA */
 		GPUTextureDesc texDesc{};
-		// setup ex desc
+		if (loadConfig.bIsCubemap)
+		{
+			/* #todo Support Cubemap Array */
+			texDesc.AsCubemap(loadConfig.Width, loadConfig.Height,
+							  loadConfig.Mips,
+							  loadConfig.Format);
+		}
+		else if (loadConfig.Dimension == ETextureDimension::Tex1D)
+		{
+			if (loadConfig.IsArray())
+			{
+				texDesc.AsTexture1DArray(loadConfig.Width, loadConfig.DepthOrArrayLength,
+										 loadConfig.Mips,
+										 loadConfig.Format);
+			}
+			else
+			{
+				texDesc.AsTexture1D(loadConfig.Width,
+									loadConfig.Mips,
+									loadConfig.Format);
+			}
+		}
+		else if (loadConfig.Dimension == ETextureDimension::Tex2D)
+		{
+			if (loadConfig.IsArray())
+			{
+				texDesc.AsTexture2DArray(loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength,
+										 loadConfig.Mips,
+										 loadConfig.Format);
+			}
+			else
+			{
+				texDesc.AsTexture2D(loadConfig.Width, loadConfig.Height,
+									loadConfig.Mips,
+									loadConfig.Format);
+			}
+		}
+		else
+		{
+			check(!loadConfig.IsArray());
+			texDesc.AsTexture3D(loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength,
+								loadConfig.Mips,
+								loadConfig.Format);
+		}
+		texDesc.DebugName = String(guid.str());
+		texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
+
+		/* Create Texture from RenderDevice */
 		std::optional<GpuTexture> newTex = renderDevice.CreateTexture(texDesc);
 		if (!newTex)
 		{
-			FE_LOG(TextureLoaderErr, "Failed to create GpuTexture from render device.");
+			FE_LOG(TextureLoaderErr, "Failed to create GpuTexture from render device, which for texture asset {}.", assetPath.string());
 			return std::nullopt;
 		}
-		// upload data to GpuTexture -> initial Layout == COMMON
-		// make srv for texture
-		// make sampler
-		// make texture object & return
 
-		unimplemented();
-		return std::nullopt;
+		/* Upload texture subresources from sysram to vram */
+		const size_t numSubresources = scratchImage.GetImageCount();
+		std::vector<D3D12_SUBRESOURCE_DATA> subresources(numSubresources);
+		const DirectX::Image* images = scratchImage.GetImages();
+
+		for (size_t idx = 0; idx < numSubresources; ++idx)
+		{
+			D3D12_SUBRESOURCE_DATA& subresource = subresources[idx];
+			subresource.RowPitch = images[idx].rowPitch;
+			subresource.SlicePitch = images[idx].slicePitch;
+			subresource.pData = images[idx].pixels;
+		}
+
+		// COMMON Layout 인 상태에서 텍스처가 GPU 메모리 상에서 어떻게 배치되어있는지
+		const GpuCopyableFootprints destCopyableFootprints = renderDevice.GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
+		UploadContext texUploadCtx = gpuUploader.Reserve(destCopyableFootprints.RequiredSize);
+
+		/* Write subresources to upload buffer */
+		for (uint32_t idx = 0; idx < numSubresources; ++idx)
+		{
+			const D3D12_SUBRESOURCE_DATA& srcSubresource = subresources[idx];
+			const D3D12_SUBRESOURCE_FOOTPRINT& dstFootprint = destCopyableFootprints.Layouts[idx].Footprint;
+			const size_t rowSizesInBytes = destCopyableFootprints.RowSizesInBytes[idx];
+			for (uint32_t z = 0; z < dstFootprint.Depth; ++z)
+			{
+				const size_t dstSlicePitch = static_cast<size_t>(dstFootprint.RowPitch) * destCopyableFootprints.NumRows[idx];
+				const size_t dstSliceOffset = dstSlicePitch * z;
+				const size_t srcSliceOffset = srcSubresource.SlicePitch * z;
+				for (uint32_t y = 0; y < destCopyableFootprints.NumRows[idx]; ++y)
+				{
+					const size_t dstRowOffset = static_cast<size_t>(dstFootprint.RowPitch) * y;
+					const size_t srcRowOffset = srcSubresource.RowPitch * y;
+
+					const size_t dstOffset = destCopyableFootprints.Layouts[idx].Offset + dstSliceOffset + dstRowOffset;
+					const size_t srcOffset = srcSliceOffset + srcRowOffset;
+					texUploadCtx.WriteData(reinterpret_cast<const uint8_t*>(srcSubresource.pData),
+										   srcOffset, dstOffset,
+										   rowSizesInBytes);
+				}
+			}
+
+			texUploadCtx->CopyTextureRegion(texUploadCtx.GetBuffer(), *newTex, idx, destCopyableFootprints.Layouts[idx]);
+		}
+
+		std::optional<GpuSync> texUploadSync = gpuUploader.Submit(texUploadCtx);
+		check(texUploadSync);
+		texUploadSync->WaitOnCpu();
+
+		/* Create Shader Resource View (GpuView) */
+		/* #wip_todo SRV for each subresource? or full srv */
+		const uint16_t mostDetailedMip = assetMetadata.LoadConfig.Mips - 1;
+		const uint16_t mipLevels = 1;
+		Handle<GpuView, GpuViewManager*> srv = gpuViewManager.RequestShaderResourceView(*newTex, GpuViewTextureSubresource{ .MostDetailedMip = mostDetailedMip, .MipLevels = mipLevels });
+		if (!srv)
+		{
+			FE_LOG(TextureLoaderErr, "Failed to create shader resource view for {}.", assetPath.string());
+			return std::nullopt;
+		}
+
+		/* #wip_todo Layout transition COMMON -> SHADER_RESOURCE? */
+		/* #wip_todo Create Sampler view for texture */
+		return Texture{
+			.metadata = assetMetadata,
+			.texture = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
+			.srv = std::move(srv)
+		};
 	}
 } // namespace fe
 

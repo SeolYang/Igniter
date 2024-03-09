@@ -365,7 +365,7 @@ namespace fe
 		return PipelineState{ std::move(newPipelineState), false };
 	}
 
-	std::optional<DescriptorHeap> RenderDevice::CreateDescriptorHeap(const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
+	std::optional<DescriptorHeap> RenderDevice::CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
 	{
 		check(device);
 
@@ -388,6 +388,7 @@ namespace fe
 		}
 
 		check(newDescriptorHeap);
+		SetObjectName(newDescriptorHeap.Get(), debugName);
 		return DescriptorHeap{
 			descriptorHeapType,
 			std::move(newDescriptorHeap),
@@ -476,6 +477,23 @@ namespace fe
 		}
 
 		return customPool;
+	}
+
+	GpuCopyableFootprints RenderDevice::GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset)
+	{
+		GpuCopyableFootprints footPrints{};
+		footPrints.Layouts.resize(numSubresources);
+		footPrints.NumRows.resize(numSubresources);
+		footPrints.RowSizesInBytes.resize(numSubresources);
+
+		device->GetCopyableFootprints1(&resDesc, firstSubresource, numSubresources, baseOffset,
+									  footPrints.Layouts.data(), footPrints.NumRows.data(), footPrints.RowSizesInBytes.data(), &footPrints.RequiredSize);
+
+		check(footPrints.RequiredSize > 0);
+		check(!footPrints.Layouts.empty());
+		check(!footPrints.NumRows.empty());
+		check(!footPrints.RowSizesInBytes.empty());
+		return footPrints;
 	}
 
 	void RenderDevice::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)

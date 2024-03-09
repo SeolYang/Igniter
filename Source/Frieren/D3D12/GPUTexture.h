@@ -37,13 +37,15 @@ namespace fe
 			return *resource.Get();
 		}
 
+		[[nodiscard]] size_t GetIntermediateSize() const { return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<uint32_t>(desc.GetNumSubresources())); }
+
 	private:
 		GpuTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
 				   ComPtr<ID3D12Resource> newResource);
 
 	private:
-		GPUTextureDesc				desc;
+		GPUTextureDesc desc;
 		ComPtr<D3D12MA::Allocation> allocation;
-		ComPtr<ID3D12Resource>		resource;
+		ComPtr<ID3D12Resource> resource;
 	};
 } // namespace fe

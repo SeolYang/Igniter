@@ -3,6 +3,8 @@
 #include <Core/HashUtils.h>
 #include <Core/MemUtils.h>
 #include <Core/Container.h>
+#include <Core/DeferredDeallocator.h>
+#include <Engine.h>
 
 namespace fe
 {
@@ -30,10 +32,10 @@ namespace fe
 			HandleImpl& operator=(const HandleImpl& other) = default;
 			HandleImpl& operator=(HandleImpl&& other) noexcept;
 
-			uint8_t*	   GetAddressOf(const uint64_t typeHashValue);
+			uint8_t* GetAddressOf(const uint64_t typeHashValue);
 			const uint8_t* GetAddressOf(const uint64_t typeHashValue) const;
 
-			uint8_t*	   GetValidatedAddressOf(const uint64_t typeHashValue);
+			uint8_t* GetValidatedAddressOf(const uint64_t typeHashValue);
 			const uint8_t* GetValidatedAddressOf(const uint64_t typeHashValue) const;
 
 			bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
@@ -54,7 +56,7 @@ namespace fe
 
 		private:
 			HandleManager* owner = nullptr;
-			uint64_t	   handle = InvalidHandle;
+			uint64_t handle = InvalidHandle;
 		};
 	} // namespace details
 
@@ -70,7 +72,7 @@ namespace fe
 	};
 
 	template <typename T>
-	using FuncPtrFinalizer = void(*)(const T*);
+	using FuncPtrFinalizer = void (*)(const T*);
 
 	template <typename T, typename Finalizer = DefaultFinalizer<T>>
 	class RefHandle
@@ -170,7 +172,7 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		details::HandleImpl				handle{};
+		details::HandleImpl handle{};
 		[[no_unique_address]] Finalizer finalizer;
 	};
 
@@ -193,7 +195,32 @@ namespace fe
 	};
 
 	template <typename T>
-	using FuncPtrDestroyer = void(*)(details::HandleImpl, const uint64_t, T*);
+	class DeferredDestroyer
+	{
+	public:
+		void operator()(details::HandleImpl handle, const uint64_t typeHashVal, T* instance) const
+		{
+			auto& deferredDeallocator = Engine::GetDeferredDeallocator();
+			deferredDeallocator.RequestDeallocation(
+				[handle, typeHashVal, instance]()
+				{
+					details::HandleImpl targetHandle = handle;
+					check(instance != nullptr);
+					if (targetHandle.IsValid() && typeHashVal != InvalidHashVal)
+					{
+						if (instance != nullptr)
+						{
+							instance->~T();
+						}
+
+						targetHandle.Deallocate(typeHashVal);
+					}
+				});
+		}
+	};
+
+	template <typename T>
+	using FuncPtrDestroyer = void (*)(details::HandleImpl, const uint64_t, T*);
 
 	template <typename T, typename Destroyer = DefaultDestroyer<T>>
 	class Handle
@@ -352,7 +379,7 @@ namespace fe
 		static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
 	private:
-		details::HandleImpl				handle;
+		details::HandleImpl handle;
 		[[no_unique_address]] Destroyer destroyer;
 	};
 } // namespace fe

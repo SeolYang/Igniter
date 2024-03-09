@@ -1,7 +1,8 @@
 #pragma once
 #include <Asset/Common.h>
-#include <Core/Handle.h>
 #include <D3D12/Common.h>
+#include <D3D12/GpuTexture.h>
+#include <Core/Handle.h>
 
 struct ID3D11Device;
 
@@ -104,6 +105,8 @@ namespace fe
 			return TextureLoadConfig{ .Version = CurrentVersion };
 		}
 
+		[[nodiscard]] bool IsArray() const { return Dimension != ETextureDimension::Tex3D && DepthOrArrayLength > 1; }
+
 		[[nodiscard]]
 		bool IsValidVersion() const
 		{
@@ -181,19 +184,20 @@ namespace fe
 	class GpuTexture;
 	class GpuView;
 	class GpuViewManager;
-	class Texture
+	struct Texture
 	{
 	public:
 		TextureAssetMetadata metadata{};
-		Handle<GpuTexture, FuncPtrDestroyer<GpuTexture>> texture{}; // Using Deferred Deallocation
+		Handle<GpuTexture, DeferredDestroyer<GpuTexture>> texture{}; // Using Deferred Deallocation
 		Handle<GpuView, GpuViewManager*> srv{};
 		RefHandle<GpuView> sampler{};
 	};
 
 	class GpuUploader;
+	class GpuViewManager;
 	class TextureLoader
 	{
 	public:
-		std::optional<Texture> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader);
+		static std::optional<Texture> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
 	};
 } // namespace fe

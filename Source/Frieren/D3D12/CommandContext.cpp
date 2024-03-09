@@ -174,6 +174,15 @@ namespace fe
 		CopyBuffer(from, 0, srcDesc.GetSizeAsBytes(), to, 0);
 	}
 
+	void CommandContext::CopyTextureRegion(GpuBuffer& from, GpuTexture& to, const uint32_t subresource, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+	{
+		check(from);
+		check(to);
+		const CD3DX12_TEXTURE_COPY_LOCATION src(&from.GetNative(), layout);
+		const CD3DX12_TEXTURE_COPY_LOCATION dst(&to.GetNative(), subresource);
+		cmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+	}
+
 	void CommandContext::SetRootSignature(RootSignature& rootSignature)
 	{
 		check(IsValid());

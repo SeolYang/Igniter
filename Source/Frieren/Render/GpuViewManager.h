@@ -26,165 +26,28 @@ namespace fe
 
 		std::array<std::reference_wrapper<DescriptorHeap>, 2> GetBindlessDescriptorHeaps();
 
-		auto RequestConstantBufferView(GpuBuffer& gpuBuffer)
-		{
-			std::optional<GpuView> newCBV = Allocate(EGpuViewType::ConstantBufferView);
-			if (newCBV)
-			{
-				check(newCBV->Type == EGpuViewType::ConstantBufferView);
-				check(newCBV->Index != InvalidIndexU32);
-				UpdateConstantBufferView(*newCBV, gpuBuffer);
-			}
-			else
-			{
-				checkNoEntry();
-			}
+		Handle<GpuView, GpuViewManager*> RequestConstantBufferView(GpuBuffer& gpuBuffer);
+		Handle<GpuView, GpuViewManager*> RequestConstantBufferView(GpuBuffer& gpuBuffer, const uint64_t offset, const uint64_t sizeInBytes);
+		Handle<GpuView, GpuViewManager*> RequestShaderResourceView(GpuBuffer& gpuBuffer);
+		Handle<GpuView, GpuViewManager*> RequestUnorderedAccessView(GpuBuffer& gpuBuffer);
 
-			return MakeHandle(*newCBV);
-		}
-
-		auto RequestConstantBufferView(GpuBuffer& gpuBuffer, const uint64_t offset, const uint64_t sizeInBytes)
-		{
-			std::optional<GpuView> newCBV = Allocate(EGpuViewType::ConstantBufferView);
-			if (newCBV)
-			{
-				check(newCBV->Type == EGpuViewType::ConstantBufferView);
-				check(newCBV->Index != InvalidIndexU32);
-				check(offset % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
-				check(sizeInBytes % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
-				UpdateConstantBufferView(*newCBV, gpuBuffer, offset, sizeInBytes);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-
-			return MakeHandle(*newCBV);
-		}
-
-		auto RequestShaderResourceView(GpuBuffer& gpuBuffer)
-		{
-			std::optional<GpuView> newSRV = Allocate(EGpuViewType::ShaderResourceView);
-			if (newSRV)
-			{
-				check(newSRV->Type == EGpuViewType::ShaderResourceView);
-				check(newSRV->Index != InvalidIndexU32);
-				UpdateShaderResourceView(*newSRV, gpuBuffer);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-
-			return MakeHandle(*newSRV);
-		}
-
-		auto RequestUnorderedAccessView(GpuBuffer& gpuBuffer)
-		{
-			std::optional<GpuView> newUAV = Allocate(EGpuViewType::UnorderedAccessView);
-			if (newUAV)
-			{
-				check(newUAV->Type == EGpuViewType::UnorderedAccessView);
-				check(newUAV->Index != InvalidIndexU32);
-				UpdateUnorderedAccessView(*newUAV, gpuBuffer);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-
-			return MakeHandle(*newUAV);
-		}
-
-		auto RequestShaderResourceView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
-		{
-			std::optional<GpuView> newSRV = Allocate(EGpuViewType::ShaderResourceView);
-			if (newSRV)
-			{
-				check(newSRV->Type == EGpuViewType::ShaderResourceView);
-				check(newSRV->Index != InvalidIndexU32);
-				UpdateShaderResourceView(*newSRV, gpuTexture, subresource);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-
-			return MakeHandle(*newSRV);
-		}
-
-		auto RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
-		{
-			std::optional<GpuView> newUAV = Allocate(EGpuViewType::UnorderedAccessView);
-			if (newUAV)
-			{
-				check(newUAV->Type == EGpuViewType::UnorderedAccessView);
-				check(newUAV->Index != InvalidIndexU32);
-				UpdateUnorderedAccessView(*newUAV, gpuTexture, subresource);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-
-			return MakeHandle(*newUAV);
-		}
-
-		auto RequestRenderTargetView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
-		{
-			std::optional<GpuView> newRTV = Allocate(EGpuViewType::RenderTargetView);
-			if (newRTV)
-			{
-				check(newRTV->Type == EGpuViewType::RenderTargetView);
-				check(newRTV->Index != InvalidIndexU32);
-				UpdateRenderTargetView(*newRTV, gpuTexture, subresource);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-
-			return MakeHandle(*newRTV);
-		}
-
-		auto RequestDepthStencilView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
-		{
-			std::optional<GpuView> newDSV = Allocate(EGpuViewType::DepthStencilView);
-			if (newDSV)
-			{
-				check(newDSV->Type == EGpuViewType::DepthStencilView);
-				check(newDSV->Index != InvalidIndexU32);
-				UpdateDepthStencilView(*newDSV, gpuTexture, subresource);
-			}
-			else
-			{
-				checkNoEntry();
-			}
-
-			return MakeHandle(*newDSV);
-		}
+		Handle<GpuView, GpuViewManager*> RequestShaderResourceView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
+		Handle<GpuView, GpuViewManager*> RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
+		Handle<GpuView, GpuViewManager*> RequestRenderTargetView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
+		Handle<GpuView, GpuViewManager*> RequestDepthStencilView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
 
 	private:
 		Handle<GpuView, GpuViewManager*> MakeHandle(const GpuView& view);
 
 		std::optional<GpuView> Allocate(const EGpuViewType type);
-		void				   Deallocate(const GpuView& gpuView);
+		void Deallocate(const GpuView& gpuView);
 
-		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer);
-		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
-		void UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer);
-		void UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer);
-
-		void UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
-		void UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
-		void UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
-		void UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
 		void operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, GpuView* view);
 
 	private:
-		HandleManager&		 handleManager;
+		HandleManager& handleManager;
 		DeferredDeallocator& deferredDeallocator;
-		RenderDevice&				 device;
+		RenderDevice& device;
 
 		std::unique_ptr<DescriptorHeap> cbvSrvUavHeap;
 		std::unique_ptr<DescriptorHeap> samplerHeap;

@@ -31,7 +31,6 @@ namespace fe
 		size_t expected = InvalidThreadID;
 		while (!reservedThreadID.compare_exchange_weak(expected, tuid, std::memory_order::acq_rel))
 		{
-			// #wip_todo 일정 시간 지나면 timeout?
 			expected = InvalidThreadID;
 			std::this_thread::yield();
 		}
@@ -74,7 +73,7 @@ namespace fe
 				newRequest->SizeInBytes = alignedRequestSize;
 				newRequest->PaddingInBytes = padding;
 				newRequest->Sync = {};
-				
+
 				bufferHead = alignedRequestSize;
 				bufferUsedSizeInBytes += (alignedRequestSize + padding);
 			}
@@ -206,9 +205,12 @@ namespace fe
 				bufferCpuAddr = nullptr;
 			}
 
+			static const auto UploadBufferName = String("Async Upload Buffer");
 			GpuBufferDesc bufferDesc{};
 			bufferDesc.AsUploadBuffer(static_cast<uint32_t>(alignedNewSize));
+			bufferDesc.DebugName = UploadBufferName;
 			buffer = std::make_unique<GpuBuffer>(renderDevice.CreateBuffer(bufferDesc).value());
+
 			bufferCapacity = alignedNewSize;
 			bufferHead = 0;
 			bufferUsedSizeInBytes = 0;
@@ -227,6 +229,22 @@ namespace fe
 	{
 		GpuSync copyQueueFlushSync = copyQueue.Flush();
 		copyQueueFlushSync.WaitOnCpu();
+	}
+
+	void UploadContext::WriteData(const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes)
+	{
+		check(uploadBuffer != nullptr);
+		check(offsettedCpuAddr != nullptr);
+		check(request != nullptr);
+		if (srcAddr != nullptr)
+		{
+			check(destOffsetInBytes + writeSizeInBytes <= request->SizeInBytes);
+			std::memcpy(offsettedCpuAddr + destOffsetInBytes, srcAddr + srcOffsetInBytes, writeSizeInBytes);
+		}
+		else
+		{
+			checkNoEntry();
+		}
 	}
 
 } // namespace fe
