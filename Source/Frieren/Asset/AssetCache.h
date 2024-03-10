@@ -34,7 +34,7 @@ namespace fe
 		// std::optional<EAssetType> QueryAssetType(const String resPath) const;
 
 		// if config == nullopt ? try query config from metadata : make default config based on resource file
-		bool							  ImportTexture(const String resPath, std::optional<TextureImportConfig> config = std::nullopt, const bool bIsPersistent = false);
+		bool ImportTexture(const String resPath, std::optional<TextureImportConfig> config = std::nullopt, const bool bIsPersistent = false);
 		RefHandle<Texture, AssetCache*> LoadTexture(const xg::Guid& guid);
 		RefHandle<Texture, AssetCache*> LoadTexture(const String resPath);
 
@@ -69,9 +69,9 @@ namespace fe
 		}
 
 	private:
-		robin_hood::unordered_map<String, xg::Guid>							   resPathGuidTable;
-		robin_hood::unordered_map<xg::Guid, Handle<Texture, AssetCache*>>	   guidTextureTable;
-		robin_hood::unordered_map<xg::Guid, Handle<StaticMesh, AssetCache*>> guidStaticMeshTable;
+		robin_hood::unordered_map<String, xg::Guid> resPathGuidTable;
+		robin_hood::unordered_map<xg::Guid, Handle<Texture, AssetCache*>> guidTextureTable;
+		//robin_hood::unordered_map<xg::Guid, Handle<StaticMesh, AssetCache*>> guidStaticMeshTable;
 	};
 
 	// 파일 경로

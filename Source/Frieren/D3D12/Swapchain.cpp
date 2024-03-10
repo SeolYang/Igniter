@@ -49,9 +49,9 @@ namespace fe
 		desc.Height = 0;
 
 		/*
-		* #todo Support hdr
-		* #ref: https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32
-		*/
+		 * #todo Support hdr
+		 * #ref: https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32
+		 */
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.Stereo = false;
 		desc.SampleDesc = { 1, 0 };
@@ -97,7 +97,11 @@ namespace fe
 			verify_succeeded(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
 			SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
 			backBuffers.emplace_back(resource);
-			renderTargetViews.emplace_back(gpuViewManager.RequestRenderTargetView(backBuffers[idx], {}));
+			renderTargetViews.emplace_back(gpuViewManager.RequestRenderTargetView(
+				backBuffers[idx],
+				D3D12_TEX2D_RTV{
+					.MipSlice = 0,
+					.PlaneSlice = 0 }));
 		}
 	}
 

@@ -7,10 +7,10 @@
 
 namespace fe
 {
-	size_t	 SizeOfTexelInBits(const DXGI_FORMAT format);
+	size_t SizeOfTexelInBits(const DXGI_FORMAT format);
 	uint16_t CalculateMaxNumMipLevels(const uint64_t width, const uint64_t height, const uint64_t depth);
-	bool	 IsDepthStencilFormat(const DXGI_FORMAT format);
-	bool	 IsTypelessFormat(const DXGI_FORMAT format);
+	bool IsDepthStencilFormat(const DXGI_FORMAT format);
+	bool IsTypelessFormat(const DXGI_FORMAT format);
 
 	// #todo Simultaneous Access flag for resource aka. D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS
 	class GPUTextureDesc : public D3D12_RESOURCE_DESC1
@@ -64,16 +64,11 @@ namespace fe
 		bool IsAllowSimultaneousAccess() const { return bIsAllowSimultaneousAccess; }
 
 		/* #wip GpuViewTexture Subresource 손보기 */
-		D3D12MA::ALLOCATION_DESC						GetAllocationDesc() const;
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const;
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const;
-		std::optional<D3D12_RENDER_TARGET_VIEW_DESC>	ToRenderTargetViewDesc(const GpuViewTextureSubresource& subresource) const;
-		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>	ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const;
-
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ConvertToNativeDesc(const GpuTextureSrvDesc& srvDesc) const;
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ConvertToNativeDesc(const GpuTextureUavDesc& uavDesc) const;
-		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> ConvertToNativeDesc(const GpuTextureRtvDesc& rtvDesc) const;
-		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> ConvertToNativeDesc(const GpuTextureDsvDesc& DSVdESC) CONST;
+		D3D12MA::ALLOCATION_DESC GetAllocationDesc() const;
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ConvertToNativeDesc(const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ConvertToNativeDesc(const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
+		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> ConvertToNativeDesc(const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
+		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> ConvertToNativeDesc(const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) CONST;
 
 		// #todo Typeless 포맷에 대한 typed 포맷을 지정한 view 생성
 		void From(const D3D12_RESOURCE_DESC& desc);

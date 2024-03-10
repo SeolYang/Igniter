@@ -425,298 +425,524 @@ namespace fe
 		return desc;
 	}
 
-	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat) const
 	{
-		if (!IsTypelessFormat(Format))
+		if (Format == DXGI_FORMAT_UNKNOWN)
 		{
-			D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
-			desc.Format = Format;
-			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			checkNoEntry();
+			return std::nullopt;
+		}
 
-			if (IsTexture1D())
+		if (IsTypelessFormat(Format) && desireViewFormat == DXGI_FORMAT_UNKNOWN)
+		{
+			checkNoEntry();
+			return std::nullopt;
+		}
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC newDesc{};
+		newDesc.Format = desireViewFormat;
+		newDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+		/* Configure Shader Resource View Description */
+		if (std::holds_alternative<D3D12_TEX1D_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
 			{
-				if (IsTextureArray())
-				{
-					desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
-					desc.Texture1DArray.FirstArraySlice = subresource.FirstArraySlice;
-					desc.Texture1DArray.ArraySize = subresource.ArraySize;
-					desc.Texture1DArray.MostDetailedMip = subresource.MostDetailedMip;
-					desc.Texture1DArray.MipLevels = subresource.MipLevels;
-				}
-				else
-				{
-					desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
-					desc.Texture1D.MostDetailedMip = subresource.MostDetailedMip;
-					desc.Texture1D.MipLevels = subresource.MipLevels;
-				}
-			}
-			else if (IsTexture2D())
-			{
-				if (IsTextureCube())
-				{
-					// #todo Handle texture cube array?
-					desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-					desc.TextureCube.MostDetailedMip = subresource.MostDetailedMip;
-					desc.TextureCube.MipLevels = subresource.MipLevels;
-				}
-				else if (IsTextureArray())
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY;
-						desc.Texture2DMSArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DMSArray.FirstArraySlice = subresource.FirstArraySlice;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-						desc.Texture2DArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DArray.FirstArraySlice = subresource.FirstArraySlice;
-						desc.Texture2DArray.MipLevels = subresource.MipLevels;
-						desc.Texture2DArray.MostDetailedMip = subresource.MostDetailedMip;
-						desc.Texture2DArray.PlaneSlice = subresource.PlaneSlice;
-					}
-				}
-				else
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-						desc.Texture2D.MipLevels = subresource.MipLevels;
-						desc.Texture2D.MostDetailedMip = subresource.MostDetailedMip;
-						desc.Texture2D.PlaneSlice = subresource.PlaneSlice;
-					}
-				}
-			}
-			else if (IsTexture3D())
-			{
-				desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
-				desc.Texture3D.MipLevels = subresource.MipLevels;
-				desc.Texture3D.MostDetailedMip = subresource.MostDetailedMip;
-			}
-			else
-			{
+				checkNoEntry();
 				return std::nullopt;
 			}
 
-			return desc;
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
+			newDesc.Texture1D = std::get<D3D12_TEX1D_SRV>(srvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			newDesc.Texture2D = std::get<D3D12_TEX2D_SRV>(srvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
+			newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_SRV>(srvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX3D_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
+		}
+		else if (std::holds_alternative<D3D12_TEXCUBE_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsCubemap)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize < 6)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+			newDesc.TextureCube = std::get<D3D12_TEXCUBE_SRV>(srvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX1D_ARRAY_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
+			newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_SRV>(srvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_ARRAY_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+			newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_SRV>(srvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY;
+			newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_SRV>(srvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEXCUBE_ARRAY_SRV>(srvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsCubemap)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize < 6)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
+			newDesc.TextureCubeArray = std::get<D3D12_TEXCUBE_ARRAY_SRV>(srvDesc);
+		}
+		else
+		{
+			checkNoEntry();
+			return std::nullopt;
 		}
 
-		return std::nullopt;
+		return std::make_optional(newDesc);
 	}
 
-	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat) const
 	{
-		if (IsUnorderedAccessCompatible() && !IsTypelessFormat(Format))
+		if (!IsUnorderedAccessCompatible())
 		{
-			D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
-			desc.Format = Format;
+			checkNoEntry();
+			return std::nullopt;
+		}
 
-			if (IsTexture1D())
+		if (Format == DXGI_FORMAT_UNKNOWN)
+		{
+			checkNoEntry();
+			return std::nullopt;
+		}
+
+		if (IsTypelessFormat(Format) && desireViewFormat == DXGI_FORMAT_UNKNOWN)
+		{
+			checkNoEntry();
+			return std::nullopt;
+		}
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC newDesc{};
+		newDesc.Format = desireViewFormat;
+
+		if (std::holds_alternative<D3D12_TEX1D_UAV>(uavDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
 			{
-				if (IsTextureArray())
-				{
-					desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
-					desc.Texture1DArray.MipSlice = subresource.MipSlice;
-					desc.Texture1DArray.FirstArraySlice = subresource.FirstArraySlice;
-					desc.Texture1DArray.ArraySize = subresource.ArraySize;
-				}
-				else
-				{
-					desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
-					desc.Texture1D.MipSlice = subresource.MipSlice;
-				}
-			}
-			else if (IsTexture2D())
-			{
-				if (IsTextureArray())
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DMSARRAY;
-						desc.Texture2DMSArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DMSArray.FirstArraySlice = subresource.FirstArraySlice;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-						desc.Texture2DArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DArray.FirstArraySlice = subresource.FirstArraySlice;
-						desc.Texture2DArray.MipSlice = subresource.MipSlice;
-						desc.Texture2DArray.PlaneSlice = subresource.PlaneSlice;
-					}
-				}
-				else
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DMS;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-						desc.Texture2D.MipSlice = subresource.MipSlice;
-						desc.Texture2D.PlaneSlice = subresource.PlaneSlice;
-					}
-				}
-			}
-			else if (IsTexture3D())
-			{
-				desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
-				desc.Texture3D.FirstWSlice = subresource.FirstWSlice;
-				desc.Texture3D.WSize = subresource.WSize;
-				desc.Texture3D.MipSlice = subresource.MipSlice;
-			}
-			else
-			{
+				checkNoEntry();
 				return std::nullopt;
 			}
 
-			return desc;
+			newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
+			newDesc.Texture1D = std::get<D3D12_TEX1D_UAV>(uavDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_UAV>(uavDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+			newDesc.Texture2D = std::get<D3D12_TEX2D_UAV>(uavDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_UAV>(uavDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DMS;
+			newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_UAV>(uavDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX3D_UAV>(uavDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
+			newDesc.Texture3D = std::get<D3D12_TEX3D_UAV>(uavDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX1D_ARRAY_UAV>(uavDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
+			newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_UAV>(uavDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_ARRAY_UAV>(uavDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+			newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_UAV>(uavDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_UAV>(uavDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DMSARRAY;
+			newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_UAV>(uavDesc);
+		}
+		else
+		{
+			checkNoEntry();
+			return std::nullopt;
 		}
 
-		return std::nullopt;
+		return std::make_optional(newDesc);
 	}
 
-	std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::ToRenderTargetViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat) const
 	{
-		if (IsRenderTargetCompatible() && !IsTypelessFormat(Format))
+		if (!IsRenderTargetCompatible())
 		{
-			D3D12_RENDER_TARGET_VIEW_DESC desc{};
-			desc.Format = Format;
+			checkNoEntry();
+			return std::nullopt;
+		}
 
-			if (IsTexture1D())
+		if (Format == DXGI_FORMAT_UNKNOWN)
+		{
+			checkNoEntry();
+			return std::nullopt;
+		}
+
+		if (IsTypelessFormat(Format) && desireViewFormat == DXGI_FORMAT_UNKNOWN)
+		{
+			checkNoEntry();
+			return std::nullopt;
+		}
+
+		D3D12_RENDER_TARGET_VIEW_DESC newDesc{};
+		newDesc.Format = desireViewFormat;
+
+		if (std::holds_alternative<D3D12_TEX1D_RTV>(rtvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
 			{
-				if (IsTextureArray())
-				{
-					desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1DARRAY;
-					desc.Texture1DArray.ArraySize = subresource.ArraySize;
-					desc.Texture1DArray.FirstArraySlice = subresource.FirstArraySlice;
-					desc.Texture1DArray.MipSlice = subresource.MipSlice;
-				}
-				else
-				{
-					desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1D;
-					desc.Texture1D.MipSlice = subresource.MipSlice;
-				}
-			}
-			else if (IsTexture2D())
-			{
-				if (IsTextureArray())
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
-						desc.Texture2DMSArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DMSArray.FirstArraySlice = subresource.FirstArraySlice;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-						desc.Texture2DArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DArray.FirstArraySlice = subresource.FirstArraySlice;
-						desc.Texture2DArray.MipSlice = subresource.MipSlice;
-						desc.Texture2DArray.PlaneSlice = subresource.PlaneSlice;
-					}
-				}
-				else
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-						desc.Texture2D.MipSlice = subresource.MipSlice;
-						desc.Texture2D.PlaneSlice = subresource.PlaneSlice;
-					}
-				}
-			}
-			else if (IsTexture3D())
-			{
-				desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
-				desc.Texture3D.MipSlice = subresource.MipSlice;
-				desc.Texture3D.FirstWSlice = subresource.FirstWSlice;
-				desc.Texture3D.WSize = subresource.WSize;
-			}
-			else
-			{
+				checkNoEntry();
 				return std::nullopt;
 			}
 
-			return desc;
+			newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1D;
+			newDesc.Texture1D = std::get<D3D12_TEX1D_RTV>(rtvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_RTV>(rtvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+			newDesc.Texture2D = std::get<D3D12_TEX2D_RTV>(rtvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_RTV>(rtvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D || !bIsMSAAEnabled)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
+			newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_RTV>(rtvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX3D_RTV>(rtvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
+			newDesc.Texture3D = std::get<D3D12_TEX3D_RTV>(rtvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX1D_ARRAY_RTV>(rtvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1DARRAY;
+			newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_RTV>(rtvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_ARRAY_RTV>(rtvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+			newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_RTV>(rtvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_RTV>(rtvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
+			newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_RTV>(rtvDesc);
+		}
+		else
+		{
+			checkNoEntry();
+			return std::nullopt;
 		}
 
-		return std::nullopt;
+		return std::make_optional(newDesc);
 	}
 
-	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GPUTextureDesc::ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const
+	std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat) const
 	{
-		if (IsDepthStencilCompatible())
+		if (!IsDepthStencilCompatible())
 		{
-			D3D12_DEPTH_STENCIL_VIEW_DESC desc{};
-			desc.Format = Format;
+			checkNoEntry();
+			return std::nullopt;
+		}
 
-			if (IsTexture1D())
+		if (desireViewFormat != DXGI_FORMAT_UNKNOWN && !IsDepthStencilFormat(desireViewFormat))
+		{
+			checkNoEntry();
+			return std::nullopt;
+		}
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC newDesc{};
+		newDesc.Format = desireViewFormat;
+
+		if (std::holds_alternative<D3D12_TEX1D_DSV>(dsvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
 			{
-				if (IsTextureArray())
-				{
-					desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1DARRAY;
-					desc.Texture1DArray.ArraySize = subresource.ArraySize;
-					desc.Texture1DArray.FirstArraySlice = subresource.FirstArraySlice;
-					desc.Texture1DArray.MipSlice = subresource.MipSlice;
-				}
-				else
-				{
-					desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1D;
-					desc.Texture1D.MipSlice = subresource.MipSlice;
-				}
-			}
-			else if (IsTexture2D())
-			{
-				if (IsTextureArray())
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-						desc.Texture2DMSArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DMSArray.FirstArraySlice = subresource.FirstArraySlice;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-						desc.Texture2DArray.ArraySize = subresource.ArraySize;
-						desc.Texture2DArray.FirstArraySlice = subresource.FirstArraySlice;
-						desc.Texture2DArray.MipSlice = subresource.MipSlice;
-					}
-				}
-				else
-				{
-					if (bIsMSAAEnabled)
-					{
-						desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
-					}
-					else
-					{
-						desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-						desc.Texture2D.MipSlice = subresource.MipSlice;
-					}
-				}
-			}
-			else
-			{
+				checkNoEntry();
 				return std::nullopt;
 			}
 
-			return desc;
+			newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1D;
+			newDesc.Texture1D = std::get<D3D12_TEX1D_DSV>(dsvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_DSV>(dsvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			newDesc.Texture2D = std::get<D3D12_TEX2D_DSV>(dsvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_DSV>(dsvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
+			newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_DSV>(dsvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX1D_ARRAY_DSV>(dsvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1DARRAY;
+			newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_DSV>(dsvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2D_ARRAY_DSV>(dsvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+			newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_DSV>(dsvDesc);
+		}
+		else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_DSV>(dsvDesc))
+		{
+			if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			if (DepthOrArraySize <= 1)
+			{
+				checkNoEntry();
+				return std::nullopt;
+			}
+
+			newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
+			newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_DSV>(dsvDesc);
+		}
+		else
+		{
+			checkNoEntry();
+			return std::nullopt;
 		}
 
-		return std::nullopt;
+		return std::make_optional(newDesc);
 	}
 
 	void GPUTextureDesc::From(const D3D12_RESOURCE_DESC& desc)

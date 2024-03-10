@@ -74,7 +74,7 @@ namespace fe
 		checkNoEntry();
 		return {};
 	}
-	
+
 	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestUnorderedAccessView(GpuBuffer& gpuBuffer)
 	{
 		std::optional<GpuView> newUAV = Allocate(EGpuViewType::UnorderedAccessView);
@@ -90,14 +90,14 @@ namespace fe
 		return {};
 	}
 
-	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestShaderResourceView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
+	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestShaderResourceView(GpuTexture& gpuTexture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
 	{
 		std::optional<GpuView> newSRV = Allocate(EGpuViewType::ShaderResourceView);
 		if (newSRV)
 		{
 			check(newSRV->Type == EGpuViewType::ShaderResourceView);
 			check(newSRV->Index != InvalidIndexU32);
-			device.UpdateShaderResourceView(*newSRV, gpuTexture, subresource);
+			device.UpdateShaderResourceView(*newSRV, gpuTexture, srvDesc, desireViewFormat);
 			return MakeHandle(*newSRV);
 		}
 
@@ -105,14 +105,14 @@ namespace fe
 		return {};
 	}
 
-	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
+	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
 	{
 		std::optional<GpuView> newUAV = Allocate(EGpuViewType::UnorderedAccessView);
 		if (newUAV)
 		{
 			check(newUAV->Type == EGpuViewType::UnorderedAccessView);
 			check(newUAV->Index != InvalidIndexU32);
-			device.UpdateUnorderedAccessView(*newUAV, gpuTexture, subresource);
+			device.UpdateUnorderedAccessView(*newUAV, gpuTexture, uavDesc, desireViewFormat);
 			return MakeHandle(*newUAV);
 		}
 
@@ -120,14 +120,14 @@ namespace fe
 		return {};
 	}
 
-	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestRenderTargetView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
+	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestRenderTargetView(GpuTexture& gpuTexture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
 	{
 		std::optional<GpuView> newRTV = Allocate(EGpuViewType::RenderTargetView);
 		if (newRTV)
 		{
 			check(newRTV->Type == EGpuViewType::RenderTargetView);
 			check(newRTV->Index != InvalidIndexU32);
-			device.UpdateRenderTargetView(*newRTV, gpuTexture, subresource);
+			device.UpdateRenderTargetView(*newRTV, gpuTexture, rtvDesc, desireViewFormat);
 			return MakeHandle(*newRTV);
 		}
 
@@ -135,14 +135,14 @@ namespace fe
 		return {};
 	}
 
-	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestDepthStencilView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource)
+	Handle<GpuView, GpuViewManager*> GpuViewManager::RequestDepthStencilView(GpuTexture& gpuTexture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
 	{
 		std::optional<GpuView> newDSV = Allocate(EGpuViewType::DepthStencilView);
 		if (newDSV)
 		{
 			check(newDSV->Type == EGpuViewType::DepthStencilView);
 			check(newDSV->Index != InvalidIndexU32);
-			device.UpdateDepthStencilView(*newDSV, gpuTexture, subresource);
+			device.UpdateDepthStencilView(*newDSV, gpuTexture, dsvDesc, desireViewFormat);
 			return MakeHandle(*newDSV);
 		}
 

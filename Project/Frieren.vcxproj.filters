@@ -201,7 +201,7 @@
     <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h">
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Asset\AssetManager.h">
+    <ClInclude Include="..\Source\Frieren\Asset\AssetCache.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Asset\Common.h">
@@ -263,6 +263,9 @@
     </ClInclude>
     <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
       <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\TypeUtils.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -359,7 +362,7 @@
     <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Asset\AssetManager.cpp">
+    <ClCompile Include="..\Source\Frieren\Asset\AssetCache.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Asset\Texture.cpp">

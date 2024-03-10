@@ -1,6 +1,7 @@
 #include <Asset/Texture.h>
 #include <Core/Container.h>
 #include <Core/Timer.h>
+#include <Core/TypeUtils.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GpuView.h>
 #include <Render/GpuUploader.h>
@@ -753,10 +754,14 @@ namespace fe
 		texUploadSync->WaitOnCpu();
 
 		/* Create Shader Resource View (GpuView) */
-		/* #wip_todo SRV for each subresource? or full srv */
-		const uint16_t mostDetailedMip = assetMetadata.LoadConfig.Mips - 1;
-		const uint16_t mipLevels = 1;
-		Handle<GpuView, GpuViewManager*> srv = gpuViewManager.RequestShaderResourceView(*newTex, GpuViewTextureSubresource{ .MostDetailedMip = mostDetailedMip, .MipLevels = mipLevels });
+		Handle<GpuView, GpuViewManager*> srv = gpuViewManager.RequestShaderResourceView(
+			*newTex,
+			D3D12_TEX2D_SRV{
+				.MostDetailedMip = 0,
+				.MipLevels = NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
+				.PlaneSlice = 0,
+				.ResourceMinLODClamp = 0.f });
+
 		if (!srv)
 		{
 			FE_LOG(TextureLoaderErr, "Failed to create shader resource view for {}.", assetPath.string());

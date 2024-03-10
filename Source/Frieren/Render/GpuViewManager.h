@@ -31,10 +31,10 @@ namespace fe
 		Handle<GpuView, GpuViewManager*> RequestShaderResourceView(GpuBuffer& gpuBuffer);
 		Handle<GpuView, GpuViewManager*> RequestUnorderedAccessView(GpuBuffer& gpuBuffer);
 
-		Handle<GpuView, GpuViewManager*> RequestShaderResourceView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
-		Handle<GpuView, GpuViewManager*> RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
-		Handle<GpuView, GpuViewManager*> RequestRenderTargetView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
-		Handle<GpuView, GpuViewManager*> RequestDepthStencilView(GpuTexture& gpuTexture, const GpuViewTextureSubresource& subresource);
+		Handle<GpuView, GpuViewManager*> RequestShaderResourceView(GpuTexture& gpuTexture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+		Handle<GpuView, GpuViewManager*> RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+		Handle<GpuView, GpuViewManager*> RequestRenderTargetView(GpuTexture& gpuTexture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+		Handle<GpuView, GpuViewManager*> RequestDepthStencilView(GpuTexture& gpuTexture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
 
 	private:
 		Handle<GpuView, GpuViewManager*> MakeHandle(const GpuView& view);

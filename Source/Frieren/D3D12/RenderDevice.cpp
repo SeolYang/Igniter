@@ -199,10 +199,10 @@ namespace fe
 		// D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS
 
 		/*
-		* #todo Virtual Texturing using tiled resource
-		* D3D12_TILED_RESOURCES_TIER > 2 for virtual texturing + texture streaming
-		* https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_tiled_resources_tier
-		*/
+		 * #todo Virtual Texturing using tiled resource
+		 * D3D12_TILED_RESOURCES_TIER > 2 for virtual texturing + texture streaming
+		 * https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_tiled_resources_tier
+		 */
 	}
 
 	void RenderDevice::CacheDescriptorHandleIncrementSize()
@@ -491,7 +491,7 @@ namespace fe
 		footPrints.RowSizesInBytes.resize(numSubresources);
 
 		device->GetCopyableFootprints1(&resDesc, firstSubresource, numSubresources, baseOffset,
-									  footPrints.Layouts.data(), footPrints.NumRows.data(), footPrints.RowSizesInBytes.data(), &footPrints.RequiredSize);
+									   footPrints.Layouts.data(), footPrints.NumRows.data(), footPrints.RowSizesInBytes.data(), &footPrints.RequiredSize);
 
 		check(footPrints.RequiredSize > 0);
 		check(!footPrints.Layouts.empty());
@@ -572,17 +572,17 @@ namespace fe
 		}
 	}
 
-	void RenderDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
 	{
 		check(gpuView.Type == EGpuViewType::ShaderResourceView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc& desc = texture.GetDesc();
-		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc(subresource);
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvDesc, desireViewFormat);
 
-		if (srvDesc)
+		if (nativeDesc)
 		{
-			device->CreateShaderResourceView(&texture.GetNative(), &srvDesc.value(), gpuView.CPUHandle);
+			device->CreateShaderResourceView(&texture.GetNative(), &nativeDesc.value(), gpuView.CPUHandle);
 		}
 		else
 		{
@@ -590,17 +590,17 @@ namespace fe
 		}
 	}
 
-	void RenderDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
 	{
 		check(gpuView.Type == EGpuViewType::UnorderedAccessView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc& desc = texture.GetDesc();
-		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc(subresource);
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavDesc, desireViewFormat);
 
-		if (uavDesc)
+		if (nativeDesc)
 		{
-			device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &uavDesc.value(), gpuView.CPUHandle);
+			device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &nativeDesc.value(), gpuView.CPUHandle);
 		}
 		else
 		{
@@ -608,16 +608,16 @@ namespace fe
 		}
 	}
 
-	void RenderDevice::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
 	{
 		check(gpuView.Type == EGpuViewType::RenderTargetView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc& desc = texture.GetDesc();
-		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> rtvDesc = desc.ToRenderTargetViewDesc(subresource);
-		if (rtvDesc)
+		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvDesc, desireViewFormat);
+		if (nativeDesc)
 		{
-			device->CreateRenderTargetView(&texture.GetNative(), &rtvDesc.value(), gpuView.CPUHandle);
+			device->CreateRenderTargetView(&texture.GetNative(), &nativeDesc.value(), gpuView.CPUHandle);
 		}
 		else
 		{
@@ -625,22 +625,21 @@ namespace fe
 		}
 	}
 
-	void RenderDevice::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuViewTextureSubresource& subresource)
+	void RenderDevice::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
 	{
 		check(gpuView.Type == EGpuViewType::DepthStencilView);
 		check(gpuView.IsValid() && gpuView.HasValidCPUHandle());
 		check(texture);
 		const GPUTextureDesc& desc = texture.GetDesc();
-		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> dsvDesc = desc.ToDepthStencilViewDesc(subresource);
+		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvDesc, desireViewFormat);
 
-		if (dsvDesc)
+		if (nativeDesc)
 		{
-			device->CreateDepthStencilView(&texture.GetNative(), &dsvDesc.value(), gpuView.CPUHandle);
+			device->CreateDepthStencilView(&texture.GetNative(), &nativeDesc.value(), gpuView.CPUHandle);
 		}
 		else
 		{
 			checkNoEntry();
 		}
 	}
-
 } // namespace fe

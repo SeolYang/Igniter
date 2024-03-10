@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\Frieren\Asset\AssetManager.h" />
+    <ClInclude Include="..\Source\Frieren\Asset\AssetCache.h" />
     <ClInclude Include="..\Source\Frieren\Asset\Common.h" />
     <ClInclude Include="..\Source\Frieren\Asset\Texture.h" />
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
@@ -41,6 +41,7 @@
     <ClInclude Include="..\Source\Frieren\Core\String.h" />
     <ClInclude Include="..\Source\Frieren\Core\ThreadUIDGenerator.h" />
     <ClInclude Include="..\Source\Frieren\Core\Timer.h" />
+    <ClInclude Include="..\Source\Frieren\Core\TypeUtils.h" />
     <ClInclude Include="..\Source\Frieren\Core\Version.h" />
     <ClInclude Include="..\Source\Frieren\Core\Win32API.h" />
     <ClInclude Include="..\Source\Frieren\Core\Window.h" />
@@ -92,7 +93,7 @@
     <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Frieren\Asset\AssetManager.cpp" />
+    <ClCompile Include="..\Source\Frieren\Asset\AssetCache.cpp" />
     <ClCompile Include="..\Source\Frieren\Asset\Common.cpp" />
     <ClCompile Include="..\Source\Frieren\Asset\Texture.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp" />
