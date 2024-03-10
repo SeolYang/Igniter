@@ -4,25 +4,19 @@
 
 namespace fe
 {
-	// #wip
-	class StaticMesh;
-	struct StaticMeshImportConfig;
-	class AssetManager final
+	class AssetCache final
 	{
-		friend class RefHandle<Texture, AssetManager*>;
-		friend class Handle<Texture, AssetManager*>;
-
-		friend class RefHandle<StaticMesh, AssetManager*>;
-		friend class Handle<StaticMesh, AssetManager*>;
+		friend class RefHandle<Texture, AssetCache*>;
+		friend class Handle<Texture, AssetCache*>;
 
 	public:
-		AssetManager();
-		AssetManager(const AssetManager&) = delete;
-		AssetManager(AssetManager&&) noexcept = delete;
-		~AssetManager();
+		AssetCache();
+		AssetCache(const AssetCache&) = delete;
+		AssetCache(AssetCache&&) noexcept = delete;
+		~AssetCache();
 
-		AssetManager& operator=(const AssetManager&) = delete;
-		AssetManager& operator=(AssetManager&&) noexcept = delete;
+		AssetCache& operator=(const AssetCache&) = delete;
+		AssetCache& operator=(AssetCache&&) noexcept = delete;
 
 		std::optional<xg::Guid> QueryGuid(const String resPathStr) const
 		{
@@ -41,8 +35,8 @@ namespace fe
 
 		// if config == nullopt ? try query config from metadata : make default config based on resource file
 		bool							  ImportTexture(const String resPath, std::optional<TextureImportConfig> config = std::nullopt, const bool bIsPersistent = false);
-		RefHandle<Texture, AssetManager*> LoadTexture(const xg::Guid& guid);
-		RefHandle<Texture, AssetManager*> LoadTexture(const String resPath);
+		RefHandle<Texture, AssetCache*> LoadTexture(const xg::Guid& guid);
+		RefHandle<Texture, AssetCache*> LoadTexture(const String resPath);
 
 		// bool				 ImportStaticMeseh(const String resPath, const StaticMeshImportConfig& config);
 		// AssetRef<StaticMesh> LoadStaticMesh(const xg::Guid& guid);
@@ -65,7 +59,7 @@ namespace fe
 
 	private:
 		template <typename AssetType>
-		void operator()(const RefHandle<AssetType, AssetManager*>&, AssetType*)
+		void operator()(const RefHandle<AssetType, AssetCache*>&, AssetType*)
 		{
 			// const uint64_t refCount = instance->GetRefCount().fetch_add(-1);
 			// if (refCount == 0 && !instance->IsPersistent())
@@ -76,8 +70,8 @@ namespace fe
 
 	private:
 		robin_hood::unordered_map<String, xg::Guid>							   resPathGuidTable;
-		robin_hood::unordered_map<xg::Guid, Handle<Texture, AssetManager*>>	   guidTextureTable;
-		robin_hood::unordered_map<xg::Guid, Handle<StaticMesh, AssetManager*>> guidStaticMeshTable;
+		robin_hood::unordered_map<xg::Guid, Handle<Texture, AssetCache*>>	   guidTextureTable;
+		robin_hood::unordered_map<xg::Guid, Handle<StaticMesh, AssetCache*>> guidStaticMeshTable;
 	};
 
 	// 파일 경로

@@ -27,7 +27,7 @@ namespace fe
 		return D3D12_COMMAND_LIST_TYPE_NONE;
 	}
 
-	bool IsSupportGPUView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType)
+	bool IsSupportGpuView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType)
 	{
 		switch (descriptorHeapType)
 		{

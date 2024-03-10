@@ -418,7 +418,7 @@ namespace fe
 			   !IsDepthStencilCompatible();
 	}
 
-	D3D12MA::ALLOCATION_DESC GPUTextureDesc::ToAllocationDesc() const
+	D3D12MA::ALLOCATION_DESC GPUTextureDesc::GetAllocationDesc() const
 	{
 		D3D12MA::ALLOCATION_DESC desc{};
 		desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;

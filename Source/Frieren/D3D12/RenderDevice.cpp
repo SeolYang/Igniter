@@ -197,6 +197,12 @@ namespace fe
 
 		// D3D12_FEATURE_DATA_D3D12_OPTIONS7: Mesh Shader/Sampler Feedback Tier
 		// D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS
+
+		/*
+		* #todo Virtual Texturing using tiled resource
+		* D3D12_TILED_RESOURCES_TIER > 2 for virtual texturing + texture streaming
+		* https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_tiled_resources_tier
+		*/
 	}
 
 	void RenderDevice::CacheDescriptorHandleIncrementSize()
@@ -330,7 +336,6 @@ namespace fe
 
 	std::optional<PipelineState> RenderDevice::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
 	{
-		// #todo 파이프라인 상태 객체 캐싱 구현 (해시 기반)
 		check(device);
 
 		ComPtr<ID3D12PipelineState> newPipelineState{};
@@ -349,7 +354,6 @@ namespace fe
 
 	std::optional<PipelineState> RenderDevice::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
 	{
-		// #todo 파이프라인 상태 객체 캐싱 구현 (해시 기반)
 		check(device);
 
 		ComPtr<ID3D12PipelineState> newPipelineState{};
@@ -402,7 +406,7 @@ namespace fe
 		check(device);
 		check(allocator);
 
-		const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.ToAllocationDesc();
+		const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.GetAllocationDesc();
 		ComPtr<D3D12MA::Allocation> allocation{};
 		ComPtr<ID3D12Resource> resource{};
 		if (const HRESULT result = allocator->CreateResource3(
@@ -427,7 +431,7 @@ namespace fe
 		check(device);
 		check(allocator);
 
-		const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.ToAllocationDesc();
+		const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.GetAllocationDesc();
 		std::optional<D3D12_CLEAR_VALUE> clearValue{};
 		if (textureDesc.IsRenderTargetCompatible())
 		{

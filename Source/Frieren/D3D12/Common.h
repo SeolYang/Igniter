@@ -30,8 +30,11 @@
 #include <D3D12MemAlloc.h>
 #pragma warning(pop)
 
+#include <WinPixEventRuntime/pix3.h>
+
 #include <memory>
 #include <functional>
+#include <variant>
 
 namespace fe
 {
@@ -90,9 +93,13 @@ namespace fe
 		DepthStencilView,
 		Unknown
 	};
-	bool IsSupportGPUView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType);
+	bool IsSupportGpuView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType);
 
-	/* #wip GpuViewTexture Subresource 손보기 -> variant? **/
+	using GpuTextureSrvDesc = std::variant<D3D12_TEX1D_SRV, D3D12_TEX2D_SRV, D3D12_TEX2DMS_SRV, D3D12_TEX3D_SRV, D3D12_TEXCUBE_SRV, D3D12_TEX1D_ARRAY_SRV, D3D12_TEX2D_ARRAY_SRV, D3D12_TEX2DMS_ARRAY_SRV, D3D12_TEXCUBE_ARRAY_SRV>;
+	using GpuTextureUavDesc = std::variant<D3D12_TEX1D_UAV, D3D12_TEX2D_UAV, D3D12_TEX2DMS_UAV, D3D12_TEX3D_UAV, D3D12_TEX1D_ARRAY_UAV, D3D12_TEX2D_ARRAY_UAV, D3D12_TEX2DMS_ARRAY_UAV>;
+	using GpuTextureRtvDesc = std::variant<D3D12_TEX1D_RTV, D3D12_TEX2D_RTV, D3D12_TEX2DMS_RTV, D3D12_TEX3D_RTV, D3D12_TEX1D_ARRAY_RTV, D3D12_TEX2D_ARRAY_RTV, D3D12_TEX2DMS_ARRAY_RTV>;
+	using GpuTextureDsvDesc = std::variant<D3D12_TEX1D_DSV, D3D12_TEX2D_DSV, D3D12_TEX2DMS_DSV, D3D12_TEX1D_ARRAY_DSV, D3D12_TEX2D_ARRAY_DSV, D3D12_TEX2DMS_ARRAY_DSV>;
+
 	struct GpuViewTextureSubresource
 	{
 		union

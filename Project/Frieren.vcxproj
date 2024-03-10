@@ -85,6 +85,11 @@
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h" />
     <ClInclude Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h" />
     <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3_win.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEvents.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsCommon.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Asset\AssetManager.cpp" />
@@ -270,7 +275,8 @@
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -301,7 +307,8 @@ xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" 
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -332,7 +339,8 @@ xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" 
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -350,7 +358,7 @@ xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" 
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -365,7 +373,8 @@ xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" 
       <Command>mkdir "$(TargetDir)\D3D12"
 xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>

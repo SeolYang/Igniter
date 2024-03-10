@@ -46,6 +46,9 @@
     <Filter Include="Source\Render">
       <UniqueIdentifier>{ebf89346-5007-4bda-ac52-6f027287c8c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thirdparty\WinPixEventRuntime">
+      <UniqueIdentifier>{d1b1f73c-4a4e-41dc-aa8c-5c0d1456bf88}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -245,6 +248,21 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Render\GpuViewManager.h">
       <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3_win.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEvents.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsCommon.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

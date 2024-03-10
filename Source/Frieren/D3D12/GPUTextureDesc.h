@@ -64,14 +64,18 @@ namespace fe
 		bool IsAllowSimultaneousAccess() const { return bIsAllowSimultaneousAccess; }
 
 		/* #wip GpuViewTexture Subresource 손보기 */
-		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
+		D3D12MA::ALLOCATION_DESC						GetAllocationDesc() const;
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc(const GpuViewTextureSubresource& subresource) const;
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc(const GpuViewTextureSubresource& subresource) const;
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC>	ToRenderTargetViewDesc(const GpuViewTextureSubresource& subresource) const;
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC>	ToDepthStencilViewDesc(const GpuViewTextureSubresource& subresource) const;
 
+		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ConvertToNativeDesc(const GpuTextureSrvDesc& srvDesc) const;
+		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ConvertToNativeDesc(const GpuTextureUavDesc& uavDesc) const;
+		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> ConvertToNativeDesc(const GpuTextureRtvDesc& rtvDesc) const;
+		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> ConvertToNativeDesc(const GpuTextureDsvDesc& DSVdESC) CONST;
+
 		// #todo Typeless 포맷에 대한 typed 포맷을 지정한 view 생성
-		/* #todo Texture 요구 메모리 크기 계산 구현 (Bits per pixel * numPixels + (Subresources...)) */
 		void From(const D3D12_RESOURCE_DESC& desc);
 
 		size_t GetNumSubresources() const { return (bIsArray ? static_cast<size_t>(DepthOrArraySize) : 1) * MipLevels; }

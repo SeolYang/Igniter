@@ -48,8 +48,10 @@ namespace fe
 		desc.Width = 0;
 		desc.Height = 0;
 
-		/** #todo Support HDR monitor ref:
-		 * https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32/ */
+		/*
+		* #todo Support hdr
+		* #ref: https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32
+		*/
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.Stereo = false;
 		desc.SampleDesc = { 1, 0 };

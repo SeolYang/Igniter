@@ -7,6 +7,7 @@
 #include <optional>
 #include <bitset>
 #include <functional>
+#include <variant>
 #include <concurrent_queue.h>
 
 #pragma warning(push)

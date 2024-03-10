@@ -111,7 +111,7 @@ namespace fe
 		uint32_t	GetNumElements() const { return numElements; }
 		uint64_t	GetSizeAsBytes() const { return Width; }
 
-		D3D12MA::ALLOCATION_DESC						ToAllocationDesc() const;
+		D3D12MA::ALLOCATION_DESC						GetAllocationDesc() const;
 		std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>	ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>	ToShaderResourceViewDesc() const;
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc() const;

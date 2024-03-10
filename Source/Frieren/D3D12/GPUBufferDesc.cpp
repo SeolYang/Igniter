@@ -137,7 +137,7 @@ namespace fe
 		Flags = D3D12_RESOURCE_FLAG_NONE;
 	}
 
-	D3D12MA::ALLOCATION_DESC GpuBufferDesc::ToAllocationDesc() const
+	D3D12MA::ALLOCATION_DESC GpuBufferDesc::GetAllocationDesc() const
 	{
 		check(bufferType != EGpuBufferType::Unknown);
 		D3D12MA::ALLOCATION_DESC desc{ .HeapType = D3D12_HEAP_TYPE_DEFAULT };

@@ -38,7 +38,6 @@ namespace fe
 	{
 		check(resource);
 		check(offset < desc.GetSizeAsBytes());
-		// #todo offset % desc.GetAlignment() == 0
 
 		uint8_t* mappedPtr = nullptr;
 		if (!SUCCEEDED(resource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPtr))))

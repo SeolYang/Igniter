@@ -7,7 +7,7 @@ namespace fe
 {
 	FE_DEFINE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosity::Fatal)
 
-	// #todo 쉐이더 컴파일 후 파일로 저장/캐싱
+	// #todo 셰이더 컴파일 후 파일로 저장/캐싱 -> 셰이더 에셋
 	ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)
 		: type(desc.Type)
 	{
