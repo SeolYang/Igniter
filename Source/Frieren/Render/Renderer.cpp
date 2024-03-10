@@ -30,6 +30,8 @@ struct BasicRenderResources
 {
 	uint32_t PosBufferIdx;
 	uint32_t VertexBufferIdx;
+	uint32_t DiffuseTexIdx;
+	uint32_t DiffuseTexSamplerIdx;
 };
 #pragma endregion
 
@@ -157,8 +159,11 @@ namespace fe
 					std::memcpy(posBuffer.Mapping->MappedPtr, &position, sizeof(fe::PositionComponent));
 					const BasicRenderResources params{
 						.PosBufferIdx = posBuffer.View->Index,
-						.VertexBufferIdx = staticMesh.VerticesBufferSRV->Index
+						.VertexBufferIdx = staticMesh.VerticesBufferSRV->Index,
+						.DiffuseTexIdx = staticMesh.DiffuseTex->Index,
+						.DiffuseTexSamplerIdx = staticMesh.DiffuseTexSampler->Index
 					};
+
 					renderCmdCtx->SetRoot32BitConstants(0, params, 0);
 				}
 

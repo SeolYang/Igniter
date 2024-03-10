@@ -33,6 +33,8 @@ struct SimpleVertex
 	float x = 0.f;
 	float y = 0.f;
 	float z = 0.f;
+	float u = 0.f;
+	float v = 0.f;
 };
 
 #include <D3D12/GPUBuffer.h>
@@ -53,8 +55,8 @@ int main()
 		fe::Engine engine;
 
 		// #test Asset System Test
-		//TextureImporter importer;
-		//importer.Import(String("Resources\\djmax_1st_anv.png"));
+		// TextureImporter importer;
+		// importer.Import(String("Resources\\djmax_1st_anv.png"));
 
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
@@ -93,14 +95,14 @@ int main()
 		Handle<GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
 
 		const SimpleVertex vertices[7] = {
-			{ -.1f, 0.f, 0.f },
-			{ -.1f, 0.5f, 0.f },
-			{ .10f, 0.5f, 0.f },
-			{ .10f, 0.f, 0.f },
-			{ -0.1f, 0.f, 0.f },
-			{ 0.0f, 0.45f, 0.f },
-			{ 0.1f, 0.f, 0.f }
+			{ -.1f, 0.f, 0.f, /*uv*/ 0.f, 1.f },
+			{ -.1f, 0.5f, 0.f, /*uv*/ 0.f, 0.f },
+			{ .10f, 0.5f, 0.f, /*uv*/ 1.f, 0.f },
+			{ .10f, 0.f, 0.f, /*uv*/ 1.f, 1.f },
 
+			{ -0.1f, 0.f, 0.f, /*uv*/ 0.f, 1.f },
+			{ 0.0f, 0.45f, 0.f, /*uv*/ 0.5f, 0.f },
+			{ 0.1f, 0.f, 0.f, /*uv*/ 1.f, 1.f }
 		};
 		GpuBufferDesc verticesBufferDesc{};
 		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
@@ -176,15 +178,20 @@ int main()
 		const StaticMeshComponent quadStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = quadIB.MakeRef(),
-			.NumIndices = NumQuadIndices
+			.NumIndices = NumQuadIndices,
+			.DiffuseTex = texture->FullRangeSrv.MakeRef(),
+			.DiffuseTexSampler = texture->TexSampler
 		};
 		defaultWorld->Attach<StaticMeshComponent>(player, quadStaticMeshComp);
 
 		const StaticMeshComponent triStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = triIB.MakeRef(),
-			.NumIndices = NumTriIndices
+			.NumIndices = NumTriIndices,
+			.DiffuseTex = texture->FullRangeSrv.MakeRef(),
+			.DiffuseTexSampler = texture->TexSampler
 		};
+
 		defaultWorld->Attach<StaticMeshComponent>(enemy, triStaticMeshComp);
 		defaultWorld->Attach<PositionComponent>(enemy, PositionComponent{ .x = .5f, .y = -0.2f });
 

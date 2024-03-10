@@ -38,6 +38,8 @@ namespace fe
 
 		RefHandle<GpuView> RequestSampler(const D3D12_SAMPLER_DESC& desc);
 
+		void ClearCachedSampler();
+
 	private:
 		Handle<GpuView, GpuViewManager*> MakeHandle(const GpuView& view);
 
@@ -56,7 +58,7 @@ namespace fe
 		std::unique_ptr<DescriptorHeap> rtvHeap;
 		std::unique_ptr<DescriptorHeap> dsvHeap;
 
-		robin_hood::unordered_map<uint64_t, Handle<GpuView>> cachedSamplerView;
+		robin_hood::unordered_map<uint64_t, Handle<GpuView, GpuViewManager*>> cachedSamplerView;
 
 		static constexpr uint32_t NumCbvSrvUavDescriptors = 4096;
 		static constexpr uint32_t NumSamplerDescriptors = 64;

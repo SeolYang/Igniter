@@ -259,6 +259,8 @@ namespace fe
 								 std::optional<TextureImportConfig> config /*= std::nullopt*/,
 								 const bool bIsPersistent /*= false*/)
 	{
+		FE_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.AsStringView());
+
 		const fs::path resPath{ resPathStr.AsStringView() };
 		if (!fs::exists(resPath))
 		{
@@ -518,31 +520,31 @@ namespace fe
 		}
 
 		/* Save data to asset file */
+		const fs::path assetPath = MakeAssetPath(EAssetType::Texture, newGuid);
+		if (fs::exists(assetPath))
 		{
-			const fs::path assetPath = MakeAssetPath(EAssetType::Texture, newGuid);
-			if (fs::exists(assetPath))
-			{
-				FE_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
-			}
-
-			const HRESULT res = DirectX::SaveToDDSFile(
-				targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
-				DirectX::DDS_FLAGS_NONE,
-				assetPath.c_str());
-
-			if (FAILED(res))
-			{
-				FE_LOG(TextureImporterErr, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
-				return false;
-			}
+			FE_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
 		}
 
+		const HRESULT res = DirectX::SaveToDDSFile(
+			targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
+			DirectX::DDS_FLAGS_NONE,
+			assetPath.c_str());
+
+		if (FAILED(res))
+		{
+			FE_LOG(TextureImporterErr, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
+			return false;
+		}
+
+		FE_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}", resPathStr.AsStringView(), assetPath.string());
 		return true;
 	}
 
 	std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
 	{
 		const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::Texture, guid);
+		FE_LOG(TextureLoaderInfo, "Load texture asset from {}...", assetMetaPath.string());
 
 		if (!fs::exists(assetMetaPath))
 		{
@@ -768,8 +770,8 @@ namespace fe
 			return std::nullopt;
 		}
 
+		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}.", assetPath.string(), assetMetadata.Common.SrcResPath);
 		/* #wip_todo Layout transition COMMON -> SHADER_RESOURCE? */
-		/* #wip_todo Create Sampler view for texture */
 		return Texture{
 			.Metadata = assetMetadata,
 			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
@@ -782,7 +784,7 @@ namespace fe
 				.MipLODBias = 0.f,
 				/* #todo if filter ==  anisotropic, Add MaxAnisotropy at load config & import config */
 				.MaxAnisotropy = ((loadConfig.Filter == D3D12_FILTER_ANISOTROPIC || loadConfig.Filter == D3D12_FILTER_COMPARISON_ANISOTROPIC) ? 1u : 0u),
-				.ComparisonFunc = D3D12_COMPARISON_FUNC_EQUAL,
+				.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #todo if filter == comparison, setup comparison func */,
 				.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
 				.MinLOD = 0.f,
 				.MaxLOD = 0.f })

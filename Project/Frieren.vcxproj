@@ -260,7 +260,7 @@
       <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -292,7 +292,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <PreprocessorDefinitions>CHECK_MEM_LEAK;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -324,7 +324,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;NOMINMAX;WIN32_MEAN_AND_LEAN;_DISABLE_VECTOR_ANNOTATION;_DISABLE_STRING_ANNOTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>

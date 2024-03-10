@@ -51,7 +51,9 @@ namespace fe
 	Engine::~Engine()
 	{
 		logger->Log<EngineInfo>("* Cleanup sub-systems");
+		gpuViewManager->ClearCachedSampler();
 		deferredDeallocator->FlushAllFrames();
+
 		gameInstance.reset();
 		imguiCanvas.reset();
 		imguiRenderer.reset();

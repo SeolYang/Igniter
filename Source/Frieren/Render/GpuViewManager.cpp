@@ -174,7 +174,7 @@ namespace fe
 				check(samplerView->HasValidCPUHandle());
 				device.CreateSampler(desc, *samplerView);
 
-				Handle<GpuView> handle = Handle<GpuView>{ handleManager, *samplerView };
+				Handle<GpuView, GpuViewManager*> handle = MakeHandle(*samplerView);
 				refHandle = handle.MakeRef();
 				cachedSamplerView[samplerDescHashVal] = std::move(handle);
 			}
@@ -182,6 +182,11 @@ namespace fe
 
 		check(refHandle);
 		return refHandle;
+	}
+
+	void GpuViewManager::ClearCachedSampler()
+	{
+		cachedSamplerView.clear();
 	}
 
 	Handle<GpuView, GpuViewManager*> GpuViewManager::MakeHandle(const GpuView& view)
