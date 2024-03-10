@@ -401,6 +401,23 @@ namespace fe
 		};
 	}
 
+	void RenderDevice::CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView)
+	{
+		if (!device)
+		{
+			checkNoEntry();
+			return;
+		}
+
+		if (!gpuView.HasValidCPUHandle())
+		{
+			checkNoEntry();
+			return;
+		}
+
+		device->CreateSampler(&samplerDesc, gpuView.CPUHandle);
+	}
+
 	std::optional<GpuBuffer> RenderDevice::CreateBuffer(const GpuBufferDesc& bufferDesc)
 	{
 		check(device);

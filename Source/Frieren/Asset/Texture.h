@@ -187,10 +187,10 @@ namespace fe
 	struct Texture
 	{
 	public:
-		TextureAssetMetadata metadata{};
-		Handle<GpuTexture, DeferredDestroyer<GpuTexture>> texture{}; // Using Deferred Deallocation
-		Handle<GpuView, GpuViewManager*> srv{};
-		RefHandle<GpuView> sampler{};
+		TextureAssetMetadata Metadata{};
+		Handle<GpuTexture, DeferredDestroyer<GpuTexture>> TextureInstance{}; // Using Deferred Deallocation
+		Handle<GpuView, GpuViewManager*> FullRangeSrv{};
+		RefHandle<GpuView> TexSampler{};
 	};
 
 	class GpuUploader;

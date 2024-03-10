@@ -108,9 +108,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GpuTexture.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\D3D12\DescriptorHeap.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>

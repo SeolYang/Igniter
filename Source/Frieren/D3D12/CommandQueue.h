@@ -98,7 +98,6 @@ namespace fe
 	};
 
 	class RenderDevice;
-	class Fence;
 	class CommandContext;
 	class CommandQueue final
 	{

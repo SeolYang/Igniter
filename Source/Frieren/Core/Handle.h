@@ -362,6 +362,7 @@ namespace fe
 			}
 		}
 
+		/* #todo ConstRefHandle */
 		[[nodiscard]] RefHandle<T> MakeRef() const
 		{
 			return RefHandle<T>{ handle };

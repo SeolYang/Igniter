@@ -5,6 +5,7 @@
 #include <Core/Assert.h>
 #include <Core/HandleManager.h>
 #include <Core/DeferredDeallocator.h>
+#include <Core/HashUtils.h>
 
 namespace fe
 {
@@ -148,6 +149,39 @@ namespace fe
 
 		checkNoEntry();
 		return {};
+	}
+
+	RefHandle<GpuView> GpuViewManager::RequestSampler(const D3D12_SAMPLER_DESC& desc)
+	{
+		const uint64_t samplerDescHashVal = HashState(&desc);
+
+		RefHandle<GpuView> refHandle{};
+		const auto itr = cachedSamplerView.find(samplerDescHashVal);
+		if (itr != cachedSamplerView.end())
+		{
+			refHandle = itr->second.MakeRef();
+		}
+		else
+		{
+			std::optional<GpuView> samplerView = samplerHeap->Allocate(EGpuViewType::Sampler);
+			if (!samplerView)
+			{
+				checkNoEntry();
+			}
+			else
+			{
+				check(samplerView->Type == EGpuViewType::Sampler);
+				check(samplerView->HasValidCPUHandle());
+				device.CreateSampler(desc, *samplerView);
+
+				Handle<GpuView> handle = Handle<GpuView>{ handleManager, *samplerView };
+				refHandle = handle.MakeRef();
+				cachedSamplerView[samplerDescHashVal] = std::move(handle);
+			}
+		}
+
+		check(refHandle);
+		return refHandle;
 	}
 
 	Handle<GpuView, GpuViewManager*> GpuViewManager::MakeHandle(const GpuView& view)

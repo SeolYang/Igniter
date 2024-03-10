@@ -59,7 +59,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineState.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\PipelineStateDesc.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\RootSignature.h" />
-    <ClInclude Include="..\Source\Frieren\D3D12\Sampler.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />

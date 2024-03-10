@@ -36,6 +36,8 @@ namespace fe
 		Handle<GpuView, GpuViewManager*> RequestRenderTargetView(GpuTexture& gpuTexture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
 		Handle<GpuView, GpuViewManager*> RequestDepthStencilView(GpuTexture& gpuTexture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
 
+		RefHandle<GpuView> RequestSampler(const D3D12_SAMPLER_DESC& desc);
+
 	private:
 		Handle<GpuView, GpuViewManager*> MakeHandle(const GpuView& view);
 
@@ -54,8 +56,10 @@ namespace fe
 		std::unique_ptr<DescriptorHeap> rtvHeap;
 		std::unique_ptr<DescriptorHeap> dsvHeap;
 
+		robin_hood::unordered_map<uint64_t, Handle<GpuView>> cachedSamplerView;
+
 		static constexpr uint32_t NumCbvSrvUavDescriptors = 4096;
-		static constexpr uint32_t NumSamplerDescriptors = 256;
+		static constexpr uint32_t NumSamplerDescriptors = 64;
 		static constexpr uint32_t NumRtvDescriptors = 512;
 		static constexpr uint32_t NumDsvDescriptors = NumRtvDescriptors;
 	};

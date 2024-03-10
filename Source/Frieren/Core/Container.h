@@ -38,18 +38,6 @@ namespace fe
 	}
 
 	template <typename T>
-	bool BitFlagContains(const T& bits, const T& flag)
-	{
-		return ((bits & flag) == flag);
-	}
-
-	template <typename T, typename... Args>
-	bool BitFlagContains(const T& bits, const T& flag, const Args&... args)
-	{
-		return ((bits & flag) == flag) && BitFlagContains(bits, args...);
-	}
-
-	template <typename T>
 	auto TransformToNative(const std::span<T> items)
 	{
 		std::vector<typename T::NativeType*> natives;

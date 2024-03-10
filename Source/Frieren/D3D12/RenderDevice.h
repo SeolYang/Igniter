@@ -12,7 +12,6 @@ namespace fe
 	class GpuBuffer;
 	class GPUTextureDesc;
 	class GpuTexture;
-	class Fence;
 	class GraphicsPipelineStateDesc;
 	class ComputePipelineStateDesc;
 	class PipelineState;
@@ -43,6 +42,8 @@ namespace fe
 		std::optional<GpuTexture> CreateTexture(const GPUTextureDesc& textureDesc);
 
 		std::optional<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
+
+		void CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView);
 
 		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer);
 		void UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);

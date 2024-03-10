@@ -771,9 +771,21 @@ namespace fe
 		/* #wip_todo Layout transition COMMON -> SHADER_RESOURCE? */
 		/* #wip_todo Create Sampler view for texture */
 		return Texture{
-			.metadata = assetMetadata,
-			.texture = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
-			.srv = std::move(srv)
+			.Metadata = assetMetadata,
+			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
+			.FullRangeSrv = std::move(srv),
+			.TexSampler = gpuViewManager.RequestSampler(D3D12_SAMPLER_DESC{
+				.Filter = loadConfig.Filter,
+				.AddressU = loadConfig.AddressModeU,
+				.AddressV = loadConfig.AddressModeV,
+				.AddressW = loadConfig.AddressModeW,
+				.MipLODBias = 0.f,
+				/* #todo if filter ==  anisotropic, Add MaxAnisotropy at load config & import config */
+				.MaxAnisotropy = ((loadConfig.Filter == D3D12_FILTER_ANISOTROPIC || loadConfig.Filter == D3D12_FILTER_COMPARISON_ANISOTROPIC) ? 1u : 0u),
+				.ComparisonFunc = D3D12_COMPARISON_FUNC_EQUAL,
+				.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
+				.MinLOD = 0.f,
+				.MaxLOD = 0.f })
 		};
 	}
 } // namespace fe

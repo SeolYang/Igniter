@@ -2,17 +2,18 @@
 #include <cstdint>
 #include <string_view>
 #include <Core/MathUtils.h>
+#include <Core/MemUtils.h>
 
-//#ifdef _M_X64
-//	#define ENABLE_SSE_CRC32 1
-//#else
-//	#define ENABLE_SSE_CRC32 0
-//#endif
-//
-//#if ENABLE_SSE_CRC32
-//	#pragma intrinsic(_mm_crc32_u32)
-//	#pragma intrinsic(_mm_crc32_u64)
-//#endif
+#ifdef _M_X64
+	#define ENABLE_SSE_CRC32 1
+#else
+	#define ENABLE_SSE_CRC32 0
+#endif
+
+#if ENABLE_SSE_CRC32
+	#pragma intrinsic(_mm_crc32_u32)
+	#pragma intrinsic(_mm_crc32_u64)
+#endif
 
 namespace fe::table
 {
@@ -310,6 +311,7 @@ namespace fe
 		return hash;
 	}
 
+	/* #ref DirectX-Graphics-Samples */
 	template <typename T>
 	inline uint64_t HashState(const T* stateDesc, size_t count = 1, uint64_t hash = 2166136261U)
 	{

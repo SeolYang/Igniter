@@ -21,4 +21,20 @@ namespace fe
 		check(alignment > 0 && IsPowOf2(alignment));
 		return ((val + alignment - 1) / alignment) * alignment;
 	}
-}
+
+	template <typename T>
+	T AlignUp(T value, const size_t alignment)
+	{
+		check(IsPow2(value));
+		const size_t mask = alignment - 1;
+		return (T)((size_t)(value + mask) & ~mask);
+	}
+
+	template <typename T>
+	T AlignDown(T value, const size_t alignment)
+	{
+		check(IsPow2(alignment));
+		const size_t mask = alignment - 1;
+		return (T)((size_t)value & ~mask);
+	}
+} // namespace fe
