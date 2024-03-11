@@ -29,7 +29,7 @@ namespace fe
 		void LogVersionMismatch(const T& instance, const std::string_view infoMessage = "")
 		{
 			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
-				   instance.Version, T::CurrentVersion, infoMessage);
+				   instance.Version, T::LatestVersion, infoMessage);
 		}
 	} // namespace details
 
@@ -55,26 +55,57 @@ namespace fe
 	fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid);
 
 	/* Common Resource Metadata */
+
+	template <uint64_t CurrentVersion>
 	struct ResourceMetadata
 	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
-
 	public:
 		[[nodiscard]]
-		static inline auto MakeDefault()
+		bool IsLatestVersion() const
 		{
-			return ResourceMetadata{ .Version = CurrentVersion };
+			return Version == LatestVersion;
 		}
 
-		[[nodiscard]]
-		bool IsValidVersion() const
+		virtual json& Serialize(json& archive) const
 		{
-			return Version == ResourceMetadata::CurrentVersion;
+			const ResourceMetadata& metadata = *this;
+			check(metadata.IsLatestVersion());
+			check(metadata.CreationTime > 0);
+			check(metadata.AssetGuid.isValid());
+			check(metadata.AssetType != EAssetType::Unknown);
+
+			FE_SERIALIZE_JSON(ResourceMetadata, archive, metadata, Version);
+			FE_SERIALIZE_JSON(ResourceMetadata, archive, metadata, CreationTime);
+			FE_SERIALIZE_GUID_JSON(ResourceMetadata, archive, metadata, AssetGuid);
+			FE_SERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType);
+			FE_SERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
+
+			return archive;
+		}
+
+		virtual const json& Deserialize(const json& archive)
+		{
+			ResourceMetadata& metadata = *this;
+			FE_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, Version);
+			FE_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, CreationTime);
+			FE_DESERIALIZE_GUID_JSON(ResourceMetadata, archive, metadata, AssetGuid);
+			FE_DESERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType, EAssetType::Unknown);
+			FE_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
+
+			check(metadata.IsLatestVersion());
+			check(metadata.CreationTime > 0);
+			check(metadata.AssetGuid.isValid());
+			check(metadata.AssetType != EAssetType::Unknown);
+
+			return archive;
 		}
 
 	public:
-		constexpr static uint64_t CurrentVersion = 1;
+		using CommonMetadata = ResourceMetadata;
+
+		constexpr static uint64_t BaseVersion = 2;
+		constexpr static uint64_t LatestVersion = BaseVersion + CurrentVersion;
+
 		uint64_t Version = 0;
 		uint64_t CreationTime = 0;
 		xg::Guid AssetGuid{};
@@ -82,37 +113,60 @@ namespace fe
 		bool bIsPersistent = false;
 	};
 
-	nlohmann::json& operator<<(nlohmann::json& archive, const ResourceMetadata& metadata);
-	const nlohmann::json& operator>>(const nlohmann::json& archive, ResourceMetadata& metadata);
-
 	/* Common Asset Metadata */
+	template <uint64_t CurrentVersion>
 	struct AssetMetadata
 	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive, AssetMetadata& metadata);
-
 	public:
 		[[nodiscard]]
-		static inline auto MakeDefault()
+		bool IsLatestVersion() const
 		{
-			return AssetMetadata{ .Version = CurrentVersion };
+			return Version == AssetMetadata::LatestVersion;
 		}
 
-		[[nodiscard]]
-		bool IsValidVersion() const
+		virtual json& Serialize(json& archive) const
 		{
-			return Version == AssetMetadata::CurrentVersion;
+			const AssetMetadata& metadata = *this;
+			check(metadata.IsLatestVersion());
+			check(metadata.Guid.isValid());
+			check(!metadata.SrcResPath.empty());
+			check(metadata.Type != EAssetType::Unknown);
+
+			FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, Version);
+			FE_SERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
+			FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
+			FE_SERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type);
+			FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
+
+			return archive;
+		}
+
+		virtual const json& Deserialize(const json& archive)
+		{
+			AssetMetadata& metadata = *this;
+			FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, Version);
+			FE_DESERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
+			FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
+			FE_DESERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type, EAssetType::Unknown);
+			FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
+
+			check(metadata.IsLatestVersion());
+			check(metadata.Guid.isValid());
+			check(!metadata.SrcResPath.empty());
+			check(metadata.Type != EAssetType::Unknown);
+			return archive;
 		}
 
 	public:
-		constexpr static size_t CurrentVersion = 1;
+		using CommonMetadata = AssetMetadata;
+
+		constexpr static size_t BaseVersion = 2;
+		constexpr static size_t LatestVersion = BaseVersion + CurrentVersion;
+
 		uint64_t Version = 0;
 		xg::Guid Guid{};
 		std::string SrcResPath{};
 		EAssetType Type = EAssetType::Unknown;
 		bool bIsPersistent = false;
 	};
-
-	nlohmann::json& operator<<(nlohmann::json& archive, const AssetMetadata& metadata);
-	const nlohmann::json& operator>>(const nlohmann::json& archive, AssetMetadata& metadata);
 } // namespace fe

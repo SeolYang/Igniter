@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Asset\AssetCache.h" />
     <ClInclude Include="..\Source\Frieren\Asset\Common.h" />
+    <ClInclude Include="..\Source\Frieren\Asset\Mesh.h" />
     <ClInclude Include="..\Source\Frieren\Asset\Texture.h" />
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\Source\Frieren\Core\Container.h" />
@@ -94,6 +95,7 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Asset\AssetCache.cpp" />
     <ClCompile Include="..\Source\Frieren\Asset\Common.cpp" />
+    <ClCompile Include="..\Source\Frieren\Asset\Mesh.cpp" />
     <ClCompile Include="..\Source\Frieren\Asset\Texture.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp" />

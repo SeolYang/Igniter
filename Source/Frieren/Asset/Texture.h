@@ -27,27 +27,22 @@ namespace fe
 		Tex3D
 	};
 
-	struct TextureImportConfig
+	struct TextureImportConfig : public ResourceMetadata<2>
 	{
 		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config);
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
 
 	public:
-		[[nodiscard]]
-		static inline auto MakeDefault()
+		[[nodiscard]] static TextureImportConfig MakeVersionedDefault()
 		{
-			return TextureImportConfig{ .Version = CurrentVersion };
+			TextureImportConfig newConfig{};
+			newConfig.Version = TextureImportConfig::LatestVersion;
+			return newConfig;
 		}
 
-		[[nodiscard]]
-		bool IsValidVersion() const
-		{
-			return Version == TextureImportConfig::CurrentVersion;
-		}
-
+		virtual json& Serialize(json& archive) const override;
+		virtual const json& Deserialize(const json& archive) override;
 	public:
-		constexpr static size_t CurrentVersion = 2;
-		size_t Version = 0;
 		ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
 		bool bGenerateMips = false;
 
@@ -61,58 +56,25 @@ namespace fe
 	nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config);
 	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
 
-	struct TextureResourceMetadata
-	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureResourceMetadata& metadata);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureResourceMetadata& metadata);
-
-	public:
-		[[nodiscard]]
-		static inline auto MakeDefault()
-		{
-			return TextureResourceMetadata{ .Version = CurrentVersion,
-											.Common = ResourceMetadata::MakeDefault(),
-											.ImportConfig = TextureImportConfig::MakeDefault() };
-		}
-		[[nodiscard]]
-		bool IsValidVersion() const
-		{
-			return Version == TextureResourceMetadata::CurrentVersion && Common.IsValidVersion() && ImportConfig.IsValidVersion();
-		}
-
-	public:
-		constexpr static size_t CurrentVersion = 1;
-		size_t Version = 0;
-		ResourceMetadata Common{};
-		TextureImportConfig ImportConfig{};
-	};
-
-	nlohmann::json& operator<<(nlohmann::json& archive, const TextureResourceMetadata& metadata);
-	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureResourceMetadata& metadata);
-
-	struct TextureLoadConfig
+	struct TextureLoadConfig : public AssetMetadata<4>
 	{
 		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config);
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
 
 	public:
-		[[nodiscard]]
-		static inline auto MakeDefault()
+		[[nodiscard]] static inline auto MakeVersionedDefault()
 		{
-			return TextureLoadConfig{ .Version = CurrentVersion };
+			TextureLoadConfig newConfig{};
+			newConfig.Version = LatestVersion;
+			return newConfig;
 		}
+
+		virtual json& Serialize(json& archive) const override;
+		virtual const json& Deserialize(const json& archive) override;
 
 		[[nodiscard]] bool IsArray() const { return Dimension != ETextureDimension::Tex3D && DepthOrArrayLength > 1; }
 
-		[[nodiscard]]
-		bool IsValidVersion() const
-		{
-			return Version == TextureLoadConfig::CurrentVersion;
-		}
-
 	public:
-		constexpr static size_t CurrentVersion = 3;
-		size_t Version = 0;
 		DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
 		ETextureDimension Dimension = ETextureDimension::Tex2D;
 		uint32_t Width = 1;
@@ -132,43 +94,13 @@ namespace fe
 	nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config);
 	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
 
-	struct TextureAssetMetadata
-	{
-		friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureAssetMetadata& metadata);
-		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureAssetMetadata& metadata);
-
-	public:
-		[[nodiscard]]
-		static inline auto MakeDefault()
-		{
-			return TextureAssetMetadata{ .Version = CurrentVersion,
-										 .Common = AssetMetadata::MakeDefault(),
-										 .LoadConfig = TextureLoadConfig::MakeDefault() };
-		}
-
-		[[nodiscard]]
-		bool IsValidVersion() const
-		{
-			return Version == TextureAssetMetadata::CurrentVersion && Common.IsValidVersion() && LoadConfig.IsValidVersion();
-		}
-
-	public:
-		constexpr static size_t CurrentVersion = 1;
-		size_t Version = 0;
-		AssetMetadata Common{};
-		TextureLoadConfig LoadConfig{};
-	};
-
-	nlohmann::json& operator<<(nlohmann::json& archive, const TextureAssetMetadata& metadata);
-	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureAssetMetadata& metadata);
-
 	class TextureImporter
 	{
 	public:
 		TextureImporter();
 		~TextureImporter();
 
-		bool Import(const String resPathStr,
+		std::optional<xg::Guid> Import(const String resPathStr,
 					std::optional<TextureImportConfig> config = std::nullopt,
 					const bool bIsPersistent = false);
 
@@ -184,7 +116,7 @@ namespace fe
 	struct Texture
 	{
 	public:
-		TextureAssetMetadata Metadata{};
+		TextureLoadConfig LoadConfig{};
 		Handle<GpuTexture, DeferredDestroyer<GpuTexture>> TextureInstance{}; // Using Deferred Deallocation
 		Handle<GpuView, GpuViewManager*> FullRangeSrv{};
 		RefHandle<GpuView> TexSampler{};

@@ -22,9 +22,6 @@
     <Filter Include="Source\ImGui">
       <UniqueIdentifier>{13d19af1-2a32-4de0-96a7-7a2dfced32f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Component">
-      <UniqueIdentifier>{83398e53-bb19-4274-b361-b404f0cd0e01}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader">
       <UniqueIdentifier>{d0dbc9e3-27a4-412c-a6ed-51cd6c470d0a}</UniqueIdentifier>
     </Filter>
@@ -48,6 +45,12 @@
     </Filter>
     <Filter Include="Thirdparty\WinPixEventRuntime">
       <UniqueIdentifier>{d1b1f73c-4a4e-41dc-aa8c-5c0d1456bf88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render\Component">
+      <UniqueIdentifier>{145c88a3-2792-4d2b-ba4b-6f8ef352a580}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Gameplay\Component">
+      <UniqueIdentifier>{10f5bb57-159e-4f17-858e-79e8e07e263a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -183,9 +186,6 @@
     <ClInclude Include="..\Source\Frieren\D3D12\GpuView.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h">
-      <Filter>Source\Gameplay</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Math\Common.h">
       <Filter>Source\Math</Filter>
     </ClInclude>
@@ -231,9 +231,6 @@
     <ClInclude Include="..\Source\Frieren\Render\Renderer.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Render\StaticMeshComponent.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Render\TempConstantBufferAllocator.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
@@ -263,6 +260,15 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Core\TypeUtils.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\StaticMeshComponent.h">
+      <Filter>Source\Render\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h">
+      <Filter>Source\Gameplay\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Asset\Mesh.h">
+      <Filter>Source\Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -385,6 +391,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Render\GpuViewManager.cpp">
       <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Asset\Mesh.cpp">
+      <Filter>Source\Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -23,11 +23,11 @@ namespace fe
 	FE_DEFINE_LOG_CATEGORY(TextureLoaderErr, ELogVerbosity::Error)
 	FE_DEFINE_LOG_CATEGORY(TextureLoaderFatal, ELogVerbosity::Fatal)
 
-	nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config)
+	json& TextureImportConfig::Serialize(json& archive) const
 	{
-		check(config.Version == TextureImportConfig::CurrentVersion);
+		CommonMetadata::Serialize(archive);
 
-		FE_SERIALIZE_JSON(TextureImportConfig, archive, config, Version);
+		const TextureImportConfig& config = *this;
 		FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode);
 		FE_SERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
 		FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter);
@@ -38,53 +38,29 @@ namespace fe
 		return archive;
 	}
 
-	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config)
+	const json& TextureImportConfig::Deserialize(const json& archive)
 	{
-		config = {};
-		FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, Version);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode,
-								 ETextureCompressionMode::None);
+		CommonMetadata::Deserialize(archive);
+
+		TextureImportConfig& config = *this;
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
 		FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter,
-								 D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU,
-								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV,
-								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW,
-								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-
-		check(config.Version == TextureImportConfig::CurrentVersion);
-		return archive;
-	}
-
-	nlohmann::json& operator<<(nlohmann::json& archive, const TextureResourceMetadata& metadata)
-	{
-		check(metadata.Version == TextureResourceMetadata::CurrentVersion);
-
-		FE_SERIALIZE_JSON(TextureResourceMetadata, archive, metadata, Version);
-		archive << metadata.Common << metadata.ImportConfig;
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		return archive;
 	}
 
-	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureResourceMetadata& metadata)
+	json& TextureLoadConfig::Serialize(json& archive) const
 	{
-		metadata = {};
-		FE_DESERIALIZE_JSON(TextureResourceMetadata, archive, metadata, Version);
-		archive >> metadata.Common >> metadata.ImportConfig;
+		CommonMetadata::Serialize(archive);
 
-		check(metadata.Version == TextureResourceMetadata::CurrentVersion);
-		return archive;
-	}
-
-	nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config)
-	{
-		check(config.Version == TextureLoadConfig::CurrentVersion);
+		const TextureLoadConfig& config = *this;
 		check(config.Format != DXGI_FORMAT_UNKNOWN);
 		check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
 
-		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Version);
 		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format);
 		FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension);
 		FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
@@ -100,10 +76,11 @@ namespace fe
 		return archive;
 	}
 
-	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config)
+	const json& TextureLoadConfig::Deserialize(const json& archive)
 	{
-		config = {};
-		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Version);
+		CommonMetadata::Deserialize(archive);
+
+		TextureLoadConfig& config = *this;
 		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
 		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
@@ -112,37 +89,33 @@ namespace fe
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
 		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU,
-								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV,
-								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW,
-								 D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
-		check(config.Version == TextureLoadConfig::CurrentVersion);
 		check(config.Format != DXGI_FORMAT_UNKNOWN);
 		check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
 		return archive;
 	}
 
-	nlohmann::json& operator<<(nlohmann::json& archive, const TextureAssetMetadata& metadata)
+	nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config)
 	{
-		check(metadata.Version == TextureAssetMetadata::CurrentVersion);
-
-		FE_SERIALIZE_JSON(TextureAssetMetadata, archive, metadata, Version);
-		archive << metadata.Common << metadata.LoadConfig;
-
-		return archive;
+		return config.Serialize(archive);
 	}
 
-	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureAssetMetadata& metadata)
+	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config)
 	{
-		metadata = {};
-		FE_DESERIALIZE_JSON(TextureAssetMetadata, archive, metadata, Version);
-		archive >> metadata.Common >> metadata.LoadConfig;
+		return config.Deserialize(archive);
+	}
 
-		check(metadata.Version == TextureAssetMetadata::CurrentVersion);
-		return archive;
+	nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config)
+	{
+		return config.Serialize(archive);
+	}
+
+	const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config)
+	{
+		return config.Deserialize(archive);
 	}
 
 	inline bool IsDDSExtnsion(const fs::path& extension)
@@ -254,9 +227,9 @@ namespace fe
 		}
 	}
 
-	bool TextureImporter::Import(const String resPathStr,
-								 std::optional<TextureImportConfig> config /*= std::nullopt*/,
-								 const bool bIsPersistent /*= false*/)
+	std::optional<xg::Guid> TextureImporter::Import(const String resPathStr,
+													std::optional<TextureImportConfig> importConfig /*= std::nullopt*/,
+													const bool bIsPersistent /*= false*/)
 	{
 		FE_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.AsStringView());
 
@@ -264,7 +237,7 @@ namespace fe
 		if (!fs::exists(resPath))
 		{
 			FE_LOG(TextureImporterErr, "The resource does not exist at {}.", resPathStr.AsStringView());
-			return false;
+			return std::nullopt;
 		}
 
 		const fs::path resExtension = resPath.extension();
@@ -305,19 +278,19 @@ namespace fe
 		{
 			FE_LOG(TextureImporterErr, "Found not supported texture extension from \"{}\".",
 				   resPathStr.AsStringView());
-			return false;
+			return std::nullopt;
 		}
 
 		if (FAILED(loadRes))
 		{
 			FE_LOG(TextureImporterErr, "Failed to load texture from {}.", resPathStr.AsStringView());
-			return false;
+			return std::nullopt;
 		}
 
 		/* Get Texture Import Config from metadata file, make default if file does not exists. */
 		bool bPersistencyRequired = bIsPersistent;
 		const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
-		if (!config)
+		if (!importConfig)
 		{
 			if (fs::exists(resMetadataPath))
 			{
@@ -325,22 +298,21 @@ namespace fe
 				const json serializedResMetadata{ json::parse(resMetadataStream) };
 				resMetadataStream.close();
 
-				TextureResourceMetadata texResMetadata{};
-				serializedResMetadata >> texResMetadata;
+				importConfig = TextureImportConfig{};
+				serializedResMetadata >> *importConfig;
 
-				if (!texResMetadata.ImportConfig.IsValidVersion())
+				if (!importConfig->IsLatestVersion())
 				{
 					details::LogVersionMismatch<TextureImportConfig, TextureImporterWarn>(
-						texResMetadata.ImportConfig,
+						*importConfig,
 						resMetadataPath.string());
 				}
 
-				bPersistencyRequired |= texResMetadata.Common.bIsPersistent;
-				config = texResMetadata.ImportConfig;
+				bPersistencyRequired |= importConfig->bIsPersistent;
 			}
 			else
 			{
-				config = TextureImportConfig::MakeDefault();
+				importConfig = TextureImportConfig::MakeVersionedDefault();
 			}
 		}
 
@@ -353,7 +325,7 @@ namespace fe
 			check(!DirectX::IsSRGB(texMetadata.format));
 
 			/* Generate full mipmap chain. */
-			if (config->bGenerateMips)
+			if (importConfig->bGenerateMips)
 			{
 				DirectX::ScratchImage mipChain{};
 				const HRESULT genRes = DirectX::GenerateMipMaps(
@@ -364,7 +336,7 @@ namespace fe
 					FE_LOG(TextureImporterErr, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
 						   genRes, resPathStr.AsStringView());
 
-					return false;
+					return std::nullopt;
 				}
 
 				texMetadata = mipChain.GetMetadata();
@@ -372,9 +344,9 @@ namespace fe
 			}
 
 			/* Compress Texture*/
-			if (config->CompressionMode != ETextureCompressionMode::None)
+			if (importConfig->CompressionMode != ETextureCompressionMode::None)
 			{
-				if (bIsHDRFormat && config->CompressionMode != ETextureCompressionMode::BC6H)
+				if (bIsHDRFormat && importConfig->CompressionMode != ETextureCompressionMode::BC6H)
 				{
 					FE_LOG(TextureImporterWarn,
 						   "The compression method for HDR extension textures is "
@@ -382,10 +354,10 @@ namespace fe
 						   "to be the 'BC6H' algorithm. File: {}",
 						   resPathStr.AsStringView());
 
-					config->CompressionMode = ETextureCompressionMode::BC6H;
+					importConfig->CompressionMode = ETextureCompressionMode::BC6H;
 				}
 				else if (IsGreyScaleFormat(texMetadata.format) &&
-						 config->CompressionMode == ETextureCompressionMode::BC4)
+						 importConfig->CompressionMode == ETextureCompressionMode::BC4)
 				{
 					FE_LOG(TextureImporterWarn,
 						   "The compression method for greyscale-formatted "
@@ -393,15 +365,15 @@ namespace fe
 						   "enforced to be the 'BC4' algorithm. File: {}",
 						   resPathStr.AsStringView());
 
-					config->CompressionMode = ETextureCompressionMode::BC4;
+					importConfig->CompressionMode = ETextureCompressionMode::BC4;
 				}
 
 				auto compFlags = static_cast<unsigned long>(DirectX::TEX_COMPRESS_PARALLEL);
-				const DXGI_FORMAT compFormat = AsBCnFormat(config->CompressionMode, texMetadata.format);
+				const DXGI_FORMAT compFormat = AsBCnFormat(importConfig->CompressionMode, texMetadata.format);
 
 				const bool bIsGPUCodecAvailable = d3d11Device != nullptr &&
-												  (config->CompressionMode == ETextureCompressionMode::BC6H ||
-												   config->CompressionMode == ETextureCompressionMode::BC7);
+												  (importConfig->CompressionMode == ETextureCompressionMode::BC6H ||
+												   importConfig->CompressionMode == ETextureCompressionMode::BC7);
 
 				HRESULT compRes = S_FALSE;
 				DirectX::ScratchImage compTex{};
@@ -436,12 +408,12 @@ namespace fe
 					FE_LOG(TextureImporterErr,
 						   "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
 						   "File: {}",
-						   magic_enum::enum_name(config->CompressionMode),
+						   magic_enum::enum_name(importConfig->CompressionMode),
 						   magic_enum::enum_name(texMetadata.format), magic_enum::enum_name(compFormat),
 						   compRes,
 						   resPathStr.AsStringView());
 
-					return false;
+					return std::nullopt;
 				}
 
 				texMetadata = compTex.GetMetadata();
@@ -454,23 +426,16 @@ namespace fe
 		const xg::Guid newGuid = xg::newGuid();
 
 		/* Configure Texture Resource Metadata */
-		config->Version = TextureImportConfig::CurrentVersion;
-		const TextureResourceMetadata newResMetadata{
-			.Version = TextureResourceMetadata::CurrentVersion,
-			.Common = {
-				.Version = ResourceMetadata::CurrentVersion,
-				.CreationTime = creationTime,
-				.AssetGuid = newGuid,
-				.AssetType = EAssetType::Texture,
-				.bIsPersistent = bPersistencyRequired },
-
-			.ImportConfig = *config
-		};
+		importConfig->Version = TextureImportConfig::LatestVersion;
+		importConfig->CreationTime = creationTime;
+		importConfig->AssetGuid = newGuid;
+		importConfig->AssetType = EAssetType::Texture;
+		importConfig->bIsPersistent = bPersistencyRequired;
 
 		/* Serialize Texture Resource Metadata & Save To File */
 		{
 			json serializedJson{};
-			serializedJson << newResMetadata;
+			serializedJson << *importConfig;
 
 			std::ofstream fileStream{ resMetadataPath.c_str() };
 			fileStream << serializedJson.dump(4);
@@ -479,16 +444,22 @@ namespace fe
 		/* Configure Texture Asset Metadata */
 		texMetadata = targetTex.GetMetadata();
 		const ETextureDimension texDim = AsTexDimension(texMetadata.dimension);
-		const TextureAssetMetadata newAssetMetadata{
-			.Version = TextureAssetMetadata::CurrentVersion,
-			.Common = {
-				.Version = AssetMetadata::CurrentVersion,
-				.Guid = newGuid,
-				.SrcResPath = resPathStr.AsString(),
-				.Type = EAssetType::Texture,
-				.bIsPersistent = bPersistencyRequired },
-			.LoadConfig = { .Version = TextureLoadConfig::CurrentVersion, .Format = texMetadata.format, .Dimension = texDim, .Width = static_cast<uint32_t>(texMetadata.width), .Height = static_cast<uint32_t>(texMetadata.height), .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize), .Mips = static_cast<uint16_t>(texMetadata.mipLevels), .bIsCubemap = texMetadata.IsCubemap(), .Filter = config->Filter, .AddressModeU = config->AddressModeU, .AddressModeV = config->AddressModeV, .AddressModeW = config->AddressModeW }
-		};
+		TextureLoadConfig newLoadConfig = TextureLoadConfig::MakeVersionedDefault();
+		newLoadConfig.Guid = newGuid;
+		newLoadConfig.SrcResPath = resPathStr.AsStringView();
+		newLoadConfig.Type = EAssetType::Texture;
+		newLoadConfig.bIsPersistent = bPersistencyRequired;
+		newLoadConfig.Format = texMetadata.format;
+		newLoadConfig.Dimension = texDim;
+		newLoadConfig.Width = static_cast<uint32_t>(texMetadata.width);
+		newLoadConfig.Height = static_cast<uint32_t>(texMetadata.height);
+		newLoadConfig.DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize);
+		newLoadConfig.Mips = static_cast<uint16_t>(texMetadata.mipLevels);
+		newLoadConfig.bIsCubemap = texMetadata.IsCubemap();
+		newLoadConfig.Filter = importConfig->Filter;
+		newLoadConfig.AddressModeU = importConfig->AddressModeU;
+		newLoadConfig.AddressModeV = importConfig->AddressModeV;
+		newLoadConfig.AddressModeW = importConfig->AddressModeW;
 
 		/* Create Texture Asset root directory if does not exist */
 		{
@@ -505,14 +476,14 @@ namespace fe
 		/* Serialize Texture Asset Metadata & Save To File */
 		{
 			json serializedJson{};
-			serializedJson << newAssetMetadata;
+			serializedJson << newLoadConfig;
 
 			const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newGuid);
 			std::ofstream fileStream{ assetMetadataPath.c_str() };
 			if (!fileStream.is_open())
 			{
 				FE_LOG(TextureImporterErr, "Failed to open asset metadata file {}.", assetMetadataPath.string());
-				return false;
+				return std::nullopt;
 			}
 
 			fileStream << serializedJson.dump(4);
@@ -533,11 +504,11 @@ namespace fe
 		if (FAILED(res))
 		{
 			FE_LOG(TextureImporterErr, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
-			return false;
+			return std::nullopt;
 		}
 
 		FE_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}", resPathStr.AsStringView(), assetPath.string());
-		return true;
+		return std::make_optional(newGuid);
 	}
 
 	std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
@@ -551,40 +522,36 @@ namespace fe
 			return std::nullopt;
 		}
 
-		TextureAssetMetadata assetMetadata{};
+		TextureLoadConfig loadConfig{};
 		std::ifstream assetMetaStream{ assetMetaPath.c_str() };
 		const json serializedAssetMeta{ json::parse(assetMetaStream) };
 		assetMetaStream.close();
 
-		serializedAssetMeta >> assetMetadata;
+		serializedAssetMeta >> loadConfig;
 
 		/* Check Asset Metadata */
-		if (!assetMetadata.IsValidVersion())
+		if (!loadConfig.IsLatestVersion())
 		{
-			details::LogVersionMismatch<TextureAssetMetadata, TextureLoaderWarn>(assetMetadata, assetMetaPath.string());
-			details::LogVersionMismatch<AssetMetadata, TextureLoaderWarn>(assetMetadata.Common, assetMetaPath.string());
-			details::LogVersionMismatch<TextureLoadConfig, TextureLoaderWarn>(assetMetadata.LoadConfig, assetMetaPath.string());
+			details::LogVersionMismatch<TextureLoadConfig, TextureLoaderWarn>(loadConfig, assetMetaPath.string());
 		}
 
-		const AssetMetadata& assetCommon = assetMetadata.Common;
-		if (assetCommon.Guid != guid)
+		if (loadConfig.Guid != guid)
 		{
 			FE_LOG(TextureLoaderErr, "Asset guid does not match. Expected: {}, Found: {}",
-				   guid.str(), assetCommon.Guid.str());
+				   guid.str(), loadConfig.Guid.str());
 			return std::nullopt;
 		}
 
-		if (assetCommon.Type != EAssetType::Texture)
+		if (loadConfig.Type != EAssetType::Texture)
 		{
 			FE_LOG(TextureLoaderErr, "Asset type does not match. Expected: {}, Found: {}",
 				   magic_enum::enum_name(EAssetType::Texture),
-				   magic_enum::enum_name(assetCommon.Type));
+				   magic_enum::enum_name(loadConfig.Type));
 
 			return std::nullopt;
 		}
 
 		/* Check TextureLoadConfig data */
-		const TextureLoadConfig& loadConfig = assetMetadata.LoadConfig;
 		if (loadConfig.Width == 0 || loadConfig.Height == 0 || loadConfig.DepthOrArrayLength == 0 || loadConfig.Mips == 0)
 		{
 			FE_LOG(TextureLoaderErr, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
@@ -769,10 +736,10 @@ namespace fe
 			return std::nullopt;
 		}
 
-		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}.", assetPath.string(), assetMetadata.Common.SrcResPath);
+		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}.", assetPath.string(), loadConfig.SrcResPath);
 		/* #todo Layout transition COMMON -> SHADER_RESOURCE? */
 		return Texture{
-			.Metadata = assetMetadata,
+			.LoadConfig = loadConfig,
 			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
 			.FullRangeSrv = std::move(srv),
 			.TexSampler = gpuViewManager.RequestSampler(D3D12_SAMPLER_DESC{

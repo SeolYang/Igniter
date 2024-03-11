@@ -56,8 +56,8 @@ int main()
 		fe::Engine engine;
 
 		// #test Asset System Test
-		// TextureImporter importer;
-		// importer.Import(String("Resources\\djmax_1st_anv.png"));
+		//TextureImporter importer;
+		//xg::Guid importedTexGuid = *importer.Import(String("Resources\\djmax_1st_anv.png"));
 
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
@@ -76,7 +76,7 @@ int main()
 		const auto enemy = defaultWorld->Create();
 
 		std::optional<Texture> texture = TextureLoader::Load(
-			xg::Guid("244a1936-d030-443a-88fb-32190bdf6432"),
+			xg::Guid("97a69908-99a9-493a-9485-510254ec10c3"),
 			handleManager, renderDevice, gpuUploader, gpuViewManager);
 
 		/* Initialize Buffers */
