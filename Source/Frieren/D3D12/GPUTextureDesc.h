@@ -63,7 +63,6 @@ namespace fe
 		bool IsMSAAEnabled() const { return bIsMSAAEnabled; }
 		bool IsAllowSimultaneousAccess() const { return bIsAllowSimultaneousAccess; }
 
-		/* #wip GpuViewTexture Subresource 손보기 */
 		D3D12MA::ALLOCATION_DESC GetAllocationDesc() const;
 		std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ConvertToNativeDesc(const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
 		std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ConvertToNativeDesc(const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;

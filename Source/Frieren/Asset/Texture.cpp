@@ -198,8 +198,7 @@ namespace fe
 		}
 		else if (compMode == ETextureCompressionMode::BC6H)
 		{
-			// #wip_todo 정확히 HDR 파일을 읽어왔을 때, 어떤 포맷으로 들어오는지
-			// 확인 필
+			// #todo 정확히 HDR 파일을 읽어왔을 때, 어떤 포맷으로 들어오는지 확인 필
 			if (IsUnsignedFormat(format))
 			{
 				return DXGI_FORMAT_BC6H_UF16;
@@ -771,7 +770,7 @@ namespace fe
 		}
 
 		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}.", assetPath.string(), assetMetadata.Common.SrcResPath);
-		/* #wip_todo Layout transition COMMON -> SHADER_RESOURCE? */
+		/* #todo Layout transition COMMON -> SHADER_RESOURCE? */
 		return Texture{
 			.Metadata = assetMetadata,
 			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },

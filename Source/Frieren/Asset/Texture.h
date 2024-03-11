@@ -10,10 +10,7 @@ namespace fe
 {
 	class GpuTexture;
 	class GpuView;
-} // namespace fe
 
-namespace fe
-{
 	enum class ETextureCompressionMode
 	{
 		None,

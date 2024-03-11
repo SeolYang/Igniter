@@ -29,13 +29,13 @@ namespace fe
 	class ShaderCompileDesc
 	{
 	public:
-		String					 SourcePath;
-		EShaderType				 Type;
-		bool					 bPackMarticesInRowMajor = false;				   // -Zpr
+		String SourcePath;
+		EShaderType Type;
+		bool bPackMarticesInRowMajor = false;									   // -Zpr
 		EShaderOptimizationLevel OptimizationLevel = EShaderOptimizationLevel::O3; // -Od~-O3
-		bool					 bDisableValidation = false;					   // -Vd
-		bool					 bTreatWarningAsErrors = false;					   // -WX
-		bool					 bForceEnableDebugInformation = false;			   // -Zi
+		bool bDisableValidation = false;										   // -Vd
+		bool bTreatWarningAsErrors = false;										   // -WX
+		bool bForceEnableDebugInformation = false;								   // -Zi
 	};
 
 	// #todo dxil.dll 빌드 후 이벤트로 옮겨주기
@@ -46,11 +46,11 @@ namespace fe
 		~ShaderBlob() = default;
 
 		EShaderType GetType() const { return type; }
-		auto&		GetNative() { return *shader.Get(); }
+		auto& GetNative() { return *shader.Get(); }
 
 	private:
-		const EShaderType  type;
+		const EShaderType type;
 		ComPtr<IDxcResult> compiledResult;
-		ComPtr<IDxcBlob>   shader;
+		ComPtr<IDxcBlob> shader;
 	};
 } // namespace fe

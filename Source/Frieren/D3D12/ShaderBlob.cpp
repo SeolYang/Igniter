@@ -103,8 +103,8 @@ namespace fe
 		ComPtr<IDxcLibrary> library;
 		verify_succeeded(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
 
-		uint32_t				 codePage = CP_UTF8;
-		const std::wstring		 wideSourcePath = desc.SourcePath.AsWideString();
+		uint32_t codePage = CP_UTF8;
+		const std::wstring wideSourcePath = desc.SourcePath.AsWideString();
 		ComPtr<IDxcBlobEncoding> sourceBlob;
 		verify_succeeded(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
 
