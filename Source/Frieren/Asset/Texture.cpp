@@ -296,6 +296,10 @@ namespace fe
 		if (!importConfig)
 		{
 			importConfig = details::LoadMetadataFromFile<TextureImportConfig, TextureImporterWarn>(resMetadataPath);
+			if (!importConfig)
+			{
+				importConfig = MakeVersionedDefault<TextureImportConfig>();
+			}
 		}
 
 		const bool bPersistencyRequired = bIsPersistent || importConfig->bIsPersistent;

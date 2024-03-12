@@ -178,9 +178,8 @@ namespace fe
 				   instance.Version, T::LatestVersion, infoMessage);
 		}
 
-		/* Return Versioned Default Instance, if file does not exist at provided path. */
 		template <typename T, typename MismatchLogCategory = fe::LogWarn>
-		T LoadMetadataFromFile(const fs::path& resMetaPath)
+		std::optional<T> LoadMetadataFromFile(const fs::path& resMetaPath)
 		{
 			if (fs::exists(resMetaPath))
 			{
@@ -199,7 +198,7 @@ namespace fe
 				return metadata;
 			}
 
-			return MakeVersionedDefault<T>();
+			return std::nullopt;
 		}
 	} // namespace details
 } // namespace fe
