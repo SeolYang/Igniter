@@ -66,6 +66,8 @@ namespace fe
 	{
 		check(NumVertices > 0);
 		check(NumIndices > 0);
+		check(CompressedVerticesSize > 0);
+		check(CompressedIndicesSize > 0);
 
 		CommonMetadata::Serialize(archive);
 
@@ -73,6 +75,8 @@ namespace fe
 		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
 		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
 		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
+		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSize);
+		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSize);
 
 		return archive;
 	}
@@ -87,9 +91,13 @@ namespace fe
 		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
 		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
 		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
+		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSize);
+		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSize);
 
 		check(NumVertices > 0);
 		check(NumIndices > 0);
+		check(CompressedVerticesSize > 0);
+		check(CompressedIndicesSize > 0);
 		return archive;
 	}
 
@@ -147,22 +155,58 @@ namespace fe
 		}
 	}
 
-	static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bPersistencyRequired, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
+	static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bPersistencyRequired, const std::string_view meshName, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices)
 	{
 		if (!fs::exists(details::StaticMeshAssetRootPath))
 		{
 			details::CreateAssetDirectories();
 		}
 
+		const xg::Guid newGuid = xg::newGuid();
+		const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, newGuid);
+		const std::string_view resPathStrView = resPathStr.AsStringView();
+		const std::string assetPathStr = assetPath.string();
+
+		/* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
+		constexpr float CacheHitRatioThreshold = 1.02f;
+		meshopt_optimizeVertexCacheStrip(indices.data(), indices.data(), indices.size(), vertices.size());
+		meshopt_optimizeOverdraw(indices.data(), indices.data(), indices.size(), &vertices[0].Position.x, vertices.size(), sizeof(StaticMeshVertex), CacheHitRatioThreshold);
+		meshopt_optimizeVertexFetch(vertices.data(), indices.data(), indices.size(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex));
+
+		FE_LOG(ModelImporterInfo, "Optimization Statistics for {}({}.{}).", assetPathStr, resPathStrView, meshName);
+		const auto nvidiaVcs = meshopt_analyzeVertexCache(indices.data(), indices.size(), vertices.size(), 32, 32, 32);
+		const auto amdVcs = meshopt_analyzeVertexCache(indices.data(), indices.size(), vertices.size(), 14, 64, 128);
+		const auto intelVcs = meshopt_analyzeVertexCache(indices.data(), indices.size(), vertices.size(), 128, 0, 0);
+		const auto vfs = meshopt_analyzeVertexFetch(indices.data(), indices.size(), vertices.size(), sizeof(StaticMeshVertex));
+		const auto os = meshopt_analyzeOverdraw(indices.data(), indices.size(), &vertices[0].Position.x, vertices.size(), sizeof(StaticMeshVertex));
+
+		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
+		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
+		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
+		FE_LOG(ModelImporterInfo, "Overfecth: {}", vfs.overfetch);
+		FE_LOG(ModelImporterInfo, "Overdraw: {}", os.overdraw);
+
+		/* Vertex/Index buffer compression */
+		meshopt_encodeVertexVersion(0);
+		meshopt_encodeIndexVersion(1);
+
+		std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(vertices.size(), sizeof(StaticMeshVertex)));
+		std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(indices.size(), vertices.size()));
+
+		encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex)));
+		encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(), indices.data(), indices.size()));
+
 		auto newStaticMeshLoadConf = MakeVersionedDefault<StaticMeshLoadConfig>();
 		newStaticMeshLoadConf.CreationTime = Timer::Now();
-		newStaticMeshLoadConf.Guid = xg::newGuid();
+		newStaticMeshLoadConf.Guid = newGuid;
 		newStaticMeshLoadConf.SrcResPath = resPathStr;
 		newStaticMeshLoadConf.Type = EAssetType::StaticMesh;
 		newStaticMeshLoadConf.bIsPersistent = bPersistencyRequired;
 		newStaticMeshLoadConf.Name = meshName;
 		newStaticMeshLoadConf.NumVertices = vertices.size();
 		newStaticMeshLoadConf.NumIndices = indices.size();
+		newStaticMeshLoadConf.CompressedVerticesSize = encodedVertices.size();
+		newStaticMeshLoadConf.CompressedIndicesSize = encodedIndices.size();
 
 		const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, newStaticMeshLoadConf.Guid);
 		if (!details::SaveSerializedToFile(newMetaPath, newStaticMeshLoadConf))
@@ -171,7 +215,6 @@ namespace fe
 			return std::nullopt;
 		}
 
-		const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, newStaticMeshLoadConf.Guid);
 		std::ofstream dataFileStream(assetPath.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
 		if (!dataFileStream.is_open())
 		{
@@ -179,8 +222,8 @@ namespace fe
 			return std::nullopt;
 		}
 
-		dataFileStream.write(reinterpret_cast<const char*>(vertices.data()), vertices.size() * sizeof(vertices[0]));
-		dataFileStream.write(reinterpret_cast<const char*>(indices.data()), indices.size() * sizeof(indices[0]));
+		dataFileStream.write(reinterpret_cast<const char*>(encodedVertices.data()), encodedVertices.size());
+		dataFileStream.write(reinterpret_cast<const char*>(encodedIndices.data()), encodedIndices.size());
 		dataFileStream.close();
 
 		return newStaticMeshLoadConf.Guid;
@@ -188,8 +231,10 @@ namespace fe
 
 	std::vector<xg::Guid> ModelImporter::ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> importConfig /*= std::nullopt*/, const bool bIsPersistent /*= false*/)
 	{
-		FE_LOG(ModelImporterInfo, "Importing resource {} as static mesh assets ...", resPathStr.AsStringView());
+		TempTimer tempTimer;
+		tempTimer.Begin();
 
+		FE_LOG(ModelImporterInfo, "Importing resource {} as static mesh assets ...", resPathStr.AsStringView());
 		const fs::path resPath{ resPathStr.AsStringView() };
 		if (!fs::exists(resPath))
 		{
@@ -317,7 +362,7 @@ namespace fe
 			FE_LOG(ModelImporterErr, "Failed to save resource metadata to {}.", resMetaPath.string());
 		}
 
-		FE_LOG(ModelImporterInfo, "Successfully imported resource {} as static mesh assets.", resPathStr.AsStringView());
+		FE_LOG(ModelImporterInfo, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.AsStringView(), tempTimer.End());
 		return importedStaticMeshGuid;
 	}
 

@@ -47,6 +47,9 @@ namespace fe
 		std::string Name{};
 		size_t NumVertices{ 0 };
 		size_t NumIndices{ 0 };
+		size_t CompressedVerticesSize{ 0 };
+		size_t CompressedIndicesSize{ 0 };
+		/* #sy_todo Add AABB Info */
 		// std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
 	};
 

@@ -38,6 +38,16 @@ namespace fe
 
 	private:
 		std::chrono::steady_clock::time_point begin = std::chrono::high_resolution_clock::now();
-		std::chrono::nanoseconds			  deltaTime = std::chrono::nanoseconds(0);
+		std::chrono::nanoseconds deltaTime = std::chrono::nanoseconds(0);
+	};
+
+	struct TempTimer
+	{
+	public:
+		void Begin() { begin = Timer::Now(); }
+		size_t End() const { return Timer::Now() - begin; }
+
+	public:
+		size_t begin = 0;
 	};
 } // namespace fe

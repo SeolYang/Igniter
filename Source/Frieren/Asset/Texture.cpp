@@ -235,6 +235,8 @@ namespace fe
 													std::optional<TextureImportConfig> importConfig /*= std::nullopt*/,
 													const bool bIsPersistent /*= false*/)
 	{
+		TempTimer tempTimer;
+		tempTimer.Begin();
 		FE_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.AsStringView());
 
 		const fs::path resPath{ resPathStr.AsStringView() };
@@ -469,12 +471,15 @@ namespace fe
 			return std::nullopt;
 		}
 
-		FE_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}", resPathStr.AsStringView(), assetPath.string());
+		FE_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.AsStringView(), assetPath.string(), tempTimer.End());
 		return std::make_optional(newLoadConfig.Guid);
 	}
 
 	std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
 	{
+		TempTimer tempTimer;
+		tempTimer.Begin();
+
 		const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::Texture, guid);
 		FE_LOG(TextureLoaderInfo, "Load texture asset from {}...", assetMetaPath.string());
 
@@ -698,7 +703,7 @@ namespace fe
 			return std::nullopt;
 		}
 
-		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}.", assetPath.string(), loadConfig.SrcResPath);
+		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}. Elapsed: {} ms", assetPath.string(), loadConfig.SrcResPath, tempTimer.End());
 		/* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
 		return Texture{
 			.LoadConfig = loadConfig,
