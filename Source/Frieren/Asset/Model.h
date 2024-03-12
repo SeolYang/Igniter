@@ -7,7 +7,6 @@ namespace fe
 	class GpuBuffer;
 	class GpuView;
 
-	/* Static Mesh */
 	struct StaticMeshImportConfig : public ResourceMetadata<1>
 	{
 		friend json& operator<<(json& archive, const StaticMeshImportConfig& config);
@@ -23,11 +22,12 @@ namespace fe
 		bool bSplitLargeMeshes = false;
 		bool bPreTransformVertices = false;
 		bool bImproveCacheLocality = false;
-		bool bGenerateUvCoors = false;
-		bool bFlipUvs = false;
+		bool bGenerateUVCoords = false;
+		bool bFlipUVs = false;
 		bool bFlipWindingOrder = false; /* IF bFlipWindingOrder: CCW -> CW */
 		bool bGenerateBoundingBoxes = false;
-
+		bool bImportTextures = false;  /* Only if textures does not imported before. */
+		bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
 	};
 
 	json& operator<<(json& archive, const StaticMeshImportConfig& config);
@@ -43,25 +43,15 @@ namespace fe
 		virtual const json& Deserialize(const json& archive) override;
 
 	public:
+		std::string Name{};
 		size_t NumVertices{ 0 };
 		size_t NumIndices{ 0 };
-
+		// std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
 	};
 
 	json& operator<<(json& archive, const StaticMeshLoadConfig& config);
 	const json& operator>>(const json& archive, StaticMeshLoadConfig& config);
 
-	struct StaticMesh
-	{
-	public:
-		StaticMeshLoadConfig LoadConfig;
-		Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> VertexBufferInstance;
-		Handle<GpuView, GpuViewManager*> VertexBufferSRV; 
-		Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> IndexBufferInstance;
-		Handle<GpuView, GpuViewManager*> IndexBufferView;
-	};
-
-	/* Skeletal Mesh */
 	struct SkeletalMeshImportConfig : public ResourceMetadata<1>
 	{
 		friend json& operator<<(json& archive, const SkeletalMeshImportConfig& config);
@@ -92,14 +82,26 @@ namespace fe
 	json& operator<<(json& archive, const SkeletalMeshLoadConfig& config);
 	const json& operator>>(const json& archive, SkeletalMeshLoadConfig& config);
 
-	/* Importer & Loader */
+	class TextureImporter;
 	class ModelImporter
 	{
 	public:
 		/* #wip_todo Impl Import as Static Meshes */
-		std::vector<xg::Guid> ImportAsStatic(const String resPathStr, std::optional<StaticMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
+		std::vector<xg::Guid> ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
 		/* #todo Impl import as Skeletal Meshes */
 		std::vector<xg::Guid> ImportAsSkeletal(const String resPathStr, std::optional<SkeletalMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
+	};
+
+	/* Static Mesh */
+	struct StaticMesh
+	{
+	public:
+		StaticMeshLoadConfig LoadConfig;
+		Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> VertexBufferInstance;
+		Handle<GpuView, GpuViewManager*> VertexBufferSRV;
+		Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> IndexBufferInstance;
+		Handle<GpuView, GpuViewManager*> IndexBufferView;
+		// RefHandle<Material>
 	};
 
 	class StaticMeshLoader

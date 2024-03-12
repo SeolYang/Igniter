@@ -159,6 +159,11 @@ namespace fe
 		return newData;
 	}
 
+	inline bool HasImportedBefore(const fs::path& resPath)
+	{
+		return fs::exists(MakeResourceMetadataPath(resPath));
+	}
+
 	namespace details
 	{
 		constexpr inline std::string_view MetadataExt = ".metadata";
