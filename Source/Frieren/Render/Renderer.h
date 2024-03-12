@@ -13,7 +13,7 @@ namespace fe
 	class Fence;
 
 #pragma region test
-	// #test
+	// #sy_test
 	class GpuBuffer;
 	class GpuTexture;
 	class ShaderBlob;
@@ -65,7 +65,7 @@ namespace fe
 		TempConstantBufferAllocator tempConstantBufferAllocator;
 
 #pragma region test
-		// #test
+		// #sy_test
 		std::unique_ptr<ShaderBlob> vs;
 		std::unique_ptr<ShaderBlob> ps;
 		std::unique_ptr<RootSignature> bindlessRootSignature;

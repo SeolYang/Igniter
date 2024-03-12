@@ -4,7 +4,7 @@
 #include <D3D12/DescriptorHeap.h>
 
 #pragma region test
-// #test
+// #sy_test
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/ShaderBlob.h>
@@ -84,10 +84,6 @@ namespace fe
 		depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
 		dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{ .MipSlice = 0 });
 
-		/* #todo 배리어만 적용하는 방법 찾아보기
-		* D3D12 WARNING: ID3D12CommandQueue::ExecuteCommandLists: ExecuteCommandLists references command lists that have recorded only Barrier commands. Since there is no other GPU work to synchronize against, all barriers should use AccessAfter / AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS and SyncBefore / SyncAfter = D3D12_BARRIER_SYNC_NONE. This information can be used as an optimization hint by some drivers. [ EXECUTION WARNING #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS]
-		D3D12: **BREAK** enabled for the previous message, which was: [ WARNING EXECUTION #1356: NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS ]
-		*/
 		auto cmdCtx = gfxCmdCtxPool.Submit();
 		cmdCtx->Begin();
 		{

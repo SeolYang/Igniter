@@ -28,12 +28,13 @@ namespace fe
 		bool bGenerateBoundingBoxes = false;
 		bool bImportTextures = false;  /* Only if textures does not imported before. */
 		bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
+		bool bMergeMeshes = false;	   /* If enabled, Ignore 'bSplitLargeMeshes' and force enable 'PreTransformVertices' */
 	};
 
 	json& operator<<(json& archive, const StaticMeshImportConfig& config);
 	const json& operator>>(const json& archive, StaticMeshImportConfig& config);
 
-	struct StaticMeshLoadConfig : public ResourceMetadata<1>
+	struct StaticMeshLoadConfig : public AssetMetadata<1>
 	{
 		friend json& operator<<(json& archive, const StaticMeshLoadConfig& config);
 		friend const json& operator>>(const json& archive, StaticMeshLoadConfig& config);
@@ -86,10 +87,10 @@ namespace fe
 	class ModelImporter
 	{
 	public:
-		/* #wip_todo Impl Import as Static Meshes */
-		std::vector<xg::Guid> ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
-		/* #todo Impl import as Skeletal Meshes */
-		std::vector<xg::Guid> ImportAsSkeletal(const String resPathStr, std::optional<SkeletalMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
+		/* #sy_wip_todo Impl Import as Static Meshes */
+		static std::vector<xg::Guid> ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
+		/* #sy_todo Impl import as Skeletal Meshes */
+		static std::vector<xg::Guid> ImportAsSkeletal(const String resPathStr, std::optional<SkeletalMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
 	};
 
 	/* Static Mesh */

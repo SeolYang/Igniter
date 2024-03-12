@@ -68,12 +68,6 @@ namespace fe
 		check(IsValid());
 		check(targetTexture);
 		check(syncBefore != syncAfter || accessBefore != accessAfter || layoutBefore != layoutAfter);
-		// #todo 서브리소스 범위 체크
-		// const auto& desc = targetTexture.GetDesc();
-		// check(...);
-
-		// #todo 커맨드 리스트 타입별 배리어 유효성 체크
-		// check(IsValidFor(cmdListTargetQueueType, accessAfter) && ...);
 
 		pendingTextureBarriers.emplace_back(D3D12_TEXTURE_BARRIER{ .SyncBefore = syncBefore,
 																   .SyncAfter = syncAfter,

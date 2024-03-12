@@ -175,7 +175,7 @@ namespace fe
 		}
 		else if (compMode == ETextureCompressionMode::BC6H)
 		{
-			// #todo 정확히 HDR 파일을 읽어왔을 때, 어떤 포맷으로 들어오는지 확인 필
+			// #sy_todo 정확히 HDR 파일을 읽어왔을 때, 어떤 포맷으로 들어오는지 확인 필
 			if (IsUnsignedFormat(format))
 			{
 				return DXGI_FORMAT_BC6H_UF16;
@@ -240,7 +240,7 @@ namespace fe
 		const fs::path resPath{ resPathStr.AsStringView() };
 		if (!fs::exists(resPath))
 		{
-			FE_LOG(TextureImporterErr, "The resource does not exist at {}.", resPathStr.AsStringView());
+			FE_LOG(TextureImporterFatal, "The resource does not exist at {}.", resPathStr.AsStringView());
 			return std::nullopt;
 		}
 
@@ -280,14 +280,14 @@ namespace fe
 		}
 		else
 		{
-			FE_LOG(TextureImporterErr, "Found not supported texture extension from \"{}\".",
+			FE_LOG(TextureImporterFatal, "Found not supported texture extension from \"{}\".",
 				   resPathStr.AsStringView());
 			return std::nullopt;
 		}
 
 		if (FAILED(loadRes))
 		{
-			FE_LOG(TextureImporterErr, "Failed to load texture from {}.", resPathStr.AsStringView());
+			FE_LOG(TextureImporterFatal, "Failed to load texture from {}.", resPathStr.AsStringView());
 			return std::nullopt;
 		}
 
@@ -320,9 +320,8 @@ namespace fe
 					bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR, 0, mipChain);
 				if (FAILED(genRes))
 				{
-					FE_LOG(TextureImporterErr, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
+					FE_LOG(TextureImporterFatal, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
 						   genRes, resPathStr.AsStringView());
-
 					return std::nullopt;
 				}
 
@@ -392,7 +391,7 @@ namespace fe
 						FE_LOG(TextureImporterErr, "Failed to compress with GPU Codec.");
 					}
 
-					FE_LOG(TextureImporterErr,
+					FE_LOG(TextureImporterFatal,
 						   "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
 						   "File: {}",
 						   magic_enum::enum_name(importConfig->CompressionMode),
@@ -408,22 +407,14 @@ namespace fe
 			}
 		}
 
-		/*************************** Configures output ***************************/
-		const size_t creationTime = Timer::Now();
-		const xg::Guid newGuid = xg::newGuid();
-
 		/* Configure Texture Resource Metadata */
 		importConfig->Version = TextureImportConfig::LatestVersion;
 		importConfig->AssetType = EAssetType::Texture;
 		importConfig->bIsPersistent = bPersistencyRequired;
 
-		/* Serialize Texture Resource Metadata & Save To File */
+		if (!details::SaveSerializedToFile(resMetadataPath, *importConfig))
 		{
-			json serializedJson{};
-			serializedJson << *importConfig;
-
-			std::ofstream fileStream{ resMetadataPath.c_str() };
-			fileStream << serializedJson.dump(4);
+			FE_LOG(TextureImporterWarn, "Failed to create resource metadata {}.", resMetadataPath.string());
 		}
 
 		/* Configure Texture Asset Metadata */
@@ -431,8 +422,8 @@ namespace fe
 		const ETextureDimension texDim = AsTexDimension(texMetadata.dimension);
 
 		auto newLoadConfig = MakeVersionedDefault<TextureLoadConfig>();
-		newLoadConfig.CreationTime = creationTime;
-		newLoadConfig.Guid = newGuid;
+		newLoadConfig.CreationTime = Timer::Now();
+		newLoadConfig.Guid = xg::newGuid();
 		newLoadConfig.SrcResPath = resPathStr.AsStringView();
 		newLoadConfig.Type = EAssetType::Texture;
 		newLoadConfig.bIsPersistent = bPersistencyRequired;
@@ -453,15 +444,15 @@ namespace fe
 			details::CreateAssetDirectories();
 		}
 
-		const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newGuid);
+		const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newLoadConfig.Guid);
 		if (!details::SaveSerializedToFile(assetMetadataPath, newLoadConfig))
 		{
-			FE_LOG(TextureImporterErr, "Failed to open asset metadata file {}.", assetMetadataPath.string());
+			FE_LOG(TextureImporterFatal, "Failed to open asset metadata file {}.", assetMetadataPath.string());
 			return std::nullopt;
 		}
 
 		/* Save data to asset file */
-		const fs::path assetPath = MakeAssetPath(EAssetType::Texture, newGuid);
+		const fs::path assetPath = MakeAssetPath(EAssetType::Texture, newLoadConfig.Guid);
 		if (fs::exists(assetPath))
 		{
 			FE_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
@@ -474,12 +465,12 @@ namespace fe
 
 		if (FAILED(res))
 		{
-			FE_LOG(TextureImporterErr, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
+			FE_LOG(TextureImporterFatal, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
 			return std::nullopt;
 		}
 
 		FE_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}", resPathStr.AsStringView(), assetPath.string());
-		return std::make_optional(newGuid);
+		return std::make_optional(newLoadConfig.Guid);
 	}
 
 	std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
@@ -489,7 +480,7 @@ namespace fe
 
 		if (!fs::exists(assetMetaPath))
 		{
-			FE_LOG(TextureLoaderErr, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());
+			FE_LOG(TextureLoaderFatal, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());
 			return std::nullopt;
 		}
 
@@ -508,14 +499,14 @@ namespace fe
 
 		if (loadConfig.Guid != guid)
 		{
-			FE_LOG(TextureLoaderErr, "Asset guid does not match. Expected: {}, Found: {}",
+			FE_LOG(TextureLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
 				   guid.str(), loadConfig.Guid.str());
 			return std::nullopt;
 		}
 
 		if (loadConfig.Type != EAssetType::Texture)
 		{
-			FE_LOG(TextureLoaderErr, "Asset type does not match. Expected: {}, Found: {}",
+			FE_LOG(TextureLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
 				   magic_enum::enum_name(EAssetType::Texture),
 				   magic_enum::enum_name(loadConfig.Type));
 
@@ -525,14 +516,14 @@ namespace fe
 		/* Check TextureLoadConfig data */
 		if (loadConfig.Width == 0 || loadConfig.Height == 0 || loadConfig.DepthOrArrayLength == 0 || loadConfig.Mips == 0)
 		{
-			FE_LOG(TextureLoaderErr, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
+			FE_LOG(TextureLoaderFatal, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
 				   loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength, loadConfig.Mips);
 			return std::nullopt;
 		}
 
 		if (loadConfig.Format == DXGI_FORMAT_UNKNOWN)
 		{
-			FE_LOG(TextureLoaderErr, "Load Config format is unknown.");
+			FE_LOG(TextureLoaderFatal, "Load Config format is unknown.");
 			return std::nullopt;
 		}
 
@@ -540,7 +531,7 @@ namespace fe
 		const fs::path assetPath = MakeAssetPath(EAssetType::Texture, guid);
 		if (!fs::exists(assetPath))
 		{
-			FE_LOG(TextureLoaderErr, "Texture Asset \"{}\" does not exist.", assetPath.string());
+			FE_LOG(TextureLoaderFatal, "Texture Asset \"{}\" does not exist.", assetPath.string());
 			return std::nullopt;
 		}
 
@@ -549,7 +540,7 @@ namespace fe
 		HRESULT res = DirectX::LoadFromDDSFile(assetPath.c_str(), DirectX::DDS_FLAGS_NONE, &ddsMeta, scratchImage);
 		if (FAILED(res))
 		{
-			FE_LOG(TextureLoaderErr, "Failed to load texture asset(dds) from {}.", assetPath.string());
+			FE_LOG(TextureLoaderFatal, "Failed to load texture asset(dds) from {}.", assetPath.string());
 			return std::nullopt;
 		}
 
@@ -558,40 +549,40 @@ namespace fe
 			loadConfig.Height != ddsMeta.height ||
 			(loadConfig.DepthOrArrayLength != ddsMeta.depth && loadConfig.DepthOrArrayLength != ddsMeta.arraySize))
 		{
-			FE_LOG(TextureLoaderErr, "DDS Metadata does not match with texture asset metadata.");
+			FE_LOG(TextureLoaderFatal, "DDS Metadata does not match with texture asset metadata.");
 			return std::nullopt;
 		}
 
 		if (loadConfig.bIsCubemap != loadConfig.bIsCubemap)
 		{
-			FE_LOG(TextureLoaderErr, "Texture asset cubemap flag does not match");
+			FE_LOG(TextureLoaderFatal, "Texture asset cubemap flag does not match");
 			return std::nullopt;
 		}
 
 		if (loadConfig.bIsCubemap && (loadConfig.DepthOrArrayLength % 6 == 0))
 		{
-			FE_LOG(TextureLoaderErr, "Cubemap array length suppose to be multiple of \'6\'.");
+			FE_LOG(TextureLoaderFatal, "Cubemap array length suppose to be multiple of \'6\'.");
 			return std::nullopt;
 		}
 
 		if (loadConfig.Dimension != AsTexDimension(ddsMeta.dimension))
 		{
-			FE_LOG(TextureLoaderErr, "Texture Asset Dimension does not match with DDS Dimension.");
+			FE_LOG(TextureLoaderFatal, "Texture Asset Dimension does not match with DDS Dimension.");
 			return std::nullopt;
 		}
 
 		if (loadConfig.Format != ddsMeta.format)
 		{
-			FE_LOG(TextureLoaderErr, "Texture Asset Format does not match with DDS Format.");
+			FE_LOG(TextureLoaderFatal, "Texture Asset Format does not match with DDS Format.");
 			return std::nullopt;
 		}
 
 		/* Configure Texture Description */
-		/* #todo Support MSAA */
+		/* #sy_todo Support MSAA */
 		GPUTextureDesc texDesc{};
 		if (loadConfig.bIsCubemap)
 		{
-			/* #todo Support Cubemap Array */
+			/* #sy_todo Support Cubemap Array */
 			texDesc.AsCubemap(loadConfig.Width, loadConfig.Height,
 							  loadConfig.Mips,
 							  loadConfig.Format);
@@ -640,7 +631,7 @@ namespace fe
 		std::optional<GpuTexture> newTex = renderDevice.CreateTexture(texDesc);
 		if (!newTex)
 		{
-			FE_LOG(TextureLoaderErr, "Failed to create GpuTexture from render device, which for texture asset {}.", assetPath.string());
+			FE_LOG(TextureLoaderFatal, "Failed to create GpuTexture from render device, which for texture asset {}.", assetPath.string());
 			return std::nullopt;
 		}
 
@@ -703,12 +694,12 @@ namespace fe
 
 		if (!srv)
 		{
-			FE_LOG(TextureLoaderErr, "Failed to create shader resource view for {}.", assetPath.string());
+			FE_LOG(TextureLoaderFatal, "Failed to create shader resource view for {}.", assetPath.string());
 			return std::nullopt;
 		}
 
 		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}.", assetPath.string(), loadConfig.SrcResPath);
-		/* #todo Layout transition COMMON -> SHADER_RESOURCE? */
+		/* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
 		return Texture{
 			.LoadConfig = loadConfig,
 			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
@@ -719,9 +710,9 @@ namespace fe
 				.AddressV = loadConfig.AddressModeV,
 				.AddressW = loadConfig.AddressModeW,
 				.MipLODBias = 0.f,
-				/* #todo if filter ==  anisotropic, Add MaxAnisotropy at load config & import config */
+				/* #sy_todo if filter ==  anisotropic, Add MaxAnisotropy at load config & import config */
 				.MaxAnisotropy = ((loadConfig.Filter == D3D12_FILTER_ANISOTROPIC || loadConfig.Filter == D3D12_FILTER_COMPARISON_ANISOTROPIC) ? 1u : 0u),
-				.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #todo if filter == comparison, setup comparison func */,
+				.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #sy_todo if filter == comparison, setup comparison func */,
 				.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
 				.MinLOD = 0.f,
 				.MaxLOD = 0.f })

@@ -244,6 +244,7 @@ namespace fe
 			}
 
 			fileStream << serialized.dump(4);
+			fileStream.close();
 			return true;
 		}
 

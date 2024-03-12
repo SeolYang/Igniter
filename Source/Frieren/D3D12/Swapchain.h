@@ -27,9 +27,9 @@ namespace fe
 		const GpuTexture& GetBackBuffer() const;
 		const GpuView&	  GetRenderTargetView() const { return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
 
-		// #todo Impl Resize Swapchain!
+		// #sy_todo Impl Resize Swapchain!
 		// void Resize(const uint32_t width, const uint32_t height);
-		// #todo Impl Change Color Space
+		// #sy_todo Impl Change Color Space
 		// void SetColorSpace(DXGI_COLOR_SPACE_TYPE newColorSpace);
 
 		void Present();

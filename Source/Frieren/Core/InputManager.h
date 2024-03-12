@@ -74,11 +74,11 @@ namespace fe
 		InputManager& operator=(const InputManager&) = delete;
 		InputManager& operator=(InputManager&&) noexcept = delete;
 
-		// #todo 한번에 여러개의 input이 들어올 때 어떻게 처리하지?
+		// #sy_todo 한번에 여러개의 input이 들어올 때 어떻게 처리하지?
 		void BindAction(String nameOfAction, EInput input);
 		void BindAxis(String nameOfAxis, EInput input, float scale);
 
-		// #todo UnbindAction/Axis
+		// #sy_todo UnbindAction/Axis
 
 		RefHandle<Action> QueryAction(String nameOfAction) const;
 		RefHandle<Axis>   QueryAxis(String nameOfAxis) const;

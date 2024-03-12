@@ -49,8 +49,8 @@ namespace fe
 		desc.Height = 0;
 
 		/*
-		 * #todo Support hdr
-		 * #ref: https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32
+		 * #sy_todo Support hdr
+		 * #sy_ref https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32
 		 */
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.Stereo = false;

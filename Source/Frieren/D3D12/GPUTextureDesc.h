@@ -12,7 +12,7 @@ namespace fe
 	bool IsDepthStencilFormat(const DXGI_FORMAT format);
 	bool IsTypelessFormat(const DXGI_FORMAT format);
 
-	// #todo Simultaneous Access flag for resource aka. D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS
+	// #sy_todo Simultaneous Access flag for resource aka. D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS
 	class GPUTextureDesc : public D3D12_RESOURCE_DESC1
 	{
 	public:
@@ -69,7 +69,7 @@ namespace fe
 		std::optional<D3D12_RENDER_TARGET_VIEW_DESC> ConvertToNativeDesc(const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
 		std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> ConvertToNativeDesc(const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) CONST;
 
-		// #todo Typeless 포맷에 대한 typed 포맷을 지정한 view 생성
+		// #sy_todo Typeless 포맷에 대한 typed 포맷을 지정한 view 생성
 		void From(const D3D12_RESOURCE_DESC& desc);
 
 		size_t GetNumSubresources() const { return (bIsArray ? static_cast<size_t>(DepthOrArraySize) : 1) * MipLevels; }

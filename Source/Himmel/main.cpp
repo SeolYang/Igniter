@@ -12,7 +12,7 @@
 #include <Core/Event.h>
 #include <iostream>
 
-// #test Test for imgui integration
+// #sy_test Test for imgui integration
 class TestLayer : public fe::ImGuiLayer
 {
 public:
@@ -28,7 +28,7 @@ public:
 };
 
 
-// #test
+// #sy_test
 struct SimpleVertex
 {
 	float x = 0.f;
@@ -44,6 +44,7 @@ struct SimpleVertex
 #include <D3D12/CommandContext.h>
 #include <D3D12/GPUView.h>
 #include <Asset/Texture.h>
+#include <Asset/Model.h>
 #include <Render/GPUViewManager.h>
 #include <Render/GpuUploader.h>
 #include <Render/StaticMeshComponent.h>
@@ -55,9 +56,14 @@ int main()
 	{
 		fe::Engine engine;
 
-		// #test Asset System Test
-		//TextureImporter importer;
+		// #sy_test Asset System Test
+		TextureImporter texImporter;
 		//xg::Guid importedTexGuid = *importer.Import(String("Resources\\djmax_1st_anv.png"));
+
+		StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
+		staticMeshImportConfig.bMergeMeshes = true;
+		std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\ash.fbx"), staticMeshImportConfig);
+		//////////////////////////////////
 
 		fe::InputManager& inputManager = engine.GetInputManager();
 		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);

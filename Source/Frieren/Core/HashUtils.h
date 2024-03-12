@@ -311,7 +311,7 @@ namespace fe
 		return hash;
 	}
 
-	/* #ref DirectX-Graphics-Samples */
+	/* #sy_ref DirectX-Graphics-Samples */
 	template <typename T>
 	inline uint64_t HashState(const T* stateDesc, size_t count = 1, uint64_t hash = 2166136261U)
 	{
@@ -332,7 +332,7 @@ namespace fe
 	}
 
 	/**
-	 * @reference	https://github.com/srned/baselib/blob/master/crc64.c
+	 * #sy_ref	https://github.com/srned/baselib/blob/master/crc64.c
 	 */
 	constexpr uint64_t EvalCRC64(const std::string_view data)
 	{
@@ -345,7 +345,9 @@ namespace fe
 		return result;
 	}
 
-	/** https://stackoverflow.com/questions/56292104/hashing-types-at-compile-time-in-c17-c2a */
+	/**
+	* #sy_ref https://stackoverflow.com/questions/56292104/hashing-types-at-compile-time-in-c17-c2a 
+	*/
 	template <typename T>
 	constexpr uint64_t EvalHashOfType()
 	{

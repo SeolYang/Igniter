@@ -25,7 +25,7 @@ namespace fe
 		O3 // Default
 	};
 
-	// #todo 매크로 정의 지원
+	// #sy_todo 매크로 정의 지원
 	class ShaderCompileDesc
 	{
 	public:
@@ -38,7 +38,7 @@ namespace fe
 		bool bForceEnableDebugInformation = false;								   // -Zi
 	};
 
-	// #todo dxil.dll 빌드 후 이벤트로 옮겨주기
+	// #sy_todo dxil.dll 빌드 후 이벤트로 옮겨주기
 	class ShaderBlob
 	{
 	public:

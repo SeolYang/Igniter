@@ -199,7 +199,7 @@ namespace fe
 		// D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS
 
 		/*
-		 * #todo Virtual Texturing using tiled resource
+		 * #sy_todo Virtual Texturing using tiled resource
 		 * D3D12_TILED_RESOURCES_TIER > 2 for virtual texturing + texture streaming
 		 * https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_tiled_resources_tier
 		 */

@@ -32,7 +32,7 @@ namespace fe
 			logger->Log<EngineInfo>("Engine version: {}", version::Version);
 			logger->Log<EngineInfo>("Initializing Engine Runtime...");
 
-			/* #test 임시 윈도우 설명자 */
+			/* #sy_test 임시 윈도우 설명자 */
 			const WindowDescription winDesc{ .Width = 1280, .Height = 720, .Title = String(settings::GameName) };
 			window = std::make_unique<Window>(winDesc);
 			renderDevice = std::make_unique<RenderDevice>();
