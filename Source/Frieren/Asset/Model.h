@@ -34,7 +34,7 @@ namespace fe
 	json& operator<<(json& archive, const StaticMeshImportConfig& config);
 	const json& operator>>(const json& archive, StaticMeshImportConfig& config);
 
-	struct StaticMeshLoadConfig : public AssetMetadata<1>
+	struct StaticMeshLoadConfig : public AssetMetadata<2>
 	{
 		friend json& operator<<(json& archive, const StaticMeshLoadConfig& config);
 		friend const json& operator>>(const json& archive, StaticMeshLoadConfig& config);
@@ -47,8 +47,8 @@ namespace fe
 		std::string Name{};
 		size_t NumVertices{ 0 };
 		size_t NumIndices{ 0 };
-		size_t CompressedVerticesSize{ 0 };
-		size_t CompressedIndicesSize{ 0 };
+		size_t CompressedVerticesSizeInBytes{ 0 };
+		size_t CompressedIndicesSizeInBytes{ 0 };
 		/* #sy_todo Add AABB Info */
 		// std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
 	};

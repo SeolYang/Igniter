@@ -66,8 +66,8 @@ namespace fe
 	{
 		check(NumVertices > 0);
 		check(NumIndices > 0);
-		check(CompressedVerticesSize > 0);
-		check(CompressedIndicesSize > 0);
+		check(CompressedVerticesSizeInBytes > 0);
+		check(CompressedIndicesSizeInBytes > 0);
 
 		CommonMetadata::Serialize(archive);
 
@@ -75,8 +75,8 @@ namespace fe
 		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
 		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
 		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
-		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSize);
-		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSize);
+		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
+		FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
 
 		return archive;
 	}
@@ -91,13 +91,13 @@ namespace fe
 		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
 		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
 		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
-		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSize);
-		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSize);
+		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
+		FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
 
 		check(NumVertices > 0);
 		check(NumIndices > 0);
-		check(CompressedVerticesSize > 0);
-		check(CompressedIndicesSize > 0);
+		check(CompressedVerticesSizeInBytes > 0);
+		check(CompressedIndicesSizeInBytes > 0);
 		return archive;
 	}
 
