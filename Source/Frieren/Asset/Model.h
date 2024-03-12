@@ -24,11 +24,15 @@ namespace fe
 		bool bImproveCacheLocality = false;
 		bool bGenerateUVCoords = false;
 		bool bFlipUVs = false;
-		bool bFlipWindingOrder = false; /* IF bFlipWindingOrder: CCW -> CW */
+		bool bFlipWindingOrder = false; /* If bFlipWindingOrder => CCW -> CW */
 		bool bGenerateBoundingBoxes = false;
 		bool bImportTextures = false;  /* Only if textures does not imported before. */
 		bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
-		bool bMergeMeshes = false;	   /* If enabled, Ignore 'bSplitLargeMeshes' and force enable 'PreTransformVertices' */
+		/* 
+		* If enabled, Ignore 'bSplitLargeMeshes' and force enable 'PreTransformVertices'.
+		* It could be cause of cache inefficiency and loss of material details.
+		*/
+		bool bMergeMeshes = false;	   
 	};
 
 	json& operator<<(json& archive, const StaticMeshImportConfig& config);

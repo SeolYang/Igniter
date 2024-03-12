@@ -155,7 +155,7 @@ namespace fe
 		}
 	}
 
-	static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bPersistencyRequired, const std::string_view meshName, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices)
+	static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bPersistencyRequired, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
 	{
 		if (!fs::exists(details::StaticMeshAssetRootPath))
 		{
@@ -167,18 +167,30 @@ namespace fe
 		const std::string_view resPathStrView = resPathStr.AsStringView();
 		const std::string assetPathStr = assetPath.string();
 
-		/* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
-		constexpr float CacheHitRatioThreshold = 1.02f;
-		meshopt_optimizeVertexCacheStrip(indices.data(), indices.data(), indices.size(), vertices.size());
-		meshopt_optimizeOverdraw(indices.data(), indices.data(), indices.size(), &vertices[0].Position.x, vertices.size(), sizeof(StaticMeshVertex), CacheHitRatioThreshold);
-		meshopt_optimizeVertexFetch(vertices.data(), indices.data(), indices.size(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex));
+		std::vector<uint32_t> remap(indices.size());
+		const size_t remappedVertexCount = meshopt_generateVertexRemap(remap.data(), 
+			indices.data(), indices.size(),
+			vertices.data(), indices.size(), sizeof(StaticMeshVertex));
 
-		FE_LOG(ModelImporterInfo, "Optimization Statistics for {}({}.{}).", assetPathStr, resPathStrView, meshName);
-		const auto nvidiaVcs = meshopt_analyzeVertexCache(indices.data(), indices.size(), vertices.size(), 32, 32, 32);
-		const auto amdVcs = meshopt_analyzeVertexCache(indices.data(), indices.size(), vertices.size(), 14, 64, 128);
-		const auto intelVcs = meshopt_analyzeVertexCache(indices.data(), indices.size(), vertices.size(), 128, 0, 0);
-		const auto vfs = meshopt_analyzeVertexFetch(indices.data(), indices.size(), vertices.size(), sizeof(StaticMeshVertex));
-		const auto os = meshopt_analyzeOverdraw(indices.data(), indices.size(), &vertices[0].Position.x, vertices.size(), sizeof(StaticMeshVertex));
+		std::vector<uint32_t> remappedIndices(indices.size());
+		std::vector<StaticMeshVertex> remappedVertices(remappedVertexCount);
+
+		meshopt_remapIndexBuffer(remappedIndices.data(), indices.data(), indices.size(), remap.data());
+		meshopt_remapVertexBuffer(remappedVertices.data(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex), remap.data());
+		FE_LOG(ModelImporterInfo, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
+
+		constexpr float CacheHitRatioThreshold = 1.02f;
+		meshopt_optimizeVertexCacheStrip(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.size());
+		meshopt_optimizeOverdraw(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex), CacheHitRatioThreshold);
+		meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex));
+
+		/* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
+		FE_LOG(ModelImporterInfo, "Optimization Statistics \"{}({}.{})\"", assetPathStr, resPathStrView, meshName);
+		const auto nvidiaVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 32, 32, 32);
+		const auto amdVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 14, 64, 128);
+		const auto intelVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 128, 0, 0);
+		const auto vfs = meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), sizeof(StaticMeshVertex));
+		const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex));
 
 		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
 		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
@@ -190,11 +202,11 @@ namespace fe
 		meshopt_encodeVertexVersion(0);
 		meshopt_encodeIndexVersion(1);
 
-		std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(vertices.size(), sizeof(StaticMeshVertex)));
-		std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(indices.size(), vertices.size()));
+		std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(), sizeof(StaticMeshVertex)));
+		std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(remappedIndices.size(), remappedVertices.size()));
 
-		encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex)));
-		encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(), indices.data(), indices.size()));
+		encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex)));
+		encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(), remappedIndices.data(), remappedIndices.size()));
 
 		auto newStaticMeshLoadConf = MakeVersionedDefault<StaticMeshLoadConfig>();
 		newStaticMeshLoadConf.CreationTime = Timer::Now();
@@ -203,10 +215,10 @@ namespace fe
 		newStaticMeshLoadConf.Type = EAssetType::StaticMesh;
 		newStaticMeshLoadConf.bIsPersistent = bPersistencyRequired;
 		newStaticMeshLoadConf.Name = meshName;
-		newStaticMeshLoadConf.NumVertices = vertices.size();
-		newStaticMeshLoadConf.NumIndices = indices.size();
-		newStaticMeshLoadConf.CompressedVerticesSize = encodedVertices.size();
-		newStaticMeshLoadConf.CompressedIndicesSize = encodedIndices.size();
+		newStaticMeshLoadConf.NumVertices = remappedVertices.size();
+		newStaticMeshLoadConf.NumIndices = remappedIndices.size();
+		newStaticMeshLoadConf.CompressedVerticesSizeInBytes = encodedVertices.size();
+		newStaticMeshLoadConf.CompressedIndicesSizeInBytes = encodedIndices.size();
 
 		const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, newStaticMeshLoadConf.Guid);
 		if (!details::SaveSerializedToFile(newMetaPath, newStaticMeshLoadConf))
@@ -308,7 +320,6 @@ namespace fe
 		/* #sy_todo Impl Import Materials in aiScene */
 
 		/* Import Static Meshes */
-		/* #sy_improvement Importing based on scene hierarchy? */
 		const std::string meshName = resPath.filename().replace_extension().string();
 
 		constexpr size_t NumIndicesPerFace = 3;
@@ -353,6 +364,7 @@ namespace fe
 				}
 			}
 		}
+		importer.FreeScene();
 
 		importConfig->Version = StaticMeshImportConfig::LatestVersion;
 		importConfig->AssetType = EAssetType::StaticMesh;
