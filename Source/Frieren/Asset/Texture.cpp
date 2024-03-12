@@ -414,8 +414,6 @@ namespace fe
 
 		/* Configure Texture Resource Metadata */
 		importConfig->Version = TextureImportConfig::LatestVersion;
-		importConfig->CreationTime = creationTime;
-		importConfig->AssetGuid = newGuid;
 		importConfig->AssetType = EAssetType::Texture;
 		importConfig->bIsPersistent = bPersistencyRequired;
 
@@ -433,6 +431,7 @@ namespace fe
 		const ETextureDimension texDim = AsTexDimension(texMetadata.dimension);
 
 		auto newLoadConfig = MakeVersionedDefault<TextureLoadConfig>();
+		newLoadConfig.CreationTime = creationTime;
 		newLoadConfig.Guid = newGuid;
 		newLoadConfig.SrcResPath = resPathStr.AsStringView();
 		newLoadConfig.Type = EAssetType::Texture;
@@ -449,32 +448,16 @@ namespace fe
 		newLoadConfig.AddressModeV = importConfig->AddressModeV;
 		newLoadConfig.AddressModeW = importConfig->AddressModeW;
 
-		/* Create Texture Asset root directory if does not exist */
+		if (!fs::exists(details::TextureAssetRootPath))
 		{
-			const fs::path texAssetDirPath = details::TextureAssetRootPath;
-			if (!fs::exists(texAssetDirPath))
-			{
-				if (!fs::create_directories(texAssetDirPath))
-				{
-					FE_LOG(TextureImporterWarn, "Failed to create texture asset root {}.", texAssetDirPath.string());
-				}
-			}
+			details::CreateAssetDirectories();
 		}
 
-		/* Serialize Texture Asset Metadata & Save To File */
+		const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newGuid);
+		if (!details::SaveSerializedToFile(assetMetadataPath, newLoadConfig))
 		{
-			json serializedJson{};
-			serializedJson << newLoadConfig;
-
-			const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newGuid);
-			std::ofstream fileStream{ assetMetadataPath.c_str() };
-			if (!fileStream.is_open())
-			{
-				FE_LOG(TextureImporterErr, "Failed to open asset metadata file {}.", assetMetadataPath.string());
-				return std::nullopt;
-			}
-
-			fileStream << serializedJson.dump(4);
+			FE_LOG(TextureImporterErr, "Failed to open asset metadata file {}.", assetMetadataPath.string());
+			return std::nullopt;
 		}
 
 		/* Save data to asset file */

@@ -76,7 +76,7 @@ int main()
 		const auto enemy = defaultWorld->Create();
 
 		std::optional<Texture> texture = TextureLoader::Load(
-			xg::Guid("97a69908-99a9-493a-9485-510254ec10c3"),
+			xg::Guid("ee4fc8c1-37d6-4f3e-bedd-84116d9dcd2e"),
 			handleManager, renderDevice, gpuUploader, gpuViewManager);
 
 		/* Initialize Buffers */

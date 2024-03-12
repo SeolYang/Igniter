@@ -50,13 +50,9 @@ namespace fe
 		{
 			const ResourceMetadata& metadata = *this;
 			check(metadata.IsLatestVersion());
-			check(metadata.CreationTime > 0);
-			check(metadata.AssetGuid.isValid());
 			check(metadata.AssetType != EAssetType::Unknown);
 
 			FE_SERIALIZE_JSON(ResourceMetadata, archive, metadata, Version);
-			FE_SERIALIZE_JSON(ResourceMetadata, archive, metadata, CreationTime);
-			FE_SERIALIZE_GUID_JSON(ResourceMetadata, archive, metadata, AssetGuid);
 			FE_SERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType);
 			FE_SERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
 
@@ -67,14 +63,10 @@ namespace fe
 		{
 			ResourceMetadata& metadata = *this;
 			FE_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, Version);
-			FE_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, CreationTime);
-			FE_DESERIALIZE_GUID_JSON(ResourceMetadata, archive, metadata, AssetGuid);
 			FE_DESERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType, EAssetType::Unknown);
 			FE_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
 
 			check(metadata.IsLatestVersion());
-			check(metadata.CreationTime > 0);
-			check(metadata.AssetGuid.isValid());
 			check(metadata.AssetType != EAssetType::Unknown);
 
 			return archive;
@@ -83,12 +75,10 @@ namespace fe
 	public:
 		using CommonMetadata = ResourceMetadata;
 
-		constexpr static uint64_t BaseVersion = 2;
+		constexpr static uint64_t BaseVersion = 3;
 		constexpr static uint64_t LatestVersion = BaseVersion + CurrentVersion;
 
 		uint64_t Version = 0;
-		uint64_t CreationTime = 0;
-		xg::Guid AssetGuid{};
 		EAssetType AssetType = EAssetType::Unknown;
 		bool bIsPersistent = false;
 	};
@@ -113,6 +103,7 @@ namespace fe
 			check(metadata.Type != EAssetType::Unknown);
 
 			FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, Version);
+			FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
 			FE_SERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
 			FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
 			FE_SERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type);
@@ -125,6 +116,7 @@ namespace fe
 		{
 			AssetMetadata& metadata = *this;
 			FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, Version);
+			FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
 			FE_DESERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
 			FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
 			FE_DESERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type, EAssetType::Unknown);
@@ -140,11 +132,11 @@ namespace fe
 	public:
 		using CommonMetadata = AssetMetadata;
 
-		constexpr static size_t BaseVersion = 2;
+		constexpr static size_t BaseVersion = 3;
 		constexpr static size_t LatestVersion = BaseVersion + CurrentVersion;
 
 		uint64_t Version = 0;
-		/* #todo Creation Time ? */
+		uint64_t CreationTime = 0;
 		xg::Guid Guid{};
 		std::string SrcResPath{};
 		EAssetType Type = EAssetType::Unknown;
@@ -205,5 +197,55 @@ namespace fe
 
 			return std::nullopt;
 		}
+
+		inline void CreateAssetDirectories()
+		{
+			if (!fs::exists(TextureAssetRootPath))
+			{
+				fs::create_directories(TextureAssetRootPath);
+			}
+
+			if (!fs::exists(StaticMeshAssetRootPath))
+			{
+				fs::create_directories(StaticMeshAssetRootPath);
+			}
+
+			if (!fs::exists(SkeletalMeshAssetRootPath))
+			{
+				fs::create_directories(SkeletalMeshAssetRootPath);
+			}
+
+			if (!fs::exists(ShaderAssetRootPath))
+			{
+				fs::create_directories(ShaderAssetRootPath);
+			}
+
+			if (!fs::exists(AudioAssetRootPath))
+			{
+				fs::create_directories(AudioAssetRootPath);
+			}
+
+			if (!fs::exists(ScriptAssetRootPath))
+			{
+				fs::create_directories(ScriptAssetRootPath);
+			}
+		}
+
+		template <typename T>
+		bool SaveSerializedToFile(const fs::path path, const T& metadata)
+		{
+			json serialized{};
+			serialized << metadata;
+
+			std::ofstream fileStream{ path.c_str() };
+			if (!fileStream.is_open())
+			{
+				return false;
+			}
+
+			fileStream << serialized.dump(4);
+			return true;
+		}
+
 	} // namespace details
 } // namespace fe
