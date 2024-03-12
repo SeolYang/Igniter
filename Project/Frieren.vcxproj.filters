@@ -267,8 +267,11 @@
     <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h">
       <Filter>Source\Gameplay\Component</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Asset\Mesh.h">
+    <ClInclude Include="..\Source\Frieren\Asset\Model.h">
       <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\Vertex.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -392,7 +395,7 @@
     <ClCompile Include="..\Source\Frieren\Render\GpuViewManager.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Asset\Mesh.cpp">
+    <ClCompile Include="..\Source\Frieren\Asset\Model.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
   </ItemGroup>

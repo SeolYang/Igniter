@@ -13,32 +13,13 @@
 namespace fe
 {
 	namespace fs = std::filesystem;
-	namespace details
-	{
-		constexpr inline std::string_view MetadataExt = ".metadata";
-		constexpr inline std::string_view ResourceRootPath = "Resources";
-		constexpr inline std::string_view AssetRootPath = "Assets";
-		constexpr inline std::string_view TextureAssetRootPath = "Assets\\Textures";
-		constexpr inline std::string_view StaticMeshAssetRootPath = "Assets\\StaticMeshes";
-		constexpr inline std::string_view ModelAssetRootPath = "Assets\\Models";
-		constexpr inline std::string_view ShaderAssetRootPath = "Assets\\Shaders";
-		constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
-		constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
-
-		template <typename T, typename LogCategory>
-		void LogVersionMismatch(const T& instance, const std::string_view infoMessage = "")
-		{
-			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
-				   instance.Version, T::LatestVersion, infoMessage);
-		}
-	} // namespace details
 
 	enum class EAssetType
 	{
 		Unknown,
 		Texture,
 		StaticMesh,
-		Model,
+		SkeletalMesh,
 		Shader,
 		Audio,
 		Script,
@@ -55,7 +36,6 @@ namespace fe
 	fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid);
 
 	/* Common Resource Metadata */
-
 	template <uint64_t CurrentVersion>
 	struct ResourceMetadata
 	{
@@ -164,9 +144,62 @@ namespace fe
 		constexpr static size_t LatestVersion = BaseVersion + CurrentVersion;
 
 		uint64_t Version = 0;
+		/* #todo Creation Time ? */
 		xg::Guid Guid{};
 		std::string SrcResPath{};
 		EAssetType Type = EAssetType::Unknown;
 		bool bIsPersistent = false;
 	};
+
+	template <typename T>
+	[[nodiscard]] T MakeVersionedDefault()
+	{
+		T newData{};
+		newData.Version = T::LatestVersion;
+		return newData;
+	}
+
+	namespace details
+	{
+		constexpr inline std::string_view MetadataExt = ".metadata";
+		constexpr inline std::string_view ResourceRootPath = "Resources";
+		constexpr inline std::string_view AssetRootPath = "Assets";
+		constexpr inline std::string_view TextureAssetRootPath = "Assets\\Textures";
+		constexpr inline std::string_view StaticMeshAssetRootPath = "Assets\\StaticMeshes";
+		constexpr inline std::string_view SkeletalMeshAssetRootPath = "Assets\\SkeletalMeshes";
+		constexpr inline std::string_view ShaderAssetRootPath = "Assets\\Shaders";
+		constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
+		constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
+
+		template <typename T, typename LogCategory>
+		void LogVersionMismatch(const T& instance, const std::string_view infoMessage = "")
+		{
+			FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
+				   instance.Version, T::LatestVersion, infoMessage);
+		}
+
+		/* Return Versioned Default Instance, if file does not exist at provided path. */
+		template <typename T, typename MismatchLogCategory = fe::LogWarn>
+		T LoadMetadataFromFile(const fs::path& resMetaPath)
+		{
+			if (fs::exists(resMetaPath))
+			{
+				T metadata{};
+				std::ifstream resMetaStream{ resMetaPath.c_str() };
+				const json serializedResMeta{ json::parse(resMetaStream) };
+				resMetaStream.close();
+
+				serializedResMeta >> metadata;
+
+				if (metadata.IsLatestVersion())
+				{
+					details::LogVersionMismatch<T, MismatchLogCategory>(metadata, resMetaPath.string());
+				}
+
+				return metadata;
+			}
+
+			return MakeVersionedDefault<T>();
+		}
+	} // namespace details
 } // namespace fe

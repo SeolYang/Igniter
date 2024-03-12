@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Asset\AssetCache.h" />
     <ClInclude Include="..\Source\Frieren\Asset\Common.h" />
-    <ClInclude Include="..\Source\Frieren\Asset\Mesh.h" />
+    <ClInclude Include="..\Source\Frieren\Asset\Model.h" />
     <ClInclude Include="..\Source\Frieren\Asset\Texture.h" />
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
     <ClInclude Include="..\Source\Frieren\Core\Container.h" />
@@ -79,6 +79,7 @@
     <ClInclude Include="..\Source\Frieren\Render\Renderer.h" />
     <ClInclude Include="..\Source\Frieren\Render\StaticMeshComponent.h" />
     <ClInclude Include="..\Source\Frieren\Render\TempConstantBufferAllocator.h" />
+    <ClInclude Include="..\Source\Frieren\Render\Vertex.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h" />
@@ -95,7 +96,7 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Asset\AssetCache.cpp" />
     <ClCompile Include="..\Source\Frieren\Asset\Common.cpp" />
-    <ClCompile Include="..\Source\Frieren\Asset\Mesh.cpp" />
+    <ClCompile Include="..\Source\Frieren\Asset\Model.cpp" />
     <ClCompile Include="..\Source\Frieren\Asset\Texture.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Frieren\Core\HandleManager.cpp" />

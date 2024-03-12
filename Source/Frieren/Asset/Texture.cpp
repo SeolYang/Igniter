@@ -40,9 +40,11 @@ namespace fe
 
 	const json& TextureImportConfig::Deserialize(const json& archive)
 	{
+		TextureImportConfig& config = *this;
+		config = {};
+
 		CommonMetadata::Deserialize(archive);
 
-		TextureImportConfig& config = *this;
 		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
 		FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
 		FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -78,9 +80,11 @@ namespace fe
 
 	const json& TextureLoadConfig::Deserialize(const json& archive)
 	{
+		TextureLoadConfig& config = *this;
+		config = {};
+
 		CommonMetadata::Deserialize(archive);
 
-		TextureLoadConfig& config = *this;
 		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
 		FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
 		FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
@@ -288,34 +292,13 @@ namespace fe
 		}
 
 		/* Get Texture Import Config from metadata file, make default if file does not exists. */
-		bool bPersistencyRequired = bIsPersistent;
 		const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
 		if (!importConfig)
 		{
-			if (fs::exists(resMetadataPath))
-			{
-				std::ifstream resMetadataStream{ resMetadataPath.c_str() };
-				const json serializedResMetadata{ json::parse(resMetadataStream) };
-				resMetadataStream.close();
-
-				importConfig = TextureImportConfig{};
-				serializedResMetadata >> *importConfig;
-
-				if (!importConfig->IsLatestVersion())
-				{
-					details::LogVersionMismatch<TextureImportConfig, TextureImporterWarn>(
-						*importConfig,
-						resMetadataPath.string());
-				}
-
-				bPersistencyRequired |= importConfig->bIsPersistent;
-			}
-			else
-			{
-				importConfig = TextureImportConfig::MakeVersionedDefault();
-			}
+			importConfig = details::LoadMetadataFromFile<TextureImportConfig, TextureImporterWarn>(resMetadataPath);
 		}
 
+		const bool bPersistencyRequired = bIsPersistent || importConfig->bIsPersistent;
 		if (!bIsDDSFormat)
 		{
 			check(texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
@@ -444,7 +427,8 @@ namespace fe
 		/* Configure Texture Asset Metadata */
 		texMetadata = targetTex.GetMetadata();
 		const ETextureDimension texDim = AsTexDimension(texMetadata.dimension);
-		TextureLoadConfig newLoadConfig = TextureLoadConfig::MakeVersionedDefault();
+
+		auto newLoadConfig = MakeVersionedDefault<TextureLoadConfig>();
 		newLoadConfig.Guid = newGuid;
 		newLoadConfig.SrcResPath = resPathStr.AsStringView();
 		newLoadConfig.Type = EAssetType::Texture;
@@ -741,7 +725,7 @@ namespace fe
 		return Texture{
 			.LoadConfig = loadConfig,
 			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
-			.FullRangeSrv = std::move(srv),
+			.ShaderResourceView = std::move(srv),
 			.TexSampler = gpuViewManager.RequestSampler(D3D12_SAMPLER_DESC{
 				.Filter = loadConfig.Filter,
 				.AddressU = loadConfig.AddressModeU,

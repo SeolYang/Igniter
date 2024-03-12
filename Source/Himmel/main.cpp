@@ -180,7 +180,7 @@ int main()
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = quadIB.MakeRef(),
 			.NumIndices = NumQuadIndices,
-			.DiffuseTex = texture->FullRangeSrv.MakeRef(),
+			.DiffuseTex = texture->ShaderResourceView.MakeRef(),
 			.DiffuseTexSampler = texture->TexSampler
 		};
 		defaultWorld->Attach<StaticMeshComponent>(player, quadStaticMeshComp);
@@ -189,7 +189,7 @@ int main()
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = triIB.MakeRef(),
 			.NumIndices = NumTriIndices,
-			.DiffuseTex = texture->FullRangeSrv.MakeRef(),
+			.DiffuseTex = texture->ShaderResourceView.MakeRef(),
 			.DiffuseTexSampler = texture->TexSampler
 		};
 

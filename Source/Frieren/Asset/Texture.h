@@ -33,20 +33,13 @@ namespace fe
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
 
 	public:
-		[[nodiscard]] static TextureImportConfig MakeVersionedDefault()
-		{
-			TextureImportConfig newConfig{};
-			newConfig.Version = TextureImportConfig::LatestVersion;
-			return newConfig;
-		}
-
 		virtual json& Serialize(json& archive) const override;
 		virtual const json& Deserialize(const json& archive) override;
+
 	public:
 		ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
 		bool bGenerateMips = false;
 
-		/* Sampler */
 		D3D12_FILTER Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 		D3D12_TEXTURE_ADDRESS_MODE AddressModeU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
@@ -62,13 +55,6 @@ namespace fe
 		friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
 
 	public:
-		[[nodiscard]] static inline auto MakeVersionedDefault()
-		{
-			TextureLoadConfig newConfig{};
-			newConfig.Version = LatestVersion;
-			return newConfig;
-		}
-
 		virtual json& Serialize(json& archive) const override;
 		virtual const json& Deserialize(const json& archive) override;
 
@@ -83,8 +69,6 @@ namespace fe
 		uint16_t Mips = 1;
 		bool bIsCubemap = false;
 
-		/* Sampler */ // #todo D3D12_FILTER_TYPE 참고하여, MIN/MAG/MIP 개별 선택 후
-					  // 조합
 		D3D12_FILTER Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 		D3D12_TEXTURE_ADDRESS_MODE AddressModeU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
@@ -118,7 +102,7 @@ namespace fe
 	public:
 		TextureLoadConfig LoadConfig{};
 		Handle<GpuTexture, DeferredDestroyer<GpuTexture>> TextureInstance{}; // Using Deferred Deallocation
-		Handle<GpuView, GpuViewManager*> FullRangeSrv{};
+		Handle<GpuView, GpuViewManager*> ShaderResourceView{};
 		RefHandle<GpuView> TexSampler{};
 	};
 

@@ -23,8 +23,8 @@ namespace fe
 					newAssetPath = details::StaticMeshAssetRootPath;
 					break;
 
-				case EAssetType::Model:
-					newAssetPath = details::ModelAssetRootPath;
+				case EAssetType::SkeletalMesh:
+					newAssetPath = details::SkeletalMeshAssetRootPath;
 					break;
 
 				case EAssetType::Shader:
