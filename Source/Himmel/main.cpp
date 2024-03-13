@@ -208,14 +208,11 @@ int main()
 		Handle<GpuView, GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
 		/*******************************************/
 
-		auto ashThumbnail = ashThumbnailFutre.get();
-		check(ashThumbnail);
-		auto homuraThumbnail = homuraThumbnailFuture.get();
-		check(homuraThumbnail);
-
 		/* #sy_test ECS based Game flow & logic tests */
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
 
+		auto ashThumbnail = ashThumbnailFutre.get();
+		check(ashThumbnail);
 		const StaticMeshComponent quadStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = quadIB.MakeRef(),
@@ -229,6 +226,8 @@ int main()
 		TransformComponent& playerTransform = defaultWorld->Get<TransformComponent>(player);
 		playerTransform.Scale = Vector3{ 10.f, 10.f, 0.f };
 
+		auto homuraThumbnail = homuraThumbnailFuture.get();
+		check(homuraThumbnail);
 		const StaticMeshComponent triStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = triIB.MakeRef(),

@@ -133,7 +133,7 @@ namespace fe
 		size_t bufferHead = 0;
 		size_t bufferUsedSizeInBytes = 0;
 
-		constexpr static size_t RequestCapacity = 2;
+		constexpr static size_t RequestCapacity = 16;
 		details::UploadRequest uploadRequests[RequestCapacity];
 		size_t requestHead = 0;
 		size_t requestTail = 0;
