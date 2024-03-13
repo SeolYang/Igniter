@@ -22,7 +22,7 @@ namespace fe
 		check(newDescriptorHeap);
 		for (uint32_t idx = 0; idx < numDescriptorsInHeap; ++idx)
 		{
-			this->descsriptorIdxPool.push(idx);
+			this->descriptorIdxPool.push(idx);
 		}
 	}
 
@@ -33,14 +33,14 @@ namespace fe
 		, numInitialDescriptors(std::exchange(other.numInitialDescriptors, 0))
 		, cpuDescriptorHandleForHeapStart(std::exchange(other.cpuDescriptorHandleForHeapStart, {}))
 		, gpuDescriptorHandleForHeapStart(std::exchange(other.gpuDescriptorHandleForHeapStart, {}))
-		, bIsShaderVisible(other.bIsShaderVisible)
-		, descsriptorIdxPool(std::move(other.descsriptorIdxPool))
+		, bIsShaderVisible(other.bIsShaderVisible),
+		  descriptorIdxPool(std::move(other.descriptorIdxPool))
 	{
 	}
 
 	DescriptorHeap::~DescriptorHeap()
 	{
-		check(numInitialDescriptors == descsriptorIdxPool.unsafe_size());
+		check(numInitialDescriptors == descriptorIdxPool.size());
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const uint32_t index) const
@@ -73,12 +73,14 @@ namespace fe
 		check(descriptorHeapType != EDescriptorHeapType::DSV ||
 			  (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EGpuViewType::DepthStencilView)));
 
-		uint32_t newDescriptorIdx = std::numeric_limits<uint32_t>::max();
-		if (descsriptorIdxPool.empty() || !descsriptorIdxPool.try_pop(newDescriptorIdx))
+		if (descriptorIdxPool.empty())
 		{
+			checkNoEntry();
 			return GpuView{};
 		}
 
+		const uint32_t newDescriptorIdx = descriptorIdxPool.top();
+		descriptorIdxPool.pop();
 		return GpuView{
 			.Type = desiredType,
 			.Index = newDescriptorIdx,
@@ -105,8 +107,8 @@ namespace fe
 
 		check(gpuView.Index < numInitialDescriptors);
 		check(gpuView.Index != std::numeric_limits<decltype(GpuView::Index)>::max());
-		descsriptorIdxPool.push(gpuView.Index);
-		check(descsriptorIdxPool.unsafe_size() <= numInitialDescriptors);
+		descriptorIdxPool.push(gpuView.Index);
+		check(descriptorIdxPool.size() <= numInitialDescriptors);
 	}
 
 } // namespace fe

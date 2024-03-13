@@ -13,7 +13,7 @@ namespace fe
 		DeferredDeallocator(DeferredDeallocator&&) noexcept = delete;
 		~DeferredDeallocator();
 
-		DeferredDeallocator&  operator=(const DeferredDeallocator&) = delete;
+		DeferredDeallocator& operator=(const DeferredDeallocator&) = delete;
 		DeferredDeallocator& operator=(DeferredDeallocator&&) = delete;
 
 		void RequestDeallocation(DefaultCallback requester);
@@ -24,8 +24,9 @@ namespace fe
 		void FlushFrame(const uint8_t localFrameIdx);
 
 	private:
-		const FrameManager&															  frameManager;
-		std::array<concurrency::concurrent_queue<DefaultCallback>, NumFramesInFlight> pendingRequesters;
+		const FrameManager& frameManager;
+		std::array<SharedMutex, NumFramesInFlight> mutexes;
+		std::array<std::queue<DefaultCallback>, NumFramesInFlight> pendingRequesters;
 	};
 
 	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);

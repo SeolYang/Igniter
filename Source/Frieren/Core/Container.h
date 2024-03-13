@@ -8,7 +8,6 @@
 #include <bitset>
 #include <functional>
 #include <variant>
-#include <concurrent_queue.h>
 
 #pragma warning(push)
 #pragma warning(disable : 26800)

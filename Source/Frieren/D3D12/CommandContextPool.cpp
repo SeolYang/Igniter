@@ -21,18 +21,20 @@ namespace fe
 
 	CommandContextPool::~CommandContextPool()
 	{
-		check(pool.unsafe_size() == reservedNumCmdCtxs);
-		for (auto begin = pool.unsafe_begin(); begin != pool.unsafe_end(); ++begin)
+		check(pool.size() == reservedNumCmdCtxs);
+		while (!pool.empty())
 		{
-			delete *begin;
+			auto* cmdCtx = pool.front();
+			pool.pop();
+			delete cmdCtx;
 		}
-		pool.clear();
 	}
 
 	void CommandContextPool::Return(CommandContext* cmdContext)
 	{
+		ReadWriteLock lock{ mutex };
 		check(cmdContext != nullptr);
-		check(pool.unsafe_size() < reservedNumCmdCtxs);
+		check(pool.size() < reservedNumCmdCtxs);
 		pool.push(cmdContext);
 	}
 } // namespace fe

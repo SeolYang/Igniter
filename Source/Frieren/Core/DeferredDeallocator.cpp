@@ -16,7 +16,11 @@ namespace fe
 	void DeferredDeallocator::RequestDeallocation(DefaultCallback requester)
 	{
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
-		pendingRequesters[localFrameIdx].push(std::move(requester));
+
+		auto& mutex = mutexes[localFrameIdx];
+		auto& queue = pendingRequesters[localFrameIdx];
+		ReadWriteLock lock{ mutex };
+		queue.push(std::move(requester));
 	}
 
 	void DeferredDeallocator::FlushCurrentFrame()
@@ -26,12 +30,15 @@ namespace fe
 
 	void DeferredDeallocator::FlushFrame(const uint8_t localFrameIdx)
 	{
-		DefaultCallback requester;
-		while (pendingRequesters[localFrameIdx].try_pop(requester))
+		auto& mutex = mutexes[localFrameIdx];
+		auto& queue = pendingRequesters[localFrameIdx];
+
+		ReadWriteLock lock{ mutex };
+		while (!queue.empty())
 		{
-			requester();
+			queue.front()();
+			queue.pop();
 		}
-		pendingRequesters[localFrameIdx].clear();
 	}
 
 	void DeferredDeallocator::FlushAllFrames()

@@ -2,12 +2,13 @@
 #include <D3D12/Common.h>
 #include <D3D12/CommandContext.h>
 #include <Core/Container.h>
+#include <Core/Mutex.h>
 
 namespace fe
 {
 	class DeferredDeallocator;
 	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
-}
+} // namespace fe
 
 namespace fe
 {
@@ -20,20 +21,24 @@ namespace fe
 
 		auto Submit(const std::string_view debugName = "")
 		{
-			const auto deleter = [this](CommandContext* ptr) {
+			const static auto deleter = [this](CommandContext* ptr)
+			{
 				if (ptr != nullptr)
 				{
-					RequestDeferredDeallocation(deferredDeallocator, [ptr, this]() { this->Return(ptr); });
+					RequestDeferredDeallocation(deferredDeallocator, [ptr, this]()
+												{ this->Return(ptr); });
 				}
 			};
-
 			using ReturnType = std::unique_ptr<CommandContext, decltype(deleter)>;
 
-			CommandContext* cmdCtxPtr = nullptr;
-			if (!pool.try_pop(cmdCtxPtr))
+			ReadWriteLock lock{ mutex };
+			if (pool.empty())
 			{
 				return ReturnType{ nullptr, deleter };
 			}
+
+			CommandContext* cmdCtxPtr = pool.front();
+			pool.pop();
 
 			if (!debugName.empty())
 			{
@@ -49,6 +54,8 @@ namespace fe
 	private:
 		DeferredDeallocator& deferredDeallocator;
 		const size_t reservedNumCmdCtxs;
-		concurrency::concurrent_queue<CommandContext*> pool;
+
+		SharedMutex mutex;
+		std::queue<CommandContext*> pool;
 	};
 } // namespace fe
