@@ -53,6 +53,8 @@ namespace fe
 		DeferredDeallocator& deferredDeallocator;
 		RenderDevice& device;
 
+		RecursiveMutex mutex;
+
 		std::unique_ptr<DescriptorHeap> cbvSrvUavHeap;
 		std::unique_ptr<DescriptorHeap> samplerHeap;
 		std::unique_ptr<DescriptorHeap> rtvHeap;

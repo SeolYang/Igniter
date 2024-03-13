@@ -136,6 +136,7 @@ namespace fe
 		constexpr static size_t RequestCapacity = 2;
 		details::UploadRequest uploadRequests[RequestCapacity];
 		size_t requestHead = 0;
+		size_t requestTail = 0;
 		size_t numInFlightRequests = 0;
 	};
 

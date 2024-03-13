@@ -153,6 +153,7 @@ namespace fe
 
 	RefHandle<GpuView> GpuViewManager::RequestSampler(const D3D12_SAMPLER_DESC& desc)
 	{
+		RecursiveLock lock{ mutex };
 		const uint64_t samplerDescHashVal = HashState(&desc);
 
 		RefHandle<GpuView> refHandle{};
@@ -202,6 +203,7 @@ namespace fe
 
 	std::optional<GpuView> GpuViewManager::Allocate(const EGpuViewType type)
 	{
+		RecursiveLock lock{ mutex };
 		check(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
 		switch (type)
 		{
@@ -225,6 +227,7 @@ namespace fe
 
 	void GpuViewManager::Deallocate(const GpuView& gpuView)
 	{
+		RecursiveLock lock{ mutex };
 		check(gpuView.IsValid());
 		check(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
 		switch (gpuView.Type)

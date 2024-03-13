@@ -102,10 +102,6 @@ int main()
 			xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08"),
 			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
-		auto ashThumbnail = ashThumbnailFutre.get();
-		check(ashThumbnail);
-		auto homuraThumbnail = homuraThumbnailFuture.get();
-		check(homuraThumbnail);
 		/******************************/
 
 		/* #sy_test Input Manager Test */
@@ -211,6 +207,11 @@ int main()
 
 		Handle<GpuView, GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
 		/*******************************************/
+
+		auto ashThumbnail = ashThumbnailFutre.get();
+		check(ashThumbnail);
+		auto homuraThumbnail = homuraThumbnailFuture.get();
+		check(homuraThumbnail);
 
 		/* #sy_test ECS based Game flow & logic tests */
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();

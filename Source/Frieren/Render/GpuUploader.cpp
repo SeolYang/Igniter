@@ -40,7 +40,10 @@ namespace fe
 
 		if (alignedRequestSize > bufferCapacity)
 		{
-			WaitForRequestUnsafe(numInFlightRequests);
+			if (numInFlightRequests >= 1)
+			{
+				WaitForRequestUnsafe(numInFlightRequests);
+			}
 			ResizeUnsafe(alignedRequestSize);
 		}
 
@@ -99,6 +102,7 @@ namespace fe
 					check(bufferUsedSizeInBytes == 0);
 					numInFlightRequests = 0;
 					requestHead = 0;
+					requestTail = 0;
 
 					newRequest = AllocateRequestUnsafe();
 					newRequest->OffsetInBytes = 0;
@@ -146,6 +150,7 @@ namespace fe
 		request.CmdCtx->End();
 		copyQueue.AddPendingContext(*request.CmdCtx);
 		request.Sync = copyQueue.Submit();
+		check(request.Sync.IsValid());
 		context.Reset();
 		reservedThreadID.store(InvalidThreadID, std::memory_order::release);
 		return request.Sync;
@@ -169,17 +174,7 @@ namespace fe
 	{
 		check(numWaitFor > 0 && numWaitFor <= numInFlightRequests);
 
-		// uint 이기 때문에 modulo 로 계산, 의미상으론 배열에서 requestHead를 시작으로 numInFlightRequest만큼 뒤로 이동하는 것과 같음
-		size_t begin = 0;
-		if (numInFlightRequests < requestHead)
-		{
-			begin = (requestHead - numInFlightRequests) % RequestCapacity;
-		}
-		else if (numInFlightRequests > requestHead)
-		{
-			begin = RequestCapacity % (numInFlightRequests - requestHead);
-		}
-
+		const size_t begin = requestTail;
 		for (size_t counter = 0; counter < numWaitFor; ++counter)
 		{
 			const size_t idx = (begin + counter) % RequestCapacity;
@@ -187,6 +182,7 @@ namespace fe
 
 			check(numInFlightRequests > 0);
 			--numInFlightRequests;
+			requestTail = (requestTail + 1) % RequestCapacity;
 			check((uploadRequests[idx].SizeInBytes + uploadRequests[idx].PaddingInBytes) <= bufferUsedSizeInBytes);
 			bufferUsedSizeInBytes -= (uploadRequests[idx].SizeInBytes + uploadRequests[idx].PaddingInBytes);
 			uploadRequests[idx].Reset();
