@@ -68,16 +68,16 @@ namespace fe
 		}
 	}
 
-	RefHandle<Action> InputManager::QueryAction(const String nameOfAction) const
+	RefHandle<const Action> InputManager::QueryAction(const String nameOfAction) const
 	{
 		auto actionMapItr = actionMap.find(nameOfAction);
-		return actionMapItr != actionMap.cend() ? actionMapItr->second.MakeRef() : RefHandle<Action>{};
+		return actionMapItr != actionMap.cend() ? actionMapItr->second.MakeRef() : RefHandle<const Action>{};
 	}
 
-	RefHandle<Axis> InputManager::QueryAxis(const String nameOfAxis) const
+	RefHandle<const Axis> InputManager::QueryAxis(const String nameOfAxis) const
 	{
 		auto axisMapItr = axisMap.find(nameOfAxis);
-		return axisMapItr != axisMap.cend() ? axisMapItr->second.MakeRef() : RefHandle<Axis>{};
+		return axisMapItr != axisMap.cend() ? axisMapItr->second.MakeRef() : RefHandle<const Axis>{};
 	}
 
 	float InputManager::QueryScaleOfAxis(const String nameOfAxis, const EInput input) const

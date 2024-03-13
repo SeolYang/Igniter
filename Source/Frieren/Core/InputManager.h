@@ -80,9 +80,9 @@ namespace fe
 
 		// #sy_todo UnbindAction/Axis
 
-		RefHandle<Action> QueryAction(String nameOfAction) const;
-		RefHandle<Axis>   QueryAxis(String nameOfAxis) const;
-		float			   QueryScaleOfAxis(String nameOfAxis, EInput input) const;
+		RefHandle<const Action> QueryAction(String nameOfAction) const;
+		RefHandle<const Axis> QueryAxis(String nameOfAxis) const;
+		float QueryScaleOfAxis(String nameOfAxis, EInput input) const;
 
 		void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);
 
@@ -101,11 +101,11 @@ namespace fe
 	private:
 		HandleManager& handleManager;
 
-		InputNameMap	  inputActionNameMap{};
+		InputNameMap inputActionNameMap{};
 		InputNameScaleMap inputAxisNameScaleMap{};
 
 		EventMap<Action> actionMap{};
-		EventMap<Axis>	 axisMap{};
+		EventMap<Axis> axisMap{};
 
 		float latestMouseX = std::numeric_limits<float>::infinity();
 		float latestMouseY = std::numeric_limits<float>::infinity();

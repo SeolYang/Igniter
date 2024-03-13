@@ -94,7 +94,6 @@ namespace fe
 	class ModelImporter
 	{
 	public:
-		/* #sy_wip_todo Impl Import as Static Meshes */
 		static std::vector<xg::Guid> ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
 		/* #sy_todo Impl import as Skeletal Meshes */
 		static std::vector<xg::Guid> ImportAsSkeletal(const String resPathStr, std::optional<SkeletalMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
@@ -115,6 +114,7 @@ namespace fe
 	class StaticMeshLoader
 	{
 	public:
+		/* #sy_wip_todo Impl Load Static Meshes */
 		std::optional<StaticMesh> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
 	};
 } // namespace fe

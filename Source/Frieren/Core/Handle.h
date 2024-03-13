@@ -362,14 +362,24 @@ namespace fe
 			}
 		}
 
-		/* #sy_todo ConstRefHandle */
-		[[nodiscard]] RefHandle<T> MakeRef() const
+		[[nodiscard]] RefHandle<const T> MakeRef() const
+		{
+			return RefHandle<const T>{ handle };
+		}
+
+		[[nodiscard]] RefHandle<T> MakeRef()
 		{
 			return RefHandle<T>{ handle };
 		}
 
 		template <typename Finalizer>
-		[[nodiscard]] RefHandle<T, Finalizer> MakeRef(Finalizer&& finalizer) const
+		[[nodiscard]] RefHandle<const T, Finalizer> MakeRef(Finalizer&& finalizer) const
+		{
+			return RefHandle<const T, Finalizer>{ handle, finalizer };
+		}
+
+		template <typename Finalizer>
+		[[nodiscard]] RefHandle<T, Finalizer> MakeRef(Finalizer&& finalizer)
 		{
 			return RefHandle<T, Finalizer>{ handle, finalizer };
 		}

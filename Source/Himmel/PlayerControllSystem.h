@@ -22,8 +22,8 @@ private:
 private:
 	const fe::Timer& timer;
 
-	fe::RefHandle<fe::Action> moveLeftAction;
-	fe::RefHandle<fe::Action> moveRightAction;
-	fe::RefHandle<fe::Action> healthRecoveryAction;
-	fe::RefHandle<fe::Action> displayPlayerInfoAction;
+	fe::RefHandle<const fe::Action> moveLeftAction;
+	fe::RefHandle<const fe::Action> moveRightAction;
+	fe::RefHandle<const fe::Action> healthRecoveryAction;
+	fe::RefHandle<const fe::Action> displayPlayerInfoAction;
 };
