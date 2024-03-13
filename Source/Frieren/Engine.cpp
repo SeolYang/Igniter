@@ -159,6 +159,12 @@ namespace fe
 		return *(instance->gameInstance);
 	}
 
+	void Engine::Exit()
+	{
+		check(instance != nullptr);
+		instance->bShouldExit = true;
+	}
+
 	int Engine::Execute()
 	{
 		logger->Log<EngineInfo>("* Start Engine main loop");

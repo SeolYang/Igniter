@@ -1,9 +1,10 @@
 struct BasicRenderResources
 {
-	uint positionBufferIdx;
-	uint vertexBufferIdx;
-	uint diffuseTexIdx;
-	uint samplerIdx;
+	uint VertexBufferIdx;
+	uint PerFrameBufferIdx;
+	uint PerObjectBufferIdx;
+	uint DiffuseTexIdx;
+	uint SamplerIdx;
 };
 
 ConstantBuffer<BasicRenderResources> renderResource : register(b0);
@@ -16,8 +17,8 @@ struct PixelShaderInput
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	Texture2D texture = ResourceDescriptorHeap[renderResource.diffuseTexIdx];
-	SamplerState samplerState = SamplerDescriptorHeap[renderResource.samplerIdx];
+	Texture2D texture = ResourceDescriptorHeap[renderResource.DiffuseTexIdx];
+	SamplerState samplerState = SamplerDescriptorHeap[renderResource.SamplerIdx];
 
 	return float4(texture.Sample(samplerState, input.aUv).rgb, 1.f);
 }

@@ -2,6 +2,7 @@
 #include <D3D12/Common.h>
 #include <Core/String.h>
 #include <Core/Container.h>
+#include <Math/Common.h>
 
 namespace fe
 {
@@ -72,7 +73,9 @@ namespace fe
 		void SetRenderTarget(const GpuView& rtv, std::optional<std::reference_wrapper<GpuView>> dsv = std::nullopt);
 		void SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology);
 		void SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth = 0.f, const float maxDepth = 1.f);
+		void SetViewport(const Viewport& viewport);
 		void SetScissorRect(const long left, const long top, const long right, const long bottom);
+		void SetScissorRect(const Viewport& viewport);
 
 		void SetRoot32BitConstants(const uint32_t registerSlot, const uint32_t num32BitValuesToSet, const void* srcData, const uint32_t destOffsetIn32BitValues);
 

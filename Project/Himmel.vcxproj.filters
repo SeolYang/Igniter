@@ -18,6 +18,9 @@
     <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Himmel\RotateEnemySystem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Himmel\PlayerControllSystem.h">
@@ -42,6 +45,18 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Himmel\PlayerComponent.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Himmel\MenuBar.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Himmel\RotateEnemySystem.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Himmel\EnemyArchetype.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Himmel\Enemy.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

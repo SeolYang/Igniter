@@ -3,6 +3,7 @@
 #include <Core/Win32API.h>
 #include <Core/String.h>
 #include <Core/Log.h>
+#include <Math/Common.h>
 
 namespace fe
 {
@@ -29,6 +30,8 @@ namespace fe
 
 		HWND GetNative() const { return windowHandle; }
 
+		[[nodiscard]] Viewport GetViewport() const { return viewport; }
+
 	private:
 		static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
@@ -38,5 +41,7 @@ namespace fe
 		std::wstring windowTitle;
 		WNDCLASSEX	 windowClass;
 		HWND		 windowHandle = NULL;
+
+		Viewport viewport;
 	};
 } // namespace fe

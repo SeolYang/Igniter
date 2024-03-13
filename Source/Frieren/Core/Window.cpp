@@ -28,7 +28,7 @@ namespace fe
 		const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
 		const auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-		constexpr auto windowStyle = WS_OVERLAPPEDWINDOW;
+		constexpr auto windowStyle = WS_POPUP;
 		constexpr auto exWindowStyle = 0;
 
 		RECT winRect{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
@@ -38,6 +38,9 @@ namespace fe
 									  (screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
 									  winRect.right - winRect.left, winRect.top - winRect.bottom, NULL, NULL,
 									  windowClass.hInstance, NULL);
+
+		viewport.width = static_cast<float>(winRect.right - winRect.left);
+		viewport.height = static_cast<float>(winRect.top - winRect.bottom);
 
 		ShowWindow(windowHandle, SW_SHOWDEFAULT);
 		UpdateWindow(windowHandle);

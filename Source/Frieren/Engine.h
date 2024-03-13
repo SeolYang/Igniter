@@ -41,6 +41,8 @@ namespace fe
 		[[nodiscard]] static GameInstance& GetGameInstance();
 		bool IsValid() const { return this == instance; }
 
+		[[nodiscard]] static void Exit();
+
 		int Execute();
 
 	private:

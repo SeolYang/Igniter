@@ -1,5 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
+#include <D3D12/GpuBuffer.h>
 #include <Core/Handle.h>
 #include <Core/FrameManager.h>
 
@@ -15,6 +16,20 @@ namespace fe
 
 	struct TempConstantBuffer
 	{
+	public:
+		template <typename T>
+		void Write(const T& data)
+		{
+			if (Mapping&& Mapping->MappedPtr != nullptr)
+			{
+				std::memcpy(Mapping->MappedPtr, &data, sizeof(T));
+			}
+			else
+			{
+				checkNoEntry();
+			}
+		}
+
 	public:
 		RefHandle<MappedGpuBuffer> Mapping = {};
 		RefHandle<GpuView> View = {};
@@ -32,6 +47,14 @@ namespace fe
 		TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
 		TempConstantBuffer Allocate(const GpuBufferDesc& desc);
+
+		template <typename T>
+		TempConstantBuffer Allocate()
+		{
+			GpuBufferDesc constantBufferDesc{};
+			constantBufferDesc.AsConstantBuffer<T>();
+			return Allocate(constantBufferDesc);
+		}
 
 		// 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다. 프레임 시작시 반드시 호출해야함.
 		void DeallocateCurrentFrame();

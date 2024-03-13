@@ -3,7 +3,7 @@
 #include <Core/Timer.h>
 #include <Core/Log.h>
 #include <Gameplay/World.h>
-#include <Gameplay/PositionComponent.h>
+#include <Render/TransformComponent.h>
 #include <HealthComponent.h>
 #include <HealthRecoveryBuff.h>
 #include <PlayerComponent.h>
@@ -32,9 +32,9 @@ void PlayerControllSystem::HandleMoveAction(fe::World& world)
 	{
 		if (moveLeftAction->IsAnyPressing())
 		{
-			world.Each<Player, fe::PositionComponent, Controllable>(
-				[this](Player& player, fe::PositionComponent& position) {
-					position.x -= player.movementPower * timer.GetDeltaTime();
+			world.Each<Player, fe::TransformComponent, Controllable>(
+				[this](Player& player, fe::TransformComponent& transform) {
+					transform.Position.x -= player.movementPower * timer.GetDeltaTime();
 				});
 		}
 	}
@@ -43,9 +43,10 @@ void PlayerControllSystem::HandleMoveAction(fe::World& world)
 	{
 		if (moveRightAction->IsAnyPressing())
 		{
-			world.Each<Player, Controllable, fe::PositionComponent>(
-				[this](Player& player, fe::PositionComponent& position) {
-					position.x += player.movementPower * timer.GetDeltaTime();
+			world.Each<Player, Controllable, fe::TransformComponent>(
+				[this](Player& player, fe::TransformComponent& transform)
+				{
+					transform.Position.x += player.movementPower * timer.GetDeltaTime();
 				});
 		}
 	}
@@ -77,10 +78,11 @@ void PlayerControllSystem::HandleDisplayPlayerInfoAction(fe::World& world)
 	{
 		if (displayPlayerInfoAction->State == fe::EInputState::Pressed)
 		{
-			world.Each<Player, HealthComponent, fe::PositionComponent>(
-				[](const Player& player, const HealthComponent& healthComponent, const fe::PositionComponent& position) {
+			world.Each<Player, HealthComponent, fe::TransformComponent>(
+				[](const Player& player, const HealthComponent& healthComponent, const fe::TransformComponent& transform)
+				{
 					FE_LOG(fe::LogInfo, "Health Recovery Buff remains: {}, Health: {}", player.remainHealthRecoveryBuff, healthComponent.value);
-					FE_LOG(fe::LogInfo, "Position: {}", position.x);
+					FE_LOG(fe::LogInfo, "Transform.Pos.X: {}", transform.Position.x);
 				});
 		}
 	}

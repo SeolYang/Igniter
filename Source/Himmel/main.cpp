@@ -1,15 +1,29 @@
 #include <Engine.h>
 #include <Core/InputManager.h>
-#include <D3D12/RenderDevice.h>
-#include <Gameplay/GameInstance.h>
-#include <Gameplay/World.h>
-#include <Gameplay/PositionComponent.h>
-#include <PlayerArchetype.h>
-#include <BasicGameFlow.h>
-#include <ImGui/ImGuiLayer.h>
-#include <ImGui/ImGuiCanvas.h>
 #include <Core/Handle.h>
 #include <Core/Event.h>
+#include <Core/Window.h>
+#include <Gameplay/GameInstance.h>
+#include <Gameplay/World.h>
+#include <D3D12/RenderDevice.h>
+#include <D3D12/GPUBuffer.h>
+#include <D3D12/GPUBufferDesc.h>
+#include <D3D12/CommandQueue.h>
+#include <D3D12/CommandContext.h>
+#include <D3D12/GPUView.h>
+#include <Render/GPUViewManager.h>
+#include <Render/GpuUploader.h>
+#include <Render/StaticMeshComponent.h>
+#include <Render/TransformComponent.h>
+#include <Render/CameraArchetype.h>
+#include <Asset/Texture.h>
+#include <Asset/Model.h>
+#include <ImGui/ImGuiLayer.h>
+#include <ImGui/ImGuiCanvas.h>
+#include <PlayerArchetype.h>
+#include <EnemyArchetype.h>
+#include <BasicGameFlow.h>
+#include <MenuBar.h>
 #include <iostream>
 
 // #sy_test Test for imgui integration
@@ -27,7 +41,6 @@ public:
 	}
 };
 
-
 // #sy_test
 struct SimpleVertex
 {
@@ -38,54 +51,41 @@ struct SimpleVertex
 	float v = 0.f;
 };
 
-#include <D3D12/GPUBuffer.h>
-#include <D3D12/GPUBufferDesc.h>
-#include <D3D12/CommandQueue.h>
-#include <D3D12/CommandContext.h>
-#include <D3D12/GPUView.h>
-#include <Asset/Texture.h>
-#include <Asset/Model.h>
-#include <Render/GPUViewManager.h>
-#include <Render/GpuUploader.h>
-#include <Render/StaticMeshComponent.h>
-
 int main()
 {
 	using namespace fe;
 	int result = 0;
 	{
-		fe::Engine engine;
-
-		// #sy_test Asset System Test
-		TextureImporter texImporter;
-		//xg::Guid importedTexGuid = *importer.Import(String("Resources\\djmax_1st_anv.png"));
-
-		StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
-		staticMeshImportConfig.bMergeMeshes = true;
-		std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\ash.fbx"), staticMeshImportConfig);
-		//////////////////////////////////
-
-		fe::InputManager& inputManager = engine.GetInputManager();
-		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
-		inputManager.BindAction(fe::String("MoveRight"), fe::EInput::D);
-		inputManager.BindAction(fe::String("UseHealthRecovery"), fe::EInput::Space);
-		inputManager.BindAction(fe::String("DisplayPlayerInfo"), fe::EInput::MouseLB);
-
-		fe::RenderDevice& renderDevice = engine.GetRenderDevice();
-		fe::GameInstance& gameInstance = engine.GetGameInstance();
+		Engine engine;
+		Window& window = engine.GetWindow();
+		InputManager& inputManager = engine.GetInputManager();
+		RenderDevice& renderDevice = engine.GetRenderDevice();
+		GameInstance& gameInstance = engine.GetGameInstance();
 		HandleManager& handleManager = engine.GetHandleManager();
 		GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
 		GpuUploader& gpuUploader = engine.GetGpuUploader();
 
-		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
-		const auto player = PlayerArchetype::Create(*defaultWorld);
-		const auto enemy = defaultWorld->Create();
+		/* #sy_test Asset System & Mechanism Test */
+		TextureImporter texImporter;
+		// xg::Guid importedTexGuid = *importer.Import(String("Resources\\djmax_1st_anv.png"));
+
+		StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
+		staticMeshImportConfig.bMergeMeshes = true;
+		std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\ash.fbx"), staticMeshImportConfig);
 
 		std::optional<Texture> texture = TextureLoader::Load(
 			xg::Guid("ee4fc8c1-37d6-4f3e-bedd-84116d9dcd2e"),
 			handleManager, renderDevice, gpuUploader, gpuViewManager);
+		/******************************/
 
-		/* Initialize Buffers */
+		/* #sy_test Input Manager Test */
+		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
+		inputManager.BindAction(fe::String("MoveRight"), fe::EInput::D);
+		inputManager.BindAction(fe::String("UseHealthRecovery"), fe::EInput::Space);
+		inputManager.BindAction(fe::String("DisplayPlayerInfo"), fe::EInput::MouseLB);
+		/********************************/
+
+		/* #sy_test GPU Buffer Creation & Upload Tests */
 		constexpr uint16_t NumQuadIndices = 6;
 		constexpr uint16_t NumTriIndices = 3;
 		const uint16_t quadIndices[NumQuadIndices] = { 0, 1, 2, 2, 3, 0 };
@@ -102,21 +102,20 @@ int main()
 		Handle<GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
 
 		const SimpleVertex vertices[7] = {
-			{ -.1f, 0.f, 0.f, /*uv*/ 0.f, 1.f },
-			{ -.1f, 0.5f, 0.f, /*uv*/ 0.f, 0.f },
-			{ .10f, 0.5f, 0.f, /*uv*/ 1.f, 0.f },
-			{ .10f, 0.f, 0.f, /*uv*/ 1.f, 1.f },
+			{ -0.5f, -0.5f, 0.f, /*uv*/ 0.f, 1.f },
+			{ -0.5f, 0.5f, 0.f, /*uv*/ 0.f, 0.f },
+			{ 0.5f, 0.5f, 0.f, /*uv*/ 1.f, 0.f },
+			{ 0.5f, -0.5f, 0.f, /*uv*/ 1.f, 1.f },
 
-			{ -0.1f, 0.f, 0.f, /*uv*/ 0.f, 1.f },
-			{ 0.0f, 0.45f, 0.f, /*uv*/ 0.5f, 0.f },
-			{ 0.1f, 0.f, 0.f, /*uv*/ 1.f, 1.f }
+			{ -0.5f, -0.5f, 0.f, /*uv*/ 0.f, 1.f },
+			{ 0.0f, 0.5f, 0.f, /*uv*/ 0.5f, 0.f },
+			{ 0.5f, -0.5f, 0.f, /*uv*/ 1.f, 1.f }
 		};
 		GpuBufferDesc verticesBufferDesc{};
 		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
 		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
 		Handle<GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
 
-		/* GPU Uploader Test */
 		std::thread t0(
 			[&gpuUploader, &quadIndices, &quadIB]()
 			{
@@ -181,6 +180,10 @@ int main()
 		t2.join();
 
 		Handle<GpuView, GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
+		/*******************************************/
+
+		/* #sy_test ECS based Game flow & logic tests */
+		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
 
 		const StaticMeshComponent quadStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
@@ -189,7 +192,11 @@ int main()
 			.DiffuseTex = texture->ShaderResourceView.MakeRef(),
 			.DiffuseTexSampler = texture->TexSampler
 		};
+
+		const auto player = PlayerArchetype::Create(*defaultWorld);
 		defaultWorld->Attach<StaticMeshComponent>(player, quadStaticMeshComp);
+		TransformComponent& playerTransform = defaultWorld->Get<TransformComponent>(player);
+		playerTransform.Scale = Vector3{ 10.f, 10.f, 0.f };
 
 		const StaticMeshComponent triStaticMeshComp{
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
@@ -199,14 +206,27 @@ int main()
 			.DiffuseTexSampler = texture->TexSampler
 		};
 
+		const auto enemy = EnemyArchetype::Create(*defaultWorld);
 		defaultWorld->Attach<StaticMeshComponent>(enemy, triStaticMeshComp);
-		defaultWorld->Attach<PositionComponent>(enemy, PositionComponent{ .x = .5f, .y = -0.2f });
+		TransformComponent& enemyTransform = defaultWorld->Get<TransformComponent>(enemy);
+		enemyTransform.Position = Vector3{ 10.5f, -3.5f, 10.f };
+		enemyTransform.Scale = Vector3{ 15.f, 15.f, 1.f };
+
+		const Entity cameraEntity = CameraArchetype::Create(*defaultWorld);
+		Camera& camera = defaultWorld->Get<Camera>(cameraEntity);
+		camera.CameraViewport = window.GetViewport();
+		TransformComponent& cameraTransform = defaultWorld->Get<TransformComponent>(cameraEntity);
+		cameraTransform.Position = Vector3{ 0.f, 0.f, -10.f };
 
 		gameInstance.SetWorld(std::move(defaultWorld));
 		gameInstance.SetGameFlow(std::make_unique<BasicGameFlow>());
+		/********************************************/
 
+		/* #sy_test ImGui integration tests */
 		fe::ImGuiCanvas& canvas = engine.GetImGuiCanvas();
 		canvas.AddLayer<TestLayer>(fe::String("DemoUI"));
+		canvas.AddLayer<MenuBar>();
+		/************************************/
 
 		result = engine.Execute();
 	}

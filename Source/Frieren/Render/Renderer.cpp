@@ -15,21 +15,20 @@
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUView.h>
 #include <Gameplay/World.h>
-#include <Gameplay/PositionComponent.h>
 #include <Render/GPUViewManager.h>
 #include <Render/StaticMeshComponent.h>
+#include <Render/TransformComponent.h>
+#include <Render/CameraComponent.h>
+#include <Core/Window.h>
 #include <Engine.h>
 #include <ranges>
-
-struct PositionBuffer
-{
-	float Position[3] = { 0.f, 0.f, 0.f };
-};
+#include <Math/Common.h>
 
 struct BasicRenderResources
 {
-	uint32_t PosBufferIdx;
 	uint32_t VertexBufferIdx;
+	uint32_t PerFrameBufferIdx;
+	uint32_t PerObjectBufferIdx;
 	uint32_t DiffuseTexIdx;
 	uint32_t DiffuseTexSamplerIdx;
 };
@@ -37,6 +36,16 @@ struct BasicRenderResources
 
 namespace fe
 {
+	struct PerFrameBuffer
+	{
+		Matrix ViewProj{};
+	};
+
+	struct PerObjectBuffer
+	{
+		Matrix LocalToWorld{};
+	};
+
 	FE_DEFINE_LOG_CATEGORY(RendererInfo, ELogVerbosity::Info)
 	FE_DEFINE_LOG_CATEGORY(RendererWarn, ELogVerbosity::Warning)
 	FE_DEFINE_LOG_CATEGORY(RendererFatal, ELogVerbosity::Fatal)
@@ -47,6 +56,7 @@ namespace fe
 		  renderDevice(device),
 		  handleManager(handleManager),
 		  gpuViewManager(gpuViewManager),
+		  mainViewport(window.GetViewport()),
 		  mainGfxQueue(device.CreateCommandQueue("Main Gfx Queue", EQueueType::Direct).value()),
 		  gfxCmdCtxPool(deferredDeallocator, device, EQueueType::Direct),
 		  swapchain(window, gpuViewManager, mainGfxQueue, NumFramesInFlight),
@@ -80,7 +90,7 @@ namespace fe
 
 		GPUTextureDesc depthStencilDesc;
 		depthStencilDesc.DebugName = String("DepthStencilBufferTex");
-		depthStencilDesc.AsDepthStencil(1280, 642, DXGI_FORMAT_D32_FLOAT);
+		depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
 		depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
 		dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{ .MipSlice = 0 });
 
@@ -121,6 +131,19 @@ namespace fe
 	{
 		check(mainGfxQueue);
 
+		TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
+
+		PerFrameBuffer perFrameBuffer{};
+
+		auto cameraView = world.View<Camera, TransformComponent>();
+		for (auto [entity, camera, transformData] : cameraView.each())
+		{
+			/* #sy_todo Multiple Camera, Render Target per camera */
+			/* Column Vector: P * ( V * (W * v) ); Row Vector: v*W*V*P  */
+			perFrameBuffer.ViewProj = ConvertToShaderSuitableForm(transformData.CreateView() * camera.CreatePerspective());
+		}
+		perFrameConstantBuffer.Write(perFrameBuffer);
+
 		auto renderCmdCtx = gfxCmdCtxPool.Submit();
 		renderCmdCtx->Begin(pso.get());
 		{
@@ -139,31 +162,33 @@ namespace fe
 			renderCmdCtx->ClearRenderTarget(backBufferRTV);
 			renderCmdCtx->ClearDepth(*dsv);
 			renderCmdCtx->SetRenderTarget(backBufferRTV, *dsv);
-			renderCmdCtx->SetViewport(0.f, 0.f, 1280.f, 642.f);
-			renderCmdCtx->SetScissorRect(0, 0, 1280, 642);
+			renderCmdCtx->SetViewport(mainViewport);
+			renderCmdCtx->SetScissorRect(mainViewport);
 			renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			size_t idx = 0;
-			GpuBufferDesc posBufferDesc;
-			posBufferDesc.AsConstantBuffer<PositionBuffer>();
-
-			world.Each<StaticMeshComponent, fe::PositionComponent>([&posBufferDesc, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, PositionComponent& position)
-																   {
-				renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
+			world.Each<StaticMeshComponent, const TransformComponent>(
+				[&perFrameConstantBuffer, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, const TransformComponent& transform)
 				{
-					TempConstantBuffer posBuffer = tempConstantBufferAllocator.Allocate(posBufferDesc);
-					std::memcpy(posBuffer.Mapping->MappedPtr, &position, sizeof(fe::PositionComponent));
-					const BasicRenderResources params{
-						.PosBufferIdx = posBuffer.View->Index,
-						.VertexBufferIdx = staticMesh.VerticesBufferSRV->Index,
-						.DiffuseTexIdx = staticMesh.DiffuseTex->Index,
-						.DiffuseTexSamplerIdx = staticMesh.DiffuseTexSampler->Index
-					};
+					renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
+					{
+						TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
+						const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
+						perObjectConstantBuffer.Write(perObjectBuffer);
 
-					renderCmdCtx->SetRoot32BitConstants(0, params, 0);
-				}
+						const BasicRenderResources params{
+							.VertexBufferIdx = staticMesh.VerticesBufferSRV->Index,
+							.PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
+							.PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
+							.DiffuseTexIdx = staticMesh.DiffuseTex->Index,
+							.DiffuseTexSamplerIdx = staticMesh.DiffuseTexSampler->Index
+						};
 
-				renderCmdCtx->DrawIndexed(staticMesh.NumIndices); });
+						renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+					}
+
+					renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
+				});
 		}
 		renderCmdCtx->End();
 		mainGfxQueue.AddPendingContext(*renderCmdCtx);

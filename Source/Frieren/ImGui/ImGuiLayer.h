@@ -1,5 +1,6 @@
 #pragma once
 #include <Core/String.h>
+#include <ImGui/Common.h>
 
 namespace fe
 {

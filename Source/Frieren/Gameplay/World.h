@@ -101,7 +101,7 @@ namespace fe
 		}
 
 		template <typename... Components>
-		[[nodiscard]] auto Get(const Entity entity)
+		[[nodiscard]] auto& Get(const Entity entity)
 		{
 			return registry.get<Components...>(entity);
 		}

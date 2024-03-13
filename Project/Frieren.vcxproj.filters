@@ -264,14 +264,20 @@
     <ClInclude Include="..\Source\Frieren\Render\StaticMeshComponent.h">
       <Filter>Source\Render\Component</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h">
-      <Filter>Source\Gameplay\Component</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Asset\Model.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Render\Vertex.h">
       <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\CameraComponent.h">
+      <Filter>Source\Render\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\TransformComponent.h">
+      <Filter>Source\Render\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Render\CameraArchetype.h">
+      <Filter>Source\Render\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

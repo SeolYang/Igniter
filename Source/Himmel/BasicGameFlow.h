@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <Gameplay/GameFlow.h>
+#include <RotateEnemySystem.h>
 
 class PlayerControllSystem;
 class BasicGameFlow : public fe::GameFlow
@@ -13,4 +14,5 @@ public:
 
 private:
     std::unique_ptr<PlayerControllSystem> playerControllSystem;
+	RotateEnemySystem rotateEnemySystem;
 };

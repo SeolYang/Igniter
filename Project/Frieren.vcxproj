@@ -65,7 +65,6 @@
     <ClInclude Include="..\Source\Frieren\Engine.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
-    <ClInclude Include="..\Source\Frieren\Gameplay\PositionComponent.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\Common.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiCanvas.h" />
@@ -73,12 +72,15 @@
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Frieren\Math\Common.h" />
     <ClInclude Include="..\Source\Frieren\Math\Utils.h" />
+    <ClInclude Include="..\Source\Frieren\Render\CameraArchetype.h" />
+    <ClInclude Include="..\Source\Frieren\Render\CameraComponent.h" />
     <ClInclude Include="..\Source\Frieren\Render\Common.h" />
     <ClInclude Include="..\Source\Frieren\Render\GpuUploader.h" />
     <ClInclude Include="..\Source\Frieren\Render\GpuViewManager.h" />
     <ClInclude Include="..\Source\Frieren\Render\Renderer.h" />
     <ClInclude Include="..\Source\Frieren\Render\StaticMeshComponent.h" />
     <ClInclude Include="..\Source\Frieren\Render\TempConstantBufferAllocator.h" />
+    <ClInclude Include="..\Source\Frieren\Render\TransformComponent.h" />
     <ClInclude Include="..\Source\Frieren\Render\Vertex.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />

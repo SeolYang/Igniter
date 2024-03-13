@@ -256,11 +256,21 @@ namespace fe
 		cmdList->RSSetViewports(1, &viewport);
 	}
 
+	void CommandContext::SetViewport(const Viewport& viewport)
+	{
+		SetViewport(viewport.x, viewport.y, viewport.width, viewport.height, viewport.minDepth, viewport.maxDepth);
+	}
+
 	void CommandContext::SetScissorRect(const long left, const long top, const long right, const long bottom)
 	{
 		check(IsValid());
 		const D3D12_RECT rect{ left, top, right, bottom };
 		cmdList->RSSetScissorRects(1, &rect);
+	}
+
+	void CommandContext::SetScissorRect(const Viewport& viewport)
+	{
+		SetScissorRect(static_cast<long>(viewport.x), static_cast<long>(viewport.y), static_cast<long>(viewport.width), static_cast<long>(viewport.height));
 	}
 
 	void CommandContext::DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset, const uint32_t vertexOffset)

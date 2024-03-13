@@ -1,6 +1,11 @@
-struct PositionBuffer
+struct PerFrameBuffer
 {
-	float3 aPos;
+	float4x4 ViewProj; 
+};
+
+struct PerObjectBuffer
+{
+	float4x4 LocalToWorld;
 };
 
 struct Vertex
@@ -11,10 +16,11 @@ struct Vertex
 
 struct BasicRenderResources
 {
-	uint positionBufferIdx;
-	uint vertexBufferIdx;
-	uint diffuseTexIdx;
-	uint samplerIdx;
+	uint VertexBufferIdx;
+	uint PerFrameBufferIdx;
+	uint PerObjectBufferIdx;
+	uint DiffuseTexIdx;
+	uint SamplerIdx;
 };
 
 struct VertexShaderOutput
@@ -27,12 +33,14 @@ ConstantBuffer<BasicRenderResources> renderResource : register(b0);
 
 VertexShaderOutput main( uint vertexID : SV_VertexID )
 {
-	ConstantBuffer<PositionBuffer> posBuffer = ResourceDescriptorHeap[renderResource.positionBufferIdx];
-	StructuredBuffer<Vertex> vertexBuffer = ResourceDescriptorHeap[renderResource.vertexBufferIdx];
+	ConstantBuffer<PerFrameBuffer> perFrameBuffer = ResourceDescriptorHeap[renderResource.PerFrameBufferIdx];
+	ConstantBuffer<PerObjectBuffer> perObjectBuffer = ResourceDescriptorHeap[renderResource.PerObjectBufferIdx];
+	StructuredBuffer<Vertex> vertexBuffer = ResourceDescriptorHeap[renderResource.VertexBufferIdx];
+
+	float4x4 worldViewProj = mul(perObjectBuffer.LocalToWorld, perFrameBuffer.ViewProj);
 
 	VertexShaderOutput output;
-	output.aPos = float4((vertexBuffer[vertexID].aPos + posBuffer.aPos), 1.f);
+	output.aPos = mul(float4(vertexBuffer[vertexID].aPos.xyz, 1.f), worldViewProj);
 	output.aUv = vertexBuffer[vertexID].aUv;
-
 	return output;
 }

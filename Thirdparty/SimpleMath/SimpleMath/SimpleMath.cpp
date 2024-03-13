@@ -34,8 +34,11 @@ namespace DirectX
         const Vector3 Vector3::Down = { 0.f, -1.f, 0.f };
         const Vector3 Vector3::Right = { 1.f, 0.f, 0.f };
         const Vector3 Vector3::Left = { -1.f, 0.f, 0.f };
-        const Vector3 Vector3::Forward = { 0.f, 0.f, -1.f };
-        const Vector3 Vector3::Backward = { 0.f, 0.f, 1.f };
+		/* #sy_modify 오른손 좌표계 기준이므로, 왼손 좌표계 기준으로 변경 */
+        //const Vector3 Vector3::Forward = { 0.f, 0.f, -1.f };
+        //const Vector3 Vector3::Backward = { 0.f, 0.f, 1.f };
+		const Vector3 Vector3::Forward = { 0.f, 0.f, 1.f };
+		const Vector3 Vector3::Backward = { 0.f, 0.f, -1.f };
 
         const Vector4 Vector4::Zero = { 0.f, 0.f, 0.f, 0.f };
         const Vector4 Vector4::One = { 1.f, 1.f, 1.f, 1.f };

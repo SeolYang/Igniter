@@ -57,6 +57,8 @@ namespace fe
 		HandleManager& handleManager;
 		GpuViewManager& gpuViewManager;
 
+		Viewport mainViewport{};
+
 		CommandQueue mainGfxQueue;
 		CommandContextPool gfxCmdCtxPool;
 		Swapchain swapchain;
@@ -72,7 +74,6 @@ namespace fe
 		std::unique_ptr<PipelineState> pso;
 		std::unique_ptr<GpuTexture> depthStencilBuffer;
 		Handle<GpuView, GpuViewManager*> dsv;
-
 #pragma endregion
 	};
 } // namespace fe
