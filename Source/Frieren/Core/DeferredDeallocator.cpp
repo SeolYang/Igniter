@@ -18,7 +18,7 @@ namespace fe
 		const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 
 		auto& mutex = mutexes[localFrameIdx];
-		auto& queue = pendingRequesters[localFrameIdx];
+		auto& queue = pendingRequesterQueues[localFrameIdx];
 		ReadWriteLock lock{ mutex };
 		queue.push(std::move(requester));
 	}
@@ -31,7 +31,7 @@ namespace fe
 	void DeferredDeallocator::FlushFrame(const uint8_t localFrameIdx)
 	{
 		auto& mutex = mutexes[localFrameIdx];
-		auto& queue = pendingRequesters[localFrameIdx];
+		auto& queue = pendingRequesterQueues[localFrameIdx];
 
 		ReadWriteLock lock{ mutex };
 		while (!queue.empty())

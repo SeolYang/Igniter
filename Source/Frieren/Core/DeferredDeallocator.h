@@ -26,7 +26,7 @@ namespace fe
 	private:
 		const FrameManager& frameManager;
 		std::array<SharedMutex, NumFramesInFlight> mutexes;
-		std::array<std::queue<DefaultCallback>, NumFramesInFlight> pendingRequesters;
+		std::array<std::queue<DefaultCallback>, NumFramesInFlight> pendingRequesterQueues;
 	};
 
 	void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
