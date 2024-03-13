@@ -168,9 +168,9 @@ namespace fe
 		const std::string assetPathStr = assetPath.string();
 
 		std::vector<uint32_t> remap(indices.size());
-		const size_t remappedVertexCount = meshopt_generateVertexRemap(remap.data(), 
-			indices.data(), indices.size(),
-			vertices.data(), indices.size(), sizeof(StaticMeshVertex));
+		const size_t remappedVertexCount = meshopt_generateVertexRemap(remap.data(),
+																	   indices.data(), indices.size(),
+																	   vertices.data(), indices.size(), sizeof(StaticMeshVertex));
 
 		std::vector<uint32_t> remappedIndices(indices.size());
 		std::vector<StaticMeshVertex> remappedVertices(remappedVertexCount);
@@ -221,22 +221,17 @@ namespace fe
 		newStaticMeshLoadConf.CompressedIndicesSizeInBytes = encodedIndices.size();
 
 		const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, newStaticMeshLoadConf.Guid);
-		if (!details::SaveSerializedToFile(newMetaPath, newStaticMeshLoadConf))
+		if (!SaveSerializedDataToJsonFile(newMetaPath, newStaticMeshLoadConf))
 		{
 			FE_LOG(ModelImporterErr, "Failed to save asset metadata to {}.", newMetaPath.string());
 			return std::nullopt;
 		}
 
-		std::ofstream dataFileStream(assetPath.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
-		if (!dataFileStream.is_open())
+		if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices }, std::span<const uint8_t>{ encodedIndices } }))
 		{
 			FE_LOG(ModelImporterErr, "Failed to save vertices/indices data to file {}.", assetPath.string());
 			return std::nullopt;
 		}
-
-		dataFileStream.write(reinterpret_cast<const char*>(encodedVertices.data()), encodedVertices.size());
-		dataFileStream.write(reinterpret_cast<const char*>(encodedIndices.data()), encodedIndices.size());
-		dataFileStream.close();
 
 		return newStaticMeshLoadConf.Guid;
 	}
@@ -369,7 +364,7 @@ namespace fe
 		importConfig->Version = StaticMeshImportConfig::LatestVersion;
 		importConfig->AssetType = EAssetType::StaticMesh;
 		importConfig->bIsPersistent = bPersistencyRequired;
-		if (!details::SaveSerializedToFile(resMetaPath, *importConfig))
+		if (!SaveSerializedDataToJsonFile(resMetaPath, *importConfig))
 		{
 			FE_LOG(ModelImporterErr, "Failed to save resource metadata to {}.", resMetaPath.string());
 		}
@@ -378,8 +373,57 @@ namespace fe
 		return importedStaticMeshGuid;
 	}
 
-	std::optional<fe::StaticMesh> StaticMeshLoader::Load(const xg::Guid&, HandleManager&, RenderDevice&, GpuUploader&, GpuViewManager&)
+	std::optional<fe::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager&, RenderDevice&, GpuUploader&, GpuViewManager&)
 	{
+		TempTimer tempTimer;
+		tempTimer.Begin();
+
+		const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, guid);
+		FE_LOG(StaticMeshLoaderInfo, "Load static mesh asset from {}...", assetMetaPath.string());
+		if (!fs::exists(assetMetaPath))
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Static Mesh Asset metadata \"{}\" does not exists.", assetMetaPath.string());
+			return std::nullopt;
+		}
+
+		std::optional<StaticMeshLoadConfig> loadConfig = LoadSerializedDataFromJsonFile<StaticMeshLoadConfig>(assetMetaPath);
+		if (!loadConfig)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Failed to read Static Mesh Load Config from file {}.", assetMetaPath.string());
+			return std::nullopt;
+		}
+
+		if (loadConfig->IsLatestVersion())
+		{
+			details::LogVersionMismatch<StaticMeshLoadConfig, StaticMeshLoaderWarn>(*loadConfig, assetMetaPath.string());
+		}
+
+		if (loadConfig->Guid != guid)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
+				   guid.str(), loadConfig->Guid.str());
+			return std::nullopt;
+		}
+
+		if (loadConfig->Type != EAssetType::StaticMesh)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
+				   magic_enum::enum_name(EAssetType::StaticMesh),
+				   magic_enum::enum_name(loadConfig->Type));
+			return std::nullopt;
+		}
+
+		/* #sy_todo Impl ToString */
+		if (loadConfig->NumVertices == 0 || loadConfig->NumIndices == 0 || loadConfig->CompressedVerticesSizeInBytes == 0 || loadConfig->CompressedIndicesSizeInBytes)
+		{
+			FE_LOG(StaticMeshLoaderFatal,
+				   "Load config has invalid values. \n * NumVertices: {}\n * NumIndices: {}\n * CompressedVerticesSizeInBytes: {}\n * CompressedIndicesSizeInBytes: {}",
+				   loadConfig->NumVertices, loadConfig->NumIndices, loadConfig->CompressedVerticesSizeInBytes, loadConfig->CompressedIndicesSizeInBytes);
+			return std::nullopt;
+		}
+
+		tempTimer.End();
+
 		unimplemented();
 		return {};
 	}

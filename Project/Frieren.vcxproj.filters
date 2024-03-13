@@ -52,6 +52,9 @@
     <Filter Include="Source\Gameplay\Component">
       <UniqueIdentifier>{10f5bb57-159e-4f17-858e-79e8e07e263a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Filesystem">
+      <UniqueIdentifier>{e3616311-888c-4bac-b79c-06e9b8d528d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -278,6 +281,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Render\CameraArchetype.h">
       <Filter>Source\Render\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Filesystem\Common.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Filesystem\Utils.h">
+      <Filter>Source\Filesystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

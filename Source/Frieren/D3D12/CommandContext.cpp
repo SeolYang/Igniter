@@ -60,9 +60,9 @@ namespace fe
 
 	void CommandContext::AddPendingTextureBarrier(GpuTexture& targetTexture, const D3D12_BARRIER_SYNC syncBefore,
 												  const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore,
-												  const D3D12_BARRIER_ACCESS			accessAfter,
-												  const D3D12_BARRIER_LAYOUT			layoutBefore,
-												  const D3D12_BARRIER_LAYOUT			layoutAfter,
+												  const D3D12_BARRIER_ACCESS accessAfter,
+												  const D3D12_BARRIER_LAYOUT layoutBefore,
+												  const D3D12_BARRIER_LAYOUT layoutAfter,
 												  const D3D12_BARRIER_SUBRESOURCE_RANGE subresourceRange)
 	{
 		check(IsValid());
@@ -168,11 +168,15 @@ namespace fe
 		CopyBuffer(from, 0, srcDesc.GetSizeAsBytes(), to, 0);
 	}
 
-	void CommandContext::CopyTextureRegion(GpuBuffer& from, GpuTexture& to, const uint32_t subresource, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+	void CommandContext::CopyTextureRegion(GpuBuffer& from, const size_t srcOffset, GpuTexture& to, const uint32_t subresource, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
 	{
 		check(from);
 		check(to);
-		const CD3DX12_TEXTURE_COPY_LOCATION src(&from.GetNative(), layout);
+
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT offsetedLayout = layout;
+		offsetedLayout.Offset += srcOffset;
+
+		const CD3DX12_TEXTURE_COPY_LOCATION src(&from.GetNative(), offsetedLayout);
 		const CD3DX12_TEXTURE_COPY_LOCATION dst(&to.GetNative(), subresource);
 		cmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
 	}
@@ -200,7 +204,8 @@ namespace fe
 		check(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
 		std::vector<ID3D12DescriptorHeap*> descriptorHeaps(targetDescriptorHeaps.size());
 		std::transform(targetDescriptorHeaps.begin(), targetDescriptorHeaps.end(), descriptorHeaps.begin(),
-					   [](DescriptorHeap& descriptorHeap) { check(descriptorHeap); return &descriptorHeap.GetNative(); });
+					   [](DescriptorHeap& descriptorHeap)
+					   { check(descriptorHeap); return &descriptorHeap.GetNative(); });
 		cmdList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()), descriptorHeaps.data());
 	}
 

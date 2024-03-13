@@ -25,6 +25,7 @@
 #include <BasicGameFlow.h>
 #include <MenuBar.h>
 #include <iostream>
+#include <future>
 
 // #sy_test Test for imgui integration
 class TestLayer : public fe::ImGuiLayer
@@ -67,15 +68,43 @@ int main()
 
 		/* #sy_test Asset System & Mechanism Test */
 		TextureImporter texImporter;
-		// xg::Guid importedTexGuid = *importer.Import(String("Resources\\djmax_1st_anv.png"));
+		// TextureImportConfig texImportConfig = MakeVersionedDefault<TextureImportConfig>();
+		// texImportConfig.bGenerateMips = true;
+		// texImportConfig.CompressionMode = fe::ETextureCompressionMode::BC7;
+		// texImporter.Import(String("Resources\\Ash\\ash.jpg"), texImportConfig);
+		// texImporter.Import(String("Resources\\Homura\\homura.jpg"), texImportConfig);
 
-		StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
-		staticMeshImportConfig.bMergeMeshes = true;
-		std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\ash.fbx"), staticMeshImportConfig);
+		// StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
+		// staticMeshImportConfig.bMergeMeshes = true;
+		// std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\Ash\\Ash.fbx"), staticMeshImportConfig);
 
-		std::optional<Texture> texture = TextureLoader::Load(
-			xg::Guid("ee4fc8c1-37d6-4f3e-bedd-84116d9dcd2e"),
-			handleManager, renderDevice, gpuUploader, gpuViewManager);
+		const xg::Guid ashThumbnailGuid = xg::Guid("512a7388-949d-4c30-9c21-5c08e2dfa587");
+		const xg::Guid homuraThumbnailGuid = xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08");
+
+		// std::optional<Texture> ashThumbnail = TextureLoader::Load(
+		//	ashThumbnailGuid,
+		//	handleManager, renderDevice, gpuUploader, gpuViewManager);
+
+		// std::optional<Texture> homuraThumbnail = TextureLoader::Load(
+		//	homuraThumbnailGuid,
+		//	handleManager, renderDevice, gpuUploader, gpuViewManager);
+
+		std::future<std::optional<Texture>> ashThumbnailFutre = std::async(
+			std::launch::async,
+			TextureLoader::Load,
+			xg::Guid("512a7388-949d-4c30-9c21-5c08e2dfa587"),
+			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
+
+		std::future<std::optional<Texture>> homuraThumbnailFuture = std::async(
+			std::launch::async,
+			TextureLoader::Load,
+			xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08"),
+			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
+
+		auto ashThumbnail = ashThumbnailFutre.get();
+		check(ashThumbnail);
+		auto homuraThumbnail = homuraThumbnailFuture.get();
+		check(homuraThumbnail);
 		/******************************/
 
 		/* #sy_test Input Manager Test */
@@ -189,8 +218,8 @@ int main()
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = quadIB.MakeRef(),
 			.NumIndices = NumQuadIndices,
-			.DiffuseTex = texture->ShaderResourceView.MakeRef(),
-			.DiffuseTexSampler = texture->TexSampler
+			.DiffuseTex = ashThumbnail->ShaderResourceView.MakeRef(),
+			.DiffuseTexSampler = ashThumbnail->TexSampler
 		};
 
 		const auto player = PlayerArchetype::Create(*defaultWorld);
@@ -202,8 +231,8 @@ int main()
 			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
 			.IndexBufferHandle = triIB.MakeRef(),
 			.NumIndices = NumTriIndices,
-			.DiffuseTex = texture->ShaderResourceView.MakeRef(),
-			.DiffuseTexSampler = texture->TexSampler
+			.DiffuseTex = homuraThumbnail->ShaderResourceView.MakeRef(),
+			.DiffuseTexSampler = homuraThumbnail->TexSampler
 		};
 
 		const auto enemy = EnemyArchetype::Create(*defaultWorld);

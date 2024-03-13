@@ -414,7 +414,7 @@ namespace fe
 		importConfig->AssetType = EAssetType::Texture;
 		importConfig->bIsPersistent = bPersistencyRequired;
 
-		if (!details::SaveSerializedToFile(resMetadataPath, *importConfig))
+		if (!SaveSerializedDataToJsonFile(resMetadataPath, *importConfig))
 		{
 			FE_LOG(TextureImporterWarn, "Failed to create resource metadata {}.", resMetadataPath.string());
 		}
@@ -447,7 +447,7 @@ namespace fe
 		}
 
 		const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newLoadConfig.Guid);
-		if (!details::SaveSerializedToFile(assetMetadataPath, newLoadConfig))
+		if (!SaveSerializedDataToJsonFile(assetMetadataPath, newLoadConfig))
 		{
 			FE_LOG(TextureImporterFatal, "Failed to open asset metadata file {}.", assetMetadataPath.string());
 			return std::nullopt;
@@ -514,7 +514,6 @@ namespace fe
 			FE_LOG(TextureLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
 				   magic_enum::enum_name(EAssetType::Texture),
 				   magic_enum::enum_name(loadConfig.Type));
-
 			return std::nullopt;
 		}
 
@@ -681,7 +680,7 @@ namespace fe
 				}
 			}
 
-			texUploadCtx->CopyTextureRegion(texUploadCtx.GetBuffer(), *newTex, idx, destCopyableFootprints.Layouts[idx]);
+			texUploadCtx->CopyTextureRegion(texUploadCtx.GetBuffer(), texUploadCtx.GetOffset(), *newTex, idx, destCopyableFootprints.Layouts[idx]);
 		}
 
 		std::optional<GpuSync> texUploadSync = gpuUploader.Submit(texUploadCtx);

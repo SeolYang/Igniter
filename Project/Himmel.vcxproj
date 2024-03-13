@@ -189,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Himmel\BasicGameFlow.h" />
+    <ClInclude Include="..\Source\Himmel\CameraController.h" />
     <ClInclude Include="..\Source\Himmel\ControllableTag.h" />
     <ClInclude Include="..\Source\Himmel\Enemy.h" />
     <ClInclude Include="..\Source\Himmel\EnemyArchetype.h" />

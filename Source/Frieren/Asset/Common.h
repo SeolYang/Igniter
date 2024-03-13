@@ -3,8 +3,7 @@
 #include <Core/Handle.h>
 #include <Core/String.h>
 #include <Core/Log.h>
-#include <filesystem>
-#include <fstream>
+#include <Filesystem/Utils.h>
 
 #ifndef FE_TEXT
 	#define FE_TEXT(x) #x
@@ -178,24 +177,23 @@ namespace fe
 		template <typename T, typename MismatchLogCategory = fe::LogWarn>
 		std::optional<T> LoadMetadataFromFile(const fs::path& resMetaPath)
 		{
-			if (fs::exists(resMetaPath))
+			if (!fs::exists(resMetaPath))
 			{
-				T metadata{};
-				std::ifstream resMetaStream{ resMetaPath.c_str() };
-				const json serializedResMeta{ json::parse(resMetaStream) };
-				resMetaStream.close();
-
-				serializedResMeta >> metadata;
-
-				if (metadata.IsLatestVersion())
-				{
-					details::LogVersionMismatch<T, MismatchLogCategory>(metadata, resMetaPath.string());
-				}
-
-				return metadata;
+				return std::nullopt;
 			}
 
-			return std::nullopt;
+			std::optional<T> metadata = LoadSerializedDataFromJsonFile<T>(resMetaPath);
+			if (!metadata)
+			{
+				return std::nullopt;
+			}
+
+			if (metadata->IsLatestVersion())
+			{
+				details::LogVersionMismatch<T, MismatchLogCategory>(*metadata, resMetaPath.string());
+			}
+
+			return metadata;
 		}
 
 		inline void CreateAssetDirectories()
@@ -230,23 +228,5 @@ namespace fe
 				fs::create_directories(ScriptAssetRootPath);
 			}
 		}
-
-		template <typename T>
-		bool SaveSerializedToFile(const fs::path path, const T& metadata)
-		{
-			json serialized{};
-			serialized << metadata;
-
-			std::ofstream fileStream{ path.c_str() };
-			if (!fileStream.is_open())
-			{
-				return false;
-			}
-
-			fileStream << serialized.dump(4);
-			fileStream.close();
-			return true;
-		}
-
 	} // namespace details
 } // namespace fe

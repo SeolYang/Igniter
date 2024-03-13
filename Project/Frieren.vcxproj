@@ -63,6 +63,8 @@
     <ClInclude Include="..\Source\Frieren\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Frieren\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Frieren\Engine.h" />
+    <ClInclude Include="..\Source\Frieren\Filesystem\Common.h" />
+    <ClInclude Include="..\Source\Frieren\Filesystem\Utils.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
