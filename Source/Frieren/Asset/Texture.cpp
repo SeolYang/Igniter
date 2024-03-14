@@ -680,7 +680,7 @@ namespace fe
 				}
 			}
 
-			texUploadCtx->CopyTextureRegion(texUploadCtx.GetBuffer(), texUploadCtx.GetOffset(), *newTex, idx, destCopyableFootprints.Layouts[idx]);
+			texUploadCtx.CopyTextureRegion(0, *newTex, idx, destCopyableFootprints.Layouts[idx]);
 		}
 
 		std::optional<GpuSync> texUploadSync = gpuUploader.Submit(texUploadCtx);

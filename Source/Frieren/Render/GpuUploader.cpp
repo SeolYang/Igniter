@@ -1,4 +1,5 @@
 #include <Render/GpuUploader.h>
+#include <D3D12/CommandContext.h>
 #include <Core/ThreadUIDGenerator.h>
 
 namespace fe
@@ -241,6 +242,34 @@ namespace fe
 		{
 			checkNoEntry();
 		}
+	}
+
+	void UploadContext::CopyBuffer(const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes /*= 0*/)
+	{
+		if (!IsValid())
+		{
+			checkNoEntry();
+			return;
+		}
+
+		check((request->OffsetInBytes + srcOffsetInBytes + numBytes) <= uploadBuffer->GetDesc().GetSizeAsBytes());
+		check((dstOffsetInBytes + numBytes) <= dst.GetDesc().GetSizeAsBytes());
+		check(request->CmdCtx != nullptr);
+		CommandContext& cmdCtx = *request->CmdCtx;
+		cmdCtx.CopyBuffer(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, numBytes, dst, dstOffsetInBytes);
+	}
+
+	void UploadContext::CopyTextureRegion(const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+	{
+		if (!IsValid())
+		{
+			checkNoEntry();
+			return;
+		}
+
+		check(request->CmdCtx != nullptr);
+		CommandContext& cmdCtx = *request->CmdCtx;
+		cmdCtx.CopyTextureRegion(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, dst, subresourceIdx, layout);
 	}
 
 } // namespace fe

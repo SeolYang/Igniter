@@ -490,10 +490,7 @@ namespace fe
 																sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, loadConfig->CompressedVerticesSizeInBytes);
 			if (decodeResult == 0)
 			{
-				verticesUploadCtx->CopyBuffer(
-					verticesUploadCtx.GetBuffer(),
-					verticesUploadCtx.GetOffset(), vertexBufferDesc.GetSizeAsBytes(),
-					*vertexBuffer, 0);
+				verticesUploadCtx.CopyBuffer(0, vertexBufferDesc.GetSizeAsBytes(), *vertexBuffer);
 			}
 			else
 			{
@@ -513,10 +510,7 @@ namespace fe
 
 			if (decodeResult == 0)
 			{
-				indicesUploadCtx->CopyBuffer(
-					indicesUploadCtx.GetBuffer(),
-					indicesUploadCtx.GetOffset(), indexBufferDesc.GetSizeAsBytes(),
-					*indexBuffer, 0);
+				indicesUploadCtx.CopyBuffer(0, indexBufferDesc.GetSizeAsBytes(), *indexBuffer);
 			}
 			else
 			{

@@ -61,9 +61,9 @@ namespace fe
 		void ClearDepth(const GpuView& dsv, float depth = 1.f);
 		void ClearStencil(const GpuView& dsv, uint8_t stencil = 0);
 
-		void CopyBuffer(GpuBuffer& from, GpuBuffer& to);
-		void CopyBuffer(GpuBuffer& from, const size_t srcOffset, const size_t numBytes, GpuBuffer& to, const size_t dstOffset);
-		void CopyTextureRegion(GpuBuffer& from, const size_t srcOffset, GpuTexture& to, const uint32_t subresource, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
+		void CopyBuffer(GpuBuffer& src, GpuBuffer& dst);
+		void CopyBuffer(GpuBuffer& src, const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes);
+		void CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
 
 		void SetRootSignature(RootSignature& rootSignature);
 		void SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps);

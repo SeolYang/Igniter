@@ -150,35 +150,35 @@ namespace fe
 		cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, nullptr);
 	}
 
-	void CommandContext::CopyBuffer(GpuBuffer& from, const size_t srcOffset, const size_t numBytes, GpuBuffer& to, const size_t dstOffset)
+	void CommandContext::CopyBuffer(GpuBuffer& src, const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes)
 	{
 		check(IsValid());
-		check(from);
-		check(to);
+		check(src);
+		check(dst);
 		check(numBytes > 0);
-		check(dstOffset + numBytes <= to.GetDesc().GetSizeAsBytes());
-		check(srcOffset + numBytes <= from.GetDesc().GetSizeAsBytes());
+		check(dstOffsetInBytes + numBytes <= dst.GetDesc().GetSizeAsBytes());
+		check(srcOffsetInBytes + numBytes <= src.GetDesc().GetSizeAsBytes());
 
-		cmdList->CopyBufferRegion(&to.GetNative(), dstOffset, &from.GetNative(), srcOffset, numBytes);
+		cmdList->CopyBufferRegion(&dst.GetNative(), dstOffsetInBytes, &src.GetNative(), srcOffsetInBytes, numBytes);
 	}
 
-	void CommandContext::CopyBuffer(GpuBuffer& from, GpuBuffer& to)
+	void CommandContext::CopyBuffer(GpuBuffer& src, GpuBuffer& dst)
 	{
-		const auto& srcDesc = from.GetDesc();
-		CopyBuffer(from, 0, srcDesc.GetSizeAsBytes(), to, 0);
+		const auto& srcDesc = src.GetDesc();
+		CopyBuffer(src, 0, srcDesc.GetSizeAsBytes(), dst, 0);
 	}
 
-	void CommandContext::CopyTextureRegion(GpuBuffer& from, const size_t srcOffset, GpuTexture& to, const uint32_t subresource, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+	void CommandContext::CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
 	{
-		check(from);
-		check(to);
+		check(src);
+		check(dst);
 
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT offsetedLayout = layout;
-		offsetedLayout.Offset += srcOffset;
+		offsetedLayout.Offset += srcOffsetInBytes;
 
-		const CD3DX12_TEXTURE_COPY_LOCATION src(&from.GetNative(), offsetedLayout);
-		const CD3DX12_TEXTURE_COPY_LOCATION dst(&to.GetNative(), subresource);
-		cmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+		const CD3DX12_TEXTURE_COPY_LOCATION srcLocation(&src.GetNative(), offsetedLayout);
+		const CD3DX12_TEXTURE_COPY_LOCATION dstLocation(&dst.GetNative(), subresourceIdx);
+		cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
 	}
 
 	void CommandContext::SetRootSignature(RootSignature& rootSignature)

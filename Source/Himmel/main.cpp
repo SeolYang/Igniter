@@ -146,14 +146,12 @@ int main()
 			[&gpuUploader, &quadIndices, &quadIB]()
 			{
 				UploadContext quadIndicesUploadCtx = gpuUploader.Reserve(sizeof(quadIndices));
+
 				quadIndicesUploadCtx.WriteData(
 					reinterpret_cast<const uint8_t*>(quadIndices),
 					0, 0, sizeof(quadIndices));
 
-				quadIndicesUploadCtx->CopyBuffer(
-					quadIndicesUploadCtx.GetBuffer(),
-					quadIndicesUploadCtx.GetOffset(), sizeof(quadIndices),
-					*quadIB, 0);
+				quadIndicesUploadCtx.CopyBuffer(0, sizeof(quadIndices), *quadIB);
 
 				std::optional<GpuSync> quadIndicesUploadSync = gpuUploader.Submit(quadIndicesUploadCtx);
 				check(quadIndicesUploadSync);
@@ -164,16 +162,13 @@ int main()
 			[&gpuUploader, &triIndices, &triIB]()
 			{
 				UploadContext triIndicesUploadCtx = gpuUploader.Reserve(sizeof(triIndices));
-				{
-					triIndicesUploadCtx.WriteData(
-						reinterpret_cast<const uint8_t*>(triIndices),
-						0, 0, sizeof(triIndices));
 
-					triIndicesUploadCtx->CopyBuffer(
-						triIndicesUploadCtx.GetBuffer(),
-						triIndicesUploadCtx.GetOffset(), sizeof(triIndices),
-						*triIB, 0);
-				}
+				triIndicesUploadCtx.WriteData(
+					reinterpret_cast<const uint8_t*>(triIndices),
+					0, 0, sizeof(triIndices));
+
+				triIndicesUploadCtx.CopyBuffer(0, sizeof(triIndices), *triIB);
+
 				std::optional<GpuSync> triIndicesUploadSync = gpuUploader.Submit(triIndicesUploadCtx);
 				check(triIndicesUploadSync);
 				triIndicesUploadSync->WaitOnCpu();
@@ -183,16 +178,13 @@ int main()
 			[&gpuUploader, &vertices, &verticesBuffer]()
 			{
 				UploadContext verticesUploadCtx = gpuUploader.Reserve(sizeof(vertices));
-				{
-					verticesUploadCtx.WriteData(
+				
+				verticesUploadCtx.WriteData(
 						reinterpret_cast<const uint8_t*>(vertices),
 						0, 0, sizeof(vertices));
 
-					verticesUploadCtx->CopyBuffer(
-						verticesUploadCtx.GetBuffer(),
-						verticesUploadCtx.GetOffset(), sizeof(vertices),
-						*verticesBuffer, 0);
-				}
+				verticesUploadCtx.CopyBuffer(0, sizeof(vertices), *verticesBuffer);
+
 				std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
 				check(verticesUploadSync);
 				verticesUploadSync->WaitOnCpu();
