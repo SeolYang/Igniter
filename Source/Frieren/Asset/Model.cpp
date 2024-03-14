@@ -132,7 +132,7 @@ namespace fe
 		return true;
 	}
 
-	static void ProcessStaticMeshData(const aiMesh& mesh, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices)
+	static void ProcessStaticMeshData(const aiMesh& mesh, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices, const uint32_t vertexIdxOffset = 0)
 	{
 		for (size_t vertexIdx = 0; vertexIdx < mesh.mNumVertices; ++vertexIdx)
 		{
@@ -149,9 +149,9 @@ namespace fe
 		for (size_t faceIdx = 0; faceIdx < mesh.mNumFaces; ++faceIdx)
 		{
 			const aiFace& face = mesh.mFaces[faceIdx];
-			indices.emplace_back(face.mIndices[0]);
-			indices.emplace_back(face.mIndices[1]);
-			indices.emplace_back(face.mIndices[2]);
+			indices.emplace_back(vertexIdxOffset + face.mIndices[0]);
+			indices.emplace_back(vertexIdxOffset + face.mIndices[1]);
+			indices.emplace_back(vertexIdxOffset + face.mIndices[2]);
 		}
 	}
 
@@ -260,8 +260,8 @@ namespace fe
 
 		const bool bPersistencyRequired = bIsPersistent || importConfig->bIsPersistent;
 
-		uint32_t importFlags = aiProcess_Triangulate;
-		importFlags |= importConfig->bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0;
+		uint32_t importFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded;
+		// importFlags |= importConfig->bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0;
 		importFlags |= importConfig->bGenerateNormals ? aiProcess_GenSmoothNormals : 0;
 
 		if (importConfig->bMergeMeshes)
@@ -275,8 +275,6 @@ namespace fe
 		}
 
 		importFlags |= importConfig->bGenerateUVCoords ? aiProcess_GenUVCoords : 0;
-		importFlags |= importConfig->bFlipUVs ? aiProcess_FlipUVs : 0;
-		importFlags |= importConfig->bFlipWindingOrder ? aiProcess_FlipWindingOrder : 0;
 		importFlags |= importConfig->bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
 
 		Assimp::Importer importer;
@@ -328,14 +326,13 @@ namespace fe
 				const aiMesh& mesh = *scene->mMeshes[meshIdx];
 				vertices.reserve(vertices.size() + mesh.mNumVertices);
 				indices.reserve(indices.size() + mesh.mNumFaces * NumIndicesPerFace);
-
-				ProcessStaticMeshData(mesh, vertices, indices);
+				ProcessStaticMeshData(mesh, vertices, indices, static_cast<uint32_t>(vertices.size()));
 			}
 
 			if (std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bPersistencyRequired, meshName, vertices, indices);
 				guid)
 			{
-				importedStaticMeshGuid.emplace_back(*guid);
+				importedStaticMeshGuid[0] = *guid;
 			}
 		}
 		else
@@ -354,7 +351,7 @@ namespace fe
 				std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bPersistencyRequired, std::format("{}.{}", meshName, mesh.mName.C_Str()), vertices, indices);
 				if (guid)
 				{
-					importedStaticMeshGuid.emplace_back(*guid);
+					importedStaticMeshGuid[meshIdx] = *guid;
 				}
 			}
 		}
@@ -374,12 +371,12 @@ namespace fe
 
 	std::optional<fe::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
 	{
+		FE_LOG(StaticMeshLoaderInfo, "Load static mesh {}.", guid.str());
 		TempTimer tempTimer;
 		tempTimer.Begin();
 
 		const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, guid);
 		const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, guid);
-		FE_LOG(StaticMeshLoaderInfo, "Load static mesh asset from {}...", assetMetaPath.string());
 		if (!fs::exists(assetPath))
 		{
 			FE_LOG(StaticMeshLoaderFatal, "Static Mesh Asset \"{}\" does not exists.", assetPath.string());

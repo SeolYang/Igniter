@@ -17,14 +17,14 @@ namespace fe
 		virtual const json& Deserialize(const json& archive) override;
 
 	public:
-		bool bMakeLeftHanded = true;
+		bool bMakeLeftHanded = false; /* #sy_deprecated */
 		bool bGenerateNormals = false;
 		bool bSplitLargeMeshes = false;
 		bool bPreTransformVertices = false;
 		bool bImproveCacheLocality = false;
 		bool bGenerateUVCoords = false;
-		bool bFlipUVs = false;
-		bool bFlipWindingOrder = false; /* If bFlipWindingOrder => CCW -> CW */
+		bool bFlipUVs = false;			/* #sy_deprecated */
+		bool bFlipWindingOrder = false; /* #sy_deprecated If bFlipWindingOrder => CCW -> CW */
 		bool bGenerateBoundingBoxes = false;
 		bool bImportTextures = false;  /* Only if textures does not imported before. */
 		bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */

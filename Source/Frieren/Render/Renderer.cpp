@@ -138,7 +138,8 @@ namespace fe
 		for (auto [entity, camera, transformData] : cameraView.each())
 		{
 			/* #sy_todo Multiple Camera, Render Target per camera */
-			/* Column Vector: P * ( V * (W * v) ); Row Vector: v*W*V*P  */
+			/* Column Vector: PVM; Row Vector: MVP  */
+			//const Matrix tempViewMatrix = XMMatrixLookAtLH()
 			perFrameBuffer.ViewProj = ConvertToShaderSuitableForm(transformData.CreateView() * camera.CreatePerspective());
 		}
 		perFrameConstantBuffer.Write(perFrameBuffer);

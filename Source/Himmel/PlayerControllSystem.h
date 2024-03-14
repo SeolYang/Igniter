@@ -24,6 +24,10 @@ private:
 
 	fe::RefHandle<const fe::Action> moveLeftAction;
 	fe::RefHandle<const fe::Action> moveRightAction;
+	fe::RefHandle<const fe::Action> moveForwardAction;
+	fe::RefHandle<const fe::Action> moveBackwardAction;
+	fe::RefHandle<const fe::Action> moveUpAction;
+	fe::RefHandle<const fe::Action> moveDownAction;
 	fe::RefHandle<const fe::Action> healthRecoveryAction;
 	fe::RefHandle<const fe::Action> displayPlayerInfoAction;
 };

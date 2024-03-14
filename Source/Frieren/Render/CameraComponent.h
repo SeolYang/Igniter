@@ -10,11 +10,10 @@ namespace fe
 	public:
 		[[nodiscard]] Matrix CreatePerspective() const
 		{
-			constexpr float FallbackAspectRatio = 16.f / 9.f;
 			const float aspectRatio = CameraViewport.AspectRatio();
 			check(aspectRatio >= 0.f);
 			const float fovRads = Deg2Rad(Fov);
-			return DirectX::XMMatrixPerspectiveFovLH(fovRads, (aspectRatio != 0.f ? aspectRatio : FallbackAspectRatio), NearZ, FarZ);
+			return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
 		}
 
 	public:

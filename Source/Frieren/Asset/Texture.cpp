@@ -477,12 +477,11 @@ namespace fe
 
 	std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
 	{
+		FE_LOG(TextureLoaderInfo, "Load texture asset {}.", guid.str());
 		TempTimer tempTimer;
 		tempTimer.Begin();
 
 		const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::Texture, guid);
-		FE_LOG(TextureLoaderInfo, "Load texture asset from {}...", assetMetaPath.string());
-
 		if (!fs::exists(assetMetaPath))
 		{
 			FE_LOG(TextureLoaderFatal, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());

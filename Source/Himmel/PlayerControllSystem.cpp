@@ -15,6 +15,10 @@ PlayerControllSystem::PlayerControllSystem()
 	auto& inputManager = fe::Engine::GetInputManager();
 	moveLeftAction = inputManager.QueryAction(fe::String("MoveLeft"));
 	moveRightAction = inputManager.QueryAction(fe::String("MoveRight"));
+	moveForwardAction = inputManager.QueryAction(fe::String("MoveForward"));
+	moveBackwardAction = inputManager.QueryAction(fe::String("MoveBackward"));
+	moveUpAction = inputManager.QueryAction(fe::String("MoveUp"));
+	moveDownAction = inputManager.QueryAction(fe::String("MoveDown"));
 	healthRecoveryAction = inputManager.QueryAction(fe::String("UseHealthRecovery"));
 	displayPlayerInfoAction = inputManager.QueryAction(fe::String("DisplayPlayerInfo"));
 }
@@ -33,7 +37,8 @@ void PlayerControllSystem::HandleMoveAction(fe::World& world)
 		if (moveLeftAction->IsAnyPressing())
 		{
 			world.Each<Player, fe::TransformComponent, Controllable>(
-				[this](Player& player, fe::TransformComponent& transform) {
+				[this](Player& player, fe::TransformComponent& transform)
+				{
 					transform.Position.x -= player.movementPower * timer.GetDeltaTime();
 				});
 		}
@@ -50,6 +55,54 @@ void PlayerControllSystem::HandleMoveAction(fe::World& world)
 				});
 		}
 	}
+
+	if (moveForwardAction)
+	{
+		if (moveForwardAction->IsAnyPressing())
+		{
+			world.Each<Player, Controllable, fe::TransformComponent>(
+				[this](Player& player, fe::TransformComponent& transform)
+				{
+					transform.Position.z += player.movementPower * timer.GetDeltaTime();
+				});
+		}
+	}
+
+	if (moveBackwardAction)
+	{
+		if (moveBackwardAction->IsAnyPressing())
+		{
+			world.Each<Player, Controllable, fe::TransformComponent>(
+				[this](Player& player, fe::TransformComponent& transform)
+				{
+					transform.Position.z -= player.movementPower * timer.GetDeltaTime();
+				});
+		}
+	}
+
+	if (moveUpAction)
+	{
+		if (moveUpAction->IsAnyPressing())
+		{
+			world.Each<Player, Controllable, fe::TransformComponent>(
+				[this](Player& player, fe::TransformComponent& transform)
+				{
+					transform.Position.y += player.movementPower * timer.GetDeltaTime();
+				});
+		}
+	}
+
+	if (moveDownAction)
+	{
+		if (moveDownAction->IsAnyPressing())
+		{
+			world.Each<Player, Controllable, fe::TransformComponent>(
+				[this](Player& player, fe::TransformComponent& transform)
+				{
+					transform.Position.y -= player.movementPower * timer.GetDeltaTime();
+				});
+		}
+	}
 }
 
 void PlayerControllSystem::HandleUseHealthRecoveryAction(fe::World& world)
@@ -59,7 +112,7 @@ void PlayerControllSystem::HandleUseHealthRecoveryAction(fe::World& world)
 		if (healthRecoveryAction->State == fe::EInputState::Pressed)
 		{
 			world.Each<Player, Controllable, HealthComponent>(
-				[&world](const fe::Entity& entity, Player& player, HealthComponent& health) 
+				[&world](const fe::Entity& entity, Player& player, HealthComponent& health)
 				{
 					if (player.remainHealthRecoveryBuff > 0 && health.value < HealthComponent::Maximum)
 					{
@@ -67,7 +120,8 @@ void PlayerControllSystem::HandleUseHealthRecoveryAction(fe::World& world)
 						FE_LOG(fe::LogInfo, "HP Recovery Buff Activated! Remain buff counter {}", player.remainHealthRecoveryBuff);
 						world.Attach<HealthRecoveryBuff>(entity);
 					}
-				}, entt::exclude<HealthRecoveryBuff>);
+				},
+				entt::exclude<HealthRecoveryBuff>);
 		}
 	}
 }
