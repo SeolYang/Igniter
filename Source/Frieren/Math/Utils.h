@@ -23,13 +23,13 @@ namespace fe
 
 	inline constexpr float Rad2Deg(const float radians)
 	{
-		constexpr float rad2deg = Pi32 / 180.f;
+		constexpr float rad2deg = 180.f / Pi32;
 		return radians * rad2deg;
 	}
 
 	inline constexpr float Deg2Rad(const float degrees)
 	{
-		constexpr float deg2rad = 180.f / Pi32;
+		constexpr float deg2rad = Pi32 / 180.f;
 		return degrees * deg2rad;
 	}
 } // namespace fe

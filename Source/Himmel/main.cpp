@@ -151,8 +151,8 @@ int main()
 		const auto enemy = EnemyArchetype::Create(*defaultWorld);
 		defaultWorld->Attach<StaticMeshComponent>(enemy, enemyStaticMeshComponent);
 		TransformComponent& enemyTransform = defaultWorld->Get<TransformComponent>(enemy);
-		enemyTransform.Position = Vector3{ -70.f, -50.f, 5.f };
-		enemyTransform.Scale = Vector3{ 0.5f, 0.5f, 0.5f };
+		enemyTransform.Position = Vector3{ -10.f, -20.f, 35.f };
+		enemyTransform.Scale = Vector3{ 0.2f, 0.2f, 0.2f };
 
 		const Entity cameraEntity = CameraArchetype::Create(*defaultWorld);
 		Camera& camera = defaultWorld->Get<Camera>(cameraEntity);
