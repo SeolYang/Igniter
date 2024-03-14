@@ -260,9 +260,10 @@ namespace fe
 
 		const bool bPersistencyRequired = bIsPersistent || importConfig->bIsPersistent;
 
-		uint32_t importFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded;
-		// importFlags |= importConfig->bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0;
-		importFlags |= importConfig->bGenerateNormals ? aiProcess_GenSmoothNormals : 0;
+		uint32_t importFlags = aiProcess_Triangulate;
+		importFlags |= importConfig->bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0;
+		importFlags |= importConfig->bFlipUVs ?  aiProcess_FlipUVs : 0;
+		importFlags |= importConfig->bFlipWindingOrder ? aiProcess_FlipWindingOrder : 0;
 
 		if (importConfig->bMergeMeshes)
 		{
@@ -274,6 +275,7 @@ namespace fe
 			importFlags |= importConfig->bPreTransformVertices ? aiProcess_PreTransformVertices : 0;
 		}
 
+		importFlags |= importConfig->bGenerateNormals ? aiProcess_GenSmoothNormals : 0;
 		importFlags |= importConfig->bGenerateUVCoords ? aiProcess_GenUVCoords : 0;
 		importFlags |= importConfig->bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
 

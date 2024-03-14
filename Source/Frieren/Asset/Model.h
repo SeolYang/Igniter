@@ -17,22 +17,24 @@ namespace fe
 		virtual const json& Deserialize(const json& archive) override;
 
 	public:
-		bool bMakeLeftHanded = false; /* #sy_deprecated */
+		bool bMakeLeftHanded = true;
+		bool bFlipUVs = true;
+		bool bFlipWindingOrder = true;
 		bool bGenerateNormals = false;
 		bool bSplitLargeMeshes = false;
 		bool bPreTransformVertices = false;
 		bool bImproveCacheLocality = false;
 		bool bGenerateUVCoords = false;
-		bool bFlipUVs = false;			/* #sy_deprecated */
-		bool bFlipWindingOrder = false; /* #sy_deprecated If bFlipWindingOrder => CCW -> CW */
 		bool bGenerateBoundingBoxes = false;
-		bool bImportTextures = false;  /* Only if textures does not imported before. */
-		bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
+
 		/*
 		 * If enabled, Ignore 'bSplitLargeMeshes' and force enable 'PreTransformVertices'.
-		 * It could be cause of cache inefficiency and loss of material details.
+		 * It cause of loss material details.
 		 */
 		bool bMergeMeshes = false;
+
+		bool bImportTextures = false;  /* Only if textures does not imported before. */
+		bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
 	};
 
 	json& operator<<(json& archive, const StaticMeshImportConfig& config);
