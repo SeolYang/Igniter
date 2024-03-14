@@ -40,7 +40,7 @@ namespace fe
 		}
 
 		template <typename Component, typename... Args>
-		auto Attach(const Entity entity, [[maybe_unused]] Args&&... args)
+		decltype(auto) Attach(const Entity entity, [[maybe_unused]] Args&&... args)
 		{
 			return registry.emplace<Component>(entity, std::forward<Args>(args)...);
 		}
@@ -107,7 +107,7 @@ namespace fe
 		}
 
 		template <typename... Components>
-		[[nodiscard]] auto Get(const Entity entity) const
+		[[nodiscard]] const auto& Get(const Entity entity) const
 		{
 			return registry.get<Components...>(entity);
 		}
