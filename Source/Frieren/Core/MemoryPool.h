@@ -14,7 +14,7 @@ namespace fe
 	{
 	public:
 		MemoryPool();
-		MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk);
+		MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk, const uint16_t magicNumber = 0);
 		MemoryPool(const MemoryPool&) = delete;
 		MemoryPool(MemoryPool&& other) noexcept;
 		~MemoryPool();

@@ -61,12 +61,6 @@ int main()
 		const xg::Guid homuraStaticMeshGuid = xg::Guid("a717ff6e-129b-4c80-927a-a786a0b21128");
 		const xg::Guid axeTexGuid = xg::Guid("eb93c3b0-1197-4884-8cfe-622f66184d4c");
 
-		std::future<std::optional<StaticMesh>> homuraStaticMeshFuture = std::async(
-			std::launch::async,
-			StaticMeshLoader::Load,
-			homuraStaticMeshGuid,
-			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
-
 		std::future<std::optional<Texture>> ashThumbnailFutre = std::async(
 			std::launch::async,
 			TextureLoader::Load,
@@ -83,6 +77,13 @@ int main()
 			std::launch::async,
 			TextureLoader::Load,
 			axeTexGuid,
+			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
+
+		
+		std::future<std::optional<StaticMesh>> homuraStaticMeshFuture = std::async(
+			std::launch::async,
+			StaticMeshLoader::Load,
+			homuraStaticMeshGuid,
 			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
 		std::future<std::optional<Texture>> homuraThumbnailFuture = std::async(

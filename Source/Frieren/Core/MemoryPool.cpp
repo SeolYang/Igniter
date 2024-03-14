@@ -9,8 +9,8 @@ namespace fe
 	{
 	}
 
-	MemoryPool::MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk)
-		: sizeOfElement(newSizeOfElement), alignOfElement(newAlignOfElement), numInitialElementPerChunk(numElementPerChunk), magicNumber(Random<uint16_t>(0, (0xffff - 1)))
+	MemoryPool::MemoryPool(const size_t newSizeOfElement, const size_t newAlignOfElement, const uint16_t numElementPerChunk, const uint32_t numInitialChunk, const uint16_t magicNumber)
+		: sizeOfElement(newSizeOfElement), alignOfElement(newAlignOfElement), numInitialElementPerChunk(numElementPerChunk), magicNumber(magicNumber == 0 ? Random<uint16_t>(0, (0xffff - 1)) : magicNumber)
 	{
 		check(sizeOfElement >= sizeof(uint64_t) && "The size of element must be at least sizeof(uint64_t) due to 'a element aliveness ensuring mechanism'.");
 		check(numElementPerChunk > 0);

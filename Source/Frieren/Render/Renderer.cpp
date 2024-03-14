@@ -139,8 +139,9 @@ namespace fe
 		{
 			/* #sy_todo Multiple Camera, Render Target per camera */
 			/* Column Vector: PVM; Row Vector: MVP  */
-			//const Matrix tempViewMatrix = XMMatrixLookAtLH()
-			perFrameBuffer.ViewProj = ConvertToShaderSuitableForm(transformData.CreateView() * camera.CreatePerspective());
+			const Matrix viewMatrix = transformData.CreateView();
+			const Matrix projMatrix = camera.CreatePerspective();
+			perFrameBuffer.ViewProj = ConvertToShaderSuitableForm(viewMatrix * projMatrix);
 		}
 		perFrameConstantBuffer.Write(perFrameBuffer);
 

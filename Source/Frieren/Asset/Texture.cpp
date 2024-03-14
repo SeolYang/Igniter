@@ -726,7 +726,7 @@ namespace fe
 			.LoadConfig = loadConfig,
 			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
 			.ShaderResourceView = std::move(srv),
-			.TexSampler = std::move(samplerView)
+			.TexSampler = samplerView
 		};
 	}
 } // namespace fe

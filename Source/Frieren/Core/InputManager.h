@@ -89,6 +89,8 @@ namespace fe
 		void HandleEvent(UINT message, WPARAM wParam, LPARAM lParam);
 		void PostUpdate();
 
+		void Clear();
+
 	private:
 		void HandleKeyDown(WPARAM wParam, LPARAM lParam);
 		void HandleKeyUp(WPARAM wParam, LPARAM lParam);

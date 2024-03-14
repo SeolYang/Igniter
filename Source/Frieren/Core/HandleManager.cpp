@@ -7,7 +7,6 @@ namespace fe
 {
 	HandleManager::~HandleManager()
 	{
-		check(pendingDeallocations.empty());
 	}
 
 	uint64_t HandleManager::Allocate(const uint64_t typeHashVal, const size_t sizeOfElement, const size_t alignOfElement)
@@ -18,13 +17,13 @@ namespace fe
 		if (!memPools.contains(typeHashVal))
 		{
 			memPools.insert({ typeHashVal,
-							  MemoryPool{ sizeOfElement, alignOfElement, static_cast<uint16_t>(SizeOfChunkBytes / sizeOfElement), NumInitialChunkPerPool } });
+							  MemoryPool{ sizeOfElement, alignOfElement, static_cast<uint16_t>(SizeOfChunkBytes / sizeOfElement), NumInitialChunkPerPool, static_cast<uint16_t>(typeHashVal) } });
 		}
 		check(memPools.contains(typeHashVal));
 
 		const uint64_t allocatedHandle = memPools[typeHashVal].Allocate();
 		check(allocatedHandle != details::HandleImpl::InvalidHandle);
-		check(!pendingDeallocations.contains(allocatedHandle));
+		check(!IsPendingDeallocationUnsafe(typeHashVal, allocatedHandle));
 		return allocatedHandle;
 	}
 
@@ -34,9 +33,11 @@ namespace fe
 		check(handle != details::HandleImpl::InvalidHandle);
 
 		ReadWriteLock lock{ mutex };
-		if (memPools.contains(typeHashVal))
+		const bool bMemPoolExists = memPools.contains(typeHashVal);
+		const bool bDeallocationSetExists = pendingDeallocationSets.contains(typeHashVal);
+		if (bMemPoolExists && bDeallocationSetExists)
 		{
-			pendingDeallocations.erase(handle);
+			pendingDeallocationSets.at(typeHashVal).erase(handle);
 			memPools[typeHashVal].Deallocate(handle);
 		}
 		else
@@ -51,17 +52,19 @@ namespace fe
 		return IsAliveUnsafe(typeHashVal, handle);
 	}
 
-	bool HandleManager::IsPendingDeallocation(const uint64_t handle) const
+	bool HandleManager::IsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle) const
 	{
 		ReadOnlyLock lock{ mutex };
-		return IsPendingDeallocationUnsafe(handle);
+		return IsPendingDeallocationUnsafe(typeHashVal, handle);
 	}
 
 	bool HandleManager::IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
 	{
 		check(typeHashVal != InvalidHashVal);
 		check(handle != details::HandleImpl::InvalidHandle);
-		if (!pendingDeallocations.contains(handle) && memPools.contains(typeHashVal))
+		const bool bPendingDeallocations = IsPendingDeallocationUnsafe(typeHashVal, handle);
+		const bool bMemPoolExists = memPools.contains(typeHashVal);
+		if (!bPendingDeallocations && bMemPoolExists)
 		{
 			const MemoryPool& pool = memPools.at(typeHashVal);
 			return pool.IsAlive(handle);
@@ -70,10 +73,11 @@ namespace fe
 		return false;
 	}
 
-	bool HandleManager::IsPendingDeallocationUnsafe(const uint64_t handle) const
+	bool HandleManager::IsPendingDeallocationUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
 	{
 		check(handle != details::HandleImpl::InvalidHandle);
-		return pendingDeallocations.contains(handle);
+		check(typeHashVal != InvalidHashVal);
+		return pendingDeallocationSets.contains(typeHashVal) ? pendingDeallocationSets.at(typeHashVal).contains(handle) : false;
 	}
 
 	void HandleManager::MaskAsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle)
@@ -81,7 +85,7 @@ namespace fe
 		ReadWriteLock lock{ mutex };
 		if (IsAliveUnsafe(typeHashVal, handle))
 		{
-			pendingDeallocations.insert(handle);
+			pendingDeallocationSets[typeHashVal].insert(handle);
 		}
 		else
 		{

@@ -136,7 +136,7 @@ void PlayerControllSystem::HandleDisplayPlayerInfoAction(fe::World& world)
 				[](const Player& player, const HealthComponent& healthComponent, const fe::TransformComponent& transform)
 				{
 					FE_LOG(fe::LogInfo, "Health Recovery Buff remains: {}, Health: {}", player.remainHealthRecoveryBuff, healthComponent.value);
-					FE_LOG(fe::LogInfo, "Transform.Pos.X: {}", transform.Position.x);
+					FE_LOG(fe::LogInfo, "Transform.Pos: {}, {}, {}", transform.Position.x, transform.Position.y, transform.Position.z);
 				});
 		}
 	}

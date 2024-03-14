@@ -50,10 +50,15 @@ namespace fe
 	{
 		check(nameOfAction);
 		check(input != EInput::None);
+		check(!inputActionNameMap[input].contains(nameOfAction));
 		inputActionNameMap[input].insert(nameOfAction);
 		if (!actionMap.contains(nameOfAction))
 		{
 			actionMap[nameOfAction] = Handle<Action>{ handleManager };
+		}
+		else
+		{
+			checkNoEntry();
 		}
 	}
 
@@ -158,6 +163,15 @@ namespace fe
 
 			preesedInputSet.clear();
 		}
+	}
+
+	void InputManager::Clear()
+	{
+		inputActionNameMap.clear();
+		inputAxisNameScaleMap.clear();
+		actionMap.clear();
+		axisMap.clear();
+		preesedInputSet.clear();
 	}
 
 	void InputManager::HandleKeyDown(const WPARAM wParam, const LPARAM /** unused */)

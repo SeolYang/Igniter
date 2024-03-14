@@ -40,7 +40,7 @@ namespace fe
 
 			bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
 			bool IsAlive(const uint64_t typeHashValue) const;
-			bool IsPendingDeallocation() const;
+			bool IsPendingDeallocation(const uint64_t typeHashValue) const;
 
 			void Deallocate(const uint64_t typeHashValue);
 			void MarkAsPendingDeallocation(const uint64_t typeHashVal);

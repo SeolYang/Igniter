@@ -52,6 +52,7 @@ namespace fe
 	{
 		logger->Log<EngineInfo>("* Cleanup sub-systems");
 		gpuViewManager->ClearCachedSampler();
+		inputManager->Clear();
 		deferredDeallocator->FlushAllFrames();
 
 		gameInstance.reset();
@@ -60,8 +61,8 @@ namespace fe
 		renderer.reset();
 		inputManager.reset();
 		deferredDeallocator.reset();
-		handleManager.reset();
 		gpuViewManager.reset();
+		handleManager.reset();
 		gpuUploader.reset();
 		renderDevice.reset();
 		window.reset();
