@@ -28,11 +28,11 @@ namespace fe
 		bool bGenerateBoundingBoxes = false;
 		bool bImportTextures = false;  /* Only if textures does not imported before. */
 		bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
-		/* 
-		* If enabled, Ignore 'bSplitLargeMeshes' and force enable 'PreTransformVertices'.
-		* It could be cause of cache inefficiency and loss of material details.
-		*/
-		bool bMergeMeshes = false;	   
+		/*
+		 * If enabled, Ignore 'bSplitLargeMeshes' and force enable 'PreTransformVertices'.
+		 * It could be cause of cache inefficiency and loss of material details.
+		 */
+		bool bMergeMeshes = false;
 	};
 
 	json& operator<<(json& archive, const StaticMeshImportConfig& config);
@@ -49,8 +49,8 @@ namespace fe
 
 	public:
 		std::string Name{};
-		size_t NumVertices{ 0 };
-		size_t NumIndices{ 0 };
+		uint32_t NumVertices{ 0 };
+		uint32_t NumIndices{ 0 };
 		size_t CompressedVerticesSizeInBytes{ 0 };
 		size_t CompressedIndicesSizeInBytes{ 0 };
 		/* #sy_todo Add AABB Info */
@@ -105,9 +105,8 @@ namespace fe
 	public:
 		StaticMeshLoadConfig LoadConfig;
 		Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> VertexBufferInstance;
-		Handle<GpuView, GpuViewManager*> VertexBufferSRV;
+		Handle<GpuView, GpuViewManager*> VertexBufferSrv;
 		Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> IndexBufferInstance;
-		Handle<GpuView, GpuViewManager*> IndexBufferView;
 		// RefHandle<Material>
 	};
 

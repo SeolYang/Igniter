@@ -52,8 +52,16 @@ namespace fe
 		size_t GetSize() const { return request != nullptr ? request->SizeInBytes : 0; }
 		size_t GetOffset() const { return request != nullptr ? request->OffsetInBytes : 0; }
 		GpuBuffer& GetBuffer() { return *uploadBuffer; }
+
+		uint8_t* GetOffsettedCpuAddress()
+		{
+			check(offsettedCpuAddr != nullptr);
+			return offsettedCpuAddr;
+		}
+
 		void WriteData(const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes);
 
+		/* #sy_improvement CopyBuffer, CopyTextureRegion 같은 애들만 UploadContext 에서 일종의 랩퍼 제공, UploadContext 에 대한 getbuffer 안해도 내부적으로 처리되도록 */
 		CommandContext* operator->()
 		{
 			check(request != nullptr && request->CmdCtx != nullptr);

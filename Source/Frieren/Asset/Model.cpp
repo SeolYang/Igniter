@@ -191,7 +191,6 @@ namespace fe
 		const auto intelVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 128, 0, 0);
 		const auto vfs = meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), sizeof(StaticMeshVertex));
 		const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex));
-
 		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
 		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
 		FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
@@ -215,8 +214,8 @@ namespace fe
 		newStaticMeshLoadConf.Type = EAssetType::StaticMesh;
 		newStaticMeshLoadConf.bIsPersistent = bPersistencyRequired;
 		newStaticMeshLoadConf.Name = meshName;
-		newStaticMeshLoadConf.NumVertices = remappedVertices.size();
-		newStaticMeshLoadConf.NumIndices = remappedIndices.size();
+		newStaticMeshLoadConf.NumVertices = static_cast<uint32_t>(remappedVertices.size());
+		newStaticMeshLoadConf.NumIndices = static_cast<uint32_t>(remappedIndices.size());
 		newStaticMeshLoadConf.CompressedVerticesSizeInBytes = encodedVertices.size();
 		newStaticMeshLoadConf.CompressedIndicesSizeInBytes = encodedIndices.size();
 
@@ -373,13 +372,20 @@ namespace fe
 		return importedStaticMeshGuid;
 	}
 
-	std::optional<fe::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager&, RenderDevice&, GpuUploader&, GpuViewManager&)
+	std::optional<fe::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
 	{
 		TempTimer tempTimer;
 		tempTimer.Begin();
 
+		const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, guid);
 		const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, guid);
 		FE_LOG(StaticMeshLoaderInfo, "Load static mesh asset from {}...", assetMetaPath.string());
+		if (!fs::exists(assetPath))
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Static Mesh Asset \"{}\" does not exists.", assetPath.string());
+			return std::nullopt;
+		}
+
 		if (!fs::exists(assetMetaPath))
 		{
 			FE_LOG(StaticMeshLoaderFatal, "Static Mesh Asset metadata \"{}\" does not exists.", assetMetaPath.string());
@@ -422,9 +428,116 @@ namespace fe
 			return std::nullopt;
 		}
 
-		tempTimer.End();
+		std::vector<uint8_t> blob = LoadBlobFromFile(assetPath);
+		if (blob.empty())
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Static Mesh {} blob is empty.", assetPath.string());
+			return std::nullopt;
+		}
 
-		unimplemented();
-		return {};
+		const size_t expectedBlobSize = loadConfig->CompressedVerticesSizeInBytes + loadConfig->CompressedIndicesSizeInBytes;
+		if (blob.size() == expectedBlobSize)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Static Mesh blob size does not match. Expected: {}, Found: {}", expectedBlobSize, blob.size());
+			return std::nullopt;
+		}
+
+		GpuBufferDesc vertexBufferDesc{};
+		vertexBufferDesc.AsVertexBuffer<StaticMeshVertex>(loadConfig->NumVertices);
+		if (vertexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedVerticesSizeInBytes)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Compressed vertices size exceed expected vertex buffer size. Compressed Size: {} bytes, Expected Vertex Buffer Size: {} bytes",
+				   loadConfig->CompressedVerticesSizeInBytes,
+				   vertexBufferDesc.GetSizeAsBytes());
+			return std::nullopt;
+		}
+
+		GpuBufferDesc indexBufferDesc{};
+		indexBufferDesc.AsIndexBuffer<uint32_t>(loadConfig->NumIndices);
+		if (indexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedIndicesSizeInBytes)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Compressed indices size exceed expected index buffer size. Compressed Size: {} bytes, Expected Index Buffer Size: {} bytes",
+				   loadConfig->CompressedIndicesSizeInBytes,
+				   indexBufferDesc.GetSizeAsBytes());
+			return std::nullopt;
+		}
+
+		std::optional<GpuBuffer> vertexBuffer = renderDevice.CreateBuffer(vertexBufferDesc);
+		if (!vertexBuffer)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Failed to create vertex buffer of {}.", assetPath.string());
+			return std::nullopt;
+		}
+
+		auto vertexBufferSrv = gpuViewManager.RequestShaderResourceView(*vertexBuffer);
+		if (!vertexBufferSrv)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Failed to create vertex buffer shader resource view of {}.", assetPath.string());
+			return std::nullopt;
+		}
+
+		std::optional<GpuBuffer> indexBuffer = renderDevice.CreateBuffer(indexBufferDesc);
+		if (!indexBuffer)
+		{
+			FE_LOG(StaticMeshLoaderFatal, "Failed to create index buffer of {}.", assetPath.string());
+			return std::nullopt;
+		}
+
+		UploadContext verticesUploadCtx = gpuUploader.Reserve(vertexBufferDesc.GetSizeAsBytes());
+		{
+			const size_t compressedVerticesOffset = 0;
+			const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(), loadConfig->NumVertices,
+																sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, loadConfig->CompressedVerticesSizeInBytes);
+			if (decodeResult == 0)
+			{
+				verticesUploadCtx->CopyBuffer(
+					verticesUploadCtx.GetBuffer(),
+					verticesUploadCtx.GetOffset(), vertexBufferDesc.GetSizeAsBytes(),
+					*vertexBuffer, 0);
+			}
+			else
+			{
+				FE_LOG(StaticMeshLoaderErr, "Failed to decode vertex buffer of {}.", assetPath.string());
+			}
+		}
+		std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
+		check(verticesUploadSync);
+
+		UploadContext indicesUploadCtx = gpuUploader.Reserve(indexBufferDesc.GetSizeAsBytes());
+		{
+			const size_t compressedIndicesOffset = loadConfig->CompressedVerticesSizeInBytes;
+			const int decodeResult = meshopt_decodeIndexBuffer<uint32_t>(
+				reinterpret_cast<uint32_t*>(indicesUploadCtx.GetOffsettedCpuAddress()),
+				loadConfig->NumIndices,
+				blob.data() + compressedIndicesOffset, loadConfig->CompressedIndicesSizeInBytes);
+
+			if (decodeResult == 0)
+			{
+				indicesUploadCtx->CopyBuffer(
+					indicesUploadCtx.GetBuffer(),
+					indicesUploadCtx.GetOffset(), indexBufferDesc.GetSizeAsBytes(),
+					*indexBuffer, 0);
+			}
+			else
+			{
+				FE_LOG(StaticMeshLoaderErr, "Failed to decode index buffer of {}.", assetPath.string());
+			}
+		}
+		std::optional<GpuSync> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
+		check(indicesUploadSync);
+
+		verticesUploadSync->WaitOnCpu();
+		indicesUploadSync->WaitOnCpu();
+
+		FE_LOG(StaticMeshLoaderInfo,
+			   "Successfully load static mesh asset {} of resource {}. Elapsed: {} ms",
+			   assetPath.string(), loadConfig->SrcResPath, tempTimer.End());
+
+		return StaticMesh{
+			.LoadConfig = *loadConfig,
+			.VertexBufferInstance = { handleManager, std::move(*vertexBuffer) },
+			.VertexBufferSrv = std::move(vertexBufferSrv),
+			.IndexBufferInstance = { handleManager, std::move(*indexBuffer) }
+		};
 	}
 } // namespace fe

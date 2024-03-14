@@ -145,7 +145,6 @@ int main()
 		std::thread t0(
 			[&gpuUploader, &quadIndices, &quadIB]()
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
 				UploadContext quadIndicesUploadCtx = gpuUploader.Reserve(sizeof(quadIndices));
 				quadIndicesUploadCtx.WriteData(
 					reinterpret_cast<const uint8_t*>(quadIndices),
@@ -164,7 +163,6 @@ int main()
 		std::thread t1(
 			[&gpuUploader, &triIndices, &triIB]()
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
 				UploadContext triIndicesUploadCtx = gpuUploader.Reserve(sizeof(triIndices));
 				{
 					triIndicesUploadCtx.WriteData(
@@ -184,7 +182,6 @@ int main()
 		std::thread t2(
 			[&gpuUploader, &vertices, &verticesBuffer]()
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(Random(1, 100)));
 				UploadContext verticesUploadCtx = gpuUploader.Reserve(sizeof(vertices));
 				{
 					verticesUploadCtx.WriteData(

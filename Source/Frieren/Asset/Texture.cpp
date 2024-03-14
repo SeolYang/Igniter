@@ -702,24 +702,32 @@ namespace fe
 			return std::nullopt;
 		}
 
+		auto samplerView = gpuViewManager.RequestSampler(D3D12_SAMPLER_DESC{
+			.Filter = loadConfig.Filter,
+			.AddressU = loadConfig.AddressModeU,
+			.AddressV = loadConfig.AddressModeV,
+			.AddressW = loadConfig.AddressModeW,
+			.MipLODBias = 0.f,
+			/* #sy_todo if filter ==  anisotropic, Add MaxAnisotropy at load config & import config */
+			.MaxAnisotropy = ((loadConfig.Filter == D3D12_FILTER_ANISOTROPIC || loadConfig.Filter == D3D12_FILTER_COMPARISON_ANISOTROPIC) ? 1u : 0u),
+			.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #sy_todo if filter == comparison, setup comparison func */,
+			.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
+			.MinLOD = 0.f,
+			.MaxLOD = 0.f });
+
+		if (!samplerView)
+		{
+			FE_LOG(TextureLoaderFatal, "Failed to create sampler view for {}.", assetPath.string());
+			return std::nullopt;
+		}
+
 		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}. Elapsed: {} ms", assetPath.string(), loadConfig.SrcResPath, tempTimer.End());
 		/* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
 		return Texture{
 			.LoadConfig = loadConfig,
 			.TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
 			.ShaderResourceView = std::move(srv),
-			.TexSampler = gpuViewManager.RequestSampler(D3D12_SAMPLER_DESC{
-				.Filter = loadConfig.Filter,
-				.AddressU = loadConfig.AddressModeU,
-				.AddressV = loadConfig.AddressModeV,
-				.AddressW = loadConfig.AddressModeW,
-				.MipLODBias = 0.f,
-				/* #sy_todo if filter ==  anisotropic, Add MaxAnisotropy at load config & import config */
-				.MaxAnisotropy = ((loadConfig.Filter == D3D12_FILTER_ANISOTROPIC || loadConfig.Filter == D3D12_FILTER_COMPARISON_ANISOTROPIC) ? 1u : 0u),
-				.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #sy_todo if filter == comparison, setup comparison func */,
-				.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
-				.MinLOD = 0.f,
-				.MaxLOD = 0.f })
+			.TexSampler = std::move(samplerView)
 		};
 	}
 } // namespace fe
