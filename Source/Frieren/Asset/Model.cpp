@@ -180,7 +180,7 @@ namespace fe
 		FE_LOG(ModelImporterInfo, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
 
 		constexpr float CacheHitRatioThreshold = 1.02f;
-		meshopt_optimizeVertexCacheStrip(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.size());
+		meshopt_optimizeVertexCache(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.size());
 		meshopt_optimizeOverdraw(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex), CacheHitRatioThreshold);
 		meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex));
 
@@ -399,7 +399,7 @@ namespace fe
 			return std::nullopt;
 		}
 
-		if (loadConfig->IsLatestVersion())
+		if (!loadConfig->IsLatestVersion())
 		{
 			details::LogVersionMismatch<StaticMeshLoadConfig, StaticMeshLoaderWarn>(*loadConfig, assetMetaPath.string());
 		}
@@ -420,7 +420,10 @@ namespace fe
 		}
 
 		/* #sy_todo Impl ToString */
-		if (loadConfig->NumVertices == 0 || loadConfig->NumIndices == 0 || loadConfig->CompressedVerticesSizeInBytes == 0 || loadConfig->CompressedIndicesSizeInBytes)
+		if (loadConfig->NumVertices == 0 ||
+			loadConfig->NumIndices == 0 ||
+			loadConfig->CompressedVerticesSizeInBytes == 0 ||
+			loadConfig->CompressedIndicesSizeInBytes == 0)
 		{
 			FE_LOG(StaticMeshLoaderFatal,
 				   "Load config has invalid values. \n * NumVertices: {}\n * NumIndices: {}\n * CompressedVerticesSizeInBytes: {}\n * CompressedIndicesSizeInBytes: {}",
@@ -436,14 +439,15 @@ namespace fe
 		}
 
 		const size_t expectedBlobSize = loadConfig->CompressedVerticesSizeInBytes + loadConfig->CompressedIndicesSizeInBytes;
-		if (blob.size() == expectedBlobSize)
+		if (blob.size() != expectedBlobSize)
 		{
 			FE_LOG(StaticMeshLoaderFatal, "Static Mesh blob size does not match. Expected: {}, Found: {}", expectedBlobSize, blob.size());
 			return std::nullopt;
 		}
 
 		GpuBufferDesc vertexBufferDesc{};
-		vertexBufferDesc.AsVertexBuffer<StaticMeshVertex>(loadConfig->NumVertices);
+		vertexBufferDesc.AsStructuredBuffer<StaticMeshVertex>(loadConfig->NumVertices);
+		vertexBufferDesc.DebugName = String(std::format("{}_Vertices", guid.str()));
 		if (vertexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedVerticesSizeInBytes)
 		{
 			FE_LOG(StaticMeshLoaderFatal, "Compressed vertices size exceed expected vertex buffer size. Compressed Size: {} bytes, Expected Vertex Buffer Size: {} bytes",
@@ -454,6 +458,7 @@ namespace fe
 
 		GpuBufferDesc indexBufferDesc{};
 		indexBufferDesc.AsIndexBuffer<uint32_t>(loadConfig->NumIndices);
+		indexBufferDesc.DebugName = String(std::format("{}_Indices", guid.str()));
 		if (indexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedIndicesSizeInBytes)
 		{
 			FE_LOG(StaticMeshLoaderFatal, "Compressed indices size exceed expected index buffer size. Compressed Size: {} bytes, Expected Index Buffer Size: {} bytes",
@@ -524,7 +529,7 @@ namespace fe
 		indicesUploadSync->WaitOnCpu();
 
 		FE_LOG(StaticMeshLoaderInfo,
-			   "Successfully load static mesh asset {} of resource {}. Elapsed: {} ms",
+			   "Successfully load static mesh asset {}, which from resource {}. Elapsed: {} ms",
 			   assetPath.string(), loadConfig->SrcResPath, tempTimer.End());
 
 		return StaticMesh{

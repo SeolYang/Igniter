@@ -113,7 +113,6 @@ namespace fe
 	class StaticMeshLoader
 	{
 	public:
-		/* #sy_wip_todo Impl Load Static Meshes */
-		std::optional<StaticMesh> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
+		static std::optional<StaticMesh> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
 	};
 } // namespace fe

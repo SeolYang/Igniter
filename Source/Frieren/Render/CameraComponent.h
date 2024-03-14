@@ -22,7 +22,7 @@ namespace fe
 		float NearZ = 0.1f;
 		float FarZ = 1000.f;
 		/* Degrees Field Of View */
-		float Fov = 20.f;
+		float Fov = 45.f;
 
 		/* #sy_improvement Support Orthographic? */
 	};

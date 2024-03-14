@@ -11,6 +11,7 @@ struct PerObjectBuffer
 struct Vertex
 {
 	float3 aPos;
+	float3 aNormal;
 	float2 aUv;
 };
 

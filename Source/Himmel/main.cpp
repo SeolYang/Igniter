@@ -76,30 +76,32 @@ int main()
 		// texImporter.Import(String("Resources\\Homura\\homura.jpg"), texImportConfig);
 
 		// StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
-		// staticMeshImportConfig.bMergeMeshes = true;
-		// std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\Ash\\Ash.fbx"), staticMeshImportConfig);
+		//staticMeshImportConfig.bMergeMeshes = true;
+		//std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\Ash\\Ash.fbx"), staticMeshImportConfig);
+
+		const xg::Guid ashStaticMeshGuid = xg::Guid("5fe88685-41be-450a-8cfc-3aa074f774c0");
+		//std::optional<StaticMesh> staticMesh = StaticMeshLoader::Load(ashStaticMeshGuid, handleManager, renderDevice, gpuUploader, gpuViewManager);
+		//check(staticMesh);
 
 		const xg::Guid ashThumbnailGuid = xg::Guid("512a7388-949d-4c30-9c21-5c08e2dfa587");
 		const xg::Guid homuraThumbnailGuid = xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08");
 
-		// std::optional<Texture> ashThumbnail = TextureLoader::Load(
-		//	ashThumbnailGuid,
-		//	handleManager, renderDevice, gpuUploader, gpuViewManager);
-
-		// std::optional<Texture> homuraThumbnail = TextureLoader::Load(
-		//	homuraThumbnailGuid,
-		//	handleManager, renderDevice, gpuUploader, gpuViewManager);
+		std::future<std::optional<StaticMesh>> ashStaticMeshFuture = std::async(
+			std::launch::async,
+			StaticMeshLoader::Load,
+			ashStaticMeshGuid,
+			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
 		std::future<std::optional<Texture>> ashThumbnailFutre = std::async(
 			std::launch::async,
 			TextureLoader::Load,
-			xg::Guid("512a7388-949d-4c30-9c21-5c08e2dfa587"),
+			ashThumbnailGuid,
 			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
 		std::future<std::optional<Texture>> homuraThumbnailFuture = std::async(
 			std::launch::async,
 			TextureLoader::Load,
-			xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08"),
+			homuraThumbnailGuid,
 			std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
 		/******************************/
@@ -111,101 +113,17 @@ int main()
 		inputManager.BindAction(fe::String("DisplayPlayerInfo"), fe::EInput::MouseLB);
 		/********************************/
 
-		/* #sy_test GPU Buffer Creation & Upload Tests */
-		constexpr uint16_t NumQuadIndices = 6;
-		constexpr uint16_t NumTriIndices = 3;
-		const uint16_t quadIndices[NumQuadIndices] = { 0, 1, 2, 2, 3, 0 };
-		const uint16_t triIndices[NumTriIndices] = { 4, 5, 6 };
-
-		GpuBufferDesc quadIBDesc{};
-		quadIBDesc.AsIndexBuffer<uint16_t>(NumQuadIndices);
-		quadIBDesc.DebugName = String("QuadMeshIB");
-		Handle<GpuBuffer> quadIB{ handleManager, renderDevice.CreateBuffer(quadIBDesc).value() };
-
-		GpuBufferDesc triIBDesc{};
-		triIBDesc.AsIndexBuffer<uint16_t>(NumTriIndices);
-		triIBDesc.DebugName = String("TriMeshIB");
-		Handle<GpuBuffer> triIB{ handleManager, renderDevice.CreateBuffer(triIBDesc).value() };
-
-		const SimpleVertex vertices[7] = {
-			{ -0.5f, -0.5f, 0.f, /*uv*/ 0.f, 1.f },
-			{ -0.5f, 0.5f, 0.f, /*uv*/ 0.f, 0.f },
-			{ 0.5f, 0.5f, 0.f, /*uv*/ 1.f, 0.f },
-			{ 0.5f, -0.5f, 0.f, /*uv*/ 1.f, 1.f },
-
-			{ -0.5f, -0.5f, 0.f, /*uv*/ 0.f, 1.f },
-			{ 0.0f, 0.5f, 0.f, /*uv*/ 0.5f, 0.f },
-			{ 0.5f, -0.5f, 0.f, /*uv*/ 1.f, 1.f }
-		};
-		GpuBufferDesc verticesBufferDesc{};
-		verticesBufferDesc.AsStructuredBuffer<SimpleVertex>(7);
-		verticesBufferDesc.DebugName = String("VerticesBuffer.SB");
-		Handle<GpuBuffer> verticesBuffer{ handleManager, renderDevice.CreateBuffer(verticesBufferDesc).value() };
-
-		std::thread t0(
-			[&gpuUploader, &quadIndices, &quadIB]()
-			{
-				UploadContext quadIndicesUploadCtx = gpuUploader.Reserve(sizeof(quadIndices));
-
-				quadIndicesUploadCtx.WriteData(
-					reinterpret_cast<const uint8_t*>(quadIndices),
-					0, 0, sizeof(quadIndices));
-
-				quadIndicesUploadCtx.CopyBuffer(0, sizeof(quadIndices), *quadIB);
-
-				std::optional<GpuSync> quadIndicesUploadSync = gpuUploader.Submit(quadIndicesUploadCtx);
-				check(quadIndicesUploadSync);
-				quadIndicesUploadSync->WaitOnCpu();
-			});
-
-		std::thread t1(
-			[&gpuUploader, &triIndices, &triIB]()
-			{
-				UploadContext triIndicesUploadCtx = gpuUploader.Reserve(sizeof(triIndices));
-
-				triIndicesUploadCtx.WriteData(
-					reinterpret_cast<const uint8_t*>(triIndices),
-					0, 0, sizeof(triIndices));
-
-				triIndicesUploadCtx.CopyBuffer(0, sizeof(triIndices), *triIB);
-
-				std::optional<GpuSync> triIndicesUploadSync = gpuUploader.Submit(triIndicesUploadCtx);
-				check(triIndicesUploadSync);
-				triIndicesUploadSync->WaitOnCpu();
-			});
-
-		std::thread t2(
-			[&gpuUploader, &vertices, &verticesBuffer]()
-			{
-				UploadContext verticesUploadCtx = gpuUploader.Reserve(sizeof(vertices));
-				
-				verticesUploadCtx.WriteData(
-						reinterpret_cast<const uint8_t*>(vertices),
-						0, 0, sizeof(vertices));
-
-				verticesUploadCtx.CopyBuffer(0, sizeof(vertices), *verticesBuffer);
-
-				std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
-				check(verticesUploadSync);
-				verticesUploadSync->WaitOnCpu();
-			});
-
-		t0.join();
-		t1.join();
-		t2.join();
-
-		Handle<GpuView, GpuViewManager*> verticesBufferSRV = gpuViewManager.RequestShaderResourceView(*verticesBuffer);
-		/*******************************************/
-
 		/* #sy_test ECS based Game flow & logic tests */
 		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
 
+		auto ashStaticMesh = ashStaticMeshFuture.get();
+		check(ashStaticMesh);
 		auto ashThumbnail = ashThumbnailFutre.get();
 		check(ashThumbnail);
 		const StaticMeshComponent quadStaticMeshComp{
-			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
-			.IndexBufferHandle = quadIB.MakeRef(),
-			.NumIndices = NumQuadIndices,
+			.VerticesBufferSRV = ashStaticMesh->VertexBufferSrv.MakeRef(),
+			.IndexBufferHandle = ashStaticMesh->IndexBufferInstance.MakeRef(),
+			.NumIndices = ashStaticMesh->LoadConfig.NumIndices,
 			.DiffuseTex = ashThumbnail->ShaderResourceView.MakeRef(),
 			.DiffuseTexSampler = ashThumbnail->TexSampler
 		};
@@ -218,9 +136,9 @@ int main()
 		auto homuraThumbnail = homuraThumbnailFuture.get();
 		check(homuraThumbnail);
 		const StaticMeshComponent triStaticMeshComp{
-			.VerticesBufferSRV = verticesBufferSRV.MakeRef(),
-			.IndexBufferHandle = triIB.MakeRef(),
-			.NumIndices = NumTriIndices,
+			.VerticesBufferSRV = ashStaticMesh->VertexBufferSrv.MakeRef(),
+			.IndexBufferHandle = ashStaticMesh->IndexBufferInstance.MakeRef(),
+			.NumIndices = ashStaticMesh->LoadConfig.NumIndices,
 			.DiffuseTex = homuraThumbnail->ShaderResourceView.MakeRef(),
 			.DiffuseTexSampler = homuraThumbnail->TexSampler
 		};
@@ -229,7 +147,7 @@ int main()
 		defaultWorld->Attach<StaticMeshComponent>(enemy, triStaticMeshComp);
 		TransformComponent& enemyTransform = defaultWorld->Get<TransformComponent>(enemy);
 		enemyTransform.Position = Vector3{ 10.5f, -3.5f, 10.f };
-		enemyTransform.Scale = Vector3{ 15.f, 15.f, 1.f };
+		enemyTransform.Scale = Vector3{ 50.f, 50.f, 1.f };
 
 		const Entity cameraEntity = CameraArchetype::Create(*defaultWorld);
 		Camera& camera = defaultWorld->Get<Camera>(cameraEntity);

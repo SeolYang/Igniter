@@ -721,7 +721,7 @@ namespace fe
 			return std::nullopt;
 		}
 
-		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {} of resource {}. Elapsed: {} ms", assetPath.string(), loadConfig.SrcResPath, tempTimer.End());
+		FE_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), loadConfig.SrcResPath, tempTimer.End());
 		/* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
 		return Texture{
 			.LoadConfig = loadConfig,
