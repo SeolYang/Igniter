@@ -91,7 +91,7 @@ namespace fe
 		if (itr != inputAxisNameScaleMap.cend())
 		{
 			const ScaleMap& scaleMap = itr->second;
-			auto			scaleMapItr = scaleMap.find(nameOfAxis);
+			auto scaleMapItr = scaleMap.find(nameOfAxis);
 			if (scaleMapItr != scaleMap.cend())
 			{
 				return scaleMapItr->second;
@@ -107,7 +107,7 @@ namespace fe
 		if (itr != inputAxisNameScaleMap.end())
 		{
 			ScaleMap& scaleMap = itr->second;
-			auto	  scaleMapItr = scaleMap.find(nameOfAxis);
+			auto scaleMapItr = scaleMap.find(nameOfAxis);
 			if (scaleMapItr != scaleMap.end())
 			{
 				scaleMapItr->second = scale;
@@ -153,10 +153,34 @@ namespace fe
 			{
 				for (const auto& actionName : inputActionNameMap[input])
 				{
-					auto& action = actionMap[actionName];
-					if (action->State == EInputState::Pressed)
+					const auto actionItr = actionMap.find(actionName);
+					if (actionItr != actionMap.end())
 					{
-						action->State = EInputState::OnPressing;
+						auto& action = actionItr->second;
+						check(action);
+						if (action->State == EInputState::Pressed)
+						{
+							action->State = EInputState::OnPressing;
+						}
+					}
+					else
+					{
+						checkNoEntry();
+					}
+				}
+
+				const auto axisNameScaleMapItr = inputAxisNameScaleMap.find(input);
+				if (axisNameScaleMapItr != inputAxisNameScaleMap.end())
+				{
+					for (auto& axisNameScale : axisNameScaleMapItr->second)
+					{
+						const auto axisItr = axisMap.find(axisNameScale.first);
+						if (axisItr != axisMap.end())
+						{
+							auto& axis = axisItr->second;
+							check(axis);
+							axis->Value = 0.f;
+						}
 					}
 				}
 			}
@@ -193,15 +217,15 @@ namespace fe
 		constexpr float Infinity = std::numeric_limits<float>::infinity();
 
 		const WindowDescription winDesc = Engine::GetWindow().GetDescription();
-		const float				mouseX = static_cast<float>(LOWORD(lParam)) / winDesc.Width;
-		const float				mouseY = static_cast<float>(HIWORD(lParam)) / winDesc.Height;
+		const float mouseX = static_cast<float>(LOWORD(lParam)) / static_cast<float>(winDesc.Width);
+		const float mouseY = static_cast<float>(HIWORD(lParam)) / static_cast<float>(winDesc.Height);
 		HandleAxis(EInput::MouseX, mouseX);
 		HandleAxis(EInput::MouseY, mouseY);
 
 		if (latestMouseX != Infinity && latestMouseY != Infinity)
 		{
 			const float relativeMouseX = mouseX - latestMouseX;
-			const float relativeMouseY = mouseY - latestMouseY;
+			const float relativeMouseY = latestMouseY - mouseY;
 			HandleAxis(EInput::RelativeMouseX, relativeMouseX);
 			HandleAxis(EInput::RelativeMouseY, relativeMouseY);
 		}
