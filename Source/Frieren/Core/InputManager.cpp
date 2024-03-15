@@ -1,6 +1,7 @@
 #include <Core/InputManager.h>
 #include <Core/Log.h>
 #include <Core/Window.h>
+#include <Core/TypeUtils.h>
 #include <Engine.h>
 
 namespace fe
@@ -13,9 +14,6 @@ namespace fe
 	{
 		switch (wParam)
 		{
-			default:
-				return EInput::None;
-
 			/** Characters */
 			case 'W':
 			case 'w':
@@ -49,6 +47,19 @@ namespace fe
 			case VK_CONTROL:
 				return EInput::Control;
 		}
+
+		/* #sy_ref https://learn.microsoft.com/ko-kr/windows/win32/learnwin32/mouse-clicks#additional-flags */
+		if (BitFlagContains(wParam, MK_LBUTTON))
+		{
+			return EInput::MouseLB;
+		}
+
+		if (BitFlagContains(wParam, MK_RBUTTON))
+		{
+			return EInput::MouseRB;
+		}
+
+		return EInput::None;
 	}
 
 	InputManager::InputManager(HandleManager& handleManager)

@@ -18,16 +18,11 @@ namespace fe
 		return std::numeric_limits<std::decay_t<T>>::max();
 	}
 
-	template <typename T>
-	constexpr bool BitFlagContains(const T& bits, const T& flag)
+	template <typename T, typename F>
+	constexpr bool BitFlagContains(const T& flags, const F& flag)
 	{
+		const auto bits = static_cast<F>(flags);
 		return ((bits & flag) == flag);
-	}
-
-	template <typename T, typename... Args>
-	constexpr bool BitFlagContains(const T& bits, const T& flag, const Args&... args)
-	{
-		return ((bits & flag) == flag) && BitFlagContains(bits, args...);
 	}
 } // namespace fe
 
