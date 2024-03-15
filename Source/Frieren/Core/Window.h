@@ -32,6 +32,11 @@ namespace fe
 
 		[[nodiscard]] Viewport GetViewport() const { return viewport; }
 
+		// void ClipCursor()
+		void ClipCursor(RECT clientRect);
+		void ClipCursor();
+		void UnclipCursor();
+
 	private:
 		static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
@@ -42,8 +47,6 @@ namespace fe
 		WNDCLASSEX windowClass;
 		HWND windowHandle = NULL;
 
-		bool bClipCursorEnabled = false;
-		RECT rect;
 		Viewport viewport;
 	};
 } // namespace fe

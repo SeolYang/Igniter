@@ -7,6 +7,10 @@
 
 namespace fe
 {
+	FE_DEFINE_LOG_CATEGORY(WindowInfo, ELogVerbosity::Info)
+	FE_DEFINE_LOG_CATEGORY(WindowDebug, ELogVerbosity::Debug)
+	FE_DEFINE_LOG_CATEGORY(WindowError, ELogVerbosity::Error)
+
 	Window::Window(const WindowDescription& description)
 		: windowDesc(description)
 	{
@@ -32,7 +36,7 @@ namespace fe
 		constexpr auto windowStyle = WS_POPUP;
 		constexpr auto exWindowStyle = 0;
 
-		rect = RECT{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
+		RECT rect{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
 		verify(AdjustWindowRectEx(&rect, windowStyle, false, exWindowStyle) != FALSE);
 
 		windowHandle = CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle,
@@ -45,6 +49,35 @@ namespace fe
 
 		ShowWindow(windowHandle, SW_SHOWDEFAULT);
 		UpdateWindow(windowHandle);
+	}
+
+	void Window::ClipCursor(RECT clientRect)
+	{
+		POINT leftTop{ .x = clientRect.left, .y = clientRect.top };
+		POINT rightBottom{ .x = clientRect.right, .y = clientRect.bottom };
+		ClientToScreen(windowHandle, &leftTop);
+		ClientToScreen(windowHandle, &rightBottom);
+
+		clientRect.left = leftTop.x;
+		clientRect.top = leftTop.y;
+		clientRect.right = rightBottom.x;
+		clientRect.bottom = rightBottom.y;
+		if (::ClipCursor(&clientRect) == FALSE)
+		{
+			FE_LOG(WindowError, "Failed to clip cursor to main window.");
+		}
+	}
+
+	void Window::ClipCursor()
+	{
+		RECT clientRect{};
+		GetClientRect(windowHandle, &clientRect);
+		ClipCursor(clientRect);
+	}
+
+	void Window::UnclipCursor()
+	{
+		::ClipCursor(nullptr);
 	}
 
 	Window::~Window()
@@ -72,6 +105,5 @@ namespace fe
 		Engine::GetInputManager().HandleEvent(uMsg, wParam, lParam);
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
-
 
 } // namespace fe

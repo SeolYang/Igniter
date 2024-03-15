@@ -34,6 +34,7 @@ namespace fe
 	/* Refer to ./Assets/{AssetType}/{GUID}.metadata */
 	fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid);
 
+	/* #sy_todo Resource Metadata, Asset Metadata 얘네를 추상화 시키기(Version) */
 	/* Common Resource Metadata */
 	template <uint64_t CurrentVersion>
 	struct ResourceMetadata
