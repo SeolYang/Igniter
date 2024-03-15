@@ -15,17 +15,14 @@ namespace fe
 		S,
 		D,
 		Space,
+		Shift,
 
 		/** Mouse inputs */
-		MouseX,
-		MouseY,
-		RelativeMouseX,
-		RelativeMouseY,
+		MouseDeltaX,
+		MouseDeltaY,
 		MouseLB,
 		MouseRB
 	};
-
-	EInput WParamToInput(const WPARAM wParam);
 
 	enum class EInputState
 	{
@@ -74,9 +71,8 @@ namespace fe
 		InputManager& operator=(const InputManager&) = delete;
 		InputManager& operator=(InputManager&&) noexcept = delete;
 
-		// #sy_todo 한번에 여러개의 input이 들어올 때 어떻게 처리하지?
 		void BindAction(String nameOfAction, EInput input);
-		void BindAxis(String nameOfAxis, EInput input, float scale);
+		void BindAxis(String nameOfAxis, EInput input, const float scale = 1.f);
 
 		// #sy_todo UnbindAction/Axis
 
@@ -94,7 +90,7 @@ namespace fe
 	private:
 		void HandleKeyDown(WPARAM wParam, LPARAM lParam);
 		void HandleKeyUp(WPARAM wParam, LPARAM lParam);
-		void HandleMouseMove(WPARAM wParam, LPARAM lParam);
+		void HandleRawInputDevices(const WPARAM wParam, const LPARAM lParam);
 
 		void HandlePressAction(EInput input);
 		void HandleReleaseAction(EInput input);
@@ -109,9 +105,9 @@ namespace fe
 		EventMap<Action> actionMap{};
 		EventMap<Axis> axisMap{};
 
-		float latestMouseX = std::numeric_limits<float>::infinity();
-		float latestMouseY = std::numeric_limits<float>::infinity();
-
 		robin_hood::unordered_set<EInput> preesedInputSet{};
+
+		std::vector<uint8_t> rawInputBuffer;
+
 	};
 } // namespace fe

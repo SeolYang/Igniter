@@ -7,7 +7,8 @@
 
 namespace fe
 {
-	Window::Window(const WindowDescription& description) : windowDesc(description)
+	Window::Window(const WindowDescription& description)
+		: windowDesc(description)
 	{
 		windowTitle = description.Title.AsWideString();
 		check(description.Width > 0 && description.Height > 0);
@@ -31,16 +32,16 @@ namespace fe
 		constexpr auto windowStyle = WS_POPUP;
 		constexpr auto exWindowStyle = 0;
 
-		RECT winRect{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
-		verify(AdjustWindowRectEx(&winRect, windowStyle, false, exWindowStyle) != FALSE);
+		rect = RECT{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
+		verify(AdjustWindowRectEx(&rect, windowStyle, false, exWindowStyle) != FALSE);
 
 		windowHandle = CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle,
 									  (screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
-									  winRect.right - winRect.left, winRect.top - winRect.bottom, NULL, NULL,
+									  rect.right - rect.left, rect.top - rect.bottom, NULL, NULL,
 									  windowClass.hInstance, NULL);
 
-		viewport.width = static_cast<float>(winRect.right - winRect.left);
-		viewport.height = static_cast<float>(winRect.top - winRect.bottom);
+		viewport.width = static_cast<float>(rect.right - rect.left);
+		viewport.height = static_cast<float>(rect.top - rect.bottom);
 
 		ShowWindow(windowHandle, SW_SHOWDEFAULT);
 		UpdateWindow(windowHandle);
@@ -71,4 +72,6 @@ namespace fe
 		Engine::GetInputManager().HandleEvent(uMsg, wParam, lParam);
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+
+
 } // namespace fe

@@ -2,7 +2,6 @@
 #include <Render/TransformComponent.h>
 #include <Gameplay/World.h>
 #include <PlayerComponent.h>
-#include <ControllableTag.h>
 #include <HealthComponent.h>
 
 class PlayerArchetype
@@ -14,7 +13,6 @@ public:
 		world.Attach<Player>(newEntity);
 		world.Attach<fe::TransformComponent>(newEntity);
 		world.Attach<HealthComponent>(newEntity);
-		world.Attach<Controllable>(newEntity);
 		return newEntity;
 	}
 };

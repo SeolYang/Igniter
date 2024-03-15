@@ -5,6 +5,7 @@
 
 namespace fe
 {
+	/* #sy_wip_todo Camera->CameraComponent */
 	struct Camera
 	{
 	public:

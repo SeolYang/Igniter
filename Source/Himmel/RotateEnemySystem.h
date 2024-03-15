@@ -9,7 +9,7 @@ namespace fe
 class RotateEnemySystem
 {
 public:
-	RotateEnemySystem(const float rotateDegsPerSec);
+	RotateEnemySystem(const float rotateDegsPerSec = 2.f);
 
 	void Update(fe::World& world);
 

@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
 #include <Gameplay/GameFlow.h>
+#include <CameraMovementSystem.h>
 #include <RotateEnemySystem.h>
 
-class PlayerControllSystem;
 class BasicGameFlow : public fe::GameFlow
 {
 public:
@@ -13,6 +13,6 @@ public:
     virtual void Update(fe::World& world) override;
 
 private:
-    std::unique_ptr<PlayerControllSystem> playerControllSystem;
+	CameraMovementSystem cameraMovementSystem;
 	RotateEnemySystem rotateEnemySystem;
 };

@@ -182,15 +182,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Himmel\BasicGameFlow.cpp" />
+    <ClCompile Include="..\Source\Himmel\CameraMovementSystem.cpp" />
     <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp" />
     <ClCompile Include="..\Source\Himmel\main.cpp" />
-    <ClCompile Include="..\Source\Himmel\PlayerControllSystem.cpp" />
     <ClCompile Include="..\Source\Himmel\RotateEnemySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Himmel\BasicGameFlow.h" />
     <ClInclude Include="..\Source\Himmel\CameraController.h" />
-    <ClInclude Include="..\Source\Himmel\ControllableTag.h" />
+    <ClInclude Include="..\Source\Himmel\CameraMovementSystem.h" />
     <ClInclude Include="..\Source\Himmel\Enemy.h" />
     <ClInclude Include="..\Source\Himmel\EnemyArchetype.h" />
     <ClInclude Include="..\Source\Himmel\RotateEnemySystem.h" />
@@ -199,7 +199,6 @@
     <ClInclude Include="..\Source\Himmel\HealthRecoverySystem.h" />
     <ClInclude Include="..\Source\Himmel\MenuBar.h" />
     <ClInclude Include="..\Source\Himmel\PlayerArchetype.h" />
-    <ClInclude Include="..\Source\Himmel\PlayerControllSystem.h" />
     <ClInclude Include="..\Source\Himmel\PlayerComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

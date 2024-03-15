@@ -1,5 +1,6 @@
 #pragma once
 #include <Math/Common.h>
+#include <Core/Assert.h>
 
 namespace fe
 {
@@ -31,5 +32,23 @@ namespace fe
 	{
 		constexpr float deg2rad = Pi32 / 180.f;
 		return degrees * deg2rad;
+	}
+
+	template <typename T>
+	constexpr T Lerp(const T a, const T b, const float t)
+	{
+		return (1 - t) * a + t * b;
+	}
+
+	constexpr float SmoothStep(float min, float max, const float x)
+	{
+		const float t = std::clamp<float>((x - min) / (max - min), 0.0f, 1.0f);
+		return t * t * (3.f - 2.f * t);
+	}
+
+	constexpr float SmootherStep(float min, float max, const float x)
+	{
+		const float t = std::clamp<float>((x - min) / (max - min), 0.0f, 1.0f);
+		return t * t * t * (t * (6.f * t - 15.f) + 10.f);
 	}
 } // namespace fe

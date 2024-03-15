@@ -11,7 +11,7 @@ namespace fe
 	{
 		const uint32_t Width;
 		const uint32_t Height;
-		const String   Title;
+		const String Title;
 	};
 
 	// @dependency	fe::Engine, fe::Logger, fe::InputManager
@@ -39,9 +39,11 @@ namespace fe
 		WindowDescription windowDesc;
 
 		std::wstring windowTitle;
-		WNDCLASSEX	 windowClass;
-		HWND		 windowHandle = NULL;
+		WNDCLASSEX windowClass;
+		HWND windowHandle = NULL;
 
+		bool bClipCursorEnabled = false;
+		RECT rect;
 		Viewport viewport;
 	};
 } // namespace fe

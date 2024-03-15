@@ -22,6 +22,7 @@
 #include <ImGui/ImGuiCanvas.h>
 #include <PlayerArchetype.h>
 #include <EnemyArchetype.h>
+#include <CameraController.h>
 #include <BasicGameFlow.h>
 #include <MenuBar.h>
 #include <iostream>
@@ -46,7 +47,7 @@ int main()
 		TextureImporter texImporter;
 		// TextureImportConfig texImportConfig = MakeVersionedDefault<TextureImportConfig>();
 		// texImportConfig.bGenerateMips = true;
-		// texImportConfig.CompressionMode = fe::ETextureCompressionMode::BC7;
+		// texImportConfig.CompressionMode = ETextureCompressionMode::BC7;
 		// texImporter.Import(String("Resources\\Homura\\Body.png"), texImportConfig);
 
 		StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
@@ -115,14 +116,17 @@ int main()
 		/******************************/
 
 		/* #sy_test Input Manager Test */
-		inputManager.BindAction(fe::String("MoveLeft"), fe::EInput::A);
-		inputManager.BindAction(fe::String("MoveRight"), fe::EInput::D);
-		inputManager.BindAction(String("MoveForward"), fe::EInput::W);
-		inputManager.BindAction(String("MoveBackward"), fe::EInput::S);
-		inputManager.BindAction(String("MoveUp"), fe::EInput::MouseLB);
-		inputManager.BindAction(String("MoveDown"), fe::EInput::MouseRB);
-		inputManager.BindAction(fe::String("UseHealthRecovery"), fe::EInput::Space);
-		inputManager.BindAction(fe::String("DisplayPlayerInfo"), fe::EInput::MouseLB);
+		inputManager.BindAction(String("MoveLeft"), EInput::A);
+		inputManager.BindAction(String("MoveRight"), EInput::D);
+		inputManager.BindAction(String("MoveForward"), EInput::W);
+		inputManager.BindAction(String("MoveBackward"), EInput::S);
+		inputManager.BindAction(String("MoveUp"), EInput::MouseLB);
+		inputManager.BindAction(String("MoveDown"), EInput::MouseRB);
+		inputManager.BindAction(String("Sprint"), EInput::Shift);
+
+		inputManager.BindAxis(String("TurnYaw"), EInput::MouseDeltaX, 1.f);
+		inputManager.BindAxis(String("TurnAxis"), EInput::MouseDeltaY, 1.f);
+
 		/********************************/
 
 		auto homuraThumbnail = homuraThumbnailFuture.get();
@@ -131,7 +135,7 @@ int main()
 		check(ashThumbnail);
 
 		/* #sy_test ECS based Game flow & logic tests */
-		std::unique_ptr<fe::World> defaultWorld = std::make_unique<fe::World>();
+		std::unique_ptr<World> defaultWorld = std::make_unique<World>();
 
 		/* Player Entity */
 		const auto player = PlayerArchetype::Create(*defaultWorld);
@@ -206,7 +210,7 @@ int main()
 		/********************************************/
 
 		/* #sy_test ImGui integration tests */
-		fe::ImGuiCanvas& canvas = engine.GetImGuiCanvas();
+		ImGuiCanvas& canvas = engine.GetImGuiCanvas();
 		canvas.AddLayer<MenuBar>();
 		/************************************/
 

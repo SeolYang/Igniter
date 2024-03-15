@@ -7,17 +7,12 @@ namespace fe
 	class Timer;
 } // namespace fe
 
-class PlayerControllSystem
+class CameraMovementSystem
 {
 public:
-	PlayerControllSystem();
+	CameraMovementSystem();
 
 	void Update(fe::World& world);
-
-private:
-	void HandleMoveAction(fe::World& world);
-	void HandleUseHealthRecoveryAction(fe::World& world);
-	void HandleDisplayPlayerInfoAction(fe::World& world);
 
 private:
 	const fe::Timer& timer;
@@ -28,6 +23,18 @@ private:
 	fe::RefHandle<const fe::Action> moveBackwardAction;
 	fe::RefHandle<const fe::Action> moveUpAction;
 	fe::RefHandle<const fe::Action> moveDownAction;
-	fe::RefHandle<const fe::Action> healthRecoveryAction;
-	fe::RefHandle<const fe::Action> displayPlayerInfoAction;
+
+	fe::RefHandle<const fe::Action> sprintAction;
+	bool bSprint = false;
+
+	fe::RefHandle<const fe::Axis> turnYawAxis;
+	fe::RefHandle<const fe::Axis> turnPitchAxis;
+
+	const float mouseYawSentisitivity = 1.f;
+	const float mousePitchSentisitivity = 1.f;
+
+	float yawDegrees = 0.f;
+	float pitchDegrees = 0.f;
+	bool bTurnDirty = false;
+
 };

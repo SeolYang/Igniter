@@ -5,7 +5,11 @@
 
 namespace fe
 {
-	EInput WParamToInput(const WPARAM wParam)
+	FE_DEFINE_LOG_CATEGORY(InputManagerInfo, ELogVerbosity::Info)
+	FE_DEFINE_LOG_CATEGORY(InputManagerDebug, ELogVerbosity::Debug)
+	FE_DEFINE_LOG_CATEGORY(InputManagerError, ELogVerbosity::Error)
+
+	static EInput WParamToInput(const WPARAM wParam)
 	{
 		switch (wParam)
 		{
@@ -36,6 +40,9 @@ namespace fe
 			case VK_RBUTTON:
 				return EInput::MouseRB;
 
+			case VK_SHIFT:
+				return EInput::Shift;
+
 			default:
 				return EInput::None;
 		}
@@ -44,6 +51,16 @@ namespace fe
 	InputManager::InputManager(HandleManager& handleManager)
 		: handleManager(handleManager)
 	{
+		RAWINPUTDEVICE mouseRID{};
+		mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
+		mouseRID.usUsage = 0x02;	 /* HID_USAGE_GENERIC_MOUSE */
+		mouseRID.dwFlags = 0;
+		mouseRID.hwndTarget = nullptr;
+
+		if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
+		{
+			FE_LOG(InputManagerError, "Failed to create raw input mouse. {:#X}", GetLastError())
+		}
 	}
 
 	void InputManager::BindAction(const String nameOfAction, const EInput input)
@@ -55,10 +72,6 @@ namespace fe
 		if (!actionMap.contains(nameOfAction))
 		{
 			actionMap[nameOfAction] = Handle<Action>{ handleManager };
-		}
-		else
-		{
-			checkNoEntry();
 		}
 	}
 
@@ -139,8 +152,8 @@ namespace fe
 				HandleKeyUp(wParam, lParam);
 				break;
 
-			case WM_MOUSEMOVE:
-				HandleMouseMove(wParam, lParam);
+			case WM_INPUT:
+				HandleRawInputDevices(wParam, lParam);
 				break;
 		}
 	}
@@ -212,26 +225,30 @@ namespace fe
 		HandleAxis(input, 0.f);
 	}
 
-	void InputManager::HandleMouseMove(const WPARAM /*wParam*/, const LPARAM lParam)
+	void InputManager::HandleRawInputDevices(const WPARAM, const LPARAM lParam)
 	{
-		constexpr float Infinity = std::numeric_limits<float>::infinity();
-
-		const WindowDescription winDesc = Engine::GetWindow().GetDescription();
-		const float mouseX = static_cast<float>(LOWORD(lParam)) / static_cast<float>(winDesc.Width);
-		const float mouseY = static_cast<float>(HIWORD(lParam)) / static_cast<float>(winDesc.Height);
-		HandleAxis(EInput::MouseX, mouseX);
-		HandleAxis(EInput::MouseY, mouseY);
-
-		if (latestMouseX != Infinity && latestMouseY != Infinity)
+		UINT pcbSize{};
+		GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &pcbSize, sizeof(RAWINPUTHEADER));
+		if (rawInputBuffer.size() < pcbSize)
 		{
-			const float relativeMouseX = mouseX - latestMouseX;
-			const float relativeMouseY = latestMouseY - mouseY;
-			HandleAxis(EInput::RelativeMouseX, relativeMouseX);
-			HandleAxis(EInput::RelativeMouseY, relativeMouseY);
+			rawInputBuffer.resize(pcbSize);
 		}
 
-		latestMouseX = mouseX;
-		latestMouseY = mouseY;
+		if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize, sizeof(RAWINPUTHEADER)) != pcbSize)
+		{
+			FE_LOG(InputManagerError, "GetRawInputData does not return correct size!");
+			return;
+		}
+
+		const auto* rawInput = reinterpret_cast<RAWINPUT*>(rawInputBuffer.data());
+		check(rawInput != nullptr);
+		if (rawInput->header.dwType == RIM_TYPEMOUSE)
+		{
+			const auto deltaX = rawInput->data.mouse.lLastX;
+			const auto deltaY = rawInput->data.mouse.lLastY;
+			HandleAxis(EInput::MouseDeltaX, static_cast<float>(deltaX));
+			HandleAxis(EInput::MouseDeltaY, static_cast<float>(deltaY));
+		}
 	}
 
 	void InputManager::HandlePressAction(const EInput input)
@@ -276,6 +293,11 @@ namespace fe
 			{
 				RefHandle<Axis> axis = axisMap[axisName].MakeRef();
 				axis->Value = value * axisScale;
+			}
+
+			if (!inputAxisNameScaleMapItr->second.empty())
+			{
+				preesedInputSet.insert(input);
 			}
 		}
 	}

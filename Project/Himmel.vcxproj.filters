@@ -12,20 +12,17 @@
     <ClCompile Include="..\Source\Himmel\BasicGameFlow.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\PlayerControllSystem.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Himmel\RotateEnemySystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Himmel\CameraMovementSystem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\Himmel\PlayerControllSystem.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Himmel\HealthRecoverySystem.h">
       <Filter>Source</Filter>
     </ClInclude>
@@ -36,9 +33,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Himmel\HealthComponent.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Himmel\ControllableTag.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Himmel\HealthRecoveryBuff.h">
@@ -60,6 +54,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Himmel\CameraController.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Himmel\CameraMovementSystem.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
