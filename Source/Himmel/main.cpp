@@ -202,8 +202,8 @@ int main()
         const Entity cameraEntity = CameraArchetype::Create(*defaultWorld);
         {
             defaultWorld->Attach<FpsCameraController>(cameraEntity);
-            Camera& camera = defaultWorld->Get<Camera>(cameraEntity);
-            camera.CameraViewport = window.GetViewport();
+            CameraComponent& cameraComponent = defaultWorld->Get<CameraComponent>(cameraEntity);
+            cameraComponent.CameraViewport = window.GetViewport();
             TransformComponent& cameraTransform = defaultWorld->Get<TransformComponent>(cameraEntity);
             cameraTransform.Position = Vector3{ 0.f, 0.f, -30.f };
         }

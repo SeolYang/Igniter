@@ -11,7 +11,7 @@ namespace fe
         static Entity Create(World& world)
         {
             const Entity newEntity = world.Create();
-            world.Attach<Camera>(newEntity);
+            world.Attach<CameraComponent>(newEntity);
             world.Attach<TransformComponent>(newEntity);
             return newEntity;
         }

@@ -134,7 +134,7 @@ namespace fe
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
-        auto cameraView = world.View<Camera, TransformComponent>();
+        auto cameraView = world.View<CameraComponent, TransformComponent>();
         for (auto [entity, camera, transformData] : cameraView.each())
         {
             /* #sy_todo Multiple Camera, Render Target per camera */

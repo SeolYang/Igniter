@@ -6,7 +6,7 @@
 namespace fe
 {
     /* #sy_wip_todo Camera->CameraComponent */
-    struct Camera
+    struct CameraComponent
     {
     public:
         [[nodiscard]] Matrix CreatePerspective() const
