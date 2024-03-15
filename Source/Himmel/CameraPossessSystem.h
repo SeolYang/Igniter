@@ -7,11 +7,11 @@ namespace fe
 	class Window;
 } // namespace fe
 
-class CameraMovementSystem;
+class FpsCameraControllSystem;
 class CameraPossessSystem
 {
 public:
-	CameraPossessSystem(CameraMovementSystem& camMovementSystem);
+	CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem);
 
 	void Update(fe::World& world);
 
@@ -21,7 +21,7 @@ private:
 private:
 	fe::Window& window;
 	fe::RefHandle<const fe::Action> togglePossessToCamera;
-	CameraMovementSystem& cameraMovementSystem;
+	FpsCameraControllSystem& fpsCamControllSystem;
 
 	bool bEnabled = true;
 };

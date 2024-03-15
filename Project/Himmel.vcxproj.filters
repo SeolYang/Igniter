@@ -18,7 +18,7 @@
     <ClCompile Include="..\Source\Himmel\RotateEnemySystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\CameraMovementSystem.cpp">
+    <ClCompile Include="..\Source\Himmel\FpsCameraControllSystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Himmel\CameraPossessSystem.cpp">
@@ -56,10 +56,10 @@
     <ClInclude Include="..\Source\Himmel\Enemy.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\CameraController.h">
+    <ClInclude Include="..\Source\Himmel\FpsCameraController.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\CameraMovementSystem.h">
+    <ClInclude Include="..\Source\Himmel\FpsCameraControllSystem.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Himmel\CameraPossessSystem.h">

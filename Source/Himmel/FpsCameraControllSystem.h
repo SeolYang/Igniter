@@ -7,10 +7,10 @@ namespace fe
 	class Timer;
 } // namespace fe
 
-class CameraMovementSystem
+class FpsCameraControllSystem
 {
 public:
-	CameraMovementSystem();
+	FpsCameraControllSystem();
 
 	void Update(fe::World& world);
 
@@ -28,17 +28,8 @@ private:
 	fe::RefHandle<const fe::Action> moveUpAction;
 	fe::RefHandle<const fe::Action> moveDownAction;
 
-	fe::RefHandle<const fe::Action> sprintAction;
-	bool bSprint = false;
-
 	fe::RefHandle<const fe::Axis> turnYawAxis;
 	fe::RefHandle<const fe::Axis> turnPitchAxis;
 
-	const float mouseYawSentisitivity = 0.03f;
-	const float mousePitchSentisitivity = 0.03f;
-
-	float yawDegrees = 0.f;
-	float pitchDegrees = 0.f;
-	bool bTurnDirty = false;
-
+	fe::RefHandle<const fe::Action> sprintAction;
 };

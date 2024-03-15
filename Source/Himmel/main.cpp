@@ -22,7 +22,7 @@
 #include <ImGui/ImGuiCanvas.h>
 #include <PlayerArchetype.h>
 #include <EnemyArchetype.h>
-#include <CameraController.h>
+#include <FpsCameraController.h>
 #include <BasicGameFlow.h>
 #include <MenuBar.h>
 #include <iostream>
@@ -127,7 +127,7 @@ int main()
 		inputManager.BindAxis(String("TurnYaw"), EInput::MouseDeltaX, 1.f);
 		inputManager.BindAxis(String("TurnAxis"), EInput::MouseDeltaY, 1.f);
 
-		inputManager.BindAction(String("TogglePossessCamera"), EInput::Control);
+		inputManager.BindAction(String("TogglePossessCamera"), EInput::Space);
 
 		/********************************/
 
@@ -201,6 +201,7 @@ int main()
 		/* Camera */
 		const Entity cameraEntity = CameraArchetype::Create(*defaultWorld);
 		{
+			defaultWorld->Attach<FpsCameraController>(cameraEntity);
 			Camera& camera = defaultWorld->Get<Camera>(cameraEntity);
 			camera.CameraViewport = window.GetViewport();
 			TransformComponent& cameraTransform = defaultWorld->Get<TransformComponent>(cameraEntity);

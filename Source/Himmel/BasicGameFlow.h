@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <Gameplay/GameFlow.h>
-#include <CameraMovementSystem.h>
+#include <FpsCameraControllSystem.h>
 #include <RotateEnemySystem.h>
 #include <CameraPossessSystem.h>
 
@@ -14,7 +14,7 @@ public:
     virtual void Update(fe::World& world) override;
 
 private:
-	CameraMovementSystem cameraMovementSystem;
-	CameraPossessSystem cameraPossessSystem{ cameraMovementSystem };
+	FpsCameraControllSystem fpsCameraControllSystem;
+	CameraPossessSystem cameraPossessSystem{ fpsCameraControllSystem };
 	RotateEnemySystem rotateEnemySystem;
 };

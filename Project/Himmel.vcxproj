@@ -183,15 +183,15 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Himmel\CameraPossessSystem.cpp" />
     <ClCompile Include="..\Source\Himmel\BasicGameFlow.cpp" />
-    <ClCompile Include="..\Source\Himmel\CameraMovementSystem.cpp" />
+    <ClCompile Include="..\Source\Himmel\FpsCameraControllSystem.cpp" />
     <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp" />
     <ClCompile Include="..\Source\Himmel\main.cpp" />
     <ClCompile Include="..\Source\Himmel\RotateEnemySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Himmel\BasicGameFlow.h" />
-    <ClInclude Include="..\Source\Himmel\CameraController.h" />
-    <ClInclude Include="..\Source\Himmel\CameraMovementSystem.h" />
+    <ClInclude Include="..\Source\Himmel\FpsCameraController.h" />
+    <ClInclude Include="..\Source\Himmel\FpsCameraControllSystem.h" />
     <ClInclude Include="..\Source\Himmel\Enemy.h" />
     <ClInclude Include="..\Source\Himmel\EnemyArchetype.h" />
     <ClInclude Include="..\Source\Himmel\RotateEnemySystem.h" />
