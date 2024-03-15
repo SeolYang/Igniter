@@ -163,9 +163,9 @@ namespace fe
 
 	void InputManager::PostUpdate()
 	{
-		if (!preesedInputSet.empty())
+		if (!scopedInputs.empty())
 		{
-			for (const auto& input : preesedInputSet)
+			for (const auto& input : scopedInputs)
 			{
 				for (const auto& actionName : inputActionNameMap[input])
 				{
@@ -201,7 +201,7 @@ namespace fe
 				}
 			}
 
-			preesedInputSet.clear();
+			scopedInputs.clear();
 		}
 	}
 
@@ -211,14 +211,17 @@ namespace fe
 		inputAxisNameScaleMap.clear();
 		actionMap.clear();
 		axisMap.clear();
-		preesedInputSet.clear();
+		scopedInputs.clear();
 	}
 
 	void InputManager::HandleKeyDown(const WPARAM wParam, const LPARAM /** unused */)
 	{
 		const EInput input = WParamToInput(wParam);
-		HandlePressAction(input);
-		HandleAxis(input, 1.f);
+		const bool bKeyDownHandled = HandlePressAction(input) || HandleAxis(input, 1.f);
+		if (bKeyDownHandled)
+		{
+			scopedInputs.insert(input);
+		}
 	}
 
 	void InputManager::HandleKeyUp(const WPARAM wParam, const LPARAM /* unused */)
@@ -249,13 +252,21 @@ namespace fe
 		{
 			const auto deltaX = rawInput->data.mouse.lLastX;
 			const auto deltaY = rawInput->data.mouse.lLastY;
-			HandleAxis(EInput::MouseDeltaX, static_cast<float>(deltaX));
-			HandleAxis(EInput::MouseDeltaY, static_cast<float>(deltaY));
+			if (HandleAxis(EInput::MouseDeltaX, static_cast<float>(deltaX), true))
+			{
+				scopedInputs.insert(EInput::MouseDeltaX);
+			}
+
+			if (HandleAxis(EInput::MouseDeltaY, static_cast<float>(deltaY), true))
+			{
+				scopedInputs.insert(EInput::MouseDeltaY);
+			}
 		}
 	}
 
-	void InputManager::HandlePressAction(const EInput input)
+	bool InputManager::HandlePressAction(const EInput input)
 	{
+		bool bPressActionHandled = false;
 		auto inputActionNameItr = inputActionNameMap.find(input);
 		if (inputActionNameItr != inputActionNameMap.end())
 		{
@@ -267,11 +278,12 @@ namespace fe
 					case EInputState::None:
 					case EInputState::Released:
 						action->State = EInputState::Pressed;
-						preesedInputSet.insert(input);
-						break;
+						bPressActionHandled = true;
 				}
 			}
 		}
+
+		return bPressActionHandled;
 	}
 
 	void InputManager::HandleReleaseAction(const EInput input)
@@ -287,21 +299,28 @@ namespace fe
 		}
 	}
 
-	void InputManager::HandleAxis(const EInput input, const float value)
+	bool InputManager::HandleAxis(const EInput input, const float value, const bool bIsDifferential)
 	{
+		bool bAxisHandled = false;
 		auto inputAxisNameScaleMapItr = inputAxisNameScaleMap.find(input);
 		if (inputAxisNameScaleMapItr != inputAxisNameScaleMap.end())
 		{
 			for (const auto& [axisName, axisScale] : inputAxisNameScaleMapItr->second)
 			{
 				RefHandle<Axis> axis = axisMap[axisName].MakeRef();
-				axis->Value = value * axisScale;
-			}
+				if (bIsDifferential)
+				{
+					axis->Value += value * axisScale;
+				}
+				else
+				{
+					axis->Value = value * axisScale;
+				}
 
-			if (!inputAxisNameScaleMapItr->second.empty())
-			{
-				preesedInputSet.insert(input);
+				bAxisHandled = true;
 			}
 		}
+
+		return bAxisHandled;
 	}
 } // namespace fe

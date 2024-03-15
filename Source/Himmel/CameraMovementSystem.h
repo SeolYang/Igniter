@@ -34,8 +34,8 @@ private:
 	fe::RefHandle<const fe::Axis> turnYawAxis;
 	fe::RefHandle<const fe::Axis> turnPitchAxis;
 
-	const float mouseYawSentisitivity = 0.3f;
-	const float mousePitchSentisitivity = 0.3f;
+	const float mouseYawSentisitivity = 0.03f;
+	const float mousePitchSentisitivity = 0.03f;
 
 	float yawDegrees = 0.f;
 	float pitchDegrees = 0.f;

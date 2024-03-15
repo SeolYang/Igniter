@@ -3,7 +3,7 @@
 struct CameraController
 {
 public:
-	float MovementPower = 10.f;
+	float MovementPower = 25.f;
 	float MovementPowerAttenuationTime = 0.5f;
 	float MouseYawSentisitivity = 5.f; /* Degrees */
 	float MousePitchSentisitivity = 5.f; /* Degrees */

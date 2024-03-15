@@ -120,8 +120,8 @@ int main()
 		inputManager.BindAction(String("MoveRight"), EInput::D);
 		inputManager.BindAction(String("MoveForward"), EInput::W);
 		inputManager.BindAction(String("MoveBackward"), EInput::S);
-		inputManager.BindAction(String("MoveUp"), EInput::MouseLB);
-		inputManager.BindAction(String("MoveDown"), EInput::MouseRB);
+		inputManager.BindAction(String("MoveUp"), EInput::MouseRB);
+		inputManager.BindAction(String("MoveDown"), EInput::MouseLB);
 		inputManager.BindAction(String("Sprint"), EInput::Shift);
 
 		inputManager.BindAxis(String("TurnYaw"), EInput::MouseDeltaX, 1.f);

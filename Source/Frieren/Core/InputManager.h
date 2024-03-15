@@ -93,9 +93,9 @@ namespace fe
 		void HandleKeyUp(WPARAM wParam, LPARAM lParam);
 		void HandleRawInputDevices(const WPARAM wParam, const LPARAM lParam);
 
-		void HandlePressAction(EInput input);
+		bool HandlePressAction(EInput input);
 		void HandleReleaseAction(EInput input);
-		void HandleAxis(EInput input, float value);
+		bool HandleAxis(EInput input, float value, const bool bIsDifferential = false);
 
 	private:
 		HandleManager& handleManager;
@@ -106,7 +106,7 @@ namespace fe
 		EventMap<Action> actionMap{};
 		EventMap<Axis> axisMap{};
 
-		robin_hood::unordered_set<EInput> preesedInputSet{};
+		robin_hood::unordered_set<EInput> scopedInputs{};
 
 		std::vector<uint8_t> rawInputBuffer;
 

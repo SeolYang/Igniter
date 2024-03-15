@@ -15,6 +15,7 @@ CameraMovementSystem::CameraMovementSystem()
 	moveRightAction = inputManager.QueryAction(fe::String("MoveRight"));
 	moveForwardAction = inputManager.QueryAction(fe::String("MoveForward"));
 	moveBackwardAction = inputManager.QueryAction(fe::String("MoveBackward"));
+
 	moveUpAction = inputManager.QueryAction(fe::String("MoveUp"));
 	moveDownAction = inputManager.QueryAction(fe::String("MoveDown"));
 
