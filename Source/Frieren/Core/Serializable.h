@@ -5,7 +5,7 @@
 
 namespace fe
 {
-    template <uint64_t CurrentVersion>
+    template <uint64_t DerivedVersion>
     struct Serializable
     {
     public:
@@ -17,24 +17,32 @@ namespace fe
 
         virtual json& Serialize(json& archive) const
         {
-            const Serializable& data = *this;
-            check(metadata.IsLatestVersion());
-            FE_SERIALIZE_JSON(Serializable, archive, data, Version);
+            const Serializable& serializable = *this;
+            FE_SERIALIZE_JSON(Serializable, archive, serializable, LatestVersion);
             return archive;
         }
 
         virtual const json& Deserialize(const json& archive)
         {
-            ResourceMetadata& metadata = *this;
-            FE_DESERIALIZE_JSON(Serializable, archive, metadata, Version);
-            check(metadata.IsLatestVersion());
+            Serializable& serializable = *this;
+            FE_DESERIALIZE_JSON(Serializable, archive, serializable, Version);
+            check(serializable.IsLatestVersion());
             return archive;
         }
 
     private:
-        constexpr static uint64_t BaseVersion = 1;
-        constexpr static uint64_t LatestVersion = BaseVersion + CurrentVersion;
+        constexpr static uint64_t BaseVersion = 0;
 
+    public:
+        constexpr static uint64_t LatestVersion = BaseVersion + DerivedVersion;
         uint64_t Version = 0;
     };
+
+    template <typename T>
+    [[nodiscard]] T MakeVersionedDefault()
+    {
+        T newData{};
+        newData.Version = T::LatestVersion;
+        return newData;
+    }
 } // namespace fe

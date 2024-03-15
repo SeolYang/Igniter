@@ -19,7 +19,7 @@ public:
 
 public:
     float MovementPower = 25.f;
-    float MovementPowerAttenuationTime = 1.f; /* Seconds */
+    float MovementPowerAttenuationTime = 0.65f; /* Seconds */
     float MouseYawSentisitivity = 0.03f;      /* Degrees */
     float MousePitchSentisitivity = 0.03f;    /* Degrees */
     float SprintFactor = 4.f;

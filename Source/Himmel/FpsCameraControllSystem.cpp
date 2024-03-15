@@ -33,7 +33,8 @@ void FpsCameraControllSystem::Update(fe::World& world)
             if (!bIgnoreInput)
             {
                 /* Handle Movements */
-                const float sprintFactor = (sprintAction && sprintAction->IsAnyPressing()) ? controller.SprintFactor : 1.f;
+                const bool bShouldSprint = sprintAction && sprintAction->IsAnyPressing();
+                const float sprintFactor = bShouldSprint ? controller.SprintFactor : 1.f;
                 fe::Vector3 direction{};
                 if (moveLeftAction && moveLeftAction->IsAnyPressing())
                 {

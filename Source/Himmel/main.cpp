@@ -127,7 +127,7 @@ int main()
         inputManager.BindAxis(String("TurnYaw"), EInput::MouseDeltaX, 1.f);
         inputManager.BindAxis(String("TurnAxis"), EInput::MouseDeltaY, 1.f);
 
-        inputManager.BindAction(String("TogglePossessCamera"), EInput::Space);
+        inputManager.BindAction(String("TogglePossessCamera"), EInput::Control);
 
         /********************************/
 
