@@ -15,9 +15,10 @@ namespace fe
 
         template <typename T, typename... Args>
             requires std::derived_from<T, ImGuiLayer>
-        void AddLayer(Args&&... args)
+        T& AddLayer(Args&&... args)
         {
             layers.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+            return reinterpret_cast<T&>(*layers.back());
         }
 
         template <typename T>

@@ -294,6 +294,9 @@
     <ClInclude Include="..\Source\Frieren\Core\Serializable.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -418,6 +421,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Asset\Model.cpp">
       <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp">
+      <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

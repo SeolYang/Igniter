@@ -20,6 +20,7 @@
 #include <Asset/Model.h>
 #include <ImGui/ImGuiLayer.h>
 #include <ImGui/ImGuiCanvas.h>
+#include <ImGui/CachedStringDebugger.h>
 #include <PlayerArchetype.h>
 #include <EnemyArchetype.h>
 #include <FpsCameraController.h>
@@ -116,16 +117,16 @@ int main()
         /******************************/
 
         /* #sy_test Input Manager Test */
-        inputManager.BindAction(String("MoveLeft"), EInput::A);
-        inputManager.BindAction(String("MoveRight"), EInput::D);
-        inputManager.BindAction(String("MoveForward"), EInput::W);
-        inputManager.BindAction(String("MoveBackward"), EInput::S);
-        inputManager.BindAction(String("MoveUp"), EInput::MouseRB);
-        inputManager.BindAction(String("MoveDown"), EInput::MouseLB);
-        inputManager.BindAction(String("Sprint"), EInput::Shift);
+        inputManager.BindAction("MoveLeft"_fs, EInput::A);
+        inputManager.BindAction("MoveRight"_fs, EInput::D);
+        inputManager.BindAction("MoveForward"_fs, EInput::W);
+        inputManager.BindAction("MoveBackward"_fs, EInput::S);
+        inputManager.BindAction("MoveUp"_fs, EInput::MouseRB);
+        inputManager.BindAction("MoveDown"_fs, EInput::MouseLB);
+        inputManager.BindAction("Sprint"_fs, EInput::Shift);
 
-        inputManager.BindAxis(String("TurnYaw"), EInput::MouseDeltaX, 1.f);
-        inputManager.BindAxis(String("TurnAxis"), EInput::MouseDeltaY, 1.f);
+        inputManager.BindAxis("TurnYaw"_fs, EInput::MouseDeltaX, 1.f);
+        inputManager.BindAxis("TurnAxis"_fs, EInput::MouseDeltaY, 1.f);
 
         inputManager.BindAction(String("TogglePossessCamera"), EInput::Control);
 
@@ -214,7 +215,8 @@ int main()
 
         /* #sy_test ImGui integration tests */
         ImGuiCanvas& canvas = engine.GetImGuiCanvas();
-        canvas.AddLayer<MenuBar>();
+        auto& cachedStringDebuggerLayer = canvas.AddLayer<CachedStringDebugger>();
+        canvas.AddLayer<MenuBar>(cachedStringDebuggerLayer);
         /************************************/
 
         result = engine.Execute();

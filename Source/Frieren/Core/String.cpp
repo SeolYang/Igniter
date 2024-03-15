@@ -61,12 +61,6 @@ namespace fe
         return Wider(AsStringView());
     }
 
-    void String::ClearCache()
-    {
-        ReadWriteLock lock{ hashStringMapMutex };
-        hashStringMap.clear();
-    }
-
     String& String::operator=(const std::string& rhs)
     {
         SetString(rhs);
@@ -93,6 +87,26 @@ namespace fe
     bool String::operator==(const String& rhs) const
     {
         return (IsValid() && rhs.IsValid()) ? hashOfString == rhs.hashOfString : false;
+    }
+
+    std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()
+    {
+        ReadOnlyLock lock{ hashStringMapMutex };
+        std::vector<std::pair<uint64_t, std::string_view>> cachedStrs;
+        cachedStrs.reserve(hashStringMap.size());
+
+        for (const auto& itr : hashStringMap)
+        {
+            cachedStrs.emplace_back(itr.first, std::string_view{ itr.second });
+        }
+
+        return cachedStrs;
+    }
+
+    void String::ClearCache()
+    {
+        ReadWriteLock lock{ hashStringMapMutex };
+        hashStringMap.clear();
     }
 
 } // namespace fe

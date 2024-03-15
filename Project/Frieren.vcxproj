@@ -70,6 +70,7 @@
     <ClInclude Include="..\Source\Frieren\Gameplay\GameFlow.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\Common.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiLayer.h" />
@@ -131,6 +132,7 @@
     <ClCompile Include="..\Source\Frieren\Engine.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCommon.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiRenderer.cpp" />

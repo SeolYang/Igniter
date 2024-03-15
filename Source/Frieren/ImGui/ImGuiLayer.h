@@ -17,8 +17,10 @@ namespace fe
 
         String GetName() const { return name; }
 
+    protected:
+        bool bIsVisible = true;
+
     private:
         const String name;
-        bool bIsVisible = true;
     };
 } // namespace fe

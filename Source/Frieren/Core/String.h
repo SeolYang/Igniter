@@ -84,6 +84,8 @@ namespace fe
         bool operator==(const String& rhs) const;
         bool operator!=(const String& rhs) const { return !(*this == rhs); }
 
+        static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
+
     private:
         friend class Engine;
         static void ClearCache();
@@ -97,6 +99,15 @@ namespace fe
         uint64_t hashOfString = InvalidHashVal;
     };
 
+    inline String operator""_fs(const char* str, const size_t count)
+    {
+        return String(std::string_view{ str, count });
+    }
+
+    inline String operator""_fs(const wchar_t* wstr, const size_t count)
+    {
+        return String(Narrower(std::wstring_view{wstr, count}));
+    }
 } // namespace fe
 
 namespace std

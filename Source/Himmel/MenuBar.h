@@ -1,12 +1,14 @@
 #pragma once
 #include <ImGui/ImGuiLayer.h>
+#include <ImGui/CachedStringDebugger.h>
 #include <Engine.h>
 
 class MenuBar : public fe::ImGuiLayer
 {
 public:
-    MenuBar()
-        : fe::ImGuiLayer(fe::String("MenuBar"))
+    MenuBar(fe::CachedStringDebugger& cachedStringDebugger)
+        : cachedStringDebugger(cachedStringDebugger),
+          fe::ImGuiLayer(fe::String("MenuBar"))
     {
     }
 
@@ -22,7 +24,20 @@ public:
                 }
                 ImGui::EndMenu();
             }
+
+            if (ImGui::BeginMenu("Debug"))
+            {
+                if (ImGui::MenuItem("Debug Cached String"))
+                {
+                    cachedStringDebugger.SetVisibility(!cachedStringDebugger.IsVisible());
+                }
+
+                ImGui::EndMenu();
+            }
             ImGui::EndMainMenuBar();
         }
     }
+
+private:
+    fe::CachedStringDebugger& cachedStringDebugger;
 };
