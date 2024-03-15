@@ -14,6 +14,7 @@ void BasicGameFlow::Update(fe::World& world)
 {
 	/* Stateful System **/
 	cameraMovementSystem.Update(world);
+	cameraPossessSystem.Update(world);
 	rotateEnemySystem.Update(world);
 	/* Stateless System **/
 	HealthRecoverySystem::Update(world);

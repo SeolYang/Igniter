@@ -42,10 +42,6 @@ int main()
 		GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
 		GpuUploader& gpuUploader = engine.GetGpuUploader();
 
-		/* #sy_test Window class tests */
-		window.ClipCursor();
-		/*******************************/
-
 		/* #sy_test Asset System & Mechanism Test */
 		/* #sy_todo Check thread-safety of TextureImporter.Import */
 		TextureImporter texImporter;
@@ -130,6 +126,8 @@ int main()
 
 		inputManager.BindAxis(String("TurnYaw"), EInput::MouseDeltaX, 1.f);
 		inputManager.BindAxis(String("TurnAxis"), EInput::MouseDeltaY, 1.f);
+
+		inputManager.BindAction(String("TogglePossessCamera"), EInput::Control);
 
 		/********************************/
 

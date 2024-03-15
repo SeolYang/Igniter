@@ -32,10 +32,10 @@ namespace fe
 
 		[[nodiscard]] Viewport GetViewport() const { return viewport; }
 
-		// void ClipCursor()
-		void ClipCursor(RECT clientRect);
-		void ClipCursor();
+		void ClipCursor(const std::optional<RECT> clipRect = std::nullopt);
 		void UnclipCursor();
+
+		void SetCursorVisibility(const bool bVisible);
 
 	private:
 		static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
@@ -48,5 +48,7 @@ namespace fe
 		HWND windowHandle = NULL;
 
 		Viewport viewport;
+
+		bool bIsCursorVisible = true;
 	};
 } // namespace fe

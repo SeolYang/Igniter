@@ -13,6 +13,9 @@ namespace fe
 	{
 		switch (wParam)
 		{
+			default:
+				return EInput::None;
+
 			/** Characters */
 			case 'W':
 			case 'w':
@@ -43,8 +46,8 @@ namespace fe
 			case VK_SHIFT:
 				return EInput::Shift;
 
-			default:
-				return EInput::None;
+			case VK_CONTROL:
+				return EInput::Control;
 		}
 	}
 
@@ -59,7 +62,7 @@ namespace fe
 
 		if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
 		{
-			FE_LOG(InputManagerError, "Failed to create raw input mouse. {:#X}", GetLastError())
+			FE_LOG(InputManagerError, "Failed to create raw input mouse. {:#X}", GetLastError());
 		}
 	}
 

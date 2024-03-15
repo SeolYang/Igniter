@@ -181,6 +181,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Himmel\CameraPossessSystem.cpp" />
     <ClCompile Include="..\Source\Himmel\BasicGameFlow.cpp" />
     <ClCompile Include="..\Source\Himmel\CameraMovementSystem.cpp" />
     <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="..\Source\Himmel\MenuBar.h" />
     <ClInclude Include="..\Source\Himmel\PlayerArchetype.h" />
     <ClInclude Include="..\Source\Himmel\PlayerComponent.h" />
+    <ClInclude Include="..\Source\Himmel\CameraPossessSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

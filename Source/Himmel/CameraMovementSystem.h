@@ -14,8 +14,12 @@ public:
 
 	void Update(fe::World& world);
 
+	void SetIgnoreInput(const bool bEnable) { this->bIgnoreInput = bEnable; }
+
 private:
 	const fe::Timer& timer;
+
+	bool bIgnoreInput = false;
 
 	fe::RefHandle<const fe::Action> moveLeftAction;
 	fe::RefHandle<const fe::Action> moveRightAction;
@@ -30,8 +34,8 @@ private:
 	fe::RefHandle<const fe::Axis> turnYawAxis;
 	fe::RefHandle<const fe::Axis> turnPitchAxis;
 
-	const float mouseYawSentisitivity = 1.f;
-	const float mousePitchSentisitivity = 1.f;
+	const float mouseYawSentisitivity = 0.3f;
+	const float mousePitchSentisitivity = 0.3f;
 
 	float yawDegrees = 0.f;
 	float pitchDegrees = 0.f;

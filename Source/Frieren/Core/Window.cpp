@@ -51,8 +51,18 @@ namespace fe
 		UpdateWindow(windowHandle);
 	}
 
-	void Window::ClipCursor(RECT clientRect)
+	void Window::ClipCursor(const std::optional<RECT> clipRect)
 	{
+		RECT clientRect{};
+		if (clipRect)
+		{
+			clientRect = *clipRect;
+		}
+		else
+		{
+			GetClientRect(windowHandle, &clientRect);
+		}
+
 		POINT leftTop{ .x = clientRect.left, .y = clientRect.top };
 		POINT rightBottom{ .x = clientRect.right, .y = clientRect.bottom };
 		ClientToScreen(windowHandle, &leftTop);
@@ -66,18 +76,31 @@ namespace fe
 		{
 			FE_LOG(WindowError, "Failed to clip cursor to main window.");
 		}
-	}
-
-	void Window::ClipCursor()
-	{
-		RECT clientRect{};
-		GetClientRect(windowHandle, &clientRect);
-		ClipCursor(clientRect);
+		else
+		{
+			FE_LOG(WindowInfo, "Cursor clipped to rect(LEFT: {}, RIGHT: {}, TOP: {}, BOTTOM: {})", clientRect.left, clientRect.right, clientRect.top, clientRect.bottom);
+		}
 	}
 
 	void Window::UnclipCursor()
 	{
 		::ClipCursor(nullptr);
+	}
+
+	void Window::SetCursorVisibility(const bool bVisible)
+	{
+		if (bVisible && !bIsCursorVisible)
+		{
+			bIsCursorVisible = true;
+			::ShowCursor(TRUE);
+			FE_LOG(WindowInfo, "Cursor visible.");
+		}
+		else if (!bVisible && bIsCursorVisible)
+		{
+			bIsCursorVisible = false;
+			::ShowCursor(FALSE);
+			FE_LOG(WindowInfo, "Cursor invisible");
+		}
 	}
 
 	Window::~Window()

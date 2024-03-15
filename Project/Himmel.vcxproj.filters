@@ -21,6 +21,9 @@
     <ClCompile Include="..\Source\Himmel\CameraMovementSystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Himmel\CameraPossessSystem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Himmel\HealthRecoverySystem.h">
@@ -57,6 +60,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Himmel\CameraMovementSystem.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Himmel\CameraPossessSystem.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

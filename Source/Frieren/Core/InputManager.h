@@ -16,6 +16,7 @@ namespace fe
 		D,
 		Space,
 		Shift,
+		Control,
 
 		/** Mouse inputs */
 		MouseDeltaX,

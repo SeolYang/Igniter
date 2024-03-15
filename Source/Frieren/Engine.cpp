@@ -33,7 +33,7 @@ namespace fe
 			logger->Log<EngineInfo>("Initializing Engine Runtime...");
 
 			/* #sy_test 임시 윈도우 설명자 */
-			const WindowDescription winDesc{ .Width = 2560, .Height = 1440, .Title = String(settings::GameName) };
+			const WindowDescription winDesc{ .Width = 1920, .Height = 1080, .Title = String(settings::GameName) };
 			window = std::make_unique<Window>(winDesc);
 			renderDevice = std::make_unique<RenderDevice>();
 			gpuUploader = std::make_unique<GpuUploader>(*renderDevice);
