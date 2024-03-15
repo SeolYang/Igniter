@@ -12,10 +12,10 @@ BasicGameFlow::~BasicGameFlow()
 
 void BasicGameFlow::Update(fe::World& world)
 {
-	/* Stateful System **/
-	fpsCameraControllSystem.Update(world);
-	cameraPossessSystem.Update(world);
-	rotateEnemySystem.Update(world);
-	/* Stateless System **/
-	HealthRecoverySystem::Update(world);
+    /* Stateful System **/
+    fpsCameraControllSystem.Update(world);
+    cameraPossessSystem.Update(world);
+    rotateEnemySystem.Update(world);
+    /* Stateless System **/
+    HealthRecoverySystem::Update(world);
 }

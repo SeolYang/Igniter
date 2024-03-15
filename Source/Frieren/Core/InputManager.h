@@ -5,110 +5,109 @@
 
 namespace fe
 {
-	enum class EInput
-	{
-		None,
+    enum class EInput
+    {
+        None,
 
-		/** Keyboard inputs */
-		W,
-		A,
-		S,
-		D,
-		Space,
-		Shift,
-		Control,
+        /** Keyboard inputs */
+        W,
+        A,
+        S,
+        D,
+        Space,
+        Shift,
+        Control,
 
-		/** Mouse inputs */
-		MouseDeltaX,
-		MouseDeltaY,
-		MouseLB,
-		MouseRB
-	};
+        /** Mouse inputs */
+        MouseDeltaX,
+        MouseDeltaY,
+        MouseLB,
+        MouseRB
+    };
 
-	enum class EInputState
-	{
-		None,
-		Pressed,
-		OnPressing,
-		Released,
-	};
+    enum class EInputState
+    {
+        None,
+        Pressed,
+        OnPressing,
+        Released,
+    };
 
-	struct Action
-	{
-	public:
-		bool IsAnyPressing() const { return State == fe::EInputState::Pressed || State == EInputState::OnPressing; }
+    struct Action
+    {
+    public:
+        bool IsAnyPressing() const { return State == fe::EInputState::Pressed || State == EInputState::OnPressing; }
 
-	public:
-		EInputState State = EInputState::None;
+    public:
+        EInputState State = EInputState::None;
 
-	private:
-		float pad = 0.f;
-	};
+    private:
+        float pad = 0.f;
+    };
 
-	struct Axis
-	{
-	public:
-		float Value = 0.0f;
+    struct Axis
+    {
+    public:
+        float Value = 0.0f;
 
-	private:
-		float pad = 0.f;
-	};
+    private:
+        float pad = 0.f;
+    };
 
-	class HandleManager;
-	class InputManager
-	{
-		using NameSet = robin_hood::unordered_set<String>;
-		using InputNameMap = robin_hood::unordered_map<EInput, NameSet>;
-		using ScaleMap = robin_hood::unordered_map<String, float>;
-		using InputNameScaleMap = robin_hood::unordered_map<EInput, ScaleMap>;
-		template <typename T>
-		using EventMap = robin_hood::unordered_map<String, Handle<T>>;
+    class HandleManager;
+    class InputManager
+    {
+        using NameSet = robin_hood::unordered_set<String>;
+        using InputNameMap = robin_hood::unordered_map<EInput, NameSet>;
+        using ScaleMap = robin_hood::unordered_map<String, float>;
+        using InputNameScaleMap = robin_hood::unordered_map<EInput, ScaleMap>;
+        template <typename T>
+        using EventMap = robin_hood::unordered_map<String, Handle<T>>;
 
-	public:
-		InputManager(HandleManager& handleManager);
-		InputManager(const InputManager&) = delete;
-		InputManager(InputManager&&) noexcept = delete;
+    public:
+        InputManager(HandleManager& handleManager);
+        InputManager(const InputManager&) = delete;
+        InputManager(InputManager&&) noexcept = delete;
 
-		InputManager& operator=(const InputManager&) = delete;
-		InputManager& operator=(InputManager&&) noexcept = delete;
+        InputManager& operator=(const InputManager&) = delete;
+        InputManager& operator=(InputManager&&) noexcept = delete;
 
-		void BindAction(String nameOfAction, EInput input);
-		void BindAxis(String nameOfAxis, EInput input, const float scale = 1.f);
+        void BindAction(String nameOfAction, EInput input);
+        void BindAxis(String nameOfAxis, EInput input, const float scale = 1.f);
 
-		// #sy_todo UnbindAction/Axis
+        // #sy_todo UnbindAction/Axis
 
-		RefHandle<const Action> QueryAction(String nameOfAction) const;
-		RefHandle<const Axis> QueryAxis(String nameOfAxis) const;
-		float QueryScaleOfAxis(String nameOfAxis, EInput input) const;
+        RefHandle<const Action> QueryAction(String nameOfAction) const;
+        RefHandle<const Axis> QueryAxis(String nameOfAxis) const;
+        float QueryScaleOfAxis(String nameOfAxis, EInput input) const;
 
-		void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);
+        void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);
 
-		void HandleEvent(UINT message, WPARAM wParam, LPARAM lParam);
-		void PostUpdate();
+        void HandleEvent(UINT message, WPARAM wParam, LPARAM lParam);
+        void PostUpdate();
 
-		void Clear();
+        void Clear();
 
-	private:
-		void HandleKeyDown(WPARAM wParam, LPARAM lParam);
-		void HandleKeyUp(WPARAM wParam, LPARAM lParam);
-		void HandleRawInputDevices(const WPARAM wParam, const LPARAM lParam);
+    private:
+        void HandleKeyDown(WPARAM wParam, LPARAM lParam);
+        void HandleKeyUp(WPARAM wParam, LPARAM lParam);
+        void HandleRawInputDevices(const WPARAM wParam, const LPARAM lParam);
 
-		bool HandlePressAction(EInput input);
-		void HandleReleaseAction(EInput input);
-		bool HandleAxis(EInput input, float value, const bool bIsDifferential = false);
+        bool HandlePressAction(EInput input);
+        void HandleReleaseAction(EInput input);
+        bool HandleAxis(EInput input, float value, const bool bIsDifferential = false);
 
-	private:
-		HandleManager& handleManager;
+    private:
+        HandleManager& handleManager;
 
-		InputNameMap inputActionNameMap{};
-		InputNameScaleMap inputAxisNameScaleMap{};
+        InputNameMap inputActionNameMap{};
+        InputNameScaleMap inputAxisNameScaleMap{};
 
-		EventMap<Action> actionMap{};
-		EventMap<Axis> axisMap{};
+        EventMap<Action> actionMap{};
+        EventMap<Axis> axisMap{};
 
-		robin_hood::unordered_set<EInput> scopedInputs{};
+        robin_hood::unordered_set<EInput> scopedInputs{};
 
-		std::vector<uint8_t> rawInputBuffer;
-
-	};
+        std::vector<uint8_t> rawInputBuffer;
+    };
 } // namespace fe

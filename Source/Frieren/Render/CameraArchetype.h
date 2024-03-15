@@ -7,13 +7,13 @@ namespace fe
 {
     struct CameraArchetype
     {
-	public:
+    public:
         static Entity Create(World& world)
         {
-			const Entity newEntity = world.Create();
-			world.Attach<Camera>(newEntity);
-			world.Attach<TransformComponent>(newEntity);
-			return newEntity;
+            const Entity newEntity = world.Create();
+            world.Attach<Camera>(newEntity);
+            world.Attach<TransformComponent>(newEntity);
+            return newEntity;
         }
     };
-}
+} // namespace fe

@@ -17,197 +17,197 @@
 
 namespace fe
 {
-	FE_DEFINE_LOG_CATEGORY(EngineInfo, ELogVerbosity::Info)
-	FE_DEFINE_LOG_CATEGORY(EngineFatal, ELogVerbosity::Fatal)
+    FE_DEFINE_LOG_CATEGORY(EngineInfo, ELogVerbosity::Info)
+    FE_DEFINE_LOG_CATEGORY(EngineFatal, ELogVerbosity::Fatal)
 
-	Engine* Engine::instance = nullptr;
-	Engine::Engine()
-	{
-		const bool bIsFirstEngineCreation = instance == nullptr;
-		check(bIsFirstEngineCreation);
-		if (bIsFirstEngineCreation)
-		{
-			instance = this;
-			logger = std::make_unique<Logger>();
-			logger->Log<EngineInfo>("Engine version: {}", version::Version);
-			logger->Log<EngineInfo>("Initializing Engine Runtime...");
+    Engine* Engine::instance = nullptr;
+    Engine::Engine()
+    {
+        const bool bIsFirstEngineCreation = instance == nullptr;
+        check(bIsFirstEngineCreation);
+        if (bIsFirstEngineCreation)
+        {
+            instance = this;
+            logger = std::make_unique<Logger>();
+            logger->Log<EngineInfo>("Engine version: {}", version::Version);
+            logger->Log<EngineInfo>("Initializing Engine Runtime...");
 
-			/* #sy_test 임시 윈도우 설명자 */
-			const WindowDescription winDesc{ .Width = 1920, .Height = 1080, .Title = String(settings::GameName) };
-			window = std::make_unique<Window>(winDesc);
-			renderDevice = std::make_unique<RenderDevice>();
-			gpuUploader = std::make_unique<GpuUploader>(*renderDevice);
-			handleManager = std::make_unique<HandleManager>();
-			deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
-			inputManager = std::make_unique<InputManager>(*handleManager);
-			gpuViewManager = std::make_unique<GpuViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
-			renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
-			imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
-			imguiCanvas = std::make_unique<ImGuiCanvas>();
-			gameInstance = std::make_unique<GameInstance>();
-		}
-	}
+            /* #sy_test 임시 윈도우 설명자 */
+            const WindowDescription winDesc{ .Width = 1920, .Height = 1080, .Title = String(settings::GameName) };
+            window = std::make_unique<Window>(winDesc);
+            renderDevice = std::make_unique<RenderDevice>();
+            gpuUploader = std::make_unique<GpuUploader>(*renderDevice);
+            handleManager = std::make_unique<HandleManager>();
+            deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
+            inputManager = std::make_unique<InputManager>(*handleManager);
+            gpuViewManager = std::make_unique<GpuViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
+            renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
+            imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
+            imguiCanvas = std::make_unique<ImGuiCanvas>();
+            gameInstance = std::make_unique<GameInstance>();
+        }
+    }
 
-	Engine::~Engine()
-	{
-		logger->Log<EngineInfo>("* Cleanup sub-systems");
-		gpuViewManager->ClearCachedSampler();
-		inputManager->Clear();
-		deferredDeallocator->FlushAllFrames();
+    Engine::~Engine()
+    {
+        logger->Log<EngineInfo>("* Cleanup sub-systems");
+        gpuViewManager->ClearCachedSampler();
+        inputManager->Clear();
+        deferredDeallocator->FlushAllFrames();
 
-		gameInstance.reset();
-		imguiCanvas.reset();
-		imguiRenderer.reset();
-		renderer.reset();
-		inputManager.reset();
-		deferredDeallocator.reset();
-		gpuViewManager.reset();
-		handleManager.reset();
-		gpuUploader.reset();
-		renderDevice.reset();
-		window.reset();
-		logger.reset();
+        gameInstance.reset();
+        imguiCanvas.reset();
+        imguiRenderer.reset();
+        renderer.reset();
+        inputManager.reset();
+        deferredDeallocator.reset();
+        gpuViewManager.reset();
+        handleManager.reset();
+        gpuUploader.reset();
+        renderDevice.reset();
+        window.reset();
+        logger.reset();
 
-		if (instance == this)
-		{
-			instance = nullptr;
-		}
+        if (instance == this)
+        {
+            instance = nullptr;
+        }
 
-		String::ClearCache();
-	}
+        String::ClearCache();
+    }
 
-	FrameManager& Engine::GetFrameManager()
-	{
-		check(instance != nullptr);
-		return instance->frameManager;
-	}
+    FrameManager& Engine::GetFrameManager()
+    {
+        check(instance != nullptr);
+        return instance->frameManager;
+    }
 
-	Timer& Engine::GetTimer()
-	{
-		check(instance != nullptr);
-		return instance->timer;
-	}
+    Timer& Engine::GetTimer()
+    {
+        check(instance != nullptr);
+        return instance->timer;
+    }
 
-	Logger& Engine::GetLogger()
-	{
-		check(instance != nullptr);
-		return *instance->logger;
-	}
+    Logger& Engine::GetLogger()
+    {
+        check(instance != nullptr);
+        return *instance->logger;
+    }
 
-	HandleManager& Engine::GetHandleManager()
-	{
-		check(instance != nullptr);
-		return *(instance->handleManager);
-	}
+    HandleManager& Engine::GetHandleManager()
+    {
+        check(instance != nullptr);
+        return *(instance->handleManager);
+    }
 
-	Window& Engine::GetWindow()
-	{
-		check(instance != nullptr);
-		return *(instance->window);
-	}
+    Window& Engine::GetWindow()
+    {
+        check(instance != nullptr);
+        return *(instance->window);
+    }
 
-	RenderDevice& Engine::GetRenderDevice()
-	{
-		check(instance != nullptr);
-		return *(instance->renderDevice);
-	}
+    RenderDevice& Engine::GetRenderDevice()
+    {
+        check(instance != nullptr);
+        return *(instance->renderDevice);
+    }
 
-	GpuUploader& Engine::GetGpuUploader()
-	{
-		check(instance != nullptr);
-		return *(instance->gpuUploader);
-	}
+    GpuUploader& Engine::GetGpuUploader()
+    {
+        check(instance != nullptr);
+        return *(instance->gpuUploader);
+    }
 
-	InputManager& Engine::GetInputManager()
-	{
-		check(instance != nullptr);
-		return *(instance->inputManager);
-	}
+    InputManager& Engine::GetInputManager()
+    {
+        check(instance != nullptr);
+        return *(instance->inputManager);
+    }
 
-	DeferredDeallocator& Engine::GetDeferredDeallocator()
-	{
-		check(instance != nullptr);
-		return *(instance->deferredDeallocator);
-	}
+    DeferredDeallocator& Engine::GetDeferredDeallocator()
+    {
+        check(instance != nullptr);
+        return *(instance->deferredDeallocator);
+    }
 
-	GpuViewManager& Engine::GetGPUViewManager()
-	{
-		check(instance != nullptr);
-		return *(instance->gpuViewManager);
-	}
+    GpuViewManager& Engine::GetGPUViewManager()
+    {
+        check(instance != nullptr);
+        return *(instance->gpuViewManager);
+    }
 
-	Renderer& Engine::GetRenderer()
-	{
-		check(instance != nullptr);
-		return *(instance->renderer);
-	}
+    Renderer& Engine::GetRenderer()
+    {
+        check(instance != nullptr);
+        return *(instance->renderer);
+    }
 
-	ImGuiRenderer& Engine::GetImGuiRenderer()
-	{
-		check(instance != nullptr);
-		return *(instance->imguiRenderer);
-	}
+    ImGuiRenderer& Engine::GetImGuiRenderer()
+    {
+        check(instance != nullptr);
+        return *(instance->imguiRenderer);
+    }
 
-	ImGuiCanvas& Engine::GetImGuiCanvas()
-	{
-		check(instance != nullptr);
-		return *(instance->imguiCanvas);
-	}
+    ImGuiCanvas& Engine::GetImGuiCanvas()
+    {
+        check(instance != nullptr);
+        return *(instance->imguiCanvas);
+    }
 
-	GameInstance& Engine::GetGameInstance()
-	{
-		check(instance != nullptr);
-		return *(instance->gameInstance);
-	}
+    GameInstance& Engine::GetGameInstance()
+    {
+        check(instance != nullptr);
+        return *(instance->gameInstance);
+    }
 
-	void Engine::Exit()
-	{
-		check(instance != nullptr);
-		instance->bShouldExit = true;
-	}
+    void Engine::Exit()
+    {
+        check(instance != nullptr);
+        instance->bShouldExit = true;
+    }
 
-	int Engine::Execute()
-	{
-		logger->Log<EngineInfo>("* Start Engine main loop");
+    int Engine::Execute()
+    {
+        logger->Log<EngineInfo>("* Start Engine main loop");
 
-		while (!bShouldExit)
-		{
-			timer.Begin();
+        while (!bShouldExit)
+        {
+            timer.Begin();
 
-			MSG msg;
-			ZeroMemory(&msg, sizeof(msg));
-			while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-			{
-				if (msg.message == WM_QUIT)
-				{
-					bShouldExit = true;
-				}
+            MSG msg;
+            ZeroMemory(&msg, sizeof(msg));
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            {
+                if (msg.message == WM_QUIT)
+                {
+                    bShouldExit = true;
+                }
 
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
 
-			deferredDeallocator->FlushCurrentFrame();
+            deferredDeallocator->FlushCurrentFrame();
 
-			gameInstance->Update();
-			inputManager->PostUpdate();
+            gameInstance->Update();
+            inputManager->PostUpdate();
 
-			renderer->BeginFrame();
+            renderer->BeginFrame();
 
-			if (gameInstance->HasWorld())
-			{
-				renderer->Render(gameInstance->GetWorld());
-			}
-			imguiRenderer->Render(*imguiCanvas, *renderer);
+            if (gameInstance->HasWorld())
+            {
+                renderer->Render(gameInstance->GetWorld());
+            }
+            imguiRenderer->Render(*imguiCanvas, *renderer);
 
-			renderer->EndFrame();
+            renderer->EndFrame();
 
-			timer.End();
-			frameManager.NextFrame();
-		}
+            timer.End();
+            frameManager.NextFrame();
+        }
 
-		renderer->FlushQueues();
-		logger->Log<EngineInfo>("* End Engine main loop");
-		return 0;
-	}
+        renderer->FlushQueues();
+        logger->Log<EngineInfo>("* End Engine main loop");
+        return 0;
+    }
 } // namespace fe

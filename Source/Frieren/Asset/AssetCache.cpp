@@ -6,10 +6,9 @@
 
 namespace fe
 {
-	FE_DEFINE_LOG_CATEGORY(AssetCacheInfo, ELogVerbosity::Info)
-	FE_DEFINE_LOG_CATEGORY(AssetCacheWarn, ELogVerbosity::Warning)
-	FE_DEFINE_LOG_CATEGORY(AssetCacheErr, ELogVerbosity::Error)
-	FE_DEFINE_LOG_CATEGORY(AssetCacheDbg, ELogVerbosity::Debug)
-	FE_DEFINE_LOG_CATEGORY(AssetCacheFatal, ELogVerbosity::Fatal)
-
+    FE_DEFINE_LOG_CATEGORY(AssetCacheInfo, ELogVerbosity::Info)
+    FE_DEFINE_LOG_CATEGORY(AssetCacheWarn, ELogVerbosity::Warning)
+    FE_DEFINE_LOG_CATEGORY(AssetCacheErr, ELogVerbosity::Error)
+    FE_DEFINE_LOG_CATEGORY(AssetCacheDbg, ELogVerbosity::Debug)
+    FE_DEFINE_LOG_CATEGORY(AssetCacheFatal, ELogVerbosity::Fatal)
 } // namespace fe

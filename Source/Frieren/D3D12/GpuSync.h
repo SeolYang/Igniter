@@ -4,10 +4,10 @@
 
 namespace fe
 {
-	class GpuSync
-	{
-	private:
-		Fence* fence = nullptr;
-		const size_t syncPoint = 0;
-	};
+    class GpuSync
+    {
+    private:
+        Fence* fence = nullptr;
+        const size_t syncPoint = 0;
+    };
 } // namespace fe

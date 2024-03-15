@@ -14,7 +14,7 @@ public:
     virtual void Update(fe::World& world) override;
 
 private:
-	FpsCameraControllSystem fpsCameraControllSystem;
-	CameraPossessSystem cameraPossessSystem{ fpsCameraControllSystem };
-	RotateEnemySystem rotateEnemySystem;
+    FpsCameraControllSystem fpsCameraControllSystem;
+    CameraPossessSystem cameraPossessSystem{ fpsCameraControllSystem };
+    RotateEnemySystem rotateEnemySystem;
 };

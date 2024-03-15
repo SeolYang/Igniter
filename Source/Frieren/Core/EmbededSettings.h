@@ -4,5 +4,5 @@
 
 namespace fe::settings
 {
-	inline constexpr std::string_view GameName = "Untitled";
+    inline constexpr std::string_view GameName = "Untitled";
 } // namespace fe::settings

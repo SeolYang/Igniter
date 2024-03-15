@@ -2,10 +2,9 @@
 
 namespace fe
 {
-	class ThreadUIDGenerator
-	{
-	public:
-		static size_t GetUID();
-
-	};
+    class ThreadUIDGenerator
+    {
+    public:
+        static size_t GetUID();
+    };
 } // namespace fe

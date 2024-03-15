@@ -7,48 +7,48 @@
 
 namespace fe
 {
-	struct WindowDescription
-	{
-		const uint32_t Width;
-		const uint32_t Height;
-		const String Title;
-	};
+    struct WindowDescription
+    {
+        const uint32_t Width;
+        const uint32_t Height;
+        const String Title;
+    };
 
-	// @dependency	fe::Engine, fe::Logger, fe::InputManager
-	class Window final
-	{
-	public:
-		Window(const WindowDescription& description);
-		~Window();
-		Window(const Window&) = delete;
-		Window(Window&&) noexcept = delete;
+    // @dependency	fe::Engine, fe::Logger, fe::InputManager
+    class Window final
+    {
+    public:
+        Window(const WindowDescription& description);
+        ~Window();
+        Window(const Window&) = delete;
+        Window(Window&&) noexcept = delete;
 
-		Window& operator=(const Window&) = delete;
-		Window& operator=(Window&&) noexcept = delete;
+        Window& operator=(const Window&) = delete;
+        Window& operator=(Window&&) noexcept = delete;
 
-		const WindowDescription& GetDescription() const { return windowDesc; }
+        const WindowDescription& GetDescription() const { return windowDesc; }
 
-		HWND GetNative() const { return windowHandle; }
+        HWND GetNative() const { return windowHandle; }
 
-		[[nodiscard]] Viewport GetViewport() const { return viewport; }
+        [[nodiscard]] Viewport GetViewport() const { return viewport; }
 
-		void ClipCursor(const std::optional<RECT> clipRect = std::nullopt);
-		void UnclipCursor();
+        void ClipCursor(const std::optional<RECT> clipRect = std::nullopt);
+        void UnclipCursor();
 
-		void SetCursorVisibility(const bool bVisible);
+        void SetCursorVisibility(const bool bVisible);
 
-	private:
-		static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
+    private:
+        static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
-	private:
-		WindowDescription windowDesc;
+    private:
+        WindowDescription windowDesc;
 
-		std::wstring windowTitle;
-		WNDCLASSEX windowClass;
-		HWND windowHandle = NULL;
+        std::wstring windowTitle;
+        WNDCLASSEX windowClass;
+        HWND windowHandle = NULL;
 
-		Viewport viewport;
+        Viewport viewport;
 
-		bool bIsCursorVisible = true;
-	};
+        bool bIsCursorVisible = true;
+    };
 } // namespace fe

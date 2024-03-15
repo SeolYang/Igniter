@@ -3,25 +3,25 @@
 
 namespace fe
 {
-	class World;
-	class Window;
+    class World;
+    class Window;
 } // namespace fe
 
 class FpsCameraControllSystem;
 class CameraPossessSystem
 {
 public:
-	CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem);
+    CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem);
 
-	void Update(fe::World& world);
-
-private:
-	void Configure();
+    void Update(fe::World& world);
 
 private:
-	fe::Window& window;
-	fe::RefHandle<const fe::Action> togglePossessToCamera;
-	FpsCameraControllSystem& fpsCamControllSystem;
+    void Configure();
 
-	bool bEnabled = true;
+private:
+    fe::Window& window;
+    fe::RefHandle<const fe::Action> togglePossessToCamera;
+    FpsCameraControllSystem& fpsCamControllSystem;
+
+    bool bEnabled = true;
 };

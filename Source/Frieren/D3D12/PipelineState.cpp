@@ -4,10 +4,11 @@
 
 namespace fe
 {
-	PipelineState::PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO)
-		: native(std::move(newPSO)), bIsGraphics(bIsGraphicsPSO)
-	{
-	}
+    PipelineState::PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO)
+        : native(std::move(newPSO)),
+          bIsGraphics(bIsGraphicsPSO)
+    {
+    }
 
-	PipelineState::~PipelineState() {}
+    PipelineState::~PipelineState() {}
 } // namespace fe

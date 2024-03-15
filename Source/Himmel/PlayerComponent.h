@@ -2,5 +2,5 @@
 
 struct Player
 {
-	size_t remainHealthRecoveryBuff = 3;
+    size_t remainHealthRecoveryBuff = 3;
 };

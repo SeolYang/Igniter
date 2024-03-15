@@ -2,23 +2,23 @@
 
 namespace fe
 {
-	World::~World()
-	{
-		registry.clear();
-	}
+    World::~World()
+    {
+        registry.clear();
+    }
 
-	void World::Destroy(const Entity entity)
-	{
-		registry.destroy(entity);
-	}
+    void World::Destroy(const Entity entity)
+    {
+        registry.destroy(entity);
+    }
 
-	bool World::IsOrphan(const Entity entity) const
-	{
-		return registry.orphan(entity);
-	}
+    bool World::IsOrphan(const Entity entity) const
+    {
+        return registry.orphan(entity);
+    }
 
-	bool World::IsValid(const Entity entity) const
-	{
-		return registry.valid(entity);
-	}
+    bool World::IsValid(const Entity entity) const
+    {
+        return registry.valid(entity);
+    }
 } // namespace fe

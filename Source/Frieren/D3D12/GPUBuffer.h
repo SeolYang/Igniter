@@ -7,89 +7,89 @@
 
 namespace fe
 {
-	struct MappedGpuBuffer
-	{
-		uint8_t* const MappedPtr = nullptr;
-	};
+    struct MappedGpuBuffer
+    {
+        uint8_t* const MappedPtr = nullptr;
+    };
 
-	class RenderDevice;
-	class GpuBuffer
-	{
-		friend class RenderDevice;
-		friend class Handle<MappedGpuBuffer, GpuBuffer*>;
+    class RenderDevice;
+    class GpuBuffer
+    {
+        friend class RenderDevice;
+        friend class Handle<MappedGpuBuffer, GpuBuffer*>;
 
-	public:
-		GpuBuffer(ComPtr<ID3D12Resource> bufferResource);
-		GpuBuffer(const GpuBuffer&) = delete;
-		GpuBuffer(GpuBuffer&& other) noexcept;
-		~GpuBuffer() = default;
+    public:
+        GpuBuffer(ComPtr<ID3D12Resource> bufferResource);
+        GpuBuffer(const GpuBuffer&) = delete;
+        GpuBuffer(GpuBuffer&& other) noexcept;
+        ~GpuBuffer() = default;
 
-		GpuBuffer& operator=(const GpuBuffer&) = delete;
-		GpuBuffer& operator=(GpuBuffer&& other) noexcept;
+        GpuBuffer& operator=(const GpuBuffer&) = delete;
+        GpuBuffer& operator=(GpuBuffer&& other) noexcept;
 
-		bool IsValid() const { return (allocation && resource) || resource; }
-		operator bool() const { return IsValid(); }
+        bool IsValid() const { return (allocation && resource) || resource; }
+        operator bool() const { return IsValid(); }
 
-		const GpuBufferDesc& GetDesc() const { return desc; }
+        const GpuBufferDesc& GetDesc() const { return desc; }
 
-		const auto& GetNative() const
-		{
-			check(resource);
-			return *resource.Get();
-		}
+        const auto& GetNative() const
+        {
+            check(resource);
+            return *resource.Get();
+        }
 
-		auto& GetNative()
-		{
-			check(resource);
-			return *resource.Get();
-		}
+        auto& GetNative()
+        {
+            check(resource);
+            return *resource.Get();
+        }
 
-		uint8_t* Map(const uint64_t offset = 0);
-		void	 Unmap();
+        uint8_t* Map(const uint64_t offset = 0);
+        void Unmap();
 
-		GPUResourceMapGuard						  MapGuard(const uint64_t offset = 0);
-		Handle<MappedGpuBuffer, GpuBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
+        GPUResourceMapGuard MapGuard(const uint64_t offset = 0);
+        Handle<MappedGpuBuffer, GpuBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
 
-		std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
-		{
-			std::optional<D3D12_VERTEX_BUFFER_VIEW> view{};
-			if (desc.GetBufferType() == EGpuBufferType::VertexBuffer)
-			{
-				view = D3D12_VERTEX_BUFFER_VIEW{
-					.BufferLocation = resource->GetGPUVirtualAddress(),
-					.SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
-					.StrideInBytes = desc.GetStructureByteStride()
-				};
-			}
+        std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
+        {
+            std::optional<D3D12_VERTEX_BUFFER_VIEW> view{};
+            if (desc.GetBufferType() == EGpuBufferType::VertexBuffer)
+            {
+                view = D3D12_VERTEX_BUFFER_VIEW{
+                    .BufferLocation = resource->GetGPUVirtualAddress(),
+                    .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
+                    .StrideInBytes = desc.GetStructureByteStride()
+                };
+            }
 
-			return view;
-		}
+            return view;
+        }
 
-		std::optional<D3D12_INDEX_BUFFER_VIEW> GetIndexBufferView() const
-		{
-			std::optional<D3D12_INDEX_BUFFER_VIEW> view{};
-			if (desc.GetBufferType() == EGpuBufferType::IndexBuffer)
-			{
-				view = D3D12_INDEX_BUFFER_VIEW{
-					.BufferLocation = resource->GetGPUVirtualAddress(),
-					.SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
-					.Format = desc.GetIndexFormat()
-				};
-			}
+        std::optional<D3D12_INDEX_BUFFER_VIEW> GetIndexBufferView() const
+        {
+            std::optional<D3D12_INDEX_BUFFER_VIEW> view{};
+            if (desc.GetBufferType() == EGpuBufferType::IndexBuffer)
+            {
+                view = D3D12_INDEX_BUFFER_VIEW{
+                    .BufferLocation = resource->GetGPUVirtualAddress(),
+                    .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
+                    .Format = desc.GetIndexFormat()
+                };
+            }
 
-			return view;
-		}
+            return view;
+        }
 
-	private:
-		GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
-				  ComPtr<ID3D12Resource> newResource);
+    private:
+        GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+                  ComPtr<ID3D12Resource> newResource);
 
-		void operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer);
+        void operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer);
 
-	private:
-		GpuBufferDesc				desc;
-		ComPtr<D3D12MA::Allocation> allocation;
-		ComPtr<ID3D12Resource>		resource;
-	};
+    private:
+        GpuBufferDesc desc;
+        ComPtr<D3D12MA::Allocation> allocation;
+        ComPtr<ID3D12Resource> resource;
+    };
 
 } // namespace fe
