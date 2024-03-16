@@ -8,6 +8,7 @@
 
 namespace fe
 {
+    /* #sy_improvement Should i not use wrapper of entt? */
     using Entity = entt::entity;
     class World
     {

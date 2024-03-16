@@ -19,25 +19,21 @@ namespace fe
             {
                 auto& registry = world.GetRegistry();
 
-                auto validEntities = std::views::filter(std::views::all(registry.template storage<Entity>()),
-                                                        [&registry](const Entity entity)
-                                                        {
-                                                            return registry.valid(entity);
-                                                        });
+                auto entityView = std::views::all(registry.template storage<Entity>());
+                auto validEntityView = std::views::filter([&registry](const Entity entity)
+                                                          { return registry.valid(entity); });
+                auto entityElementView = std::views::transform(
+                    [&registry](const Entity entity)
+                    {
+                        if (registry.all_of<NameComponent>(entity))
+                        {
+                            auto& nameComponent = registry.get<NameComponent>(entity);
+                            return std::format("{} ({})", nameComponent.Name.AsStringView(), entt::to_integral(entity));
+                        }
+                        return std::format("Entity {}", entt::to_integral(entity));
+                    });
 
-                auto entityElements = std::views::transform(validEntities,
-                                                            [&registry](const Entity entity)
-                                                            {
-                                                                if (registry.all_of<NameComponent>(entity))
-                                                                {
-                                                                    auto& nameComponent = registry.get<NameComponent>(entity);
-                                                                    return std::format("{} ({})", nameComponent.Name.AsStringView(), entt::to_integral(entity));
-                                                                }
-
-                                                                return std::format("Entity {}", entt::to_integral(entity));
-                                                            });
-
-                for (const auto element : entityElements)
+                for (const auto element : entityView | validEntityView | entityElementView)
                 {
                     ImGui::Text("%s", element.c_str());
                 }
