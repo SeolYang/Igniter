@@ -2,7 +2,7 @@
 #include <ImGui/Common.h>
 #include <Gameplay/Common.h>
 #include <Gameplay/GameInstance.h>
-#include <Core/NameComponent.h>
+#include <Component/NameComponent.h>
 #include <Core/Igniter.h>
 
 namespace ig

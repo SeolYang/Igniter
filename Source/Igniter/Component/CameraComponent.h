@@ -5,7 +5,6 @@
 
 namespace ig
 {
-    /* #sy_wip_todo Camera->CameraComponent */
     struct CameraComponent
     {
     public:

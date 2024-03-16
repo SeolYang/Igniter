@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <string_view>
-#include <Core/MathUtils.h>
 #include <Core/MemUtils.h>
 
 #ifdef _M_X64

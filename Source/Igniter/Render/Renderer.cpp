@@ -12,11 +12,11 @@
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUView.h>
 #include <Render/GPUViewManager.h>
-#include <Render/StaticMeshComponent.h>
-#include <Render/TransformComponent.h>
-#include <Render/CameraComponent.h>
-#include <Core/Window.h>
+#include <Component/StaticMeshComponent.h>
+#include <Component/TransformComponent.h>
+#include <Component/CameraComponent.h>
 #include <Math/Common.h>
+#include <Core/Window.h>
 #include <Core/Igniter.h>
 
 struct BasicRenderResources

@@ -1,5 +1,5 @@
 #pragma once
-#include <Render/TransformComponent.h>
+#include <Component/TransformComponent.h>
 #include <Gameplay/Common.h>
 #include <PlayerComponent.h>
 #include <HealthComponent.h>

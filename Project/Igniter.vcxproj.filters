@@ -49,8 +49,11 @@
     <Filter Include="Source\Renderer">
       <UniqueIdentifier>{36ef20ca-725c-48ea-81d7-7a5cb33925a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Components">
+    <Filter Include="Source\Component">
       <UniqueIdentifier>{a2feb8ca-1174-4678-b886-dc43aece1d9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Component\Archetype">
+      <UniqueIdentifier>{af474de2-4b68-4d7c-91d2-b9aac8fc9f75}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -105,9 +108,6 @@
     <ClInclude Include="..\Source\Igniter\Core\Assert.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\ComponentRegistry.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Container.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -141,9 +141,6 @@
     <ClInclude Include="..\Source\Igniter\Core\Log.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\MathUtils.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -151,12 +148,6 @@
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Mutex.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\NameComponent.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\NamedType.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Profile.h">
@@ -285,12 +276,6 @@
     <ClInclude Include="..\Source\Igniter\Math\Utils.h">
       <Filter>Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\CameraArchetype.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\CameraComponent.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Render\Common.h">
       <Filter>Source\Renderer</Filter>
     </ClInclude>
@@ -303,13 +288,7 @@
     <ClInclude Include="..\Source\Igniter\Render\Renderer.h">
       <Filter>Source\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\StaticMeshComponent.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\TransformComponent.h">
       <Filter>Source\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Render\Vertex.h">
@@ -317,6 +296,27 @@
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Igniter.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Filesystem\FileWatcher.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Component\NameComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Component\CameraComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Component\StaticMeshComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Component\TransformComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Component\CameraArchetype.h">
+      <Filter>Source\Component\Archetype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h">
+      <Filter>Source\Gameplay</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

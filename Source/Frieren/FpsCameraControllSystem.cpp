@@ -1,6 +1,6 @@
 #include <FpsCameraControllSystem.h>
-#include <Render/TransformComponent.h>
-#include <Render/CameraComponent.h>
+#include <Component/TransformComponent.h>
+#include <Component/CameraComponent.h>
 #include <Core/InputManager.h>
 #include <Core/Log.h>
 #include <Core/Igniter.h>

@@ -3,7 +3,6 @@
 #include <Core/Handle.h>
 #include <Core/Event.h>
 #include <Core/Window.h>
-#include <Core/NameComponent.h>
 #include <Gameplay/GameInstance.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GPUBuffer.h>
@@ -13,9 +12,10 @@
 #include <D3D12/GPUView.h>
 #include <Render/GPUViewManager.h>
 #include <Render/GpuUploader.h>
-#include <Render/StaticMeshComponent.h>
-#include <Render/TransformComponent.h>
-#include <Render/CameraArchetype.h>
+#include <Component/NameComponent.h>
+#include <Component/StaticMeshComponent.h>
+#include <Component/TransformComponent.h>
+#include <Component/CameraArchetype.h>
 #include <Asset/Texture.h>
 #include <Asset/Model.h>
 #include <ImGui/ImGuiLayer.h>
@@ -63,8 +63,7 @@ int main()
         const xg::Guid homuraThumbnailGuid = xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08");
         const xg::Guid homuraBodyTexGuid = xg::Guid("87949751-3431-45c7-bd57-0a1518649511");
         const xg::Guid homuraStaticMeshGuid = xg::Guid("a717ff6e-129b-4c80-927a-a786a0b21128");
-
-        const xg::Guid axeTexGuid = xg::Guid("eb93c3b0-1197-4884-8cfe-622f66184d4c");
+                const xg::Guid axeTexGuid = xg::Guid("eb93c3b0-1197-4884-8cfe-622f66184d4c");
         const xg::Guid axeStaticMeshGuid = xg::Guid("4452fc34-9c3f-4715-8b6c-4481ab16b9bb");
 
         std::future<std::optional<Texture>> ashThumbnailFutre = std::async(

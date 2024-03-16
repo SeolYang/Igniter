@@ -1,6 +1,6 @@
 #include <RotateEnemySystem.h>
 #include <Core/Timer.h>
-#include <Render/TransformComponent.h>
+#include <Component/TransformComponent.h>
 #include <EnemyArchetype.h>
 #include <Enemy.h>
 #include <Core/Igniter.h>

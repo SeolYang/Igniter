@@ -20,9 +20,6 @@
 #include <magic_enum.hpp>
 #include <Core/Json.h>
 
-/* #sy_deprecate_it */
-#define UNUSED(x) (x)
-
 namespace ig
 {
     namespace ranges = std::ranges;

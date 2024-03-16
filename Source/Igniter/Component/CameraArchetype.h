@@ -1,6 +1,6 @@
 #pragma once
-#include <Render/CameraComponent.h>
-#include <Render/TransformComponent.h>
+#include <Component/CameraComponent.h>
+#include <Component/TransformComponent.h>
 #include <Gameplay/Common.h>
 
 namespace ig

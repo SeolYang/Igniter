@@ -1,7 +1,6 @@
 #pragma once
 #include <Core/Container.h>
 #include <Core/Assert.h>
-#include <Core/MathUtils.h>
 
 namespace ig
 {

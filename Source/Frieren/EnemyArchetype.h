@@ -1,6 +1,6 @@
 #pragma once
-#include <Render/TransformComponent.h>
 #include <Gameplay/Common.h>
+#include <Component/TransformComponent.h>
 #include <HealthComponent.h>
 #include <Enemy.h>
 
