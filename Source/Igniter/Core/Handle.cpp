@@ -9,10 +9,10 @@ namespace ig
             : owner(&handleManager),
               handle(handleManager.Allocate(typeHashVal, sizeOfType, alignOfType))
         {
-            check(owner != nullptr);
-            check(handle != InvalidHandle);
-            check(sizeOfType > 0);
-            check(alignOfType > 0);
+            IG_CHECK(owner != nullptr);
+            IG_CHECK(handle != InvalidHandle);
+            IG_CHECK(sizeOfType > 0);
+            IG_CHECK(alignOfType > 0);
         }
 
         HandleImpl::HandleImpl(HandleImpl&& other) noexcept
@@ -59,7 +59,7 @@ namespace ig
             }
             else
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
             }
         }
 
@@ -72,7 +72,7 @@ namespace ig
 
         void HandleImpl::MarkAsPendingDeallocation(const uint64_t typeHashVal)
         {
-            check(typeHashVal != InvalidHandle);
+            IG_CHECK(typeHashVal != InvalidHandle);
             owner->MaskAsPendingDeallocation(typeHashVal, handle);
         }
     } // namespace details

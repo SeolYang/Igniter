@@ -34,13 +34,13 @@ namespace ig
 
         const auto& GetNative() const
         {
-            check(resource);
+            IG_CHECK(resource);
             return *resource.Get();
         }
 
         auto& GetNative()
         {
-            check(resource);
+            IG_CHECK(resource);
             return *resource.Get();
         }
 

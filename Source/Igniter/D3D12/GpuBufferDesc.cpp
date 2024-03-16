@@ -6,7 +6,7 @@ namespace ig
 {
     void GpuBufferDesc::AsConstantBuffer(const uint32_t sizeOfBufferInBytes)
     {
-        verify(sizeOfBufferInBytes > 0);
+        IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
         bIsCPUAccessible = true;
         bufferType = EGpuBufferType::ConstantBuffer;
@@ -28,8 +28,8 @@ namespace ig
 
     void GpuBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
     {
-        verify(sizeOfElementInBytes > 0);
-        verify(numOfElements > 0);
+        IG_VERIFY(sizeOfElementInBytes > 0);
+        IG_VERIFY(numOfElements > 0);
         bIsShaderReadWritable = bEnableShaderReadWrtie;
         bIsCPUAccessible = false;
         bufferType = EGpuBufferType::StructuredBuffer;
@@ -51,7 +51,7 @@ namespace ig
 
     void GpuBufferDesc::AsUploadBuffer(const uint32_t sizeOfBufferInBytes)
     {
-        verify(sizeOfBufferInBytes > 0);
+        IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
         bIsCPUAccessible = true;
         bufferType = EGpuBufferType::UploadBuffer;
@@ -73,7 +73,7 @@ namespace ig
 
     void GpuBufferDesc::AsReadbackBuffer(const uint32_t sizeOfBufferInBytes)
     {
-        verify(sizeOfBufferInBytes > 0);
+        IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
         bIsCPUAccessible = true;
         bufferType = EGpuBufferType::ReadbackBuffer;
@@ -95,8 +95,8 @@ namespace ig
 
     void GpuBufferDesc::AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices)
     {
-        verify(sizeOfVertexInBytes > 0);
-        verify(numVertices > 0);
+        IG_VERIFY(sizeOfVertexInBytes > 0);
+        IG_VERIFY(numVertices > 0);
         bIsShaderReadWritable = false;
         bIsCPUAccessible = false;
         bufferType = EGpuBufferType::VertexBuffer;
@@ -117,8 +117,8 @@ namespace ig
 
     void GpuBufferDesc::AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices)
     {
-        verify(sizeOfIndexInBytes > 0);
-        verify(numIndices > 0);
+        IG_VERIFY(sizeOfIndexInBytes > 0);
+        IG_VERIFY(numIndices > 0);
         bIsShaderReadWritable = false;
         bIsCPUAccessible = false;
         bufferType = EGpuBufferType::IndexBuffer;
@@ -139,7 +139,7 @@ namespace ig
 
     D3D12MA::ALLOCATION_DESC GpuBufferDesc::GetAllocationDesc() const
     {
-        check(bufferType != EGpuBufferType::Unknown);
+        IG_CHECK(bufferType != EGpuBufferType::Unknown);
         D3D12MA::ALLOCATION_DESC desc{ .HeapType = D3D12_HEAP_TYPE_DEFAULT };
         switch (bufferType)
         {
@@ -159,7 +159,7 @@ namespace ig
 
     std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> GpuBufferDesc::ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const
     {
-        check(bufferType != EGpuBufferType::Unknown);
+        IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
         std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{};
         if (IsConstantBufferViewCompatibleBuffer(bufferType))
@@ -175,7 +175,7 @@ namespace ig
 
     std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GpuBufferDesc::ToShaderResourceViewDesc() const
     {
-        check(bufferType != EGpuBufferType::Unknown);
+        IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
         std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> desc{};
         if (IsShaderResourceViewCompatibleBuffer(bufferType))
@@ -196,7 +196,7 @@ namespace ig
 
     std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GpuBufferDesc::ToUnorderedAccessViewDesc() const
     {
-        check(bufferType != EGpuBufferType::Unknown);
+        IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
         std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> desc{};
         if (IsUnorderdAccessViewCompatibleBuffer(bufferType) && bIsShaderReadWritable)
@@ -217,7 +217,7 @@ namespace ig
 
     void GpuBufferDesc::From(const D3D12_RESOURCE_DESC& desc)
     {
-        verify(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
+        IG_VERIFY(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
         Dimension = desc.Dimension;
         Alignment = desc.Alignment;
         Width = desc.Width;

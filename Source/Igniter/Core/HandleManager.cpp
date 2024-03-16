@@ -11,7 +11,7 @@ namespace ig
 
     uint64_t HandleManager::Allocate(const uint64_t typeHashVal, const size_t sizeOfElement, const size_t alignOfElement)
     {
-        check(typeHashVal != InvalidHashVal);
+        IG_CHECK(typeHashVal != InvalidHashVal);
 
         ReadWriteLock lock{ mutex };
         if (!memPools.contains(typeHashVal))
@@ -19,18 +19,18 @@ namespace ig
             memPools.insert({ typeHashVal,
                               MemoryPool{ sizeOfElement, alignOfElement, static_cast<uint16_t>(SizeOfChunkBytes / sizeOfElement), NumInitialChunkPerPool, static_cast<uint16_t>(typeHashVal) } });
         }
-        check(memPools.contains(typeHashVal));
+        IG_CHECK(memPools.contains(typeHashVal));
 
         const uint64_t allocatedHandle = memPools[typeHashVal].Allocate();
-        check(allocatedHandle != details::HandleImpl::InvalidHandle);
-        check(!IsPendingDeallocationUnsafe(typeHashVal, allocatedHandle));
+        IG_CHECK(allocatedHandle != details::HandleImpl::InvalidHandle);
+        IG_CHECK(!IsPendingDeallocationUnsafe(typeHashVal, allocatedHandle));
         return allocatedHandle;
     }
 
     void HandleManager::Deallocate(const uint64_t typeHashVal, const uint64_t handle)
     {
-        check(typeHashVal != InvalidHashVal);
-        check(handle != details::HandleImpl::InvalidHandle);
+        IG_CHECK(typeHashVal != InvalidHashVal);
+        IG_CHECK(handle != details::HandleImpl::InvalidHandle);
 
         ReadWriteLock lock{ mutex };
         const bool bMemPoolExists = memPools.contains(typeHashVal);
@@ -42,7 +42,7 @@ namespace ig
         }
         else
         {
-            check("Trying to deallocate invalid type of handle.");
+            IG_CHECK("Trying to deallocate invalid type of handle.");
         }
     }
 
@@ -60,8 +60,8 @@ namespace ig
 
     bool HandleManager::IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
     {
-        check(typeHashVal != InvalidHashVal);
-        check(handle != details::HandleImpl::InvalidHandle);
+        IG_CHECK(typeHashVal != InvalidHashVal);
+        IG_CHECK(handle != details::HandleImpl::InvalidHandle);
         const bool bPendingDeallocations = IsPendingDeallocationUnsafe(typeHashVal, handle);
         const bool bMemPoolExists = memPools.contains(typeHashVal);
         if (!bPendingDeallocations && bMemPoolExists)
@@ -75,8 +75,8 @@ namespace ig
 
     bool HandleManager::IsPendingDeallocationUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
     {
-        check(handle != details::HandleImpl::InvalidHandle);
-        check(typeHashVal != InvalidHashVal);
+        IG_CHECK(handle != details::HandleImpl::InvalidHandle);
+        IG_CHECK(typeHashVal != InvalidHashVal);
         return pendingDeallocationSets.contains(typeHashVal) ? pendingDeallocationSets.at(typeHashVal).contains(handle) : false;
     }
 
@@ -89,7 +89,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
         }
     }
 } // namespace ig

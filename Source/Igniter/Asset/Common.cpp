@@ -44,7 +44,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
         }
 
         return newAssetPath;

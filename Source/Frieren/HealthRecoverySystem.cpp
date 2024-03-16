@@ -16,7 +16,7 @@ void HealthRecoverySystem::Update(ig::Registry& registry)
 
         if (healthRecoveryBuff.elapsedTime >= healthRecoveryBuff.period)
         {
-            FE_LOG(ig::LogInfo, "HP recovered from {} to {}", health.value, recoveredHealth);
+            IG_LOG(ig::LogInfo, "HP recovered from {} to {}", health.value, recoveredHealth);
             healthRecoveryBuff.elapsedTime = 0.f;
             health.value = std::min(recoveredHealth, HealthComponent::Maximum);
         }
@@ -27,7 +27,7 @@ void HealthRecoverySystem::Update(ig::Registry& registry)
 
         if (health.value >= HealthComponent::Maximum)
         {
-            FE_LOG(ig::LogInfo, "HP fully recovered!");
+            IG_LOG(ig::LogInfo, "HP fully recovered!");
             registry.erase<HealthRecoveryBuff>(entity);
         }
     }

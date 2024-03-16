@@ -7,15 +7,15 @@
 
 namespace ig
 {
-    FE_DEFINE_LOG_CATEGORY(WindowInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(WindowDebug, ELogVerbosity::Debug)
-    FE_DEFINE_LOG_CATEGORY(WindowError, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(WindowInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(WindowDebug, ELogVerbosity::Debug)
+    IG_DEFINE_LOG_CATEGORY(WindowError, ELogVerbosity::Error)
 
     Window::Window(const WindowDescription& description)
         : windowDesc(description)
     {
         windowTitle = description.Title.AsWideString();
-        check(description.Width > 0 && description.Height > 0);
+        IG_CHECK(description.Width > 0 && description.Height > 0);
         windowClass = { sizeof(WNDCLASSEX),
                         CS_OWNDC,
                         WindowProc,
@@ -29,7 +29,7 @@ namespace ig
                         windowTitle.c_str(),
                         NULL };
 
-        verify(SUCCEEDED(RegisterClassEx(&windowClass)));
+        IG_VERIFY(SUCCEEDED(RegisterClassEx(&windowClass)));
         const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
         const auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -37,7 +37,7 @@ namespace ig
         constexpr auto exWindowStyle = 0;
 
         RECT rect{ 0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0 };
-        verify(AdjustWindowRectEx(&rect, windowStyle, false, exWindowStyle) != FALSE);
+        IG_VERIFY(AdjustWindowRectEx(&rect, windowStyle, false, exWindowStyle) != FALSE);
 
         windowHandle = CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle,
                                       (screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
@@ -74,11 +74,11 @@ namespace ig
         clientRect.bottom = rightBottom.y;
         if (::ClipCursor(&clientRect) == FALSE)
         {
-            FE_LOG(WindowError, "Failed to clip cursor to main window.");
+            IG_LOG(WindowError, "Failed to clip cursor to main window.");
         }
         else
         {
-            FE_LOG(WindowInfo, "Cursor clipped to rect(LEFT: {}, RIGHT: {}, TOP: {}, BOTTOM: {})", clientRect.left, clientRect.right, clientRect.top, clientRect.bottom);
+            IG_LOG(WindowInfo, "Cursor clipped to rect(LEFT: {}, RIGHT: {}, TOP: {}, BOTTOM: {})", clientRect.left, clientRect.right, clientRect.top, clientRect.bottom);
         }
     }
 
@@ -93,13 +93,13 @@ namespace ig
         {
             bIsCursorVisible = true;
             ::ShowCursor(TRUE);
-            FE_LOG(WindowInfo, "Cursor visible.");
+            IG_LOG(WindowInfo, "Cursor visible.");
         }
         else if (!bVisible && bIsCursorVisible)
         {
             bIsCursorVisible = false;
             ::ShowCursor(FALSE);
-            FE_LOG(WindowInfo, "Cursor invisible");
+            IG_LOG(WindowInfo, "Cursor invisible");
         }
     }
 

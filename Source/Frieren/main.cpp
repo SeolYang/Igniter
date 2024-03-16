@@ -134,9 +134,9 @@ int main()
         /********************************/
 
         auto homuraThumbnail = homuraThumbnailFuture.get();
-        check(homuraThumbnail);
+        IG_CHECK(homuraThumbnail);
         auto ashThumbnail = ashThumbnailFutre.get();
-        check(ashThumbnail);
+        IG_CHECK(ashThumbnail);
 
         /* #sy_test ECS based Game flow & logic tests */
         Registry& registry = gameInstance.GetRegistry();
@@ -145,9 +145,9 @@ int main()
         /* Player Entity */
         const auto player = PlayerArchetype::Create(registry);
         auto homuraBodyTex = homuraBodyTexFuture.get();
-        check(homuraBodyTex);
+        IG_CHECK(homuraBodyTex);
         auto homuraStaticMesh = homuraStaticMeshFuture.get();
-        check(homuraStaticMesh);
+        IG_CHECK(homuraStaticMesh);
         {
             registry.emplace<NameComponent>(player, "Player"_fs);
 
@@ -166,9 +166,9 @@ int main()
         /* Enemy Entity */
         const auto enemy = EnemyArchetype::Create(registry);
         auto ashBodyTex = ashBodyTexFuture.get();
-        check(ashBodyTex);
+        IG_CHECK(ashBodyTex);
         auto ashStaticMesh = ashStaticMeshFuture.get();
-        check(ashStaticMesh);
+        IG_CHECK(ashStaticMesh);
         {
             registry.emplace<NameComponent>(enemy, "Enemy"_fs);
 
@@ -187,9 +187,9 @@ int main()
         /* Axe Entity */
         const Entity axeEntity = registry.create();
         auto axeTex = axeTexFutrue.get();
-        check(axeTex);
+        IG_CHECK(axeTex);
         auto axeStaticMesh = axeStaticMeshFuture.get();
-        check(axeStaticMesh);
+        IG_CHECK(axeStaticMesh);
         {
             registry.emplace<NameComponent>(axeEntity, "Axe"_fs);
 

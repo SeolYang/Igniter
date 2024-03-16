@@ -14,9 +14,9 @@ namespace ig
     GpuTexture::GpuTexture(ComPtr<ID3D12Resource> textureResource)
         : resource(std::move(textureResource))
     {
-        check(resource);
+        IG_CHECK(resource);
         desc.From(resource->GetDesc());
-        check(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
+        IG_CHECK(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
     }
 
     GpuTexture::GpuTexture(GpuTexture&& other) noexcept

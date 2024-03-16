@@ -42,7 +42,7 @@ namespace ig
         factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-        verify_succeeded(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
+        IG_VERIFY_SUCCEEDED(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
 
         DXGI_SWAP_CHAIN_DESC1 desc = {};
         desc.Width = 0;
@@ -65,12 +65,12 @@ namespace ig
         desc.Flags = bTearingEnabled ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
         ComPtr<IDXGISwapChain1> swapchain1;
-        verify_succeeded(factory->CreateSwapChainForHwnd(&mainGfxQueue.GetNative(), window.GetNative(), &desc,
+        IG_VERIFY_SUCCEEDED(factory->CreateSwapChainForHwnd(&mainGfxQueue.GetNative(), window.GetNative(), &desc,
                                                          nullptr, nullptr, &swapchain1));
 
         // Disable Alt+Enter full-screen toggle.
-        verify_succeeded(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
-        verify_succeeded(swapchain1.As(&swapchain));
+        IG_VERIFY_SUCCEEDED(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
+        IG_VERIFY_SUCCEEDED(swapchain1.As(&swapchain));
     }
 
     void Swapchain::CheckTearingSupport(ComPtr<IDXGIFactory5> factory)
@@ -94,7 +94,7 @@ namespace ig
         for (uint32_t idx = 0; idx < numBackBuffers; ++idx)
         {
             ComPtr<ID3D12Resource1> resource;
-            verify_succeeded(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
+            IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
             SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
             backBuffers.emplace_back(resource);
             renderTargetViews.emplace_back(gpuViewManager.RequestRenderTargetView(
@@ -109,6 +109,6 @@ namespace ig
     {
         const uint32_t syncInterval = bVSyncEnabled ? 1 : 0;
         const uint32_t presentFlags = bTearingEnabled && !bVSyncEnabled ? DXGI_PRESENT_ALLOW_TEARING : 0;
-        verify_succeeded(swapchain->Present(syncInterval, presentFlags));
+        IG_VERIFY_SUCCEEDED(swapchain->Present(syncInterval, presentFlags));
     }
 } // namespace ig

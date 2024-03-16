@@ -18,15 +18,15 @@ namespace ig
         virtual json& Serialize(json& archive) const
         {
             const Serializable& serializable = *this;
-            FE_SERIALIZE_JSON(Serializable, archive, serializable, LatestVersion);
+            IG_SERIALIZE_JSON(Serializable, archive, serializable, LatestVersion);
             return archive;
         }
 
         virtual const json& Deserialize(const json& archive)
         {
             Serializable& serializable = *this;
-            FE_DESERIALIZE_JSON(Serializable, archive, serializable, Version);
-            check(serializable.IsLatestVersion());
+            IG_DESERIALIZE_JSON(Serializable, archive, serializable, Version);
+            IG_CHECK(serializable.IsLatestVersion());
             return archive;
         }
 

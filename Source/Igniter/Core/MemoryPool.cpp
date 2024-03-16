@@ -18,9 +18,9 @@ namespace ig
           numInitialElementPerChunk(numElementPerChunk),
           magicNumber(magicNumber == 0 ? Random<uint16_t>(0, (0xffff - 1)) : magicNumber)
     {
-        check(sizeOfElement >= sizeof(uint64_t) && "The size of element must be at least sizeof(uint64_t) due to 'a element aliveness ensuring mechanism'.");
-        check(numElementPerChunk > 0);
-        check(numInitialChunk > 0);
+        IG_CHECK(sizeOfElement >= sizeof(uint64_t) && "The size of element must be at least sizeof(uint64_t) due to 'a element aliveness ensuring mechanism'.");
+        IG_CHECK(numElementPerChunk > 0);
+        IG_CHECK(numInitialChunk > 0);
         chunks.reserve(numInitialChunk);
 
         for (uint32_t chunkIdx = 0; chunkIdx < numInitialChunk; ++chunkIdx)
@@ -41,7 +41,7 @@ namespace ig
 
     MemoryPool::~MemoryPool()
     {
-        check((magicNumber == InvalidMagicNumber) || IsFull());
+        IG_CHECK((magicNumber == InvalidMagicNumber) || IsFull());
         for (uint8_t* chunk : chunks)
         {
             _aligned_free(chunk);
@@ -52,7 +52,7 @@ namespace ig
     {
         if (pool.empty() && !CreateNewChunk())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return InvalidHandle;
         }
 
@@ -66,7 +66,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return InvalidHandle;
         }
 
@@ -84,14 +84,14 @@ namespace ig
             }
             else
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
             }
 
             pool.push(handle);
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
         }
     }
 
@@ -109,7 +109,7 @@ namespace ig
             for (uint16_t elementIdx = 0; elementIdx < numInitialElementPerChunk; ++elementIdx)
             {
                 const uint64_t newHandle = MakeHandle(magicNumber, newChunkIdx, elementIdx);
-                check(newHandle != InvalidHandle);
+                IG_CHECK(newHandle != InvalidHandle);
                 pool.push(newHandle);
 
                 uint64_t* handleInUseFlagPtr = GetHandleInUseFlagPtr(newHandle);

@@ -54,7 +54,7 @@ namespace ig
 
         uint8_t* GetOffsettedCpuAddress()
         {
-            check(offsettedCpuAddr != nullptr);
+            IG_CHECK(offsettedCpuAddr != nullptr);
             return offsettedCpuAddr;
         }
 
@@ -70,9 +70,9 @@ namespace ig
               offsettedCpuAddr(uploadBufferCpuAddr + request->OffsetInBytes),
               request(request)
         {
-            check(uploadBuffer != nullptr);
-            check(uploadBufferCpuAddr != nullptr);
-            check(request != nullptr);
+            IG_CHECK(uploadBuffer != nullptr);
+            IG_CHECK(uploadBufferCpuAddr != nullptr);
+            IG_CHECK(request != nullptr);
         }
 
         details::UploadRequest& GetRequest() { return *request; }

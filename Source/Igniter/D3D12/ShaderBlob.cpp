@@ -5,7 +5,7 @@
 
 namespace ig
 {
-    FE_DEFINE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(ShaderBlobFatal, ELogVerbosity::Fatal)
 
     // #sy_todo 셰이더 컴파일 후 파일로 저장/캐싱 -> 셰이더 에셋
     ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)
@@ -43,7 +43,7 @@ namespace ig
                 arguments.push_back(TEXT("as_6_6"));
                 break;
             default:
-                verify(false);
+                IG_VERIFY(false);
                 break;
         }
 
@@ -95,36 +95,36 @@ namespace ig
         }
 
         ComPtr<IDxcUtils> utils;
-        verify_succeeded(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(utils.ReleaseAndGetAddressOf())));
+        IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(utils.ReleaseAndGetAddressOf())));
 
         ComPtr<IDxcIncludeHandler> defaultIncludeHandler;
         utils->CreateDefaultIncludeHandler(defaultIncludeHandler.ReleaseAndGetAddressOf());
 
         ComPtr<IDxcLibrary> library;
-        verify_succeeded(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
+        IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
 
         uint32_t codePage = CP_UTF8;
         const std::wstring wideSourcePath = desc.SourcePath.AsWideString();
         ComPtr<IDxcBlobEncoding> sourceBlob;
-        verify_succeeded(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
+        IG_VERIFY_SUCCEEDED(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
 
         ComPtr<IDxcCompiler3> compiler;
-        verify_succeeded(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf())));
+        IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf())));
 
         const DxcBuffer buffer{ .Ptr = sourceBlob->GetBufferPointer(),
                                 .Size = sourceBlob->GetBufferSize(),
                                 .Encoding = codePage };
 
-        verify_succeeded(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
+        IG_VERIFY_SUCCEEDED(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
                                            IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
         ComPtr<IDxcBlobUtf8> errors;
         compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
         if (errors && errors->GetStringLength() > 0)
         {
-            FE_LOG(ShaderBlobFatal, "Failed to compile shader {}; {}", desc.SourcePath.AsStringView(), errors->GetStringPointer());
+            IG_LOG(ShaderBlobFatal, "Failed to compile shader {}; {}", desc.SourcePath.AsStringView(), errors->GetStringPointer());
         }
 
-        verify_succeeded(compiledResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
+        IG_VERIFY_SUCCEEDED(compiledResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
     }
 } // namespace ig

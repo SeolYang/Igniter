@@ -13,30 +13,30 @@
 
 namespace ig
 {
-    FE_DEFINE_LOG_CATEGORY(ModelImporterInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(ModelImporterWarn, ELogVerbosity::Warning)
-    FE_DEFINE_LOG_CATEGORY(ModelImporterErr, ELogVerbosity::Error)
-    FE_DEFINE_LOG_CATEGORY(ModelImporterFatal, ELogVerbosity::Fatal)
-    FE_DEFINE_LOG_CATEGORY(StaticMeshLoaderInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(StaticMeshLoaderWarn, ELogVerbosity::Warning)
-    FE_DEFINE_LOG_CATEGORY(StaticMeshLoaderErr, ELogVerbosity::Error)
-    FE_DEFINE_LOG_CATEGORY(StaticMeshLoaderFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(ModelImporterInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(ModelImporterWarn, ELogVerbosity::Warning)
+    IG_DEFINE_LOG_CATEGORY(ModelImporterErr, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(ModelImporterFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(StaticMeshLoaderInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(StaticMeshLoaderWarn, ELogVerbosity::Warning)
+    IG_DEFINE_LOG_CATEGORY(StaticMeshLoaderErr, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(StaticMeshLoaderFatal, ELogVerbosity::Fatal)
 
     json& StaticMeshImportConfig::Serialize(json& archive) const
     {
         CommonMetadata::Serialize(archive);
 
         const auto& config = *this;
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bSplitLargeMeshes);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bPreTransformVertices);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImproveCacheLocality);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateUVCoords);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipUVs);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes);
-        FE_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bSplitLargeMeshes);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bPreTransformVertices);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImproveCacheLocality);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateUVCoords);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipUVs);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes);
 
         return archive;
     }
@@ -48,35 +48,35 @@ namespace ig
 
         CommonMetadata::Deserialize(archive);
 
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bSplitLargeMeshes);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bPreTransformVertices);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImproveCacheLocality);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateUVCoords);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipUVs);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes);
-        FE_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bSplitLargeMeshes);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bPreTransformVertices);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImproveCacheLocality);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateUVCoords);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipUVs);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes);
 
         return archive;
     }
 
     json& StaticMeshLoadConfig::Serialize(json& archive) const
     {
-        check(NumVertices > 0);
-        check(NumIndices > 0);
-        check(CompressedVerticesSizeInBytes > 0);
-        check(CompressedIndicesSizeInBytes > 0);
+        IG_CHECK(NumVertices > 0);
+        IG_CHECK(NumIndices > 0);
+        IG_CHECK(CompressedVerticesSizeInBytes > 0);
+        IG_CHECK(CompressedIndicesSizeInBytes > 0);
 
         CommonMetadata::Serialize(archive);
 
         const auto& config = *this;
-        FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
-        FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
-        FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
-        FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
-        FE_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
+        IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
+        IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
+        IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
+        IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
+        IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
 
         return archive;
     }
@@ -88,16 +88,16 @@ namespace ig
 
         CommonMetadata::Deserialize(archive);
 
-        FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
-        FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
-        FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
-        FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
-        FE_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
 
-        check(NumVertices > 0);
-        check(NumIndices > 0);
-        check(CompressedVerticesSizeInBytes > 0);
-        check(CompressedIndicesSizeInBytes > 0);
+        IG_CHECK(NumVertices > 0);
+        IG_CHECK(NumIndices > 0);
+        IG_CHECK(CompressedVerticesSizeInBytes > 0);
+        IG_CHECK(CompressedIndicesSizeInBytes > 0);
         return archive;
     }
 
@@ -125,7 +125,7 @@ namespace ig
     {
         if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr)
         {
-            FE_LOG(ModelImporterErr, "Load model file from \"{}\" failed: \"{}\"", resPathStr.AsStringView(), importer.GetErrorString());
+            IG_LOG(ModelImporterErr, "Load model file from \"{}\" failed: \"{}\"", resPathStr.AsStringView(), importer.GetErrorString());
             return false;
         }
 
@@ -177,7 +177,7 @@ namespace ig
 
         meshopt_remapIndexBuffer(remappedIndices.data(), indices.data(), indices.size(), remap.data());
         meshopt_remapVertexBuffer(remappedVertices.data(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex), remap.data());
-        FE_LOG(ModelImporterInfo, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
+        IG_LOG(ModelImporterInfo, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
 
         constexpr float CacheHitRatioThreshold = 1.02f;
         meshopt_optimizeVertexCache(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.size());
@@ -185,17 +185,17 @@ namespace ig
         meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex));
 
         /* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
-        FE_LOG(ModelImporterInfo, "Optimization Statistics \"{}({}.{})\"", assetPathStr, resPathStrView, meshName);
+        IG_LOG(ModelImporterInfo, "Optimization Statistics \"{}({}.{})\"", assetPathStr, resPathStrView, meshName);
         const auto nvidiaVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 32, 32, 32);
         const auto amdVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 14, 64, 128);
         const auto intelVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 128, 0, 0);
         const auto vfs = meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), sizeof(StaticMeshVertex));
         const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex));
-        FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
-        FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
-        FE_LOG(ModelImporterInfo, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
-        FE_LOG(ModelImporterInfo, "Overfecth: {}", vfs.overfetch);
-        FE_LOG(ModelImporterInfo, "Overdraw: {}", os.overdraw);
+        IG_LOG(ModelImporterInfo, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
+        IG_LOG(ModelImporterInfo, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
+        IG_LOG(ModelImporterInfo, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
+        IG_LOG(ModelImporterInfo, "Overfecth: {}", vfs.overfetch);
+        IG_LOG(ModelImporterInfo, "Overdraw: {}", os.overdraw);
 
         /* Vertex/Index buffer compression */
         meshopt_encodeVertexVersion(0);
@@ -222,13 +222,13 @@ namespace ig
         const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, newStaticMeshLoadConf.Guid);
         if (!SaveSerializedDataToJsonFile(newMetaPath, newStaticMeshLoadConf))
         {
-            FE_LOG(ModelImporterErr, "Failed to save asset metadata to {}.", newMetaPath.string());
+            IG_LOG(ModelImporterErr, "Failed to save asset metadata to {}.", newMetaPath.string());
             return std::nullopt;
         }
 
         if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices }, std::span<const uint8_t>{ encodedIndices } }))
         {
-            FE_LOG(ModelImporterErr, "Failed to save vertices/indices data to file {}.", assetPath.string());
+            IG_LOG(ModelImporterErr, "Failed to save vertices/indices data to file {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -240,11 +240,11 @@ namespace ig
         TempTimer tempTimer;
         tempTimer.Begin();
 
-        FE_LOG(ModelImporterInfo, "Importing resource {} as static mesh assets ...", resPathStr.AsStringView());
+        IG_LOG(ModelImporterInfo, "Importing resource {} as static mesh assets ...", resPathStr.AsStringView());
         const fs::path resPath{ resPathStr.AsStringView() };
         if (!fs::exists(resPath))
         {
-            FE_LOG(ModelImporterErr, "The resource does not exist at {}.", resPathStr.AsStringView());
+            IG_LOG(ModelImporterErr, "The resource does not exist at {}.", resPathStr.AsStringView());
             return {};
         }
 
@@ -300,11 +300,11 @@ namespace ig
                     std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr, MakeVersionedDefault<TextureImportConfig>());
                     if (newTexAssetGuid)
                     {
-                        FE_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
+                        IG_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
                     }
                     else
                     {
-                        FE_LOG(ModelImporterErr, "Failed to import texture resource {}.", texResPathStr.AsStringView());
+                        IG_LOG(ModelImporterErr, "Failed to import texture resource {}.", texResPathStr.AsStringView());
                     }
                 }
             }
@@ -364,16 +364,16 @@ namespace ig
         importConfig->bIsPersistent = bPersistencyRequired;
         if (!SaveSerializedDataToJsonFile(resMetaPath, *importConfig))
         {
-            FE_LOG(ModelImporterErr, "Failed to save resource metadata to {}.", resMetaPath.string());
+            IG_LOG(ModelImporterErr, "Failed to save resource metadata to {}.", resMetaPath.string());
         }
 
-        FE_LOG(ModelImporterInfo, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.AsStringView(), tempTimer.End());
+        IG_LOG(ModelImporterInfo, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.AsStringView(), tempTimer.End());
         return importedStaticMeshGuid;
     }
 
     std::optional<ig::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
     {
-        FE_LOG(StaticMeshLoaderInfo, "Load static mesh {}.", guid.str());
+        IG_LOG(StaticMeshLoaderInfo, "Load static mesh {}.", guid.str());
         TempTimer tempTimer;
         tempTimer.Begin();
 
@@ -381,20 +381,20 @@ namespace ig
         const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, guid);
         if (!fs::exists(assetPath))
         {
-            FE_LOG(StaticMeshLoaderFatal, "Static Mesh Asset \"{}\" does not exists.", assetPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Static Mesh Asset \"{}\" does not exists.", assetPath.string());
             return std::nullopt;
         }
 
         if (!fs::exists(assetMetaPath))
         {
-            FE_LOG(StaticMeshLoaderFatal, "Static Mesh Asset metadata \"{}\" does not exists.", assetMetaPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Static Mesh Asset metadata \"{}\" does not exists.", assetMetaPath.string());
             return std::nullopt;
         }
 
         std::optional<StaticMeshLoadConfig> loadConfig = LoadSerializedDataFromJsonFile<StaticMeshLoadConfig>(assetMetaPath);
         if (!loadConfig)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Failed to read Static Mesh Load Config from file {}.", assetMetaPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Failed to read Static Mesh Load Config from file {}.", assetMetaPath.string());
             return std::nullopt;
         }
 
@@ -405,14 +405,14 @@ namespace ig
 
         if (loadConfig->Guid != guid)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
+            IG_LOG(StaticMeshLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
                    guid.str(), loadConfig->Guid.str());
             return std::nullopt;
         }
 
         if (loadConfig->Type != EAssetType::StaticMesh)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
+            IG_LOG(StaticMeshLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
                    magic_enum::enum_name(EAssetType::StaticMesh),
                    magic_enum::enum_name(loadConfig->Type));
             return std::nullopt;
@@ -424,7 +424,7 @@ namespace ig
             loadConfig->CompressedVerticesSizeInBytes == 0 ||
             loadConfig->CompressedIndicesSizeInBytes == 0)
         {
-            FE_LOG(StaticMeshLoaderFatal,
+            IG_LOG(StaticMeshLoaderFatal,
                    "Load config has invalid values. \n * NumVertices: {}\n * NumIndices: {}\n * CompressedVerticesSizeInBytes: {}\n * CompressedIndicesSizeInBytes: {}",
                    loadConfig->NumVertices, loadConfig->NumIndices, loadConfig->CompressedVerticesSizeInBytes, loadConfig->CompressedIndicesSizeInBytes);
             return std::nullopt;
@@ -433,14 +433,14 @@ namespace ig
         std::vector<uint8_t> blob = LoadBlobFromFile(assetPath);
         if (blob.empty())
         {
-            FE_LOG(StaticMeshLoaderFatal, "Static Mesh {} blob is empty.", assetPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Static Mesh {} blob is empty.", assetPath.string());
             return std::nullopt;
         }
 
         const size_t expectedBlobSize = loadConfig->CompressedVerticesSizeInBytes + loadConfig->CompressedIndicesSizeInBytes;
         if (blob.size() != expectedBlobSize)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Static Mesh blob size does not match. Expected: {}, Found: {}", expectedBlobSize, blob.size());
+            IG_LOG(StaticMeshLoaderFatal, "Static Mesh blob size does not match. Expected: {}, Found: {}", expectedBlobSize, blob.size());
             return std::nullopt;
         }
 
@@ -449,7 +449,7 @@ namespace ig
         vertexBufferDesc.DebugName = String(std::format("{}_Vertices", guid.str()));
         if (vertexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedVerticesSizeInBytes)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Compressed vertices size exceed expected vertex buffer size. Compressed Size: {} bytes, Expected Vertex Buffer Size: {} bytes",
+            IG_LOG(StaticMeshLoaderFatal, "Compressed vertices size exceed expected vertex buffer size. Compressed Size: {} bytes, Expected Vertex Buffer Size: {} bytes",
                    loadConfig->CompressedVerticesSizeInBytes,
                    vertexBufferDesc.GetSizeAsBytes());
             return std::nullopt;
@@ -460,7 +460,7 @@ namespace ig
         indexBufferDesc.DebugName = String(std::format("{}_Indices", guid.str()));
         if (indexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedIndicesSizeInBytes)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Compressed indices size exceed expected index buffer size. Compressed Size: {} bytes, Expected Index Buffer Size: {} bytes",
+            IG_LOG(StaticMeshLoaderFatal, "Compressed indices size exceed expected index buffer size. Compressed Size: {} bytes, Expected Index Buffer Size: {} bytes",
                    loadConfig->CompressedIndicesSizeInBytes,
                    indexBufferDesc.GetSizeAsBytes());
             return std::nullopt;
@@ -469,21 +469,21 @@ namespace ig
         std::optional<GpuBuffer> vertexBuffer = renderDevice.CreateBuffer(vertexBufferDesc);
         if (!vertexBuffer)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Failed to create vertex buffer of {}.", assetPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Failed to create vertex buffer of {}.", assetPath.string());
             return std::nullopt;
         }
 
         auto vertexBufferSrv = gpuViewManager.RequestShaderResourceView(*vertexBuffer);
         if (!vertexBufferSrv)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Failed to create vertex buffer shader resource view of {}.", assetPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Failed to create vertex buffer shader resource view of {}.", assetPath.string());
             return std::nullopt;
         }
 
         std::optional<GpuBuffer> indexBuffer = renderDevice.CreateBuffer(indexBufferDesc);
         if (!indexBuffer)
         {
-            FE_LOG(StaticMeshLoaderFatal, "Failed to create index buffer of {}.", assetPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Failed to create index buffer of {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -498,11 +498,11 @@ namespace ig
             }
             else
             {
-                FE_LOG(StaticMeshLoaderErr, "Failed to decode vertex buffer of {}.", assetPath.string());
+                IG_LOG(StaticMeshLoaderErr, "Failed to decode vertex buffer of {}.", assetPath.string());
             }
         }
         std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
-        check(verticesUploadSync);
+        IG_CHECK(verticesUploadSync);
 
         UploadContext indicesUploadCtx = gpuUploader.Reserve(indexBufferDesc.GetSizeAsBytes());
         {
@@ -518,16 +518,16 @@ namespace ig
             }
             else
             {
-                FE_LOG(StaticMeshLoaderErr, "Failed to decode index buffer of {}.", assetPath.string());
+                IG_LOG(StaticMeshLoaderErr, "Failed to decode index buffer of {}.", assetPath.string());
             }
         }
         std::optional<GpuSync> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
-        check(indicesUploadSync);
+        IG_CHECK(indicesUploadSync);
 
         verticesUploadSync->WaitOnCpu();
         indicesUploadSync->WaitOnCpu();
 
-        FE_LOG(StaticMeshLoaderInfo,
+        IG_LOG(StaticMeshLoaderInfo,
                "Successfully load static mesh asset {}, which from resource {}. Elapsed: {} ms",
                assetPath.string(), loadConfig->SrcResPath, tempTimer.End());
 

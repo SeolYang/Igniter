@@ -31,15 +31,15 @@ namespace ig
 
         uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle)
         {
-            check(typeHashVal != InvalidHashVal);
-            check(memPools.contains(typeHashVal));
+            IG_CHECK(typeHashVal != InvalidHashVal);
+            IG_CHECK(memPools.contains(typeHashVal));
             return memPools[typeHashVal].GetAddressOf(handle);
         }
 
         const uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
         {
-            check(typeHashVal != InvalidHashVal);
-            check(memPools.contains(typeHashVal));
+            IG_CHECK(typeHashVal != InvalidHashVal);
+            IG_CHECK(memPools.contains(typeHashVal));
             const auto& memPool = memPools.at(typeHashVal);
             return memPool.GetAddressOf(handle);
         }
@@ -61,7 +61,7 @@ namespace ig
         uint8_t* GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle)
         {
             ReadOnlyLock lock{ mutex };
-            check(memPools.contains(typeHashVal));
+            IG_CHECK(memPools.contains(typeHashVal));
             return !IsPendingDeallocationUnsafe(typeHashVal, handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
         }
 

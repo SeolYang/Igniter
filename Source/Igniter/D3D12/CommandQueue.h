@@ -64,14 +64,14 @@ namespace ig
                 return fence->GetCompletedValue();
             }
 
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return 0;
         }
         [[nodiscard]] bool IsExpired() const { return syncPoint <= GetCompletedSyncPoint(); }
 
         void WaitOnCpu()
         {
-            check(IsValid());
+            IG_CHECK(IsValid());
             if (fence != nullptr && syncPoint > GetCompletedSyncPoint())
             {
                 fence->SetEventOnCompletion(syncPoint, nullptr);
@@ -83,12 +83,12 @@ namespace ig
             : fence(&fence),
               syncPoint(syncPoint)
         {
-            check(IsValid());
+            IG_CHECK(IsValid());
         }
 
         [[nodiscard]] ID3D12Fence& GetFence()
         {
-            check(fence != nullptr);
+            IG_CHECK(fence != nullptr);
             return *fence;
         }
 

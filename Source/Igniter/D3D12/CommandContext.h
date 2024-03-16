@@ -83,7 +83,7 @@ namespace ig
             requires(std::is_pod_v<T>)
         void SetRoot32BitConstants(const uint32_t registerSlot, const T& data, const uint32_t destOffsetIn32BitValues)
         {
-            check(sizeof(T) % 4 == 0 && "Data loss may occur specific conditions.");
+            IG_CHECK(sizeof(T) % 4 == 0 && "Data loss may occur specific conditions.");
             SetRoot32BitConstants(registerSlot, sizeof(T) / 4, reinterpret_cast<const void*>(&data), destOffsetIn32BitValues);
         }
 

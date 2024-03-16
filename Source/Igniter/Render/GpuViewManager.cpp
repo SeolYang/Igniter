@@ -34,13 +34,13 @@ namespace ig
         std::optional<GpuView> newCBV = Allocate(EGpuViewType::ConstantBufferView);
         if (newCBV)
         {
-            check(newCBV->Type == EGpuViewType::ConstantBufferView);
-            check(newCBV->Index != InvalidIndexU32);
+            IG_CHECK(newCBV->Type == EGpuViewType::ConstantBufferView);
+            IG_CHECK(newCBV->Index != InvalidIndexU32);
             device.UpdateConstantBufferView(*newCBV, gpuBuffer);
             return MakeHandle(*newCBV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -49,15 +49,15 @@ namespace ig
         std::optional<GpuView> newCBV = Allocate(EGpuViewType::ConstantBufferView);
         if (newCBV)
         {
-            check(newCBV->Type == EGpuViewType::ConstantBufferView);
-            check(newCBV->Index != InvalidIndexU32);
-            check(offset % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
-            check(sizeInBytes % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
+            IG_CHECK(newCBV->Type == EGpuViewType::ConstantBufferView);
+            IG_CHECK(newCBV->Index != InvalidIndexU32);
+            IG_CHECK(offset % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
+            IG_CHECK(sizeInBytes % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
             device.UpdateConstantBufferView(*newCBV, gpuBuffer, offset, sizeInBytes);
             return MakeHandle(*newCBV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -66,13 +66,13 @@ namespace ig
         std::optional<GpuView> newSRV = Allocate(EGpuViewType::ShaderResourceView);
         if (newSRV)
         {
-            check(newSRV->Type == EGpuViewType::ShaderResourceView);
-            check(newSRV->Index != InvalidIndexU32);
+            IG_CHECK(newSRV->Type == EGpuViewType::ShaderResourceView);
+            IG_CHECK(newSRV->Index != InvalidIndexU32);
             device.UpdateShaderResourceView(*newSRV, gpuBuffer);
             return MakeHandle(*newSRV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -81,13 +81,13 @@ namespace ig
         std::optional<GpuView> newUAV = Allocate(EGpuViewType::UnorderedAccessView);
         if (newUAV)
         {
-            check(newUAV->Type == EGpuViewType::UnorderedAccessView);
-            check(newUAV->Index != InvalidIndexU32);
+            IG_CHECK(newUAV->Type == EGpuViewType::UnorderedAccessView);
+            IG_CHECK(newUAV->Index != InvalidIndexU32);
             device.UpdateUnorderedAccessView(*newUAV, gpuBuffer);
             return MakeHandle(*newUAV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -96,13 +96,13 @@ namespace ig
         std::optional<GpuView> newSRV = Allocate(EGpuViewType::ShaderResourceView);
         if (newSRV)
         {
-            check(newSRV->Type == EGpuViewType::ShaderResourceView);
-            check(newSRV->Index != InvalidIndexU32);
+            IG_CHECK(newSRV->Type == EGpuViewType::ShaderResourceView);
+            IG_CHECK(newSRV->Index != InvalidIndexU32);
             device.UpdateShaderResourceView(*newSRV, gpuTexture, srvDesc, desireViewFormat);
             return MakeHandle(*newSRV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -111,13 +111,13 @@ namespace ig
         std::optional<GpuView> newUAV = Allocate(EGpuViewType::UnorderedAccessView);
         if (newUAV)
         {
-            check(newUAV->Type == EGpuViewType::UnorderedAccessView);
-            check(newUAV->Index != InvalidIndexU32);
+            IG_CHECK(newUAV->Type == EGpuViewType::UnorderedAccessView);
+            IG_CHECK(newUAV->Index != InvalidIndexU32);
             device.UpdateUnorderedAccessView(*newUAV, gpuTexture, uavDesc, desireViewFormat);
             return MakeHandle(*newUAV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -126,13 +126,13 @@ namespace ig
         std::optional<GpuView> newRTV = Allocate(EGpuViewType::RenderTargetView);
         if (newRTV)
         {
-            check(newRTV->Type == EGpuViewType::RenderTargetView);
-            check(newRTV->Index != InvalidIndexU32);
+            IG_CHECK(newRTV->Type == EGpuViewType::RenderTargetView);
+            IG_CHECK(newRTV->Index != InvalidIndexU32);
             device.UpdateRenderTargetView(*newRTV, gpuTexture, rtvDesc, desireViewFormat);
             return MakeHandle(*newRTV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -141,13 +141,13 @@ namespace ig
         std::optional<GpuView> newDSV = Allocate(EGpuViewType::DepthStencilView);
         if (newDSV)
         {
-            check(newDSV->Type == EGpuViewType::DepthStencilView);
-            check(newDSV->Index != InvalidIndexU32);
+            IG_CHECK(newDSV->Type == EGpuViewType::DepthStencilView);
+            IG_CHECK(newDSV->Index != InvalidIndexU32);
             device.UpdateDepthStencilView(*newDSV, gpuTexture, dsvDesc, desireViewFormat);
             return MakeHandle(*newDSV);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
@@ -167,12 +167,12 @@ namespace ig
             std::optional<GpuView> samplerView = samplerHeap->Allocate(EGpuViewType::Sampler);
             if (!samplerView)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
             }
             else
             {
-                check(samplerView->Type == EGpuViewType::Sampler);
-                check(samplerView->HasValidCPUHandle());
+                IG_CHECK(samplerView->Type == EGpuViewType::Sampler);
+                IG_CHECK(samplerView->HasValidCPUHandle());
                 device.CreateSampler(desc, *samplerView);
 
                 Handle<GpuView, GpuViewManager*> handle = MakeHandle(*samplerView);
@@ -181,7 +181,7 @@ namespace ig
             }
         }
 
-        check(refHandle);
+        IG_CHECK(refHandle);
         return refHandle;
     }
 
@@ -204,7 +204,7 @@ namespace ig
     std::optional<GpuView> GpuViewManager::Allocate(const EGpuViewType type)
     {
         RecursiveLock lock{ mutex };
-        check(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
+        IG_CHECK(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
         switch (type)
         {
             case EGpuViewType::ConstantBufferView:
@@ -221,15 +221,15 @@ namespace ig
                 return dsvHeap->Allocate(type);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
     void GpuViewManager::Deallocate(const GpuView& gpuView)
     {
         RecursiveLock lock{ mutex };
-        check(gpuView.IsValid());
-        check(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
+        IG_CHECK(gpuView.IsValid());
+        IG_CHECK(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
         switch (gpuView.Type)
         {
             case EGpuViewType::ConstantBufferView:
@@ -246,7 +246,7 @@ namespace ig
                 return dsvHeap->Deallocate(gpuView);
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
     }
 
     void GpuViewManager::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, GpuView* view)
@@ -254,7 +254,7 @@ namespace ig
         deferredDeallocator.RequestDeallocation(
             [this, handle, evaluatedTypeHash, view]()
             {
-                check(view != nullptr && view->IsValid());
+                IG_CHECK(view != nullptr && view->IsValid());
                 this->Deallocate(*view);
                 details::HandleImpl targetHandle = handle;
                 targetHandle.Deallocate(evaluatedTypeHash);

@@ -1,26 +1,26 @@
 #pragma once
 #if (defined(_DEBUG) || defined(DEBUG))
-    #define verify(EXPRESSION)  \
-        do                      \
-            if (!(EXPRESSION))  \
-            {                   \
-                __debugbreak(); \
-            }                   \
+    #define IG_VERIFY(EXPRESSION) \
+        do                        \
+            if (!(EXPRESSION))    \
+            {                     \
+                __debugbreak();   \
+            }                     \
         while (false)
 
-    #define check(CONDITION) verify(CONDITION)
+    #define IG_CHECK(CONDITION) IG_VERIFY(CONDITION)
 #else
-    #define verify(EXPRESSION) \
-        do                     \
-        {                      \
-            (EXPRESSION);      \
+    #define IG_VERIFY(EXPRESSION) \
+        do                        \
+        {                         \
+            (EXPRESSION);         \
         } while (false)
 
-    #define check(CONDITION) ((void)0)
+    #define IG_CHECK(CONDITION) ((void)0)
 #endif
 
-#define checkNoEntry()           check(false)
-#define unimplemented()          check(false)
+#define IG_CHECK_NO_ENTRY()      IG_CHECK(false)
+#define IG_UNIMPLEMENTED()       IG_CHECK(false)
 
-#define verify_succeeded(RESULT) verify(SUCCEEDED(RESULT))
-#define check_succeeded(RESULT)  check(SUCCEEDED(RESULT))
+#define IG_VERIFY_SUCCEEDED(RESULT) IG_VERIFY(SUCCEEDED(RESULT))
+#define IG_CHECK_SUCCEEDED(RESULT)  IG_CHECK(SUCCEEDED(RESULT))

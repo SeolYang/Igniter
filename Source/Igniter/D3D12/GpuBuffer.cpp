@@ -21,9 +21,9 @@ namespace ig
     GpuBuffer::GpuBuffer(ComPtr<ID3D12Resource> bufferResource)
         : resource(std::move(bufferResource))
     {
-        check(resource);
+        IG_CHECK(resource);
         desc.From(resource->GetDesc());
-        check(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
+        IG_CHECK(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
     }
 
     GpuBuffer& GpuBuffer::operator=(GpuBuffer&& other) noexcept
@@ -36,8 +36,8 @@ namespace ig
 
     uint8_t* GpuBuffer::Map(const uint64_t offset)
     {
-        check(resource);
-        check(offset < desc.GetSizeAsBytes());
+        IG_CHECK(resource);
+        IG_CHECK(offset < desc.GetSizeAsBytes());
 
         uint8_t* mappedPtr = nullptr;
         if (!SUCCEEDED(resource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPtr))))
@@ -78,13 +78,13 @@ namespace ig
             };
         }
 
-        checkNoEntry();
+        IG_CHECK_NO_ENTRY();
         return {};
     }
 
     void GpuBuffer::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer)
     {
-        verify(mappedGPUBuffer != nullptr);
+        IG_VERIFY(mappedGPUBuffer != nullptr);
         handle.Deallocate(evaluatedTypeHash);
     }
 

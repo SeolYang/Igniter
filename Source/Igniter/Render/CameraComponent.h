@@ -12,7 +12,7 @@ namespace ig
         [[nodiscard]] Matrix CreatePerspective() const
         {
             const float aspectRatio = CameraViewport.AspectRatio();
-            check(aspectRatio >= 0.f);
+            IG_CHECK(aspectRatio >= 0.f);
             const float fovRads = Deg2Rad(Fov);
             return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
         }

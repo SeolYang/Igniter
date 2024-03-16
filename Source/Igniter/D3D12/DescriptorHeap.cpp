@@ -18,7 +18,7 @@ namespace ig
           cpuDescriptorHandleForHeapStart(descriptorHeap->GetCPUDescriptorHandleForHeapStart()),
           gpuDescriptorHandleForHeapStart(bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart() : D3D12_GPU_DESCRIPTOR_HANDLE{ std::numeric_limits<decltype(D3D12_GPU_DESCRIPTOR_HANDLE::ptr)>::max() })
     {
-        check(newDescriptorHeap);
+        IG_CHECK(newDescriptorHeap);
         for (uint32_t idx = 0; idx < numDescriptorsInHeap; ++idx)
         {
             this->descriptorIdxPool.push(idx);
@@ -39,7 +39,7 @@ namespace ig
 
     DescriptorHeap::~DescriptorHeap()
     {
-        check(numInitialDescriptors == descriptorIdxPool.size());
+        IG_CHECK(numInitialDescriptors == descriptorIdxPool.size());
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const uint32_t index) const
@@ -57,23 +57,23 @@ namespace ig
 
     std::optional<GpuView> DescriptorHeap::Allocate(const EGpuViewType desiredType)
     {
-        check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
               (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (desiredType == EGpuViewType::ConstantBufferView ||
                                                                           desiredType == EGpuViewType::ShaderResourceView ||
                                                                           desiredType == EGpuViewType::UnorderedAccessView)));
 
-        check(descriptorHeapType != EDescriptorHeapType::Sampler ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::Sampler ||
               (descriptorHeapType == EDescriptorHeapType::Sampler && (desiredType == EGpuViewType::Sampler)));
 
-        check(descriptorHeapType != EDescriptorHeapType::RTV ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::RTV ||
               (descriptorHeapType == EDescriptorHeapType::RTV && (desiredType == EGpuViewType::RenderTargetView)));
 
-        check(descriptorHeapType != EDescriptorHeapType::DSV ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::DSV ||
               (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EGpuViewType::DepthStencilView)));
 
         if (descriptorIdxPool.empty())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return GpuView{};
         }
 
@@ -89,24 +89,24 @@ namespace ig
 
     void DescriptorHeap::Deallocate(const GpuView& gpuView)
     {
-        check(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
               (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV && (gpuView.Type == EGpuViewType::ConstantBufferView ||
                                                                           gpuView.Type == EGpuViewType::ShaderResourceView ||
                                                                           gpuView.Type == EGpuViewType::UnorderedAccessView)));
 
-        check(descriptorHeapType != EDescriptorHeapType::Sampler ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::Sampler ||
               (descriptorHeapType == EDescriptorHeapType::Sampler && (gpuView.Type == EGpuViewType::Sampler)));
 
-        check(descriptorHeapType != EDescriptorHeapType::RTV ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::RTV ||
               (descriptorHeapType == EDescriptorHeapType::RTV && (gpuView.Type == EGpuViewType::RenderTargetView)));
 
-        check(descriptorHeapType != EDescriptorHeapType::DSV ||
+        IG_CHECK(descriptorHeapType != EDescriptorHeapType::DSV ||
               (descriptorHeapType == EDescriptorHeapType::DSV && (gpuView.Type == EGpuViewType::DepthStencilView)));
 
-        check(gpuView.Index < numInitialDescriptors);
-        check(gpuView.Index != std::numeric_limits<decltype(GpuView::Index)>::max());
+        IG_CHECK(gpuView.Index < numInitialDescriptors);
+        IG_CHECK(gpuView.Index != std::numeric_limits<decltype(GpuView::Index)>::max());
         descriptorIdxPool.push(gpuView.Index);
-        check(descriptorIdxPool.size() <= numInitialDescriptors);
+        IG_CHECK(descriptorIdxPool.size() <= numInitialDescriptors);
     }
 
 } // namespace ig

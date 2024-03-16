@@ -12,7 +12,7 @@ namespace ig
         : deferredDeallocator(deferredDeallocator),
           reservedNumCmdCtxs(std::thread::hardware_concurrency() * NumFramesInFlight + (NumExtraCommandContextsPerFrame * NumFramesInFlight))
     {
-        check(reservedNumCmdCtxs > 0);
+        IG_CHECK(reservedNumCmdCtxs > 0);
         for (size_t idx = 0; idx < reservedNumCmdCtxs; ++idx)
         {
             pool.push(new CommandContext(device.CreateCommandContext("Reserved Cmd Ctx", queueType).value()));
@@ -21,7 +21,7 @@ namespace ig
 
     CommandContextPool::~CommandContextPool()
     {
-        check(pool.size() == reservedNumCmdCtxs);
+        IG_CHECK(pool.size() == reservedNumCmdCtxs);
         while (!pool.empty())
         {
             auto* cmdCtx = pool.front();
@@ -33,8 +33,8 @@ namespace ig
     void CommandContextPool::Return(CommandContext* cmdContext)
     {
         ReadWriteLock lock{ mutex };
-        check(cmdContext != nullptr);
-        check(pool.size() < reservedNumCmdCtxs);
+        IG_CHECK(cmdContext != nullptr);
+        IG_CHECK(pool.size() < reservedNumCmdCtxs);
         pool.push(cmdContext);
     }
 } // namespace ig

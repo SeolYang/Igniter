@@ -17,7 +17,7 @@ namespace ig
 
         T MoveValue()
         {
-            check(IsSucceeded());
+            IG_CHECK(IsSucceeded());
             return std::move(*value);
         }
 

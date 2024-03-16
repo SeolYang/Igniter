@@ -36,7 +36,7 @@ namespace ig
             std::this_thread::yield();
         }
 
-        check(requestSize > 0);
+        IG_CHECK(requestSize > 0);
         const size_t alignedRequestSize = AlignTo(requestSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
 
         if (alignedRequestSize > bufferCapacity)
@@ -55,7 +55,7 @@ namespace ig
         }
 
         details::UploadRequest* newRequest = AllocateRequestUnsafe();
-        check(newRequest != nullptr);
+        IG_CHECK(newRequest != nullptr);
         if (bufferHead + alignedRequestSize <= bufferCapacity)
         {
             newRequest->OffsetInBytes = bufferHead;
@@ -68,7 +68,7 @@ namespace ig
         }
         else
         {
-            check(bufferHead < bufferCapacity);
+            IG_CHECK(bufferHead < bufferCapacity);
             const size_t padding = bufferCapacity - bufferHead;
 
             if ((bufferUsedSizeInBytes + padding + alignedRequestSize) <= bufferCapacity)
@@ -100,7 +100,7 @@ namespace ig
                 }
                 else if (numInFlightRequests == 1)
                 {
-                    check(bufferUsedSizeInBytes == 0);
+                    IG_CHECK(bufferUsedSizeInBytes == 0);
                     numInFlightRequests = 0;
                     requestHead = 0;
                     requestTail = 0;
@@ -116,17 +116,17 @@ namespace ig
                 }
                 else
                 {
-                    checkNoEntry();
+                    IG_CHECK_NO_ENTRY();
                 }
             }
         }
 
-        check(newRequest != nullptr);
-        check(bufferUsedSizeInBytes <= bufferCapacity);
-        check(bufferHead < bufferCapacity);
-        check(numInFlightRequests <= RequestCapacity);
-        check(requestHead < RequestCapacity);
-        check(bufferCpuAddr != nullptr);
+        IG_CHECK(newRequest != nullptr);
+        IG_CHECK(bufferUsedSizeInBytes <= bufferCapacity);
+        IG_CHECK(bufferHead < bufferCapacity);
+        IG_CHECK(numInFlightRequests <= RequestCapacity);
+        IG_CHECK(requestHead < RequestCapacity);
+        IG_CHECK(bufferCpuAddr != nullptr);
 
         newRequest->CmdCtx->Begin();
         return UploadContext{ buffer.get(), bufferCpuAddr, newRequest };
@@ -137,13 +137,13 @@ namespace ig
         const static thread_local size_t tuid = ThreadUIDGenerator::GetUID();
         if (reservedThreadID.load(std::memory_order::acquire) != tuid)
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return {};
         }
 
         if (!context.IsValid())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return {};
         }
 
@@ -151,7 +151,7 @@ namespace ig
         request.CmdCtx->End();
         copyQueue.AddPendingContext(*request.CmdCtx);
         request.Sync = copyQueue.Submit();
-        check(request.Sync.IsValid());
+        IG_CHECK(request.Sync.IsValid());
         context.Reset();
         reservedThreadID.store(InvalidThreadID, std::memory_order::release);
         return request.Sync;
@@ -159,7 +159,7 @@ namespace ig
 
     details::UploadRequest* GpuUploader::AllocateRequestUnsafe()
     {
-        check(numInFlightRequests <= RequestCapacity);
+        IG_CHECK(numInFlightRequests <= RequestCapacity);
         if (numInFlightRequests == RequestCapacity)
         {
             return nullptr;
@@ -173,7 +173,7 @@ namespace ig
 
     void GpuUploader::WaitForRequestUnsafe(const size_t numWaitFor)
     {
-        check(numWaitFor > 0 && numWaitFor <= numInFlightRequests);
+        IG_CHECK(numWaitFor > 0 && numWaitFor <= numInFlightRequests);
 
         const size_t begin = requestTail;
         for (size_t counter = 0; counter < numWaitFor; ++counter)
@@ -181,10 +181,10 @@ namespace ig
             const size_t idx = (begin + counter) % RequestCapacity;
             uploadRequests[idx].Sync.WaitOnCpu();
 
-            check(numInFlightRequests > 0);
+            IG_CHECK(numInFlightRequests > 0);
             --numInFlightRequests;
             requestTail = (requestTail + 1) % RequestCapacity;
-            check((uploadRequests[idx].SizeInBytes + uploadRequests[idx].PaddingInBytes) <= bufferUsedSizeInBytes);
+            IG_CHECK((uploadRequests[idx].SizeInBytes + uploadRequests[idx].PaddingInBytes) <= bufferUsedSizeInBytes);
             bufferUsedSizeInBytes -= (uploadRequests[idx].SizeInBytes + uploadRequests[idx].PaddingInBytes);
             uploadRequests[idx].Reset();
         }
@@ -218,7 +218,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
         }
     }
 
@@ -230,17 +230,17 @@ namespace ig
 
     void UploadContext::WriteData(const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes)
     {
-        check(uploadBuffer != nullptr);
-        check(offsettedCpuAddr != nullptr);
-        check(request != nullptr);
+        IG_CHECK(uploadBuffer != nullptr);
+        IG_CHECK(offsettedCpuAddr != nullptr);
+        IG_CHECK(request != nullptr);
         if (srcAddr != nullptr)
         {
-            check(destOffsetInBytes + writeSizeInBytes <= request->SizeInBytes);
+            IG_CHECK(destOffsetInBytes + writeSizeInBytes <= request->SizeInBytes);
             std::memcpy(offsettedCpuAddr + destOffsetInBytes, srcAddr + srcOffsetInBytes, writeSizeInBytes);
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
         }
     }
 
@@ -248,13 +248,13 @@ namespace ig
     {
         if (!IsValid())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return;
         }
 
-        check((request->OffsetInBytes + srcOffsetInBytes + numBytes) <= uploadBuffer->GetDesc().GetSizeAsBytes());
-        check((dstOffsetInBytes + numBytes) <= dst.GetDesc().GetSizeAsBytes());
-        check(request->CmdCtx != nullptr);
+        IG_CHECK((request->OffsetInBytes + srcOffsetInBytes + numBytes) <= uploadBuffer->GetDesc().GetSizeAsBytes());
+        IG_CHECK((dstOffsetInBytes + numBytes) <= dst.GetDesc().GetSizeAsBytes());
+        IG_CHECK(request->CmdCtx != nullptr);
         CommandContext& cmdCtx = *request->CmdCtx;
         cmdCtx.CopyBuffer(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, numBytes, dst, dstOffsetInBytes);
     }
@@ -263,11 +263,11 @@ namespace ig
     {
         if (!IsValid())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return;
         }
 
-        check(request->CmdCtx != nullptr);
+        IG_CHECK(request->CmdCtx != nullptr);
         CommandContext& cmdCtx = *request->CmdCtx;
         cmdCtx.CopyTextureRegion(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, dst, subresourceIdx, layout);
     }

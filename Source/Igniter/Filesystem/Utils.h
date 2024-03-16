@@ -72,7 +72,7 @@ namespace ig
         }
 
         const size_t sizeOfBlob = fs::file_size(path);
-        check(sizeOfBlob > 0);
+        IG_CHECK(sizeOfBlob > 0);
         blob.resize(sizeOfBlob);
         blobStream.read((char*)blob.data(), blob.size());
         return blob;
@@ -80,7 +80,7 @@ namespace ig
 
     inline bool SaveBlobToFile(const fs::path& path, const std::span<const uint8_t> blob)
     {
-        check(blob.size_bytes() > 0);
+        IG_CHECK(blob.size_bytes() > 0);
 
         std::ofstream fileStream{ path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc };
         if (!fileStream.is_open())
@@ -96,7 +96,7 @@ namespace ig
     template <size_t N>
     inline bool SaveBlobsToFile(const fs::path& path, const std::array<std::span<const uint8_t>, N> blobs)
     {
-        check(blobs.size() > 0);
+        IG_CHECK(blobs.size() > 0);
         std::ofstream fileStream{ path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc };
         if (!fileStream.is_open())
         {
@@ -105,7 +105,7 @@ namespace ig
 
         for (const std::span<const uint8_t> blob : blobs)
         {
-            check(blob.size_bytes() > 0);
+            IG_CHECK(blob.size_bytes() > 0);
             fileStream.write(reinterpret_cast<const char*>(blob.data()), blob.size_bytes());
         }
 

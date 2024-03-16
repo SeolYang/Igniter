@@ -188,7 +188,7 @@ namespace ig
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        verify(width > 0);
+        IG_VERIFY(width > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
         Alignment = 0;
         Width = width;
@@ -210,14 +210,14 @@ namespace ig
                                      const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
                                      uint32_t sampleQuality /*= 0*/)
     {
-        verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        verify(width > 0 && height > 0);
+        IG_VERIFY(width > 0 && height > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -240,14 +240,14 @@ namespace ig
                                      const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
                                      uint32_t sampleQuality /*= 0*/)
     {
-        verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        verify(width > 0 && height > 0 && depth > 0);
+        IG_VERIFY(width > 0 && height > 0 && depth > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
         Alignment = 0;
         Width = width;
@@ -268,14 +268,14 @@ namespace ig
                                         const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
                                         uint32_t sampleQuality /*= 0*/)
     {
-        verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = false;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        verify(width > 0 && height > 0);
+        IG_VERIFY(width > 0 && height > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -300,8 +300,8 @@ namespace ig
         bIsShaderReadWrite = false;
         bIsAllowSimultaneousAccess = false;
 
-        verify(width > 0 && height > 0);
-        verify(IsDepthStencilFormat(format));
+        IG_VERIFY(width > 0 && height > 0);
+        IG_VERIFY(IsDepthStencilFormat(format));
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -327,7 +327,7 @@ namespace ig
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        verify(width > 0 && arrayLength > 0);
+        IG_VERIFY(width > 0 && arrayLength > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
         Alignment = 0;
         Width = width;
@@ -350,14 +350,14 @@ namespace ig
                                           const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
                                           uint32_t sampleQuality /*= 0*/)
     {
-        verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        verify(width > 0 && height > 0 && arrayLength > 0);
+        IG_VERIFY(width > 0 && height > 0 && arrayLength > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -378,14 +378,14 @@ namespace ig
                                    const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
                                    const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
     {
-        verify(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = true;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        verify(width > 0 && height > 0);
+        IG_VERIFY(width > 0 && height > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -429,13 +429,13 @@ namespace ig
     {
         if (Format == DXGI_FORMAT_UNKNOWN)
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
         if (IsTypelessFormat(Format) && desireViewFormat == DXGI_FORMAT_UNKNOWN)
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -448,7 +448,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -459,7 +459,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -470,7 +470,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -481,7 +481,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -491,13 +491,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsCubemap)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize < 6)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -508,13 +508,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -525,13 +525,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -542,13 +542,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -559,13 +559,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsCubemap)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize < 6)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -574,7 +574,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -585,19 +585,19 @@ namespace ig
     {
         if (!IsUnorderedAccessCompatible())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
         if (Format == DXGI_FORMAT_UNKNOWN)
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
         if (IsTypelessFormat(Format) && desireViewFormat == DXGI_FORMAT_UNKNOWN)
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -608,7 +608,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -619,7 +619,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -630,7 +630,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -641,7 +641,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -652,13 +652,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -669,13 +669,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -686,13 +686,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -701,7 +701,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -712,19 +712,19 @@ namespace ig
     {
         if (!IsRenderTargetCompatible())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
         if (Format == DXGI_FORMAT_UNKNOWN)
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
         if (IsTypelessFormat(Format) && desireViewFormat == DXGI_FORMAT_UNKNOWN)
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -735,7 +735,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -746,7 +746,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -757,7 +757,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D || !bIsMSAAEnabled)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -768,7 +768,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -779,13 +779,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -796,13 +796,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -813,13 +813,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -828,7 +828,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -839,13 +839,13 @@ namespace ig
     {
         if (!IsDepthStencilCompatible())
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
         if (desireViewFormat != DXGI_FORMAT_UNKNOWN && !IsDepthStencilFormat(desireViewFormat))
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -856,7 +856,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -867,7 +867,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -878,7 +878,7 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -889,13 +889,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -906,13 +906,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -923,13 +923,13 @@ namespace ig
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
             if (DepthOrArraySize <= 1)
             {
-                checkNoEntry();
+                IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
 
@@ -938,7 +938,7 @@ namespace ig
         }
         else
         {
-            checkNoEntry();
+            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 
@@ -947,7 +947,7 @@ namespace ig
 
     void GPUTextureDesc::From(const D3D12_RESOURCE_DESC& desc)
     {
-        verify(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
+        IG_VERIFY(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
         Dimension = desc.Dimension;
         Alignment = desc.Alignment;
         Width = desc.Width;

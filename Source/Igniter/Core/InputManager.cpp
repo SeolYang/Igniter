@@ -6,9 +6,9 @@
 
 namespace ig
 {
-    FE_DEFINE_LOG_CATEGORY(InputManagerInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(InputManagerDebug, ELogVerbosity::Debug)
-    FE_DEFINE_LOG_CATEGORY(InputManagerError, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(InputManagerInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(InputManagerDebug, ELogVerbosity::Debug)
+    IG_DEFINE_LOG_CATEGORY(InputManagerError, ELogVerbosity::Error)
 
     static EInput WParamToInput(const WPARAM wParam)
     {
@@ -73,15 +73,15 @@ namespace ig
 
         if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
         {
-            FE_LOG(InputManagerError, "Failed to create raw input mouse. {:#X}", GetLastError());
+            IG_LOG(InputManagerError, "Failed to create raw input mouse. {:#X}", GetLastError());
         }
     }
 
     void InputManager::BindAction(const String nameOfAction, const EInput input)
     {
-        check(nameOfAction);
-        check(input != EInput::None);
-        check(!inputActionNameMap[input].contains(nameOfAction));
+        IG_CHECK(nameOfAction);
+        IG_CHECK(input != EInput::None);
+        IG_CHECK(!inputActionNameMap[input].contains(nameOfAction));
         inputActionNameMap[input].insert(nameOfAction);
         if (!actionMap.contains(nameOfAction))
         {
@@ -91,8 +91,8 @@ namespace ig
 
     void InputManager::BindAxis(const String nameOfAxis, const EInput input, const float scale)
     {
-        check(nameOfAxis);
-        check(input != EInput::None);
+        IG_CHECK(nameOfAxis);
+        IG_CHECK(input != EInput::None);
         if (!axisMap.contains(nameOfAxis))
         {
             inputAxisNameScaleMap[input][nameOfAxis] = scale;
@@ -184,7 +184,7 @@ namespace ig
                     if (actionItr != actionMap.end())
                     {
                         auto& action = actionItr->second;
-                        check(action);
+                        IG_CHECK(action);
                         if (action->State == EInputState::Pressed)
                         {
                             action->State = EInputState::OnPressing;
@@ -192,7 +192,7 @@ namespace ig
                     }
                     else
                     {
-                        checkNoEntry();
+                        IG_CHECK_NO_ENTRY();
                     }
                 }
 
@@ -205,7 +205,7 @@ namespace ig
                         if (axisItr != axisMap.end())
                         {
                             auto& axis = axisItr->second;
-                            check(axis);
+                            IG_CHECK(axis);
                             axis->Value = 0.f;
                         }
                     }
@@ -253,12 +253,12 @@ namespace ig
 
         if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize, sizeof(RAWINPUTHEADER)) != pcbSize)
         {
-            FE_LOG(InputManagerError, "GetRawInputData does not return correct size!");
+            IG_LOG(InputManagerError, "GetRawInputData does not return correct size!");
             return;
         }
 
         const auto* rawInput = reinterpret_cast<RAWINPUT*>(rawInputBuffer.data());
-        check(rawInput != nullptr);
+        IG_CHECK(rawInput != nullptr);
         if (rawInput->header.dwType == RIM_TYPEMOUSE)
         {
             const auto deltaX = rawInput->data.mouse.lLastX;

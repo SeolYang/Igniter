@@ -26,7 +26,7 @@ namespace ig
     GpuSync CommandQueue::FlushUnsafe()
     {
         ++syncCounter;
-        verify_succeeded(native->Signal(fence.Get(), syncCounter));
+        IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncCounter));
         return { *fence.Get(), syncCounter };
     }
 
@@ -38,18 +38,18 @@ namespace ig
 
     void CommandQueue::AddPendingContext(CommandContext& cmdCtx)
     {
-        check(cmdCtx);
+        IG_CHECK(cmdCtx);
         ReadWriteLock lock{ mutex };
         pendingContexts.emplace_back(cmdCtx);
     }
 
     GpuSync CommandQueue::Submit()
     {
-        check(IsValid());
-        check(fence);
+        IG_CHECK(IsValid());
+        IG_CHECK(fence);
 
         ReadWriteLock lock{ mutex };
-        check(!pendingContexts.empty());
+        IG_CHECK(!pendingContexts.empty());
         auto pendingNativeCmdLists = TransformToNative(std::span{ pendingContexts });
         native->ExecuteCommandLists(static_cast<uint32_t>(pendingNativeCmdLists.size()),
                                     reinterpret_cast<ID3D12CommandList* const*>(pendingNativeCmdLists.data()));
@@ -60,8 +60,8 @@ namespace ig
 
     void CommandQueue::SyncWith(GpuSync& sync)
     {
-        check(native);
+        IG_CHECK(native);
         ID3D12Fence& dependentQueueFence = sync.GetFence();
-        verify_succeeded(native->Wait(&dependentQueueFence, sync.GetSyncPoint()));
+        IG_VERIFY_SUCCEEDED(native->Wait(&dependentQueueFence, sync.GetSyncPoint()));
     }
 } // namespace ig

@@ -83,7 +83,7 @@ namespace ig
         explicit RefHandle(const details::HandleImpl newHandle)
             : handle(newHandle)
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
             if constexpr (std::is_pointer_v<Finalizer>)
             {
                 finalizer = nullptr;
@@ -96,7 +96,7 @@ namespace ig
             : handle(newHandle),
               finalizer(std::forward<Fn>(finalizer))
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
         }
 
         RefHandle(const RefHandle& other) = default;
@@ -133,33 +133,33 @@ namespace ig
 
         [[nodiscard]] T& operator*()
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
             T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] const T& operator*() const
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
             T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
             T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
             T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
@@ -182,7 +182,7 @@ namespace ig
     public:
         void operator()(details::HandleImpl handle, const uint64_t typeHashVal, T* instance) const
         {
-            check(instance != nullptr);
+            IG_CHECK(instance != nullptr);
             if (handle.IsValid() && typeHashVal != InvalidHashVal)
             {
                 if (instance != nullptr)
@@ -205,7 +205,7 @@ namespace ig
                 [handle, typeHashVal, instance]()
                 {
                     details::HandleImpl targetHandle = handle;
-                    check(instance != nullptr);
+                    IG_CHECK(instance != nullptr);
                     if (targetHandle.IsValid() && typeHashVal != InvalidHashVal)
                     {
                         if (instance != nullptr)
@@ -262,14 +262,14 @@ namespace ig
             : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
               destroyer(std::forward<Dx>(destroyer))
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
             if constexpr (std::is_pointer_v<Destroyer>)
             {
-                check(destroyer != nullptr);
+                IG_CHECK(destroyer != nullptr);
             }
 
             T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             new (instancePtr) T(std::forward<Args>(args)...);
         }
 
@@ -278,9 +278,9 @@ namespace ig
         Handle(HandleManager& handleManager, Args&&... args)
             : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
         {
-            check(IsAlive());
+            IG_CHECK(IsAlive());
             T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             new (instancePtr) T(std::forward<Args>(args)...);
         }
 
@@ -314,28 +314,28 @@ namespace ig
         [[nodiscard]] T& operator*()
         {
             T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] const T& operator*() const
         {
             const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] T* operator->()
         {
             T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
             const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
-            check(instancePtr != nullptr);
+            IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
@@ -348,10 +348,10 @@ namespace ig
             {
                 handle.MarkAsPendingDeallocation(EvaluatedTypeHashVal);
                 T* instance = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
-                check(instance != nullptr);
+                IG_CHECK(instance != nullptr);
                 if constexpr (std::is_pointer_v<Destroyer>)
                 {
-                    check(destroyer != nullptr);
+                    IG_CHECK(destroyer != nullptr);
                     (*destroyer)(handle, EvaluatedTypeHashVal, instance);
                 }
                 else

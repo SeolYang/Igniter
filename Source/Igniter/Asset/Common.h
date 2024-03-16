@@ -6,8 +6,8 @@
 #include <Core/Serializable.h>
 #include <Filesystem/Utils.h>
 
-#ifndef FE_TEXT
-    #define FE_TEXT(x) #x
+#ifndef IG_TEXT
+    #define IG_TEXT(x) #x
 #endif
 
 namespace ig
@@ -46,10 +46,10 @@ namespace ig
             Serializable<DerivedVersion + BaseVersion>::Serialize(archive);
 
             const ResourceMetadata& metadata = *this;
-            check(metadata.AssetType != EAssetType::Unknown);
+            IG_CHECK(metadata.AssetType != EAssetType::Unknown);
 
-            FE_SERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType);
-            FE_SERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
+            IG_SERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType);
+            IG_SERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
 
             return archive;
         }
@@ -59,10 +59,10 @@ namespace ig
             Serializable<DerivedVersion + BaseVersion>::Deserialize(archive);
 
             ResourceMetadata& metadata = *this;
-            FE_DESERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType, EAssetType::Unknown);
-            FE_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
+            IG_DESERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType, EAssetType::Unknown);
+            IG_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
 
-            check(metadata.AssetType != EAssetType::Unknown);
+            IG_CHECK(metadata.AssetType != EAssetType::Unknown);
             return archive;
         }
 
@@ -83,15 +83,15 @@ namespace ig
             Serializable<DerivedVersion + BaseVersion>::Serialize(archive);
 
             const AssetMetadata& metadata = *this;
-            check(metadata.Guid.isValid());
-            check(!metadata.SrcResPath.empty());
-            check(metadata.Type != EAssetType::Unknown);
+            IG_CHECK(metadata.Guid.isValid());
+            IG_CHECK(!metadata.SrcResPath.empty());
+            IG_CHECK(metadata.Type != EAssetType::Unknown);
 
-            FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
-            FE_SERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
-            FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
-            FE_SERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type);
-            FE_SERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
+            IG_SERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
+            IG_SERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
+            IG_SERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
+            IG_SERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type);
+            IG_SERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
 
             return archive;
         }
@@ -101,15 +101,15 @@ namespace ig
             Serializable<DerivedVersion + BaseVersion>::Deserialize(archive);
 
             AssetMetadata& metadata = *this;
-            FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
-            FE_DESERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
-            FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
-            FE_DESERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type, EAssetType::Unknown);
-            FE_DESERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
+            IG_DESERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
+            IG_DESERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
+            IG_DESERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
+            IG_DESERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type, EAssetType::Unknown);
+            IG_DESERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
 
-            check(metadata.Guid.isValid());
-            check(!metadata.SrcResPath.empty());
-            check(metadata.Type != EAssetType::Unknown);
+            IG_CHECK(metadata.Guid.isValid());
+            IG_CHECK(!metadata.SrcResPath.empty());
+            IG_CHECK(metadata.Type != EAssetType::Unknown);
             return archive;
         }
 
@@ -143,7 +143,7 @@ namespace ig
         template <typename T, typename LogCategory>
         void LogVersionMismatch(const T& instance, const std::string_view infoMessage = "")
         {
-            FE_LOG(LogCategory, FE_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
+            IG_LOG(LogCategory, IG_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
                    instance.Version, T::LatestVersion, infoMessage);
         }
 

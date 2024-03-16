@@ -14,26 +14,26 @@
 
 namespace ig
 {
-    FE_DEFINE_LOG_CATEGORY(TextureImporterInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(TextureImporterWarn, ELogVerbosity::Warning)
-    FE_DEFINE_LOG_CATEGORY(TextureImporterErr, ELogVerbosity::Error)
-    FE_DEFINE_LOG_CATEGORY(TextureImporterFatal, ELogVerbosity::Fatal)
-    FE_DEFINE_LOG_CATEGORY(TextureLoaderInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(TextureLoaderWarn, ELogVerbosity::Warning)
-    FE_DEFINE_LOG_CATEGORY(TextureLoaderErr, ELogVerbosity::Error)
-    FE_DEFINE_LOG_CATEGORY(TextureLoaderFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(TextureImporterInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(TextureImporterWarn, ELogVerbosity::Warning)
+    IG_DEFINE_LOG_CATEGORY(TextureImporterErr, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(TextureImporterFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(TextureLoaderInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(TextureLoaderWarn, ELogVerbosity::Warning)
+    IG_DEFINE_LOG_CATEGORY(TextureLoaderErr, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(TextureLoaderFatal, ELogVerbosity::Fatal)
 
     json& TextureImportConfig::Serialize(json& archive) const
     {
         CommonMetadata::Serialize(archive);
 
         const TextureImportConfig& config = *this;
-        FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode);
-        FE_SERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
-        FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter);
-        FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU);
-        FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV);
-        FE_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW);
+        IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode);
+        IG_SERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
+        IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter);
+        IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU);
+        IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV);
+        IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW);
 
         return archive;
     }
@@ -45,12 +45,12 @@ namespace ig
 
         CommonMetadata::Deserialize(archive);
 
-        FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
-        FE_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
-        FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-        FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        FE_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
+        IG_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
+        IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+        IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
         return archive;
     }
@@ -60,20 +60,20 @@ namespace ig
         CommonMetadata::Serialize(archive);
 
         const TextureLoadConfig& config = *this;
-        check(config.Format != DXGI_FORMAT_UNKNOWN);
-        check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
+        IG_CHECK(config.Format != DXGI_FORMAT_UNKNOWN);
+        IG_CHECK(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
 
-        FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format);
-        FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension);
-        FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
-        FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Height);
-        FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength);
-        FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
-        FE_SERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
-        FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter);
-        FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU);
-        FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV);
-        FE_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW);
+        IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format);
+        IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension);
+        IG_SERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
+        IG_SERIALIZE_JSON(TextureLoadConfig, archive, config, Height);
+        IG_SERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength);
+        IG_SERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
+        IG_SERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
+        IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter);
+        IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU);
+        IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV);
+        IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW);
 
         return archive;
     }
@@ -85,20 +85,20 @@ namespace ig
 
         CommonMetadata::Deserialize(archive);
 
-        FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
-        FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
-        FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
-        FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Height);
-        FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength);
-        FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
-        FE_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
-        FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-        FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        FE_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
+        IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Height);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
+        IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+        IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
-        check(config.Format != DXGI_FORMAT_UNKNOWN);
-        check(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
+        IG_CHECK(config.Format != DXGI_FORMAT_UNKNOWN);
+        IG_CHECK(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
         return archive;
     }
 
@@ -219,7 +219,7 @@ namespace ig
 
         if (FAILED(res))
         {
-            FE_LOG(TextureImporterWarn, "Failed create d3d11 device. HRESULT: {:#X}", res);
+            IG_LOG(TextureImporterWarn, "Failed create d3d11 device. HRESULT: {:#X}", res);
         }
     }
 
@@ -237,12 +237,12 @@ namespace ig
     {
         TempTimer tempTimer;
         tempTimer.Begin();
-        FE_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.AsStringView());
+        IG_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.AsStringView());
 
         const fs::path resPath{ resPathStr.AsStringView() };
         if (!fs::exists(resPath))
         {
-            FE_LOG(TextureImporterFatal, "The resource does not exist at {}.", resPathStr.AsStringView());
+            IG_LOG(TextureImporterFatal, "The resource does not exist at {}.", resPathStr.AsStringView());
             return std::nullopt;
         }
 
@@ -257,7 +257,7 @@ namespace ig
         {
             // 만약 DDS 타입이면, 바로 가공 없이 에셋으로 사용한다. 이 경우,
             // 제공된 config 은 무시된다.; 애초에 DDS로 미리 가공했는데 다시 압축을 풀고, 밉맵을 생성하고 할 필요가 없음.
-            FE_LOG(TextureImporterWarn,
+            IG_LOG(TextureImporterWarn,
                    "For DDS files, the provided configuration values are disregarded, "
                    "and the supplied file is used as the asset as it is. File: {}",
                    resPathStr.AsStringView());
@@ -282,14 +282,14 @@ namespace ig
         }
         else
         {
-            FE_LOG(TextureImporterFatal, "Found not supported texture extension from \"{}\".",
+            IG_LOG(TextureImporterFatal, "Found not supported texture extension from \"{}\".",
                    resPathStr.AsStringView());
             return std::nullopt;
         }
 
         if (FAILED(loadRes))
         {
-            FE_LOG(TextureImporterFatal, "Failed to load texture from {}.", resPathStr.AsStringView());
+            IG_LOG(TextureImporterFatal, "Failed to load texture from {}.", resPathStr.AsStringView());
             return std::nullopt;
         }
 
@@ -307,11 +307,11 @@ namespace ig
         const bool bPersistencyRequired = bIsPersistent || importConfig->bIsPersistent;
         if (!bIsDDSFormat)
         {
-            check(texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
+            IG_CHECK(texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
                   texMetadata.arraySize > 0);
-            check(!texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1));
-            check(texMetadata.format != DXGI_FORMAT_UNKNOWN);
-            check(!DirectX::IsSRGB(texMetadata.format));
+            IG_CHECK(!texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1));
+            IG_CHECK(texMetadata.format != DXGI_FORMAT_UNKNOWN);
+            IG_CHECK(!DirectX::IsSRGB(texMetadata.format));
 
             /* Generate full mipmap chain. */
             if (importConfig->bGenerateMips)
@@ -322,7 +322,7 @@ namespace ig
                     bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR, 0, mipChain);
                 if (FAILED(genRes))
                 {
-                    FE_LOG(TextureImporterFatal, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
+                    IG_LOG(TextureImporterFatal, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
                            genRes, resPathStr.AsStringView());
                     return std::nullopt;
                 }
@@ -336,7 +336,7 @@ namespace ig
             {
                 if (bIsHDRFormat && importConfig->CompressionMode != ETextureCompressionMode::BC6H)
                 {
-                    FE_LOG(TextureImporterWarn,
+                    IG_LOG(TextureImporterWarn,
                            "The compression method for HDR extension textures is "
                            "enforced "
                            "to be the 'BC6H' algorithm. File: {}",
@@ -347,7 +347,7 @@ namespace ig
                 else if (IsGreyScaleFormat(texMetadata.format) &&
                          importConfig->CompressionMode == ETextureCompressionMode::BC4)
                 {
-                    FE_LOG(TextureImporterWarn,
+                    IG_LOG(TextureImporterWarn,
                            "The compression method for greyscale-formatted "
                            "textures is "
                            "enforced to be the 'BC4' algorithm. File: {}",
@@ -390,10 +390,10 @@ namespace ig
                 {
                     if (bIsGPUCodecAvailable)
                     {
-                        FE_LOG(TextureImporterErr, "Failed to compress with GPU Codec.");
+                        IG_LOG(TextureImporterErr, "Failed to compress with GPU Codec.");
                     }
 
-                    FE_LOG(TextureImporterFatal,
+                    IG_LOG(TextureImporterFatal,
                            "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
                            "File: {}",
                            magic_enum::enum_name(importConfig->CompressionMode),
@@ -416,7 +416,7 @@ namespace ig
 
         if (!SaveSerializedDataToJsonFile(resMetadataPath, *importConfig))
         {
-            FE_LOG(TextureImporterWarn, "Failed to create resource metadata {}.", resMetadataPath.string());
+            IG_LOG(TextureImporterWarn, "Failed to create resource metadata {}.", resMetadataPath.string());
         }
 
         /* Configure Texture Asset Metadata */
@@ -449,7 +449,7 @@ namespace ig
         const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newLoadConfig.Guid);
         if (!SaveSerializedDataToJsonFile(assetMetadataPath, newLoadConfig))
         {
-            FE_LOG(TextureImporterFatal, "Failed to open asset metadata file {}.", assetMetadataPath.string());
+            IG_LOG(TextureImporterFatal, "Failed to open asset metadata file {}.", assetMetadataPath.string());
             return std::nullopt;
         }
 
@@ -457,7 +457,7 @@ namespace ig
         const fs::path assetPath = MakeAssetPath(EAssetType::Texture, newLoadConfig.Guid);
         if (fs::exists(assetPath))
         {
-            FE_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
+            IG_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
         }
 
         const HRESULT res = DirectX::SaveToDDSFile(
@@ -467,24 +467,24 @@ namespace ig
 
         if (FAILED(res))
         {
-            FE_LOG(TextureImporterFatal, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
+            IG_LOG(TextureImporterFatal, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
             return std::nullopt;
         }
 
-        FE_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.AsStringView(), assetPath.string(), tempTimer.End());
+        IG_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.AsStringView(), assetPath.string(), tempTimer.End());
         return std::make_optional(newLoadConfig.Guid);
     }
 
     std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
     {
-        FE_LOG(TextureLoaderInfo, "Load texture asset {}.", guid.str());
+        IG_LOG(TextureLoaderInfo, "Load texture asset {}.", guid.str());
         TempTimer tempTimer;
         tempTimer.Begin();
 
         const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::Texture, guid);
         if (!fs::exists(assetMetaPath))
         {
-            FE_LOG(TextureLoaderFatal, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());
+            IG_LOG(TextureLoaderFatal, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());
             return std::nullopt;
         }
 
@@ -503,14 +503,14 @@ namespace ig
 
         if (loadConfig.Guid != guid)
         {
-            FE_LOG(TextureLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
+            IG_LOG(TextureLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
                    guid.str(), loadConfig.Guid.str());
             return std::nullopt;
         }
 
         if (loadConfig.Type != EAssetType::Texture)
         {
-            FE_LOG(TextureLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
+            IG_LOG(TextureLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
                    magic_enum::enum_name(EAssetType::Texture),
                    magic_enum::enum_name(loadConfig.Type));
             return std::nullopt;
@@ -519,14 +519,14 @@ namespace ig
         /* Check TextureLoadConfig data */
         if (loadConfig.Width == 0 || loadConfig.Height == 0 || loadConfig.DepthOrArrayLength == 0 || loadConfig.Mips == 0)
         {
-            FE_LOG(TextureLoaderFatal, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
+            IG_LOG(TextureLoaderFatal, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
                    loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength, loadConfig.Mips);
             return std::nullopt;
         }
 
         if (loadConfig.Format == DXGI_FORMAT_UNKNOWN)
         {
-            FE_LOG(TextureLoaderFatal, "Load Config format is unknown.");
+            IG_LOG(TextureLoaderFatal, "Load Config format is unknown.");
             return std::nullopt;
         }
 
@@ -534,7 +534,7 @@ namespace ig
         const fs::path assetPath = MakeAssetPath(EAssetType::Texture, guid);
         if (!fs::exists(assetPath))
         {
-            FE_LOG(TextureLoaderFatal, "Texture Asset \"{}\" does not exist.", assetPath.string());
+            IG_LOG(TextureLoaderFatal, "Texture Asset \"{}\" does not exist.", assetPath.string());
             return std::nullopt;
         }
 
@@ -543,7 +543,7 @@ namespace ig
         HRESULT res = DirectX::LoadFromDDSFile(assetPath.c_str(), DirectX::DDS_FLAGS_NONE, &ddsMeta, scratchImage);
         if (FAILED(res))
         {
-            FE_LOG(TextureLoaderFatal, "Failed to load texture asset(dds) from {}.", assetPath.string());
+            IG_LOG(TextureLoaderFatal, "Failed to load texture asset(dds) from {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -552,31 +552,31 @@ namespace ig
             loadConfig.Height != ddsMeta.height ||
             (loadConfig.DepthOrArrayLength != ddsMeta.depth && loadConfig.DepthOrArrayLength != ddsMeta.arraySize))
         {
-            FE_LOG(TextureLoaderFatal, "DDS Metadata does not match with texture asset metadata.");
+            IG_LOG(TextureLoaderFatal, "DDS Metadata does not match with texture asset metadata.");
             return std::nullopt;
         }
 
         if (loadConfig.bIsCubemap != loadConfig.bIsCubemap)
         {
-            FE_LOG(TextureLoaderFatal, "Texture asset cubemap flag does not match");
+            IG_LOG(TextureLoaderFatal, "Texture asset cubemap flag does not match");
             return std::nullopt;
         }
 
         if (loadConfig.bIsCubemap && (loadConfig.DepthOrArrayLength % 6 == 0))
         {
-            FE_LOG(TextureLoaderFatal, "Cubemap array length suppose to be multiple of \'6\'.");
+            IG_LOG(TextureLoaderFatal, "Cubemap array length suppose to be multiple of \'6\'.");
             return std::nullopt;
         }
 
         if (loadConfig.Dimension != AsTexDimension(ddsMeta.dimension))
         {
-            FE_LOG(TextureLoaderFatal, "Texture Asset Dimension does not match with DDS Dimension.");
+            IG_LOG(TextureLoaderFatal, "Texture Asset Dimension does not match with DDS Dimension.");
             return std::nullopt;
         }
 
         if (loadConfig.Format != ddsMeta.format)
         {
-            FE_LOG(TextureLoaderFatal, "Texture Asset Format does not match with DDS Format.");
+            IG_LOG(TextureLoaderFatal, "Texture Asset Format does not match with DDS Format.");
             return std::nullopt;
         }
 
@@ -622,7 +622,7 @@ namespace ig
         }
         else
         {
-            check(!loadConfig.IsArray());
+            IG_CHECK(!loadConfig.IsArray());
             texDesc.AsTexture3D(loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength,
                                 loadConfig.Mips,
                                 loadConfig.Format);
@@ -634,7 +634,7 @@ namespace ig
         std::optional<GpuTexture> newTex = renderDevice.CreateTexture(texDesc);
         if (!newTex)
         {
-            FE_LOG(TextureLoaderFatal, "Failed to create GpuTexture from render device, which for texture asset {}.", assetPath.string());
+            IG_LOG(TextureLoaderFatal, "Failed to create GpuTexture from render device, which for texture asset {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -683,7 +683,7 @@ namespace ig
         }
 
         std::optional<GpuSync> texUploadSync = gpuUploader.Submit(texUploadCtx);
-        check(texUploadSync);
+        IG_CHECK(texUploadSync);
         texUploadSync->WaitOnCpu();
 
         /* Create Shader Resource View (GpuView) */
@@ -697,7 +697,7 @@ namespace ig
 
         if (!srv)
         {
-            FE_LOG(TextureLoaderFatal, "Failed to create shader resource view for {}.", assetPath.string());
+            IG_LOG(TextureLoaderFatal, "Failed to create shader resource view for {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -716,11 +716,11 @@ namespace ig
 
         if (!samplerView)
         {
-            FE_LOG(TextureLoaderFatal, "Failed to create sampler view for {}.", assetPath.string());
+            IG_LOG(TextureLoaderFatal, "Failed to create sampler view for {}.", assetPath.string());
             return std::nullopt;
         }
 
-        FE_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), loadConfig.SrcResPath, tempTimer.End());
+        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), loadConfig.SrcResPath, tempTimer.End());
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
         return Texture{
             .LoadConfig = loadConfig,

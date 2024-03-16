@@ -41,9 +41,9 @@ namespace ig
         Matrix LocalToWorld{};
     };
 
-    FE_DEFINE_LOG_CATEGORY(RendererInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(RendererWarn, ELogVerbosity::Warning)
-    FE_DEFINE_LOG_CATEGORY(RendererFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(RendererInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(RendererWarn, ELogVerbosity::Warning)
+    IG_DEFINE_LOG_CATEGORY(RendererFatal, ELogVerbosity::Fatal)
 
     Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager)
         : frameManager(engineFrameManager),
@@ -124,13 +124,13 @@ namespace ig
 
     void Renderer::Render(Registry& registry)
     {
-        check(mainGfxQueue);
+        IG_CHECK(mainGfxQueue);
 
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
         auto cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
-        check(cameraView.size_hint() == 1);
+        IG_CHECK(cameraView.size_hint() == 1);
         for (auto [entity, camera, transformData] : cameraView.each())
         {
             /* #sy_todo Multiple Camera, Render Target per camera */

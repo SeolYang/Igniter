@@ -17,7 +17,7 @@ namespace ig
           gpuViewManager(gpuViewManager),
           reservedSizeInBytesPerFrame(reservedSizeInBytesPerFrame)
     {
-        check(reservedSizeInBytesPerFrame % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
+        IG_CHECK(reservedSizeInBytesPerFrame % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
 
         GpuBufferDesc desc{};
         desc.AsConstantBuffer(reservedSizeInBytesPerFrame);
@@ -37,10 +37,10 @@ namespace ig
     TempConstantBuffer TempConstantBufferAllocator::Allocate(const GpuBufferDesc& desc)
     {
         const size_t currentLocalFrameIdx = frameManager.GetLocalFrameIndex();
-        check(currentLocalFrameIdx < NumFramesInFlight);
+        IG_CHECK(currentLocalFrameIdx < NumFramesInFlight);
         const uint64_t allocSizeInBytes = desc.GetSizeAsBytes();
         const uint64_t offset = allocatedSizeInBytes[currentLocalFrameIdx].fetch_add(allocSizeInBytes);
-        check(offset <= reservedSizeInBytesPerFrame);
+        IG_CHECK(offset <= reservedSizeInBytesPerFrame);
         mappedBuffers[currentLocalFrameIdx].emplace_back(buffers[currentLocalFrameIdx].MapHandle(handleManager, offset));
         allocatedViews[currentLocalFrameIdx].emplace_back(gpuViewManager.RequestConstantBufferView(buffers[currentLocalFrameIdx], offset, allocSizeInBytes));
 
@@ -53,7 +53,7 @@ namespace ig
     void TempConstantBufferAllocator::DeallocateCurrentFrame()
     {
         const size_t currentLocalFrameIdx = frameManager.GetLocalFrameIndex();
-        check(currentLocalFrameIdx < NumFramesInFlight);
+        IG_CHECK(currentLocalFrameIdx < NumFramesInFlight);
         mappedBuffers[currentLocalFrameIdx].clear();
         allocatedViews[currentLocalFrameIdx].clear();
         allocatedSizeInBytes[currentLocalFrameIdx].store(0);

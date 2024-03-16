@@ -100,7 +100,7 @@ namespace ig
     };
 } // namespace ig
 
-#define FE_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME, VERBOSITY_LEVEL)           \
+#define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME, VERBOSITY_LEVEL)           \
     struct LOG_CATEGORY_NAME                                                 \
     {                                                                        \
         static constexpr ig::ELogVerbosity Verbosity = VERBOSITY_LEVEL;      \
@@ -108,30 +108,30 @@ namespace ig
     };
 
 #if defined(DEBUG) || defined(_DEBUG)
-    #define FE_LOG(LOG_CATEGORY, ...)                                                                                             \
+    #define IG_LOG(LOG_CATEGORY, ...)                                                                                             \
         ig::Igniter::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__);                                                                   \
         if constexpr (LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Error || LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Fatal) \
         {                                                                                                                         \
-            checkNoEntry();                                                                                                       \
+            IG_CHECK_NO_ENTRY();                                                                                                       \
         }
 #else
-    #define FE_LOG(LOG_CATEGORY, ...) ig::Igniter::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
+    #define IG_LOG(LOG_CATEGORY, ...) ig::Igniter::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
 #endif
 
-#define FE_CONDITIONAL_LOG(LOG_CATEGORY, CONDITION, ...) \
+#define IG_CONDITIONAL_LOG(LOG_CATEGORY, CONDITION, ...) \
     do                                                   \
         if (!(CONDITION))                                \
         {                                                \
-            FE_LOG(LOG_CATEGORY, __VA_ARGS__);           \
+            IG_LOG(LOG_CATEGORY, __VA_ARGS__);           \
         }                                                \
     while (false)
 
 namespace ig
 {
-    FE_DEFINE_LOG_CATEGORY(LogTemp, ELogVerbosity::Temp)
-    FE_DEFINE_LOG_CATEGORY(LogInfo, ELogVerbosity::Info)
-    FE_DEFINE_LOG_CATEGORY(LogDebug, ELogVerbosity::Debug)
-    FE_DEFINE_LOG_CATEGORY(LogWarn, ELogVerbosity::Warning)
-    FE_DEFINE_LOG_CATEGORY(LogError, ELogVerbosity::Error)
-    FE_DEFINE_LOG_CATEGORY(LogFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(LogTemp, ELogVerbosity::Temp)
+    IG_DEFINE_LOG_CATEGORY(LogInfo, ELogVerbosity::Info)
+    IG_DEFINE_LOG_CATEGORY(LogDebug, ELogVerbosity::Debug)
+    IG_DEFINE_LOG_CATEGORY(LogWarn, ELogVerbosity::Warning)
+    IG_DEFINE_LOG_CATEGORY(LogError, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(LogFatal, ELogVerbosity::Fatal)
 } // namespace ig

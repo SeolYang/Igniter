@@ -10,7 +10,7 @@ CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControll
 {
     const auto& inputManager = ig::Igniter::GetInputManager();
     togglePossessToCamera = inputManager.QueryAction(ig::String("TogglePossessCamera"));
-    check(togglePossessToCamera);
+    IG_CHECK(togglePossessToCamera);
 
     Configure();
 }
@@ -31,14 +31,14 @@ void CameraPossessSystem::Configure()
 {
     if (bEnabled)
     {
-        FE_LOG(ig::LogDebug, "Possess to Camera.");
+        IG_LOG(ig::LogDebug, "Possess to Camera.");
         fpsCamControllSystem.SetIgnoreInput(false);
         window.SetCursorVisibility(false);
         window.ClipCursor();
     }
     else
     {
-        FE_LOG(ig::LogDebug, "Unposess from Camera.");
+        IG_LOG(ig::LogDebug, "Unposess from Camera.");
         fpsCamControllSystem.SetIgnoreInput(true);
         window.SetCursorVisibility(true);
         window.UnclipCursor();
