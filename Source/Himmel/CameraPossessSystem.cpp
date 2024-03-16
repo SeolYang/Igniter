@@ -2,14 +2,14 @@
 #include <FpsCameraControllSystem.h>
 #include <Core/Window.h>
 #include <Core/Log.h>
-#include <Engine.h>
+#include <Core/Igniter.h>
 
 CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
-    : window(fe::Engine::GetWindow()),
+    : window(ig::Igniter::GetWindow()),
       fpsCamControllSystem(fpsCamControllSystem)
 {
-    const auto& inputManager = fe::Engine::GetInputManager();
-    togglePossessToCamera = inputManager.QueryAction(fe::String("TogglePossessCamera"));
+    const auto& inputManager = ig::Igniter::GetInputManager();
+    togglePossessToCamera = inputManager.QueryAction(ig::String("TogglePossessCamera"));
     check(togglePossessToCamera);
 
     Configure();
@@ -19,7 +19,7 @@ void CameraPossessSystem::Update()
 {
     if (togglePossessToCamera)
     {
-        if (togglePossessToCamera->State == fe::EInputState::Pressed)
+        if (togglePossessToCamera->State == ig::EInputState::Pressed)
         {
             bEnabled = !bEnabled;
             Configure();
@@ -31,14 +31,14 @@ void CameraPossessSystem::Configure()
 {
     if (bEnabled)
     {
-        FE_LOG(fe::LogDebug, "Possess to Camera.");
+        FE_LOG(ig::LogDebug, "Possess to Camera.");
         fpsCamControllSystem.SetIgnoreInput(false);
         window.SetCursorVisibility(false);
         window.ClipCursor();
     }
     else
     {
-        FE_LOG(fe::LogDebug, "Unposess from Camera.");
+        FE_LOG(ig::LogDebug, "Unposess from Camera.");
         fpsCamControllSystem.SetIgnoreInput(true);
         window.SetCursorVisibility(true);
         window.UnclipCursor();

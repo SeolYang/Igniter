@@ -1,0 +1,408 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Asan|x64">
+      <Configuration>Asan</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="CheckMemLeak|x64">
+      <Configuration>CheckMemLeak</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\Common.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\Model.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\Texture.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Assert.h" />
+    <ClInclude Include="..\Source\Igniter\Core\ComponentRegistry.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Container.h" />
+    <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h" />
+    <ClInclude Include="..\Source\Igniter\Core\EmbededSettings.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Event.h" />
+    <ClInclude Include="..\Source\Igniter\Core\FrameManager.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Handle.h" />
+    <ClInclude Include="..\Source\Igniter\Core\HandleManager.h" />
+    <ClInclude Include="..\Source\Igniter\Core\HashUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Igniter.h" />
+    <ClInclude Include="..\Source\Igniter\Core\InputManager.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Json.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Log.h" />
+    <ClInclude Include="..\Source\Igniter\Core\MathUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h" />
+    <ClInclude Include="..\Source\Igniter\Core\MemUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Mutex.h" />
+    <ClInclude Include="..\Source\Igniter\Core\NameComponent.h" />
+    <ClInclude Include="..\Source\Igniter\Core\NamedType.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Profile.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Result.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Serializable.h" />
+    <ClInclude Include="..\Source\Igniter\Core\String.h" />
+    <ClInclude Include="..\Source\Igniter\Core\ThreadUIDGenerator.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Timer.h" />
+    <ClInclude Include="..\Source\Igniter\Core\TypeUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Version.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Win32API.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Window.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\CommandContext.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\CommandContextPool.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\CommandQueue.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\Common.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\DescriptorHeap.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuBuffer.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuBufferDesc.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuSync.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuTexture.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuTextureDesc.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuView.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\PipelineState.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\PipelineStateDesc.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\RenderDevice.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\RootSignature.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\Sampler.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\ShaderBlob.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\ShaderCompiler.h" />
+    <ClInclude Include="..\Source\Igniter\D3D12\Swapchain.h" />
+    <ClInclude Include="..\Source\Igniter\Filesystem\Common.h" />
+    <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h" />
+    <ClInclude Include="..\Source\Igniter\Gameplay\Common.h" />
+    <ClInclude Include="..\Source\Igniter\Gameplay\GameInstance.h" />
+    <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\CachedStringDebugger.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\Common.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\EntityList.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
+    <ClInclude Include="..\Source\Igniter\Math\Common.h" />
+    <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
+    <ClInclude Include="..\Source\Igniter\Render\CameraArchetype.h" />
+    <ClInclude Include="..\Source\Igniter\Render\CameraComponent.h" />
+    <ClInclude Include="..\Source\Igniter\Render\Common.h" />
+    <ClInclude Include="..\Source\Igniter\Render\GpuUploader.h" />
+    <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h" />
+    <ClInclude Include="..\Source\Igniter\Render\Renderer.h" />
+    <ClInclude Include="..\Source\Igniter\Render\StaticMeshComponent.h" />
+    <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h" />
+    <ClInclude Include="..\Source\Igniter\Render\TransformComponent.h" />
+    <ClInclude Include="..\Source\Igniter\Render\Vertex.h" />
+    <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcerrors.h" />
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h" />
+    <ClInclude Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h" />
+    <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3_win.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEvents.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsCommon.h" />
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Source\Igniter\Asset\AssetCache.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\Model.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\HashUtils.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\Igniter.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\InputManager.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\Log.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\MemoryPool.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\String.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\ThreadUIDGenerator.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\Window.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\CommandContext.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\CommandContextPool.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\CommandQueue.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\D3D12Common.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\DescriptorHeap.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\GpuBuffer.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\GpuBufferDesc.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\GpuTexture.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\GPUTextureDesc.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\PipelineState.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\PipelineStateDesc.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\RenderDevice.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\RootSignature.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp" />
+    <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCommon.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
+    <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
+    <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
+    <ClCompile Include="..\Source\Igniter\Render\Renderer.cpp" />
+    <ClCompile Include="..\Source\Igniter\Render\RendererCommon.cpp" />
+    <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp" />
+    <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl" />
+    <None Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{229becc5-709f-4d93-b959-7c23283ddef8}</ProjectGuid>
+    <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Igniter</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>true</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgApplocalDeps>true</VcpkgApplocalDeps>
+    <VcpkgXUseBuiltInApplocalDeps>true</VcpkgXUseBuiltInApplocalDeps>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeak|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>CHECK_MEM_LEAK;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;NOMINMAX;WIN32_MEAN_AND_LEAN;_DISABLE_VECTOR_ANNOTATION;_DISABLE_STRING_ANNOTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxgi.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

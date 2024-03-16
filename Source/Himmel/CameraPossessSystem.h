@@ -2,10 +2,10 @@
 #include <Core/InputManager.h>
 #include <Gameplay/Common.h>
 
-namespace fe
+namespace ig
 {
     class Window;
-} // namespace fe
+} // namespace ig
 
 class FpsCameraControllSystem;
 class CameraPossessSystem
@@ -19,8 +19,8 @@ private:
     void Configure();
 
 private:
-    fe::Window& window;
-    fe::RefHandle<const fe::Action> togglePossessToCamera;
+    ig::Window& window;
+    ig::RefHandle<const ig::Action> togglePossessToCamera;
     FpsCameraControllSystem& fpsCamControllSystem;
 
     bool bEnabled = true;

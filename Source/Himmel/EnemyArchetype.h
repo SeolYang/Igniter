@@ -7,11 +7,11 @@
 class EnemyArchetype
 {
 public:
-    static fe::Entity Create(fe::Registry& registry)
+    static ig::Entity Create(ig::Registry& registry)
     {
-        const fe::Entity newEntity = registry.create();
+        const ig::Entity newEntity = registry.create();
         registry.emplace<Enemy>(newEntity);
-        registry.emplace<fe::TransformComponent>(newEntity);
+        registry.emplace<ig::TransformComponent>(newEntity);
         registry.emplace<HealthComponent>(newEntity);
         return newEntity;
     }

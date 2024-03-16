@@ -1,4 +1,4 @@
-#include <Engine.h>
+#include <Core/Igniter.h>
 #include <Core/InputManager.h>
 #include <Core/Handle.h>
 #include <Core/Event.h>
@@ -32,10 +32,10 @@
 
 int main()
 {
-    using namespace fe;
+    using namespace ig;
     int result = 0;
     {
-        Engine engine;
+        Igniter engine;
         Window& window = engine.GetWindow();
         InputManager& inputManager = engine.GetInputManager();
         RenderDevice& renderDevice = engine.GetRenderDevice();

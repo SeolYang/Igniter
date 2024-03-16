@@ -5,13 +5,13 @@
 #include <RotateEnemySystem.h>
 #include <CameraPossessSystem.h>
 
-class TestGameMode : public fe::GameMode
+class TestGameMode : public ig::GameMode
 {
 public:
     TestGameMode();
     ~TestGameMode();
 
-    virtual void Update(fe::Registry& registry) override;
+    virtual void Update(ig::Registry& registry) override;
 
 private:
     FpsCameraControllSystem fpsCameraControllSystem;

@@ -1,0 +1,469 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{687bade5-725c-495a-9ef1-7a3784f06a28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty">
+      <UniqueIdentifier>{649caa31-cf2a-4603-ace2-485c6b0c9660}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\D3D12MemAlloc">
+      <UniqueIdentifier>{d6c45c0b-c442-4eac-90cf-dcc17c5d6e29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{d0dbc9e3-27a4-412c-a6ed-51cd6c470d0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\SimpleMath">
+      <UniqueIdentifier>{0e94695b-79b7-4b7f-8524-6543ee102861}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\DirectXTex">
+      <UniqueIdentifier>{af091ce6-3816-42e2-9da1-b229568acb68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\DirectXCompiler">
+      <UniqueIdentifier>{173fb3a5-9de0-4c9b-9e2b-fec11f93dc3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\WinPixEventRuntime">
+      <UniqueIdentifier>{d1b1f73c-4a4e-41dc-aa8c-5c0d1456bf88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset">
+      <UniqueIdentifier>{3c18d2ba-7e87-4165-9442-349c99f3e97e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Core">
+      <UniqueIdentifier>{1bda930a-08a2-46c9-a9ce-cb49bf7105b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\D3D12">
+      <UniqueIdentifier>{058964cd-5d0e-4a04-81a2-a256387061be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Filesystem">
+      <UniqueIdentifier>{aaed342c-7a55-4052-92f8-5abc0cf1e747}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Gameplay">
+      <UniqueIdentifier>{68b2b4dd-9a48-4225-8364-71ddf11c704c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ImGui">
+      <UniqueIdentifier>{8a58a63d-d3f6-4e1b-a871-a8ba1824da64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{3e0a91db-4807-4302-b29c-858e6f83b600}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Renderer">
+      <UniqueIdentifier>{36ef20ca-725c-48ea-81d7-7a5cb33925a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Components">
+      <UniqueIdentifier>{a2feb8ca-1174-4678-b886-dc43aece1d9f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
+      <Filter>Thirdparty\D3D12MemAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h">
+      <Filter>Thirdparty\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcerrors.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3_win.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEvents.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsCommon.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\Common.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\Model.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\Texture.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Assert.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\ComponentRegistry.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Container.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\EmbededSettings.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Event.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\FrameManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Handle.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\HandleManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\HashUtils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\InputManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Json.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Log.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\MathUtils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\MemUtils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Mutex.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\NameComponent.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\NamedType.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Profile.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Result.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Serializable.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\String.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\ThreadUIDGenerator.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Timer.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\TypeUtils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Version.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Win32API.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Window.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\CommandContext.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\CommandContextPool.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\CommandQueue.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\Common.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\DescriptorHeap.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuBuffer.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuBufferDesc.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuSync.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuTexture.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuTextureDesc.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\GpuView.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\PipelineState.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\PipelineStateDesc.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\RenderDevice.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\RootSignature.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\Sampler.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\ShaderBlob.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\ShaderCompiler.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\D3D12\Swapchain.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Filesystem\Common.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Gameplay\Common.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Gameplay\GameInstance.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\CachedStringDebugger.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\Common.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\EntityList.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Math\Common.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Math\Utils.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\CameraArchetype.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\CameraComponent.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\Common.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\GpuUploader.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\Renderer.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\StaticMeshComponent.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\TransformComponent.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\Vertex.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Igniter.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
+      <Filter>Thirdparty\D3D12MemAlloc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\AssetCache.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\Common.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\Model.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\Handle.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\HashUtils.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\InputManager.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\Log.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\MemoryPool.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\String.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\ThreadUIDGenerator.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\Window.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\CommandContext.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\CommandContextPool.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\CommandQueue.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\D3D12Common.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\DescriptorHeap.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\GpuBuffer.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\GpuBufferDesc.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\GpuTexture.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\GPUTextureDesc.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\PipelineState.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\PipelineStateDesc.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\RenderDevice.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\RootSignature.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp">
+      <Filter>Source\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCommon.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp">
+      <Filter>Source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp">
+      <Filter>Source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\Renderer.cpp">
+      <Filter>Source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\RendererCommon.cpp">
+      <Filter>Source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp">
+      <Filter>Source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\Igniter.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </None>
+    <None Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
+      <Filter>Thirdparty\DirectXTex</Filter>
+    </None>
+  </ItemGroup>
+</Project>

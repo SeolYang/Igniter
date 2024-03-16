@@ -4,5 +4,5 @@
 class HealthRecoverySystem
 {
 public:
-    static void Update(fe::Registry& registry);
+    static void Update(ig::Registry& registry);
 };

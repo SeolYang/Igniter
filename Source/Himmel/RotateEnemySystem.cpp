@@ -3,21 +3,21 @@
 #include <Render/TransformComponent.h>
 #include <EnemyArchetype.h>
 #include <Enemy.h>
-#include <Engine.h>
+#include <Core/Igniter.h>
 
 RotateEnemySystem::RotateEnemySystem(const float rotateDegsPerSec)
-    : timer(fe::Engine::GetTimer()),
+    : timer(ig::Igniter::GetTimer()),
       rotateDegsPerSec(rotateDegsPerSec)
 {
 }
 
-void RotateEnemySystem::Update(fe::Registry& registry)
+void RotateEnemySystem::Update(ig::Registry& registry)
 {
-    const auto enemyView = registry.view<Enemy, fe::TransformComponent>();
+    const auto enemyView = registry.view<Enemy, ig::TransformComponent>();
     for (auto [entity, transform] : enemyView.each())
     {
-        transform.Rotation = fe::Quaternion::Concatenate(
-            fe::Quaternion::CreateFromYawPitchRoll(fe::Vector3{ 0.f, rotateDegsPerSec * timer.GetDeltaTime(), 0.f }),
+        transform.Rotation = ig::Quaternion::Concatenate(
+            ig::Quaternion::CreateFromYawPitchRoll(ig::Vector3{ 0.f, rotateDegsPerSec * timer.GetDeltaTime(), 0.f }),
             transform.Rotation);
     }
 }

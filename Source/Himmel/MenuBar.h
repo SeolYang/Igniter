@@ -2,15 +2,15 @@
 #include <ImGui/ImGuiLayer.h>
 #include <ImGui/CachedStringDebugger.h>
 #include <ImGui/EntityList.h>
-#include <Engine.h>
+#include <Core/Igniter.h>
 
-class MenuBar : public fe::ImGuiLayer
+class MenuBar : public ig::ImGuiLayer
 {
 public:
-    MenuBar(fe::CachedStringDebugger& cachedStringDebugger, fe::EntityList& entityList)
+    MenuBar(ig::CachedStringDebugger& cachedStringDebugger, ig::EntityList& entityList)
         : cachedStringDebugger(cachedStringDebugger),
           entityList(entityList),
-          fe::ImGuiLayer(fe::String("MenuBar"))
+          ig::ImGuiLayer(ig::String("MenuBar"))
     {
     }
 
@@ -22,7 +22,7 @@ public:
             {
                 if (ImGui::MenuItem("Exit (Alt+F4)"))
                 {
-                    fe::Engine::Exit();
+                    ig::Igniter::Exit();
                 }
                 ImGui::EndMenu();
             }
@@ -46,6 +46,6 @@ public:
     }
 
 private:
-    fe::CachedStringDebugger& cachedStringDebugger;
-    fe::EntityList& entityList;
+    ig::CachedStringDebugger& cachedStringDebugger;
+    ig::EntityList& entityList;
 };

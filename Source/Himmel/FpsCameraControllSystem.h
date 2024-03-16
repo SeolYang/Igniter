@@ -2,34 +2,34 @@
 #include <Core/InputManager.h>
 #include <Gameplay/Common.h>
 
-namespace fe
+namespace ig
 {
     class Timer;
-} // namespace fe
+} // namespace ig
 
 class FpsCameraControllSystem
 {
 public:
     FpsCameraControllSystem();
 
-    void Update(fe::Registry& registry);
+    void Update(ig::Registry& registry);
 
     void SetIgnoreInput(const bool bEnable) { this->bIgnoreInput = bEnable; }
 
 private:
-    const fe::Timer& timer;
+    const ig::Timer& timer;
 
     bool bIgnoreInput = false;
 
-    fe::RefHandle<const fe::Action> moveLeftAction;
-    fe::RefHandle<const fe::Action> moveRightAction;
-    fe::RefHandle<const fe::Action> moveForwardAction;
-    fe::RefHandle<const fe::Action> moveBackwardAction;
-    fe::RefHandle<const fe::Action> moveUpAction;
-    fe::RefHandle<const fe::Action> moveDownAction;
+    ig::RefHandle<const ig::Action> moveLeftAction;
+    ig::RefHandle<const ig::Action> moveRightAction;
+    ig::RefHandle<const ig::Action> moveForwardAction;
+    ig::RefHandle<const ig::Action> moveBackwardAction;
+    ig::RefHandle<const ig::Action> moveUpAction;
+    ig::RefHandle<const ig::Action> moveDownAction;
 
-    fe::RefHandle<const fe::Axis> turnYawAxis;
-    fe::RefHandle<const fe::Axis> turnPitchAxis;
+    ig::RefHandle<const ig::Axis> turnYawAxis;
+    ig::RefHandle<const ig::Axis> turnPitchAxis;
 
-    fe::RefHandle<const fe::Action> sprintAction;
+    ig::RefHandle<const ig::Action> sprintAction;
 };

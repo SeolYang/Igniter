@@ -3,33 +3,33 @@
 #include <Render/CameraComponent.h>
 #include <Core/InputManager.h>
 #include <Core/Log.h>
-#include <Engine.h>
+#include <Core/Igniter.h>
 #include <FpsCameraController.h>
 
 FpsCameraControllSystem::FpsCameraControllSystem()
-    : timer(fe::Engine::GetTimer())
+    : timer(ig::Igniter::GetTimer())
 {
-    auto& inputManager = fe::Engine::GetInputManager();
-    moveLeftAction = inputManager.QueryAction(fe::String("MoveLeft"));
-    moveRightAction = inputManager.QueryAction(fe::String("MoveRight"));
-    moveForwardAction = inputManager.QueryAction(fe::String("MoveForward"));
-    moveBackwardAction = inputManager.QueryAction(fe::String("MoveBackward"));
+    auto& inputManager = ig::Igniter::GetInputManager();
+    moveLeftAction = inputManager.QueryAction(ig::String("MoveLeft"));
+    moveRightAction = inputManager.QueryAction(ig::String("MoveRight"));
+    moveForwardAction = inputManager.QueryAction(ig::String("MoveForward"));
+    moveBackwardAction = inputManager.QueryAction(ig::String("MoveBackward"));
 
-    moveUpAction = inputManager.QueryAction(fe::String("MoveUp"));
-    moveDownAction = inputManager.QueryAction(fe::String("MoveDown"));
+    moveUpAction = inputManager.QueryAction(ig::String("MoveUp"));
+    moveDownAction = inputManager.QueryAction(ig::String("MoveDown"));
 
-    sprintAction = inputManager.QueryAction(fe::String("Sprint"));
+    sprintAction = inputManager.QueryAction(ig::String("Sprint"));
 
-    turnYawAxis = inputManager.QueryAxis(fe::String("TurnYaw"));
-    turnPitchAxis = inputManager.QueryAxis(fe::String("TurnAxis"));
+    turnYawAxis = inputManager.QueryAxis(ig::String("TurnYaw"));
+    turnPitchAxis = inputManager.QueryAxis(ig::String("TurnAxis"));
 }
 
-void FpsCameraControllSystem::Update(fe::Registry& registry)
+void FpsCameraControllSystem::Update(ig::Registry& registry)
 {
-    const auto fpsCamView = registry.view<fe::TransformComponent, FpsCameraController, fe::CameraComponent>();
-    for (const fe::Entity entity : fpsCamView)
+    const auto fpsCamView = registry.view<ig::TransformComponent, FpsCameraController, ig::CameraComponent>();
+    for (const ig::Entity entity : fpsCamView)
     {
-        auto& transform = fpsCamView.get<fe::TransformComponent>(entity);
+        auto& transform = fpsCamView.get<ig::TransformComponent>(entity);
         auto& controller = fpsCamView.get<FpsCameraController>(entity);
 
         if (!bIgnoreInput)
@@ -37,7 +37,7 @@ void FpsCameraControllSystem::Update(fe::Registry& registry)
             /* Handle Movements */
             const bool bShouldSprint = sprintAction && sprintAction->IsAnyPressing();
             const float sprintFactor = bShouldSprint ? controller.SprintFactor : 1.f;
-            fe::Vector3 direction{};
+            ig::Vector3 direction{};
             if (moveLeftAction && moveLeftAction->IsAnyPressing())
             {
                 direction += transform.GetLeftDirection();
@@ -60,17 +60,17 @@ void FpsCameraControllSystem::Update(fe::Registry& registry)
 
             if (moveUpAction && moveUpAction->IsAnyPressing())
             {
-                direction += fe::Vector3::Up;
+                direction += ig::Vector3::Up;
             }
 
             if (moveDownAction && moveDownAction->IsAnyPressing())
             {
-                direction += fe::Vector3::Down;
+                direction += ig::Vector3::Down;
             }
 
-            if (direction != fe::Vector3::Zero)
+            if (direction != ig::Vector3::Zero)
             {
-                const fe::Vector3 impulse = controller.MovementPower * sprintFactor * direction * timer.GetDeltaTime();
+                const ig::Vector3 impulse = controller.MovementPower * sprintFactor * direction * timer.GetDeltaTime();
                 controller.LatestImpulse = impulse;
                 controller.ElapsedTimeAfterLatestImpulse = 0.f;
             }

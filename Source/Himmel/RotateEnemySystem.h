@@ -1,19 +1,19 @@
 #pragma once
 #include <Gameplay/Common.h>
 
-namespace fe
+namespace ig
 {
     class Timer;
-} // namespace fe
+} // namespace ig
 
 class RotateEnemySystem
 {
 public:
     RotateEnemySystem(const float rotateDegsPerSec = 2.f);
 
-    void Update(fe::Registry& registry);
+    void Update(ig::Registry& registry);
 
 private:
-    const fe::Timer& timer;
+    const ig::Timer& timer;
     const float rotateDegsPerSec;
 };
