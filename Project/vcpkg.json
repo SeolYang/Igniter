@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "frieren",
+  "name": "igniter",
   "version": "0.2.0",
   "dependencies": [
     {

@@ -6,63 +6,63 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Himmel\main.cpp">
+    <ClCompile Include="..\Source\Frieren\CameraPossessSystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\TestGameMode.cpp">
+    <ClCompile Include="..\Source\Frieren\FpsCameraControllSystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp">
+    <ClCompile Include="..\Source\Frieren\HealthRecoverySystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\RotateEnemySystem.cpp">
+    <ClCompile Include="..\Source\Frieren\main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\FpsCameraControllSystem.cpp">
+    <ClCompile Include="..\Source\Frieren\RotateEnemySystem.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\CameraPossessSystem.cpp">
+    <ClCompile Include="..\Source\Frieren\TestGameMode.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\Himmel\HealthRecoverySystem.h">
+    <ClInclude Include="..\Source\Frieren\CameraPossessSystem.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\PlayerArchetype.h">
+    <ClInclude Include="..\Source\Frieren\Enemy.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\TestGameMode.h">
+    <ClInclude Include="..\Source\Frieren\EnemyArchetype.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\HealthComponent.h">
+    <ClInclude Include="..\Source\Frieren\FpsCameraController.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\HealthRecoveryBuff.h">
+    <ClInclude Include="..\Source\Frieren\FpsCameraControllSystem.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\PlayerComponent.h">
+    <ClInclude Include="..\Source\Frieren\HealthComponent.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\MenuBar.h">
+    <ClInclude Include="..\Source\Frieren\HealthRecoveryBuff.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\RotateEnemySystem.h">
+    <ClInclude Include="..\Source\Frieren\HealthRecoverySystem.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\EnemyArchetype.h">
+    <ClInclude Include="..\Source\Frieren\MenuBar.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\Enemy.h">
+    <ClInclude Include="..\Source\Frieren\PlayerArchetype.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\FpsCameraController.h">
+    <ClInclude Include="..\Source\Frieren\PlayerComponent.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\FpsCameraControllSystem.h">
+    <ClInclude Include="..\Source\Frieren\RotateEnemySystem.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\CameraPossessSystem.h">
+    <ClInclude Include="..\Source\Frieren\TestGameMode.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

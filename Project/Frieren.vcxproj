@@ -18,12 +18,36 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Source\Frieren\CameraPossessSystem.cpp" />
+    <ClCompile Include="..\Source\Frieren\FpsCameraControllSystem.cpp" />
+    <ClCompile Include="..\Source\Frieren\HealthRecoverySystem.cpp" />
+    <ClCompile Include="..\Source\Frieren\main.cpp" />
+    <ClCompile Include="..\Source\Frieren\RotateEnemySystem.cpp" />
+    <ClCompile Include="..\Source\Frieren\TestGameMode.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Source\Frieren\CameraPossessSystem.h" />
+    <ClInclude Include="..\Source\Frieren\Enemy.h" />
+    <ClInclude Include="..\Source\Frieren\EnemyArchetype.h" />
+    <ClInclude Include="..\Source\Frieren\FpsCameraController.h" />
+    <ClInclude Include="..\Source\Frieren\FpsCameraControllSystem.h" />
+    <ClInclude Include="..\Source\Frieren\HealthComponent.h" />
+    <ClInclude Include="..\Source\Frieren\HealthRecoveryBuff.h" />
+    <ClInclude Include="..\Source\Frieren\HealthRecoverySystem.h" />
+    <ClInclude Include="..\Source\Frieren\MenuBar.h" />
+    <ClInclude Include="..\Source\Frieren\PlayerArchetype.h" />
+    <ClInclude Include="..\Source\Frieren\PlayerComponent.h" />
+    <ClInclude Include="..\Source\Frieren\RotateEnemySystem.h" />
+    <ClInclude Include="..\Source\Frieren\TestGameMode.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{3225fafa-796d-4c15-8b47-a26a6724c6fa}</ProjectGuid>
     <RootNamespace>Himmel</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Frieren</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -112,7 +136,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Himmel;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -130,7 +154,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Himmel;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -148,7 +172,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Himmel;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -168,7 +192,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Himmel;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -180,29 +204,6 @@
       <AdditionalLibraryDirectories>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\;$(SolutionDir)..\Thirdparty\DirectXTex\libs;$(SolutionDir)..\Thirdparty\DirectXCompiler\lib;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Source\Himmel\CameraPossessSystem.cpp" />
-    <ClCompile Include="..\Source\Himmel\TestGameMode.cpp" />
-    <ClCompile Include="..\Source\Himmel\FpsCameraControllSystem.cpp" />
-    <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp" />
-    <ClCompile Include="..\Source\Himmel\main.cpp" />
-    <ClCompile Include="..\Source\Himmel\RotateEnemySystem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Source\Himmel\TestGameMode.h" />
-    <ClInclude Include="..\Source\Himmel\FpsCameraController.h" />
-    <ClInclude Include="..\Source\Himmel\FpsCameraControllSystem.h" />
-    <ClInclude Include="..\Source\Himmel\Enemy.h" />
-    <ClInclude Include="..\Source\Himmel\EnemyArchetype.h" />
-    <ClInclude Include="..\Source\Himmel\RotateEnemySystem.h" />
-    <ClInclude Include="..\Source\Himmel\HealthComponent.h" />
-    <ClInclude Include="..\Source\Himmel\HealthRecoveryBuff.h" />
-    <ClInclude Include="..\Source\Himmel\HealthRecoverySystem.h" />
-    <ClInclude Include="..\Source\Himmel\MenuBar.h" />
-    <ClInclude Include="..\Source\Himmel\PlayerArchetype.h" />
-    <ClInclude Include="..\Source\Himmel\PlayerComponent.h" />
-    <ClInclude Include="..\Source\Himmel\CameraPossessSystem.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
