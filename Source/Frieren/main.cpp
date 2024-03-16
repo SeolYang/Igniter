@@ -45,7 +45,6 @@ int main()
         GpuUploader& gpuUploader = engine.GetGpuUploader();
 
         /* #sy_test Asset System & Mechanism Test */
-        /* #sy_todo Check thread-safety of TextureImporter.Import */
         TextureImporter texImporter;
         // TextureImportConfig texImportConfig = MakeVersionedDefault<TextureImportConfig>();
         // texImportConfig.bGenerateMips = true;

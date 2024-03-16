@@ -38,7 +38,6 @@ namespace ig
         bool bForceEnableDebugInformation = false;                                 // -Zi
     };
 
-    // #sy_todo dxil.dll 빌드 후 이벤트로 옮겨주기
     class ShaderBlob
     {
     public:

@@ -418,7 +418,6 @@ namespace ig
             return std::nullopt;
         }
 
-        /* #sy_todo Impl ToString */
         if (loadConfig->NumVertices == 0 ||
             loadConfig->NumIndices == 0 ||
             loadConfig->CompressedVerticesSizeInBytes == 0 ||
