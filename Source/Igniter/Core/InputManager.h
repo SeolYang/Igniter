@@ -68,6 +68,7 @@ namespace ig
         InputManager(HandleManager& handleManager);
         InputManager(const InputManager&) = delete;
         InputManager(InputManager&&) noexcept = delete;
+        ~InputManager();
 
         InputManager& operator=(const InputManager&) = delete;
         InputManager& operator=(InputManager&&) noexcept = delete;

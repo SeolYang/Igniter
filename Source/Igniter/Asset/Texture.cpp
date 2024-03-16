@@ -746,6 +746,11 @@ namespace ig::details
                           << std::hex << hr << std::endl;
             }
         }
+
+        ~DirectXTexInitializer()
+        {
+            CoUninitialize();
+        }
     };
 
 #pragma warning(push)

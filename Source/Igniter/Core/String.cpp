@@ -104,7 +104,6 @@ namespace ig
 
     void String::ClearCache()
     {
-        ReadWriteLock lock{ hashStringMapMutex };
         hashStringMap.clear();
     }
 

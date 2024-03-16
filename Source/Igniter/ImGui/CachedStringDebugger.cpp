@@ -15,7 +15,7 @@ namespace ig
         {
             ImGui::Text("Target ID: ");
             ImGui::SameLine(0.f, 1.f);
-            ImGui::InputText("", inputBuffer.data(), MaxInputLength, ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_CharsNoBlank);
+            ImGui::InputText("##HashInput", inputBuffer.data(), MaxInputLength, ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_CharsNoBlank);
             ImGui::SameLine();
 
             if (ImGui::Button("Search"))
@@ -107,6 +107,8 @@ namespace ig
 
                 ImGui::EndTable();
             }
+
+            ImGui::End();
         }
     }
 } // namespace ig

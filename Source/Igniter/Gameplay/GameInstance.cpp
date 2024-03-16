@@ -7,6 +7,7 @@ namespace ig
 
     GameInstance::~GameInstance()
     {
+        registry.clear();
     }
 
     void GameInstance::Update()

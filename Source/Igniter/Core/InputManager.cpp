@@ -77,6 +77,20 @@ namespace ig
         }
     }
 
+    InputManager::~InputManager()
+    {
+        RAWINPUTDEVICE mouseRID{};
+        mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
+        mouseRID.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
+        mouseRID.dwFlags = RIDEV_REMOVE;
+        mouseRID.hwndTarget = nullptr;
+
+        if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
+        {
+            IG_LOG(InputManagerError, "Failed to unregister raw input mouse. {:#X}", GetLastError());
+        }
+    }
+
     void InputManager::BindAction(const String nameOfAction, const EInput input)
     {
         IG_CHECK(nameOfAction);
