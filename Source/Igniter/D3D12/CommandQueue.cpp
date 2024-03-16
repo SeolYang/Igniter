@@ -38,9 +38,14 @@ namespace ig
 
     void CommandQueue::AddPendingContext(CommandContext& cmdCtx)
     {
-        IG_CHECK(cmdCtx);
+        if (!cmdCtx)
+        {
+            IG_CHECK_NO_ENTRY();
+            return;
+        }
+
         ReadWriteLock lock{ mutex };
-        pendingContexts.emplace_back(cmdCtx);
+        pendingContexts.emplace_back(&cmdCtx.GetNative());
     }
 
     GpuSync CommandQueue::Submit()
@@ -50,9 +55,8 @@ namespace ig
 
         ReadWriteLock lock{ mutex };
         IG_CHECK(!pendingContexts.empty());
-        auto pendingNativeCmdLists = TransformToNative(std::span{ pendingContexts });
-        native->ExecuteCommandLists(static_cast<uint32_t>(pendingNativeCmdLists.size()),
-                                    reinterpret_cast<ID3D12CommandList* const*>(pendingNativeCmdLists.data()));
+        native->ExecuteCommandLists(static_cast<uint32_t>(pendingContexts.size()),
+                                    reinterpret_cast<ID3D12CommandList* const*>(pendingContexts.data()));
         pendingContexts.clear();
 
         return FlushUnsafe();

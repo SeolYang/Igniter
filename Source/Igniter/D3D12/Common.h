@@ -32,9 +32,7 @@
 
 #include <WinPixEventRuntime/pix3.h>
 
-#include <memory>
-#include <functional>
-#include <variant>
+#include <Core/Container.h>
 
 namespace ig
 {

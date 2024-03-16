@@ -1,5 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
+#include <D3D12/CommandContext.h>
 #include <Core/Container.h>
 #include <Core/Mutex.h>
 
@@ -137,6 +138,6 @@ namespace ig
         SharedMutex mutex;
         ComPtr<ID3D12Fence> fence;
         uint64_t syncCounter = 0;
-        std::vector<std::reference_wrapper<CommandContext>> pendingContexts;
+        std::vector<CommandContext::NativeType*> pendingContexts;
     };
 } // namespace ig
