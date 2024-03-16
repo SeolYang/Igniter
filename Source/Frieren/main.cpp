@@ -62,7 +62,7 @@ int main()
         const xg::Guid homuraThumbnailGuid = xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08");
         const xg::Guid homuraBodyTexGuid = xg::Guid("87949751-3431-45c7-bd57-0a1518649511");
         const xg::Guid homuraStaticMeshGuid = xg::Guid("a717ff6e-129b-4c80-927a-a786a0b21128");
-                const xg::Guid axeTexGuid = xg::Guid("eb93c3b0-1197-4884-8cfe-622f66184d4c");
+        const xg::Guid axeTexGuid = xg::Guid("eb93c3b0-1197-4884-8cfe-622f66184d4c");
         const xg::Guid axeStaticMeshGuid = xg::Guid("4452fc34-9c3f-4715-8b6c-4481ab16b9bb");
 
         std::future<std::optional<Texture>> ashThumbnailFutre = std::async(
@@ -228,5 +228,30 @@ int main()
 
         result = engine.Execute();
     }
+
     return result;
 }
+
+#ifdef _CRTDBG_MAP_ALLOC
+    #include <crtdbg.h>
+
+struct MemoryLeakDetector
+{
+    MemoryLeakDetector()
+    {
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+        _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
+    }
+
+    ~MemoryLeakDetector()
+    {
+        _CrtDumpMemoryLeaks();
+    }
+};
+
+    #pragma warning(push)
+    #pragma warning(disable : 4073)
+    #pragma init_seg(lib)
+MemoryLeakDetector memLeakDetector;
+    #pragma warning(pop)
+#endif
