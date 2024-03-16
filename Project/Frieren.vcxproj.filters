@@ -55,6 +55,9 @@
     <Filter Include="Source\Filesystem">
       <UniqueIdentifier>{e3616311-888c-4bac-b79c-06e9b8d528d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Core\Component">
+      <UniqueIdentifier>{5fa9d39e-16bf-4be3-a62a-2dd5155b6364}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\Core\Assert.h">
@@ -297,6 +300,15 @@
     <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\EntityList.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\ComponentRegistry.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Core\NameComponent.h">
+      <Filter>Source\Core\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Core\String.cpp">
@@ -423,6 +435,9 @@
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\EntityList.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>

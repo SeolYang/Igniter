@@ -2,6 +2,10 @@
 
 namespace fe
 {
+    World::World(const String name /*= "World"_fs*/) : name(name)
+    {
+    }
+
     World::~World()
     {
         registry.clear();

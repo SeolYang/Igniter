@@ -24,6 +24,7 @@
     <ClInclude Include="..\Source\Frieren\Asset\Model.h" />
     <ClInclude Include="..\Source\Frieren\Asset\Texture.h" />
     <ClInclude Include="..\Source\Frieren\Core\Assert.h" />
+    <ClInclude Include="..\Source\Frieren\Core\ComponentRegistry.h" />
     <ClInclude Include="..\Source\Frieren\Core\Container.h" />
     <ClInclude Include="..\Source\Frieren\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Frieren\Core\Event.h" />
@@ -38,6 +39,7 @@
     <ClInclude Include="..\Source\Frieren\Core\MemoryPool.h" />
     <ClInclude Include="..\Source\Frieren\Core\MemUtils.h" />
     <ClInclude Include="..\Source\Frieren\Core\Mutex.h" />
+    <ClInclude Include="..\Source\Frieren\Core\NameComponent.h" />
     <ClInclude Include="..\Source\Frieren\Core\Profile.h" />
     <ClInclude Include="..\Source\Frieren\Core\Result.h" />
     <ClInclude Include="..\Source\Frieren\Core\Serializable.h" />
@@ -72,6 +74,7 @@
     <ClInclude Include="..\Source\Frieren\Gameplay\World.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\Common.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\EntityList.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\ImGuiRenderer.h" />
@@ -133,6 +136,7 @@
     <ClCompile Include="..\Source\Frieren\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Frieren\Gameplay\World.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\EntityList.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiCommon.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\ImGuiRenderer.cpp" />

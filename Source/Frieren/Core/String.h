@@ -71,6 +71,7 @@ namespace fe
         operator std::string_view() const { return AsStringView(); }
         std::string AsString() const;
         std::string_view AsStringView() const;
+        const char* AsCStr() const;
         std::wstring AsWideString() const;
 
         operator bool() const { return IsValid(); }

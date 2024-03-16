@@ -3,6 +3,7 @@
 #include <Core/Handle.h>
 #include <Core/Event.h>
 #include <Core/Window.h>
+#include <Core/NameComponent.h>
 #include <Gameplay/GameInstance.h>
 #include <Gameplay/World.h>
 #include <D3D12/RenderDevice.h>
@@ -21,6 +22,7 @@
 #include <ImGui/ImGuiLayer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/CachedStringDebugger.h>
+#include <ImGui/EntityList.h>
 #include <PlayerArchetype.h>
 #include <EnemyArchetype.h>
 #include <FpsCameraController.h>
@@ -202,6 +204,7 @@ int main()
         /* Camera */
         const Entity cameraEntity = CameraArchetype::Create(*defaultWorld);
         {
+            defaultWorld->Attach<NameComponent>(cameraEntity, "Camera"_fs);
             defaultWorld->Attach<FpsCameraController>(cameraEntity);
             CameraComponent& cameraComponent = defaultWorld->Get<CameraComponent>(cameraEntity);
             cameraComponent.CameraViewport = window.GetViewport();
@@ -216,7 +219,8 @@ int main()
         /* #sy_test ImGui integration tests */
         ImGuiCanvas& canvas = engine.GetImGuiCanvas();
         auto& cachedStringDebuggerLayer = canvas.AddLayer<CachedStringDebugger>();
-        canvas.AddLayer<MenuBar>(cachedStringDebuggerLayer);
+        auto& entityListLayer = canvas.AddLayer<EntityList>(gameInstance.GetWorld());
+        canvas.AddLayer<MenuBar>(cachedStringDebuggerLayer, entityListLayer);
         /************************************/
 
         result = engine.Execute();

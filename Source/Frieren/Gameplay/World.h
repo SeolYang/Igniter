@@ -3,6 +3,8 @@
 #pragma warning(disable : 26827)
 #include <entt/entt.hpp>
 #pragma warning(pop)
+#include <span>
+#include <Core/String.h>
 
 namespace fe
 {
@@ -12,18 +14,22 @@ namespace fe
     public:
         using Registry = entt::registry;
 
-        World() = default;
+        World(const String name = "New World"_fs);
         World(const World&) = delete;
         World(World&&) noexcept = delete;
+        virtual ~World();
 
         World& operator=(const World&) = delete;
         World& operator=(World&&) noexcept = delete;
 
-        virtual ~World();
+        String GetName() const { return name; }
 
-        [[nodiscard]] inline Entity Create() { return registry.create(); }
+        [[nodiscard]] Entity Create() { return registry.create(); }
+
+        entt::registry& GetRegistry() { return registry; }
 
         void Destroy(Entity entity);
+
         template <typename Itr>
         void Destroy(Itr begin, const Itr end)
         {
@@ -162,6 +168,7 @@ namespace fe
         [[nodiscard]] bool IsValid(const Entity entity) const;
 
     private:
-        Registry registry;
+        Registry registry{};
+        String name;
     };
 } // namespace fe

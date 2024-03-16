@@ -36,24 +36,23 @@ namespace fe
 
     std::string String::AsString() const
     {
-        if (hashOfString == InvalidHashVal)
-        {
-            return {};
-        }
-
-        ReadOnlyLock lock{ hashStringMapMutex };
-        return hashStringMap[hashOfString];
+        return std::string{ AsStringView() };
     }
 
     std::string_view String::AsStringView() const
     {
         if (hashOfString == InvalidHashVal)
         {
-            return {};
+            return std::string_view{};
         }
 
         ReadOnlyLock lock{ hashStringMapMutex };
         return hashStringMap[hashOfString];
+    }
+
+    const char* String::AsCStr() const
+    {
+        return AsStringView().data();
     }
 
     std::wstring String::AsWideString() const
