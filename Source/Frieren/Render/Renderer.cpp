@@ -2,9 +2,6 @@
 #include <D3D12/RenderDevice.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/DescriptorHeap.h>
-
-#pragma region test
-// #sy_test
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/ShaderBlob.h>
@@ -14,15 +11,13 @@
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUView.h>
-#include <Gameplay/World.h>
 #include <Render/GPUViewManager.h>
 #include <Render/StaticMeshComponent.h>
 #include <Render/TransformComponent.h>
 #include <Render/CameraComponent.h>
 #include <Core/Window.h>
-#include <Engine.h>
-#include <ranges>
 #include <Math/Common.h>
+#include <Engine.h>
 
 struct BasicRenderResources
 {
@@ -127,14 +122,15 @@ namespace fe
         tempConstantBufferAllocator.DeallocateCurrentFrame();
     }
 
-    void Renderer::Render(World& world)
+    void Renderer::Render(Registry& registry)
     {
         check(mainGfxQueue);
 
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
-        auto cameraView = world.View<CameraComponent, TransformComponent>();
+        auto cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
+        check(cameraView.size_hint() == 1);
         for (auto [entity, camera, transformData] : cameraView.each())
         {
             /* #sy_todo Multiple Camera, Render Target per camera */
@@ -167,29 +163,28 @@ namespace fe
             renderCmdCtx->SetScissorRect(mainViewport);
             renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            size_t idx = 0;
-            world.Each<StaticMeshComponent, const TransformComponent>(
-                [&perFrameConstantBuffer, &renderCmdCtx, &idx, this](StaticMeshComponent& staticMesh, const TransformComponent& transform)
+            const auto renderableView = registry.view<StaticMeshComponent, TransformComponent>();
+            for (auto [entity, staticMesh, transform] : renderableView.each())
+            {
+                renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
                 {
-                    renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
-                    {
-                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
-                        const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
-                        perObjectConstantBuffer.Write(perObjectBuffer);
+                    TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
+                    const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
+                    perObjectConstantBuffer.Write(perObjectBuffer);
 
-                        const BasicRenderResources params{
-                            .VertexBufferIdx = staticMesh.VerticesBufferSRV->Index,
-                            .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
-                            .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
-                            .DiffuseTexIdx = staticMesh.DiffuseTex->Index,
-                            .DiffuseTexSamplerIdx = staticMesh.DiffuseTexSampler->Index
-                        };
+                    const BasicRenderResources params{
+                        .VertexBufferIdx = staticMesh.VerticesBufferSRV->Index,
+                        .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
+                        .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
+                        .DiffuseTexIdx = staticMesh.DiffuseTex->Index,
+                        .DiffuseTexSamplerIdx = staticMesh.DiffuseTexSampler->Index
+                    };
 
-                        renderCmdCtx->SetRoot32BitConstants(0, params, 0);
-                    }
+                    renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+                }
 
-                    renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
-                });
+                renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
+            }
         }
         renderCmdCtx->End();
         mainGfxQueue.AddPendingContext(*renderCmdCtx);

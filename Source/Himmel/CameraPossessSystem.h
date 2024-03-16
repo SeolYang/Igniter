@@ -1,9 +1,9 @@
 #pragma once
 #include <Core/InputManager.h>
+#include <Gameplay/Common.h>
 
 namespace fe
 {
-    class World;
     class Window;
 } // namespace fe
 
@@ -13,7 +13,7 @@ class CameraPossessSystem
 public:
     CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem);
 
-    void Update(fe::World& world);
+    void Update();
 
 private:
     void Configure();

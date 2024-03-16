@@ -1,9 +1,10 @@
 #pragma once
 #include <Render/Common.h>
+#include <Render/TempConstantBufferAllocator.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContextPool.h>
 #include <D3D12/Swapchain.h>
-#include <Render/TempConstantBufferAllocator.h>
+#include <Gameplay/Common.h>
 #include <Core/Handle.h>
 
 namespace fe
@@ -28,7 +29,6 @@ namespace fe
 namespace fe
 {
     class Window;
-    class World;
     class DeferredDeallocator;
     class Renderer
     {
@@ -45,7 +45,7 @@ namespace fe
         Swapchain& GetSwapchain() { return swapchain; }
 
         void BeginFrame();
-        void Render(World& world);
+        void Render(Registry& registry);
         void EndFrame();
 
         void FlushQueues();

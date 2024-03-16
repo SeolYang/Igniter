@@ -1,12 +1,14 @@
 #include <ImGui/EntityList.h>
-#include <Gameplay/World.h>
+#include <ImGui/Common.h>
+#include <Gameplay/Common.h>
+#include <Gameplay/GameInstance.h>
 #include <Core/NameComponent.h>
+#include <Engine.h>
 
 namespace fe
 {
-    EntityList::EntityList(World& world)
-        : world(world),
-          ImGuiLayer("Entity List"_fs)
+    EntityList::EntityList()
+        : ImGuiLayer("Entity List"_fs)
     {
     }
 
@@ -14,11 +16,9 @@ namespace fe
     {
         if (ImGui::Begin("List of Entity", &bIsVisible))
         {
-            const String worldName = world.GetName();
-            if (ImGui::TreeNode(worldName.AsStringView().data()))
+            if (ImGui::TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                auto& registry = world.GetRegistry();
-
+                auto& registry = Engine::GetGameInstance().GetRegistry();
                 auto entityView = std::views::all(registry.template storage<Entity>());
                 auto validEntityView = std::views::filter([&registry](const Entity entity)
                                                           { return registry.valid(entity); });

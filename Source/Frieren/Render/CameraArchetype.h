@@ -1,18 +1,18 @@
 #pragma once
 #include <Render/CameraComponent.h>
 #include <Render/TransformComponent.h>
-#include <Gameplay/World.h>
+#include <Gameplay/Common.h>
 
 namespace fe
 {
     struct CameraArchetype
     {
     public:
-        static Entity Create(World& world)
+        static Entity Create(Registry& registry)
         {
-            const Entity newEntity = world.Create();
-            world.Attach<CameraComponent>(newEntity);
-            world.Attach<TransformComponent>(newEntity);
+            const Entity newEntity = registry.create();
+            registry.emplace<CameraComponent>(newEntity);
+            registry.emplace<TransformComponent>(newEntity);
             return newEntity;
         }
     };

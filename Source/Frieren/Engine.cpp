@@ -13,7 +13,6 @@
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <Gameplay/GameInstance.h>
-#include <Gameplay/World.h>
 
 namespace fe
 {
@@ -193,13 +192,10 @@ namespace fe
             inputManager->PostUpdate();
 
             renderer->BeginFrame();
-
-            if (gameInstance->HasWorld())
             {
-                renderer->Render(gameInstance->GetWorld());
+                renderer->Render(gameInstance->GetRegistry());
+                imguiRenderer->Render(*imguiCanvas, *renderer);
             }
-            imguiRenderer->Render(*imguiCanvas, *renderer);
-
             renderer->EndFrame();
 
             timer.End();

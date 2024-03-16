@@ -5,7 +5,6 @@
 #include <Core/Window.h>
 #include <Core/NameComponent.h>
 #include <Gameplay/GameInstance.h>
-#include <Gameplay/World.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
@@ -26,7 +25,7 @@
 #include <PlayerArchetype.h>
 #include <EnemyArchetype.h>
 #include <FpsCameraController.h>
-#include <BasicGameFlow.h>
+#include <TestGameMode.h>
 #include <MenuBar.h>
 #include <iostream>
 #include <future>
@@ -140,61 +139,68 @@ int main()
         check(ashThumbnail);
 
         /* #sy_test ECS based Game flow & logic tests */
-        std::unique_ptr<World> defaultWorld = std::make_unique<World>();
+        Registry& registry = gameInstance.GetRegistry();
+        gameInstance.SetGameMode(std::make_unique<TestGameMode>());
 
         /* Player Entity */
-        const auto player = PlayerArchetype::Create(*defaultWorld);
+        const auto player = PlayerArchetype::Create(registry);
         auto homuraBodyTex = homuraBodyTexFuture.get();
         check(homuraBodyTex);
         auto homuraStaticMesh = homuraStaticMeshFuture.get();
         check(homuraStaticMesh);
         {
-            StaticMeshComponent& playerStaticMeshComponent = defaultWorld->Attach<StaticMeshComponent>(player);
+            registry.emplace<NameComponent>(player, "Player"_fs);
+
+            StaticMeshComponent& playerStaticMeshComponent = registry.emplace<StaticMeshComponent>(player);
             playerStaticMeshComponent.VerticesBufferSRV = homuraStaticMesh->VertexBufferSrv.MakeRef();
             playerStaticMeshComponent.IndexBufferHandle = homuraStaticMesh->IndexBufferInstance.MakeRef();
             playerStaticMeshComponent.NumIndices = homuraStaticMesh->LoadConfig.NumIndices;
             playerStaticMeshComponent.DiffuseTex = homuraBodyTex->ShaderResourceView.MakeRef();
             playerStaticMeshComponent.DiffuseTexSampler = homuraBodyTex->TexSampler;
 
-            TransformComponent& playerTransform = defaultWorld->Get<TransformComponent>(player);
+            TransformComponent& playerTransform = registry.get<TransformComponent>(player);
             playerTransform.Position = Vector3{ 10.5f, -30.f, 10.f };
             playerTransform.Scale = Vector3{ 0.35f, 0.35f, 0.35f };
         }
 
         /* Enemy Entity */
-        const auto enemy = EnemyArchetype::Create(*defaultWorld);
+        const auto enemy = EnemyArchetype::Create(registry);
         auto ashBodyTex = ashBodyTexFuture.get();
         check(ashBodyTex);
         auto ashStaticMesh = ashStaticMeshFuture.get();
         check(ashStaticMesh);
         {
-            StaticMeshComponent& enemeyStaticMeshComponent = defaultWorld->Attach<StaticMeshComponent>(enemy);
+            registry.emplace<NameComponent>(enemy, "Enemy"_fs);
+
+            StaticMeshComponent& enemeyStaticMeshComponent = registry.emplace<StaticMeshComponent>(enemy);
             enemeyStaticMeshComponent.VerticesBufferSRV = ashStaticMesh->VertexBufferSrv.MakeRef();
             enemeyStaticMeshComponent.IndexBufferHandle = ashStaticMesh->IndexBufferInstance.MakeRef();
             enemeyStaticMeshComponent.NumIndices = ashStaticMesh->LoadConfig.NumIndices;
             enemeyStaticMeshComponent.DiffuseTex = ashBodyTex->ShaderResourceView.MakeRef();
             enemeyStaticMeshComponent.DiffuseTexSampler = ashBodyTex->TexSampler;
 
-            TransformComponent& enemyTransform = defaultWorld->Get<TransformComponent>(enemy);
+            TransformComponent& enemyTransform = registry.get<TransformComponent>(enemy);
             enemyTransform.Position = Vector3{ -10.f, -30.f, 35.f };
             enemyTransform.Scale = Vector3{ 40.f, 40.f, 40.f };
         }
 
         /* Axe Entity */
-        const Entity axeEntity = defaultWorld->Create();
+        const Entity axeEntity = registry.create();
         auto axeTex = axeTexFutrue.get();
         check(axeTex);
         auto axeStaticMesh = axeStaticMeshFuture.get();
         check(axeStaticMesh);
         {
-            StaticMeshComponent& axeStaticMeshComponent = defaultWorld->Attach<StaticMeshComponent>(axeEntity);
+            registry.emplace<NameComponent>(axeEntity, "Axe"_fs);
+
+            StaticMeshComponent& axeStaticMeshComponent = registry.emplace<StaticMeshComponent>(axeEntity);
             axeStaticMeshComponent.VerticesBufferSRV = axeStaticMesh->VertexBufferSrv.MakeRef();
             axeStaticMeshComponent.IndexBufferHandle = axeStaticMesh->IndexBufferInstance.MakeRef();
             axeStaticMeshComponent.NumIndices = axeStaticMesh->LoadConfig.NumIndices;
             axeStaticMeshComponent.DiffuseTex = axeTex->ShaderResourceView.MakeRef();
             axeStaticMeshComponent.DiffuseTexSampler = axeTex->TexSampler;
 
-            TransformComponent& axeTransformComponent = defaultWorld->Attach<TransformComponent>(axeEntity);
+            TransformComponent& axeTransformComponent = registry.emplace<TransformComponent>(axeEntity);
             axeTransformComponent.Position = Vector3{ -15.f, 0.f, 2.0f };
             axeTransformComponent.Scale = Vector3{
                 3.f, 3.f, 3.f
@@ -202,24 +208,23 @@ int main()
         }
 
         /* Camera */
-        const Entity cameraEntity = CameraArchetype::Create(*defaultWorld);
+        const Entity cameraEntity = CameraArchetype::Create(registry);
         {
-            defaultWorld->Attach<NameComponent>(cameraEntity, "Camera"_fs);
-            defaultWorld->Attach<FpsCameraController>(cameraEntity);
-            CameraComponent& cameraComponent = defaultWorld->Get<CameraComponent>(cameraEntity);
+            registry.emplace<NameComponent>(cameraEntity, "Camera"_fs);
+            registry.emplace<MainCameraTag>(cameraEntity);
+            registry.emplace<FpsCameraController>(cameraEntity);
+            CameraComponent& cameraComponent = registry.get<CameraComponent>(cameraEntity);
             cameraComponent.CameraViewport = window.GetViewport();
-            TransformComponent& cameraTransform = defaultWorld->Get<TransformComponent>(cameraEntity);
+            TransformComponent& cameraTransform = registry.get<TransformComponent>(cameraEntity);
             cameraTransform.Position = Vector3{ 0.f, 0.f, -30.f };
         }
 
-        gameInstance.SetWorld(std::move(defaultWorld));
-        gameInstance.SetGameFlow(std::make_unique<BasicGameFlow>());
         /********************************************/
 
         /* #sy_test ImGui integration tests */
         ImGuiCanvas& canvas = engine.GetImGuiCanvas();
         auto& cachedStringDebuggerLayer = canvas.AddLayer<CachedStringDebugger>();
-        auto& entityListLayer = canvas.AddLayer<EntityList>(gameInstance.GetWorld());
+        auto& entityListLayer = canvas.AddLayer<EntityList>();
         canvas.AddLayer<MenuBar>(cachedStringDebuggerLayer, entityListLayer);
         /************************************/
 

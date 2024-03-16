@@ -1,12 +1,8 @@
 #pragma once
-
-namespace fe
-{
-    class World;
-}
+#include <Gameplay/Common.h>
 
 class HealthRecoverySystem
 {
 public:
-    static void Update(fe::World& world);
+    static void Update(fe::Registry& registry);
 };

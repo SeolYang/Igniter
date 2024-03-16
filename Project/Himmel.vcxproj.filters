@@ -9,7 +9,7 @@
     <ClCompile Include="..\Source\Himmel\main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Himmel\BasicGameFlow.cpp">
+    <ClCompile Include="..\Source\Himmel\TestGameMode.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Himmel\HealthRecoverySystem.cpp">
@@ -32,7 +32,7 @@
     <ClInclude Include="..\Source\Himmel\PlayerArchetype.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Himmel\BasicGameFlow.h">
+    <ClInclude Include="..\Source\Himmel\TestGameMode.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Himmel\HealthComponent.h">

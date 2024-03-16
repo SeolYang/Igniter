@@ -1,6 +1,5 @@
 #include <Gameplay/GameInstance.h>
-#include <Gameplay/World.h>
-#include <Gameplay/GameFlow.h>
+#include <Gameplay/GameMode.h>
 
 namespace fe
 {
@@ -8,24 +7,18 @@ namespace fe
 
     GameInstance::~GameInstance()
     {
-        world.reset();
     }
 
     void GameInstance::Update()
     {
-        if (world && gameFlow)
+        if (gameMode)
         {
-            gameFlow->Update(*world);
+            gameMode->Update(registry);
         }
     }
 
-    void GameInstance::SetWorld(std::unique_ptr<World> newWorld)
+    void GameInstance::SetGameMode(std::unique_ptr<GameMode> newGameMode)
     {
-        world = std::move(newWorld);
-    }
-
-    void GameInstance::SetGameFlow(std::unique_ptr<GameFlow> newGameFlow)
-    {
-        gameFlow = std::move(newGameFlow);
+        gameMode = std::move(newGameMode);
     }
 } // namespace fe

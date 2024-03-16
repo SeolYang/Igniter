@@ -1,10 +1,9 @@
 #pragma once
-#include <memory>
+#include <Gameplay/Common.h>
 
 namespace fe
 {
-    class GameFlow;
-    class World;
+    class GameMode;
     class GameInstance final
     {
     public:
@@ -17,16 +16,18 @@ namespace fe
         GameInstance& operator=(const GameInstance&) = delete;
         GameInstance& operator=(GameInstance&&) = delete;
 
+        Registry& GetRegistry() { return registry; }
+
         void Update();
 
-        void SetWorld(std::unique_ptr<World> newWorld);
-        void SetGameFlow(std::unique_ptr<GameFlow> newGameFlow);
-
-        bool HasWorld() const { return world != nullptr; }
-        World& GetWorld() { return *world; }
+        void SetGameMode(std::unique_ptr<GameMode> newGameMode);
+        OptionalRef<GameMode> GetGameMode()
+        {
+            return gameMode != nullptr ? MakeOptionalRef(*gameMode) : std::nullopt;
+        }
 
     private:
-        std::unique_ptr<World> world;
-        std::unique_ptr<GameFlow> gameFlow;
+        Registry registry;
+        std::unique_ptr<GameMode> gameMode;
     };
 } // namespace fe

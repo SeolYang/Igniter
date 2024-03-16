@@ -15,7 +15,7 @@ CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControll
     Configure();
 }
 
-void CameraPossessSystem::Update(fe::World&)
+void CameraPossessSystem::Update()
 {
     if (togglePossessToCamera)
     {

@@ -8,6 +8,7 @@
 #include <bitset>
 #include <functional>
 #include <variant>
+#include <ranges>
 
 #pragma warning(push)
 #pragma warning(disable : 26800)
@@ -19,11 +20,23 @@
 #include <magic_enum.hpp>
 #include <Core/Json.h>
 
-/* #sy_todo remove this */
+/* #sy_deprecate_it */
 #define UNUSED(x) (x)
 
 namespace fe
 {
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+
+    template <typename T>
+    using OptionalRef = std::optional<std::reference_wrapper<T>>;
+
+    template <typename T>
+    OptionalRef<T> MakeOptionalRef(T& ref)
+    {
+        return std::make_optional(std::ref(ref));
+    }
+
     using DefaultCallback = std::function<void()>;
 
     template <typename IndexType>
@@ -37,7 +50,9 @@ namespace fe
         return result;
     }
 
+    /* #sy_deprecate_it */
     template <typename T>
+    //[[deprecated("Replace it to ranges/views")]]
     auto TransformToNative(const std::span<T> items)
     {
         std::vector<typename T::NativeType*> natives;
@@ -48,6 +63,7 @@ namespace fe
     }
 
     template <typename T>
+    //[[deprecated("Replace it to ranges/views")]]
     auto TransformToNative(const std::span<const T> items)
     {
         std::vector<const typename T::NativeType*> natives;
@@ -59,6 +75,7 @@ namespace fe
     }
 
     template <typename T>
+    //[[deprecated("Replace it to ranges/views")]]
     auto TransformToNative(const std::span<std::reference_wrapper<T>> items)
     {
         std::vector<typename T::NativeType*> natives;
@@ -70,6 +87,7 @@ namespace fe
     }
 
     template <typename T>
+    //[[deprecated("Replace it to ranges/views")]]
     auto TransformToNative(const std::span<std::reference_wrapper<const T>> items)
     {
         std::vector<const typename T::NativeType*> natives;

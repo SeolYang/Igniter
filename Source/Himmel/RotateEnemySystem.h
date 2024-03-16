@@ -1,8 +1,8 @@
 #pragma once
+#include <Gameplay/Common.h>
 
 namespace fe
 {
-    class World;
     class Timer;
 } // namespace fe
 
@@ -11,7 +11,7 @@ class RotateEnemySystem
 public:
     RotateEnemySystem(const float rotateDegsPerSec = 2.f);
 
-    void Update(fe::World& world);
+    void Update(fe::Registry& registry);
 
 private:
     const fe::Timer& timer;

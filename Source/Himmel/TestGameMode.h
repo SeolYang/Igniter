@@ -1,17 +1,17 @@
 #pragma once
 #include <memory>
-#include <Gameplay/GameFlow.h>
+#include <Gameplay/GameMode.h>
 #include <FpsCameraControllSystem.h>
 #include <RotateEnemySystem.h>
 #include <CameraPossessSystem.h>
 
-class BasicGameFlow : public fe::GameFlow
+class TestGameMode : public fe::GameMode
 {
 public:
-    BasicGameFlow();
-    ~BasicGameFlow();
+    TestGameMode();
+    ~TestGameMode();
 
-    virtual void Update(fe::World& world) override;
+    virtual void Update(fe::Registry& registry) override;
 
 private:
     FpsCameraControllSystem fpsCameraControllSystem;

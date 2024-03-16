@@ -26,4 +26,8 @@ namespace fe
 
         /* #sy_improvement Support Orthographic? */
     };
+
+    struct MainCameraTag
+    {
+    };
 } // namespace fe

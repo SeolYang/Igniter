@@ -1,9 +1,9 @@
 #pragma once
 #include <Core/InputManager.h>
+#include <Gameplay/Common.h>
 
 namespace fe
 {
-    class World;
     class Timer;
 } // namespace fe
 
@@ -12,7 +12,7 @@ class FpsCameraControllSystem
 public:
     FpsCameraControllSystem();
 
-    void Update(fe::World& world);
+    void Update(fe::Registry& registry);
 
     void SetIgnoreInput(const bool bEnable) { this->bIgnoreInput = bEnable; }
 

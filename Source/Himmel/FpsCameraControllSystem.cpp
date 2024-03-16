@@ -3,7 +3,6 @@
 #include <Render/CameraComponent.h>
 #include <Core/InputManager.h>
 #include <Core/Log.h>
-#include <Gameplay/World.h>
 #include <Engine.h>
 #include <FpsCameraController.h>
 
@@ -25,66 +24,69 @@ FpsCameraControllSystem::FpsCameraControllSystem()
     turnPitchAxis = inputManager.QueryAxis(fe::String("TurnAxis"));
 }
 
-void FpsCameraControllSystem::Update(fe::World& world)
+void FpsCameraControllSystem::Update(fe::Registry& registry)
 {
-    world.Each<fe::TransformComponent, FpsCameraController>(
-        [this](fe::TransformComponent& transform, FpsCameraController& controller)
+    const auto fpsCamView = registry.view<fe::TransformComponent, FpsCameraController, fe::CameraComponent>();
+    for (const fe::Entity entity : fpsCamView)
+    {
+        auto& transform = fpsCamView.get<fe::TransformComponent>(entity);
+        auto& controller = fpsCamView.get<FpsCameraController>(entity);
+
+        if (!bIgnoreInput)
         {
-            if (!bIgnoreInput)
+            /* Handle Movements */
+            const bool bShouldSprint = sprintAction && sprintAction->IsAnyPressing();
+            const float sprintFactor = bShouldSprint ? controller.SprintFactor : 1.f;
+            fe::Vector3 direction{};
+            if (moveLeftAction && moveLeftAction->IsAnyPressing())
             {
-                /* Handle Movements */
-                const bool bShouldSprint = sprintAction && sprintAction->IsAnyPressing();
-                const float sprintFactor = bShouldSprint ? controller.SprintFactor : 1.f;
-                fe::Vector3 direction{};
-                if (moveLeftAction && moveLeftAction->IsAnyPressing())
-                {
-                    direction += transform.GetLeftDirection();
-                }
-
-                if (moveRightAction && moveRightAction->IsAnyPressing())
-                {
-                    direction += transform.GetRightDirection();
-                }
-
-                if (moveForwardAction && moveForwardAction->IsAnyPressing())
-                {
-                    direction += transform.GetForwardDirection();
-                }
-
-                if (moveBackwardAction && moveBackwardAction->IsAnyPressing())
-                {
-                    direction += transform.GetBackwardDirection();
-                }
-
-                if (moveUpAction && moveUpAction->IsAnyPressing())
-                {
-                    direction += fe::Vector3::Up;
-                }
-
-                if (moveDownAction && moveDownAction->IsAnyPressing())
-                {
-                    direction += fe::Vector3::Down;
-                }
-
-                if (direction != fe::Vector3::Zero)
-                {
-                    const fe::Vector3 impulse = controller.MovementPower * sprintFactor * direction * timer.GetDeltaTime();
-                    controller.LatestImpulse = impulse;
-                    controller.ElapsedTimeAfterLatestImpulse = 0.f;
-                }
-
-                /* Handle Rotations */
-                const float yawAxisValue = turnYawAxis ? turnYawAxis->Value : 0.f;
-                const float pitchAxisValue = turnPitchAxis ? turnPitchAxis->Value : 0.f;
-                if (yawAxisValue != 0.f || pitchAxisValue != 0.f)
-                {
-                    controller.CurrentYaw += yawAxisValue * controller.MouseYawSentisitivity;
-                    controller.CurrentPitch += pitchAxisValue * controller.MousePitchSentisitivity;
-                }
+                direction += transform.GetLeftDirection();
             }
 
-            controller.ElapsedTimeAfterLatestImpulse += timer.GetDeltaTime();
-            transform.Position += controller.GetCurrentVelocity();
-            transform.Rotation = controller.GetCurrentRotation();
-        });
+            if (moveRightAction && moveRightAction->IsAnyPressing())
+            {
+                direction += transform.GetRightDirection();
+            }
+
+            if (moveForwardAction && moveForwardAction->IsAnyPressing())
+            {
+                direction += transform.GetForwardDirection();
+            }
+
+            if (moveBackwardAction && moveBackwardAction->IsAnyPressing())
+            {
+                direction += transform.GetBackwardDirection();
+            }
+
+            if (moveUpAction && moveUpAction->IsAnyPressing())
+            {
+                direction += fe::Vector3::Up;
+            }
+
+            if (moveDownAction && moveDownAction->IsAnyPressing())
+            {
+                direction += fe::Vector3::Down;
+            }
+
+            if (direction != fe::Vector3::Zero)
+            {
+                const fe::Vector3 impulse = controller.MovementPower * sprintFactor * direction * timer.GetDeltaTime();
+                controller.LatestImpulse = impulse;
+                controller.ElapsedTimeAfterLatestImpulse = 0.f;
+            }
+
+            /* Handle Rotations */
+            const float yawAxisValue = turnYawAxis ? turnYawAxis->Value : 0.f;
+            const float pitchAxisValue = turnPitchAxis ? turnPitchAxis->Value : 0.f;
+            if (yawAxisValue != 0.f || pitchAxisValue != 0.f)
+            {
+                controller.CurrentYaw += yawAxisValue * controller.MouseYawSentisitivity;
+                controller.CurrentPitch += pitchAxisValue * controller.MousePitchSentisitivity;
+            }
+        }
+
+        controller.ElapsedTimeAfterLatestImpulse += timer.GetDeltaTime();
+        transform.Position += controller.GetCurrentVelocity();
+        transform.Rotation = controller.GetCurrentRotation();
+    }
 }
