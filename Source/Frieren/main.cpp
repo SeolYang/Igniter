@@ -230,21 +230,3 @@ int main()
     }
     return result;
 }
-
-#if defined(CHECK_MEM_LEAK)
-    #define _CRTDBG_MAP_ALLOC
-    #include <cstdlib>
-    #include <crtdbg.h>
-
-struct MemoryLeakDetector
-{
-    MemoryLeakDetector() { _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); }
-    ~MemoryLeakDetector() { _CrtDumpMemoryLeaks(); }
-};
-    #pragma warning(push)
-    #pragma warning(disable : 4074)
-    #pragma init_seg(compiler)
-MemoryLeakDetector memLeakDetector;
-    #pragma warning(pop)
-
-#endif
