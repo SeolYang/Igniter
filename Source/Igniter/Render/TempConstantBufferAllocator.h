@@ -61,6 +61,13 @@ namespace ig
 
         void InitBufferStateTransition(CommandContext& cmdCtx);
 
+        std::pair<uint64_t, uint64_t> GetUsedSizeInBytes() const
+        {
+            return { allocatedSizeInBytes[0].load(), allocatedSizeInBytes[1].load() };
+        }
+
+        uint32_t GetReservedSizeInBytesPerFrame() const { return reservedSizeInBytesPerFrame; }
+
     public:
         // 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값 == 4 MB)
         static constexpr uint32_t DefaultReservedBufferSizeInBytes = 4194304;

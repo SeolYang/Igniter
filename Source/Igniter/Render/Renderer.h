@@ -50,6 +50,8 @@ namespace ig
 
         void FlushQueues();
 
+        auto& GetTempConstantBufferAllocator() { return tempConstantBufferAllocator; }
+
     private:
         const FrameManager& frameManager;
         DeferredDeallocator& deferredDeallocator;
