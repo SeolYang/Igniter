@@ -150,7 +150,6 @@
     <ClCompile Include="..\Source\Igniter\ImGui\EntityInspector.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCommon.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />

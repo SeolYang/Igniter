@@ -428,9 +428,6 @@
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCommon.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>

@@ -76,10 +76,6 @@ namespace ig
         {
             IG_LOG(WindowError, "Failed to clip cursor to main window.");
         }
-        else
-        {
-            IG_LOG(WindowInfo, "Cursor clipped to rect(LEFT: {}, RIGHT: {}, TOP: {}, BOTTOM: {})", clientRect.left, clientRect.right, clientRect.top, clientRect.bottom);
-        }
     }
 
     void Window::UnclipCursor()
@@ -93,13 +89,11 @@ namespace ig
         {
             bIsCursorVisible = true;
             ::ShowCursor(TRUE);
-            IG_LOG(WindowInfo, "Cursor visible.");
         }
         else if (!bVisible && bIsCursorVisible)
         {
             bIsCursorVisible = false;
             ::ShowCursor(FALSE);
-            IG_LOG(WindowInfo, "Cursor invisible");
         }
     }
 
