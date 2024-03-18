@@ -37,4 +37,19 @@ namespace ig
         const size_t mask = alignment - 1;
         return (T)((size_t)value & ~mask);
     }
+
+    inline constexpr double BytesToKiloBytes(const size_t bytes)
+    {
+        return bytes / 1024.0;
+    }
+
+    inline constexpr double BytesToMegaBytes(const size_t bytes)
+    {
+        return bytes / (1024.0 * 1024.0);
+    }
+
+    inline constexpr double BytesToGigaBytes(const size_t bytes)
+    {
+        return bytes / (1024.0 * 1024.0 * 1024.0);
+    }
 } // namespace ig

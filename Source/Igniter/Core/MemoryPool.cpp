@@ -104,7 +104,7 @@ namespace ig
     {
         if (chunks.size() + 1 != MaxNumChunk)
         {
-            const uint32_t newChunkIdx = static_cast<uint32_t>(chunks.size());
+            const auto newChunkIdx = static_cast<uint32_t>(chunks.size());
             chunks.emplace_back(reinterpret_cast<uint8_t*>(_aligned_malloc(sizeOfElement * numInitialElementPerChunk, alignOfElement)));
             for (uint16_t elementIdx = 0; elementIdx < numInitialElementPerChunk; ++elementIdx)
             {

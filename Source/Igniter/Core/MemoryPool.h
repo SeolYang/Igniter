@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Container.h>
 #include <Core/Assert.h>
+#include <Core/MemUtils.h>
 
 namespace ig
 {
@@ -46,6 +47,11 @@ namespace ig
             const uint64_t* flagPtr = GetHandleInUseFlagPtr(handle);
             return flagPtr != nullptr ? (*flagPtr != HandleCurrentlyNotInUseFlag) : false;
         }
+
+        size_t GetNumAllocatedChunks() const { return chunks.size(); }
+        size_t GetAllocatedChunksSize() const { return chunks.size() * AlignUp(numInitialElementPerChunk * sizeOfElement, alignOfElement); }
+        size_t GetNumAllocations() const { return (numInitialElementPerChunk * chunks.size()) - pool.size(); }
+        size_t GetUsedSizeInBytes() const { return sizeOfElement * GetNumAllocations(); }
 
     private:
         bool IsFull() const;

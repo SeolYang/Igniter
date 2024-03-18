@@ -9,6 +9,22 @@ namespace ig
     {
     }
 
+    HandleManager::Statistics HandleManager::GetStatistics() const
+    {
+        ReadOnlyLock lock{ mutex };
+        Statistics newStatistics{};
+        for (const auto& memPoolPair : memPools)
+        {
+            ++newStatistics.NumMemoryPools;
+            newStatistics.AllocatedChunksSizeInBytes += memPoolPair.second.GetAllocatedChunksSize();
+            newStatistics.UsedSizeInBytes += memPoolPair.second.GetUsedSizeInBytes();
+            newStatistics.NumAllocatedChunks += memPoolPair.second.GetNumAllocatedChunks();
+            newStatistics.NumAllocatedHandles += memPoolPair.second.GetNumAllocations();
+        }
+        
+        return newStatistics;
+    }
+
     uint64_t HandleManager::Allocate(const uint64_t typeHashVal, const size_t sizeOfElement, const size_t alignOfElement)
     {
         IG_CHECK(typeHashVal != InvalidHashVal);

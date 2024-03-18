@@ -1,8 +1,8 @@
 #pragma once
-#include <Core/MemoryPool.h>
-#include <Core/Mutex.h>
 #include <Core/Container.h>
 #include <Core/HashUtils.h>
+#include <Core/MemoryPool.h>
+#include <Core/Mutex.h>
 
 namespace ig
 {
@@ -16,6 +16,16 @@ namespace ig
         friend class details::HandleImpl;
 
     public:
+        struct Statistics
+        {
+            size_t NumMemoryPools = 0;
+            size_t AllocatedChunksSizeInBytes = 0;
+            size_t UsedSizeInBytes = 0;
+            size_t NumAllocatedChunks = 0;
+            size_t NumAllocatedHandles = 0;
+        };
+
+    public:
         HandleManager() = default;
         HandleManager(const HandleManager&) = delete;
         HandleManager(HandleManager&&) noexcept = delete;
@@ -23,6 +33,8 @@ namespace ig
 
         HandleManager& operator=(const HandleManager&) = delete;
         HandleManager& operator=(HandleManager&&) = delete;
+
+        Statistics GetStatistics() const;
 
     private:
         uint64_t Allocate(const uint64_t typeHashVal, const size_t sizeOfElement, const size_t alignOfElement);
