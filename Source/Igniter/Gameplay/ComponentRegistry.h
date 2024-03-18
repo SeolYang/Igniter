@@ -52,14 +52,9 @@ namespace ig
 
     private:
         static void Register(const entt::id_type componentTypeID, const ComponentInfo componentInfo);
+        static std::vector<std::pair<entt::id_type, ComponentRegistry::ComponentInfo>>& GetComponentInfosInternal();
 
-    private:
-        static std::vector<std::pair<entt::id_type, ig::ComponentRegistry::ComponentInfo>> componentInfos;
     };
-
-    namespace details
-    {
-    }
 } // namespace ig
 
 #define IG_DECLARE_COMPONENT(COMPONENT_TYPE)                                                                     \

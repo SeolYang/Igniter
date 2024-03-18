@@ -4,8 +4,6 @@
 
 namespace ig
 {
-    std::vector<std::pair<entt::id_type, ig::ComponentRegistry::ComponentInfo>> ComponentRegistry::componentInfos;
-
     void ComponentRegistry::Register(const entt::id_type componentTypeID, const ComponentInfo componentInfo)
     {
         if (Igniter::IsInitialized())
@@ -21,15 +19,23 @@ namespace ig
             return;
         }
 
+        auto& componentInfos = GetComponentInfosInternal();
         componentInfos.emplace_back(componentTypeID, componentInfo);
         componentIDSet.insert(componentTypeID);
+    }
+
+    std::vector<std::pair<entt::id_type, ComponentRegistry::ComponentInfo>>& ComponentRegistry::GetComponentInfosInternal()
+    {
+        static std::vector<std::pair<entt::id_type, ComponentRegistry::ComponentInfo>> componentInfoInstance{};
+        return componentInfoInstance;
     }
 
     std::span<const std::pair<entt::id_type, ComponentRegistry::ComponentInfo>> ComponentRegistry::GetComponentInfos()
     {
         static std::once_flag sorted{};
+        auto& componentInfos = GetComponentInfosInternal();
         std::call_once(sorted,
-                       []()
+                       [&componentInfos]()
                        {
                            std::sort(componentInfos.begin(), componentInfos.end(),
                                      [](const auto& lhs, const auto& rhs)
