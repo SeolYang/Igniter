@@ -85,6 +85,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h" />
     <ClInclude Include="..\Source\Igniter\Math\Common.h" />
     <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Render\Common.h" />
@@ -149,10 +150,10 @@
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCommon.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\Renderer.cpp" />
-    <ClCompile Include="..\Source\Igniter\Render\RendererCommon.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>

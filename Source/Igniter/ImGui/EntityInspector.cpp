@@ -21,7 +21,7 @@ namespace ig
                 Registry& registry = gameInstance.GetRegistry();
                 bool bHasDisplayableComponent = false;
 
-                const auto& componentInfos = ComponentRegistry::GetComponentInfos();
+                const auto componentInfos = ComponentRegistry::GetComponentInfos();
                 for (const auto& componentInfoPair : componentInfos)
                 {
                     const auto& [componentID, componentInfo] = componentInfoPair;
@@ -29,7 +29,7 @@ namespace ig
                     entt::sparse_set* sparseSet = registry.storage(componentID);
                     if (sparseSet != nullptr && sparseSet->contains(selectedEntity))
                     {
-                        if (ImGui::TreeNode(componentInfo.Name.data()))
+                        if (ImGui::TreeNodeEx(componentInfo.Name.data(), ImGuiTreeNodeFlags_Framed))
                         {
                             componentInfo.OnImGui(registry, selectedEntity);
                             ImGui::TreePop();

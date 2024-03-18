@@ -101,10 +101,4 @@ namespace ig
 
         return cachedStrs;
     }
-
-    void String::ClearCache()
-    {
-        hashStringMap.clear();
-    }
-
 } // namespace ig

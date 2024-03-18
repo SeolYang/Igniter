@@ -69,8 +69,6 @@ namespace ig
         {
             instance = nullptr;
         }
-
-        String::ClearCache();
     }
 
     FrameManager& Igniter::GetFrameManager()

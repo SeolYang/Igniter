@@ -315,6 +315,9 @@
     <ClInclude Include="..\Source\Igniter\ImGui\EntityInsepctor.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -437,9 +440,6 @@
     <ClCompile Include="..\Source\Igniter\Render\Renderer.cpp">
       <Filter>Source\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Render\RendererCommon.cpp">
-      <Filter>Source\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp">
       <Filter>Source\Renderer</Filter>
     </ClCompile>
@@ -463,6 +463,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Component\CameraComponent.cpp">
       <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp">
+      <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

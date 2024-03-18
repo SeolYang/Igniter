@@ -88,10 +88,6 @@ namespace ig
         static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
     private:
-        friend class Igniter;
-        static void ClearCache();
-
-    private:
         using HashStringMap = robin_hood::unordered_map<uint64_t, std::string>;
         static HashStringMap hashStringMap;
         static SharedMutex hashStringMapMutex;

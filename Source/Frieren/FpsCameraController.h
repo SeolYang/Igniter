@@ -29,8 +29,10 @@ public:
     ig::Vector3 LatestImpulse{};
     float ElapsedTimeAfterLatestImpulse = 0.f;
 
-    float CurrentYaw = 0.f;
-    float CurrentPitch = 0.f;
+    float CurrentYaw = 0.f; /* Degrees */
+    float CurrentPitch = 0.f; /* Degrees */
+    constexpr static float MinPitchDegrees = -45.f;
+    constexpr static float MaxPitchDegrees = 45.f;
 };
 
 IG_DECLARE_COMPONENT(FpsCameraController);

@@ -4,12 +4,14 @@
 #include <ImGui/EntityInsepctor.h>
 #include <ImGui/EntityList.h>
 #include <ImGui/ImGuiLayer.h>
+#include <ImGui/StatisticsPanel.h>
 
 class MenuBar : public ig::ImGuiLayer
 {
 public:
-    MenuBar(ig::CachedStringDebugger& cachedStringDebugger, ig::EntityList& entityList, ig::EntityInspector& entityInspector)
-        : cachedStringDebugger(cachedStringDebugger),
+    MenuBar(ig::StatisticsPanel& statisticsPanel, ig::CachedStringDebugger& cachedStringDebugger, ig::EntityList& entityList, ig::EntityInspector& entityInspector)
+        : statisticsPanel(statisticsPanel),
+          cachedStringDebugger(cachedStringDebugger),
           entityList(entityList),
           entityInspector(entityInspector)
     {
@@ -32,6 +34,11 @@ public:
 
             if (ImGui::BeginMenu("Debug"))
             {
+                if (ImGui::MenuItem("Statistics Panel"))
+                {
+                    statisticsPanel.SetVisibility(true);
+                }
+
                 if (ImGui::MenuItem("Debug Cached String"))
                 {
                     cachedStringDebugger.SetVisibility(true);
@@ -54,6 +61,7 @@ public:
     }
 
 private:
+    ig::StatisticsPanel& statisticsPanel;
     ig::CachedStringDebugger& cachedStringDebugger;
     ig::EntityList& entityList;
     ig::EntityInspector& entityInspector;

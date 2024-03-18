@@ -25,6 +25,7 @@
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/ImGuiLayer.h>
 #include <MenuBar.h>
+#include <ImGui/StatisticsPanel.h>
 #include <PlayerArchetype.h>
 #include <Render/GPUViewManager.h>
 #include <Render/GpuUploader.h>
@@ -191,10 +192,11 @@ int main()
 
         /* #sy_test ImGui integration tests */
         ImGuiCanvas& canvas = engine.GetImGuiCanvas();
+        auto& statisticsPanelLayer = canvas.AddLayer<StatisticsPanel>();
         auto& cachedStringDebuggerLayer = canvas.AddLayer<CachedStringDebugger>();
         auto& entityListLayer = canvas.AddLayer<EntityList>();
         auto& entityInspectorLayer = canvas.AddLayer<EntityInspector>(entityListLayer);
-        auto& menuBar = canvas.AddLayer<MenuBar>(cachedStringDebuggerLayer, entityListLayer, entityInspectorLayer);
+        auto& menuBar = canvas.AddLayer<MenuBar>(statisticsPanelLayer, cachedStringDebuggerLayer, entityListLayer, entityInspectorLayer);
         entityListLayer.SetPriority(1);
         entityListLayer.SetVisibility(true);
         entityInspectorLayer.SetVisibility(true);

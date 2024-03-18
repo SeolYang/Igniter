@@ -82,6 +82,7 @@ void FpsCameraControllSystem::Update(ig::Registry& registry)
             {
                 controller.CurrentYaw += yawAxisValue * controller.MouseYawSentisitivity;
                 controller.CurrentPitch += pitchAxisValue * controller.MousePitchSentisitivity;
+                controller.CurrentPitch = std::clamp(controller.CurrentPitch, FpsCameraController::MinPitchDegrees, FpsCameraController::MaxPitchDegrees);
             }
         }
 
