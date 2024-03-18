@@ -10,6 +10,7 @@ namespace ig
 {
     class GpuTexture;
     class GpuView;
+    class AssetManager;
 
     enum class ETextureCompressionMode
     {
@@ -68,10 +69,13 @@ namespace ig
 
     class TextureImporter
     {
+        friend class AssetManager;
+
     public:
-        TextureImporter();
         ~TextureImporter();
 
+    private:
+        TextureImporter();
         std::optional<xg::Guid> Import(const String resPathStr, std::optional<TextureImportConfig> config = std::nullopt, const bool bIsPersistent = false);
 
     private:

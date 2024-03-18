@@ -55,13 +55,12 @@ int main()
         GpuUploader& gpuUploader = engine.GetGpuUploader();
 
         /* #sy_test Asset System & Mechanism Test */
-        TextureImporter texImporter;
         // TextureImportConfig texImportConfig = MakeVersionedDefault<TextureImportConfig>();
         // texImportConfig.bGenerateMips = true;
         // texImportConfig.CompressionMode = ETextureCompressionMode::BC7;
         // texImporter.Import(String("Resources\\Homura\\Body.png"), texImportConfig);
 
-        StaticMeshImportConfig staticMeshImportConfig{};
+        // StaticMeshImportConfig staticMeshImportConfig{};
         // staticMeshImportConfig.bMergeMeshes = true;
         // std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\Homura\\Axe.fbx"), staticMeshImportConfig);
 

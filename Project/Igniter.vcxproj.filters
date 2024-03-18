@@ -93,7 +93,7 @@
     <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
       <Filter>Thirdparty\WinPixEventRuntime</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h">
+    <ClInclude Include="..\Source\Igniter\Asset\AssetManager.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Asset\Common.h">
@@ -329,7 +329,7 @@
     <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Asset\AssetCache.cpp">
+    <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp">

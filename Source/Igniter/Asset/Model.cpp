@@ -270,18 +270,19 @@ namespace ig
                 const String texResPathStr = String(texture.mFilename.C_Str());
                 const fs::path texResPath = texResPathStr.AsStringView();
 
-                if (!HasImportedBefore(texResPath))
-                {
-                    std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr);
-                    if (newTexAssetGuid)
-                    {
-                        IG_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
-                    }
-                    else
-                    {
-                        IG_LOG(ModelImporterErr, "Failed to import texture resource {}.", texResPathStr.AsStringView());
-                    }
-                }
+                /* #sy_wip_todo 에셋 매니저 경유 */
+                //if (!HasImportedBefore(texResPath))
+                //{
+                //    std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr);
+                //    if (newTexAssetGuid)
+                //    {
+                //        IG_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
+                //    }
+                //    else
+                //    {
+                //        IG_LOG(ModelImporterErr, "Failed to import texture resource {}.", texResPathStr.AsStringView());
+                //    }
+                //}
             }
         }
 

@@ -5,7 +5,6 @@
 #include <functional>
 #include <string_view>
 
-/* #sy_wip_todo 2024/03/17~on working */
 namespace ig
 {
     template <typename Component>
