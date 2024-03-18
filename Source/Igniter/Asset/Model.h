@@ -7,14 +7,11 @@ namespace ig
     class GpuBuffer;
     class GpuView;
 
-    struct StaticMeshImportConfig : public ResourceMetadata<1>
+    struct StaticMeshImportConfig
     {
-        friend json& operator<<(json& archive, const StaticMeshImportConfig& config);
-        friend const json& operator>>(const json& archive, StaticMeshImportConfig& config);
-
     public:
-        virtual json& Serialize(json& archive) const override;
-        virtual const json& Deserialize(const json& archive) override;
+        json& Serialize(json& archive) const;
+        const json& Deserialize(const json& archive);
 
     public:
         bool bMakeLeftHanded = true;
@@ -37,17 +34,11 @@ namespace ig
         bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
     };
 
-    json& operator<<(json& archive, const StaticMeshImportConfig& config);
-    const json& operator>>(const json& archive, StaticMeshImportConfig& config);
-
-    struct StaticMeshLoadConfig : public AssetMetadata<2>
+    struct StaticMeshLoadConfig
     {
-        friend json& operator<<(json& archive, const StaticMeshLoadConfig& config);
-        friend const json& operator>>(const json& archive, StaticMeshLoadConfig& config);
-
     public:
-        virtual json& Serialize(json& archive) const override;
-        virtual const json& Deserialize(const json& archive) override;
+        json& Serialize(json& archive) const;
+        const json& Deserialize(const json& archive);
 
     public:
         std::string Name{};
@@ -59,38 +50,20 @@ namespace ig
         // std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
     };
 
-    json& operator<<(json& archive, const StaticMeshLoadConfig& config);
-    const json& operator>>(const json& archive, StaticMeshLoadConfig& config);
-
-    struct SkeletalMeshImportConfig : public ResourceMetadata<1>
+    struct SkeletalMeshImportConfig
     {
-        friend json& operator<<(json& archive, const SkeletalMeshImportConfig& config);
-        friend const json& operator>>(const json& archive, SkeletalMeshImportConfig& config);
-
     public:
-        virtual json& Serialize(json& archive) const override;
-        virtual const json& Deserialize(const json& archive) override;
-
-    public:
+        json& Serialize(json& archive) const;
+        const json& Deserialize(const json& archive);
     };
 
-    json& operator<<(json& archive, const SkeletalMeshImportConfig& config);
-    const json& operator>>(const json& archive, SkeletalMeshImportConfig& config);
-
-    struct SkeletalMeshLoadConfig : public ResourceMetadata<1>
+    struct SkeletalMeshLoadConfig
     {
-        friend json& operator<<(json& archive, const SkeletalMeshLoadConfig& config);
-        friend const json& operator>>(const json& archive, SkeletalMeshLoadConfig& config);
-
     public:
-        virtual json& Serialize(json& archive) const override;
-        virtual const json& Deserialize(const json& archive) override;
+        json& Serialize(json& archive) const;
+        const json& Deserialize(const json& archive);
 
-    public:
     };
-
-    json& operator<<(json& archive, const SkeletalMeshLoadConfig& config);
-    const json& operator>>(const json& archive, SkeletalMeshLoadConfig& config);
 
     class TextureImporter;
     class ModelImporter

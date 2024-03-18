@@ -24,8 +24,6 @@ namespace ig
 
     json& StaticMeshImportConfig::Serialize(json& archive) const
     {
-        CommonMetadata::Serialize(archive);
-
         const auto& config = *this;
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded);
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals);
@@ -45,8 +43,6 @@ namespace ig
     {
         auto& config = *this;
         config = {};
-
-        CommonMetadata::Deserialize(archive);
 
         IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded);
         IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals);
@@ -69,8 +65,6 @@ namespace ig
         IG_CHECK(CompressedVerticesSizeInBytes > 0);
         IG_CHECK(CompressedIndicesSizeInBytes > 0);
 
-        CommonMetadata::Serialize(archive);
-
         const auto& config = *this;
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
@@ -86,8 +80,6 @@ namespace ig
         auto& config = *this;
         config = {};
 
-        CommonMetadata::Deserialize(archive);
-
         IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
         IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
         IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
@@ -99,26 +91,6 @@ namespace ig
         IG_CHECK(CompressedVerticesSizeInBytes > 0);
         IG_CHECK(CompressedIndicesSizeInBytes > 0);
         return archive;
-    }
-
-    json& operator<<(json& archive, const StaticMeshImportConfig& config)
-    {
-        return config.Serialize(archive);
-    }
-
-    const json& operator>>(const json& archive, StaticMeshImportConfig& config)
-    {
-        return config.Deserialize(archive);
-    }
-
-    json& operator<<(json& archive, const StaticMeshLoadConfig& config)
-    {
-        return config.Serialize(archive);
-    }
-
-    const json& operator>>(const json& archive, StaticMeshLoadConfig& config)
-    {
-        return config.Deserialize(archive);
     }
 
     static bool CheckAssimpSceneLoadingSucceed(const String resPathStr, const Assimp::Importer& importer, const aiScene* scene)
@@ -155,7 +127,7 @@ namespace ig
         }
     }
 
-    static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bPersistencyRequired, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
+    static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bIsPersistent, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
     {
         if (!fs::exists(details::StaticMeshAssetRootPath))
         {
@@ -207,20 +179,26 @@ namespace ig
         encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex)));
         encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(), remappedIndices.data(), remappedIndices.size()));
 
-        auto newStaticMeshLoadConf = MakeVersionedDefault<StaticMeshLoadConfig>();
-        newStaticMeshLoadConf.CreationTime = Timer::Now();
-        newStaticMeshLoadConf.Guid = newGuid;
-        newStaticMeshLoadConf.SrcResPath = resPathStr;
-        newStaticMeshLoadConf.Type = EAssetType::StaticMesh;
-        newStaticMeshLoadConf.bIsPersistent = bPersistencyRequired;
-        newStaticMeshLoadConf.Name = meshName;
-        newStaticMeshLoadConf.NumVertices = static_cast<uint32_t>(remappedVertices.size());
-        newStaticMeshLoadConf.NumIndices = static_cast<uint32_t>(remappedIndices.size());
-        newStaticMeshLoadConf.CompressedVerticesSizeInBytes = encodedVertices.size();
-        newStaticMeshLoadConf.CompressedIndicesSizeInBytes = encodedIndices.size();
+        const AssetInfo assetInfo{
+            .CreationTime = Timer::Now(),
+            .Guid = newGuid,
+            .SrcResPath = resPathStr,
+            .Type = EAssetType::StaticMesh,
+            .bIsPersistent = bIsPersistent
+        };
 
-        const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, newStaticMeshLoadConf.Guid);
-        if (!SaveSerializedDataToJsonFile(newMetaPath, newStaticMeshLoadConf))
+        const StaticMeshLoadConfig newLoadConfig{
+            .NumVertices = static_cast<uint32_t>(remappedVertices.size()),
+            .NumIndices = static_cast<uint32_t>(remappedIndices.size()),
+            .CompressedVerticesSizeInBytes = encodedVertices.size(),
+            .CompressedIndicesSizeInBytes = encodedIndices.size()
+        };
+
+        json assetMetadata{};
+        assetMetadata << assetInfo << newLoadConfig;
+
+        const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, assetInfo.Guid);
+        if (!SaveJsonToFile(newMetaPath, assetMetadata))
         {
             IG_LOG(ModelImporterErr, "Failed to save asset metadata to {}.", newMetaPath.string());
             return std::nullopt;
@@ -232,7 +210,7 @@ namespace ig
             return std::nullopt;
         }
 
-        return newStaticMeshLoadConf.Guid;
+        return assetInfo.Guid;
     }
 
     std::vector<xg::Guid> ModelImporter::ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> importConfig /*= std::nullopt*/, const bool bIsPersistent /*= false*/)
@@ -251,14 +229,10 @@ namespace ig
         const fs::path resMetaPath{ MakeResourceMetadataPath(resPath) };
         if (!importConfig)
         {
-            importConfig = details::LoadMetadataFromFile<StaticMeshImportConfig, ModelImporterWarn>(resMetaPath);
-            if (!importConfig)
-            {
-                importConfig = MakeVersionedDefault<StaticMeshImportConfig>();
-            }
+            json resMetadata{ LoadJsonFromFile(resMetaPath) };
+            importConfig = StaticMeshImportConfig{};
+            resMetadata >> *importConfig;
         }
-
-        const bool bPersistencyRequired = bIsPersistent || importConfig->bIsPersistent;
 
         uint32_t importFlags = aiProcess_Triangulate;
         importFlags |= importConfig->bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0;
@@ -297,7 +271,7 @@ namespace ig
 
                 if (!HasImportedBefore(texResPath))
                 {
-                    std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr, MakeVersionedDefault<TextureImportConfig>());
+                    std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr);
                     if (newTexAssetGuid)
                     {
                         IG_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
@@ -331,7 +305,7 @@ namespace ig
                 ProcessStaticMeshData(mesh, vertices, indices, static_cast<uint32_t>(vertices.size()));
             }
 
-            if (std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bPersistencyRequired, meshName, vertices, indices);
+            if (std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bIsPersistent, meshName, vertices, indices);
                 guid)
             {
                 importedStaticMeshGuid[0] = *guid;
@@ -350,7 +324,7 @@ namespace ig
 
                 ProcessStaticMeshData(mesh, vertices, indices);
 
-                std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bPersistencyRequired, std::format("{}.{}", meshName, mesh.mName.C_Str()), vertices, indices);
+                std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bIsPersistent, std::format("{}.{}", meshName, mesh.mName.C_Str()), vertices, indices);
                 if (guid)
                 {
                     importedStaticMeshGuid[meshIdx] = *guid;
@@ -359,10 +333,10 @@ namespace ig
         }
         importer.FreeScene();
 
-        importConfig->Version = StaticMeshImportConfig::LatestVersion;
-        importConfig->AssetType = EAssetType::StaticMesh;
-        importConfig->bIsPersistent = bPersistencyRequired;
-        if (!SaveSerializedDataToJsonFile(resMetaPath, *importConfig))
+        const ResourceInfo resInfo{ .Type = EAssetType::StaticMesh };
+        json resMetadata{};
+        resMetadata << resInfo << *importConfig;
+        if (!SaveJsonToFile(resMetaPath, resMetadata))
         {
             IG_LOG(ModelImporterErr, "Failed to save resource metadata to {}.", resMetaPath.string());
         }
@@ -391,41 +365,40 @@ namespace ig
             return std::nullopt;
         }
 
-        std::optional<StaticMeshLoadConfig> loadConfig = LoadSerializedDataFromJsonFile<StaticMeshLoadConfig>(assetMetaPath);
-        if (!loadConfig)
+        const json assetMetadata{ LoadJsonFromFile(assetMetaPath) };
+        if (assetMetadata.empty())
         {
-            IG_LOG(StaticMeshLoaderFatal, "Failed to read Static Mesh Load Config from file {}.", assetMetaPath.string());
+            IG_LOG(StaticMeshLoaderFatal, "Failed to load asset metadata from {}.", assetMetaPath.string());
             return std::nullopt;
         }
 
-        if (!loadConfig->IsLatestVersion())
-        {
-            details::LogVersionMismatch<StaticMeshLoadConfig, StaticMeshLoaderWarn>(*loadConfig, assetMetaPath.string());
-        }
+        AssetInfo assetInfo{};
+        StaticMeshLoadConfig loadConfig{};
+        assetMetadata >> loadConfig >> assetInfo;
 
-        if (loadConfig->Guid != guid)
+        if (assetInfo.Guid != guid)
         {
             IG_LOG(StaticMeshLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
-                   guid.str(), loadConfig->Guid.str());
+                   guid.str(), assetInfo.Guid.str());
             return std::nullopt;
         }
 
-        if (loadConfig->Type != EAssetType::StaticMesh)
+        if (assetInfo.Type != EAssetType::StaticMesh)
         {
             IG_LOG(StaticMeshLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
                    magic_enum::enum_name(EAssetType::StaticMesh),
-                   magic_enum::enum_name(loadConfig->Type));
+                   magic_enum::enum_name(assetInfo.Type));
             return std::nullopt;
         }
 
-        if (loadConfig->NumVertices == 0 ||
-            loadConfig->NumIndices == 0 ||
-            loadConfig->CompressedVerticesSizeInBytes == 0 ||
-            loadConfig->CompressedIndicesSizeInBytes == 0)
+        if (loadConfig.NumVertices == 0 ||
+            loadConfig.NumIndices == 0 ||
+            loadConfig.CompressedVerticesSizeInBytes == 0 ||
+            loadConfig.CompressedIndicesSizeInBytes == 0)
         {
             IG_LOG(StaticMeshLoaderFatal,
                    "Load config has invalid values. \n * NumVertices: {}\n * NumIndices: {}\n * CompressedVerticesSizeInBytes: {}\n * CompressedIndicesSizeInBytes: {}",
-                   loadConfig->NumVertices, loadConfig->NumIndices, loadConfig->CompressedVerticesSizeInBytes, loadConfig->CompressedIndicesSizeInBytes);
+                   loadConfig.NumVertices, loadConfig.NumIndices, loadConfig.CompressedVerticesSizeInBytes, loadConfig.CompressedIndicesSizeInBytes);
             return std::nullopt;
         }
 
@@ -436,7 +409,7 @@ namespace ig
             return std::nullopt;
         }
 
-        const size_t expectedBlobSize = loadConfig->CompressedVerticesSizeInBytes + loadConfig->CompressedIndicesSizeInBytes;
+        const size_t expectedBlobSize = loadConfig.CompressedVerticesSizeInBytes + loadConfig.CompressedIndicesSizeInBytes;
         if (blob.size() != expectedBlobSize)
         {
             IG_LOG(StaticMeshLoaderFatal, "Static Mesh blob size does not match. Expected: {}, Found: {}", expectedBlobSize, blob.size());
@@ -444,23 +417,23 @@ namespace ig
         }
 
         GpuBufferDesc vertexBufferDesc{};
-        vertexBufferDesc.AsStructuredBuffer<StaticMeshVertex>(loadConfig->NumVertices);
+        vertexBufferDesc.AsStructuredBuffer<StaticMeshVertex>(loadConfig.NumVertices);
         vertexBufferDesc.DebugName = String(std::format("{}_Vertices", guid.str()));
-        if (vertexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedVerticesSizeInBytes)
+        if (vertexBufferDesc.GetSizeAsBytes() < loadConfig.CompressedVerticesSizeInBytes)
         {
             IG_LOG(StaticMeshLoaderFatal, "Compressed vertices size exceed expected vertex buffer size. Compressed Size: {} bytes, Expected Vertex Buffer Size: {} bytes",
-                   loadConfig->CompressedVerticesSizeInBytes,
+                   loadConfig.CompressedVerticesSizeInBytes,
                    vertexBufferDesc.GetSizeAsBytes());
             return std::nullopt;
         }
 
         GpuBufferDesc indexBufferDesc{};
-        indexBufferDesc.AsIndexBuffer<uint32_t>(loadConfig->NumIndices);
+        indexBufferDesc.AsIndexBuffer<uint32_t>(loadConfig.NumIndices);
         indexBufferDesc.DebugName = String(std::format("{}_Indices", guid.str()));
-        if (indexBufferDesc.GetSizeAsBytes() < loadConfig->CompressedIndicesSizeInBytes)
+        if (indexBufferDesc.GetSizeAsBytes() < loadConfig.CompressedIndicesSizeInBytes)
         {
             IG_LOG(StaticMeshLoaderFatal, "Compressed indices size exceed expected index buffer size. Compressed Size: {} bytes, Expected Index Buffer Size: {} bytes",
-                   loadConfig->CompressedIndicesSizeInBytes,
+                   loadConfig.CompressedIndicesSizeInBytes,
                    indexBufferDesc.GetSizeAsBytes());
             return std::nullopt;
         }
@@ -489,8 +462,8 @@ namespace ig
         UploadContext verticesUploadCtx = gpuUploader.Reserve(vertexBufferDesc.GetSizeAsBytes());
         {
             const size_t compressedVerticesOffset = 0;
-            const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(), loadConfig->NumVertices,
-                                                                sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, loadConfig->CompressedVerticesSizeInBytes);
+            const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(), loadConfig.NumVertices,
+                                                                sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, loadConfig.CompressedVerticesSizeInBytes);
             if (decodeResult == 0)
             {
                 verticesUploadCtx.CopyBuffer(0, vertexBufferDesc.GetSizeAsBytes(), *vertexBuffer);
@@ -505,11 +478,11 @@ namespace ig
 
         UploadContext indicesUploadCtx = gpuUploader.Reserve(indexBufferDesc.GetSizeAsBytes());
         {
-            const size_t compressedIndicesOffset = loadConfig->CompressedVerticesSizeInBytes;
+            const size_t compressedIndicesOffset = loadConfig.CompressedVerticesSizeInBytes;
             const int decodeResult = meshopt_decodeIndexBuffer<uint32_t>(
                 reinterpret_cast<uint32_t*>(indicesUploadCtx.GetOffsettedCpuAddress()),
-                loadConfig->NumIndices,
-                blob.data() + compressedIndicesOffset, loadConfig->CompressedIndicesSizeInBytes);
+                loadConfig.NumIndices,
+                blob.data() + compressedIndicesOffset, loadConfig.CompressedIndicesSizeInBytes);
 
             if (decodeResult == 0)
             {
@@ -528,10 +501,10 @@ namespace ig
 
         IG_LOG(StaticMeshLoaderInfo,
                "Successfully load static mesh asset {}, which from resource {}. Elapsed: {} ms",
-               assetPath.string(), loadConfig->SrcResPath, tempTimer.End());
+               assetPath.string(), assetInfo.SrcResPath, tempTimer.End());
 
         return StaticMesh{
-            .LoadConfig = *loadConfig,
+            .LoadConfig = loadConfig,
             .VertexBufferInstance = { handleManager, std::move(*vertexBuffer) },
             .VertexBufferSrv = std::move(vertexBufferSrv),
             .IndexBufferInstance = { handleManager, std::move(*indexBuffer) }

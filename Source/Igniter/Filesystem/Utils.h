@@ -4,21 +4,20 @@
 
 namespace ig
 {
-    inline std::optional<json> LoadJsonFromFile(const fs::path& path)
+    inline json LoadJsonFromFile(const fs::path& path)
     {
-        if (!fs::exists(path))
+        json newJson{};
+        if (fs::exists(path))
         {
-            return std::nullopt;
+            std::ifstream fileStream{ path.c_str() };
+
+            if (fileStream.is_open())
+            {
+                newJson = json::parse(fileStream);
+            }
         }
 
-        std::ifstream fileStream{ path.c_str() };
-        if (!fileStream.is_open())
-        {
-            return std::nullopt;
-        }
-
-        json jsonData{ json::parse(fileStream) };
-        return jsonData;
+        return newJson;
     }
 
     inline bool SaveJsonToFile(const fs::path& path, const json& jsonData)
@@ -32,29 +31,6 @@ namespace ig
         fileStream << jsonData.dump(4);
         fileStream.close();
         return true;
-    }
-
-    template <typename T>
-    std::optional<T> LoadSerializedDataFromJsonFile(const fs::path& path)
-    {
-        std::optional<json> serializedData = LoadJsonFromFile(path);
-        if (!serializedData)
-        {
-            return std::nullopt;
-        }
-
-        T data{};
-        *serializedData >> data;
-        return data;
-    }
-
-    template <typename T>
-    bool SaveSerializedDataToJsonFile(const fs::path& path, const T& data)
-    {
-        json serializedData{};
-        serializedData << data;
-
-        return SaveJsonToFile(path, serializedData);
     }
 
     inline std::vector<uint8_t> LoadBlobFromFile(const fs::path& path)

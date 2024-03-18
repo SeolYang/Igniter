@@ -1,14 +1,14 @@
 #include <Asset/Texture.h>
 #include <Core/Container.h>
+#include <Core/Igniter.h>
 #include <Core/Timer.h>
 #include <Core/TypeUtils.h>
-#include <D3D12/RenderDevice.h>
 #include <D3D12/GpuView.h>
+#include <D3D12/RenderDevice.h>
 #include <Render/GpuUploader.h>
 #include <Render/GpuViewManager.h>
-#include <Core/Igniter.h>
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 #include <d3d11.h>
 #include <DirectXTex/DirectXTex.h>
 
@@ -25,8 +25,6 @@ namespace ig
 
     json& TextureImportConfig::Serialize(json& archive) const
     {
-        CommonMetadata::Serialize(archive);
-
         const TextureImportConfig& config = *this;
         IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode);
         IG_SERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
@@ -40,11 +38,9 @@ namespace ig
 
     const json& TextureImportConfig::Deserialize(const json& archive)
     {
+        *this = {};
+
         TextureImportConfig& config = *this;
-        config = {};
-
-        CommonMetadata::Deserialize(archive);
-
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
         IG_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -57,8 +53,6 @@ namespace ig
 
     json& TextureLoadConfig::Serialize(json& archive) const
     {
-        CommonMetadata::Serialize(archive);
-
         const TextureLoadConfig& config = *this;
         IG_CHECK(config.Format != DXGI_FORMAT_UNKNOWN);
         IG_CHECK(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
@@ -80,11 +74,8 @@ namespace ig
 
     const json& TextureLoadConfig::Deserialize(const json& archive)
     {
+        *this = {};
         TextureLoadConfig& config = *this;
-        config = {};
-
-        CommonMetadata::Deserialize(archive);
-
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
         IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
@@ -100,26 +91,6 @@ namespace ig
         IG_CHECK(config.Format != DXGI_FORMAT_UNKNOWN);
         IG_CHECK(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
         return archive;
-    }
-
-    nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config)
-    {
-        return config.Serialize(archive);
-    }
-
-    const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config)
-    {
-        return config.Deserialize(archive);
-    }
-
-    nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config)
-    {
-        return config.Serialize(archive);
-    }
-
-    const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config)
-    {
-        return config.Deserialize(archive);
     }
 
     inline bool IsDDSExtnsion(const fs::path& extension)
@@ -297,18 +268,15 @@ namespace ig
         const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
         if (!importConfig)
         {
-            importConfig = details::LoadMetadataFromFile<TextureImportConfig, TextureImporterWarn>(resMetadataPath);
-            if (!importConfig)
-            {
-                importConfig = MakeVersionedDefault<TextureImportConfig>();
-            }
+            json resMetadata{ LoadJsonFromFile(resMetadataPath) };
+            importConfig = TextureImportConfig{};
+            resMetadata >> *importConfig;
         }
 
-        const bool bPersistencyRequired = bIsPersistent || importConfig->bIsPersistent;
         if (!bIsDDSFormat)
         {
             IG_CHECK(texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
-                  texMetadata.arraySize > 0);
+                     texMetadata.arraySize > 0);
             IG_CHECK(!texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1));
             IG_CHECK(texMetadata.format != DXGI_FORMAT_UNKNOWN);
             IG_CHECK(!DirectX::IsSRGB(texMetadata.format));
@@ -410,51 +378,56 @@ namespace ig
         }
 
         /* Configure Texture Resource Metadata */
-        importConfig->Version = TextureImportConfig::LatestVersion;
-        importConfig->AssetType = EAssetType::Texture;
-        importConfig->bIsPersistent = bPersistencyRequired;
-
-        if (!SaveSerializedDataToJsonFile(resMetadataPath, *importConfig))
+        const ResourceInfo resInfo{ .Type = EAssetType::Texture };
+        json resMetadata{};
+        resMetadata << resInfo << *importConfig;
+        if (SaveJsonToFile(resMetadataPath, resMetadata))
         {
             IG_LOG(TextureImporterWarn, "Failed to create resource metadata {}.", resMetadataPath.string());
         }
 
         /* Configure Texture Asset Metadata */
         texMetadata = targetTex.GetMetadata();
-        const ETextureDimension texDim = AsTexDimension(texMetadata.dimension);
 
-        auto newLoadConfig = MakeVersionedDefault<TextureLoadConfig>();
-        newLoadConfig.CreationTime = Timer::Now();
-        newLoadConfig.Guid = xg::newGuid();
-        newLoadConfig.SrcResPath = resPathStr.AsStringView();
-        newLoadConfig.Type = EAssetType::Texture;
-        newLoadConfig.bIsPersistent = bPersistencyRequired;
-        newLoadConfig.Format = texMetadata.format;
-        newLoadConfig.Dimension = texDim;
-        newLoadConfig.Width = static_cast<uint32_t>(texMetadata.width);
-        newLoadConfig.Height = static_cast<uint32_t>(texMetadata.height);
-        newLoadConfig.DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize);
-        newLoadConfig.Mips = static_cast<uint16_t>(texMetadata.mipLevels);
-        newLoadConfig.bIsCubemap = texMetadata.IsCubemap();
-        newLoadConfig.Filter = importConfig->Filter;
-        newLoadConfig.AddressModeU = importConfig->AddressModeU;
-        newLoadConfig.AddressModeV = importConfig->AddressModeV;
-        newLoadConfig.AddressModeW = importConfig->AddressModeW;
+        const AssetInfo assetInfo{
+            .CreationTime = Timer::Now(),
+            .Guid = xg::newGuid(),
+            .SrcResPath = resPathStr.AsString(),
+            .Type = EAssetType::Texture,
+            .bIsPersistent = bIsPersistent
+        };
+
+        const TextureLoadConfig newLoadConfig{
+            .Format = texMetadata.format,
+            .Dimension = AsTexDimension(texMetadata.dimension),
+            .Width = static_cast<uint32_t>(texMetadata.width),
+            .Height = static_cast<uint32_t>(texMetadata.height),
+            .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize),
+            .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
+            .bIsCubemap = texMetadata.IsCubemap(),
+            .Filter = importConfig->Filter,
+            .AddressModeU = importConfig->AddressModeU,
+            .AddressModeV = importConfig->AddressModeV,
+            .AddressModeW = importConfig->AddressModeW
+        };
+
+        json assetMetadata{};
+        assetMetadata << assetInfo << newLoadConfig;
 
         if (!fs::exists(details::TextureAssetRootPath))
         {
             details::CreateAssetDirectories();
         }
 
-        const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, newLoadConfig.Guid);
-        if (!SaveSerializedDataToJsonFile(assetMetadataPath, newLoadConfig))
+        const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, assetInfo.Guid);
+        if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
             IG_LOG(TextureImporterFatal, "Failed to open asset metadata file {}.", assetMetadataPath.string());
             return std::nullopt;
         }
 
         /* Save data to asset file */
-        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, newLoadConfig.Guid);
+        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.Guid);
         if (fs::exists(assetPath))
         {
             IG_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
@@ -472,7 +445,7 @@ namespace ig
         }
 
         IG_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.AsStringView(), assetPath.string(), tempTimer.End());
-        return std::make_optional(newLoadConfig.Guid);
+        return std::make_optional(assetInfo.Guid);
     }
 
     std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
@@ -488,31 +461,30 @@ namespace ig
             return std::nullopt;
         }
 
-        TextureLoadConfig loadConfig{};
-        std::ifstream assetMetaStream{ assetMetaPath.c_str() };
-        const json serializedAssetMeta{ json::parse(assetMetaStream) };
-        assetMetaStream.close();
-
-        serializedAssetMeta >> loadConfig;
-
-        /* Check Asset Metadata */
-        if (!loadConfig.IsLatestVersion())
+        const json assetMetadata{ LoadJsonFromFile(assetMetaPath) };
+        if (assetMetadata.empty())
         {
-            details::LogVersionMismatch<TextureLoadConfig, TextureLoaderWarn>(loadConfig, assetMetaPath.string());
-        }
-
-        if (loadConfig.Guid != guid)
-        {
-            IG_LOG(TextureLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
-                   guid.str(), loadConfig.Guid.str());
+            IG_LOG(TextureLoaderFatal, "Failed to load asset metadata from {}.", assetMetaPath.string());
             return std::nullopt;
         }
 
-        if (loadConfig.Type != EAssetType::Texture)
+        AssetInfo assetInfo{};
+        TextureLoadConfig loadConfig{};
+        assetMetadata >> loadConfig >> assetInfo;
+
+        /* Check Asset Metadata */
+        if (assetInfo.Guid != guid)
+        {
+            IG_LOG(TextureLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
+                   guid.str(), assetInfo.Guid.str());
+            return std::nullopt;
+        }
+
+        if (assetInfo.Type != EAssetType::Texture)
         {
             IG_LOG(TextureLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
                    magic_enum::enum_name(EAssetType::Texture),
-                   magic_enum::enum_name(loadConfig.Type));
+                   magic_enum::enum_name(assetInfo.Type));
             return std::nullopt;
         }
 
@@ -720,7 +692,7 @@ namespace ig
             return std::nullopt;
         }
 
-        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), loadConfig.SrcResPath, tempTimer.End());
+        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.SrcResPath, tempTimer.End());
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
         return Texture{
             .LoadConfig = loadConfig,

@@ -48,7 +48,7 @@ namespace ig
 
             ImGui::SameLine();
 
-            ImGui::SliderInt("Polling Interval", &pollingInterval, 10, 180);
+            ImGui::SliderInt("Interval", &pollingInterval, 10, 180);
 
             if (ImGui::TreeNodeEx("Engine (Real-time)", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {

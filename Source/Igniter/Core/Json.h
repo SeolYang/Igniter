@@ -46,6 +46,9 @@ namespace ig::details
 #define IG_SERIALIZE_ENUM_JSON(DataType, JsonArchive, Data, Var) \
     ig::details::Serialize(JsonArchive, magic_enum::enum_name<std::decay_t<decltype(Data.Var)>>(Data.Var), #DataType, #Var)
 
+#define IG_SERIALIZE_STRING_JSON(DataType, JsonArchive, Data, Var) \
+    ig::details::Serialize(JsonArchive, Data.Var.AsStringView(), #DataType, #Var)
+
 #define IG_DESERIALIZE_JSON(DataType, JsonArchive, Data, Var)                                                                                  \
     ig::details::DeSerialize<std::decay_t<decltype(Data.Var)>>(JsonArchive, Data.Var, #DataType, #Var,                                         \
                                                                [](const nlohmann::json& archive, std::decay_t<decltype(Data.Var)>& var) {      \
@@ -62,4 +65,10 @@ namespace ig::details
     ig::details::DeSerialize<std::decay_t<decltype(Data.Var)>>(JsonArchive, Data.Var, #DataType, #Var,                                                                                                        \
                                                                [](const nlohmann::json& archive, std::decay_t<decltype(Data.Var)>& var) {                                                                     \
                                                                    var = magic_enum::enum_cast<std::decay_t<decltype(Data.Var)>>(archive[#DataType][#Var].template get<std::string>()).value_or(FallbackVal); \
+                                                               })
+
+#define IG_DESERIALIZE_STRING_JSON(DataType, JsonArchive, Data, Var)                                                                      \
+    ig::details::DeSerialize<std::decay_t<decltype(Data.Var)>>(JsonArchive, Data.Var, #DataType, #Var,                                    \
+                                                               [](const nlohmann::json& archive, std::decay_t<decltype(Data.Var)>& var) { \
+                                                                   var = archive[#DataType][#Var].template get<std::string>();            \
                                                                })

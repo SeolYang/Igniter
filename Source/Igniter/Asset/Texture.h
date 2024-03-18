@@ -27,14 +27,11 @@ namespace ig
         Tex3D
     };
 
-    struct TextureImportConfig : public ResourceMetadata<2>
+    struct TextureImportConfig
     {
-        friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config);
-        friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
-
     public:
-        virtual json& Serialize(json& archive) const override;
-        virtual const json& Deserialize(const json& archive) override;
+        json& Serialize(json& archive) const;
+        const json& Deserialize(const json& archive);
 
     public:
         ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
@@ -46,17 +43,11 @@ namespace ig
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     };
 
-    nlohmann::json& operator<<(nlohmann::json& archive, const TextureImportConfig& config);
-    const nlohmann::json& operator>>(const nlohmann::json& archive, TextureImportConfig& config);
-
-    struct TextureLoadConfig : public AssetMetadata<4>
+    struct TextureLoadConfig
     {
-        friend nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config);
-        friend const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
-
     public:
-        virtual json& Serialize(json& archive) const override;
-        virtual const json& Deserialize(const json& archive) override;
+        json& Serialize(json& archive) const;
+        const json& Deserialize(const json& archive);
 
         [[nodiscard]] bool IsArray() const { return Dimension != ETextureDimension::Tex3D && DepthOrArrayLength > 1; }
 
@@ -74,9 +65,6 @@ namespace ig
         D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     };
-
-    nlohmann::json& operator<<(nlohmann::json& archive, const TextureLoadConfig& config);
-    const nlohmann::json& operator>>(const nlohmann::json& archive, TextureLoadConfig& config);
 
     class TextureImporter
     {

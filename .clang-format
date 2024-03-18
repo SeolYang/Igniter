@@ -41,7 +41,7 @@ IndentPPDirectives: BeforeHash
 IndentWidth: 4
 NamespaceIndentation: All
 PointerAlignment: Left
-SortIncludes: true
+SortIncludes: false
 SpaceBeforeCaseColon: false
 SpaceBeforeCtorInitializerColon : true
 SpaceBeforeInheritanceColon : true

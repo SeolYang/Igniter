@@ -1,48 +1,35 @@
 #pragma once
+#include <Core/Assert.h>
 #include <Core/Container.h>
 #include <Core/String.h>
-#include <Core/Assert.h>
 
 namespace ig
 {
-    template <uint64_t DerivedVersion>
-    struct Serializable
-    {
-    public:
-        [[nodiscard]]
-        bool IsLatestVersion() const
+    template <typename Archive, typename Data>
+    concept Serializable = requires(Archive& archive, const Data& data) {
         {
-            return Version == LatestVersion;
-        }
-
-        virtual json& Serialize(json& archive) const
-        {
-            const Serializable& serializable = *this;
-            IG_SERIALIZE_JSON(Serializable, archive, serializable, LatestVersion);
-            return archive;
-        }
-
-        virtual const json& Deserialize(const json& archive)
-        {
-            Serializable& serializable = *this;
-            IG_DESERIALIZE_JSON(Serializable, archive, serializable, Version);
-            IG_CHECK(serializable.IsLatestVersion());
-            return archive;
-        }
-
-    private:
-        constexpr static uint64_t BaseVersion = 0;
-
-    public:
-        constexpr static uint64_t LatestVersion = BaseVersion + DerivedVersion;
-        uint64_t Version = 0;
+            data.Serialize(archive)
+        } -> std::convertible_to<Archive&>;
     };
 
-    template <typename T>
-    [[nodiscard]] T MakeVersionedDefault()
+    template <typename Archive, typename Data>
+    concept Deserializable = requires(const Archive& archive, Data& data) {
+        {
+            data.Deserialize(archive)
+        } -> std::convertible_to<const Archive&>;
+    };
+
+    template <typename Archive, typename Data>
+        requires Serializable<Archive, Data>
+    Archive& operator<<(Archive& archive, const Data& data)
     {
-        T newData{};
-        newData.Version = T::LatestVersion;
-        return newData;
+        return data.Serialize(archive);
+    }
+
+    template <typename Archive, typename Data>
+        requires Deserializable<Archive, Data>
+    const Archive& operator>>(const Archive& archive, Data& data)
+    {
+        return data.Deserialize(archive);
     }
 } // namespace ig

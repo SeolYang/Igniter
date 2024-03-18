@@ -11,6 +11,6 @@ namespace ig
     {
         StaticMeshComponent& staticMeshComponent = registry.get<StaticMeshComponent>(entity);
         IG_CHECK(staticMeshComponent.StaticMeshHandle);
-        ImGui::Text(staticMeshComponent.StaticMeshHandle->LoadConfig.SrcResPath.c_str());
+        ImGui::Text(staticMeshComponent.StaticMeshHandle->LoadConfig.Name.c_str());
     }
 } // namespace ig

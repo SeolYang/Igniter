@@ -61,31 +61,15 @@ int main()
         // texImportConfig.CompressionMode = ETextureCompressionMode::BC7;
         // texImporter.Import(String("Resources\\Homura\\Body.png"), texImportConfig);
 
-        StaticMeshImportConfig staticMeshImportConfig = MakeVersionedDefault<StaticMeshImportConfig>();
+        StaticMeshImportConfig staticMeshImportConfig{};
         // staticMeshImportConfig.bMergeMeshes = true;
         // std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\Homura\\Axe.fbx"), staticMeshImportConfig);
 
         const xg::Guid ashBodyTexGuid = xg::Guid("4b2b2556-7d81-4884-ba50-777392ebc9ee");
-        const xg::Guid ashThumbnailGuid = xg::Guid("512a7388-949d-4c30-9c21-5c08e2dfa587");
         const xg::Guid ashStaticMeshGuid = xg::Guid("e42f93b4-e57d-44ae-9fde-302013c6e9e8");
 
-        const xg::Guid homuraThumbnailGuid = xg::Guid("0aa4c1e2-41fa-429c-959b-4abfbfef2a08");
         const xg::Guid homuraBodyTexGuid = xg::Guid("87949751-3431-45c7-bd57-0a1518649511");
         const xg::Guid homuraStaticMeshGuid = xg::Guid("a717ff6e-129b-4c80-927a-a786a0b21128");
-        const xg::Guid axeTexGuid = xg::Guid("eb93c3b0-1197-4884-8cfe-622f66184d4c");
-        const xg::Guid axeStaticMeshGuid = xg::Guid("4452fc34-9c3f-4715-8b6c-4481ab16b9bb");
-
-        std::future<std::optional<Texture>> ashThumbnailFutre = std::async(
-            std::launch::async,
-            TextureLoader::Load,
-            ashThumbnailGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
-
-        std::future<std::optional<Texture>> homuraThumbnailFuture = std::async(
-            std::launch::async,
-            TextureLoader::Load,
-            homuraThumbnailGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
         std::future<std::optional<Texture>> ashBodyTexFuture = std::async(
             std::launch::async,
@@ -127,11 +111,6 @@ int main()
 
         inputManager.BindAction(String("TogglePossessCamera"), EInput::Control);
         /********************************/
-
-        auto homuraThumbnail = homuraThumbnailFuture.get();
-        IG_CHECK(homuraThumbnail);
-        auto ashThumbnail = ashThumbnailFutre.get();
-        IG_CHECK(ashThumbnail);
 
         /* #sy_test ECS based Game flow & logic tests */
         Registry& registry = gameInstance.GetRegistry();

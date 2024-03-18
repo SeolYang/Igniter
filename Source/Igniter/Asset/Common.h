@@ -1,9 +1,9 @@
 #pragma once
 #include <Core/Container.h>
 #include <Core/Handle.h>
-#include <Core/String.h>
 #include <Core/Log.h>
 #include <Core/Serializable.h>
+#include <Core/String.h>
 #include <Filesystem/Utils.h>
 
 #ifndef IG_TEXT
@@ -35,86 +35,66 @@ namespace ig
     /* Refer to ./Assets/{AssetType}/{GUID}.metadata */
     fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid);
 
-    /* Common Resource Metadata */
-    template <uint64_t DerivedVersion, uint64_t BaseVersion = 3>
-    struct ResourceMetadata : public Serializable<DerivedVersion + BaseVersion>
+    struct ResourceInfo
     {
     public:
-        virtual json& Serialize(json& archive) const
+        json& Serialize(json& archive) const
         {
-            Serializable<DerivedVersion + BaseVersion>::Serialize(archive);
-
-            const ResourceMetadata& metadata = *this;
-            IG_CHECK(metadata.AssetType != EAssetType::Unknown);
-
-            IG_SERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType);
-            IG_SERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
-
+            const ResourceInfo& info = *this;
+            IG_CHECK(info.Type != EAssetType::Unknown);
+            IG_SERIALIZE_ENUM_JSON(ResourceInfo, archive, info, Type);
             return archive;
         }
 
-        virtual const json& Deserialize(const json& archive)
+        const json& Deserialize(const json& archive)
         {
-            Serializable<DerivedVersion + BaseVersion>::Deserialize(archive);
+            ResourceInfo& info = *this;
+            IG_DESERIALIZE_ENUM_JSON(AssetMetadata, archive, info, Type, EAssetType::Unknown);
 
-            ResourceMetadata& metadata = *this;
-            IG_DESERIALIZE_ENUM_JSON(ResourceMetadata, archive, metadata, AssetType, EAssetType::Unknown);
-            IG_DESERIALIZE_JSON(ResourceMetadata, archive, metadata, bIsPersistent);
-
-            IG_CHECK(metadata.AssetType != EAssetType::Unknown);
+            IG_CHECK(info.Type != EAssetType::Unknown);
             return archive;
         }
 
     public:
-        using CommonMetadata = ResourceMetadata;
-
-        EAssetType AssetType = EAssetType::Unknown;
-        bool bIsPersistent = false;
+        EAssetType Type = EAssetType::Unknown;
     };
 
     /* Common Asset Metadata */
-    template <uint64_t DerivedVersion, uint64_t BaseVersion = 3>
-    struct AssetMetadata : public Serializable<DerivedVersion + BaseVersion>
+    struct AssetInfo
     {
     public:
-        virtual json& Serialize(json& archive) const
+        json& Serialize(json& archive) const
         {
-            Serializable<DerivedVersion + BaseVersion>::Serialize(archive);
+            const AssetInfo& info = *this;
+            IG_CHECK(info.Guid.isValid());
+            IG_CHECK(!info.SrcResPath.empty());
+            IG_CHECK(info.Type != EAssetType::Unknown);
 
-            const AssetMetadata& metadata = *this;
-            IG_CHECK(metadata.Guid.isValid());
-            IG_CHECK(!metadata.SrcResPath.empty());
-            IG_CHECK(metadata.Type != EAssetType::Unknown);
-
-            IG_SERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
-            IG_SERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
-            IG_SERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
-            IG_SERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type);
-            IG_SERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
+            IG_SERIALIZE_JSON(AssetInfo, archive, info, CreationTime);
+            IG_SERIALIZE_GUID_JSON(AssetInfo, archive, info, Guid);
+            IG_SERIALIZE_JSON(AssetInfo, archive, info, SrcResPath);
+            IG_SERIALIZE_ENUM_JSON(AssetInfo, archive, info, Type);
+            IG_SERIALIZE_JSON(AssetInfo, archive, info, bIsPersistent);
 
             return archive;
         }
 
-        virtual const json& Deserialize(const json& archive)
+        const json& Deserialize(const json& archive)
         {
-            Serializable<DerivedVersion + BaseVersion>::Deserialize(archive);
+            AssetInfo& info = *this;
+            IG_DESERIALIZE_JSON(AssetInfo, archive, info, CreationTime);
+            IG_DESERIALIZE_GUID_JSON(AssetInfo, archive, info, Guid);
+            IG_DESERIALIZE_JSON(AssetInfo, archive, info, SrcResPath);
+            IG_DESERIALIZE_ENUM_JSON(AssetInfo, archive, info, Type, EAssetType::Unknown);
+            IG_DESERIALIZE_JSON(AssetInfo, archive, info, bIsPersistent);
 
-            AssetMetadata& metadata = *this;
-            IG_DESERIALIZE_JSON(AssetMetadata, archive, metadata, CreationTime);
-            IG_DESERIALIZE_GUID_JSON(AssetMetadata, archive, metadata, Guid);
-            IG_DESERIALIZE_JSON(AssetMetadata, archive, metadata, SrcResPath);
-            IG_DESERIALIZE_ENUM_JSON(AssetMetadata, archive, metadata, Type, EAssetType::Unknown);
-            IG_DESERIALIZE_JSON(AssetMetadata, archive, metadata, bIsPersistent);
-
-            IG_CHECK(metadata.Guid.isValid());
-            IG_CHECK(!metadata.SrcResPath.empty());
-            IG_CHECK(metadata.Type != EAssetType::Unknown);
+            IG_CHECK(info.Guid.isValid());
+            IG_CHECK(!info.SrcResPath.empty());
+            IG_CHECK(info.Type != EAssetType::Unknown);
             return archive;
         }
 
     public:
-        using CommonMetadata = AssetMetadata;
-
         uint64_t CreationTime = 0;
         xg::Guid Guid{};
         std::string SrcResPath{};
@@ -138,35 +118,6 @@ namespace ig
         constexpr inline std::string_view ShaderAssetRootPath = "Assets\\Shaders";
         constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
         constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
-
-        template <typename T, typename LogCategory>
-        void LogVersionMismatch(const T& instance, const std::string_view infoMessage = "")
-        {
-            IG_LOG(LogCategory, IG_TEXT(T) " version does not match.\n\tFound: {}\nExpected: {}\nInfos: {}",
-                   instance.Version, T::LatestVersion, infoMessage);
-        }
-
-        template <typename T, typename MismatchLogCategory = ig::LogWarn>
-        std::optional<T> LoadMetadataFromFile(const fs::path& resMetaPath)
-        {
-            if (!fs::exists(resMetaPath))
-            {
-                return std::nullopt;
-            }
-
-            std::optional<T> metadata = LoadSerializedDataFromJsonFile<T>(resMetaPath);
-            if (!metadata)
-            {
-                return std::nullopt;
-            }
-
-            if (metadata->IsLatestVersion())
-            {
-                details::LogVersionMismatch<T, MismatchLogCategory>(*metadata, resMetaPath.string());
-            }
-
-            return metadata;
-        }
 
         inline void CreateAssetDirectories()
         {
