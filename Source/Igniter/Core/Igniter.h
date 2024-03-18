@@ -6,7 +6,6 @@
 
 namespace ig
 {
-    class Logger;
     class Window;
     class RenderDevice;
     class GpuUploader;
@@ -26,7 +25,6 @@ namespace ig
 
         [[nodiscard]] static FrameManager& GetFrameManager();
         [[nodiscard]] static Timer& GetTimer();
-        [[nodiscard]] static Logger& GetLogger();
         [[nodiscard]] static Window& GetWindow();
         [[nodiscard]] static RenderDevice& GetRenderDevice();
         [[nodiscard]] static GpuUploader& GetGpuUploader();
@@ -51,7 +49,6 @@ namespace ig
         bool bShouldExit = false;
         FrameManager frameManager;
         Timer timer;
-        std::unique_ptr<Logger> logger;
         std::unique_ptr<Window> window;
         std::unique_ptr<RenderDevice> renderDevice;
         std::unique_ptr<GpuUploader> gpuUploader;

@@ -27,9 +27,8 @@ namespace ig
         if (bIsFirstEngineCreation)
         {
             instance = this;
-            logger = std::make_unique<Logger>();
-            logger->Log<EngineInfo>("Igniter Engine version: {}", version::Version);
-            logger->Log<EngineInfo>("Igniting Engine Runtime!");
+            IG_LOG(EngineInfo, "Igniter Engine Version {}", version::Version);
+            IG_LOG(EngineInfo, "Igniting Engine Runtime!");
 
             /* #sy_test 임시 윈도우 설명자 */
             const WindowDescription winDesc{ .Width = 1920, .Height = 1080, .Title = String(settings::GameName) };
@@ -49,7 +48,7 @@ namespace ig
 
     Igniter::~Igniter()
     {
-        logger->Log<EngineInfo>("* Cleanup sub-systems");
+        IG_LOG(EngineInfo, "Extinguishing Engine Runtime.");
         gpuViewManager->ClearCachedSampler();
         inputManager->Clear();
         deferredDeallocator->FlushAllFrames();
@@ -65,7 +64,6 @@ namespace ig
         gpuUploader.reset();
         renderDevice.reset();
         window.reset();
-        logger.reset();
 
         if (instance == this)
         {
@@ -85,12 +83,6 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return instance->timer;
-    }
-
-    Logger& Igniter::GetLogger()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->logger;
     }
 
     HandleManager& Igniter::GetHandleManager()
@@ -167,7 +159,7 @@ namespace ig
 
     int Igniter::Execute()
     {
-        logger->Log<EngineInfo>("* Start Engine main loop");
+        IG_LOG(EngineInfo, "Igniting Main Loop!");
 
         while (!bShouldExit)
         {
@@ -203,7 +195,8 @@ namespace ig
         }
 
         renderer->FlushQueues();
-        logger->Log<EngineInfo>("* End Engine main loop");
+
+        IG_LOG(EngineInfo, "Extinguishing Engine Main Loop.");
         return 0;
     }
 } // namespace ig

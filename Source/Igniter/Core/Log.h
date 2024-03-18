@@ -3,16 +3,16 @@
 #pragma warning(push)
 #pragma warning(disable : 26800)
 #pragma warning(disable : 26498)
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 #pragma warning(pop)
-#include <format>
+#include <Core/Assert.h>
 #include <Core/Container.h>
-#include <Core/String.h>
 #include <Core/HashUtils.h>
 #include <Core/Mutex.h>
-#include <Core/Assert.h>
+#include <Core/String.h>
+#include <format>
 
 namespace ig
 {
@@ -30,7 +30,6 @@ namespace ig
     class Logger final
     {
     public:
-        Logger();
         Logger(const Logger&) = delete;
         Logger(Logger&&) noexcept = delete;
         ~Logger();
@@ -80,7 +79,15 @@ namespace ig
             }
         }
 
+        static Logger& GetInstance()
+        {
+            static Logger instance{};
+            return instance;
+        }
+
     private:
+        Logger();
+
         template <typename C>
         spdlog::logger* QueryCategory()
         {
@@ -90,7 +97,6 @@ namespace ig
 
     private:
         mutable SharedMutex mutex;
-
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
         std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
         robin_hood::unordered_map<uint64_t, spdlog::logger*> categoryMap;
@@ -109,13 +115,13 @@ namespace ig
 
 #if defined(DEBUG) || defined(_DEBUG)
     #define IG_LOG(LOG_CATEGORY, ...)                                                                                             \
-        ig::Igniter::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__);                                                                   \
+        ig::Logger::GetInstance().Log<LOG_CATEGORY>(__VA_ARGS__);                                                                 \
         if constexpr (LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Error || LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Fatal) \
         {                                                                                                                         \
-            IG_CHECK_NO_ENTRY();                                                                                                       \
+            IG_CHECK_NO_ENTRY();                                                                                                  \
         }
 #else
-    #define IG_LOG(LOG_CATEGORY, ...) ig::Igniter::GetLogger().Log<LOG_CATEGORY>(__VA_ARGS__)
+    #define IG_LOG(LOG_CATEGORY, ...) ig::Logger::GetInstance().Log<LOG_CATEGORY>(__VA_ARGS__)
 #endif
 
 #define IG_CONDITIONAL_LOG(LOG_CATEGORY, CONDITION, ...) \
