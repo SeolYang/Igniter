@@ -11,7 +11,7 @@ namespace ig
 {
     void StatisticsPanel::Render()
     {
-        if (pollingStep >= pollingInterval)
+        if (bEnablePolling && pollingStep >= pollingInterval)
         {
             Renderer& renderer = Igniter::GetRenderer();
             {
@@ -40,9 +40,17 @@ namespace ig
 
         if (ImGui::Begin("Statistics Panel", &bIsVisible))
         {
+            if (ImGui::RadioButton("##EnablePollingStatistics", bEnablePolling))
+            {
+                bEnablePolling = !bEnablePolling;
+                pollingStep = 0;
+            }
+
+            ImGui::SameLine();
+
             ImGui::SliderInt("Polling Interval", &pollingInterval, 10, 180);
 
-            if (ImGui::TreeNodeEx("Engine", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::TreeNodeEx("Engine (Real-time)", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {
                 const Timer& timer = Igniter::GetTimer();
                 ImGui::Text("FPS: %d", timer.GetStableFps());

@@ -11,6 +11,7 @@ namespace ig
         void Render() override;
 
     private:
+        bool bEnablePolling = true;
         int pollingInterval = 60;
         int pollingStep = pollingInterval;
 
