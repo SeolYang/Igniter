@@ -1,4 +1,5 @@
 #include <Asset/Texture.h>
+#include <Asset/Utils.h>
 #include <Core/Container.h>
 #include <Core/Igniter.h>
 #include <Core/Timer.h>

@@ -1,5 +1,6 @@
 #include <Asset/Model.h>
 #include <Asset/Texture.h>
+#include <Asset/Utils.h>
 #include <D3D12/GpuBuffer.h>
 #include <D3D12/GpuBufferDesc.h>
 #include <Render/GpuViewManager.h>
