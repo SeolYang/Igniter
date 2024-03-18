@@ -13,6 +13,7 @@ namespace ig
             {
                 const Timer& timer = Igniter::GetTimer();
                 ImGui::Text("FPS: %d", timer.GetStableFps());
+                ImGui::Text("Delta Time: %d ms", timer.GetDeltaTimeMillis());
             }
             ImGui::End();
         }

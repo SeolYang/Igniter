@@ -77,7 +77,7 @@ namespace ig
                 ImGui::EndChild();
             }
 
-            if (ImGui::IsWindowFocused() && ImGui::IsMouseClicked(1) && !bIsItemClicked)
+            if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseClicked(0) && !bIsItemClicked)
             {
                 selectedEntity = entt::null;
             }

@@ -197,7 +197,7 @@ int main()
         auto& entityListLayer = canvas.AddLayer<EntityList>();
         auto& entityInspectorLayer = canvas.AddLayer<EntityInspector>(entityListLayer);
         auto& menuBar = canvas.AddLayer<MenuBar>(statisticsPanelLayer, cachedStringDebuggerLayer, entityListLayer, entityInspectorLayer);
-        entityListLayer.SetPriority(1);
+        statisticsPanelLayer.SetVisibility(true);
         entityListLayer.SetVisibility(true);
         entityInspectorLayer.SetVisibility(true);
         menuBar.SetVisibility(true);
