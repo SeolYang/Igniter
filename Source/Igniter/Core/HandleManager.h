@@ -29,7 +29,7 @@ namespace ig
         HandleManager() = default;
         HandleManager(const HandleManager&) = delete;
         HandleManager(HandleManager&&) noexcept = delete;
-        ~HandleManager();
+        ~HandleManager() = default;
 
         HandleManager& operator=(const HandleManager&) = delete;
         HandleManager& operator=(HandleManager&&) = delete;
@@ -41,53 +41,22 @@ namespace ig
         void Deallocate(const uint64_t typeHashVal, const uint64_t handle);
         void MaskAsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle);
 
-        uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle)
-        {
-            IG_CHECK(typeHashVal != InvalidHashVal);
-            IG_CHECK(memPools.contains(typeHashVal));
-            return memPools[typeHashVal].GetAddressOf(handle);
-        }
-
-        const uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
-        {
-            IG_CHECK(typeHashVal != InvalidHashVal);
-            IG_CHECK(memPools.contains(typeHashVal));
-            const auto& memPool = memPools.at(typeHashVal);
-            return memPool.GetAddressOf(handle);
-        }
+        uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle);
+        const uint8_t* GetAddressOfUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
 
         /* If handle.alived == address existed. */
-        uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle)
-        {
-            ReadOnlyLock lock{ mutex };
-            return GetAddressOfUnsafe(typeHashVal, handle);
-        }
-
-        const uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
-        {
-            ReadOnlyLock lock{ mutex };
-            return GetAddressOfUnsafe(typeHashVal, handle);
-        }
+        uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle);
+        const uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
 
         /* Validated Address = handle.alived && !pending-deallocation */
-        uint8_t* GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle)
-        {
-            ReadOnlyLock lock{ mutex };
-            IG_CHECK(memPools.contains(typeHashVal));
-            return !IsPendingDeallocationUnsafe(typeHashVal, handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
-        }
-
-        const uint8_t* GetValidatedAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
-        {
-            ReadOnlyLock lock{ mutex };
-            return !IsPendingDeallocationUnsafe(typeHashVal, handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
-        }
-
-        bool IsAlive(const uint64_t typeHashVal, const uint64_t handle) const;
-        bool IsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle) const;
+        uint8_t* GetVaildAddressOf(const uint64_t typeHashVal, const uint64_t handle);
+        const uint8_t* GetVaildAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
 
         bool IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
+        bool IsAlive(const uint64_t typeHashVal, const uint64_t handle) const;
+
         bool IsPendingDeallocationUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
+        bool IsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle) const;
 
     private:
         mutable SharedMutex mutex;

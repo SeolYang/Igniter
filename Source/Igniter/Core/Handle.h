@@ -35,8 +35,8 @@ namespace ig
             uint8_t* GetAddressOf(const uint64_t typeHashValue);
             const uint8_t* GetAddressOf(const uint64_t typeHashValue) const;
 
-            uint8_t* GetValidatedAddressOf(const uint64_t typeHashValue);
-            const uint8_t* GetValidatedAddressOf(const uint64_t typeHashValue) const;
+            uint8_t* GetVaildAddressOf(const uint64_t typeHashValue);
+            const uint8_t* GetVaildAddressOf(const uint64_t typeHashValue) const;
 
             bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
             bool IsAlive(const uint64_t typeHashValue) const;
@@ -313,28 +313,28 @@ namespace ig
 
         [[nodiscard]] T& operator*()
         {
-            T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] const T& operator*() const
         {
-            const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
+            const T* instancePtr = reinterpret_cast<const T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            T* instancePtr = reinterpret_cast<T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            const T* instancePtr = reinterpret_cast<const T*>(handle.GetValidatedAddressOf(EvaluatedTypeHashVal));
+            const T* instancePtr = reinterpret_cast<const T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
