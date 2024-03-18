@@ -20,27 +20,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\CameraPossessSystem.cpp" />
-    <ClCompile Include="..\Source\Frieren\Enemy.cpp" />
     <ClCompile Include="..\Source\Frieren\FpsCameraController.cpp" />
     <ClCompile Include="..\Source\Frieren\FpsCameraControllSystem.cpp" />
-    <ClCompile Include="..\Source\Frieren\HealthRecoverySystem.cpp" />
     <ClCompile Include="..\Source\Frieren\main.cpp" />
-    <ClCompile Include="..\Source\Frieren\RotateEnemySystem.cpp" />
     <ClCompile Include="..\Source\Frieren\TestGameMode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\CameraPossessSystem.h" />
-    <ClInclude Include="..\Source\Frieren\Enemy.h" />
-    <ClInclude Include="..\Source\Frieren\EnemyArchetype.h" />
     <ClInclude Include="..\Source\Frieren\FpsCameraController.h" />
     <ClInclude Include="..\Source\Frieren\FpsCameraControllSystem.h" />
-    <ClInclude Include="..\Source\Frieren\HealthComponent.h" />
-    <ClInclude Include="..\Source\Frieren\HealthRecoveryBuff.h" />
-    <ClInclude Include="..\Source\Frieren\HealthRecoverySystem.h" />
     <ClInclude Include="..\Source\Frieren\MenuBar.h" />
-    <ClInclude Include="..\Source\Frieren\PlayerArchetype.h" />
-    <ClInclude Include="..\Source\Frieren\PlayerComponent.h" />
-    <ClInclude Include="..\Source\Frieren\RotateEnemySystem.h" />
     <ClInclude Include="..\Source\Frieren\TestGameMode.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

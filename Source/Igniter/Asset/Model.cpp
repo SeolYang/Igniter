@@ -271,6 +271,7 @@ namespace ig
                 const fs::path texResPath = texResPathStr.AsStringView();
 
                 /* #sy_wip_todo 에셋 매니저 경유 */
+                textureImporter;
                 //if (!HasImportedBefore(texResPath))
                 //{
                 //    std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr);

@@ -15,7 +15,6 @@
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/GPUView.h>
 #include <D3D12/RenderDevice.h>
-#include <EnemyArchetype.h>
 #include <FpsCameraController.h>
 #include <Gameplay/ComponentRegistry.h>
 #include <Gameplay/GameInstance.h>
@@ -26,7 +25,6 @@
 #include <ImGui/ImGuiLayer.h>
 #include <MenuBar.h>
 #include <ImGui/StatisticsPanel.h>
-#include <PlayerArchetype.h>
 #include <Render/GPUViewManager.h>
 #include <Render/GpuUploader.h>
 #include <TestGameMode.h>
@@ -35,14 +33,8 @@
 
 int main()
 {
-    // DrawImGui(registry)
-    // found components = registry.getCompLists(entity)
-    // for (compID : components)
-    // auto& compInfo = compRegistry.get(compID)
-    // compInfo.OnImGui(registry, enttiy)
-    // ....
-
     using namespace ig;
+    using namespace fe;
     int result = 0;
     {
         Igniter engine;
@@ -55,15 +47,6 @@ int main()
         GpuUploader& gpuUploader = engine.GetGpuUploader();
 
         /* #sy_test Asset System & Mechanism Test */
-        // TextureImportConfig texImportConfig = MakeVersionedDefault<TextureImportConfig>();
-        // texImportConfig.bGenerateMips = true;
-        // texImportConfig.CompressionMode = ETextureCompressionMode::BC7;
-        // texImporter.Import(String("Resources\\Homura\\Body.png"), texImportConfig);
-
-        // StaticMeshImportConfig staticMeshImportConfig{};
-        // staticMeshImportConfig.bMergeMeshes = true;
-        // std::vector<xg::Guid> staticMeshAssetGuids = ModelImporter::ImportAsStatic(texImporter, String("Resources\\Homura\\Axe.fbx"), staticMeshImportConfig);
-
         const xg::Guid ashBodyTexGuid = xg::Guid("4b2b2556-7d81-4884-ba50-777392ebc9ee");
         const xg::Guid ashStaticMeshGuid = xg::Guid("e42f93b4-e57d-44ae-9fde-302013c6e9e8");
 
@@ -115,56 +98,59 @@ int main()
         Registry& registry = gameInstance.GetRegistry();
         gameInstance.SetGameMode(std::make_unique<TestGameMode>());
 
-        /* Player Entity */
-        const auto player = PlayerArchetype::Create(registry);
         auto homuraBodyTex = homuraBodyTexFuture.get();
         IG_CHECK(homuraBodyTex);
         auto homuraStaticMesh = homuraStaticMeshFuture.get();
         auto homuraStaticMeshHandle = Handle<StaticMesh>{ handleManager, std::move(homuraStaticMesh.value()) };
+
+        const auto homura = registry.create();
         IG_CHECK(homuraStaticMesh);
         {
-            registry.emplace<NameComponent>(player, "Player"_fs);
+            registry.emplace<NameComponent>(homura, "Homura"_fs);
 
-            StaticMeshComponent& playerStaticMeshComponent = registry.emplace<StaticMeshComponent>(player);
-            playerStaticMeshComponent.StaticMeshHandle = homuraStaticMeshHandle.MakeRef();
-            playerStaticMeshComponent.DiffuseTex = homuraBodyTex->ShaderResourceView.MakeRef();
-            playerStaticMeshComponent.DiffuseTexSampler = homuraBodyTex->TexSampler;
+            auto& transformComponent = registry.emplace<TransformComponent>(homura);
+            transformComponent.Position = Vector3{ 10.5f, -30.f, 10.f };
+            transformComponent.Scale = Vector3{ 0.35f, 0.35f, 0.35f };
 
-            TransformComponent& playerTransform = registry.get<TransformComponent>(player);
-            playerTransform.Position = Vector3{ 10.5f, -30.f, 10.f };
-            playerTransform.Scale = Vector3{ 0.35f, 0.35f, 0.35f };
+            auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
+            staticMeshComponent.StaticMeshHandle = homuraStaticMeshHandle.MakeRef();
+            staticMeshComponent.DiffuseTex = homuraBodyTex->ShaderResourceView.MakeRef();
+            staticMeshComponent.DiffuseTexSampler = homuraBodyTex->TexSampler;
         }
 
-        /* Enemy Entity */
-        const auto enemy = EnemyArchetype::Create(registry);
         auto ashBodyTex = ashBodyTexFuture.get();
         IG_CHECK(ashBodyTex);
         auto ashStaticMesh = ashStaticMeshFuture.get();
         IG_CHECK(ashStaticMesh);
         auto ashStaticMeshHandle = Handle<StaticMesh>{ handleManager, std::move(ashStaticMesh.value()) };
+
+        const auto ash = registry.create();
         {
-            registry.emplace<NameComponent>(enemy, "Enemy"_fs);
+            registry.emplace<NameComponent>(ash, "Ash"_fs);
 
-            StaticMeshComponent& enemeyStaticMeshComponent = registry.emplace<StaticMeshComponent>(enemy);
-            enemeyStaticMeshComponent.StaticMeshHandle = ashStaticMeshHandle.MakeRef();
-            enemeyStaticMeshComponent.DiffuseTex = ashBodyTex->ShaderResourceView.MakeRef();
-            enemeyStaticMeshComponent.DiffuseTexSampler = ashBodyTex->TexSampler;
+            auto& transformComponent = registry.emplace<TransformComponent>(ash);
+            transformComponent.Position = Vector3{ -10.f, -30.f, 35.f };
+            transformComponent.Scale = Vector3{ 40.f, 40.f, 40.f };
 
-            TransformComponent& enemyTransform = registry.get<TransformComponent>(enemy);
-            enemyTransform.Position = Vector3{ -10.f, -30.f, 35.f };
-            enemyTransform.Scale = Vector3{ 40.f, 40.f, 40.f };
+            auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(ash);
+            staticMeshComponent.StaticMeshHandle = ashStaticMeshHandle.MakeRef();
+            staticMeshComponent.DiffuseTex = ashBodyTex->ShaderResourceView.MakeRef();
+            staticMeshComponent.DiffuseTexSampler = ashBodyTex->TexSampler;
         }
 
         /* Camera */
         const Entity cameraEntity = CameraArchetype::Create(registry);
         {
             registry.emplace<NameComponent>(cameraEntity, "Camera"_fs);
-            registry.emplace<MainCameraTag>(cameraEntity);
-            registry.emplace<FpsCameraController>(cameraEntity);
-            CameraComponent& cameraComponent = registry.get<CameraComponent>(cameraEntity);
-            cameraComponent.CameraViewport = window.GetViewport();
+
             TransformComponent& cameraTransform = registry.get<TransformComponent>(cameraEntity);
             cameraTransform.Position = Vector3{ 0.f, 0.f, -30.f };
+
+            CameraComponent& cameraComponent = registry.get<CameraComponent>(cameraEntity);
+            cameraComponent.CameraViewport = window.GetViewport();
+
+            registry.emplace<FpsCameraController>(cameraEntity);
+            registry.emplace<MainCameraTag>(cameraEntity);
         }
         /********************************************/
 

@@ -6,63 +6,66 @@
 #include <ImGui/ImGuiLayer.h>
 #include <ImGui/StatisticsPanel.h>
 
-class MenuBar : public ig::ImGuiLayer
+namespace fe
 {
-public:
-    MenuBar(ig::StatisticsPanel& statisticsPanel, ig::CachedStringDebugger& cachedStringDebugger, ig::EntityList& entityList, ig::EntityInspector& entityInspector)
-        : statisticsPanel(statisticsPanel),
-          cachedStringDebugger(cachedStringDebugger),
-          entityList(entityList),
-          entityInspector(entityInspector)
+    class MenuBar : public ig::ImGuiLayer
     {
-    }
-
-    ~MenuBar() = default;
-
-    void Render() override
-    {
-        if (ImGui::BeginMainMenuBar())
+    public:
+        MenuBar(ig::StatisticsPanel& statisticsPanel, ig::CachedStringDebugger& cachedStringDebugger, ig::EntityList& entityList, ig::EntityInspector& entityInspector)
+            : statisticsPanel(statisticsPanel),
+              cachedStringDebugger(cachedStringDebugger),
+              entityList(entityList),
+              entityInspector(entityInspector)
         {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Exit (Alt+F4)"))
-                {
-                    ig::Igniter::Exit();
-                }
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::BeginMenu("Debug"))
-            {
-                if (ImGui::MenuItem("Statistics Panel"))
-                {
-                    statisticsPanel.SetVisibility(true);
-                }
-
-                if (ImGui::MenuItem("Debug Cached String"))
-                {
-                    cachedStringDebugger.SetVisibility(true);
-                }
-
-                if (ImGui::MenuItem("Entity List"))
-                {
-                    entityList.SetVisibility(true);
-                }
-
-                if (ImGui::MenuItem("Entity Inspector"))
-                {
-                    entityInspector.SetVisibility(true);
-                }
-
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
         }
-    }
 
-private:
-    ig::StatisticsPanel& statisticsPanel;
-    ig::CachedStringDebugger& cachedStringDebugger;
-    ig::EntityList& entityList;
-    ig::EntityInspector& entityInspector;
-};
+        ~MenuBar() = default;
+
+        void Render() override
+        {
+            if (ImGui::BeginMainMenuBar())
+            {
+                if (ImGui::BeginMenu("File"))
+                {
+                    if (ImGui::MenuItem("Exit (Alt+F4)"))
+                    {
+                        ig::Igniter::Exit();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Debug"))
+                {
+                    if (ImGui::MenuItem("Statistics Panel"))
+                    {
+                        statisticsPanel.SetVisibility(true);
+                    }
+
+                    if (ImGui::MenuItem("Debug Cached String"))
+                    {
+                        cachedStringDebugger.SetVisibility(true);
+                    }
+
+                    if (ImGui::MenuItem("Entity List"))
+                    {
+                        entityList.SetVisibility(true);
+                    }
+
+                    if (ImGui::MenuItem("Entity Inspector"))
+                    {
+                        entityInspector.SetVisibility(true);
+                    }
+
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMainMenuBar();
+            }
+        }
+
+    private:
+        ig::StatisticsPanel& statisticsPanel;
+        ig::CachedStringDebugger& cachedStringDebugger;
+        ig::EntityList& entityList;
+        ig::EntityInspector& entityInspector;
+    };
+}

@@ -7,21 +7,24 @@ namespace ig
     class Window;
 } // namespace ig
 
-class FpsCameraControllSystem;
-class CameraPossessSystem
+namespace fe
 {
-public:
-    CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem);
+    class FpsCameraControllSystem;
+    class CameraPossessSystem
+    {
+    public:
+        CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem);
 
-    void Update();
+        void Update();
 
-private:
-    void Configure();
+    private:
+        void Configure();
 
-private:
-    ig::Window& window;
-    ig::RefHandle<const ig::Action> togglePossessToCamera;
-    FpsCameraControllSystem& fpsCamControllSystem;
+    private:
+        ig::Window& window;
+        ig::RefHandle<const ig::Action> togglePossessToCamera;
+        FpsCameraControllSystem& fpsCamControllSystem;
 
-    bool bEnabled = true;
-};
+        bool bEnabled = true;
+    };
+} // namespace fe

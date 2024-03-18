@@ -1,13 +1,17 @@
 #include <FpsCameraController.h>
 #include <ImGui/Common.h>
-IG_DEFINE_COMPONENT(FpsCameraController);
+
+namespace fe
+{
+    IG_DEFINE_COMPONENT(FpsCameraController);
+}
 
 namespace ig
 {
     template <>
-    void OnImGui<FpsCameraController>(Registry& registry, const Entity entity)
+    void OnImGui<fe::FpsCameraController>(Registry& registry, const Entity entity)
     {
-        FpsCameraController& controller = registry.get<FpsCameraController>(entity);
+        fe::FpsCameraController& controller = registry.get<fe::FpsCameraController>(entity);
         ImGui::DragFloat("Movement Power", &controller.MovementPower, 0.01f, 20.f, 90.f);
         ImGui::DragFloat("Movement Power Attenuation Time(secs)", &controller.MovementPowerAttenuationTime, 0.001f);
         ImGui::DragFloat("Mouse Yaw(Y-Axis) Sensitivity", &controller.MouseYawSentisitivity, 0.01f);

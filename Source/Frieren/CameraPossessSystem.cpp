@@ -4,43 +4,46 @@
 #include <Core/Log.h>
 #include <Core/Igniter.h>
 
-CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
-    : window(ig::Igniter::GetWindow()),
-      fpsCamControllSystem(fpsCamControllSystem)
+namespace fe
 {
-    const auto& inputManager = ig::Igniter::GetInputManager();
-    togglePossessToCamera = inputManager.QueryAction(ig::String("TogglePossessCamera"));
-    IG_CHECK(togglePossessToCamera);
-
-    Configure();
-}
-
-void CameraPossessSystem::Update()
-{
-    if (togglePossessToCamera)
+    CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
+        : window(ig::Igniter::GetWindow()),
+          fpsCamControllSystem(fpsCamControllSystem)
     {
-        if (togglePossessToCamera->State == ig::EInputState::Pressed)
+        const auto& inputManager = ig::Igniter::GetInputManager();
+        togglePossessToCamera = inputManager.QueryAction(ig::String("TogglePossessCamera"));
+        IG_CHECK(togglePossessToCamera);
+
+        Configure();
+    }
+
+    void CameraPossessSystem::Update()
+    {
+        if (togglePossessToCamera)
         {
-            bEnabled = !bEnabled;
-            Configure();
+            if (togglePossessToCamera->State == ig::EInputState::Pressed)
+            {
+                bEnabled = !bEnabled;
+                Configure();
+            }
         }
     }
-}
 
-void CameraPossessSystem::Configure()
-{
-    if (bEnabled)
+    void CameraPossessSystem::Configure()
     {
-        IG_LOG(ig::LogDebug, "Possess to Camera.");
-        fpsCamControllSystem.SetIgnoreInput(false);
-        window.SetCursorVisibility(false);
-        window.ClipCursor();
+        if (bEnabled)
+        {
+            IG_LOG(ig::LogDebug, "Possess to Camera.");
+            fpsCamControllSystem.SetIgnoreInput(false);
+            window.SetCursorVisibility(false);
+            window.ClipCursor();
+        }
+        else
+        {
+            IG_LOG(ig::LogDebug, "Unposess from Camera.");
+            fpsCamControllSystem.SetIgnoreInput(true);
+            window.SetCursorVisibility(true);
+            window.UnclipCursor();
+        }
     }
-    else
-    {
-        IG_LOG(ig::LogDebug, "Unposess from Camera.");
-        fpsCamControllSystem.SetIgnoreInput(true);
-        window.SetCursorVisibility(true);
-        window.UnclipCursor();
-    }
-}
+} // namespace fe

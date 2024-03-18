@@ -27,20 +27,11 @@
     <ClCompile Include="..\Source\Frieren\CameraPossessSystem.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\HealthRecoverySystem.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Frieren\FpsCameraControllSystem.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Frieren\RotateEnemySystem.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\TestGameMode.cpp">
       <Filter>Source\GameMode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Frieren\Enemy.cpp">
-      <Filter>Source\Component</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\FpsCameraController.cpp">
       <Filter>Source\Component</Filter>
@@ -50,17 +41,8 @@
     <ClInclude Include="..\Source\Frieren\CameraPossessSystem.h">
       <Filter>Source\System</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\HealthRecoverySystem.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\FpsCameraControllSystem.h">
       <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\RotateEnemySystem.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\EnemyArchetype.h">
-      <Filter>Source\Component\Archetype</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\MenuBar.h">
       <Filter>Source\UI</Filter>
@@ -68,22 +50,7 @@
     <ClInclude Include="..\Source\Frieren\TestGameMode.h">
       <Filter>Source\GameMode</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\PlayerArchetype.h">
-      <Filter>Source\Component\Archetype</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\FpsCameraController.h">
-      <Filter>Source\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\Enemy.h">
-      <Filter>Source\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\HealthRecoveryBuff.h">
-      <Filter>Source\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\HealthComponent.h">
-      <Filter>Source\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\PlayerComponent.h">
       <Filter>Source\Component</Filter>
     </ClInclude>
   </ItemGroup>
