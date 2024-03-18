@@ -1,5 +1,7 @@
 #pragma once
+#include <Gameplay/ComponentRegistry.h>
 #include <Math/Common.h>
+#include <Math/Utils.h>
 
 struct FpsCameraController
 {
@@ -20,8 +22,8 @@ public:
 public:
     float MovementPower = 25.f;
     float MovementPowerAttenuationTime = 0.65f; /* Seconds */
-    float MouseYawSentisitivity = 0.03f;      /* Degrees */
-    float MousePitchSentisitivity = 0.03f;    /* Degrees */
+    float MouseYawSentisitivity = 0.03f;        /* Degrees */
+    float MousePitchSentisitivity = 0.03f;      /* Degrees */
     float SprintFactor = 4.f;
 
     ig::Vector3 LatestImpulse{};
@@ -30,3 +32,5 @@ public:
     float CurrentYaw = 0.f;
     float CurrentPitch = 0.f;
 };
+
+IG_DECLARE_COMPONENT(FpsCameraController);

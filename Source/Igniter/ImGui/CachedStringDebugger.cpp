@@ -4,11 +4,6 @@
 
 namespace ig
 {
-    CachedStringDebugger::CachedStringDebugger()
-        : ImGuiLayer("Cached String Debugger"_fs)
-    {
-    }
-
     void CachedStringDebugger::Render()
     {
         if (ImGui::Begin("Cached String Debugger", &bIsVisible))

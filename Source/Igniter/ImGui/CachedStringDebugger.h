@@ -7,7 +7,8 @@ namespace ig
     class CachedStringDebugger : public ImGuiLayer
     {
     public:
-        CachedStringDebugger();
+        CachedStringDebugger()= default;
+        ~CachedStringDebugger() = default;
 
         void Render() override;
 

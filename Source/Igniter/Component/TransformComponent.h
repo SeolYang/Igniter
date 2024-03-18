@@ -1,5 +1,6 @@
 #pragma once
 #include <Math/Common.h>
+#include <Gameplay/ComponentRegistry.h>
 
 namespace ig
 {
@@ -53,4 +54,6 @@ namespace ig
         Vector3 Scale{ 1.f, 1.f, 1.f };
         Quaternion Rotation;
     };
+
+    IG_DECLARE_COMPONENT(TransformComponent);
 } // namespace ig

@@ -1,17 +1,78 @@
 #pragma once
+#include <Core/Container.h>
+#include <Core/Json.h>
+#include <Gameplay/Common.h>
+#include <functional>
+#include <string_view>
 
-/* #sy_wip_todo 2024/03/17 */
+/* #sy_wip_todo 2024/03/17~on working */
 namespace ig
 {
+    template <typename Component>
+    void OnImGui(Registry&, const Entity)
+    {
+    }
+
+    template <typename Component>
+    void SerializeComponent(Registry&, const Entity, json&)
+    {
+    }
+
+    template <typename Component>
+    void DeserializeComponent(Registry&, const Entity, const json&)
+    {
+    }
+
     class ComponentRegistry
     {
     public:
+        using ComponentEvent = std::function<void(Registry&, const Entity)>;
+        using SerializeCallback = std::function<void(Registry&, const Entity, json&)>;
+        using DeserializeCallback = std::function<void(Registry&, const Entity, const json&)>;
+
         struct ComponentInfo
         {
-
+            std::string_view Name;
+            ComponentEvent OnImGui{};
+            SerializeCallback Serialize{};
+            DeserializeCallback Deserialize{};
         };
 
-    private:
+        template <typename Component>
+        static void Register(const std::string_view nameOfComponent)
+        {
+            Register(entt::type_hash<Component>::value(), ComponentInfo{
+                                                              .Name = nameOfComponent,
+                                                              .OnImGui = OnImGui<Component>,
+                                                              .Serialize = SerializeComponent<Component>,
+                                                              .Deserialize = DeserializeComponent<Component> });
+        }
 
+        static std::span<const std::pair<entt::id_type, ComponentInfo>> GetComponentInfos();
+
+    private:
+        static void Register(const entt::id_type componentTypeID, const ComponentInfo componentInfo);
+
+    private:
+        static std::vector<std::pair<entt::id_type, ig::ComponentRegistry::ComponentInfo>> componentInfos;
     };
-}
+
+    namespace details
+    {
+    }
+} // namespace ig
+
+#define IG_DECLARE_COMPONENT(COMPONENT_TYPE)                                                                     \
+    namespace details::component                                                                                 \
+    {                                                                                                            \
+        struct COMPONENT_TYPE##REGISTRATION                                                                      \
+        {                                                                                                        \
+            COMPONENT_TYPE##REGISTRATION() { ig::ComponentRegistry::Register<COMPONENT_TYPE>(#COMPONENT_TYPE); } \
+                                                                                                                 \
+        private:                                                                                                 \
+            static COMPONENT_TYPE##REGISTRATION _##COMPONENT_TYPE##REGISTRATION;                                 \
+        };                                                                                                       \
+    }
+
+#define IG_DEFINE_COMPONENT(COMPONENT_TYPE) \
+    details::component::COMPONENT_TYPE##REGISTRATION details::component::COMPONENT_TYPE##REGISTRATION::_##COMPONENT_TYPE##REGISTRATION

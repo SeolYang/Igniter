@@ -1,5 +1,6 @@
 #pragma once
 #include <Core/String.h>
+#include <Gameplay/ComponentRegistry.h>
 
 namespace ig
 {
@@ -8,4 +9,6 @@ namespace ig
     public:
         String Name{};
     };
+
+    IG_DECLARE_COMPONENT(NameComponent);
 } // namespace ig

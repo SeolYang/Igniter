@@ -10,7 +10,7 @@ AlignOperands: Align
 AlignTrailingComments: Always
 AllowShortBlocksOnASingleLine: Always
 AllowShortEnumsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: All
 AllowShortLambdasOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: false
 BraceWrapping:
@@ -41,7 +41,7 @@ IndentPPDirectives: BeforeHash
 IndentWidth: 4
 NamespaceIndentation: All
 PointerAlignment: Left
-SortIncludes: false
+SortIncludes: true
 SpaceBeforeCaseColon: false
 SpaceBeforeCtorInitializerColon : true
 SpaceBeforeInheritanceColon : true

@@ -80,6 +80,7 @@
     <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\CachedStringDebugger.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\Common.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\EntityInsepctor.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\EntityList.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
@@ -110,6 +111,10 @@
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Model.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp" />
+    <ClCompile Include="..\Source\Igniter\Component\CameraComponent.cpp" />
+    <ClCompile Include="..\Source\Igniter\Component\NameComponent.cpp" />
+    <ClCompile Include="..\Source\Igniter\Component\StaticMeshComponent.cpp" />
+    <ClCompile Include="..\Source\Igniter\Component\TransformComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />
@@ -136,8 +141,10 @@
     <ClCompile Include="..\Source\Igniter\D3D12\RootSignature.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp" />
+    <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\EntityInspector.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCommon.cpp" />

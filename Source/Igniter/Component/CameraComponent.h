@@ -1,7 +1,8 @@
 #pragma once
+#include <Core/Assert.h>
+#include <Gameplay/ComponentRegistry.h>
 #include <Math/Common.h>
 #include <Math/Utils.h>
-#include <Core/Assert.h>
 
 namespace ig
 {
@@ -29,4 +30,7 @@ namespace ig
     struct MainCameraTag
     {
     };
+
+    IG_DECLARE_COMPONENT(CameraComponent);
+    IG_DECLARE_COMPONENT(MainCameraTag);
 } // namespace ig

@@ -1,37 +1,46 @@
-#include <Core/Igniter.h>
-#include <Core/InputManager.h>
-#include <Core/Handle.h>
-#include <Core/Event.h>
-#include <Core/Window.h>
-#include <Gameplay/GameInstance.h>
-#include <D3D12/RenderDevice.h>
-#include <D3D12/GPUBuffer.h>
-#include <D3D12/GPUBufferDesc.h>
-#include <D3D12/CommandQueue.h>
-#include <D3D12/CommandContext.h>
-#include <D3D12/GPUView.h>
-#include <Render/GPUViewManager.h>
-#include <Render/GpuUploader.h>
+#include <Asset/Model.h>
+#include <Asset/Texture.h>
+#include <Component/CameraArchetype.h>
 #include <Component/NameComponent.h>
 #include <Component/StaticMeshComponent.h>
 #include <Component/TransformComponent.h>
-#include <Component/CameraArchetype.h>
-#include <Asset/Texture.h>
-#include <Asset/Model.h>
-#include <ImGui/ImGuiLayer.h>
-#include <ImGui/ImGuiCanvas.h>
-#include <ImGui/CachedStringDebugger.h>
-#include <ImGui/EntityList.h>
-#include <PlayerArchetype.h>
+#include <Core/Event.h>
+#include <Core/Handle.h>
+#include <Core/Igniter.h>
+#include <Core/InputManager.h>
+#include <Core/Window.h>
+#include <D3D12/CommandContext.h>
+#include <D3D12/CommandQueue.h>
+#include <D3D12/GPUBuffer.h>
+#include <D3D12/GPUBufferDesc.h>
+#include <D3D12/GPUView.h>
+#include <D3D12/RenderDevice.h>
 #include <EnemyArchetype.h>
 #include <FpsCameraController.h>
-#include <TestGameMode.h>
+#include <Gameplay/ComponentRegistry.h>
+#include <Gameplay/GameInstance.h>
+#include <ImGui/CachedStringDebugger.h>
+#include <ImGui/EntityInsepctor.h>
+#include <ImGui/EntityList.h>
+#include <ImGui/ImGuiCanvas.h>
+#include <ImGui/ImGuiLayer.h>
 #include <MenuBar.h>
-#include <iostream>
+#include <PlayerArchetype.h>
+#include <Render/GPUViewManager.h>
+#include <Render/GpuUploader.h>
+#include <TestGameMode.h>
 #include <future>
+#include <iostream>
 
 int main()
 {
+    // DrawImGui(registry)
+    // found components = registry.getCompLists(entity)
+    // for (compID : components)
+    // auto& compInfo = compRegistry.get(compID)
+    // compInfo.OnImGui(registry, enttiy)
+    // ....
+
     using namespace ig;
     int result = 0;
     {
@@ -89,18 +98,6 @@ int main()
             ashStaticMeshGuid,
             std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
-        std::future<std::optional<Texture>> axeTexFutrue = std::async(
-            std::launch::async,
-            TextureLoader::Load,
-            axeTexGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
-
-        std::future<std::optional<StaticMesh>> axeStaticMeshFuture = std::async(
-            std::launch::async,
-            StaticMeshLoader::Load,
-            axeStaticMeshGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
-
         std::future<std::optional<StaticMesh>> homuraStaticMeshFuture = std::async(
             std::launch::async,
             StaticMeshLoader::Load,
@@ -128,7 +125,6 @@ int main()
         inputManager.BindAxis("TurnAxis"_fs, EInput::MouseDeltaY, 1.f);
 
         inputManager.BindAction(String("TogglePossessCamera"), EInput::Control);
-
         /********************************/
 
         auto homuraThumbnail = homuraThumbnailFuture.get();
@@ -145,14 +141,13 @@ int main()
         auto homuraBodyTex = homuraBodyTexFuture.get();
         IG_CHECK(homuraBodyTex);
         auto homuraStaticMesh = homuraStaticMeshFuture.get();
+        auto homuraStaticMeshHandle = Handle<StaticMesh>{ handleManager, std::move(homuraStaticMesh.value()) };
         IG_CHECK(homuraStaticMesh);
         {
             registry.emplace<NameComponent>(player, "Player"_fs);
 
             StaticMeshComponent& playerStaticMeshComponent = registry.emplace<StaticMeshComponent>(player);
-            playerStaticMeshComponent.VerticesBufferSRV = homuraStaticMesh->VertexBufferSrv.MakeRef();
-            playerStaticMeshComponent.IndexBufferHandle = homuraStaticMesh->IndexBufferInstance.MakeRef();
-            playerStaticMeshComponent.NumIndices = homuraStaticMesh->LoadConfig.NumIndices;
+            playerStaticMeshComponent.StaticMeshHandle = homuraStaticMeshHandle.MakeRef();
             playerStaticMeshComponent.DiffuseTex = homuraBodyTex->ShaderResourceView.MakeRef();
             playerStaticMeshComponent.DiffuseTexSampler = homuraBodyTex->TexSampler;
 
@@ -167,42 +162,18 @@ int main()
         IG_CHECK(ashBodyTex);
         auto ashStaticMesh = ashStaticMeshFuture.get();
         IG_CHECK(ashStaticMesh);
+        auto ashStaticMeshHandle = Handle<StaticMesh>{ handleManager, std::move(ashStaticMesh.value()) };
         {
             registry.emplace<NameComponent>(enemy, "Enemy"_fs);
 
             StaticMeshComponent& enemeyStaticMeshComponent = registry.emplace<StaticMeshComponent>(enemy);
-            enemeyStaticMeshComponent.VerticesBufferSRV = ashStaticMesh->VertexBufferSrv.MakeRef();
-            enemeyStaticMeshComponent.IndexBufferHandle = ashStaticMesh->IndexBufferInstance.MakeRef();
-            enemeyStaticMeshComponent.NumIndices = ashStaticMesh->LoadConfig.NumIndices;
+            enemeyStaticMeshComponent.StaticMeshHandle = ashStaticMeshHandle.MakeRef();
             enemeyStaticMeshComponent.DiffuseTex = ashBodyTex->ShaderResourceView.MakeRef();
             enemeyStaticMeshComponent.DiffuseTexSampler = ashBodyTex->TexSampler;
 
             TransformComponent& enemyTransform = registry.get<TransformComponent>(enemy);
             enemyTransform.Position = Vector3{ -10.f, -30.f, 35.f };
             enemyTransform.Scale = Vector3{ 40.f, 40.f, 40.f };
-        }
-
-        /* Axe Entity */
-        const Entity axeEntity = registry.create();
-        auto axeTex = axeTexFutrue.get();
-        IG_CHECK(axeTex);
-        auto axeStaticMesh = axeStaticMeshFuture.get();
-        IG_CHECK(axeStaticMesh);
-        {
-            registry.emplace<NameComponent>(axeEntity, "Axe"_fs);
-
-            StaticMeshComponent& axeStaticMeshComponent = registry.emplace<StaticMeshComponent>(axeEntity);
-            axeStaticMeshComponent.VerticesBufferSRV = axeStaticMesh->VertexBufferSrv.MakeRef();
-            axeStaticMeshComponent.IndexBufferHandle = axeStaticMesh->IndexBufferInstance.MakeRef();
-            axeStaticMeshComponent.NumIndices = axeStaticMesh->LoadConfig.NumIndices;
-            axeStaticMeshComponent.DiffuseTex = axeTex->ShaderResourceView.MakeRef();
-            axeStaticMeshComponent.DiffuseTexSampler = axeTex->TexSampler;
-
-            TransformComponent& axeTransformComponent = registry.emplace<TransformComponent>(axeEntity);
-            axeTransformComponent.Position = Vector3{ -15.f, 0.f, 2.0f };
-            axeTransformComponent.Scale = Vector3{
-                3.f, 3.f, 3.f
-            };
         }
 
         /* Camera */
@@ -216,14 +187,18 @@ int main()
             TransformComponent& cameraTransform = registry.get<TransformComponent>(cameraEntity);
             cameraTransform.Position = Vector3{ 0.f, 0.f, -30.f };
         }
-
         /********************************************/
 
         /* #sy_test ImGui integration tests */
         ImGuiCanvas& canvas = engine.GetImGuiCanvas();
         auto& cachedStringDebuggerLayer = canvas.AddLayer<CachedStringDebugger>();
         auto& entityListLayer = canvas.AddLayer<EntityList>();
-        canvas.AddLayer<MenuBar>(cachedStringDebuggerLayer, entityListLayer);
+        auto& entityInspectorLayer = canvas.AddLayer<EntityInspector>(entityListLayer);
+        auto& menuBar = canvas.AddLayer<MenuBar>(cachedStringDebuggerLayer, entityListLayer, entityInspectorLayer);
+        entityListLayer.SetPriority(1);
+        entityListLayer.SetVisibility(true);
+        entityInspectorLayer.SetVisibility(true);
+        menuBar.SetVisibility(true);
         /************************************/
 
         result = engine.Execute();

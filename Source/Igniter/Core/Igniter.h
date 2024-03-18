@@ -40,6 +40,8 @@ namespace ig
         [[nodiscard]] static GameInstance& GetGameInstance();
         bool IsValid() const { return this == instance; }
 
+        bool static IsInitialized() { return instance != nullptr; }
+
         [[nodiscard]] static void Exit();
 
         int Execute();

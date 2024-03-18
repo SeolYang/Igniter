@@ -312,6 +312,9 @@
     <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h">
       <Filter>Source\Gameplay</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\EntityInsepctor.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -442,6 +445,24 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\Igniter.cpp">
       <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp">
+      <Filter>Source\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\EntityInspector.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Component\NameComponent.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Component\StaticMeshComponent.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Component\TransformComponent.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Component\CameraComponent.cpp">
+      <Filter>Source\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

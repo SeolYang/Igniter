@@ -18,6 +18,7 @@ namespace ig
         T& AddLayer(Args&&... args)
         {
             layers.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+            bDirty = true;
             return reinterpret_cast<T&>(*layers.back());
         }
 
@@ -30,6 +31,20 @@ namespace ig
                 if (typeid(*(*itr)) == typeid(T))
                 {
                     layers.erase(itr);
+                    bDirty = true;
+                    break;
+                }
+            }
+        }
+
+        void RemoveLayer(const uint64_t layerID)
+        {
+            for (auto itr = layers.begin(); itr != layers.end(); ++itr)
+            {
+                if ((*itr)->GetID() == layerID)
+                {
+                    layers.erase(itr);
+                    bDirty = true;
                     break;
                 }
             }
@@ -44,23 +59,13 @@ namespace ig
                 if (typeid(*(*itr)) == typeid(T))
                 {
                     layers.erase(itr);
-                }
-            }
-        }
-
-        void RemoveLayer(const String layerName)
-        {
-            for (auto itr = layers.begin(); itr != layers.end(); ++itr)
-            {
-                if ((*itr)->GetName() == layerName)
-                {
-                    layers.erase(itr);
-                    break;
+                    bDirty = true;
                 }
             }
         }
 
     private:
         std::vector<std::unique_ptr<ImGuiLayer>> layers;
+        bool bDirty = false;
     };
 } // namespace ig

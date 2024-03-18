@@ -1,23 +1,24 @@
-#include <Render/Renderer.h>
-#include <D3D12/RenderDevice.h>
+#include <Asset/Model.h>
+#include <Component/CameraComponent.h>
+#include <Component/StaticMeshComponent.h>
+#include <Component/TransformComponent.h>
+#include <Core/Igniter.h>
+#include <Core/Window.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
-#include <D3D12/ShaderBlob.h>
-#include <D3D12/PipelineState.h>
-#include <D3D12/PipelineStateDesc.h>
-#include <D3D12/RootSignature.h>
 #include <D3D12/GPUTexture.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUView.h>
-#include <Render/GPUViewManager.h>
-#include <Component/StaticMeshComponent.h>
-#include <Component/TransformComponent.h>
-#include <Component/CameraComponent.h>
+#include <D3D12/PipelineState.h>
+#include <D3D12/PipelineStateDesc.h>
+#include <D3D12/RenderDevice.h>
+#include <D3D12/RootSignature.h>
+#include <D3D12/ShaderBlob.h>
 #include <Math/Common.h>
-#include <Core/Window.h>
-#include <Core/Igniter.h>
+#include <Render/GPUViewManager.h>
+#include <Render/Renderer.h>
 
 struct BasicRenderResources
 {
@@ -164,26 +165,28 @@ namespace ig
             renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
             const auto renderableView = registry.view<StaticMeshComponent, TransformComponent>();
-            for (auto [entity, staticMesh, transform] : renderableView.each())
+            for (auto [entity, staticMeshComponent, transform] : renderableView.each())
             {
-                renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferHandle);
+                IG_CHECK(staticMeshComponent.StaticMeshHandle);
+                StaticMesh& staticMesh = *staticMeshComponent.StaticMeshHandle;
+                renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferInstance);
                 {
                     TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
                     const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
                     perObjectConstantBuffer.Write(perObjectBuffer);
 
                     const BasicRenderResources params{
-                        .VertexBufferIdx = staticMesh.VerticesBufferSRV->Index,
+                        .VertexBufferIdx = staticMesh.VertexBufferSrv->Index,
                         .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
                         .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
-                        .DiffuseTexIdx = staticMesh.DiffuseTex->Index,
-                        .DiffuseTexSamplerIdx = staticMesh.DiffuseTexSampler->Index
+                        .DiffuseTexIdx = staticMeshComponent.DiffuseTex->Index,
+                        .DiffuseTexSamplerIdx = staticMeshComponent.DiffuseTexSampler->Index
                     };
 
                     renderCmdCtx->SetRoot32BitConstants(0, params, 0);
                 }
 
-                renderCmdCtx->DrawIndexed(staticMesh.NumIndices);
+                renderCmdCtx->DrawIndexed(staticMesh.LoadConfig.NumIndices);
             }
         }
         renderCmdCtx->End();

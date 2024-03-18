@@ -1,5 +1,6 @@
 #pragma once
 #include <Core/Handle.h>
+#include <Gameplay/ComponentRegistry.h>
 
 namespace ig
 {
@@ -9,13 +10,14 @@ namespace ig
 
 namespace ig
 {
+    struct StaticMesh;
     struct StaticMeshComponent
     {
     public:
-        RefHandle<GpuView> VerticesBufferSRV = {};
-        RefHandle<GpuBuffer> IndexBufferHandle = {};
-        uint32_t NumIndices = 0;
+        RefHandle<StaticMesh> StaticMeshHandle{};
         RefHandle<GpuView> DiffuseTex{};
         RefHandle<GpuView> DiffuseTexSampler{};
     };
+
+    IG_DECLARE_COMPONENT(StaticMeshComponent);
 } // namespace ig

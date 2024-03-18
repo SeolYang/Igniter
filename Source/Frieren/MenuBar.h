@@ -1,20 +1,23 @@
 #pragma once
-#include <ImGui/ImGuiLayer.h>
-#include <ImGui/CachedStringDebugger.h>
-#include <ImGui/EntityList.h>
 #include <Core/Igniter.h>
+#include <ImGui/CachedStringDebugger.h>
+#include <ImGui/EntityInsepctor.h>
+#include <ImGui/EntityList.h>
+#include <ImGui/ImGuiLayer.h>
 
 class MenuBar : public ig::ImGuiLayer
 {
 public:
-    MenuBar(ig::CachedStringDebugger& cachedStringDebugger, ig::EntityList& entityList)
+    MenuBar(ig::CachedStringDebugger& cachedStringDebugger, ig::EntityList& entityList, ig::EntityInspector& entityInspector)
         : cachedStringDebugger(cachedStringDebugger),
           entityList(entityList),
-          ig::ImGuiLayer(ig::String("MenuBar"))
+          entityInspector(entityInspector)
     {
     }
 
-    virtual void Render() override
+    ~MenuBar() = default;
+
+    void Render() override
     {
         if (ImGui::BeginMainMenuBar())
         {
@@ -39,6 +42,11 @@ public:
                     entityList.SetVisibility(true);
                 }
 
+                if (ImGui::MenuItem("Entity Inspector"))
+                {
+                    entityInspector.SetVisibility(true);
+                }
+
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -48,4 +56,5 @@ public:
 private:
     ig::CachedStringDebugger& cachedStringDebugger;
     ig::EntityList& entityList;
+    ig::EntityInspector& entityInspector;
 };

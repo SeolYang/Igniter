@@ -10,14 +10,14 @@
     <Filter Include="Source\System">
       <UniqueIdentifier>{5eb5e90c-0c58-401b-912a-fb0903b7a144}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Archetype">
-      <UniqueIdentifier>{69eeb543-ea95-4e9e-a905-c5c3ddf19d20}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\UI">
       <UniqueIdentifier>{e07b64ff-aa45-4891-8b15-a93434d14b93}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\GameMode">
       <UniqueIdentifier>{933cae9c-3514-4fc1-bdb2-f4a4d197315d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Component\Archetype">
+      <UniqueIdentifier>{69eeb543-ea95-4e9e-a905-c5c3ddf19d20}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +39,12 @@
     <ClCompile Include="..\Source\Frieren\TestGameMode.cpp">
       <Filter>Source\GameMode</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Enemy.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\FpsCameraController.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Frieren\CameraPossessSystem.h">
@@ -54,7 +60,7 @@
       <Filter>Source\System</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\EnemyArchetype.h">
-      <Filter>Source\Archetype</Filter>
+      <Filter>Source\Component\Archetype</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\MenuBar.h">
       <Filter>Source\UI</Filter>
@@ -63,7 +69,7 @@
       <Filter>Source\GameMode</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\PlayerArchetype.h">
-      <Filter>Source\Archetype</Filter>
+      <Filter>Source\Component\Archetype</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\FpsCameraController.h">
       <Filter>Source\Component</Filter>
