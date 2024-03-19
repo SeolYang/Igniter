@@ -5,8 +5,7 @@
  * Also, All strings stored in memory are instances of std::string.
  * When string comes in either UTF-16 encoded or as a wide characters. It must converted to UTF-8 encoded string using
  * 'Narrower' function. Basically, 'Igniter' is targeting the 'Windows Platform'. Sometimes, It should pass string as
- * 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider
- * character string. For all literal constant strings, they must be used with the 'IG_TEXT macro function'.
+ * 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider character string.
  */
 #include <Core/Container.h>
 #include <Core/Mutex.h>

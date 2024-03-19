@@ -6,10 +6,6 @@
 #include <Core/String.h>
 #include <Filesystem/Utils.h>
 
-#ifndef IG_TEXT
-    #define IG_TEXT(x) #x
-#endif
-
 namespace ig
 {
     enum class EAssetType
