@@ -49,6 +49,9 @@ namespace ig
     struct FileNotification
     {
     public:
+        bool operator==(const FileNotification& other) { return Action == other.Action && Path == other.Path; }
+
+    public:
         EFileTrackingAction Action = EFileTrackingAction::Unknown;
         fs::path Path{};
     };
@@ -56,16 +59,61 @@ namespace ig
     class FileTracker
     {
     public:
+        struct Iterator
+        {
+        public:
+            using iterator_category = std::input_iterator_tag;
+            using value_type = FileNotification;
+            using difference_type = size_t;
+            using reference = FileNotification&;
+
+        public:
+            Iterator() = default;
+            Iterator(FileTracker& fileTracker) noexcept;
+            Iterator(std::default_sentinel_t) noexcept;
+            Iterator(Iterator&&) noexcept = default;
+            ~Iterator() = default;
+
+            [[nodiscard]] FileNotification& operator*() noexcept;
+            [[nodiscard]] const FileNotification& operator*() const noexcept;
+
+            auto* operator->() noexcept;
+            const auto* operator->() const noexcept;
+
+            Iterator& operator++();
+            Iterator operator++(int);
+
+            [[nodiscard]] friend bool operator==(const Iterator& lhs, std::default_sentinel_t)
+            {
+                return !lhs.notification.has_value();
+            }
+
+        private:
+            FileTracker* fileTracker = nullptr;
+            std::optional<FileNotification> notification{ std::nullopt };
+        };
+
+    public:
         FileTracker() = default;
         ~FileTracker();
 
         [[nodiscard]] bool IsTracking() const noexcept { return directoryHandle != INVALID_HANDLE_VALUE; }
         [[nodiscard]] EFileTrackerResult StartTracking(const fs::path& targetDirPath,
-                                                       const ETrackingFilterFlags filter =  ETrackingFilterFlags::ChangeDirName | ETrackingFilterFlags::ChangeFileName | ETrackingFilterFlags::ChangeSize,
+                                                       const ETrackingFilterFlags filter = ETrackingFilterFlags::ChangeDirName | ETrackingFilterFlags::ChangeFileName | ETrackingFilterFlags::ChangeSize,
                                                        const bool bTrackingRecursively = true,
                                                        const chrono::milliseconds ioCheckingPeriod = 66ms);
         void StopTracking();
         std::optional<FileNotification> TryGetNotification();
+
+        Iterator begin()
+        {
+            return Iterator{ *this };
+        }
+
+        std::default_sentinel_t end()
+        {
+            return std::default_sentinel_t{};
+        }
 
     private:
         std::jthread trackingThread{};

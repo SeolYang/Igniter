@@ -171,4 +171,59 @@ namespace ig
 
         return std::nullopt;
     }
+
+    FileTracker::Iterator::Iterator(FileTracker& fileTracker) noexcept : fileTracker(&fileTracker)
+    {
+        ++(*this);
+    }
+
+    FileTracker::Iterator::Iterator(std::default_sentinel_t) noexcept
+    {
+    }
+
+    FileNotification& FileTracker::Iterator::operator*() noexcept
+    {
+        IG_CHECK(notification);
+        return *notification;
+    }
+
+    const FileNotification& FileTracker::Iterator::operator*() const noexcept
+    {
+        IG_CHECK(notification);
+        return *notification;
+    }
+
+    auto* FileTracker::Iterator::operator->() noexcept
+    {
+        return &notification;
+    }
+
+    const auto* FileTracker::Iterator::operator->() const noexcept
+    {
+        return &notification;
+    }
+
+    ig::FileTracker::Iterator& FileTracker::Iterator::operator++()
+    {
+        if (fileTracker != nullptr)
+        {
+            notification = fileTracker->TryGetNotification();
+            if (!notification)
+            {
+                fileTracker = nullptr;
+            }
+        }
+
+        return *this;
+    }
+
+    ig::FileTracker::Iterator FileTracker::Iterator::operator++(int)
+    {
+        Iterator oldItr{};
+        oldItr.fileTracker = fileTracker;
+        oldItr.notification = std::move(notification);
+
+        ++(*this);
+        return oldItr;
+    }
 } // namespace ig
