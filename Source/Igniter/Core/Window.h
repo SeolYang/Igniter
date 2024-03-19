@@ -45,7 +45,7 @@ namespace ig
 
         std::wstring windowTitle;
         WNDCLASSEX windowClass;
-        HWND windowHandle = NULL;
+        HWND windowHandle = nullptr;
 
         Viewport viewport;
 

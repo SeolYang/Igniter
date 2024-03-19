@@ -73,7 +73,7 @@
     <ClInclude Include="..\Source\Igniter\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\Common.h" />
-    <ClInclude Include="..\Source\Igniter\Filesystem\FileWatcher.h" />
+    <ClInclude Include="..\Source\Igniter\Filesystem\FileTracker.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\Common.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h" />
@@ -136,6 +136,7 @@
     <ClCompile Include="..\Source\Igniter\D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\GpuBuffer.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\GpuBufferDesc.cpp" />
+    <ClCompile Include="..\Source\Igniter\D3D12\GpuSync.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\GpuTexture.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\GPUTextureDesc.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\PipelineState.cpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="..\Source\Igniter\D3D12\RootSignature.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp" />
+    <ClCompile Include="..\Source\Igniter\Filesystem\FileTracker.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp" />

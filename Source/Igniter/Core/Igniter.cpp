@@ -13,6 +13,7 @@
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <Gameplay/GameInstance.h>
+#include <Filesystem/FileTracker.h>
 
 namespace ig
 {
@@ -69,6 +70,67 @@ namespace ig
         {
             instance = nullptr;
         }
+    }
+
+    int Igniter::Execute()
+    {
+        IG_LOG(EngineInfo, "Igniting Main Loop!");
+
+        FileTracker fileTracker;
+        const auto fileTrackerResult = fileTracker.StartTracking("Assets");
+        IG_CHECK(IsSucceeded(fileTrackerResult));
+
+        while (!bShouldExit)
+        {
+            /* 이것도 이터레이터화 시킬 수 있지 않을까? */
+            std::optional<FileNotification> notification = fileTracker.TryGetNotification();
+            while (notification)
+            {
+                IG_LOG(EngineInfo, "File notification: {}, {}", magic_enum::enum_name(notification->Action), notification->Path.string());
+                notification = fileTracker.TryGetNotification();
+            }
+
+            timer.Begin();
+
+            MSG msg;
+            ZeroMemory(&msg, sizeof(msg));
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            {
+                if (msg.message == WM_QUIT)
+                {
+                    bShouldExit = true;
+                }
+
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+
+            deferredDeallocator->FlushCurrentFrame();
+
+            gameInstance->Update();
+            inputManager->PostUpdate();
+
+            renderer->BeginFrame();
+            {
+                renderer->Render(gameInstance->GetRegistry());
+                imguiRenderer->Render(*imguiCanvas, *renderer);
+            }
+            renderer->EndFrame();
+
+            timer.End();
+            frameManager.NextFrame();
+        }
+
+        renderer->FlushQueues();
+
+        IG_LOG(EngineInfo, "Extinguishing Engine Main Loop.");
+        return 0;
+    }
+
+    void Igniter::Exit()
+    {
+        IG_CHECK(instance != nullptr);
+        instance->bShouldExit = true;
     }
 
     FrameManager& Igniter::GetFrameManager()
@@ -163,54 +225,5 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *(instance->gameInstance);
-    }
-
-    void Igniter::Exit()
-    {
-        IG_CHECK(instance != nullptr);
-        instance->bShouldExit = true;
-    }
-
-    int Igniter::Execute()
-    {
-        IG_LOG(EngineInfo, "Igniting Main Loop!");
-
-        while (!bShouldExit)
-        {
-            timer.Begin();
-
-            MSG msg;
-            ZeroMemory(&msg, sizeof(msg));
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                {
-                    bShouldExit = true;
-                }
-
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-
-            deferredDeallocator->FlushCurrentFrame();
-
-            gameInstance->Update();
-            inputManager->PostUpdate();
-
-            renderer->BeginFrame();
-            {
-                renderer->Render(gameInstance->GetRegistry());
-                imguiRenderer->Render(*imguiCanvas, *renderer);
-            }
-            renderer->EndFrame();
-
-            timer.End();
-            frameManager.NextFrame();
-        }
-
-        renderer->FlushQueues();
-
-        IG_LOG(EngineInfo, "Extinguishing Engine Main Loop.");
-        return 0;
     }
 } // namespace ig

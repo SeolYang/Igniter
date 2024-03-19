@@ -3,7 +3,6 @@
 #include <memory>
 #include <Core/Assert.h>
 
-/* #sy_todo */
 namespace ig
 {
     namespace details
@@ -25,8 +24,14 @@ namespace ig
         };
     };
 
-    /* 일반적인 Error Code 의 확장 버전. 발생한 결과물은 성공하든 실패하든 발생 함수의 호출자에 의해 처리되는 것을 상정 하였음. */
-    template <ResultStatus StatusType, typename Ty>
+    template <ResultStatus StatusType>
+    constexpr bool IsSucceeded(const StatusType status)
+    {
+        return status == StatusType::Success;
+    }
+
+    /* 일반적인 Error Code 의 확장 버전. */
+    template <typename Ty, ResultStatus StatusType>
     class Result
     {
     public:
@@ -48,6 +53,7 @@ namespace ig
 
         ~Result()
         {
+            IG_CHECK(!IsSuccess() || (IsSuccess() && bOwnershipTransferred) && "Result doesn't handled.");
             if constexpr (!std::is_trivial_v<Ty>)
             {
                 if (status == StatusType::Success)
@@ -104,23 +110,23 @@ namespace ig
         union
         {
             details::NonTrivialDummy dummy;
-            std::remove_cv_t<Ty> value;
+            std::decay_t<Ty> value;
         };
 
         StatusType status;
         bool bOwnershipTransferred = false;
     };
 
-    template <ResultStatus StatusType, typename Ty, StatusType Status>
+    template <typename Ty, ResultStatus StatusType, StatusType Status>
         requires(Status != StatusType::Success)
-    Result<StatusType, Ty> MakeFail()
+    Result<Ty, StatusType> MakeFail()
     {
-        return Result<StatusType, Ty>::template Make<Status>();
+        return Result<Ty, StatusType>::template Make<Status>();
     }
 
-    template <ResultStatus StatusType, typename Ty, typename... Args>
-    Result<StatusType, Ty> MakeSuccess(Args&&... args)
+    template <typename Ty, ResultStatus StatusType, typename... Args>
+    Result<Ty, StatusType> MakeSuccess(Args&&... args)
     {
-        return Result<StatusType, Ty>::template Make<StatusType::Success>(std::forward<Args>(args)...);
+        return Result<Ty, StatusType>::template Make<StatusType::Success>(std::forward<Args>(args)...);
     }
 } // namespace ig

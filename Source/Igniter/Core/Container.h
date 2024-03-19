@@ -8,6 +8,8 @@
 #include <span>
 #include <variant>
 #include <vector>
+#include <chrono>
+#include <concurrent_queue.h>
 
 #pragma warning(push)
 #pragma warning(disable : 26800)
@@ -22,6 +24,8 @@
 
 namespace ig
 {
+    using namespace std::chrono_literals;
+    namespace chrono = std::chrono;
     namespace ranges = std::ranges;
     namespace views = std::views;
 
