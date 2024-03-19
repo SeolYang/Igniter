@@ -64,8 +64,12 @@ namespace ig
             }
         }
 
+        bool IsIgnoreInputEnabled() const { return bIgnoreInput; }
+        void SetIgnoreInput(const bool bEnableIgnoreInput) { this->bIgnoreInput = bEnableIgnoreInput; }
+
     private:
         std::vector<std::unique_ptr<ImGuiLayer>> layers;
+        bool bIgnoreInput = false;
         bool bDirty = false;
     };
 } // namespace ig

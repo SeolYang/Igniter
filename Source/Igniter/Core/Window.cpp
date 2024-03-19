@@ -3,6 +3,7 @@
 #include <Core/EmbededSettings.h>
 #include <Core/InputManager.h>
 #include <ImGui/Common.h>
+#include <ImGUi/ImGuiCanvas.h>
 #include <Core/Igniter.h>
 
 namespace ig
@@ -104,9 +105,11 @@ namespace ig
 
     LRESULT CALLBACK Window::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
     {
-        if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+        const auto imguiCanvasRef = Igniter::TryGetImGuiCanvas();
+        const bool bIgnoreImGuiInput = imguiCanvasRef ? imguiCanvasRef->get().IsIgnoreInputEnabled() : false;
+        if (!bIgnoreImGuiInput && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
         {
-            return true;
+            return false;
         }
 
         switch (uMsg)
@@ -122,5 +125,4 @@ namespace ig
         Igniter::GetInputManager().HandleEvent(uMsg, wParam, lParam);
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
     }
-
 } // namespace ig

@@ -143,6 +143,22 @@ namespace ig
         return *(instance->imguiCanvas);
     }
 
+    OptionalRef<ImGuiCanvas> Igniter::TryGetImGuiCanvas()
+    {
+        if (Igniter::instance == nullptr)
+        {
+            IG_CHECK_NO_ENTRY();
+            return std::nullopt;
+        }
+
+        if (Igniter::instance->imguiCanvas == nullptr)
+        {
+            return std::nullopt;
+        }
+
+        return GetImGuiCanvas();
+    }
+
     GameInstance& Igniter::GetGameInstance()
     {
         IG_CHECK(instance != nullptr);

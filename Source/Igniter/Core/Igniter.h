@@ -3,6 +3,7 @@
 #include <Core/Version.h>
 #include <Core/FrameManager.h>
 #include <Core/Timer.h>
+#include <Core/Container.h>
 
 namespace ig
 {
@@ -35,6 +36,7 @@ namespace ig
         [[nodiscard]] static Renderer& GetRenderer();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
         [[nodiscard]] static ImGuiCanvas& GetImGuiCanvas();
+        [[nodiscard]] static OptionalRef<ImGuiCanvas> TryGetImGuiCanvas();
         [[nodiscard]] static GameInstance& GetGameInstance();
         bool IsValid() const { return this == instance; }
 

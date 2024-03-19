@@ -3,6 +3,7 @@
 #include <Core/Window.h>
 #include <Core/Log.h>
 #include <Core/Igniter.h>
+#include <ImGui/ImGuiCanvas.h>
 
 namespace fe
 {
@@ -31,12 +32,14 @@ namespace fe
 
     void CameraPossessSystem::Configure()
     {
+        auto& imguiCanvas = ig::Igniter::GetImGuiCanvas();
         if (bEnabled)
         {
             IG_LOG(ig::LogDebug, "Possess to Camera.");
             fpsCamControllSystem.SetIgnoreInput(false);
             window.SetCursorVisibility(false);
             window.ClipCursor();
+            imguiCanvas.SetIgnoreInput(true);
         }
         else
         {
@@ -44,6 +47,7 @@ namespace fe
             fpsCamControllSystem.SetIgnoreInput(true);
             window.SetCursorVisibility(true);
             window.UnclipCursor();
+            imguiCanvas.SetIgnoreInput(false);
         }
     }
 } // namespace fe
