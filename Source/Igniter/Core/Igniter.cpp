@@ -75,26 +75,13 @@ namespace ig
     int Igniter::Execute()
     {
         IG_LOG(EngineInfo, "Igniting Main Loop!");
-
-        FileTracker fileTracker;
-        const auto fileTrackerResult = fileTracker.StartTracking("Assets");
-        IG_CHECK(IsSucceeded(fileTrackerResult));
-
         while (!bShouldExit)
         {
-            /* 이것도 이터레이터화 시킬 수 있지 않을까? */
-            std::optional<FileNotification> notification = fileTracker.TryGetNotification();
-            while (notification)
-            {
-                IG_LOG(EngineInfo, "File notification: {}, {}", magic_enum::enum_name(notification->Action), notification->Path.string());
-                notification = fileTracker.TryGetNotification();
-            }
-
             timer.Begin();
 
             MSG msg;
             ZeroMemory(&msg, sizeof(msg));
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
             {
                 if (msg.message == WM_QUIT)
                 {

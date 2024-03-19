@@ -118,12 +118,10 @@ namespace ig
                                 continue;
                             }
 
-                            newNotification.Path = fs::path{ fileNameBuffer };
+                            newNotification.Path = path / fileNameBuffer;
                             notificationQueue.push(std::move(newNotification));
                             notifyInfo = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(reinterpret_cast<const uint8_t*>(notifyInfo) + notifyInfo->NextEntryOffset);
                         } while (notifyInfo->NextEntryOffset > 0);
-
-                        ZeroMemory(buffer.data(), buffer.size());
                     }
                     else
                     {
@@ -164,6 +162,7 @@ namespace ig
 
     std::optional<FileNotification> FileTracker::TryGetNotification()
     {
+        IG_CHECK(IsTracking());
         FileNotification notification;
         if (notificationQueue.try_pop(notification))
         {
