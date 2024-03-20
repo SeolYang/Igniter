@@ -21,7 +21,7 @@ namespace ig
         (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
+        io.Fonts->AddFontFromFileTTF("Fonts/D2Coding-ligature.ttf", 18, nullptr, io.Fonts->GetGlyphRangesKorean());
         ImGui::StyleColorsDark();
 
         ImGui_ImplWin32_Init(window.GetNative());

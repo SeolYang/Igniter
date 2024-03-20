@@ -288,7 +288,7 @@
     <ClInclude Include="..\Source\Igniter\Core\Igniter.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Filesystem\FileTracker.h">
+    <ClInclude Include="..\Source\Igniter\Filesystem\AsyncFileTracker.h">
       <Filter>Source\Filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Component\NameComponent.h">
@@ -320,6 +320,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\D3D12\GpuSync.h">
       <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\FileNotificationPanel.h">
+      <Filter>Source\ImGui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -470,11 +473,14 @@
     <ClCompile Include="..\Source\Igniter\Asset\Utils.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Filesystem\FileTracker.cpp">
+    <ClCompile Include="..\Source\Igniter\Filesystem\AsyncFileTracker.cpp">
       <Filter>Source\Filesystem</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\D3D12\GpuSync.cpp">
       <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\FileNotificationPanel.cpp">
+      <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
