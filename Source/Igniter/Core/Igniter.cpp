@@ -13,7 +13,6 @@
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <Gameplay/GameInstance.h>
-#include <Filesystem/FileTracker.h>
 
 namespace ig
 {
