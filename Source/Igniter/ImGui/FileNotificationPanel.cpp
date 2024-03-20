@@ -1,11 +1,12 @@
 #include <ImGui/FileNotificationPanel.h>
+#include <Core/Result.h>
 
 namespace ig
 {
     FileNotificationPanel::FileNotificationPanel()
     {
         targetDirPath.reserve(MAX_PATH);
-        notifications.reserve(128);
+        notifications.reserve(64);
     }
 
     void FileNotificationPanel::Render()
@@ -35,10 +36,8 @@ namespace ig
                     notifications.emplace_back(notification);
                 }
             }
-            else
-            {
-                ImGui::Text("File Tracker Status: %s", magic_enum::enum_name(lastTrackingStatus).data());
-            }
+
+            ImGui::Text("File Tracker Status: %s", magic_enum::enum_name(lastTrackingStatus).data());
 
             constexpr ImGuiTableFlags TableFlags =
                 ImGuiTableFlags_Reorderable |

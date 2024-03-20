@@ -102,7 +102,7 @@ namespace ig
         [[nodiscard]] EFileTrackerResult StartTracking(const fs::path& targetDirPath,
                                                        const ETrackingFilterFlags filter = ETrackingFilterFlags::Default,
                                                        const bool bTrackingRecursively = true,
-                                                       const chrono::milliseconds ioCheckingPeriod = 66ms);
+                                                       const chrono::milliseconds ioCheckingPeriod = 33ms);
         void StopTracking();
         std::optional<FileNotification> TryGetNotification();
 

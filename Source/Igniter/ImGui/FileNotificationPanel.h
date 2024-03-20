@@ -16,7 +16,6 @@ namespace ig
         AsyncFileTracker fileTracker{};
         EFileTrackerResult lastTrackingStatus = EFileTrackerResult::FileDoesNotExist;
         std::string targetDirPath;
-
         std::vector<FileNotification> notifications;
     };
 

@@ -65,7 +65,6 @@ namespace ig
                     IG_CHECK(directoryHandle != INVALID_HANDLE_VALUE);
                     DWORD bytesReturned{ 0 };
                     const bool bRequestSucceeded = ReadDirectoryChangesW(directoryHandle,
-                                                                         /* 주어진 버퍼 크기만큼 읽어온 다음, 덜 읽어왔으면 다음에 무조건 읽어 온다. */
                                                                          buffer.data(), ReservedBufferSizeInBytes,
                                                                          bTrackingRecursively, notifyFilter,
                                                                          &bytesReturned, &overlapped, 0);
