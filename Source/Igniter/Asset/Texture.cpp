@@ -9,10 +9,6 @@
 #include <D3D12/RenderDevice.h>
 #include <Render/GpuUploader.h>
 #include <Render/GpuViewManager.h>
-#include <algorithm>
-#include <cctype>
-#include <d3d11.h>
-#include <DirectXTex/DirectXTex.h>
 
 namespace ig
 {

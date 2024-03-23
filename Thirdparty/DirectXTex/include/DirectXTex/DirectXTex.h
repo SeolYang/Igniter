@@ -34,7 +34,7 @@
 #include <wsl/winadapter.h>
 #endif
 
-#include <Math/Common.h>
+#include <SimpleMath/SimpleMath.h>
 
 #ifdef _WIN32
 #if defined(NTDDI_WIN10_FE) || defined(__MINGW32__)

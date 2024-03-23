@@ -1,6 +1,5 @@
 #pragma once
 #include <Core/String.h>
-#include <Core/Win32API.h>
 #include <Core/Handle.h>
 
 namespace ig

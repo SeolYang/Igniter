@@ -3,7 +3,6 @@
 #include <Core/Igniter.h>
 #include <Core/MemUtils.h>
 #include <Core/Timer.h>
-#include <ImGui/Common.h>
 #include <ImGui/StatisticsPanel.h>
 #include <Render/Renderer.h>
 #include <Render/TempConstantBufferAllocator.h>

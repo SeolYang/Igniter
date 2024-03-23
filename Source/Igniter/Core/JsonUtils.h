@@ -1,7 +1,6 @@
 #pragma once
 #include <PCH.h>
 
-/* #sy_wip rename to JsonUtils */
 namespace ig::details
 {
     template <typename VarType>

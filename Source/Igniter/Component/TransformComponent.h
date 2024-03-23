@@ -1,5 +1,5 @@
 #pragma once
-#include <Math/Common.h>
+#include <PCH.h>
 #include <Gameplay/ComponentRegistry.h>
 
 namespace ig

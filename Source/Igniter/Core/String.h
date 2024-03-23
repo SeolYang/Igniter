@@ -8,8 +8,6 @@
  * 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider character string.
  */
 #include <PCH.h>
-#include <Core/Container.h>
-#include <Core/Mutex.h>
 #include <Core/HashUtils.h>
 
 namespace ig

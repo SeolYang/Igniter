@@ -3,7 +3,6 @@
 #include <D3D12/Common.h>
 #include <D3D12/CommandContext.h>
 #include <Core/Container.h>
-#include <Core/Mutex.h>
 
 namespace ig
 {

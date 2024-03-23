@@ -1,6 +1,5 @@
 #pragma once
 #include <Core/InputManager.h>
-#include <Gameplay/Common.h>
 
 namespace ig
 {

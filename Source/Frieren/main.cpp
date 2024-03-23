@@ -1,6 +1,7 @@
 #include <Asset/Model.h>
 #include <Asset/Texture.h>
 #include <Component/CameraArchetype.h>
+#include <Component/CameraComponent.h>
 #include <Component/NameComponent.h>
 #include <Component/StaticMeshComponent.h>
 #include <Component/TransformComponent.h>
@@ -14,7 +15,6 @@
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/GPUView.h>
 #include <D3D12/RenderDevice.h>
-#include <FpsCameraController.h>
 #include <Gameplay/ComponentRegistry.h>
 #include <Gameplay/GameInstance.h>
 #include <ImGui/CachedStringDebugger.h>
@@ -22,13 +22,13 @@
 #include <ImGui/EntityList.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/ImGuiLayer.h>
-#include <MainLayer.h>
 #include <ImGui/StatisticsPanel.h>
 #include <Render/GPUViewManager.h>
 #include <Render/GpuUploader.h>
+#include <Core/String.h>
+#include <MainLayer.h>
+#include <FpsCameraController.h>
 #include <TestGameMode.h>
-#include <future>
-#include <iostream>
 
 int main()
 {

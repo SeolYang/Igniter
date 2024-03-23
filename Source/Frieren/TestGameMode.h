@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <Gameplay/GameMode.h>
 #include <FpsCameraControllSystem.h>
 #include <CameraPossessSystem.h>

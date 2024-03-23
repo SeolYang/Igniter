@@ -1,6 +1,5 @@
 #include <PCH.h>
 #include <Component/NameComponent.h>
-#include <ImGui/Common.h>
 
 namespace ig
 {

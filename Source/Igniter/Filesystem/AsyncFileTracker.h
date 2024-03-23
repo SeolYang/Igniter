@@ -1,10 +1,6 @@
 #pragma once
-#include <Core/Win32API.h>
+#include <PCH.h>
 #include <Core/Event.h>
-#include <Core/Assert.h>
-#include <Filesystem/Common.h>
-#include <thread>
-#include <future>
 
 namespace ig
 {

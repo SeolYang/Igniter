@@ -1,6 +1,5 @@
 #include <PCH.h>
 #include <Core/String.h>
-#include <Core/HashUtils.h>
 
 namespace ig
 {

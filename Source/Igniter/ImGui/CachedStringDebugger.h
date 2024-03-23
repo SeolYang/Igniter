@@ -1,5 +1,4 @@
 #pragma once
-#include <ImGui/Common.h>
 #include <ImGui/ImGuiLayer.h>
 
 namespace ig

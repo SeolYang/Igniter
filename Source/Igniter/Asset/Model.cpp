@@ -8,10 +8,6 @@
 #include <Render/GpuUploader.h>
 #include <Render/Vertex.h>
 #include <Core/Timer.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <meshoptimizer.h>
 
 namespace ig
 {

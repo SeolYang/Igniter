@@ -1,6 +1,5 @@
 #pragma once
 #include <Core/Container.h>
-#include <Core/Mutex.h>
 #include <Core/FrameManager.h>
 
 namespace ig

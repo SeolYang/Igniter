@@ -1,10 +1,8 @@
 #pragma once
-#include <Render/Common.h>
 #include <Render/TempConstantBufferAllocator.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContextPool.h>
 #include <D3D12/Swapchain.h>
-#include <Gameplay/Common.h>
 #include <Core/Handle.h>
 
 namespace ig

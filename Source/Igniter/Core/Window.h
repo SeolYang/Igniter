@@ -1,9 +1,6 @@
 #pragma once
 #include <PCH.h>
-#include <Core/Win32API.h>
 #include <Core/String.h>
-#include <Core/Log.h>
-#include <Math/Common.h>
 
 namespace ig
 {

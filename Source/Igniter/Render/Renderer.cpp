@@ -17,7 +17,7 @@
 #include <D3D12/RenderDevice.h>
 #include <D3D12/RootSignature.h>
 #include <D3D12/ShaderBlob.h>
-#include <Math/Common.h>
+#include <Render/Utils.h>
 #include <Render/GPUViewManager.h>
 #include <Render/Renderer.h>
 

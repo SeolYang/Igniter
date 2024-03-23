@@ -128,8 +128,10 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,8 +149,10 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -166,8 +170,10 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -187,9 +193,11 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

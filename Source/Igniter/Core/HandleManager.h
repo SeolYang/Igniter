@@ -2,7 +2,6 @@
 #include <Core/Container.h>
 #include <Core/HashUtils.h>
 #include <Core/MemoryPool.h>
-#include <Core/Mutex.h>
 
 namespace ig
 {

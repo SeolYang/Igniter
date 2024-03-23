@@ -2,9 +2,9 @@
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
 #include <Core/InputManager.h>
-#include <ImGui/Common.h>
 #include <ImGUi/ImGuiCanvas.h>
 #include <Core/Igniter.h>
+#include <Core/Log.h>
 
 namespace ig
 {

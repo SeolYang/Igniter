@@ -4,7 +4,6 @@
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/RenderDevice.h>
-#include <Core/Mutex.h>
 
 namespace ig
 {

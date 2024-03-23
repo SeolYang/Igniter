@@ -1,6 +1,5 @@
 #pragma once
 #include <Core/Version.h>
-#include <string_view>
 
 namespace ig::settings
 {

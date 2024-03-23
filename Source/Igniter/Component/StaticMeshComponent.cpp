@@ -1,7 +1,6 @@
 #include <PCH.h>
 #include <Asset/Model.h>
 #include <Component/StaticMeshComponent.h>
-#include <ImGui/Common.h>
 
 namespace ig
 {

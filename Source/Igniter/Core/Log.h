@@ -1,18 +1,8 @@
 #pragma once
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
-#pragma warning(push)
-#pragma warning(disable : 26800)
-#pragma warning(disable : 26498)
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
-#pragma warning(pop)
-#include <Core/Assert.h>
+#include <PCH.h>
 #include <Core/Container.h>
 #include <Core/HashUtils.h>
-#include <Core/Mutex.h>
 #include <Core/String.h>
-#include <format>
 
 namespace ig
 {

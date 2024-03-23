@@ -3,7 +3,6 @@
 #include <Core/Assert.h>
 #include <Core/Log.h>
 #include <Core/Igniter.h>
-#include <fstream>
 
 namespace ig
 {

@@ -24,6 +24,12 @@
 #include <memory>
 #include <atomic>
 #include <format>
+#include <algorithm>
+#include <cctype>
+#include <thread>
+#include <variant>
+#include <any>
+#include <future>
 
 #ifndef UTF_CPP_CPLUSPLUS
     #define UTF_CPP_CPLUSPLUS 201703L
@@ -80,7 +86,11 @@
 #include <D3D12MemAlloc.h>
 #pragma warning(pop)
 
+#include <d3d11.h>
+#include <DirectXTex/DirectXTex.h>
+
 #include <WinPixEventRuntime/pix3.h>
+
 #include <SimpleMath/SimpleMath.h>
 
 #include <imgui.h>
@@ -101,6 +111,20 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 #endif
 
 #include <tracy/Tracy.hpp>
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <meshoptimizer.h>
+
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+#pragma warning(push)
+#pragma warning(disable : 26800)
+#pragma warning(disable : 26498)
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+#pragma warning(pop)
 
 #include <Core/Assert.h>
 namespace ig

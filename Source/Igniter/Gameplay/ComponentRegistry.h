@@ -1,9 +1,6 @@
 #pragma once
 #include <Core/Container.h>
-#include <Core/Json.h>
-#include <Gameplay/Common.h>
-#include <functional>
-#include <string_view>
+#include <Core/JsonUtils.h>
 
 namespace ig
 {

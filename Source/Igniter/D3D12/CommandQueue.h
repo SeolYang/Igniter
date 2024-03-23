@@ -4,7 +4,6 @@
 #include <D3D12/CommandContext.h>
 #include <D3D12/GpuSync.h>
 #include <Core/Container.h>
-#include <Core/Mutex.h>
 
 namespace ig
 {
