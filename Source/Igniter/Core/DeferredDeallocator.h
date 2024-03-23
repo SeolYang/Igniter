@@ -15,7 +15,7 @@ namespace ig
         DeferredDeallocator& operator=(const DeferredDeallocator&) = delete;
         DeferredDeallocator& operator=(DeferredDeallocator&&) = delete;
 
-        void RequestDeallocation(DefaultCallback requester);
+        void RequestDeallocation(std::function<void()> requester);
         void FlushCurrentFrame();
         void FlushAllFrames();
 
@@ -25,8 +25,8 @@ namespace ig
     private:
         const FrameManager& frameManager;
         std::array<SharedMutex, NumFramesInFlight> mutexes;
-        std::array<std::queue<DefaultCallback>, NumFramesInFlight> pendingRequesterQueues;
+        std::array<std::queue<std::function<void()>>, NumFramesInFlight> pendingRequesterQueues;
     };
 
-    void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, DefaultCallback requester);
+    void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, std::function<void()> requester);
 } // namespace ig

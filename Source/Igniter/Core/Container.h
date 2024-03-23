@@ -3,8 +3,6 @@
 
 namespace ig
 {
-    using DefaultCallback = std::function<void()>;
-
     template <typename IndexType>
     std::queue<IndexType> CreateIndexQueue(const IndexType numIndices)
     {
