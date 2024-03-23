@@ -55,7 +55,7 @@ namespace ig
         Event
     };
 
-    struct FileNotification
+    struct [[nodiscard]] FileNotification
     {
     public:
         bool operator==(const FileNotification& other) { return Action == other.Action && Path == other.Path; }
@@ -83,8 +83,8 @@ namespace ig
             Iterator(Iterator&&) noexcept = default;
             ~Iterator() = default;
 
-            [[nodiscard]] FileNotification& operator*() noexcept;
-            [[nodiscard]] const FileNotification& operator*() const noexcept;
+            FileNotification& operator*() noexcept;
+            const FileNotification& operator*() const noexcept;
 
             auto* operator->() noexcept;
             const auto* operator->() const noexcept;

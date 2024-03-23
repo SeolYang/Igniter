@@ -1,6 +1,7 @@
 #pragma once
 #include <Asset/Common.h>
 #include <Asset/Texture.h>
+#include <Filesystem/AsyncFileTracker.h>
 
 namespace ig
 {
@@ -30,7 +31,13 @@ namespace ig
             IG_UNIMPLEMENTED();
         }
 
+        /* "/Assets" 폴더에서 리소스의 메타데이터를 읽어와서, 초기 nameGuidTable과 guidAssetInfoTable 설정 */
+        void ParseAssetDirectory();
+
     private:
+        robin_hood::unordered_map<String, xg::Guid> nameGuidTable;
+        robin_hood::unordered_map<xg::Guid, AssetInfo> guidAssetInfoTable;
+
     };
 
 } // namespace ig

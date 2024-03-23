@@ -52,6 +52,7 @@ namespace ig
                 ImGui::TableSetupColumn("Path", ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableHeadersRow();
 
+                ReadOnlyLock readLock{ mutex };
                 for (const auto& notification : notifications)
                 {
                     ImGui::TableNextRow();
