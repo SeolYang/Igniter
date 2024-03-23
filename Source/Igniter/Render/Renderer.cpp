@@ -1,10 +1,6 @@
 #include <Igniter.h>
-#include <Asset/Model.h>
-#include <Component/CameraComponent.h>
-#include <Component/StaticMeshComponent.h>
-#include <Component/TransformComponent.h>
-#include <Core/Engine.h>
 #include <Core/Window.h>
+#include <Core/Log.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUBuffer.h>
@@ -20,6 +16,10 @@
 #include <Render/Utils.h>
 #include <Render/GPUViewManager.h>
 #include <Render/Renderer.h>
+#include <Asset/Model.h>
+#include <Component/CameraComponent.h>
+#include <Component/StaticMeshComponent.h>
+#include <Component/TransformComponent.h>
 
 struct BasicRenderResources
 {

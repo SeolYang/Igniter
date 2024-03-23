@@ -1,10 +1,5 @@
 #pragma once
-#include <Core/Container.h>
-#include <Core/Handle.h>
-#include <Core/Log.h>
-#include <Core/Serializable.h>
-#include <Core/String.h>
-#include <Filesystem/Utils.h>
+#include <Igniter.h>
 
 namespace ig
 {

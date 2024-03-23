@@ -1,8 +1,6 @@
 #include <Igniter.h>
 #include <Asset/AssetManager.h>
-#include <Core/Assert.h>
 #include <Core/Log.h>
-#include <Core/Engine.h>
 
 namespace ig
 {

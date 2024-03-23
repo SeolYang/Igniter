@@ -1,8 +1,9 @@
 #pragma once
-#include <Asset/Common.h>
+#include <Core/Handle.h>
+#include <Core/String.h>
 #include <D3D12/Common.h>
 #include <D3D12/GpuTexture.h>
-#include <Core/Handle.h>
+#include <Asset/Common.h>
 
 struct ID3D11Device;
 
