@@ -1,8 +1,6 @@
 #include <Igniter.h>
-#include <D3D12/ShaderBlob.h>
-#include <Core/ContainerUtils.h>
 #include <Core/Log.h>
-#include <Core/Engine.h>
+#include <D3D12/ShaderBlob.h>
 
 namespace ig
 {
@@ -117,7 +115,7 @@ namespace ig
                                 .Encoding = codePage };
 
         IG_VERIFY_SUCCEEDED(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
-                                           IID_PPV_ARGS(compiledResult.GetAddressOf())));
+                                              IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
         ComPtr<IDxcBlobUtf8> errors;
         compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);

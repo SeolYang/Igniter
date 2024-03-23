@@ -74,6 +74,7 @@
 #include <AgilitySDK/dxgiformat.h>
 #include <dxgi.h>
 #include <dxgi1_6.h>
+#include <dxgidebug.h>
 #include <dxc/dxcapi.h>
 
 #pragma warning(push)
@@ -154,6 +155,9 @@ namespace ig
 
     using Entity = entt::entity;
     using Registry = entt::registry;
+
+    constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
+    constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
 } // namespace ig
 
 namespace ig /* Constants */

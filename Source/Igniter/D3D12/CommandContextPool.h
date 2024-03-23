@@ -1,8 +1,6 @@
 #pragma once
 #include <Igniter.h>
 #include <D3D12/Common.h>
-#include <D3D12/CommandContext.h>
-#include <Core/ContainerUtils.h>
 
 namespace ig
 {
@@ -13,40 +11,14 @@ namespace ig
 namespace ig
 {
     class RenderDevice;
+    class CommandContext;
     class CommandContextPool
     {
     public:
         CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device, const EQueueType queueType);
         ~CommandContextPool();
 
-        auto Submit(const std::string_view debugName = "")
-        {
-            const static auto deleter = [this](CommandContext* ptr)
-            {
-                if (ptr != nullptr)
-                {
-                    RequestDeferredDeallocation(deferredDeallocator, [ptr, this]()
-                                                { this->Return(ptr); });
-                }
-            };
-            using ReturnType = std::unique_ptr<CommandContext, decltype(deleter)>;
-
-            ReadWriteLock lock{ mutex };
-            if (pool.empty())
-            {
-                return ReturnType{ nullptr, deleter };
-            }
-
-            CommandContext* cmdCtxPtr = pool.front();
-            pool.pop();
-
-            if (!debugName.empty())
-            {
-                SetObjectName(&cmdCtxPtr->GetNative(), debugName);
-            }
-
-            return ReturnType{ cmdCtxPtr, deleter };
-        }
+        std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> Submit(const std::string_view debugName = "");
 
     private:
         void Return(CommandContext* cmdContext);

@@ -1,7 +1,5 @@
 #include <Igniter.h>
 #include <D3D12/PipelineState.h>
-#include <D3D12/RenderDevice.h>
-#include <D3D12/PipelineStateDesc.h>
 
 namespace ig
 {

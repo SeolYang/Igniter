@@ -1,7 +1,4 @@
 #pragma once
-#include <optional>
-#include <span>
-
 #include <Core/String.h>
 #include <D3D12/Common.h>
 

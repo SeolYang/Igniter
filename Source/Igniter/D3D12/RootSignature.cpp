@@ -1,6 +1,5 @@
 #include <Igniter.h>
 #include <D3D12/RootSignature.h>
-#include <D3D12/RenderDevice.h>
 
 namespace ig
 {

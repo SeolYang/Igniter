@@ -9,7 +9,6 @@
 #include <D3D12/PipelineState.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/RootSignature.h>
-#include <Core/Assert.h>
 
 namespace ig
 {
@@ -240,7 +239,7 @@ namespace ig
         IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
         IG_CHECK(!dsv ||
-              (dsv->get() && (dsv->get().Type == EGpuViewType::DepthStencilView)));
+                 (dsv->get() && (dsv->get().Type == EGpuViewType::DepthStencilView)));
 
         const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = rtv.CPUHandle;
         const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle =

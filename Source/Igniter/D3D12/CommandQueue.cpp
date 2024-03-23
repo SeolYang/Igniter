@@ -56,6 +56,7 @@ namespace ig
 
         ReadWriteLock lock{ mutex };
         IG_CHECK(!pendingContexts.empty());
+
         native->ExecuteCommandLists(static_cast<uint32_t>(pendingContexts.size()),
                                     reinterpret_cast<ID3D12CommandList* const*>(pendingContexts.data()));
         pendingContexts.clear();

@@ -8,6 +8,11 @@ namespace ig
 
     using GPUResourceMapGuard = std::unique_ptr<uint8_t, std::function<void(uint8_t*)>>;
 
+    struct MappedGpuBuffer
+    {
+        uint8_t* const MappedPtr = nullptr;
+    };
+
     enum class EQueueType
     {
         Direct,

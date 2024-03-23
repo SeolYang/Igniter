@@ -1,9 +1,9 @@
 #include <Igniter.h>
+#include <Core/ContainerUtils.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GPUView.h>
-#include <Core/ContainerUtils.h>
-#include <Core/Engine.h>
+
 
 namespace ig
 {

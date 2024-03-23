@@ -1,17 +1,10 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <D3D12/DescriptorHeap.h>
 #include <D3D12/GpuBufferDesc.h>
-#include <Core/Assert.h>
 #include <Core/Handle.h>
 
 namespace ig
 {
-    struct MappedGpuBuffer
-    {
-        uint8_t* const MappedPtr = nullptr;
-    };
-
     class RenderDevice;
     class GpuBuffer
     {

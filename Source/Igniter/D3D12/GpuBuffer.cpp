@@ -1,6 +1,5 @@
 #include <Igniter.h>
 #include <D3D12/GpuBuffer.h>
-#include <D3D12/RenderDevice.h>
 
 namespace ig
 {

@@ -1,6 +1,5 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <Core/Assert.h>
 #include <Core/Handle.h>
 
 namespace ig

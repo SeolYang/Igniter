@@ -1,19 +1,18 @@
 #include <Igniter.h>
+#include <Core/Engine.h>
+#include <Core/Log.h>
 #include <D3D12/RenderDevice.h>
+#include <D3D12/CommandQueue.h>
+#include <D3D12/CommandContext.h>
+#include <D3D12/PipelineState.h>
+#include <D3D12/PipelineStateDesc.h>
+#include <D3D12/RootSignature.h>
 #include <D3D12/DescriptorHeap.h>
+#include <D3D12/GPUView.h>
 #include <D3D12/GPUBufferDesc.h>
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
-#include <D3D12/GPUView.h>
-#include <D3D12/PipelineState.h>
-#include <D3D12/PipelineStateDesc.h>
-#include <D3D12/RootSignature.h>
-#include <D3D12/CommandQueue.h>
-#include <D3D12/CommandContext.h>
-#include <dxgidebug.h>
-#include <Core/Engine.h>
-#include <Core/Log.h>
 
 namespace ig
 {

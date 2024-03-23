@@ -1,10 +1,11 @@
 #include <Igniter.h>
-#include <D3D12/CommandContextPool.h>
-#include <D3D12/RenderDevice.h>
-#include <D3D12/CommandContext.h>
 #include <Core/FrameManager.h>
 #include <Core/Assert.h>
 #include <Core/DeferredDeallocator.h>
+#include <D3D12/CommandContextPool.h>
+#include <D3D12/CommandContext.h>
+#include <D3D12/RenderDevice.h>
+#include <D3D12/CommandContext.h>
 
 namespace ig
 {
@@ -29,6 +30,37 @@ namespace ig
             pool.pop();
             delete cmdCtx;
         }
+    }
+
+    std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> CommandContextPool::Submit(const std::string_view debugName)
+    {
+        const auto deleter = [this](CommandContext* ptr)
+        {
+            if (ptr != nullptr)
+            {
+                RequestDeferredDeallocation(deferredDeallocator, [ptr, this]()
+                                            { this->Return(ptr); });
+            }
+        };
+
+        ReadWriteLock lock{ mutex };
+        CommandContext* cmdCtxPtr = nullptr;
+        if (pool.empty())
+        {
+            return nullptr;
+        }
+        else
+        {
+            cmdCtxPtr = pool.front();
+            pool.pop();
+
+            if (!debugName.empty())
+            {
+                SetObjectName(&cmdCtxPtr->GetNative(), debugName);
+            }
+        }
+
+        return { cmdCtxPtr, deleter };
     }
 
     void CommandContextPool::Return(CommandContext* cmdContext)

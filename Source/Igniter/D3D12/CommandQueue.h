@@ -1,9 +1,7 @@
 #pragma once
 #include <Igniter.h>
 #include <D3D12/Common.h>
-#include <D3D12/CommandContext.h>
 #include <D3D12/GpuSync.h>
-#include <Core/ContainerUtils.h>
 
 namespace ig
 {
@@ -47,6 +45,6 @@ namespace ig
         SharedMutex mutex;
         ComPtr<ID3D12Fence> fence;
         uint64_t syncCounter = 0;
-        std::vector<CommandContext::NativeType*> pendingContexts;
+        std::vector<ID3D12CommandList*> pendingContexts;
     };
 } // namespace ig

@@ -1,8 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUTextureDesc.h>
-#include <Core/Assert.h>
 
 namespace ig
 {
