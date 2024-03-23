@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Win32API.h>
 #include <Core/Event.h>
+#include <Core/Assert.h>
 #include <Filesystem/Common.h>
 #include <thread>
 #include <future>
@@ -11,10 +12,11 @@ namespace ig
     {
         Success,
         DuplicateTrackingRequest,
+        EmptyEvent,
         NotDirectoryPath,
         FileDoesNotExist,
         FailedToOpen,
-        FailedToCreateIOEventHandle
+        FailedToCreateIOEventHandle,
     };
 
     enum class ETrackingFilterFlags : uint32_t
@@ -45,6 +47,12 @@ namespace ig
         Modified,       /* 파일이 수정 됨 */
         RenamedOldName, /* 이름이 변경된 파일의 변경 전 이름 */
         RenamedNewName  /* 이름이 변경된 파일의 변경 후 이름 */
+    };
+
+    enum class EFileTrackingMode
+    {
+        Polling,
+        Event
     };
 
     struct FileNotification
@@ -100,6 +108,7 @@ namespace ig
 
         [[nodiscard]] bool IsTracking() const noexcept { return directoryHandle != INVALID_HANDLE_VALUE; }
         [[nodiscard]] EFileTrackerResult StartTracking(const fs::path& targetDirPath,
+                                                       const EFileTrackingMode trackingMode = EFileTrackingMode::Polling,
                                                        const ETrackingFilterFlags filter = ETrackingFilterFlags::Default,
                                                        const bool bTrackingRecursively = true,
                                                        const chrono::milliseconds ioCheckingPeriod = 33ms);
@@ -109,17 +118,25 @@ namespace ig
         Iterator begin() { return Iterator{ *this }; }
         std::default_sentinel_t end() { return std::default_sentinel_t{}; }
 
-    private:
-        std::jthread trackingThread{};
+        Event<String, FileNotification>& GetEvent()
+        {
+            IG_CHECK(!IsTracking() && "Modify event during tracking is not thread safe!");
+            return event;
+        }
 
+    private:
         fs::path path{};
         HANDLE directoryHandle{ INVALID_HANDLE_VALUE };
         HANDLE ioEventHandle{ INVALID_HANDLE_VALUE };
+
+        std::jthread trackingThread{};
         std::promise<void> ioPromise{};
 
-        concurrency::concurrent_queue<FileNotification> notificationQueue{};
+        constexpr static uint32_t ReservedRawBufferSizeInBytes = 1024Ui32 * 1024Ui32; /* 1 KB */
+        std::vector<uint8_t> rawBuffer{ std::vector<uint8_t>(ReservedRawBufferSizeInBytes) };
 
-        constexpr static uint32_t ReservedBufferSizeInBytes = 1024Ui32 * 1024Ui32; /* 1 KB */
-        std::vector<uint8_t> buffer{ std::vector<uint8_t>(ReservedBufferSizeInBytes) };
+        EFileTrackingMode mode{ EFileTrackingMode::Polling };
+        Event<String, FileNotification> event{};
+        concurrency::concurrent_queue<FileNotification> notificationQueue{};
     };
 } // namespace ig

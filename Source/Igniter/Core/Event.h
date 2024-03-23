@@ -36,6 +36,11 @@ namespace ig
             subscribeTable.erase(id);
         }
 
+        [[nodiscard]] bool HasAnySubscriber() const
+        {
+            return !subscribeTable.empty();
+        }
+
         [[nodiscard]] bool HasSubscriber(const Identifier& id) const
         {
             return subscribeTable.contains(id);
@@ -47,6 +52,11 @@ namespace ig
             {
                 subscribe.second(args...);
             }
+        }
+
+        void Clear()
+        {
+            subscribeTable.clear();
         }
 
     private:

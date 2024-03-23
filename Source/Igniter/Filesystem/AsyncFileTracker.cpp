@@ -10,12 +10,19 @@ namespace ig
     }
 
     EFileTrackerResult AsyncFileTracker::StartTracking(const fs::path& targetDirPath,
-                                                       const ETrackingFilterFlags filter, const bool bTrackingRecursively,
+                                                       const EFileTrackingMode trackingMode,
+                                                       const ETrackingFilterFlags filter,
+                                                       const bool bTrackingRecursively,
                                                        const chrono::milliseconds ioCheckingPeriod)
     {
         if (IsTracking())
         {
             return EFileTrackerResult::DuplicateTrackingRequest;
+        }
+
+        if (trackingMode == EFileTrackingMode::Event && !event.HasAnySubscriber())
+        {
+            return EFileTrackerResult::EmptyEvent;
         }
 
         if (!fs::is_directory(targetDirPath))
@@ -48,6 +55,7 @@ namespace ig
             return EFileTrackerResult::FailedToCreateIOEventHandle;
         }
 
+        mode = trackingMode;
         path = targetDirPath;
         const auto notifyFilter = static_cast<DWORD>(filter);
 
@@ -65,9 +73,9 @@ namespace ig
                     IG_CHECK(directoryHandle != INVALID_HANDLE_VALUE);
                     DWORD bytesReturned{ 0 };
                     const bool bRequestSucceeded = ReadDirectoryChangesW(directoryHandle,
-                                                                         buffer.data(), ReservedBufferSizeInBytes,
+                                                                         rawBuffer.data(), ReservedRawBufferSizeInBytes,
                                                                          bTrackingRecursively, notifyFilter,
-                                                                         &bytesReturned, &overlapped, 0);
+                                                                         &bytesReturned, &overlapped, nullptr);
 
                     if (bRequestSucceeded)
                     {
@@ -83,7 +91,7 @@ namespace ig
                             }
                         }
 
-                        const auto* notifyInfo = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(buffer.data());
+                        const auto* notifyInfo = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(rawBuffer.data());
                         while (notifyInfo != nullptr && transferedBytes >= sizeof(FILE_NOTIFY_INFORMATION))
                         {
                             FileNotification newNotification;
@@ -118,7 +126,15 @@ namespace ig
                             }
 
                             newNotification.Path = path / fileNameBuffer;
-                            notificationQueue.push(std::move(newNotification));
+
+                            if (mode == EFileTrackingMode::Event)
+                            {
+                                event.Notify(newNotification);
+                            }
+                            else
+                            {
+                                notificationQueue.push(std::move(newNotification));
+                            }
 
                             if (notifyInfo->NextEntryOffset > 0)
                             {
@@ -169,7 +185,7 @@ namespace ig
 
     std::optional<FileNotification> AsyncFileTracker::TryGetNotification()
     {
-        IG_CHECK(IsTracking());
+        IG_CHECK(IsTracking() && mode == EFileTrackingMode::Polling);
         FileNotification notification;
         if (notificationQueue.try_pop(notification))
         {
