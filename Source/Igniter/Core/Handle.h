@@ -2,7 +2,7 @@
 #include <Core/Assert.h>
 #include <Core/HashUtils.h>
 #include <Core/MemUtils.h>
-#include <Core/Container.h>
+#include <Core/ContainerUtils.h>
 #include <Core/DeferredDeallocator.h>
 #include <Core/Engine.h>
 

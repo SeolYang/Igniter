@@ -30,7 +30,7 @@
     <ClInclude Include="..\Source\Igniter\Component\StaticMeshComponent.h" />
     <ClInclude Include="..\Source\Igniter\Component\TransformComponent.h" />
     <ClInclude Include="..\Source\Igniter\Core\Assert.h" />
-    <ClInclude Include="..\Source\Igniter\Core\Container.h" />
+    <ClInclude Include="..\Source\Igniter\Core\ContainerUtils.h" />
     <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h" />
     <ClInclude Include="..\Source\Igniter\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Igniter\Core\Event.h" />

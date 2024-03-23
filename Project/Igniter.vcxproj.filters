@@ -108,7 +108,7 @@
     <ClInclude Include="..\Source\Igniter\Core\Assert.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\Container.h">
+    <ClInclude Include="..\Source\Igniter\Core\ContainerUtils.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h">
