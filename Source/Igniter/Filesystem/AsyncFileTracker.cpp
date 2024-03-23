@@ -1,7 +1,5 @@
 #include <Igniter.h>
 #include <Filesystem/AsyncFileTracker.h>
-#include <Core/Log.h>
-#include <strsafe.h>
 
 namespace ig
 {

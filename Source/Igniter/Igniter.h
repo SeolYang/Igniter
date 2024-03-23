@@ -55,6 +55,7 @@
     #define WIN32_MEAN_AND_LEAN
 #endif
 #include <Windows.h>
+#include <strsafe.h>
 
 #include <AgilitySDK/d3dcommon.h>
 #pragma warning(push)
