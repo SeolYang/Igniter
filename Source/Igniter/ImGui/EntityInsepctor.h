@@ -1,5 +1,4 @@
 #pragma once
-#include <Gameplay/ComponentRegistry.h>
 #include <ImGui/ImGuiLayer.h>
 
 namespace ig

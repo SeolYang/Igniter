@@ -1,6 +1,4 @@
 #include <Igniter.h>
-#include <ImGui/ImGuiRenderer.h>
-#include <ImGui/ImGuiCanvas.h>
 #include <Core/Window.h>
 #include <Core/FrameManager.h>
 #include <D3D12/RenderDevice.h>
@@ -9,6 +7,8 @@
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 #include <Render/Renderer.h>
+#include <ImGui/ImGuiRenderer.h>
+#include <ImGui/ImGuiCanvas.h>
 
 namespace ig
 {

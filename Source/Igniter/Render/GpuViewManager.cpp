@@ -1,12 +1,11 @@
 #include <Igniter.h>
-#include <Render/GpuViewManager.h>
-#include <D3D12/GpuView.h>
-#include <D3D12/RenderDevice.h>
-#include <D3D12/DescriptorHeap.h>
-#include <Core/Assert.h>
 #include <Core/HandleManager.h>
 #include <Core/DeferredDeallocator.h>
-#include <Core/HashUtils.h>
+#include <D3D12/GpuView.h>
+#include <D3D12/GpuBuffer.h>
+#include <D3D12/RenderDevice.h>
+#include <D3D12/DescriptorHeap.h>
+#include <Render/GpuViewManager.h>
 
 namespace ig
 {

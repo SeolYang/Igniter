@@ -1,7 +1,7 @@
 #pragma once
 #include <Igniter.h>
-#include <ImGui/ImGuiLayer.h>
 #include <Filesystem/AsyncFileTracker.h>
+#include <ImGui/ImGuiLayer.h>
 
 namespace ig
 {

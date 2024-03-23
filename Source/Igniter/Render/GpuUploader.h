@@ -1,9 +1,6 @@
 #pragma once
-#include <D3D12/GpuBuffer.h>
-#include <D3D12/GpuBufferDesc.h>
-#include <D3D12/CommandQueue.h>
-#include <D3D12/CommandContext.h>
-#include <D3D12/RenderDevice.h>
+#include <Igniter.h>
+#include <D3D12/GpuSync.h>
 
 namespace ig
 {
@@ -29,6 +26,8 @@ namespace ig
         };
     } // namespace details
 
+    class CommandQueue;
+    class CommandContext;
     class UploadContext final
     {
         friend class GpuUploader;
@@ -90,6 +89,7 @@ namespace ig
     };
 
     // Reserve Upload -> setup data & fill up copy cmd ctx -> Submit Upload -> Submit to Async Copy Queue
+    class CommandQueue;
     class GpuUploader
     {
     public:
@@ -120,7 +120,7 @@ namespace ig
         constexpr static uint64_t InvalidThreadID = std::numeric_limits<uint64_t>::max();
         std::atomic_uint64_t reservedThreadID = InvalidThreadID;
 
-        CommandQueue copyQueue;
+        std::unique_ptr<CommandQueue> copyQueue;
 
         constexpr static size_t InitialBufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
         size_t bufferCapacity = 0;

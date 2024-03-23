@@ -1,11 +1,12 @@
 #include <Igniter.h>
-#include <Core/HandleManager.h>
 #include <Core/Engine.h>
 #include <Core/MemUtils.h>
 #include <Core/Timer.h>
-#include <ImGui/StatisticsPanel.h>
+#include <Core/HandleManager.h>
 #include <Render/Renderer.h>
 #include <Render/TempConstantBufferAllocator.h>
+#include <ImGui/StatisticsPanel.h>
+
 
 namespace ig
 {

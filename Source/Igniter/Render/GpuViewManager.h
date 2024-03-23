@@ -1,15 +1,15 @@
 #pragma once
 #include <D3D12/Common.h>
-#include <D3D12/GPUView.h>
 #include <Core/Handle.h>
 
 namespace ig
 {
     class DeferredDeallocator;
     class HandleManager;
+    class RenderDevice;
     class GpuBuffer;
     class GpuTexture;
-    class RenderDevice;
+    class GpuView;
     class DescriptorHeap;
     class GpuViewManager
     {

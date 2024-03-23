@@ -1,6 +1,5 @@
 #include <Igniter.h>
 #include <ImGui/ImGuiCanvas.h>
-#include <ImGui/ImGuiLayer.h>
 
 namespace ig
 {

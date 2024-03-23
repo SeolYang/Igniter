@@ -4,6 +4,7 @@
 #include <Core/JsonUtils.h>
 #include <Core/Serializable.h>
 #include <Filesystem/Utils.h>
+#include <D3D12/RenderDevice.h>
 #include <D3D12/GpuBuffer.h>
 #include <D3D12/GpuBufferDesc.h>
 #include <Render/GpuViewManager.h>

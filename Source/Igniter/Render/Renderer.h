@@ -20,7 +20,6 @@ namespace ig
     class PipelineState;
     class GpuView;
     class GpuViewManager;
-    class TempConstantBufferAllocator;
 #pragma endregion
 } // namespace ig
 

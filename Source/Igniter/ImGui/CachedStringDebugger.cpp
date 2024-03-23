@@ -1,7 +1,6 @@
 #include <Igniter.h>
+#include <Core/String.h>
 #include <ImGUi/CachedStringDebugger.h>
-#include <Core/Log.h>
-#include <Core/Engine.h>
 
 namespace ig
 {

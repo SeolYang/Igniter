@@ -1,7 +1,6 @@
 #pragma once
 #include <Igniter.h>
 #include <ImGui/ImGuiLayer.h>
-#include <Core/ContainerUtils.h>
 
 namespace ig
 {

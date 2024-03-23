@@ -2,6 +2,7 @@
 #include <Component/NameComponent.h>
 #include <Core/Engine.h>
 #include <Core/Log.h>
+#include <Core/ContainerUtils.h>
 #include <Gameplay/GameInstance.h>
 #include <ImGui/EntityList.h>
 

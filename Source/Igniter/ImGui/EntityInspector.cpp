@@ -1,7 +1,7 @@
 #include <Igniter.h>
-#include <Component/NameComponent.h>
 #include <Core/Engine.h>
 #include <Gameplay/GameInstance.h>
+#include <Component/NameComponent.h>
 #include <ImGui/EntityInsepctor.h>
 #include <ImGui/EntityList.h>
 

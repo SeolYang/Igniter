@@ -1,6 +1,5 @@
 #pragma once
-#include <Core/ContainerUtils.h>
-#include <memory>
+#include <Igniter.h>
 
 namespace ig
 {

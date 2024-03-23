@@ -1,13 +1,16 @@
 #include <Igniter.h>
-#include <Render/GpuUploader.h>
-#include <D3D12/CommandContext.h>
 #include <Core/ThreadUIDGenerator.h>
+#include <D3D12/CommandQueue.h>
+#include <D3D12/CommandContext.h>
+#include <D3D12/GpuBuffer.h>
+#include <D3D12/RenderDevice.h>
+#include <Render/GpuUploader.h>
 
 namespace ig
 {
     GpuUploader::GpuUploader(RenderDevice& renderDevice)
         : renderDevice(renderDevice),
-          copyQueue(renderDevice.CreateCommandQueue("Gpu Uploader Copy Queue", EQueueType::Copy).value())
+          copyQueue(std::make_unique<CommandQueue>(renderDevice.CreateCommandQueue("Gpu Uploader Copy Queue", EQueueType::Copy).value()))
     {
         ResizeUnsafe(InitialBufferCapacity);
         for (size_t idx = 0; idx < RequestCapacity; ++idx)
@@ -150,8 +153,8 @@ namespace ig
 
         details::UploadRequest& request = context.GetRequest();
         request.CmdCtx->End();
-        copyQueue.AddPendingContext(*request.CmdCtx);
-        request.Sync = copyQueue.Submit();
+        copyQueue->AddPendingContext(*request.CmdCtx);
+        request.Sync = copyQueue->Submit();
         IG_CHECK(request.Sync.IsValid());
         context.Reset();
         reservedThreadID.store(InvalidThreadID, std::memory_order::release);
@@ -225,7 +228,7 @@ namespace ig
 
     void GpuUploader::FlushQueue()
     {
-        GpuSync copyQueueFlushSync = copyQueue.Flush();
+        GpuSync copyQueueFlushSync = copyQueue->Flush();
         copyQueueFlushSync.WaitOnCpu();
     }
 
