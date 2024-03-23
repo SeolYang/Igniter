@@ -353,9 +353,6 @@
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\HashUtils.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\InputManager.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>

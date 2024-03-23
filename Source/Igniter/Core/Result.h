@@ -5,14 +5,6 @@
 
 namespace ig
 {
-    namespace details
-    {
-        struct NonTrivialDummy
-        {
-            constexpr NonTrivialDummy() noexcept {}
-        };
-    } // namespace details
-
     template <typename T>
     concept ResultStatus = requires {
         {
@@ -39,7 +31,7 @@ namespace ig
     /* 일반적인 Error Code 의 확장 버전. */
     template <typename T, ResultStatus E>
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T>
-    class Result final
+    class [[nodiscard]] Result final
     {
     public:
         Result(const Result&) = delete;
@@ -90,17 +82,10 @@ namespace ig
         friend Result<Ty, En> MakeFail();
 
         template <typename... Args>
-        Result(const E newStatus, Args&&... args) : status(newStatus)
+        Result(const E newStatus, Args&&... args) : 
+            dummy{},
+            status(newStatus)
         {
-            if constexpr (std::is_trivial_v<T>)
-            {
-                value = {};
-            }
-            else
-            {
-                dummy = {};
-            }
-
             if (newStatus == E::Success)
             {
                 ::new (&value) T(std::forward<Args>(args)...);
@@ -110,7 +95,10 @@ namespace ig
     private:
         union
         {
-            details::NonTrivialDummy dummy;
+            struct NonTrivialDummy
+            {
+                constexpr NonTrivialDummy() noexcept {}
+            } dummy;
             std::decay_t<T> value;
         };
 

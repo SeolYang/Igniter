@@ -7,9 +7,7 @@
 
 namespace ig
 {
-    /**
-     * Does not guarantee thread-safety. (The event subscribe/unsubscribe and call of notify. And also callee it self. )
-     */
+    /* #sy_warn 호출되는 델리게이트 들은 각자의 스레드 안정성을 스스로 보장해야 한다. */
     template <typename Identifier = ig::String, typename... Params>
         requires(std::is_object_v<Identifier>) && (std::is_object_v<Params> && ...)
     class Event
@@ -27,63 +25,31 @@ namespace ig
         Event& operator=(Event&&) noexcept = default;
 
         template <typename I, typename D>
+            requires std::is_convertible_v<I, Identifier> && std::is_convertible_v<D, DelegateType>
         void Subscribe(I&& id, D&& delegate)
         {
-            Subscribe(std::make_pair(std::forward<I>(id), std::forward<D>(delegate)));
-        }
-
-        template <typename S>
-        void Subscribe(S&& subscriber)
-        {
-            if (!HasSubscriber(subscriber.first))
-            {
-                subscribers.emplace_back(std::forward<S>(subscriber));
-            }
-            else
-            {
-                IG_CHECK_NO_ENTRY();
-            }
+            subscribeTable.insert_or_assign(std::forward<I>(id), std::forward<D>(delegate));
         }
 
         void Unsubscribe(const Identifier& id)
         {
-            for (auto itr = subscribers.begin(); itr != subscribers.end(); ++itr)
-            {
-                if (itr->first == id)
-                {
-                    subscribers.erase(itr);
-                    return;
-                }
-            }
+            subscribeTable.erase(id);
         }
 
-        bool HasSubscriber(const Identifier& id) const
+        [[nodiscard]] bool HasSubscriber(const Identifier& id) const
         {
-            for (const auto& subscriber : subscribers)
-            {
-                if (subscriber.first == id)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return subscribeTable.contains(id);
         }
 
-        /*
-         * @warn	만약에 perfect forwarding 되버려서 임의의 argument 가 특정 delegate 호출로 '이동'되어 버리면,
-         * 이후 호출에서 해당 argument 가 의도했던 대로 전달되지 않을 수 있다.
-         */
-        template <typename... Args>
-        void Notify(Args&&... args)
+        void Notify(const Params&... args)
         {
-            for (auto& subscriber : subscribers)
+            for (auto& subscribe : subscribeTable)
             {
-                subscriber.second(std::forward<Args>(args)...);
+                subscribe.second(args...);
             }
         }
 
     private:
-        std::vector<SubscriberType> subscribers{};
+        robin_hood::unordered_map<Identifier, DelegateType> subscribeTable{};
     };
 } // namespace ig

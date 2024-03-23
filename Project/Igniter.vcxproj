@@ -122,7 +122,6 @@
     <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />
-    <ClCompile Include="..\Source\Igniter\Core\HashUtils.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Igniter.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\InputManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Log.cpp" />
