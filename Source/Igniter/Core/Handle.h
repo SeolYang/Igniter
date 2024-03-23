@@ -4,7 +4,7 @@
 #include <Core/MemUtils.h>
 #include <Core/Container.h>
 #include <Core/DeferredDeallocator.h>
-#include <Core/Igniter.h>
+#include <Core/Engine.h>
 
 namespace ig
 {

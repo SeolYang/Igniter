@@ -1,3 +1,4 @@
+#include <Frieren.h>
 #include <Asset/Model.h>
 #include <Asset/Texture.h>
 #include <Component/CameraArchetype.h>
@@ -7,7 +8,7 @@
 #include <Component/TransformComponent.h>
 #include <Core/Event.h>
 #include <Core/Handle.h>
-#include <Core/Igniter.h>
+#include <Core/Engine.h>
 #include <Core/InputManager.h>
 #include <Core/Window.h>
 #include <D3D12/CommandQueue.h>

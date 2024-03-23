@@ -1,3 +1,4 @@
+#include <Frieren.h>
 #include <FpsCameraController.h>
 
 namespace fe

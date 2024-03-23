@@ -264,7 +264,7 @@
     <ClInclude Include="..\Source\Igniter\Render\Vertex.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\Igniter.h">
+    <ClInclude Include="..\Source\Igniter\Core\Engine.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Filesystem\AsyncFileTracker.h">
@@ -303,7 +303,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\FileNotificationPanel.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\PCH.h">
+    <ClInclude Include="..\Source\Igniter\Igniter.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -425,7 +425,7 @@
     <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\Igniter.cpp">
+    <ClCompile Include="..\Source\Igniter\Core\Engine.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp">
@@ -461,7 +461,7 @@
     <ClCompile Include="..\Source\Igniter\ImGui\FileNotificationPanel.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\PCH.cpp">
+    <ClCompile Include="..\Source\Igniter\Igniter.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

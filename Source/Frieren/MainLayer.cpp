@@ -1,3 +1,4 @@
+#include <Frieren.h>
 #include <MainLayer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/StatisticsPanel.h>

@@ -1,3 +1,4 @@
+#include <Frieren.h>
 #include <TestGameMode.h>
 
 namespace fe

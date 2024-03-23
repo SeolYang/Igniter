@@ -1,5 +1,5 @@
 #pragma once
-#include <PCH.h>
+#include <Igniter.h>
 #include <Gameplay/ComponentRegistry.h>
 
 namespace ig
