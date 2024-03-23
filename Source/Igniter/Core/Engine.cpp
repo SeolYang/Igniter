@@ -2,6 +2,9 @@
 #include <Core/Engine.h>
 #include <Core/Assert.h>
 #include <Core/Log.h>
+#include <Core/Version.h>
+#include <Core/FrameManager.h>
+#include <Core/Timer.h>
 #include <Core/HandleManager.h>
 #include <Core/InputManager.h>
 #include <Core/Window.h>
@@ -31,40 +34,75 @@ namespace ig
             IG_LOG(EngineInfo, "Igniter Engine Version {}", version::Version);
             IG_LOG(EngineInfo, "Igniting Engine Runtime!");
 
+            //////////////////////// L0 ////////////////////////
+            frameManager = std::make_unique<FrameManager>();
+            timer = std::make_unique<Timer>();
             /* #sy_test 임시 윈도우 설명자 */
-            const WindowDescription winDesc{ .Width = 1920, .Height = 1080, .Title = String(settings::GameName) };
-            window = std::make_unique<Window>(winDesc);
+            window = std::make_unique<Window>(WindowDescription{ .Width = 1920, .Height = 1080, .Title = String(settings::GameName) });
             renderDevice = std::make_unique<RenderDevice>();
-            gpuUploader = std::make_unique<GpuUploader>(*renderDevice);
             handleManager = std::make_unique<HandleManager>();
-            deferredDeallocator = std::make_unique<DeferredDeallocator>(frameManager);
+            ////////////////////////////////////////////////////
+
+            //////////////////////// L1 ////////////////////////
             inputManager = std::make_unique<InputManager>(*handleManager);
+            deferredDeallocator = std::make_unique<DeferredDeallocator>(*frameManager);
+            gpuUploader = std::make_unique<GpuUploader>(*renderDevice);
+            imguiRenderer = std::make_unique<ImGuiRenderer>(*frameManager, *window, *renderDevice);
+            ////////////////////////////////////////////////////
+
+            //////////////////////// L2 ////////////////////////
             gpuViewManager = std::make_unique<GpuViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
-            renderer = std::make_unique<Renderer>(frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
-            imguiRenderer = std::make_unique<ImGuiRenderer>(frameManager, *window, *renderDevice);
+            ////////////////////////////////////////////////////
+
+            //////////////////////// L3 ////////////////////////
+            renderer = std::make_unique<Renderer>(*frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
+            ////////////////////////////////////////////////////
+
+            //////////////////////// APP ///////////////////////
             imguiCanvas = std::make_unique<ImGuiCanvas>();
             gameInstance = std::make_unique<GameInstance>();
+            ////////////////////////////////////////////////////
         }
     }
 
     Igniter::~Igniter()
     {
         IG_LOG(EngineInfo, "Extinguishing Engine Runtime.");
-        gpuViewManager->ClearCachedSampler();
-        inputManager->Clear();
-        deferredDeallocator->FlushAllFrames();
 
+        //////////////////////// APP ///////////////////////
         gameInstance.reset();
         imguiCanvas.reset();
-        imguiRenderer.reset();
+        ////////////////////////////////////////////////////
+
+        /* #sy_log 각 계층에서 여전히 지연 해제하는 경우, 상위 계층을 해제하기 전에 중간에 수동으로 처리 해주어야 함. */
+        deferredDeallocator->FlushAllFrames();
+
+        //////////////////////// L3 ////////////////////////
         renderer.reset();
-        inputManager.reset();
-        deferredDeallocator.reset();
+        ////////////////////////////////////////////////////
+
+        deferredDeallocator->FlushAllFrames();
+
+        //////////////////////// L2 ////////////////////////
         gpuViewManager.reset();
-        handleManager.reset();
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L1 ////////////////////////
+        imguiRenderer.reset();
         gpuUploader.reset();
+        deferredDeallocator.reset();
+        inputManager.reset();
+        ////////////////////////////////////////////////////
+        
+        //////////////////////// L0 ////////////////////////
+        handleManager.reset();
         renderDevice.reset();
         window.reset();
+        timer.reset();
+        frameManager.reset();
+        ////////////////////////////////////////////////////
+
+        
 
         if (instance == this)
         {
@@ -77,7 +115,7 @@ namespace ig
         IG_LOG(EngineInfo, "Igniting Main Loop!");
         while (!bShouldExit)
         {
-            timer.Begin();
+            timer->Begin();
 
             MSG msg;
             ZeroMemory(&msg, sizeof(msg));
@@ -104,8 +142,8 @@ namespace ig
             }
             renderer->EndFrame();
 
-            timer.End();
-            frameManager.NextFrame();
+            timer->End();
+            frameManager->NextFrame();
         }
 
         renderer->FlushQueues();
@@ -123,13 +161,13 @@ namespace ig
     FrameManager& Igniter::GetFrameManager()
     {
         IG_CHECK(instance != nullptr);
-        return instance->frameManager;
+        return *instance->frameManager;
     }
 
     Timer& Igniter::GetTimer()
     {
         IG_CHECK(instance != nullptr);
-        return instance->timer;
+        return *instance->timer;
     }
 
     HandleManager& Igniter::GetHandleManager()

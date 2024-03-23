@@ -1,12 +1,10 @@
 #pragma once
 #include <Igniter.h>
-#include <Core/Version.h>
-#include <Core/FrameManager.h>
-#include <Core/Timer.h>
-#include <Core/Container.h>
 
 namespace ig
 {
+    class FrameManager;
+    class Timer;
     class Window;
     class RenderDevice;
     class GpuUploader;
@@ -49,18 +47,34 @@ namespace ig
     private:
         static Igniter* instance;
         bool bShouldExit = false;
-        FrameManager frameManager;
-        Timer timer;
+
+        /* L# stand for Dependency Level */
+        //////////////////////// L0 ////////////////////////
+        std::unique_ptr<FrameManager> frameManager;
+        std::unique_ptr<Timer> timer;
         std::unique_ptr<Window> window;
         std::unique_ptr<RenderDevice> renderDevice;
-        std::unique_ptr<GpuUploader> gpuUploader;
         std::unique_ptr<HandleManager> handleManager;
-        std::unique_ptr<DeferredDeallocator> deferredDeallocator;
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L1 ////////////////////////
         std::unique_ptr<InputManager> inputManager;
-        std::unique_ptr<GpuViewManager> gpuViewManager;
-        std::unique_ptr<Renderer> renderer;
+        std::unique_ptr<DeferredDeallocator> deferredDeallocator;
+        std::unique_ptr<GpuUploader> gpuUploader;
         std::unique_ptr<ImGuiRenderer> imguiRenderer;
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L2 ////////////////////////
+        std::unique_ptr<GpuViewManager> gpuViewManager;
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L3 ////////////////////////
+        std::unique_ptr<Renderer> renderer;
+        ////////////////////////////////////////////////////
+
+        //////////////////////// APP ///////////////////////
         std::unique_ptr<ImGuiCanvas> imguiCanvas;
         std::unique_ptr<GameInstance> gameInstance;
+        ////////////////////////////////////////////////////
     };
 } // namespace ig

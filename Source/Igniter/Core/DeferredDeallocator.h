@@ -1,13 +1,13 @@
 #pragma once
-#include <Core/Container.h>
-#include <Core/FrameManager.h>
+#include <Igniter.h>
 
 namespace ig
 {
+    class FrameManager;
     class DeferredDeallocator final
     {
     public:
-        DeferredDeallocator(const FrameManager& engineFrameManager);
+        DeferredDeallocator(const FrameManager& frameManager);
         DeferredDeallocator(const DeferredDeallocator&) = delete;
         DeferredDeallocator(DeferredDeallocator&&) noexcept = delete;
         ~DeferredDeallocator();

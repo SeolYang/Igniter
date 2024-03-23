@@ -3,7 +3,6 @@
 
 namespace ig
 {
-    inline constexpr uint8_t NumFramesInFlight = 2;
     class FrameManager
     {
     public:

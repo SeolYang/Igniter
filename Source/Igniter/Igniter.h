@@ -156,6 +156,10 @@ namespace ig
     using Registry = entt::registry;
 } // namespace ig
 
+namespace ig /* Constants */
+{
+    inline constexpr uint8_t NumFramesInFlight = 2;
+}
 
 #ifdef _M_X64
     #define ENABLE_SSE_CRC32 1

@@ -5,6 +5,7 @@
 #include <Core/InputManager.h>
 #include <Core/Log.h>
 #include <Core/Engine.h>
+#include <Core/Timer.h>
 #include <FpsCameraController.h>
 
 namespace fe

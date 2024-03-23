@@ -38,8 +38,6 @@ namespace ig
 
         RefHandle<GpuView> RequestSampler(const D3D12_SAMPLER_DESC& desc);
 
-        void ClearCachedSampler();
-
     private:
         Handle<GpuView, GpuViewManager*> MakeHandle(const GpuView& view);
 

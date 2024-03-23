@@ -4,8 +4,8 @@
 
 namespace ig
 {
-    DeferredDeallocator::DeferredDeallocator(const FrameManager& engineFrameManager)
-        : frameManager(engineFrameManager)
+    DeferredDeallocator::DeferredDeallocator(const FrameManager& frameManager)
+        : frameManager(frameManager)
     {
     }
 

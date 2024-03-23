@@ -176,7 +176,7 @@ namespace ig
                 IG_CHECK(samplerView->HasValidCPUHandle());
                 device.CreateSampler(desc, *samplerView);
 
-                Handle<GpuView, GpuViewManager*> handle = MakeHandle(*samplerView);
+                Handle<GpuView, GpuViewManager*> handle{ MakeHandle(*samplerView) };
                 refHandle = handle.MakeRef();
                 cachedSamplerView[samplerDescHashVal] = std::move(handle);
             }
@@ -186,20 +186,9 @@ namespace ig
         return refHandle;
     }
 
-    void GpuViewManager::ClearCachedSampler()
-    {
-        cachedSamplerView.clear();
-    }
-
     Handle<GpuView, GpuViewManager*> GpuViewManager::MakeHandle(const GpuView& view)
     {
-        Handle<GpuView, GpuViewManager*> res;
-        if (view.IsValid())
-        {
-            res = Handle<GpuView, GpuViewManager*>{ handleManager, this, view };
-        }
-
-        return res;
+        return Handle<GpuView, GpuViewManager*>{ handleManager, this, view };
     }
 
     std::optional<GpuView> GpuViewManager::Allocate(const EGpuViewType type)
@@ -252,13 +241,25 @@ namespace ig
 
     void GpuViewManager::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, GpuView* view)
     {
-        deferredDeallocator.RequestDeallocation(
-            [this, handle, evaluatedTypeHash, view]()
+        if (view != nullptr)
+        {
+            const auto deallocate = [this, handle, evaluatedTypeHash, view]()
             {
                 IG_CHECK(view != nullptr && view->IsValid());
                 this->Deallocate(*view);
                 details::HandleImpl targetHandle = handle;
                 targetHandle.Deallocate(evaluatedTypeHash);
-            });
+            };
+
+            if (view->Type == EGpuViewType::Sampler)
+            {
+                /* #sy_log 샘플러는 GpuViewManager에 캐싱되어서, GpuViewManager의 수명 끝에서 해제되므로. 지연 해제 되선 안됨! */
+                deallocate();
+            }
+            else
+            {
+                deferredDeallocator.RequestDeallocation(deallocate);
+            }
+        }
     }
 } // namespace ig
