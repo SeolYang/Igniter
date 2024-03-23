@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Asset/AssetManager.h>
 #include <Core/Assert.h>
 #include <Core/Log.h>

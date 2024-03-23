@@ -324,6 +324,9 @@
     <ClInclude Include="..\Source\Igniter\ImGui\FileNotificationPanel.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\PCH.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -478,6 +481,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\FileNotificationPanel.cpp">
       <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\PCH.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

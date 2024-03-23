@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
 #include <Core/Container.h>

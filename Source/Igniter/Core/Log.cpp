@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Core/Log.h>
 
 namespace ig

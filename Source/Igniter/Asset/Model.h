@@ -1,4 +1,5 @@
 #pragma once
+#include <PCH.h>
 #include <Asset/Common.h>
 #include <Core/Handle.h>
 

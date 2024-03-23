@@ -1,8 +1,3 @@
 #pragma once
-#include <filesystem>
-#include <fstream>
-
-namespace ig
-{
-    namespace fs = std::filesystem;
-}
+/* #sy_wip remove this */
+#include <PCH.h>

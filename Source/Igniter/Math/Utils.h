@@ -1,6 +1,5 @@
 #pragma once
-#include <Math/Common.h>
-#include <Core/Assert.h>
+#include <PCH.h>
 
 namespace ig
 {

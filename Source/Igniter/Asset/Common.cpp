@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Asset/Common.h>
 
 namespace ig

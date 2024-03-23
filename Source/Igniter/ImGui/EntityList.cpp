@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Component/NameComponent.h>
 #include <Core/Igniter.h>
 #include <Core/Log.h>

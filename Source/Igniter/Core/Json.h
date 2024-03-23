@@ -1,17 +1,7 @@
 #pragma once
-#include <Core/Assert.h>
-#pragma warning(push)
-#pragma warning(disable : 26800)
-#pragma warning(disable : 26819)
-#include <nlohmann/json.hpp>
-#pragma warning(pop)
-#include <magic_enum.hpp>
+#include <PCH.h>
 
-namespace ig
-{
-    using json = nlohmann::json;
-}
-
+/* #sy_wip rename to JsonUtils */
 namespace ig::details
 {
     template <typename VarType>

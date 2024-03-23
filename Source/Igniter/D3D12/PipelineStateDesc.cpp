@@ -1,7 +1,7 @@
+#include <PCH.h>
 #include <D3D12/PipelineStateDesc.h>
 #include <D3D12/ShaderBlob.h>
 #include <D3D12/RootSignature.h>
-#include <Core/Assert.h>
 
 namespace ig
 {

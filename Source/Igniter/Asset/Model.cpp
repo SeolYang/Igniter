@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Asset/Model.h>
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
@@ -270,7 +271,7 @@ namespace ig
                 const String texResPathStr = String(texture.mFilename.C_Str());
                 const fs::path texResPath = texResPathStr.AsStringView();
 
-                /* #sy_wip_todo 에셋 매니저 경유 */
+                /* #sy_wip 에셋 매니저 경유 */
                 textureImporter;
                 //if (!HasImportedBefore(texResPath))
                 //{

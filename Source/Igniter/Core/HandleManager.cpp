@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Core/HandleManager.h>
 #include <Core/Assert.h>
 #include <Core/HashUtils.h>

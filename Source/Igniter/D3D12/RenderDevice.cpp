@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUBufferDesc.h>
@@ -12,7 +13,6 @@
 #include <D3D12/CommandContext.h>
 #include <dxgidebug.h>
 #include <Core/Igniter.h>
-#include <Core/Assert.h>
 #include <Core/Log.h>
 
 namespace ig

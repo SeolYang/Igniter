@@ -1,9 +1,7 @@
 #pragma once
-#include <functional>
-#include <concepts>
+#include <PCH.h>
 #include <Core/Container.h>
 #include <Core/String.h>
-#include <Core/Assert.h>
 
 namespace ig
 {

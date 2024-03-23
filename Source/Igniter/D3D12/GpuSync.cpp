@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <D3D12/GpuSync.h>
 
 namespace ig

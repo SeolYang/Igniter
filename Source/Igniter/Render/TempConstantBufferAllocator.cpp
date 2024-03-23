@@ -1,12 +1,10 @@
+#include <PCH.h>
 #include <Render/TempConstantBufferAllocator.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GpuBuffer.h>
 #include <D3D12/GpuBufferDesc.h>
 #include <Render/GpuViewManager.h>
 #include <D3D12/CommandContext.h>
-#include <Core/Assert.h>
-#include <ranges>
-#include <format>
 
 namespace ig
 {

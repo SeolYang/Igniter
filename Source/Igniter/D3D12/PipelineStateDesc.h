@@ -1,7 +1,6 @@
 #pragma once
 #include <D3D12/Common.h>
 #include <Core/String.h>
-#include <span>
 
 namespace ig
 {

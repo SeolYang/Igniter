@@ -1,42 +1,8 @@
 #pragma once
-#include <array>
-#include <bitset>
-#include <functional>
-#include <optional>
-#include <queue>
-#include <ranges>
-#include <span>
-#include <variant>
-#include <vector>
-#include <chrono>
-#include <concurrent_queue.h>
-
-#pragma warning(push)
-#pragma warning(disable : 26800)
-#pragma warning(disable : 26819)
-#pragma warning(disable : 6305)
-#include <robin_hood.h>
-#pragma warning(pop)
-#include <Core/Json.h>
-#include <crossguid/guid.hpp>
-#include <magic_enum.hpp>
+#include <PCH.h>
 
 namespace ig
 {
-    using namespace std::chrono_literals;
-    namespace chrono = std::chrono;
-    namespace ranges = std::ranges;
-    namespace views = std::views;
-
-    template <typename T>
-    using OptionalRef = std::optional<std::reference_wrapper<T>>;
-
-    template <typename T>
-    OptionalRef<T> MakeOptionalRef(T& ref)
-    {
-        return std::make_optional(std::ref(ref));
-    }
-
     using DefaultCallback = std::function<void()>;
 
     template <typename IndexType>

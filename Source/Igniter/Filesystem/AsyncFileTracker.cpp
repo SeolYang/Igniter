@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Filesystem/AsyncFileTracker.h>
 #include <Core/Log.h>
 #include <strsafe.h>

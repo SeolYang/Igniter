@@ -1,7 +1,5 @@
 #pragma once
-#include <concepts>
-#include <memory>
-#include <Core/Assert.h>
+#include <PCH.h>
 
 namespace ig
 {

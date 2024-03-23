@@ -1,6 +1,6 @@
+#include <PCH.h>
 #include <Core/String.h>
 #include <Core/HashUtils.h>
-#include <Core/Assert.h>
 
 namespace ig
 {

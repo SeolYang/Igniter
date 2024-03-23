@@ -1,4 +1,4 @@
-#include <Core/Assert.h>
+#include <PCH.h>
 #include <Core/Igniter.h>
 #include <Gameplay/ComponentRegistry.h>
 

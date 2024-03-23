@@ -7,14 +7,10 @@
  * 'Narrower' function. Basically, 'Igniter' is targeting the 'Windows Platform'. Sometimes, It should pass string as
  * 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider character string.
  */
+#include <PCH.h>
 #include <Core/Container.h>
 #include <Core/Mutex.h>
 #include <Core/HashUtils.h>
-#include <string>
-#ifndef UTF_CPP_CPLUSPLUS
-    #define UTF_CPP_CPLUSPLUS 201703L
-#endif
-#include <utf8cpp/utf8.h>
 
 namespace ig
 {

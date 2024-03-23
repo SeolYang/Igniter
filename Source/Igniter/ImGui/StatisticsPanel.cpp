@@ -1,3 +1,4 @@
+#include <PCH.h>
 #include <Core/HandleManager.h>
 #include <Core/Igniter.h>
 #include <Core/MemUtils.h>
