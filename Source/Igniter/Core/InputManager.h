@@ -1,4 +1,5 @@
 #pragma once
+#include <Igniter.h>
 #include <Core/String.h>
 #include <Core/Handle.h>
 

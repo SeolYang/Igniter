@@ -1,11 +1,10 @@
 #pragma once
 #include <Igniter.h>
-#include <Core/String.h>
 
 namespace ig
 {
     /* #sy_warn 호출되는 델리게이트 들은 각자의 스레드 안정성을 스스로 보장해야 한다. */
-    template <typename Identifier = ig::String, typename... Params>
+    template <typename Identifier, typename... Params>
         requires(std::is_object_v<Identifier>) && (std::is_object_v<Params> && ...)
     class [[nodiscard]] Event
     {

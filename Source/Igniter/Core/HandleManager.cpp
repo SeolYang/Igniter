@@ -1,8 +1,7 @@
 #include <Igniter.h>
 #include <Core/HandleManager.h>
-#include <Core/Assert.h>
-#include <Core/HashUtils.h>
 #include <Core/Handle.h>
+#include <Core/HashUtils.h>
 
 namespace ig
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include <Igniter.h>
 #include <Core/Event.h>
+#include <Core/String.h>
 
 namespace ig
 {

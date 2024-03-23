@@ -1,6 +1,4 @@
 #pragma once
-#include <Core/ContainerUtils.h>
-#include <Core/Assert.h>
 #include <Core/MemUtils.h>
 
 namespace ig

@@ -2,9 +2,8 @@
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
 #include <Core/InputManager.h>
-#include <ImGUi/ImGuiCanvas.h>
-#include <Core/Engine.h>
 #include <Core/Log.h>
+#include <ImGUi/ImGuiCanvas.h>
 
 namespace ig
 {
