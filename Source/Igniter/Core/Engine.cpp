@@ -105,7 +105,6 @@ namespace ig
         ////////////////////////////////////////////////////
 
         
-
         if (instance == this)
         {
             instance = nullptr;
@@ -114,6 +113,7 @@ namespace ig
 
     int Igniter::Execute()
     {
+        size_t count = 0;
         IG_LOG(EngineInfo, "Igniting Main Loop!");
         while (!bShouldExit)
         {
@@ -131,8 +131,16 @@ namespace ig
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
+
+            ++count;
+            if (count == 4)
+            {
+                std::vector<DialogFilter> filters{ DialogFilter{} };
+                auto test = window->OpenFileDialog(filters);
+                test;
+            }
             deferredDeallocator->FlushCurrentFrame();
-            assetManager->ProcessFileNotifications();
+            assetManager->Update();
 
             gameInstance->Update();
             inputManager->PostUpdate();

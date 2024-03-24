@@ -18,7 +18,7 @@ namespace ig
 
     private:
         AsyncFileTracker fileTracker{};
-        EFileTrackerResult lastTrackingStatus = EFileTrackerResult::FileDoesNotExist;
+        EFileTrackerStatus lastTrackingStatus = EFileTrackerStatus::FileDoesNotExist;
         std::string targetDirPath;
 
         SharedMutex mutex;

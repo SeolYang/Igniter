@@ -5,7 +5,7 @@
 
 namespace ig
 {
-    enum class EFileTrackerResult
+    enum class EFileTrackerStatus
     {
         Success,
         DuplicateTrackingRequest,
@@ -48,7 +48,7 @@ namespace ig
 
     enum class EFileTrackingMode
     {
-        Polling,
+        Default,
         Event
     };
 
@@ -109,11 +109,12 @@ namespace ig
         ~AsyncFileTracker();
 
         [[nodiscard]] bool IsTracking() const noexcept { return directoryHandle != INVALID_HANDLE_VALUE; }
-        [[nodiscard]] EFileTrackerResult StartTracking(const fs::path& targetDirPath,
-                                                       const EFileTrackingMode trackingMode = EFileTrackingMode::Polling,
+        [[nodiscard]] EFileTrackerStatus StartTracking(const fs::path& targetDirPath,
+                                                       const EFileTrackingMode trackingMode = EFileTrackingMode::Default,
                                                        const ETrackingFilterFlags filter = ETrackingFilterFlags::Default,
                                                        const bool bTrackingRecursively = true,
-                                                       const chrono::milliseconds ioCheckingPeriod = 33ms);
+                                                       const chrono::milliseconds requestPeriod = 33ms,
+                                                       const chrono::milliseconds completionCheckPeriod = 16ms);
         void StopTracking();
         std::optional<FileNotification> TryGetNotification();
 
@@ -137,7 +138,7 @@ namespace ig
         constexpr static uint32_t ReservedRawBufferSizeInBytes = 1024Ui32 * 1024Ui32; /* 1 KB */
         std::vector<uint8_t> rawBuffer{ std::vector<uint8_t>(ReservedRawBufferSizeInBytes) };
 
-        EFileTrackingMode mode{ EFileTrackingMode::Polling };
+        EFileTrackingMode mode{ EFileTrackingMode::Default };
         Event<String, FileNotification> event{};
         concurrency::concurrent_queue<FileNotification> notificationQueue{};
     };

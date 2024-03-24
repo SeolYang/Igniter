@@ -8,30 +8,31 @@ namespace ig
         StopTracking();
     }
 
-    EFileTrackerResult AsyncFileTracker::StartTracking(const fs::path& targetDirPath,
+    EFileTrackerStatus AsyncFileTracker::StartTracking(const fs::path& targetDirPath,
                                                        const EFileTrackingMode trackingMode,
                                                        const ETrackingFilterFlags filter,
                                                        const bool bTrackingRecursively,
-                                                       const chrono::milliseconds ioCheckingPeriod)
+                                                       const chrono::milliseconds requestPeriod,
+                                                       const chrono::milliseconds completionCheckPeriod)
     {
         if (IsTracking())
         {
-            return EFileTrackerResult::DuplicateTrackingRequest;
+            return EFileTrackerStatus::DuplicateTrackingRequest;
         }
 
         if (trackingMode == EFileTrackingMode::Event && !event.HasAnySubscriber())
         {
-            return EFileTrackerResult::EmptyEvent;
+            return EFileTrackerStatus::EmptyEvent;
         }
 
         if (!fs::is_directory(targetDirPath))
         {
-            return EFileTrackerResult::NotDirectoryPath;
+            return EFileTrackerStatus::NotDirectoryPath;
         }
 
         if (!fs::exists(targetDirPath))
         {
-            return EFileTrackerResult::FileDoesNotExist;
+            return EFileTrackerStatus::FileDoesNotExist;
         }
 
         constexpr DWORD DesiredAccess = GENERIC_READ;
@@ -44,14 +45,14 @@ namespace ig
 
         if (directoryHandle == INVALID_HANDLE_VALUE)
         {
-            return EFileTrackerResult::FailedToOpen;
+            return EFileTrackerStatus::FailedToOpen;
         }
 
         IG_CHECK(ioEventHandle == INVALID_HANDLE_VALUE);
         ioEventHandle = CreateEvent(nullptr, 0, 0, nullptr);
         if (ioEventHandle == INVALID_HANDLE_VALUE)
         {
-            return EFileTrackerResult::FailedToCreateIOEventHandle;
+            return EFileTrackerStatus::FailedToCreateIOEventHandle;
         }
 
         mode = trackingMode;
@@ -59,7 +60,7 @@ namespace ig
         const auto notifyFilter = static_cast<DWORD>(filter);
 
         trackingThread = std::jthread(
-            [this, bTrackingRecursively, notifyFilter, ioCheckingPeriod](std::stop_token stopToken)
+            [this, bTrackingRecursively, notifyFilter, requestPeriod, completionCheckPeriod](std::stop_token stopToken)
             {
                 WCHAR fileNameBuffer[MAX_PATH]{ 0 };
 
@@ -84,8 +85,19 @@ namespace ig
                         while (!GetOverlappedResult(directoryHandle, &overlapped, &transferedBytes, FALSE))
                         {
                             lastError = GetLastError();
-                            // I/O 처리가 아직 끝나지 않은 경우 'ioCheckingPeriod' 만큼 대기 후 다시 시도.
-                            if (ioFuture.wait_for(ioCheckingPeriod) != std::future_status::timeout)
+                            // I/O 처리가 아직 끝나지 않은 경우 'completionCheckPeriod' 만큼 대기 후 다시 시도.
+                            const bool bIsRealtime = completionCheckPeriod == 0ms;
+                            bool bStopRequested = false;
+                            if (bIsRealtime)
+                            {
+                                bStopRequested = stopToken.stop_requested();
+                            }
+                            else
+                            {
+                                bStopRequested = ioFuture.wait_for(completionCheckPeriod) != std::future_status::timeout;
+                            }
+
+                            if (bStopRequested)
                             {
                                 IG_CHECK(lastError == ERROR_IO_INCOMPLETE);
                                 return;
@@ -153,16 +165,16 @@ namespace ig
                         }
                     }
 
-                    // I/O 처리가 완료 되거나, 요청 자체에 실패한 경우 'ioCheckingPeriod' 만큼 대기 후 재시도.
+                    // I/O 처리가 완료 되거나, 요청 자체에 실패한 경우 'requestPeriod' 만큼 대기 후 재시도.
                     // 대기 중 언제든지 취소 가능.
-                    if (ioFuture.wait_for(ioCheckingPeriod) != std::future_status::timeout)
+                    if (requestPeriod != 0ms)
                     {
-                        break;
+                        ioFuture.wait_for(requestPeriod);
                     }
                 }
             });
 
-        return EFileTrackerResult::Success;
+        return EFileTrackerStatus::Success;
     }
 
     void AsyncFileTracker::StopTracking()
@@ -191,7 +203,7 @@ namespace ig
 
     std::optional<FileNotification> AsyncFileTracker::TryGetNotification()
     {
-        IG_CHECK(IsTracking() && mode == EFileTrackingMode::Polling);
+        IG_CHECK(IsTracking() && mode == EFileTrackingMode::Default);
         FileNotification notification;
         if (notificationQueue.try_pop(notification))
         {

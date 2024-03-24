@@ -33,7 +33,17 @@ namespace ig
     {
     public:
         Result(const Result&) = delete;
-        Result(Result&& other) noexcept = delete;
+        Result(Result&& other) noexcept : dummy{},
+                                          status(other.status)
+        {
+            if (other.HasOwnership())
+            {
+                value = std::move(other.value);
+            }
+
+            bOwnershipTransferred = std::exchange(other.bOwnershipTransferred, false);
+        }
+
         ~Result()
         {
             IG_CHECK(!IsSuccess() || (IsSuccess() && bOwnershipTransferred) && "Result doesn't handled.");

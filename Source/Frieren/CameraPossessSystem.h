@@ -24,6 +24,6 @@ namespace fe
         ig::RefHandle<const ig::Action> togglePossessToCamera;
         FpsCameraControllSystem& fpsCamControllSystem;
 
-        bool bEnabled = true;
+        bool bEnabled = false;
     };
 } // namespace fe

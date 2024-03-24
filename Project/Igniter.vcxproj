@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h" />
     <ClInclude Include="..\Source\Igniter\Asset\AssetManager.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Common.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Model.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Texture.h" />
@@ -30,6 +32,7 @@
     <ClInclude Include="..\Source\Igniter\Component\StaticMeshComponent.h" />
     <ClInclude Include="..\Source\Igniter\Component\TransformComponent.h" />
     <ClInclude Include="..\Source\Igniter\Core\Assert.h" />
+    <ClInclude Include="..\Source\Igniter\Core\ComInitializer.h" />
     <ClInclude Include="..\Source\Igniter\Core\ContainerUtils.h" />
     <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h" />
     <ClInclude Include="..\Source\Igniter\Core\EmbededSettings.h" />
@@ -105,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Model.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp" />
@@ -113,6 +117,7 @@
     <ClCompile Include="..\Source\Igniter\Component\NameComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\StaticMeshComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\TransformComponent.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\CoInitializer.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />

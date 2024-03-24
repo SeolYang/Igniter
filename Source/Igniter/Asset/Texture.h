@@ -9,10 +9,6 @@ struct ID3D11Device;
 
 namespace ig
 {
-    class GpuTexture;
-    class GpuView;
-    class AssetManager;
-
     enum class ETextureCompressionMode
     {
         None,
@@ -70,13 +66,10 @@ namespace ig
 
     class TextureImporter
     {
-        friend class AssetManager;
-
     public:
+        TextureImporter();
         ~TextureImporter();
 
-    private:
-        TextureImporter();
         std::optional<xg::Guid> Import(const String resPathStr, TextureImportConfig config, const bool bIsPersistent = false);
 
     private:
@@ -98,7 +91,6 @@ namespace ig
     };
 
     class GpuUploader;
-    class GpuViewManager;
     class TextureLoader
     {
     public:

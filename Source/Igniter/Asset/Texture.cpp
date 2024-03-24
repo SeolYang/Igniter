@@ -14,6 +14,8 @@
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
 
+#include <Core/ComInitializer.h>
+
 namespace ig
 {
     IG_DEFINE_LOG_CATEGORY(TextureImporterInfo, ELogVerbosity::Info)
@@ -208,6 +210,7 @@ namespace ig
                                                     TextureImportConfig importConfig,
                                                     const bool bIsPersistent /*= false*/)
     {
+        CoInitializeUnique();
         TempTimer tempTimer;
         tempTimer.Begin();
         IG_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.AsStringView());
@@ -692,31 +695,3 @@ namespace ig
         };
     }
 } // namespace ig
-
-#include <iostream>
-namespace ig::details
-{
-    struct DirectXTexInitializer
-    {
-    public:
-        DirectXTexInitializer()
-        {
-            const HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-            if (FAILED(hr))
-            {
-                std::cerr << "Failed to initialize DirectXTex. HRESULT: "
-                          << std::hex << hr << std::endl;
-            }
-        }
-
-        ~DirectXTexInitializer()
-        {
-            CoUninitialize();
-        }
-    };
-
-#pragma warning(push)
-#pragma warning(disable : 4074)
-    thread_local DirectXTexInitializer dxTexInitializer;
-#pragma warning(pop)
-} // namespace ig::details

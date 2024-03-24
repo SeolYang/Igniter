@@ -306,6 +306,15 @@
     <ClInclude Include="..\Source\Igniter\Igniter.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\ComInitializer.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -463,6 +472,12 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Igniter.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\CoInitializer.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
