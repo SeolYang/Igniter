@@ -9,13 +9,7 @@ namespace ig
     {
         Success,
         CreateDialog,
-        CreateEventHandler,
-        HookUpEventHandler,
-        GetDialogOptions,
-        SetDialogOptions,
         SetFileTypes,
-        SetFileTypeIndex,
-        SetDefaultExtension,
         ShowDialog,
         GetResult,
         GetDisplayName

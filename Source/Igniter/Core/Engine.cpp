@@ -113,7 +113,6 @@ namespace ig
 
     int Igniter::Execute()
     {
-        size_t count = 0;
         IG_LOG(EngineInfo, "Igniting Main Loop!");
         while (!bShouldExit)
         {
@@ -132,13 +131,6 @@ namespace ig
                 DispatchMessage(&msg);
             }
 
-            ++count;
-            if (count == 4)
-            {
-                std::vector<DialogFilter> filters{ DialogFilter{} };
-                auto test = window->OpenFileDialog(filters);
-                test;
-            }
             deferredDeallocator->FlushCurrentFrame();
             assetManager->Update();
 
