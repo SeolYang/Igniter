@@ -17,7 +17,6 @@ namespace ig::details
     template <typename VarType, typename F>
     void DeSerialize(const nlohmann::json& archive, VarType& var, const std::string_view dataTypeName, const std::string_view varName, F callback)
     {
-        IG_CHECK(!archive.is_null());
         IG_CHECK(archive.contains(dataTypeName) && archive[dataTypeName].is_object());
         if (archive.contains(dataTypeName) && archive[dataTypeName].contains(varName))
         {

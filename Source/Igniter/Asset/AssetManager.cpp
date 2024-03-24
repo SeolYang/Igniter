@@ -56,11 +56,39 @@ namespace ig
     void AssetManager::ProcessFileNotifications()
     {
         ReadWriteLock rwLock{ bufferMutex };
-        for (const auto& notification : notificationBuffer)
+
+        bool bBufferProcessingPostponed = false;
+        for (size_t idx = 0; idx < notificationBuffer.size(); ++idx)
         {
+            const auto& notification = notificationBuffer[idx];
+            const bool bPossiblyDuplicatedModification = notification.Action == EFileTrackingAction::Modified && notification.FileSize == 0;
+
+            if (bPossiblyDuplicatedModification)
+            {
+                if (notificationBuffer.size() == 1)
+                {
+                    bBufferProcessingPostponed = true;
+                    break;
+                }
+                else if (idx + 1 < notificationBuffer.size())
+                {
+                    const auto& nextNotification = notificationBuffer[idx + 1];
+                    const bool bDuplicatedModification = nextNotification.Action == EFileTrackingAction::Modified &&
+                                                         nextNotification.Path == notification.Path;
+                    if (bDuplicatedModification)
+                    {
+                        continue;
+                    }
+                }
+            }
+
             ProcessFileNotification(notification);
         }
-        notificationBuffer.clear();
+
+        if (!bBufferProcessingPostponed)
+        {
+            notificationBuffer.clear();
+        }
     }
 
     AssetManager::VirtualPathGuidTable& AssetManager::GetVirtualPathGuidTable(const EAssetType assetType)
@@ -165,8 +193,6 @@ namespace ig
             IG_LOG(AssetManagerErr, "Found invalid guid from {}.", notification.Path.string());
             return;
         }
-
-       
 
         // 기본적으로 모두 유효한 GUID를 가지는 경우에만 가능.
         // Added/Modified/RenamedNew => 테이블에 업데이트.

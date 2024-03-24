@@ -16,9 +16,8 @@ namespace ig
             return json{};
         }
 
-        json newJson{ json::parse(fileStream) };
-        fileStream.close();
-        return newJson;
+        json newJson{ json::parse(fileStream, nullptr, false) };
+        return newJson.is_discarded() ? json{} : newJson;
     }
 
     inline bool SaveJsonToFile(const fs::path& path, const json& jsonData)
