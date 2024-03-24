@@ -205,7 +205,7 @@ namespace ig
     }
 
     std::optional<xg::Guid> TextureImporter::Import(const String resPathStr,
-                                                    std::optional<TextureImportConfig> importConfig /*= std::nullopt*/,
+                                                    TextureImportConfig importConfig,
                                                     const bool bIsPersistent /*= false*/)
     {
         TempTimer tempTimer;
@@ -266,15 +266,6 @@ namespace ig
             return std::nullopt;
         }
 
-        /* Get Texture Import Config from metadata file, make default if file does not exists. */
-        const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
-        if (!importConfig)
-        {
-            json resMetadata{ LoadJsonFromFile(resMetadataPath) };
-            importConfig = TextureImportConfig{};
-            resMetadata >> *importConfig;
-        }
-
         if (!bIsDDSFormat)
         {
             IG_CHECK(texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
@@ -284,7 +275,7 @@ namespace ig
             IG_CHECK(!DirectX::IsSRGB(texMetadata.format));
 
             /* Generate full mipmap chain. */
-            if (importConfig->bGenerateMips)
+            if (importConfig.bGenerateMips)
             {
                 DirectX::ScratchImage mipChain{};
                 const HRESULT genRes = DirectX::GenerateMipMaps(
@@ -302,9 +293,9 @@ namespace ig
             }
 
             /* Compress Texture*/
-            if (importConfig->CompressionMode != ETextureCompressionMode::None)
+            if (importConfig.CompressionMode != ETextureCompressionMode::None)
             {
-                if (bIsHDRFormat && importConfig->CompressionMode != ETextureCompressionMode::BC6H)
+                if (bIsHDRFormat && importConfig.CompressionMode != ETextureCompressionMode::BC6H)
                 {
                     IG_LOG(TextureImporterWarn,
                            "The compression method for HDR extension textures is "
@@ -312,10 +303,10 @@ namespace ig
                            "to be the 'BC6H' algorithm. File: {}",
                            resPathStr.AsStringView());
 
-                    importConfig->CompressionMode = ETextureCompressionMode::BC6H;
+                    importConfig.CompressionMode = ETextureCompressionMode::BC6H;
                 }
                 else if (IsGreyScaleFormat(texMetadata.format) &&
-                         importConfig->CompressionMode == ETextureCompressionMode::BC4)
+                         importConfig.CompressionMode == ETextureCompressionMode::BC4)
                 {
                     IG_LOG(TextureImporterWarn,
                            "The compression method for greyscale-formatted "
@@ -323,15 +314,15 @@ namespace ig
                            "enforced to be the 'BC4' algorithm. File: {}",
                            resPathStr.AsStringView());
 
-                    importConfig->CompressionMode = ETextureCompressionMode::BC4;
+                    importConfig.CompressionMode = ETextureCompressionMode::BC4;
                 }
 
                 auto compFlags = static_cast<unsigned long>(DirectX::TEX_COMPRESS_PARALLEL);
-                const DXGI_FORMAT compFormat = AsBCnFormat(importConfig->CompressionMode, texMetadata.format);
+                const DXGI_FORMAT compFormat = AsBCnFormat(importConfig.CompressionMode, texMetadata.format);
 
                 const bool bIsGPUCodecAvailable = d3d11Device != nullptr &&
-                                                  (importConfig->CompressionMode == ETextureCompressionMode::BC6H ||
-                                                   importConfig->CompressionMode == ETextureCompressionMode::BC7);
+                                                  (importConfig.CompressionMode == ETextureCompressionMode::BC6H ||
+                                                   importConfig.CompressionMode == ETextureCompressionMode::BC7);
 
                 HRESULT compRes = S_FALSE;
                 DirectX::ScratchImage compTex{};
@@ -366,7 +357,7 @@ namespace ig
                     IG_LOG(TextureImporterFatal,
                            "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
                            "File: {}",
-                           magic_enum::enum_name(importConfig->CompressionMode),
+                           magic_enum::enum_name(importConfig.CompressionMode),
                            magic_enum::enum_name(texMetadata.format), magic_enum::enum_name(compFormat),
                            compRes,
                            resPathStr.AsStringView());
@@ -382,7 +373,9 @@ namespace ig
         /* Configure Texture Resource Metadata */
         const ResourceInfo resInfo{ .Type = EAssetType::Texture };
         json resMetadata{};
-        resMetadata << resInfo << *importConfig;
+        resMetadata << resInfo << importConfig;
+
+        const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
         if (SaveJsonToFile(resMetadataPath, resMetadata))
         {
             IG_LOG(TextureImporterWarn, "Failed to create resource metadata {}.", resMetadataPath.string());
@@ -407,10 +400,10 @@ namespace ig
             .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize),
             .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
             .bIsCubemap = texMetadata.IsCubemap(),
-            .Filter = importConfig->Filter,
-            .AddressModeU = importConfig->AddressModeU,
-            .AddressModeV = importConfig->AddressModeV,
-            .AddressModeW = importConfig->AddressModeW
+            .Filter = importConfig.Filter,
+            .AddressModeU = importConfig.AddressModeU,
+            .AddressModeV = importConfig.AddressModeV,
+            .AddressModeW = importConfig.AddressModeW
         };
 
         json assetMetadata{};
