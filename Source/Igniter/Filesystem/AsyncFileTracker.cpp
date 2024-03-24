@@ -70,10 +70,10 @@ namespace ig
                 while (!stopToken.stop_requested())
                 {
                     IG_CHECK(directoryHandle != INVALID_HANDLE_VALUE);
-                    const bool bRequestSucceeded = ReadDirectoryChangesW(directoryHandle,
+                    const bool bRequestSucceeded = ReadDirectoryChangesExW(directoryHandle,
                                                                          rawBuffer.data(), ReservedRawBufferSizeInBytes,
                                                                          bTrackingRecursively, notifyFilter,
-                                                                         nullptr, &overlapped, nullptr);
+                                                                           nullptr, &overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
 
                     if (bRequestSucceeded)
                     {
@@ -92,8 +92,8 @@ namespace ig
                             }
                         }
 
-                        const auto* notifyInfo = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(rawBuffer.data());
-                        while (notifyInfo != nullptr && transferedBytes >= sizeof(FILE_NOTIFY_INFORMATION))
+                        const auto* notifyInfo = reinterpret_cast<const FILE_NOTIFY_EXTENDED_INFORMATION*>(rawBuffer.data());
+                        while (notifyInfo != nullptr && transferedBytes >= sizeof(FILE_NOTIFY_EXTENDED_INFORMATION))
                         {
                             FileNotification newNotification;
                             switch (notifyInfo->Action)
@@ -127,6 +127,11 @@ namespace ig
                             }
 
                             newNotification.Path = path / fileNameBuffer;
+                            newNotification.CreationTime = notifyInfo->CreationTime.QuadPart;
+                            newNotification.LastModificationTime = notifyInfo->LastModificationTime.QuadPart;
+                            newNotification.LastChangeTime = notifyInfo->LastChangeTime.QuadPart;
+                            newNotification.LastAccessTime = notifyInfo->LastAccessTime.QuadPart;
+                            newNotification.FileSize = notifyInfo->FileSize.QuadPart;
                             
                             if (mode == EFileTrackingMode::Event)
                             {
@@ -139,7 +144,7 @@ namespace ig
 
                             if (notifyInfo->NextEntryOffset > 0)
                             {
-                                notifyInfo = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(reinterpret_cast<const uint8_t*>(notifyInfo) + notifyInfo->NextEntryOffset);
+                                notifyInfo = reinterpret_cast<const FILE_NOTIFY_EXTENDED_INFORMATION*>(reinterpret_cast<const uint8_t*>(notifyInfo) + notifyInfo->NextEntryOffset);
                             }
                             else
                             {

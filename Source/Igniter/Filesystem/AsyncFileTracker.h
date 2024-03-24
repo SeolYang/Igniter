@@ -60,6 +60,11 @@ namespace ig
     public:
         EFileTrackingAction Action = EFileTrackingAction::Unknown;
         fs::path Path{};
+        uint64_t CreationTime{};
+        uint64_t LastModificationTime{};
+        uint64_t LastChangeTime{};
+        uint64_t LastAccessTime{};
+        uint64_t FileSize{};
     };
 
     class AsyncFileTracker
