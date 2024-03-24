@@ -75,14 +75,13 @@ namespace ig
         template <typename Ty, ResultStatus En, typename... Args>
         friend Result<Ty, En> MakeSuccess(Args&&... args);
 
-        template <typename Ty, ResultStatus En, En Status>
-            requires(Status != En::Success)
-        friend Result<Ty, En> MakeFail();
+        template <typename T, auto Status>
+            requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
+        friend Result<T, decltype(Status)> MakeFail();
 
         template <typename... Args>
-        Result(const E newStatus, Args&&... args) : 
-            dummy{},
-            status(newStatus)
+        Result(const E newStatus, Args&&... args) : dummy{},
+                                                    status(newStatus)
         {
             if (newStatus == E::Success)
             {
@@ -100,7 +99,7 @@ namespace ig
             std::decay_t<T> value;
         };
 
-        E status;
+        const E status;
         bool bOwnershipTransferred = false;
     };
 
@@ -111,12 +110,11 @@ namespace ig
         return Result<T, E>{ E::Success, std::forward<Args>(args)... };
     }
 
-    template <typename T, ResultStatus E, E Status>
-        requires(Status != E::Success)
-    Result<T, E> MakeFail()
+    template <typename T, auto Status>
+        requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
+    Result<T, decltype(Status)> MakeFail()
     {
         /* prvalue -> Guaranteed Copy Elision */
-        return Result<T, E>{ Status };
+        return Result<T, decltype(Status)>{ Status };
     }
-
 } // namespace ig
