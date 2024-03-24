@@ -12,6 +12,7 @@ namespace ig
     class InputManager;
     class GpuViewManager;
     class DeferredDeallocator;
+    class AssetManager;
     class Renderer;
     class ImGuiCanvas;
     class ImGuiRenderer;
@@ -28,14 +29,19 @@ namespace ig
         [[nodiscard]] static RenderDevice& GetRenderDevice();
         [[nodiscard]] static GpuUploader& GetGpuUploader();
         [[nodiscard]] static HandleManager& GetHandleManager();
+
         [[nodiscard]] static InputManager& GetInputManager();
         [[nodiscard]] static DeferredDeallocator& GetDeferredDeallocator();
         [[nodiscard]] static GpuViewManager& GetGPUViewManager();
-        [[nodiscard]] static Renderer& GetRenderer();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
+
+        [[nodiscard]] static AssetManager& GetAssetManager();
+        [[nodiscard]] static Renderer& GetRenderer();
+
         [[nodiscard]] static ImGuiCanvas& GetImGuiCanvas();
         [[nodiscard]] static OptionalRef<ImGuiCanvas> TryGetImGuiCanvas();
         [[nodiscard]] static GameInstance& GetGameInstance();
+
         bool IsValid() const { return this == instance; }
 
         bool static IsInitialized() { return instance != nullptr; }
@@ -69,6 +75,7 @@ namespace ig
         ////////////////////////////////////////////////////
 
         //////////////////////// L3 ////////////////////////
+        std::unique_ptr<AssetManager> assetManager;
         std::unique_ptr<Renderer> renderer;
         ////////////////////////////////////////////////////
 

@@ -24,12 +24,11 @@ namespace ig
     {
         const AssetInfo& info = *this;
         IG_CHECK(info.Guid.isValid());
-        IG_CHECK(!info.SrcResPath.empty());
         IG_CHECK(info.Type != EAssetType::Unknown);
 
         IG_SERIALIZE_JSON(AssetInfo, archive, info, CreationTime);
         IG_SERIALIZE_GUID_JSON(AssetInfo, archive, info, Guid);
-        IG_SERIALIZE_JSON(AssetInfo, archive, info, SrcResPath);
+        IG_SERIALIZE_STRING_JSON(AssetInfo, archive, info, VirtualPath);
         IG_SERIALIZE_ENUM_JSON(AssetInfo, archive, info, Type);
         IG_SERIALIZE_JSON(AssetInfo, archive, info, bIsPersistent);
 
@@ -41,12 +40,11 @@ namespace ig
         AssetInfo& info = *this;
         IG_DESERIALIZE_JSON(AssetInfo, archive, info, CreationTime);
         IG_DESERIALIZE_GUID_JSON(AssetInfo, archive, info, Guid);
-        IG_DESERIALIZE_JSON(AssetInfo, archive, info, SrcResPath);
+        IG_DESERIALIZE_STRING_JSON(AssetInfo, archive, info, VirtualPath);
         IG_DESERIALIZE_ENUM_JSON(AssetInfo, archive, info, Type, EAssetType::Unknown);
         IG_DESERIALIZE_JSON(AssetInfo, archive, info, bIsPersistent);
 
         IG_CHECK(info.Guid.isValid());
-        IG_CHECK(!info.SrcResPath.empty());
         IG_CHECK(info.Type != EAssetType::Unknown);
         return archive;
     }

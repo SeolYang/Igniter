@@ -9,46 +9,32 @@ namespace ig
         return resPath;
     }
 
+    fs::path GetAssetDirectoryPath(const EAssetType type)
+    {
+        IG_CHECK(type != EAssetType::Unknown);
+        switch (type)
+        {
+            case EAssetType::Texture:
+                return fs::path{ details::TextureAssetRootPath };
+            case EAssetType::StaticMesh:
+                return fs::path{ details::StaticMeshAssetRootPath };
+            case EAssetType::SkeletalMesh:
+                return fs::path{ details::SkeletalMeshAssetRootPath };
+            case EAssetType::Shader:
+                return fs::path{ details::ShaderAssetRootPath };
+            case EAssetType::Audio:
+                return fs::path{ details::AudioAssetRootPath };
+            case EAssetType::Script:
+                return fs::path{ details::ScriptAssetRootPath };
+            [[unlikely]] default:
+                return fs::path{};
+        }
+    }
+
     fs::path MakeAssetPath(const EAssetType type, const xg::Guid& guid)
     {
-        fs::path newAssetPath{};
-        if (type != EAssetType::Unknown && guid.isValid())
-        {
-            switch (type)
-            {
-                case EAssetType::Texture:
-                    newAssetPath = details::TextureAssetRootPath;
-                    break;
-
-                case EAssetType::StaticMesh:
-                    newAssetPath = details::StaticMeshAssetRootPath;
-                    break;
-
-                case EAssetType::SkeletalMesh:
-                    newAssetPath = details::SkeletalMeshAssetRootPath;
-                    break;
-
-                case EAssetType::Shader:
-                    newAssetPath = details::ShaderAssetRootPath;
-                    break;
-
-                case EAssetType::Audio:
-                    newAssetPath = details::AudioAssetRootPath;
-                    break;
-
-                case EAssetType::Script:
-                    newAssetPath = details::ScriptAssetRootPath;
-                    break;
-            }
-
-            newAssetPath /= guid.str();
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
-
-        return newAssetPath;
+        IG_CHECK(guid.isValid() && type != EAssetType::Unknown);
+        return fs::path{ GetAssetDirectoryPath(type) } / guid.str();
     }
 
     fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid)
@@ -67,36 +53,24 @@ namespace ig
         return fs::exists(MakeResourceMetadataPath(resPath));
     }
 
-    void details::CreateAssetDirectories()
+    bool IsMetadataPath(const fs::path& resPath)
     {
-        if (!fs::exists(TextureAssetRootPath))
-        {
-            fs::create_directories(TextureAssetRootPath);
-        }
+        std::string extension = resPath.extension().string();
+        std::transform(extension.begin(), extension.end(), extension.begin(),
+                       [](const char character)
+                       { return static_cast<char>(::tolower(static_cast<int>(character))); });
 
-        if (!fs::exists(StaticMeshAssetRootPath))
-        {
-            fs::create_directories(StaticMeshAssetRootPath);
-        }
-
-        if (!fs::exists(SkeletalMeshAssetRootPath))
-        {
-            fs::create_directories(SkeletalMeshAssetRootPath);
-        }
-
-        if (!fs::exists(ShaderAssetRootPath))
-        {
-            fs::create_directories(ShaderAssetRootPath);
-        }
-
-        if (!fs::exists(AudioAssetRootPath))
-        {
-            fs::create_directories(AudioAssetRootPath);
-        }
-
-        if (!fs::exists(ScriptAssetRootPath))
-        {
-            fs::create_directories(ScriptAssetRootPath);
-        }
+        return extension == details::MetadataExt;
     }
+
+    xg::Guid ConvertMetadataPathToGuid(fs::path path)
+    {
+        if (!IsMetadataPath(path))
+        {
+            return xg::Guid{};
+        }
+
+        return xg::Guid{ path.replace_extension().filename().string() };
+    }
+
 } // namespace ig

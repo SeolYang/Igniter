@@ -6,6 +6,8 @@ namespace ig
     /* Refer to {ResourcePath}.metadata */
     fs::path MakeResourceMetadataPath(fs::path resPath);
 
+    fs::path GetAssetDirectoryPath(const EAssetType type);
+
     /* Refer to ./Asset/{AssetType}/{GUID} */
     fs::path MakeAssetPath(const EAssetType type, const xg::Guid& guid);
 
@@ -14,8 +16,7 @@ namespace ig
 
     bool HasImportedBefore(const fs::path& resPath);
 
-    namespace details
-    {
-        void CreateAssetDirectories();
-    }
+    bool IsMetadataPath(const fs::path& resPath);
+
+    xg::Guid ConvertMetadataPathToGuid(fs::path path);
 } // namespace ig

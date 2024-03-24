@@ -394,7 +394,7 @@ namespace ig
         const AssetInfo assetInfo{
             .CreationTime = Timer::Now(),
             .Guid = xg::newGuid(),
-            .SrcResPath = resPathStr.AsString(),
+            .VirtualPath = String(resPath.filename().replace_extension().string()),
             .Type = EAssetType::Texture,
             .bIsPersistent = bIsPersistent
         };
@@ -415,11 +415,6 @@ namespace ig
 
         json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;
-
-        if (!fs::exists(details::TextureAssetRootPath))
-        {
-            details::CreateAssetDirectories();
-        }
 
         const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, assetInfo.Guid);
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
@@ -694,7 +689,7 @@ namespace ig
             return std::nullopt;
         }
 
-        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.SrcResPath, tempTimer.End());
+        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.VirtualPath.AsStringView(), tempTimer.End());
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
         return Texture{
             .LoadConfig = loadConfig,

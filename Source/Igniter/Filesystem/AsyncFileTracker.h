@@ -18,7 +18,7 @@ namespace ig
 
     enum class ETrackingFilterFlags : uint32_t
     {
-        Default = FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE,
+        Default = FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE,
         ChangeFileName = FILE_NOTIFY_CHANGE_FILE_NAME,
         ChangeDirName = FILE_NOTIFY_CHANGE_DIR_NAME,
         ChangeAttributes = FILE_NOTIFY_CHANGE_ATTRIBUTES,

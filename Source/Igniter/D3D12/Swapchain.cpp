@@ -74,8 +74,7 @@ namespace ig
     void Swapchain::CheckTearingSupport(ComPtr<IDXGIFactory5> factory)
     {
         BOOL allowTearing = FALSE;
-        if (FAILED(
-                factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing))))
+        if (FAILED(factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing))))
         {
             bTearingEnabled = false;
         }

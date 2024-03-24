@@ -104,7 +104,7 @@ namespace ig
 #if defined(DEBUG) || defined(_DEBUG)
     #define IG_LOG(LOG_CATEGORY, ...)                                                                                             \
         ig::Logger::GetInstance().Log<LOG_CATEGORY>(__VA_ARGS__);                                                                 \
-        if constexpr (LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Error || LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Fatal) \
+        if constexpr (LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Fatal) \
         {                                                                                                                         \
             IG_CHECK_NO_ENTRY();                                                                                                  \
         }

@@ -132,11 +132,6 @@ namespace ig
 
     static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bIsPersistent, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
     {
-        if (!fs::exists(details::StaticMeshAssetRootPath))
-        {
-            details::CreateAssetDirectories();
-        }
-
         const xg::Guid newGuid = xg::newGuid();
         const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, newGuid);
         const std::string_view resPathStrView = resPathStr.AsStringView();
@@ -185,7 +180,7 @@ namespace ig
         const AssetInfo assetInfo{
             .CreationTime = Timer::Now(),
             .Guid = newGuid,
-            .SrcResPath = resPathStr,
+            .VirtualPath = meshName,
             .Type = EAssetType::StaticMesh,
             .bIsPersistent = bIsPersistent
         };
@@ -506,7 +501,7 @@ namespace ig
 
         IG_LOG(StaticMeshLoaderInfo,
                "Successfully load static mesh asset {}, which from resource {}. Elapsed: {} ms",
-               assetPath.string(), assetInfo.SrcResPath, tempTimer.End());
+               assetPath.string(), assetInfo.VirtualPath.AsStringView(), tempTimer.End());
 
         return StaticMesh{
             .LoadConfig = loadConfig,

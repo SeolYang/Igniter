@@ -70,19 +70,21 @@ namespace ig
                 while (!stopToken.stop_requested())
                 {
                     IG_CHECK(directoryHandle != INVALID_HANDLE_VALUE);
-                    DWORD bytesReturned{ 0 };
                     const bool bRequestSucceeded = ReadDirectoryChangesW(directoryHandle,
                                                                          rawBuffer.data(), ReservedRawBufferSizeInBytes,
                                                                          bTrackingRecursively, notifyFilter,
-                                                                         &bytesReturned, &overlapped, nullptr);
+                                                                         nullptr, &overlapped, nullptr);
 
                     if (bRequestSucceeded)
                     {
                         DWORD lastError = ERROR_IO_INCOMPLETE;
                         DWORD transferedBytes{ 0 };
+
+                        // I/O 처리가 완료 되었는지 확인
                         while (!GetOverlappedResult(directoryHandle, &overlapped, &transferedBytes, FALSE))
                         {
                             lastError = GetLastError();
+                            // I/O 처리가 아직 끝나지 않은 경우 'ioCheckingPeriod' 만큼 대기 후 다시 시도.
                             if (ioFuture.wait_for(ioCheckingPeriod) != std::future_status::timeout)
                             {
                                 IG_CHECK(lastError == ERROR_IO_INCOMPLETE);
@@ -125,7 +127,7 @@ namespace ig
                             }
 
                             newNotification.Path = path / fileNameBuffer;
-
+                            
                             if (mode == EFileTrackingMode::Event)
                             {
                                 event.Notify(newNotification);
@@ -145,12 +147,12 @@ namespace ig
                             }
                         }
                     }
-                    else
+
+                    // I/O 처리가 완료 되거나, 요청 자체에 실패한 경우 'ioCheckingPeriod' 만큼 대기 후 재시도.
+                    // 대기 중 언제든지 취소 가능.
+                    if (ioFuture.wait_for(ioCheckingPeriod) != std::future_status::timeout)
                     {
-                        if (ioFuture.wait_for(ioCheckingPeriod) != std::future_status::timeout)
-                        {
-                            return;
-                        }
+                        break;
                     }
                 }
             });

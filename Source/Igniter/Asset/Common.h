@@ -1,5 +1,6 @@
 #pragma once
 #include <Igniter.h>
+#include <Core/String.h>
 
 namespace ig
 {
@@ -32,10 +33,12 @@ namespace ig
         json& Serialize(json& archive) const;
         const json& Deserialize(const json& archive);
 
+        [[nodiscard]] bool IsValid() const { return Guid.isValid() && VirtualPath.IsValid() && Type != EAssetType::Unknown; }
+
     public:
         uint64_t CreationTime = 0;
         xg::Guid Guid{};
-        std::string SrcResPath{};
+        String VirtualPath{};
         EAssetType Type = EAssetType::Unknown;
         bool bIsPersistent = false;
     };

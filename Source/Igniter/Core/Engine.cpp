@@ -16,6 +16,7 @@
 #include <Render/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
+#include <Asset/AssetManager.h>
 #include <Gameplay/GameInstance.h>
 
 namespace ig
@@ -55,6 +56,7 @@ namespace ig
             ////////////////////////////////////////////////////
 
             //////////////////////// L3 ////////////////////////
+            assetManager = std::make_unique<AssetManager>(); /* #sy_test Temporary */
             renderer = std::make_unique<Renderer>(*frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
             ////////////////////////////////////////////////////
 
@@ -129,8 +131,8 @@ namespace ig
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-
             deferredDeallocator->FlushCurrentFrame();
+            assetManager->ProcessFileNotifications();
 
             gameInstance->Update();
             inputManager->PostUpdate();
@@ -173,61 +175,67 @@ namespace ig
     HandleManager& Igniter::GetHandleManager()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->handleManager);
+        return *instance->handleManager;
     }
 
     Window& Igniter::GetWindow()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->window);
+        return *instance->window;
     }
 
     RenderDevice& Igniter::GetRenderDevice()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->renderDevice);
+        return *instance->renderDevice;
     }
 
     GpuUploader& Igniter::GetGpuUploader()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->gpuUploader);
+        return *instance->gpuUploader;
     }
 
     InputManager& Igniter::GetInputManager()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->inputManager);
+        return *instance->inputManager;
     }
 
     DeferredDeallocator& Igniter::GetDeferredDeallocator()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->deferredDeallocator);
+        return *instance->deferredDeallocator;
     }
 
     GpuViewManager& Igniter::GetGPUViewManager()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->gpuViewManager);
+        return *instance->gpuViewManager;
     }
 
     Renderer& Igniter::GetRenderer()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->renderer);
+        return *instance->renderer;
     }
 
     ImGuiRenderer& Igniter::GetImGuiRenderer()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->imguiRenderer);
+        return *instance->imguiRenderer;
+    }
+
+    AssetManager& Igniter::GetAssetManager()
+    {
+        IG_CHECK(instance != nullptr);
+        return *instance->assetManager;
     }
 
     ImGuiCanvas& Igniter::GetImGuiCanvas()
     {
         IG_CHECK(instance != nullptr);
-        return *(instance->imguiCanvas);
+        return *instance->imguiCanvas;
     }
 
     OptionalRef<ImGuiCanvas> Igniter::TryGetImGuiCanvas()

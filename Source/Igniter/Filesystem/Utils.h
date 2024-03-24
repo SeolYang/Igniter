@@ -5,17 +5,19 @@ namespace ig
 {
     inline json LoadJsonFromFile(const fs::path& path)
     {
-        json newJson{};
-        if (fs::exists(path))
+        if (!fs::exists(path))
         {
-            std::ifstream fileStream{ path.c_str() };
-
-            if (fileStream.is_open())
-            {
-                newJson = json::parse(fileStream);
-            }
+            return json{};
         }
 
+        std::ifstream fileStream{ path.c_str() };
+        if (!fileStream.is_open())
+        {
+            return json{};
+        }
+
+        json newJson{ json::parse(fileStream) };
+        fileStream.close();
         return newJson;
     }
 
