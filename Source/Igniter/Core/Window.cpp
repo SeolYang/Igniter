@@ -4,11 +4,6 @@
 #include <Core/InputManager.h>
 #include <Core/Log.h>
 #include <ImGUi/ImGuiCanvas.h>
-#include <Core/ComInitializer.h>
-
-#pragma comment(lib, "comctl32.lib")
-#pragma comment(lib, "propsys.lib")
-#pragma comment(lib, "shlwapi.lib")
 
 namespace ig
 {
@@ -105,59 +100,6 @@ namespace ig
             bIsCursorVisible = false;
             ::ShowCursor(FALSE);
         }
-    }
-
-    Result<fs::path, EOpenFileDialogStatus> Window::OpenFileDialog(const std::span<const DialogFilter> filters)
-    {
-        CoInitializeUnique();
-        Microsoft::WRL::ComPtr<IFileDialog> fileDialog;
-        Microsoft::WRL::ComPtr<IFileDialogEvents> fileDialogEvents;
-        Microsoft::WRL::ComPtr<IShellItem> shellItem;
-
-        // #sy_log Save 다이얼로그엔 CLSID_FileSaveDialog
-        HRESULT result = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
-        if (FAILED(result))
-        {
-            return MakeFail<fs::path, EOpenFileDialogStatus::CreateDialog>();
-        }
-
-        std::vector<COMDLG_FILTERSPEC> dialogFilters(filters.size());
-        std::transform(filters.begin(), filters.end(), dialogFilters.begin(),
-                       [](const DialogFilter& filter)
-                       {
-                           return COMDLG_FILTERSPEC{ .pszName = filter.Name.data(),
-                                                     .pszSpec = filter.FilterPattern.data() };
-                       });
-
-        result = fileDialog->SetFileTypes(static_cast<uint32_t>(dialogFilters.size()), dialogFilters.data());
-        fileDialog->SetTitle(L"A Single-Selection Dialog");
-        if (FAILED(result))
-        {
-            return MakeFail<fs::path, EOpenFileDialogStatus::SetFileTypes>();
-        }
-
-        result = fileDialog->Show(windowHandle);
-        if (FAILED(result))
-        {
-            return MakeFail<fs::path, EOpenFileDialogStatus::ShowDialog>();
-        }
-
-        result = fileDialog->GetResult(&shellItem);
-        if (FAILED(result))
-        {
-            return MakeFail<fs::path, EOpenFileDialogStatus::GetResult>();
-        }
-
-        PWSTR filePath{ nullptr };
-        result = shellItem->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
-        if (FAILED(result))
-        {
-            return MakeFail<fs::path, EOpenFileDialogStatus::GetDisplayName>();
-        }
-
-        fs::path resultPath{ filePath };
-        CoTaskMemFree(filePath);
-        return MakeSuccess<fs::path, EOpenFileDialogStatus>(resultPath);
     }
 
     LRESULT CALLBACK Window::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)

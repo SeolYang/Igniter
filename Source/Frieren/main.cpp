@@ -30,6 +30,7 @@
 #include <MainLayer.h>
 #include <FpsCameraController.h>
 #include <TestGameMode.h>
+#include <Filesystem/FileDialog.h>
 
 int main()
 {
@@ -76,8 +77,11 @@ int main()
             TextureLoader::Load,
             homuraBodyTexGuid,
             std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
-
         /******************************/
+
+        std::vector<DialogFilter> filters{ DialogFilter{ .Name = "Images"_fs, .FilterPattern = "*.png"_fs } };
+        auto test = OpenFileDialog::Show(nullptr, "Hello"_fs, filters);
+        test;
 
         /* #sy_test Input Manager Test */
         inputManager.BindAction("MoveLeft"_fs, EInput::A);

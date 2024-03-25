@@ -10,6 +10,7 @@
 #include <Core/Window.h>
 #include <Core/DeferredDeallocator.h>
 #include <Core/EmbededSettings.h>
+#include <Core/ComInitializer.h>
 #include <D3D12/RenderDevice.h>
 #include <Render/GpuUploader.h>
 #include <Render/GPUViewManager.h>
@@ -27,6 +28,7 @@ namespace ig
     Igniter* Igniter::instance = nullptr;
     Igniter::Igniter()
     {
+        CoInitializeUnique();
         const bool bIsFirstEngineCreation = instance == nullptr;
         IG_CHECK(bIsFirstEngineCreation);
         if (bIsFirstEngineCreation)

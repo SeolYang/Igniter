@@ -73,6 +73,7 @@
     <ClInclude Include="..\Source\Igniter\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\AsyncFileTracker.h" />
+    <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\GameInstance.h" />
@@ -145,6 +146,7 @@
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\AsyncFileTracker.cpp" />
+    <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp" />
