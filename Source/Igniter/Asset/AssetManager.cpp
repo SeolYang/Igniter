@@ -50,7 +50,6 @@ namespace ig
                 }
 
                 // #sy_wip Force Unload Expired Assets!
-
                 IG_LOG(AssetManagerWarn, "Asset {} expired.", assetPath.string());
             }
         }
@@ -66,8 +65,8 @@ namespace ig
         }
         
         // 성공 한 직후, 바로 Load 가능해야 하기 때문에 강제로 처리해주어야 함.
-        //IG_CHECK(guidAssetInfoTable.contains(*importedGuid));
+        Update();
+        IG_CHECK(assetMonitor->Contains(*importedGuid));
         return MakeSuccess<xg::Guid, EAssetImportResult>(*importedGuid);
     }
-
 } // namespace ig

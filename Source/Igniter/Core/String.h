@@ -26,11 +26,6 @@ namespace ig
         return result;
     }
 
-    inline bool IsValidUTF8(const std::string_view string)
-    {
-        return utf8::is_valid(string);
-    }
-
     /**
      * The String class is light-weight strictly UTF-8 Encoded String.
      * It provides light-weight string-string comparing based on 'CRC64' hash.
@@ -60,12 +55,12 @@ namespace ig
         bool IsValid() const { return hashOfString != InvalidHashVal; }
         uint64_t GetHash() const { return hashOfString; }
 
-        operator std::string() const { return AsString(); }
-        operator std::string_view() const { return AsStringView(); }
-        std::string AsString() const;
-        std::string_view AsStringView() const;
-        const char* AsCStr() const;
-        std::wstring AsWideString() const;
+        operator std::string() const { return ToStandard(); }
+        operator std::string_view() const { return ToStringView(); }
+        std::string ToStandard() const;
+        std::string_view ToStringView() const;
+        const char* ToCString() const;
+        std::wstring ToWideString() const;
 
         operator bool() const { return IsValid(); }
 
@@ -91,7 +86,7 @@ namespace ig
 
     inline String operator""_fs(const char* str, const size_t count)
     {
-        return String(std::string_view{ str, count });
+        return std::string_view{ str, count };
     }
 
     inline String operator""_fs(const wchar_t* wstr, const size_t count)

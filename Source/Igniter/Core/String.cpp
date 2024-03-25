@@ -17,7 +17,7 @@ namespace ig
 
     void String::SetString(const std::string_view stringView)
     {
-        if (!stringView.empty() && IsValidUTF8(stringView))
+        if (!stringView.empty() && utf8::is_valid(stringView))
         {
             hashOfString = EvalCRC64(stringView);
 
@@ -33,12 +33,12 @@ namespace ig
         }
     }
 
-    std::string String::AsString() const
+    std::string String::ToStandard() const
     {
-        return std::string{ AsStringView() };
+        return std::string{ ToStringView() };
     }
 
-    std::string_view String::AsStringView() const
+    std::string_view String::ToStringView() const
     {
         if (hashOfString == InvalidHashVal)
         {
@@ -46,17 +46,18 @@ namespace ig
         }
 
         ReadOnlyLock lock{ hashStringMapMutex };
+        IG_CHECK(hashStringMap.contains(hashOfString));
         return hashStringMap[hashOfString];
     }
 
-    const char* String::AsCStr() const
+    const char* String::ToCString() const
     {
-        return AsStringView().data();
+        return ToStringView().data();
     }
 
-    std::wstring String::AsWideString() const
+    std::wstring String::ToWideString() const
     {
-        return Wider(AsStringView());
+        return Wider(ToStringView());
     }
 
     String& String::operator=(const std::string& rhs)

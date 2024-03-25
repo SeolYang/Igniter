@@ -9,6 +9,6 @@ namespace ig
     void OnImGui<NameComponent>(Registry& registry, const Entity entity)
     {
         NameComponent& nameComponent = registry.get<NameComponent>(entity);
-        ImGui::Text(nameComponent.Name.AsCStr());
+        ImGui::Text(nameComponent.Name.ToCString());
     }
 } // namespace ig

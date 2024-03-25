@@ -100,7 +100,7 @@ namespace ig
     {
         if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr)
         {
-            IG_LOG(ModelImporterErr, "Load model file from \"{}\" failed: \"{}\"", resPathStr.AsStringView(), importer.GetErrorString());
+            IG_LOG(ModelImporterErr, "Load model file from \"{}\" failed: \"{}\"", resPathStr.ToStringView(), importer.GetErrorString());
             return false;
         }
 
@@ -134,7 +134,7 @@ namespace ig
     {
         const xg::Guid newGuid = xg::newGuid();
         const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, newGuid);
-        const std::string_view resPathStrView = resPathStr.AsStringView();
+        const std::string_view resPathStrView = resPathStr.ToStringView();
         const std::string assetPathStr = assetPath.string();
 
         std::vector<uint32_t> remap(indices.size());
@@ -216,11 +216,11 @@ namespace ig
         TempTimer tempTimer;
         tempTimer.Begin();
 
-        IG_LOG(ModelImporterInfo, "Importing resource {} as static mesh assets ...", resPathStr.AsStringView());
-        const fs::path resPath{ resPathStr.AsStringView() };
+        IG_LOG(ModelImporterInfo, "Importing resource {} as static mesh assets ...", resPathStr.ToStringView());
+        const fs::path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
-            IG_LOG(ModelImporterErr, "The resource does not exist at {}.", resPathStr.AsStringView());
+            IG_LOG(ModelImporterErr, "The resource does not exist at {}.", resPathStr.ToStringView());
             return {};
         }
 
@@ -252,7 +252,7 @@ namespace ig
         importFlags |= importConfig->bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
 
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(resPathStr.AsString(), importFlags);
+        const aiScene* scene = importer.ReadFile(resPathStr.ToStandard(), importFlags);
         if (!CheckAssimpSceneLoadingSucceed(resPathStr, importer, scene))
         {
             return {};
@@ -265,7 +265,7 @@ namespace ig
             {
                 const aiTexture& texture = *scene->mTextures[idx];
                 const String texResPathStr = String(texture.mFilename.C_Str());
-                const fs::path texResPath = texResPathStr.AsStringView();
+                const fs::path texResPath = texResPathStr.ToStringView();
 
                 /* #sy_wip 에셋 매니저 경유 */
                 textureImporter;
@@ -341,7 +341,7 @@ namespace ig
             IG_LOG(ModelImporterErr, "Failed to save resource metadata to {}.", resMetaPath.string());
         }
 
-        IG_LOG(ModelImporterInfo, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.AsStringView(), tempTimer.End());
+        IG_LOG(ModelImporterInfo, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.ToStringView(), tempTimer.End());
         return importedStaticMeshGuid;
     }
 
@@ -501,7 +501,7 @@ namespace ig
 
         IG_LOG(StaticMeshLoaderInfo,
                "Successfully load static mesh asset {}, which from resource {}. Elapsed: {} ms",
-               assetPath.string(), assetInfo.VirtualPath.AsStringView(), tempTimer.End());
+               assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
 
         return StaticMesh{
             .LoadConfig = loadConfig,

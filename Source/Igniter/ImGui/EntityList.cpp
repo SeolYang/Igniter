@@ -29,7 +29,7 @@ namespace ig
                             if (registry.all_of<NameComponent>(entity))
                             {
                                 auto& nameComponent = registry.get<NameComponent>(entity);
-                                formattedName = std::format("{} ({})", nameComponent.Name.AsStringView(), entt::to_integral(entity));
+                                formattedName = std::format("{} ({})", nameComponent.Name.ToStringView(), entt::to_integral(entity));
                             }
                             else
                             {

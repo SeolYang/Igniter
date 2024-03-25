@@ -188,7 +188,7 @@ namespace ig
 
                     IG_CHECK(!virtualPathGuidTable.contains(assetInfo.VirtualPath));
                     virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
-                    IG_LOG(AssetMonitorDbg, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.AsStringView(), assetInfo.Guid.str());
+                    IG_LOG(AssetMonitorDbg, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
                     IG_CHECK(!guidAssetInfoTable.contains(assetInfo.Guid));
                     guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
                 }
@@ -271,14 +271,14 @@ namespace ig
                     guidAssetInfoTable.erase(expiredGuid);
 
                     IG_LOG(AssetMonitorInfo, "Virtual path duplication found: {}. The old asset {} info has been expired.",
-                           assetInfo.VirtualPath.AsStringView(), expiredGuid.str());
+                           assetInfo.VirtualPath.ToStringView(), expiredGuid.str());
                 }
 
                 virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
                 guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
 
                 IG_LOG(AssetMonitorInfo, "{} => [Guid: {}, Virtual Path: {}, Type: {}] cached.",
-                       magic_enum::enum_name(notification.Action), assetInfo.Guid.str(), assetInfo.VirtualPath.AsStringView(), magic_enum::enum_name(assetInfo.Type));
+                       magic_enum::enum_name(notification.Action), assetInfo.Guid.str(), assetInfo.VirtualPath.ToStringView(), magic_enum::enum_name(assetInfo.Type));
             }
             else
             {
@@ -292,7 +292,7 @@ namespace ig
             const AssetInfo cachedAssetInfo = guidAssetInfoTable[guidFromPath];
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(cachedAssetInfo.Type);
             IG_LOG(AssetMonitorInfo, "{} => [Guid: {}, Virtual Path: {}, Type: {}] removed.",
-                   magic_enum::enum_name(notification.Action), cachedAssetInfo.Guid.str(), cachedAssetInfo.VirtualPath.AsStringView(), magic_enum::enum_name(cachedAssetInfo.Type));
+                   magic_enum::enum_name(notification.Action), cachedAssetInfo.Guid.str(), cachedAssetInfo.VirtualPath.ToStringView(), magic_enum::enum_name(cachedAssetInfo.Type));
 
             virtualPathGuidTable.erase(cachedAssetInfo.VirtualPath);
             guidAssetInfoTable.erase(cachedAssetInfo.Guid);

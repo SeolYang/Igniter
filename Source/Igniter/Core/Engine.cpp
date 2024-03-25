@@ -36,7 +36,6 @@ namespace ig
             instance = this;
             IG_LOG(EngineInfo, "Igniter Engine Version {}", version::Version);
             IG_LOG(EngineInfo, "Igniting Engine Runtime!");
-
             //////////////////////// L0 ////////////////////////
             frameManager = std::make_unique<FrameManager>();
             timer = std::make_unique<Timer>();
@@ -72,7 +71,6 @@ namespace ig
     Igniter::~Igniter()
     {
         IG_LOG(EngineInfo, "Extinguishing Engine Runtime.");
-
         //////////////////////// APP ///////////////////////
         gameInstance.reset();
         imguiCanvas.reset();
@@ -105,7 +103,6 @@ namespace ig
         timer.reset();
         frameManager.reset();
         ////////////////////////////////////////////////////
-
         
         if (instance == this)
         {

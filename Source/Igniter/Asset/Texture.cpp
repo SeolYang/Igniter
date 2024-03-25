@@ -213,12 +213,12 @@ namespace ig
         CoInitializeUnique();
         TempTimer tempTimer;
         tempTimer.Begin();
-        IG_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.AsStringView());
+        IG_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.ToStringView());
 
-        const fs::path resPath{ resPathStr.AsStringView() };
+        const fs::path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
-            IG_LOG(TextureImporterFatal, "The resource does not exist at {}.", resPathStr.AsStringView());
+            IG_LOG(TextureImporterFatal, "The resource does not exist at {}.", resPathStr.ToStringView());
             return std::nullopt;
         }
 
@@ -236,7 +236,7 @@ namespace ig
             IG_LOG(TextureImporterWarn,
                    "For DDS files, the provided configuration values are disregarded, "
                    "and the supplied file is used as the asset as it is. File: {}",
-                   resPathStr.AsStringView());
+                   resPathStr.ToStringView());
 
             loadRes = DirectX::LoadFromDDSFile(
                 resPath.c_str(),
@@ -259,13 +259,13 @@ namespace ig
         else
         {
             IG_LOG(TextureImporterFatal, "Found not supported texture extension from \"{}\".",
-                   resPathStr.AsStringView());
+                   resPathStr.ToStringView());
             return std::nullopt;
         }
 
         if (FAILED(loadRes))
         {
-            IG_LOG(TextureImporterFatal, "Failed to load texture from {}.", resPathStr.AsStringView());
+            IG_LOG(TextureImporterFatal, "Failed to load texture from {}.", resPathStr.ToStringView());
             return std::nullopt;
         }
 
@@ -287,7 +287,7 @@ namespace ig
                 if (FAILED(genRes))
                 {
                     IG_LOG(TextureImporterFatal, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
-                           genRes, resPathStr.AsStringView());
+                           genRes, resPathStr.ToStringView());
                     return std::nullopt;
                 }
 
@@ -304,7 +304,7 @@ namespace ig
                            "The compression method for HDR extension textures is "
                            "enforced "
                            "to be the 'BC6H' algorithm. File: {}",
-                           resPathStr.AsStringView());
+                           resPathStr.ToStringView());
 
                     importConfig.CompressionMode = ETextureCompressionMode::BC6H;
                 }
@@ -315,7 +315,7 @@ namespace ig
                            "The compression method for greyscale-formatted "
                            "textures is "
                            "enforced to be the 'BC4' algorithm. File: {}",
-                           resPathStr.AsStringView());
+                           resPathStr.ToStringView());
 
                     importConfig.CompressionMode = ETextureCompressionMode::BC4;
                 }
@@ -363,7 +363,7 @@ namespace ig
                            magic_enum::enum_name(importConfig.CompressionMode),
                            magic_enum::enum_name(texMetadata.format), magic_enum::enum_name(compFormat),
                            compRes,
-                           resPathStr.AsStringView());
+                           resPathStr.ToStringView());
 
                     return std::nullopt;
                 }
@@ -437,7 +437,7 @@ namespace ig
             return std::nullopt;
         }
 
-        IG_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.AsStringView(), assetPath.string(), tempTimer.End());
+        IG_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.ToStringView(), assetPath.string(), tempTimer.End());
         return std::make_optional(assetInfo.Guid);
     }
 
@@ -685,7 +685,7 @@ namespace ig
             return std::nullopt;
         }
 
-        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.VirtualPath.AsStringView(), tempTimer.End());
+        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
         return Texture{
             .LoadConfig = loadConfig,

@@ -14,7 +14,7 @@ namespace ig
     Window::Window(const WindowDescription& description)
         : windowDesc(description)
     {
-        windowTitle = description.Title.AsWideString();
+        windowTitle = description.Title.ToWideString();
         IG_CHECK(description.Width > 0 && description.Height > 0);
         windowClass = { sizeof(WNDCLASSEX),
                         CS_OWNDC,

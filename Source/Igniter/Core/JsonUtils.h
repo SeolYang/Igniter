@@ -35,7 +35,7 @@ namespace ig::details
     ig::details::Serialize(JsonArchive, magic_enum::enum_name<std::decay_t<decltype(Data.Var)>>(Data.Var), #DataType, #Var)
 
 #define IG_SERIALIZE_STRING_JSON(DataType, JsonArchive, Data, Var) \
-    ig::details::Serialize(JsonArchive, Data.Var.AsStringView(), #DataType, #Var)
+    ig::details::Serialize(JsonArchive, Data.Var.ToStringView(), #DataType, #Var)
 
 #define IG_DESERIALIZE_JSON(DataType, JsonArchive, Data, Var)                                                                                  \
     ig::details::DeSerialize<std::decay_t<decltype(Data.Var)>>(JsonArchive, Data.Var, #DataType, #Var,                                         \
