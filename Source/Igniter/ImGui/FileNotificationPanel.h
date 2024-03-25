@@ -14,14 +14,10 @@ namespace ig
         void Render() override;
 
     private:
-        void OnNotification(const FileNotification& newNotification);
-
-    private:
         AsyncFileTracker fileTracker{};
         EFileTrackerStatus lastTrackingStatus = EFileTrackerStatus::FileDoesNotExist;
         std::string targetDirPath;
 
-        SharedMutex mutex;
         std::vector<FileNotification> notifications;
     };
 

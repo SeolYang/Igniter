@@ -11,12 +11,6 @@ namespace ig
 
         auto eventRef = fileTracker.GetEvent();
         IG_CHECK(eventRef);
-        Event<String, FileNotification>& fileEvent = eventRef->get();
-        fileEvent.Subscribe("FileNotificationPanel"_fs,
-                            [this](const FileNotification& notification)
-                            {
-                                OnNotification(notification);
-                            });
     }
 
     void FileNotificationPanel::Render()
@@ -36,7 +30,7 @@ namespace ig
                     fileTracker.StopTracking();
                 }
 
-                lastTrackingStatus = fileTracker.StartTracking(targetDirPath, EFileTrackingMode::Event);
+                lastTrackingStatus = fileTracker.StartTracking(targetDirPath, EFileTrackingMode::Default);
             }
 
             ImGui::Text("File Tracker Status: %s", magic_enum::enum_name(lastTrackingStatus).data());
@@ -55,7 +49,6 @@ namespace ig
                 ImGui::TableSetupColumn("Path", ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableHeadersRow();
 
-                ReadOnlyLock readLock{ mutex };
                 for (const auto& notification : notifications)
                 {
                     ImGui::TableNextRow();
@@ -68,11 +61,10 @@ namespace ig
             }
             ImGui::End();
         }
-    }
 
-    void FileNotificationPanel::OnNotification(const FileNotification& newNotification)
-    {
-        ReadWriteLock rwLock{ mutex };
-        notifications.emplace_back(newNotification);
+        for (const auto& newNotification : fileTracker)
+        {
+            notifications.emplace_back(newNotification);
+        }
     }
 } // namespace ig
