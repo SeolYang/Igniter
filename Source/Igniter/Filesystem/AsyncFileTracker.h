@@ -113,7 +113,7 @@ namespace ig
                                                        const EFileTrackingMode trackingMode = EFileTrackingMode::Default,
                                                        const ETrackingFilterFlags filter = ETrackingFilterFlags::Default,
                                                        const bool bTrackingRecursively = true,
-                                                       const chrono::milliseconds requestPeriod = 33ms,
+                                                       const uint64_t completionCheckSpinCount = 2000,
                                                        const chrono::milliseconds completionCheckPeriod = 16ms);
         void StopTracking();
         std::optional<FileNotification> TryGetNotification();
@@ -121,10 +121,15 @@ namespace ig
         Iterator begin() { return Iterator{ *this }; }
         std::default_sentinel_t end() { return std::default_sentinel_t{}; }
 
-        Event<String, FileNotification>& GetEvent()
+        OptionalRef<Event<String, FileNotification>> GetEvent()
         {
-            IG_CHECK(!IsTracking() && "Modify event during tracking is not thread safe!");
-            return event;
+            if (IsTracking())
+            {
+                IG_CHECK_NO_ENTRY();
+                return std::nullopt;
+            }
+
+            return std::ref(event);
         }
 
     private:

@@ -9,7 +9,9 @@ namespace ig
         targetDirPath.reserve(MAX_PATH);
         notifications.reserve(64);
 
-        Event<String, FileNotification>& fileEvent = fileTracker.GetEvent();
+        auto eventRef = fileTracker.GetEvent();
+        IG_CHECK(eventRef);
+        Event<String, FileNotification>& fileEvent = eventRef->get();
         fileEvent.Subscribe("FileNotificationPanel"_fs,
                             [this](const FileNotification& notification)
                             {

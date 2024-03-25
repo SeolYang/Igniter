@@ -56,6 +56,7 @@
 #endif
 #include <Windows.h>
 #include <strsafe.h>
+#include <shobjidl.h>
 
 #include <AgilitySDK/d3dcommon.h>
 #pragma warning(push)

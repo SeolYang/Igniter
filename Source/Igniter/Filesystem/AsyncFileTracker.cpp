@@ -12,7 +12,7 @@ namespace ig
                                                        const EFileTrackingMode trackingMode,
                                                        const ETrackingFilterFlags filter,
                                                        const bool bTrackingRecursively,
-                                                       const chrono::milliseconds requestPeriod,
+                                                       const uint64_t completionCheckSpinCount,
                                                        const chrono::milliseconds completionCheckPeriod)
     {
         if (IsTracking())
@@ -60,7 +60,7 @@ namespace ig
         const auto notifyFilter = static_cast<DWORD>(filter);
 
         trackingThread = std::jthread(
-            [this, bTrackingRecursively, notifyFilter, requestPeriod, completionCheckPeriod](std::stop_token stopToken)
+            [this, bTrackingRecursively, notifyFilter, completionCheckSpinCount, completionCheckPeriod](std::stop_token stopToken)
             {
                 WCHAR fileNameBuffer[MAX_PATH]{ 0 };
 
@@ -72,34 +72,38 @@ namespace ig
                 {
                     IG_CHECK(directoryHandle != INVALID_HANDLE_VALUE);
                     const bool bRequestSucceeded = ReadDirectoryChangesExW(directoryHandle,
-                                                                         rawBuffer.data(), ReservedRawBufferSizeInBytes,
-                                                                         bTrackingRecursively, notifyFilter,
+                                                                           rawBuffer.data(), ReservedRawBufferSizeInBytes,
+                                                                           bTrackingRecursively, notifyFilter,
                                                                            nullptr, &overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
 
                     if (bRequestSucceeded)
                     {
-                        DWORD lastError = ERROR_IO_INCOMPLETE;
+                        uint64_t spinCount = 0;
                         DWORD transferedBytes{ 0 };
-
-                        // I/O 처리가 완료 되었는지 확인
                         while (!GetOverlappedResult(directoryHandle, &overlapped, &transferedBytes, FALSE))
                         {
-                            lastError = GetLastError();
-                            // I/O 처리가 아직 끝나지 않은 경우 'completionCheckPeriod' 만큼 대기 후 다시 시도.
-                            const bool bIsRealtime = completionCheckPeriod == 0ms;
                             bool bStopRequested = false;
-                            if (bIsRealtime)
+                            if (spinCount < completionCheckSpinCount)
                             {
+                                ++spinCount;
                                 bStopRequested = stopToken.stop_requested();
                             }
                             else
                             {
-                                bStopRequested = ioFuture.wait_for(completionCheckPeriod) != std::future_status::timeout;
+                                if (completionCheckPeriod == 0ms)
+                                {
+                                    bStopRequested = stopToken.stop_requested();
+                                }
+                                else
+                                {
+                                    bStopRequested = ioFuture.wait_for(completionCheckPeriod) != std::future_status::timeout;
+                                }
+
+                                spinCount = 0;
                             }
 
                             if (bStopRequested)
                             {
-                                IG_CHECK(lastError == ERROR_IO_INCOMPLETE);
                                 return;
                             }
                         }
@@ -144,7 +148,7 @@ namespace ig
                             newNotification.LastChangeTime = notifyInfo->LastChangeTime.QuadPart;
                             newNotification.LastAccessTime = notifyInfo->LastAccessTime.QuadPart;
                             newNotification.FileSize = notifyInfo->FileSize.QuadPart;
-                            
+
                             if (mode == EFileTrackingMode::Event)
                             {
                                 event.Notify(newNotification);
@@ -163,13 +167,6 @@ namespace ig
                                 notifyInfo = nullptr;
                             }
                         }
-                    }
-
-                    // I/O 처리가 완료 되거나, 요청 자체에 실패한 경우 'requestPeriod' 만큼 대기 후 재시도.
-                    // 대기 중 언제든지 취소 가능.
-                    if (requestPeriod != 0ms)
-                    {
-                        ioFuture.wait_for(requestPeriod);
                     }
                 }
             });

@@ -200,7 +200,10 @@ namespace ig
 
     void AssetMonitor::StartTracking()
     {
-        auto& event = tracker->GetEvent();
+        auto eventRef = tracker->GetEvent();
+        IG_CHECK(eventRef);
+
+        auto& event = eventRef->get();
         event.Subscribe("AssetMonitor"_fs,
                         [this](const FileNotification& newNotification)
                         {
@@ -208,11 +211,7 @@ namespace ig
                             buffer.emplace_back(newNotification);
                         });
 
-        const EFileTrackerStatus status = tracker->StartTracking(fs::path{ details::AssetRootPath },
-                                                                 EFileTrackingMode::Event,
-                                                                 ETrackingFilterFlags::Default, true,
-                                                                 0ms,
-                                                                 0ms); // Real-time Tracking
+        const EFileTrackerStatus status = tracker->StartTracking(fs::path{ details::AssetRootPath }, EFileTrackingMode::Event);
 
         IG_LOG(AssetMonitorInfo, "Start Asset Tracking Status: {}", magic_enum::enum_name(status));
         IG_CHECK(status == EFileTrackerStatus::Success);
