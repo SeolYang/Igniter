@@ -33,7 +33,7 @@ namespace ig
         Released,
     };
 
-    struct Action
+    struct Action final
     {
     public:
         bool IsAnyPressing() const { return State == ig::EInputState::Pressed || State == EInputState::OnPressing; }
@@ -45,7 +45,7 @@ namespace ig
         float pad = 0.f;
     };
 
-    struct Axis
+    struct Axis final
     {
     public:
         float Value = 0.0f;
@@ -55,7 +55,7 @@ namespace ig
     };
 
     class HandleManager;
-    class InputManager
+    class InputManager final
     {
         using NameSet = robin_hood::unordered_set<String>;
         using InputNameMap = robin_hood::unordered_map<EInput, NameSet>;

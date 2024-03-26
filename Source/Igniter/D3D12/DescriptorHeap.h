@@ -6,7 +6,7 @@ namespace ig
 {
     class RenderDevice;
     class GpuView;
-    class DescriptorHeap
+    class DescriptorHeap final
     {
         friend class RenderDevice;
         friend class GpuViewManager;

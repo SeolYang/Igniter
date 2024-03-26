@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    class GpuView
+    class GpuView final
     {
     public:
         bool IsValid() const { return Type != EGpuViewType::Unknown && Index != InvalidIndexU32; }

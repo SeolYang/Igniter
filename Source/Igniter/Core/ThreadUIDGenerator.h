@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    class ThreadUIDGenerator
+    class ThreadUIDGenerator final
     {
     public:
         static size_t GetUID();

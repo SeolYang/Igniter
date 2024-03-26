@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    class FrameManager
+    class FrameManager final
     {
     public:
         FrameManager() = default;

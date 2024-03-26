@@ -27,7 +27,7 @@ namespace ig
 {
     class Window;
     class DeferredDeallocator;
-    class Renderer
+    class Renderer final
     {
     public:
         Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager);

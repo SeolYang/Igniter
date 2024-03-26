@@ -4,7 +4,7 @@
 namespace ig
 {
     class EntityList;
-    class EntityInspector : public ImGuiLayer
+    class EntityInspector final : public ImGuiLayer
     {
     public:
         EntityInspector(const EntityList& entityList);

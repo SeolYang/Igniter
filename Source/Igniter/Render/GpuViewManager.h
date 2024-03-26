@@ -11,7 +11,7 @@ namespace ig
     class GpuTexture;
     class GpuView;
     class DescriptorHeap;
-    class GpuViewManager
+    class GpuViewManager final
     {
         friend class Handle<GpuView, GpuViewManager*>;
 

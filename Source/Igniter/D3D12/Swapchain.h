@@ -15,7 +15,7 @@ namespace ig
     class GpuViewManager;
     class GpuView;
     class GpuTexture;
-    class Swapchain
+    class Swapchain final
     {
     public:
         Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync = true);

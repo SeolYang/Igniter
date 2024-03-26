@@ -6,7 +6,7 @@ namespace ig
 {
     namespace details
     {
-        struct UploadRequest
+        struct UploadRequest final
         {
         public:
             void Reset()
@@ -90,7 +90,7 @@ namespace ig
 
     // Reserve Upload -> setup data & fill up copy cmd ctx -> Submit Upload -> Submit to Async Copy Queue
     class CommandQueue;
-    class GpuUploader
+    class GpuUploader final
     {
     public:
         GpuUploader(RenderDevice& renderDevice);

@@ -4,7 +4,7 @@
 namespace ig
 {
     class RenderDevice;
-    class RootSignature
+    class RootSignature final
     {
         friend class RenderDevice;
 

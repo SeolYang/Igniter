@@ -10,7 +10,7 @@ namespace ig
     class GpuView;
     class RootSignature;
     class PipelineState;
-    class CommandContext
+    class CommandContext final
     {
         friend class RenderDevice;
 

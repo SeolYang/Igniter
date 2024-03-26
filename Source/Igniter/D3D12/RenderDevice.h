@@ -15,7 +15,7 @@ namespace ig
     class ComputePipelineStateDesc;
     class PipelineState;
     class RootSignature;
-    class RenderDevice
+    class RenderDevice final
     {
     public:
         RenderDevice();

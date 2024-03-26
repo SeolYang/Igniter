@@ -8,9 +8,6 @@ namespace ig
     {
         targetDirPath.reserve(MAX_PATH);
         notifications.reserve(64);
-
-        auto eventRef = fileTracker.GetEvent();
-        IG_CHECK(eventRef);
     }
 
     void FileNotificationPanel::Render()

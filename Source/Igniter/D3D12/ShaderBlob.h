@@ -26,7 +26,7 @@ namespace ig
     };
 
     // #sy_todo 매크로 정의 지원
-    class ShaderCompileDesc
+    class ShaderCompileDesc final
     {
     public:
         String SourcePath;
@@ -38,7 +38,7 @@ namespace ig
         bool bForceEnableDebugInformation = false;                                 // -Zi
     };
 
-    class ShaderBlob
+    class ShaderBlob final
     {
     public:
         ShaderBlob(const ShaderCompileDesc& desc);

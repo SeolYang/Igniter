@@ -6,7 +6,7 @@
 namespace ig
 {
     class RenderDevice;
-    class GpuBuffer
+    class GpuBuffer final
     {
         friend class RenderDevice;
         friend class Handle<MappedGpuBuffer, GpuBuffer*>;

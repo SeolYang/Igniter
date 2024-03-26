@@ -119,7 +119,7 @@
     <ClCompile Include="..\Source\Igniter\Component\NameComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\StaticMeshComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\TransformComponent.cpp" />
-    <ClCompile Include="..\Source\Igniter\Core\CoInitializer.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\ComInitializer.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />

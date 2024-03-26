@@ -4,7 +4,7 @@
 namespace ig
 {
     class GameMode;
-    class GameInstance final
+    class GameInstance
     {
     public:
         GameInstance();

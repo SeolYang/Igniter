@@ -482,7 +482,7 @@
     <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\CoInitializer.cpp">
+    <ClCompile Include="..\Source\Igniter\Core\ComInitializer.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp">

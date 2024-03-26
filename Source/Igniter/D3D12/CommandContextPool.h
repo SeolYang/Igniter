@@ -12,7 +12,7 @@ namespace ig
 {
     class RenderDevice;
     class CommandContext;
-    class CommandContextPool
+    class CommandContextPool final
     {
     public:
         CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device, const EQueueType queueType);

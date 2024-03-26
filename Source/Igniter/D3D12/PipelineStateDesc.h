@@ -6,7 +6,7 @@ namespace ig
 {
     class ShaderBlob;
     class RootSignature;
-    class GraphicsPipelineStateDesc : public D3D12_GRAPHICS_PIPELINE_STATE_DESC
+    class GraphicsPipelineStateDesc final : public D3D12_GRAPHICS_PIPELINE_STATE_DESC
     {
     public:
         GraphicsPipelineStateDesc()

@@ -81,15 +81,18 @@ namespace ig
             factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
             ComPtr<ID3D12Debug5> debugController;
             const bool bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
-            IG_CONDITIONAL_LOG(DeviceFatal, bDebugControllerAcquired, "Failed to get debug controller.");
+            if (!bDebugControllerAcquired)
+            {
+                IG_LOG(RenderDevice, Warning, "Failed to get debug controller.");
+            }
             if (bDebugControllerAcquired)
             {
                 debugController->EnableDebugLayer();
-                IG_LOG(DeviceInfo, "D3D12 Debug Layer Enabled.");
+                IG_LOG(RenderDevice, Info, "D3D12 Debug Layer Enabled.");
     #if defined(ENABLE_GPU_VALIDATION)
                 // gpu based validation?
                 debugController->SetEnableGPUBasedValidation(true);
-                IG_LOG(DeviceInfo, "D3D12 GPU Based Validation Enabled.")''
+                IG_LOG(RenderDevice, Info, "D3D12 GPU Based Validation Enabled.")''
     #endif
             }
 #endif
@@ -157,7 +160,7 @@ namespace ig
         }
         else
         {
-            IG_LOG(DeviceWarn, "Failed to query a info queue from the device.");
+            IG_LOG(RenderDevice, Warning, "Failed to query a info queue from the device.");
         }
 #endif
     }

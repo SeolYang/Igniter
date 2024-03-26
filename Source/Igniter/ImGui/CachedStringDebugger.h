@@ -4,7 +4,7 @@
 
 namespace ig
 {
-    class CachedStringDebugger : public ImGuiLayer
+    class CachedStringDebugger final : public ImGuiLayer
     {
     public:
         CachedStringDebugger()= default;

@@ -8,7 +8,7 @@ namespace ig
 
     using GPUResourceMapGuard = std::unique_ptr<uint8_t, std::function<void(uint8_t*)>>;
 
-    struct MappedGpuBuffer
+    struct MappedGpuBuffer final
     {
         uint8_t* const MappedPtr = nullptr;
     };
@@ -70,7 +70,7 @@ namespace ig
     using GpuTextureRtvDesc = std::variant<D3D12_TEX1D_RTV, D3D12_TEX2D_RTV, D3D12_TEX2DMS_RTV, D3D12_TEX3D_RTV, D3D12_TEX1D_ARRAY_RTV, D3D12_TEX2D_ARRAY_RTV, D3D12_TEX2DMS_ARRAY_RTV>;
     using GpuTextureDsvDesc = std::variant<D3D12_TEX1D_DSV, D3D12_TEX2D_DSV, D3D12_TEX2DMS_DSV, D3D12_TEX1D_ARRAY_DSV, D3D12_TEX2D_ARRAY_DSV, D3D12_TEX2DMS_ARRAY_DSV>;
 
-    struct GpuCopyableFootprints
+    struct GpuCopyableFootprints final
     {
     public:
         size_t RequiredSize = 0;

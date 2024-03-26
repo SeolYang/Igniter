@@ -105,12 +105,15 @@ namespace ig
     }
 
 #if defined(DEBUG) || defined(_DEBUG)
-    #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...)                                         \
-        ig::Logger::GetInstance().Log<categories::LOG_CATEGORY, LOG_VERBOSITY>(MESSAGE, __VA_ARGS__); \
-        if constexpr (LOG_CATEGORY::Verbosity == ig::Fatal)                            \
-        {                                                                                             \
-            IG_CHECK_NO_ENTRY();                                                                      \
+    #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...)                                                                \
+        ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__); \
+        if constexpr (ig::ELogVerbosity::LOG_VERBOSITY == ig::ELogVerbosity::Fatal)                                                             \
+        {                                                                                                                    \
+            IG_CHECK_NO_ENTRY();                                                                                             \
         }
 #else
     #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...) ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__)
 #endif
+
+IG_DEFINE_LOG_CATEGORY(LogTemp);
+IG_DEFINE_LOG_CATEGORY(LogEnsure);

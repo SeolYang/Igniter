@@ -52,7 +52,7 @@ namespace ig
         Event
     };
 
-    struct [[nodiscard]] FileNotification
+    struct [[nodiscard]] FileNotification final
     {
     public:
         bool operator==(const FileNotification& other) { return Action == other.Action && Path == other.Path; }
@@ -67,10 +67,10 @@ namespace ig
         uint64_t FileSize{};
     };
 
-    class AsyncFileTracker
+    class AsyncFileTracker final
     {
     public:
-        struct Iterator
+        struct Iterator final
         {
         public:
             using iterator_category = std::input_iterator_tag;
@@ -116,14 +116,14 @@ namespace ig
                                                        const uint64_t completionCheckSpinCount = 2000,
                                                        const chrono::milliseconds completionCheckPeriod = 16ms);
         void StopTracking();
-        std::optional<FileNotification> TryGetNotification();
+        [[nodiscard]] std::optional<FileNotification> TryGetNotification();
 
         Iterator begin() { return Iterator{ *this }; }
         std::default_sentinel_t end() { return std::default_sentinel_t{}; }
 
-        Event<String, FileNotification>& GetEvent()
+        [[nodiscard]] Event<String, FileNotification>& GetEvent()
         {
-            IG_CHECK(IsTracking());
+            IG_CHECK(!IsTracking());
             return event;
         }
 

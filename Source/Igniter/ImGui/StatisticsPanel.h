@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    class StatisticsPanel : public ImGuiLayer
+    class StatisticsPanel final : public ImGuiLayer
     {
     public:
         StatisticsPanel() = default;

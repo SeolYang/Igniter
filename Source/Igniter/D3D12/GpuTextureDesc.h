@@ -9,7 +9,7 @@ namespace ig
     bool IsDepthStencilFormat(const DXGI_FORMAT format);
     bool IsTypelessFormat(const DXGI_FORMAT format);
 
-    class GPUTextureDesc : public D3D12_RESOURCE_DESC1
+    class GPUTextureDesc final : public D3D12_RESOURCE_DESC1
     {
     public:
         GPUTextureDesc() = default;

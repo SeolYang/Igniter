@@ -14,7 +14,7 @@ namespace ig
     class GpuViewManager;
     class CommandContext;
 
-    struct TempConstantBuffer
+    struct TempConstantBuffer final
     {
     public:
         template <typename T>
@@ -35,7 +35,7 @@ namespace ig
         RefHandle<GpuView> View = {};
     };
 
-    class TempConstantBufferAllocator
+    class TempConstantBufferAllocator final
     {
     public:
         TempConstantBufferAllocator(const FrameManager& frameManager, RenderDevice& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);

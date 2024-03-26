@@ -99,56 +99,56 @@ namespace ig::details
  *
  * 이렇게, Deserialize 과정에서 실제 값이 Json 에 없는 경우에 대한 오류 처리를 유연하게 할 수 있다.
  */
-#define IG_DESERIALIZE_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                                          \
-    ig::details::DeSerialize<std::decay_t<decltype(DATA.VAR)>>(                                                  \
-        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                                  \
-        [](const nlohmann::json& archive, std::decay_t<decltype(DATA.VAR)>& var) {                               \
-            IG_CHECK(archive.contains(#DATA_TYPE) && IG_CHECK(archive[#DATA_TYPE].contains(#VAR)));                \
-            using JsonDATA_TYPE_t = ig::details::JsonInternal_t<std::decay_t<decltype(var)>>;                     \
+#define IG_DESERIALIZE_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                                           \
+    ig::details::DeSerialize<std::decay_t<decltype(DATA.VAR)>>(                                                     \
+        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                                   \
+        [](const nlohmann::json& archive, std::decay_t<decltype(DATA.VAR)>& var) {                                  \
+            IG_CHECK(archive.contains(#DATA_TYPE) && archive[#DATA_TYPE].contains(#VAR));                           \
+            using JsonDATA_TYPE_t = ig::details::JsonInternal_t<std::decay_t<decltype(var)>>;                       \
             const JsonDATA_TYPE_t* valuePtr = archive[#DATA_TYPE][#VAR].template get_ptr<const JsonDATA_TYPE_t*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                      \
-            if (bTypeMismatch)                                                                                   \
-            {                                                                                                    \
-                return false;                                                                                    \
-            }                                                                                                    \
-            var = static_cast<std::decay_t<decltype(DATA.VAR)>>(*valuePtr);                                      \
-            return true;                                                                                         \
-        },                                                                                                       \
+            const bool bTypeMismatch = valuePtr == nullptr;                                                         \
+            if (bTypeMismatch)                                                                                      \
+            {                                                                                                       \
+                return false;                                                                                       \
+            }                                                                                                       \
+            var = static_cast<std::decay_t<decltype(DATA.VAR)>>(*valuePtr);                                         \
+            return true;                                                                                            \
+        },                                                                                                          \
         FALLBACK)
 
-#define IG_DESERIALIZE_GUID_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                               \
-    ig::details::DeSerialize<xg::Guid>(                                                                    \
-        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                            \
-        [](const nlohmann::json& archive, xg::Guid& var) {                                                 \
-            IG_CHECK(archive.contains(#DATA_TYPE) && IG_CHECK(archive[#DATA_TYPE].contains(#VAR)));          \
+#define IG_DESERIALIZE_GUID_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                              \
+    ig::details::DeSerialize<xg::Guid>(                                                                     \
+        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                           \
+        [](const nlohmann::json& archive, xg::Guid& var) {                                                  \
+            IG_CHECK(archive.contains(#DATA_TYPE) && archive[#DATA_TYPE].contains(#VAR));                           \
             const std::string* valuePtr = archive[#DATA_TYPE][#VAR].template get_ptr<const std::string*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                \
-            if (bTypeMismatch)                                                                             \
-            {                                                                                              \
-                return false;                                                                              \
-            }                                                                                              \
-            var = xg::Guid(valuePtr->c_str());                                                             \
-            return true;                                                                                   \
-        },                                                                                                 \
+            const bool bTypeMismatch = valuePtr == nullptr;                                                 \
+            if (bTypeMismatch)                                                                              \
+            {                                                                                               \
+                return false;                                                                               \
+            }                                                                                               \
+            var = xg::Guid(valuePtr->c_str());                                                              \
+            return true;                                                                                    \
+        },                                                                                                  \
         FALLBACK)
 
-#define IG_DESERIALIZE_ENUM_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                               \
-    ig::details::DeSerialize<std::decay_t<decltype(DATA.VAR)>>(                                            \
-        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                            \
-        [](const nlohmann::json& archive, std::decay_t<decltype(DATA.VAR)>& var) {                         \
-            IG_CHECK(archive.contains(#DATA_TYPE) && IG_CHECK(archive[#DATA_TYPE].contains(#VAR)));          \
+#define IG_DESERIALIZE_ENUM_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                              \
+    ig::details::DeSerialize<std::decay_t<decltype(DATA.VAR)>>(                                             \
+        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                           \
+        [](const nlohmann::json& archive, std::decay_t<decltype(DATA.VAR)>& var) {                          \
+            IG_CHECK(archive.contains(#DATA_TYPE) && archive[#DATA_TYPE].contains(#VAR));                           \
             const std::string* valuePtr = archive[#DATA_TYPE][#VAR].template get_ptr<const std::string*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                \
-            if (bTypeMismatch)                                                                             \
-            {                                                                                              \
-                return false;                                                                              \
-            }                                                                                              \
-            auto valueOpt = magic_enum::enum_cast<std::decay_t<decltype(DATA.VAR)>>(*valuePtr);            \
-            if (!valueOpt)                                                                                 \
-            {                                                                                              \
-                return false;                                                                              \
-            }                                                                                              \
-            var = *valueOpt;                                                                               \
-            return true;                                                                                   \
-        },                                                                                                 \
+            const bool bTypeMismatch = valuePtr == nullptr;                                                 \
+            if (bTypeMismatch)                                                                              \
+            {                                                                                               \
+                return false;                                                                               \
+            }                                                                                               \
+            auto valueOpt = magic_enum::enum_cast<std::decay_t<decltype(DATA.VAR)>>(*valuePtr);             \
+            if (!valueOpt)                                                                                  \
+            {                                                                                               \
+                return false;                                                                               \
+            }                                                                                               \
+            var = *valueOpt;                                                                                \
+            return true;                                                                                    \
+        },                                                                                                  \
         FALLBACK)

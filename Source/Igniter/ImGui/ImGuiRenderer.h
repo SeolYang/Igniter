@@ -14,7 +14,7 @@ namespace ig
     class Window;
     class Renderer;
     class ImGuiCanvas;
-    class ImGuiRenderer
+    class ImGuiRenderer final
     {
     public:
         ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, RenderDevice& device);

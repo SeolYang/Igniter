@@ -18,14 +18,14 @@ namespace ig
     {
     }
 
-    class ComponentRegistry
+    class ComponentRegistry final
     {
     public:
         using ComponentEvent = std::function<void(Registry&, const Entity)>;
         using SerializeCallback = std::function<void(Registry&, const Entity, json&)>;
         using DeserializeCallback = std::function<void(Registry&, const Entity, const json&)>;
 
-        struct ComponentInfo
+        struct ComponentInfo final
         {
             std::string_view Name;
             ComponentEvent OnImGui{};

@@ -9,7 +9,7 @@ namespace ig
         class HandleImpl;
     }
 
-    class HandleManager
+    class HandleManager final
     {
         friend class details::HandleImpl;
 

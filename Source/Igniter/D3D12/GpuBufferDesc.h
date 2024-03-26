@@ -50,7 +50,7 @@ namespace ig
         return type == EGpuBufferType::ReadbackBuffer;
     }
 
-    class GpuBufferDesc : public D3D12_RESOURCE_DESC1
+    class GpuBufferDesc final : public D3D12_RESOURCE_DESC1
     {
     public:
         void AsConstantBuffer(const uint32_t sizeOfBufferInBytes);

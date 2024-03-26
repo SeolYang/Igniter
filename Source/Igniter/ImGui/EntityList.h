@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    class EntityList : public ImGuiLayer
+    class EntityList final : public ImGuiLayer
     {
     public:
         EntityList() = default;

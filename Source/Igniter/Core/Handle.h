@@ -14,7 +14,7 @@ namespace ig
     class HandleManager;
     namespace details
     {
-        class HandleImpl
+        class HandleImpl final
         {
             template <typename T, typename Finalizer>
             friend class RefHandle;
@@ -59,7 +59,7 @@ namespace ig
     } // namespace details
 
     template <typename T>
-    class DefaultFinalizer
+    class DefaultFinalizer final
     {
     public:
         void operator()(const T*)
@@ -73,7 +73,7 @@ namespace ig
     using FuncPtrFinalizer = void (*)(const T*);
 
     template <typename T, typename Finalizer = DefaultFinalizer<T>>
-    class RefHandle
+    class RefHandle final
     {
     public:
         RefHandle() = default;
@@ -175,7 +175,7 @@ namespace ig
     };
 
     template <typename T>
-    class DefaultDestroyer
+    class DefaultDestroyer final
     {
     public:
         void operator()(details::HandleImpl handle, const uint64_t typeHashVal, T* instance) const
@@ -193,7 +193,7 @@ namespace ig
     };
 
     template <typename T>
-    class DeferredDestroyer
+    class DeferredDestroyer final
     {
     public:
         void operator()(details::HandleImpl handle, const uint64_t typeHashVal, T* instance) const
@@ -221,7 +221,7 @@ namespace ig
     using FuncPtrDestroyer = void (*)(details::HandleImpl, const uint64_t, T*);
 
     template <typename T, typename Destroyer = DefaultDestroyer<T>>
-    class Handle
+    class Handle final
     {
     public:
         Handle()
@@ -396,14 +396,14 @@ namespace ig
 namespace std
 {
     template <typename T, typename Dx>
-    class hash<ig::Handle<T, Dx>>
+    class hash<ig::Handle<T, Dx>> final
     {
     public:
         size_t operator()(const ig::Handle<T, Dx>& handle) const { return handle.GetHash(); }
     };
 
     template <typename T>
-    class hash<ig::RefHandle<T>>
+    class hash<ig::RefHandle<T>> final
     {
     public:
         size_t operator()(const ig::RefHandle<T>& handle) const { return handle.GetHash(); }
