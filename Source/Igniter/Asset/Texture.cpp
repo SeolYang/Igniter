@@ -18,14 +18,8 @@
 
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(TextureImporterInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(TextureImporterWarn, ELogVerbosity::Warning)
-    IG_DEFINE_LOG_CATEGORY(TextureImporterErr, ELogVerbosity::Error)
-    IG_DEFINE_LOG_CATEGORY(TextureImporterFatal, ELogVerbosity::Fatal)
-    IG_DEFINE_LOG_CATEGORY(TextureLoaderInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(TextureLoaderWarn, ELogVerbosity::Warning)
-    IG_DEFINE_LOG_CATEGORY(TextureLoaderErr, ELogVerbosity::Error)
-    IG_DEFINE_LOG_CATEGORY(TextureLoaderFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(TextureImporter);
+    IG_DEFINE_LOG_CATEGORY(TextureLoader);
 
     json& TextureImportConfig::Serialize(json& archive) const
     {
@@ -196,7 +190,7 @@ namespace ig
 
         if (FAILED(res))
         {
-            IG_LOG(TextureImporterWarn, "Failed create d3d11 device. HRESULT: {:#X}", res);
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed create d3d11 device. HRESULT: {:#X}", res);
         }
     }
 
@@ -215,12 +209,12 @@ namespace ig
         CoInitializeUnique();
         TempTimer tempTimer;
         tempTimer.Begin();
-        IG_LOG(TextureImporterInfo, "Importing resource {} as texture asset...", resPathStr.ToStringView());
+        IG_LOG(TextureImporter, ELogVerbosity::Info, "Importing resource {} as texture asset...", resPathStr.ToStringView());
 
         const fs::path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
-            IG_LOG(TextureImporterFatal, "The resource does not exist at {}.", resPathStr.ToStringView());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "The resource does not exist at {}.", resPathStr.ToStringView());
             return std::nullopt;
         }
 
@@ -235,7 +229,7 @@ namespace ig
         {
             // 만약 DDS 타입이면, 바로 가공 없이 에셋으로 사용한다. 이 경우,
             // 제공된 config 은 무시된다.; 애초에 DDS로 미리 가공했는데 다시 압축을 풀고, 밉맵을 생성하고 할 필요가 없음.
-            IG_LOG(TextureImporterWarn,
+            IG_LOG(TextureImporter, ELogVerbosity::Warning,
                    "For DDS files, the provided configuration values are disregarded, "
                    "and the supplied file is used as the asset as it is. File: {}",
                    resPathStr.ToStringView());
@@ -260,14 +254,14 @@ namespace ig
         }
         else
         {
-            IG_LOG(TextureImporterFatal, "Found not supported texture extension from \"{}\".",
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Found not supported texture extension from \"{}\".",
                    resPathStr.ToStringView());
             return std::nullopt;
         }
 
         if (FAILED(loadRes))
         {
-            IG_LOG(TextureImporterFatal, "Failed to load texture from {}.", resPathStr.ToStringView());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to load texture from {}.", resPathStr.ToStringView());
             return std::nullopt;
         }
 
@@ -288,7 +282,7 @@ namespace ig
                     bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR, 0, mipChain);
                 if (FAILED(genRes))
                 {
-                    IG_LOG(TextureImporterFatal, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
+                    IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
                            genRes, resPathStr.ToStringView());
                     return std::nullopt;
                 }
@@ -302,7 +296,7 @@ namespace ig
             {
                 if (bIsHDRFormat && importConfig.CompressionMode != ETextureCompressionMode::BC6H)
                 {
-                    IG_LOG(TextureImporterWarn,
+                    IG_LOG(TextureImporter, ELogVerbosity::Warning,
                            "The compression method for HDR extension textures is "
                            "enforced "
                            "to be the 'BC6H' algorithm. File: {}",
@@ -313,7 +307,7 @@ namespace ig
                 else if (IsGreyScaleFormat(texMetadata.format) &&
                          importConfig.CompressionMode == ETextureCompressionMode::BC4)
                 {
-                    IG_LOG(TextureImporterWarn,
+                    IG_LOG(TextureImporter, ELogVerbosity::Warning,
                            "The compression method for greyscale-formatted "
                            "textures is "
                            "enforced to be the 'BC4' algorithm. File: {}",
@@ -356,10 +350,10 @@ namespace ig
                 {
                     if (bIsGPUCodecAvailable)
                     {
-                        IG_LOG(TextureImporterErr, "Failed to compress with GPU Codec.");
+                        IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to compress with GPU Codec.");
                     }
 
-                    IG_LOG(TextureImporterFatal,
+                    IG_LOG(TextureImporter, ELogVerbosity::Error,
                            "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
                            "File: {}",
                            magic_enum::enum_name(importConfig.CompressionMode),
@@ -383,7 +377,7 @@ namespace ig
         const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
         if (SaveJsonToFile(resMetadataPath, resMetadata))
         {
-            IG_LOG(TextureImporterWarn, "Failed to create resource metadata {}.", resMetadataPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Warning, "Failed to create resource metadata {}.", resMetadataPath.string());
         }
 
         /* Configure Texture Asset Metadata */
@@ -417,7 +411,7 @@ namespace ig
         const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, assetInfo.Guid);
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
-            IG_LOG(TextureImporterFatal, "Failed to open asset metadata file {}.", assetMetadataPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to open asset metadata file {}.", assetMetadataPath.string());
             return std::nullopt;
         }
 
@@ -425,7 +419,7 @@ namespace ig
         const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.Guid);
         if (fs::exists(assetPath))
         {
-            IG_LOG(TextureImporterWarn, "The Asset file {} alread exist.", assetPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Warning, "The Asset file {} alread exist.", assetPath.string());
         }
 
         const HRESULT res = DirectX::SaveToDDSFile(
@@ -435,31 +429,31 @@ namespace ig
 
         if (FAILED(res))
         {
-            IG_LOG(TextureImporterFatal, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
             return std::nullopt;
         }
 
-        IG_LOG(TextureImporterInfo, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.ToStringView(), assetPath.string(), tempTimer.End());
+        IG_LOG(TextureImporter, ELogVerbosity::Info, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.ToStringView(), assetPath.string(), tempTimer.End());
         return std::make_optional(assetInfo.Guid);
     }
 
     std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
     {
-        IG_LOG(TextureLoaderInfo, "Load texture asset {}.", guid.str());
+        IG_LOG(TextureImporter, ELogVerbosity::Info, "Load texture asset {}.", guid.str());
         TempTimer tempTimer;
         tempTimer.Begin();
 
         const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::Texture, guid);
         if (!fs::exists(assetMetaPath))
         {
-            IG_LOG(TextureLoaderFatal, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Texture Asset Metadata \"{}\" does not exists.", assetMetaPath.string());
             return std::nullopt;
         }
 
         const json assetMetadata{ LoadJsonFromFile(assetMetaPath) };
         if (assetMetadata.empty())
         {
-            IG_LOG(TextureLoaderFatal, "Failed to load asset metadata from {}.", assetMetaPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to load asset metadata from {}.", assetMetaPath.string());
             return std::nullopt;
         }
 
@@ -470,14 +464,14 @@ namespace ig
         /* Check Asset Metadata */
         if (assetInfo.Guid != guid)
         {
-            IG_LOG(TextureLoaderFatal, "Asset guid does not match. Expected: {}, Found: {}",
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Asset guid does not match. Expected: {}, Found: {}",
                    guid.str(), assetInfo.Guid.str());
             return std::nullopt;
         }
 
         if (assetInfo.Type != EAssetType::Texture)
         {
-            IG_LOG(TextureLoaderFatal, "Asset type does not match. Expected: {}, Found: {}",
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Asset type does not match. Expected: {}, Found: {}",
                    magic_enum::enum_name(EAssetType::Texture),
                    magic_enum::enum_name(assetInfo.Type));
             return std::nullopt;
@@ -486,14 +480,14 @@ namespace ig
         /* Check TextureLoadConfig data */
         if (loadConfig.Width == 0 || loadConfig.Height == 0 || loadConfig.DepthOrArrayLength == 0 || loadConfig.Mips == 0)
         {
-            IG_LOG(TextureLoaderFatal, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
                    loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength, loadConfig.Mips);
             return std::nullopt;
         }
 
         if (loadConfig.Format == DXGI_FORMAT_UNKNOWN)
         {
-            IG_LOG(TextureLoaderFatal, "Load Config format is unknown.");
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Load Config format is unknown.");
             return std::nullopt;
         }
 
@@ -501,7 +495,7 @@ namespace ig
         const fs::path assetPath = MakeAssetPath(EAssetType::Texture, guid);
         if (!fs::exists(assetPath))
         {
-            IG_LOG(TextureLoaderFatal, "Texture Asset \"{}\" does not exist.", assetPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Texture Asset \"{}\" does not exist.", assetPath.string());
             return std::nullopt;
         }
 
@@ -510,7 +504,7 @@ namespace ig
         HRESULT res = DirectX::LoadFromDDSFile(assetPath.c_str(), DirectX::DDS_FLAGS_NONE, &ddsMeta, scratchImage);
         if (FAILED(res))
         {
-            IG_LOG(TextureLoaderFatal, "Failed to load texture asset(dds) from {}.", assetPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to load texture asset(dds) from {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -519,31 +513,31 @@ namespace ig
             loadConfig.Height != ddsMeta.height ||
             (loadConfig.DepthOrArrayLength != ddsMeta.depth && loadConfig.DepthOrArrayLength != ddsMeta.arraySize))
         {
-            IG_LOG(TextureLoaderFatal, "DDS Metadata does not match with texture asset metadata.");
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "DDS Metadata does not match with texture asset metadata.");
             return std::nullopt;
         }
 
         if (loadConfig.bIsCubemap != loadConfig.bIsCubemap)
         {
-            IG_LOG(TextureLoaderFatal, "Texture asset cubemap flag does not match");
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Texture asset cubemap flag does not match");
             return std::nullopt;
         }
 
         if (loadConfig.bIsCubemap && (loadConfig.DepthOrArrayLength % 6 == 0))
         {
-            IG_LOG(TextureLoaderFatal, "Cubemap array length suppose to be multiple of \'6\'.");
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Cubemap array length suppose to be multiple of \'6\'.");
             return std::nullopt;
         }
 
         if (loadConfig.Dimension != AsTexDimension(ddsMeta.dimension))
         {
-            IG_LOG(TextureLoaderFatal, "Texture Asset Dimension does not match with DDS Dimension.");
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Texture Asset Dimension does not match with DDS Dimension.");
             return std::nullopt;
         }
 
         if (loadConfig.Format != ddsMeta.format)
         {
-            IG_LOG(TextureLoaderFatal, "Texture Asset Format does not match with DDS Format.");
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Texture Asset Format does not match with DDS Format.");
             return std::nullopt;
         }
 
@@ -601,7 +595,7 @@ namespace ig
         std::optional<GpuTexture> newTex = renderDevice.CreateTexture(texDesc);
         if (!newTex)
         {
-            IG_LOG(TextureLoaderFatal, "Failed to create GpuTexture from render device, which for texture asset {}.", assetPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to create GpuTexture from render device, which for texture asset {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -664,7 +658,7 @@ namespace ig
 
         if (!srv)
         {
-            IG_LOG(TextureLoaderFatal, "Failed to create shader resource view for {}.", assetPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to create shader resource view for {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -683,11 +677,11 @@ namespace ig
 
         if (!samplerView)
         {
-            IG_LOG(TextureLoaderFatal, "Failed to create sampler view for {}.", assetPath.string());
+            IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to create sampler view for {}.", assetPath.string());
             return std::nullopt;
         }
 
-        IG_LOG(TextureLoaderInfo, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
+        IG_LOG(TextureImporter, ELogVerbosity::Info, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
         return Texture{
             .LoadConfig = loadConfig,

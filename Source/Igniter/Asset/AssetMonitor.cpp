@@ -8,11 +8,7 @@
 
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(AssetMonitorInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(AssetMonitorWarn, ELogVerbosity::Warning)
-    IG_DEFINE_LOG_CATEGORY(AssetMonitorErr, ELogVerbosity::Error)
-    IG_DEFINE_LOG_CATEGORY(AssetMonitorDbg, ELogVerbosity::Debug)
-    IG_DEFINE_LOG_CATEGORY(AssetMonitorFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(AssetMonitor);
 
     AssetMonitor::AssetMonitor() : tracker(std::make_unique<AsyncFileTracker>())
     {
@@ -144,7 +140,7 @@ namespace ig
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
             fs::directory_iterator directoryItr{ GetAssetDirectoryPath(assetType) };
 
-            IG_LOG(AssetMonitorDbg, "Root Dir: {}", GetAssetDirectoryPath(assetType).string());
+            IG_LOG(AssetMonitor, ELogVerbosity::Debug, "Root Dir: {}", GetAssetDirectoryPath(assetType).string());
             while (directoryItr != fs::end(directoryItr))
             {
                 const fs::directory_entry& entry = *directoryItr;
@@ -154,7 +150,7 @@ namespace ig
                     const xg::Guid guidFromPath{ entry.path().filename().string() };
                     if (!guidFromPath.isValid())
                     {
-                        IG_LOG(AssetMonitorWarn, "Asset {} ignored. {} is not valid guid.", entry.path().string(), entry.path().filename().string());
+                        IG_LOG(AssetMonitor, ELogVerbosity::Warning, "Asset {} ignored. {} is not valid guid.", entry.path().string(), entry.path().filename().string());
                         ++directoryItr;
                         continue;
                     }
@@ -163,7 +159,7 @@ namespace ig
                     metadataPath.replace_extension(details::MetadataExt);
                     if (!fs::exists(metadataPath))
                     {
-                        IG_LOG(AssetMonitorWarn, "Asset {} ignored. The metadata does not exists.", entry.path().string());
+                        IG_LOG(AssetMonitor, ELogVerbosity::Warning, "Asset {} ignored. The metadata does not exists.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
@@ -174,21 +170,21 @@ namespace ig
 
                     if (!assetInfo.IsValid())
                     {
-                        IG_LOG(AssetMonitorWarn, "Asset {} ignored. The asset info is invalid.", entry.path().string());
+                        IG_LOG(AssetMonitor, ELogVerbosity::Warning, "Asset {} ignored. The asset info is invalid.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
                     if (guidFromPath != assetInfo.Guid)
                     {
-                        IG_LOG(AssetMonitorWarn, "Asset {} ignored. The guid from filename does not match asset info guid.", entry.path().string());
+                        IG_LOG(AssetMonitor, ELogVerbosity::Warning, "Asset {} ignored. The guid from filename does not match asset info guid.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
                     IG_CHECK(!virtualPathGuidTable.contains(assetInfo.VirtualPath));
                     virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
-                    IG_LOG(AssetMonitorDbg, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
+                    IG_LOG(AssetMonitor, ELogVerbosity::Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
                     IG_CHECK(!guidAssetInfoTable.contains(assetInfo.Guid));
                     guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
                 }
@@ -213,7 +209,7 @@ namespace ig
 
         const EFileTrackerStatus status = tracker->StartTracking(fs::path{ details::AssetRootPath }, EFileTrackingMode::Event);
 
-        IG_LOG(AssetMonitorInfo, "Start Asset Tracking Status: {}", magic_enum::enum_name(status));
+        IG_LOG(AssetMonitor, ELogVerbosity::Info, "Start Asset Tracking Status: {}", magic_enum::enum_name(status));
         IG_CHECK(status == EFileTrackerStatus::Success);
     }
 
@@ -228,7 +224,7 @@ namespace ig
         const xg::Guid guidFromPath{ ConvertMetadataPathToGuid(notification.Path) };
         if (!guidFromPath.isValid())
         {
-            IG_LOG(AssetMonitorErr, "Found invalid guid from {}.", notification.Path.string());
+            IG_LOG(AssetMonitor, ELogVerbosity::Error, "Found invalid guid from {}.", notification.Path.string());
             return;
         }
 
@@ -251,13 +247,13 @@ namespace ig
             if (!assetInfo.IsValid())
             {
                 bErrorOccurs = true;
-                IG_LOG(AssetMonitorErr, "Asset info {} is invalid.", notification.Path.string());
+                IG_LOG(AssetMonitor, ELogVerbosity::Error, "Asset info {} is invalid.", notification.Path.string());
             }
 
             if (guidFromPath != assetInfo.Guid)
             {
                 bErrorOccurs = true;
-                IG_LOG(AssetMonitorErr, "Guid from path {} != Asset Info Guid {}.", guidFromPath.str(), assetInfo.Guid.str());
+                IG_LOG(AssetMonitor, ELogVerbosity::Error, "Guid from path {} != Asset Info Guid {}.", guidFromPath.str(), assetInfo.Guid.str());
             }
 
             if (!bErrorOccurs)
@@ -269,19 +265,19 @@ namespace ig
                     expiredAssetInfos.emplace_back(guidAssetInfoTable[expiredGuid]);
                     guidAssetInfoTable.erase(expiredGuid);
 
-                    IG_LOG(AssetMonitorInfo, "Virtual path duplication found: {}. The old asset {} info has been expired.",
+                    IG_LOG(AssetMonitor, ELogVerbosity::Info, "Virtual path duplication found: {}. The old asset {} info has been expired.",
                            assetInfo.VirtualPath.ToStringView(), expiredGuid.str());
                 }
 
                 virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
                 guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
 
-                IG_LOG(AssetMonitorInfo, "{} => [Guid: {}, Virtual Path: {}, Type: {}] cached.",
+                IG_LOG(AssetMonitor, ELogVerbosity::Info, "{} => [Guid: {}, Virtual Path: {}, Type: {}] cached.",
                        magic_enum::enum_name(notification.Action), assetInfo.Guid.str(), assetInfo.VirtualPath.ToStringView(), magic_enum::enum_name(assetInfo.Type));
             }
             else
             {
-                IG_LOG(AssetMonitorErr, "Error Occurs({})", magic_enum::enum_name(notification.Action));
+                IG_LOG(AssetMonitor, ELogVerbosity::Error, "Error Occurs({})", magic_enum::enum_name(notification.Action));
                 bRemoveRequired = true;
             }
         }
@@ -290,7 +286,7 @@ namespace ig
         {
             const AssetInfo cachedAssetInfo = guidAssetInfoTable[guidFromPath];
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(cachedAssetInfo.Type);
-            IG_LOG(AssetMonitorInfo, "{} => [Guid: {}, Virtual Path: {}, Type: {}] removed.",
+            IG_LOG(AssetMonitor, ELogVerbosity::Error, "{} => [Guid: {}, Virtual Path: {}, Type: {}] removed.",
                    magic_enum::enum_name(notification.Action), cachedAssetInfo.Guid.str(), cachedAssetInfo.VirtualPath.ToStringView(), magic_enum::enum_name(cachedAssetInfo.Type));
 
             virtualPathGuidTable.erase(cachedAssetInfo.VirtualPath);

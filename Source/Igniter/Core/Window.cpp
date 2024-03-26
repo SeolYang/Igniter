@@ -7,9 +7,7 @@
 
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(WindowInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(WindowDebug, ELogVerbosity::Debug)
-    IG_DEFINE_LOG_CATEGORY(WindowError, ELogVerbosity::Error)
+    IG_DEFINE_LOG_CATEGORY(Window);
 
     Window::Window(const WindowDescription& description)
         : windowDesc(description)
@@ -79,7 +77,7 @@ namespace ig
         clientRect.bottom = rightBottom.y;
         if (::ClipCursor(&clientRect) == FALSE)
         {
-            IG_LOG(WindowError, "Failed to clip cursor to main window.");
+            IG_LOG(Window, ELogVerbosity::Error, "Failed to clip cursor to main window.");
         }
     }
 

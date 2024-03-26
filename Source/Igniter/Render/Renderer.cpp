@@ -43,9 +43,7 @@ namespace ig
         Matrix LocalToWorld{};
     };
 
-    IG_DEFINE_LOG_CATEGORY(RendererInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(RendererWarn, ELogVerbosity::Warning)
-    IG_DEFINE_LOG_CATEGORY(RendererFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(Renderer);
 
     Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager)
         : frameManager(engineFrameManager),

@@ -6,7 +6,7 @@ namespace ig
 {
     enum class ELogVerbosity
     {
-        Temp,
+        Trace,
         Info,
         Debug,
         Warning,
@@ -25,27 +25,27 @@ namespace ig
         Logger& operator=(const Logger&) = delete;
         Logger& operator=(Logger&&) noexcept = delete;
 
-        template <typename C, typename... Args>
+        template <typename Category, ELogVerbosity Verbosity, typename... Args>
         void Log(const std::string_view logMessage, Args&&... args)
         {
-            spdlog::logger* logger = QueryCategory<C>();
+            spdlog::logger* logger = QueryCategory<Category>();
             if (logger == nullptr)
             {
                 ReadWriteLock lock{ mutex };
-                logger = new spdlog::logger(C::CategoryName.data(), { consoleSink, fileSink });
+                logger = new spdlog::logger(Category::CategoryName.data(), { consoleSink, fileSink });
                 logger->set_level(spdlog::level::trace);
-                categoryMap[HashOfType<C>] = logger;
+                categoryMap[HashOfType<Category>] = logger;
             }
 
             const std::string formattedMessage =
                 std::vformat(logMessage, std::make_format_args(std::forward<Args>(args)...));
 
-            switch (C::Verbosity)
+            switch (Verbosity)
             {
                 case ELogVerbosity::Info:
                     logger->info(formattedMessage);
                     break;
-                case ELogVerbosity::Temp:
+                case ELogVerbosity::Trace:
                     logger->trace(formattedMessage);
                     break;
 
@@ -94,38 +94,22 @@ namespace ig
     };
 } // namespace ig
 
-#define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME, VERBOSITY_LEVEL)           \
-    struct LOG_CATEGORY_NAME                                                 \
-    {                                                                        \
-        static constexpr ig::ELogVerbosity Verbosity = VERBOSITY_LEVEL;      \
-        static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
-    };
+#define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)                                \
+    namespace categories                                                         \
+    {                                                                            \
+        struct LOG_CATEGORY_NAME                                                 \
+        {                                                                        \
+            static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
+        };                                                                       \
+    }
 
 #if defined(DEBUG) || defined(_DEBUG)
-    #define IG_LOG(LOG_CATEGORY, ...)                                                                                             \
-        ig::Logger::GetInstance().Log<LOG_CATEGORY>(__VA_ARGS__);                                                                 \
-        if constexpr (LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Fatal) \
-        {                                                                                                                         \
-            IG_CHECK_NO_ENTRY();                                                                                                  \
+    #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...)                                         \
+        ig::Logger::GetInstance().Log<categories::LOG_CATEGORY, LOG_VERBOSITY>(MESSAGE, __VA_ARGS__); \
+        if constexpr (LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Fatal)                            \
+        {                                                                                             \
+            IG_CHECK_NO_ENTRY();                                                                      \
         }
 #else
-    #define IG_LOG(LOG_CATEGORY, MESSAGE, ...) ig::Logger::GetInstance().Log<LOG_CATEGORY>(MESSAGE, __VA_ARGS__)
+    #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...) ig::Logger::GetInstance().Log<categories::LOG_CATEGORY, LOG_VERBOSITY>(MESSAGE, __VA_ARGS__)
 #endif
-
-#define IG_CONDITIONAL_LOG(LOG_CATEGORY, CONDITION, ...) \
-    do                                                   \
-        if (!(CONDITION))                                \
-        {                                                \
-            IG_LOG(LOG_CATEGORY, __VA_ARGS__);           \
-        }                                                \
-    while (false)
-
-namespace ig
-{
-    IG_DEFINE_LOG_CATEGORY(LogTemp, ELogVerbosity::Temp)
-    IG_DEFINE_LOG_CATEGORY(LogInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(LogDebug, ELogVerbosity::Debug)
-    IG_DEFINE_LOG_CATEGORY(LogWarn, ELogVerbosity::Warning)
-    IG_DEFINE_LOG_CATEGORY(LogError, ELogVerbosity::Error)
-    IG_DEFINE_LOG_CATEGORY(LogFatal, ELogVerbosity::Fatal)
-} // namespace ig

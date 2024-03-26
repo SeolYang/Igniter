@@ -22,8 +22,7 @@
 
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(EngineInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(EngineFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(Engine);
 
     Igniter* Igniter::instance = nullptr;
     Igniter::Igniter()
@@ -34,8 +33,8 @@ namespace ig
         if (bIsFirstEngineCreation)
         {
             instance = this;
-            IG_LOG(EngineInfo, "Igniter Engine Version {}", version::Version);
-            IG_LOG(EngineInfo, "Igniting Engine Runtime!");
+            IG_LOG(Engine, ELogVerbosity::Info, "Igniter Engine Version {}", version::Version);
+            IG_LOG(Engine, ELogVerbosity::Info, "Igniting Engine Runtime!");
             //////////////////////// L0 ////////////////////////
             frameManager = std::make_unique<FrameManager>();
             timer = std::make_unique<Timer>();
@@ -70,7 +69,7 @@ namespace ig
 
     Igniter::~Igniter()
     {
-        IG_LOG(EngineInfo, "Extinguishing Engine Runtime.");
+        IG_LOG(Engine, ELogVerbosity::Info, "Extinguishing Engine Runtime.");
         //////////////////////// APP ///////////////////////
         gameInstance.reset();
         imguiCanvas.reset();
@@ -112,7 +111,7 @@ namespace ig
 
     int Igniter::Execute()
     {
-        IG_LOG(EngineInfo, "Igniting Main Loop!");
+        IG_LOG(Engine, ELogVerbosity::Info, "Igniting Main Loop!");
         while (!bShouldExit)
         {
             timer->Begin();
@@ -149,7 +148,7 @@ namespace ig
 
         renderer->FlushQueues();
 
-        IG_LOG(EngineInfo, "Extinguishing Engine Main Loop.");
+        IG_LOG(Engine, ELogVerbosity::Info, "Extinguishing Engine Main Loop.");
         return 0;
     }
 

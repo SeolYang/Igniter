@@ -9,11 +9,7 @@
 
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(AssetManagerInfo, ELogVerbosity::Info)
-    IG_DEFINE_LOG_CATEGORY(AssetManagerWarn, ELogVerbosity::Warning)
-    IG_DEFINE_LOG_CATEGORY(AssetManagerErr, ELogVerbosity::Error)
-    IG_DEFINE_LOG_CATEGORY(AssetManagerDbg, ELogVerbosity::Debug)
-    IG_DEFINE_LOG_CATEGORY(AssetManagerFatal, ELogVerbosity::Fatal)
+    IG_DEFINE_LOG_CATEGORY(AssetManager);
 
     AssetManager::AssetManager() :  
         assetMonitor(std::make_unique<AssetMonitor>()),
@@ -50,7 +46,7 @@ namespace ig
                 }
 
                 // #sy_wip Force Unload Expired Assets!
-                IG_LOG(AssetManagerWarn, "Asset {} expired.", assetPath.string());
+                IG_LOG(AssetManager, ELogVerbosity::Warning, "Asset {} expired.", assetPath.string());
             }
         }
     }
