@@ -196,10 +196,7 @@ namespace ig
 
     void AssetMonitor::StartTracking()
     {
-        auto eventRef = tracker->GetEvent();
-        IG_CHECK(eventRef);
-
-        auto& event = eventRef->get();
+        auto& event = tracker->GetEvent();
         event.Subscribe("AssetMonitor"_fs,
                         [this](const FileNotification& newNotification)
                         {

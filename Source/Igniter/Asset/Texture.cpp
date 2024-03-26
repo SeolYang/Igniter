@@ -30,7 +30,6 @@ namespace ig
         IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU);
         IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV);
         IG_SERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW);
-
         return archive;
     }
 
@@ -44,7 +43,6 @@ namespace ig
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-
         return archive;
     }
 
@@ -53,7 +51,6 @@ namespace ig
         const TextureLoadConfig& config = *this;
         IG_CHECK(config.Format != DXGI_FORMAT_UNKNOWN);
         IG_CHECK(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
-
         IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format);
         IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension);
         IG_SERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
@@ -65,17 +62,13 @@ namespace ig
         IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU);
         IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV);
         IG_SERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW);
-
         return archive;
     }
 
     const json& TextureLoadConfig::Deserialize(const json& archive)
     {
-        *this = {};
-
-        static_assert(std::is_convertible_v<uint64_t, uint64_t>);
-
         TextureLoadConfig& config = *this;
+        config = {};
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
         IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width, 0);
@@ -87,9 +80,6 @@ namespace ig
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-
-        IG_CHECK(config.Format != DXGI_FORMAT_UNKNOWN);
-        IG_CHECK(config.Width > 0 && config.Height > 0 && config.DepthOrArrayLength > 0 && config.Mips > 0);
         return archive;
     }
 
@@ -206,6 +196,8 @@ namespace ig
                                                     TextureImportConfig importConfig,
                                                     const bool bIsPersistent /*= false*/)
     {
+        IG_CHECK(resPathStr);
+
         CoInitializeUnique();
         TempTimer tempTimer;
         tempTimer.Begin();
@@ -246,6 +238,8 @@ namespace ig
                 resPath.c_str(),
                 DirectX::WIC_FLAGS_FORCE_LINEAR,
                 &texMetadata, targetTex);
+
+            IG_CHECK(!DirectX::IsSRGB(texMetadata.format));
         }
         else if (IsHDRExtnsion(resExtension))
         {
@@ -267,19 +261,35 @@ namespace ig
 
         if (!bIsDDSFormat)
         {
-            IG_CHECK(texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
-                     texMetadata.arraySize > 0);
-            IG_CHECK(!texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1));
-            IG_CHECK(texMetadata.format != DXGI_FORMAT_UNKNOWN);
-            IG_CHECK(!DirectX::IsSRGB(texMetadata.format));
+            const bool bValidDimensions = texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 && texMetadata.arraySize > 0;
+            if (!bValidDimensions)
+            {
+                IG_LOG(TextureImporter, ELogVerbosity::Error, "Found invalid dimensions in texture metadata.");
+                return std::nullopt;
+                ;
+            }
+
+            const bool bValidVolumemapArgs = !texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1);
+            if (!bValidVolumemapArgs)
+            {
+                IG_LOG(TextureImporter, ELogVerbosity::Error, "The volumemap can't be array.");
+                return std::nullopt;
+            }
+
+            if (texMetadata.format != DXGI_FORMAT_UNKNOWN)
+            {
+                IG_LOG(TextureImporter, ELogVerbosity::Error, "Found 'Unknown' format from texture metadata.");
+                return std::nullopt;
+            }
 
             /* Generate full mipmap chain. */
             if (importConfig.bGenerateMips)
             {
                 DirectX::ScratchImage mipChain{};
-                const HRESULT genRes = DirectX::GenerateMipMaps(
-                    targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
-                    bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR, 0, mipChain);
+                const HRESULT genRes = DirectX::GenerateMipMaps(targetTex.GetImages(), targetTex.GetImageCount(),
+                                                                targetTex.GetMetadata(),
+                                                                bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR,
+                                                                0, mipChain);
                 if (FAILED(genRes))
                 {
                     IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
@@ -350,7 +360,7 @@ namespace ig
                 {
                     if (bIsGPUCodecAvailable)
                     {
-                        IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to compress with GPU Codec.");
+                        IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to compress using GPU Codec.");
                     }
 
                     IG_LOG(TextureImporter, ELogVerbosity::Error,
@@ -409,6 +419,7 @@ namespace ig
         assetMetadata << assetInfo << newLoadConfig;
 
         const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, assetInfo.Guid);
+        IG_CHECK(!assetMetadataPath.empty());
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
             IG_LOG(TextureImporter, ELogVerbosity::Error, "Failed to open asset metadata file {}.", assetMetadataPath.string());
@@ -417,6 +428,7 @@ namespace ig
 
         /* Save data to asset file */
         const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.Guid);
+        IG_CHECK(!assetPath.empty());
         if (fs::exists(assetPath))
         {
             IG_LOG(TextureImporter, ELogVerbosity::Warning, "The Asset file {} alread exist.", assetPath.string());

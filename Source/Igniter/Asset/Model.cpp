@@ -57,6 +57,12 @@ namespace ig
     json& StaticMeshLoadConfig::Serialize(json& archive) const
     {
         const auto& config = *this;
+        IG_CHECK(!config.Name.empty());
+        IG_CHECK(config.NumVertices > 0);
+        IG_CHECK(config.NumIndices > 0);
+        IG_CHECK(config.CompressedVerticesSizeInBytes > 0);
+        IG_CHECK(config.CompressedIndicesSizeInBytes > 0);
+
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
@@ -113,6 +119,10 @@ namespace ig
 
     static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bIsPersistent, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
     {
+        IG_CHECK(!vertices.empty());
+        IG_CHECK(!indices.empty());
+        IG_CHECK(resPathStr);
+
         const xg::Guid newGuid = xg::newGuid();
         const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, newGuid);
         const std::string_view resPathStrView = resPathStr.ToStringView();

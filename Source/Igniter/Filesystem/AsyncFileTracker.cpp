@@ -187,7 +187,7 @@ namespace ig
             CloseHandle(directoryHandle);
             directoryHandle = INVALID_HANDLE_VALUE;
 
-            IG_CHECK(ioEventHandle);
+            IG_CHECK(ioEventHandle != INVALID_HANDLE_VALUE);
             CloseHandle(ioEventHandle);
             ioEventHandle = INVALID_HANDLE_VALUE;
 
@@ -221,13 +221,11 @@ namespace ig
 
     FileNotification& AsyncFileTracker::Iterator::operator*() noexcept
     {
-        IG_CHECK(notification);
         return *notification;
     }
 
     const FileNotification& AsyncFileTracker::Iterator::operator*() const noexcept
     {
-        IG_CHECK(notification);
         return *notification;
     }
 

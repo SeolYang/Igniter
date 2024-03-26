@@ -16,7 +16,6 @@ namespace ig
     {
         ResourceInfo& info = *this;
         IG_DESERIALIZE_ENUM_JSON(ResourceInfo, archive, info, Type, EAssetType::Unknown);
-        IG_CHECK(info.Type != EAssetType::Unknown);
         return archive;
     }
 
@@ -43,9 +42,6 @@ namespace ig
         IG_DESERIALIZE_JSON(AssetInfo, archive, info, VirtualPath, String{});
         IG_DESERIALIZE_ENUM_JSON(AssetInfo, archive, info, Type, EAssetType::Unknown);
         IG_DESERIALIZE_JSON(AssetInfo, archive, info, bIsPersistent, false);
-
-        IG_CHECK(info.Guid.isValid());
-        IG_CHECK(info.Type != EAssetType::Unknown);
         return archive;
     }
 } // namespace ig

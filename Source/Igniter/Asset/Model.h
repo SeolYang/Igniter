@@ -42,7 +42,7 @@ namespace ig
         const json& Deserialize(const json& archive);
 
     public:
-        std::string Name{};
+        std::string Name{}; /* #sy_deprecated */
         uint32_t NumVertices{ 0 };
         uint32_t NumIndices{ 0 };
         size_t CompressedVerticesSizeInBytes{ 0 };

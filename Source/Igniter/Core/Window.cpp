@@ -9,8 +9,7 @@ namespace ig
 {
     IG_DEFINE_LOG_CATEGORY(Window);
 
-    Window::Window(const WindowDescription& description)
-        : windowDesc(description)
+    Window::Window(const WindowDescription& description) : windowDesc(description)
     {
         windowTitle = description.Title.ToWideString();
         IG_CHECK(description.Width > 0 && description.Height > 0);

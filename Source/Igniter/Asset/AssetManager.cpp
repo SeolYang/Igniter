@@ -11,11 +11,9 @@ namespace ig
 {
     IG_DEFINE_LOG_CATEGORY(AssetManager);
 
-    AssetManager::AssetManager() :  
-        assetMonitor(std::make_unique<AssetMonitor>()),
-        textureImporter(std::make_unique<TextureImporter>())
+    AssetManager::AssetManager() : assetMonitor(std::make_unique<AssetMonitor>()),
+                                   textureImporter(std::make_unique<TextureImporter>())
     {
-       
     }
 
     AssetManager::~AssetManager()
@@ -59,7 +57,7 @@ namespace ig
         {
             return MakeFail<xg::Guid, EAssetImportResult::ImporterFailure>();
         }
-        
+
         // 성공 한 직후, 바로 Load 가능해야 하기 때문에 강제로 처리해주어야 함.
         Update();
         IG_CHECK(assetMonitor->Contains(*importedGuid));

@@ -121,16 +121,10 @@ namespace ig
         Iterator begin() { return Iterator{ *this }; }
         std::default_sentinel_t end() { return std::default_sentinel_t{}; }
 
-        OptionalRef<Event<String, FileNotification>> GetEvent()
+        Event<String, FileNotification>& GetEvent()
         {
-            if (IsTracking())
-            {
-                /* #sy_ambiguous_assert */
-                IG_CHECK_NO_ENTRY();
-                return std::nullopt;
-            }
-
-            return std::ref(event);
+            IG_CHECK(IsTracking());
+            return event;
         }
 
     private:
