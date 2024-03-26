@@ -6,9 +6,10 @@
 #include <Core/Engine.h>
 #include <ImGui/ImGuiCanvas.h>
 
+IG_DEFINE_LOG_CATEGORY(CameraPossessSystem);
+
 namespace fe
 {
-    IG_DEFINE_LOG_CATEGORY(CameraPossessSystem);
 
     CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
         : window(ig::Igniter::GetWindow()),
@@ -38,7 +39,7 @@ namespace fe
         auto& imguiCanvas = ig::Igniter::GetImGuiCanvas();
         if (bEnabled)
         {
-            IG_LOG(CameraPossessSystem, ig::ELogVerbosity::Debug, "Possess to Camera.");
+            IG_LOG(CameraPossessSystem, Debug, "Possess to Camera.");
             fpsCamControllSystem.SetIgnoreInput(false);
             window.SetCursorVisibility(false);
             window.ClipCursor();
@@ -46,7 +47,7 @@ namespace fe
         }
         else
         {
-            IG_LOG(CameraPossessSystem, ig::ELogVerbosity::Debug, "Unposess from Camera.");
+            IG_LOG(CameraPossessSystem, Debug, "Unposess from Camera.");
             fpsCamControllSystem.SetIgnoreInput(true);
             window.SetCursorVisibility(true);
             window.UnclipCursor();

@@ -14,11 +14,11 @@
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
 
+IG_DEFINE_LOG_CATEGORY(ModelImporter);
+IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);
+
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(ModelImporter);
-    IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);
-
     json& StaticMeshImportConfig::Serialize(json& archive) const
     {
         const auto& config = *this;
@@ -87,7 +87,7 @@ namespace ig
     {
         if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Load model file from \"{}\" failed: \"{}\"", resPathStr.ToStringView(), importer.GetErrorString());
+            IG_LOG(ModelImporter, Error, "Load model file from \"{}\" failed: \"{}\"", resPathStr.ToStringView(), importer.GetErrorString());
             return false;
         }
 
@@ -138,7 +138,7 @@ namespace ig
 
         meshopt_remapIndexBuffer(remappedIndices.data(), indices.data(), indices.size(), remap.data());
         meshopt_remapVertexBuffer(remappedVertices.data(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex), remap.data());
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
+        IG_LOG(ModelImporter, Info, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
 
         constexpr float CacheHitRatioThreshold = 1.02f;
         meshopt_optimizeVertexCache(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.size());
@@ -146,17 +146,17 @@ namespace ig
         meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex));
 
         /* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Optimization Statistics \"{}({}.{})\"", assetPathStr, resPathStrView, meshName);
+        IG_LOG(ModelImporter, Info, "Optimization Statistics \"{}({}.{})\"", assetPathStr, resPathStrView, meshName);
         const auto nvidiaVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 32, 32, 32);
         const auto amdVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 14, 64, 128);
         const auto intelVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 128, 0, 0);
         const auto vfs = meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), sizeof(StaticMeshVertex));
         const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex));
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Overfecth: {}", vfs.overfetch);
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Overdraw: {}", os.overdraw);
+        IG_LOG(ModelImporter, Info, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
+        IG_LOG(ModelImporter, Info, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
+        IG_LOG(ModelImporter, Info, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
+        IG_LOG(ModelImporter, Info, "Overfecth: {}", vfs.overfetch);
+        IG_LOG(ModelImporter, Info, "Overdraw: {}", os.overdraw);
 
         /* Vertex/Index buffer compression */
         meshopt_encodeVertexVersion(0);
@@ -189,13 +189,13 @@ namespace ig
         const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, assetInfo.Guid);
         if (!SaveJsonToFile(newMetaPath, assetMetadata))
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to save asset metadata to {}.", newMetaPath.string());
+            IG_LOG(ModelImporter, Error, "Failed to save asset metadata to {}.", newMetaPath.string());
             return std::nullopt;
         }
 
         if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices }, std::span<const uint8_t>{ encodedIndices } }))
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to save vertices/indices data to file {}.", assetPath.string());
+            IG_LOG(ModelImporter, Error, "Failed to save vertices/indices data to file {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -207,11 +207,11 @@ namespace ig
         TempTimer tempTimer;
         tempTimer.Begin();
 
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Importing resource {} as static mesh assets ...", resPathStr.ToStringView());
+        IG_LOG(ModelImporter, Info, "Importing resource {} as static mesh assets ...", resPathStr.ToStringView());
         const fs::path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "The resource does not exist at {}.", resPathStr.ToStringView());
+            IG_LOG(ModelImporter, Error, "The resource does not exist at {}.", resPathStr.ToStringView());
             return {};
         }
 
@@ -329,16 +329,16 @@ namespace ig
         resMetadata << resInfo << *importConfig;
         if (!SaveJsonToFile(resMetaPath, resMetadata))
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to save resource metadata to {}.", resMetaPath.string());
+            IG_LOG(ModelImporter, Error, "Failed to save resource metadata to {}.", resMetaPath.string());
         }
 
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.ToStringView(), tempTimer.End());
+        IG_LOG(ModelImporter, Info, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.ToStringView(), tempTimer.End());
         return importedStaticMeshGuid;
     }
 
     std::optional<ig::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
     {
-        IG_LOG(ModelImporter, ELogVerbosity::Info, "Load static mesh {}.", guid.str());
+        IG_LOG(ModelImporter, Info, "Load static mesh {}.", guid.str());
         TempTimer tempTimer;
         tempTimer.Begin();
 
@@ -346,20 +346,20 @@ namespace ig
         const fs::path assetMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, guid);
         if (!fs::exists(assetPath))
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Static Mesh Asset \"{}\" does not exists.", assetPath.string());
+            IG_LOG(ModelImporter, Error, "Static Mesh Asset \"{}\" does not exists.", assetPath.string());
             return std::nullopt;
         }
 
         if (!fs::exists(assetMetaPath))
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Static Mesh Asset metadata \"{}\" does not exists.", assetMetaPath.string());
+            IG_LOG(ModelImporter, Error, "Static Mesh Asset metadata \"{}\" does not exists.", assetMetaPath.string());
             return std::nullopt;
         }
 
         const json assetMetadata{ LoadJsonFromFile(assetMetaPath) };
         if (assetMetadata.empty())
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to load asset metadata from {}.", assetMetaPath.string());
+            IG_LOG(ModelImporter, Error, "Failed to load asset metadata from {}.", assetMetaPath.string());
             return std::nullopt;
         }
 
@@ -369,14 +369,14 @@ namespace ig
 
         if (assetInfo.Guid != guid)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Asset guid does not match. Expected: {}, Found: {}",
+            IG_LOG(ModelImporter, Error, "Asset guid does not match. Expected: {}, Found: {}",
                    guid.str(), assetInfo.Guid.str());
             return std::nullopt;
         }
 
         if (assetInfo.Type != EAssetType::StaticMesh)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Asset type does not match. Expected: {}, Found: {}",
+            IG_LOG(ModelImporter, Error, "Asset type does not match. Expected: {}, Found: {}",
                    magic_enum::enum_name(EAssetType::StaticMesh),
                    magic_enum::enum_name(assetInfo.Type));
             return std::nullopt;
@@ -387,7 +387,7 @@ namespace ig
             loadConfig.CompressedVerticesSizeInBytes == 0 ||
             loadConfig.CompressedIndicesSizeInBytes == 0)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error,
+            IG_LOG(ModelImporter, Error,
                    "Load config has invalid values. \n * NumVertices: {}\n * NumIndices: {}\n * CompressedVerticesSizeInBytes: {}\n * CompressedIndicesSizeInBytes: {}",
                    loadConfig.NumVertices, loadConfig.NumIndices, loadConfig.CompressedVerticesSizeInBytes, loadConfig.CompressedIndicesSizeInBytes);
             return std::nullopt;
@@ -396,14 +396,14 @@ namespace ig
         std::vector<uint8_t> blob = LoadBlobFromFile(assetPath);
         if (blob.empty())
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Static Mesh {} blob is empty.", assetPath.string());
+            IG_LOG(ModelImporter, Error, "Static Mesh {} blob is empty.", assetPath.string());
             return std::nullopt;
         }
 
         const size_t expectedBlobSize = loadConfig.CompressedVerticesSizeInBytes + loadConfig.CompressedIndicesSizeInBytes;
         if (blob.size() != expectedBlobSize)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Static Mesh blob size does not match. Expected: {}, Found: {}", expectedBlobSize, blob.size());
+            IG_LOG(ModelImporter, Error, "Static Mesh blob size does not match. Expected: {}, Found: {}", expectedBlobSize, blob.size());
             return std::nullopt;
         }
 
@@ -412,7 +412,7 @@ namespace ig
         vertexBufferDesc.DebugName = String(std::format("{}_Vertices", guid.str()));
         if (vertexBufferDesc.GetSizeAsBytes() < loadConfig.CompressedVerticesSizeInBytes)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Compressed vertices size exceed expected vertex buffer size. Compressed Size: {} bytes, Expected Vertex Buffer Size: {} bytes",
+            IG_LOG(ModelImporter, Error, "Compressed vertices size exceed expected vertex buffer size. Compressed Size: {} bytes, Expected Vertex Buffer Size: {} bytes",
                    loadConfig.CompressedVerticesSizeInBytes,
                    vertexBufferDesc.GetSizeAsBytes());
             return std::nullopt;
@@ -423,7 +423,7 @@ namespace ig
         indexBufferDesc.DebugName = String(std::format("{}_Indices", guid.str()));
         if (indexBufferDesc.GetSizeAsBytes() < loadConfig.CompressedIndicesSizeInBytes)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Compressed indices size exceed expected index buffer size. Compressed Size: {} bytes, Expected Index Buffer Size: {} bytes",
+            IG_LOG(ModelImporter, Error, "Compressed indices size exceed expected index buffer size. Compressed Size: {} bytes, Expected Index Buffer Size: {} bytes",
                    loadConfig.CompressedIndicesSizeInBytes,
                    indexBufferDesc.GetSizeAsBytes());
             return std::nullopt;
@@ -432,21 +432,21 @@ namespace ig
         std::optional<GpuBuffer> vertexBuffer = renderDevice.CreateBuffer(vertexBufferDesc);
         if (!vertexBuffer)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to create vertex buffer of {}.", assetPath.string());
+            IG_LOG(ModelImporter, Error, "Failed to create vertex buffer of {}.", assetPath.string());
             return std::nullopt;
         }
 
         auto vertexBufferSrv = gpuViewManager.RequestShaderResourceView(*vertexBuffer);
         if (!vertexBufferSrv)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to create vertex buffer shader resource view of {}.", assetPath.string());
+            IG_LOG(ModelImporter, Error, "Failed to create vertex buffer shader resource view of {}.", assetPath.string());
             return std::nullopt;
         }
 
         std::optional<GpuBuffer> indexBuffer = renderDevice.CreateBuffer(indexBufferDesc);
         if (!indexBuffer)
         {
-            IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to create index buffer of {}.", assetPath.string());
+            IG_LOG(ModelImporter, Error, "Failed to create index buffer of {}.", assetPath.string());
             return std::nullopt;
         }
 
@@ -461,7 +461,7 @@ namespace ig
             }
             else
             {
-                IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to decode vertex buffer of {}.", assetPath.string());
+                IG_LOG(ModelImporter, Error, "Failed to decode vertex buffer of {}.", assetPath.string());
             }
         }
         std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
@@ -481,7 +481,7 @@ namespace ig
             }
             else
             {
-                IG_LOG(ModelImporter, ELogVerbosity::Error, "Failed to decode index buffer of {}.", assetPath.string());
+                IG_LOG(ModelImporter, Error, "Failed to decode index buffer of {}.", assetPath.string());
             }
         }
         std::optional<GpuSync> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
@@ -490,7 +490,7 @@ namespace ig
         verticesUploadSync->WaitOnCpu();
         indicesUploadSync->WaitOnCpu();
 
-        IG_LOG(ModelImporter, ELogVerbosity::Info,
+        IG_LOG(ModelImporter, Info,
                "Successfully load static mesh asset {}, which from resource {}. Elapsed: {} ms",
                assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
 

@@ -3,9 +3,9 @@
 #include <Core/Log.h>
 #include <Core/TypeUtils.h>
 
+IG_DEFINE_LOG_CATEGORY(InputManager);
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(InputManager);
 
     static EInput WParamToInput(const WPARAM wParam)
     {
@@ -70,7 +70,7 @@ namespace ig
 
         if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
         {
-            IG_LOG(InputManager, ELogVerbosity::Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
+            IG_LOG(InputManager, Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
         }
     }
 
@@ -84,7 +84,7 @@ namespace ig
 
         if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
         {
-            IG_LOG(InputManager, ELogVerbosity::Fatal, "Failed to unregister raw input mouse. {:#X}", GetLastError());
+            IG_LOG(InputManager, Error, "Failed to unregister raw input mouse. {:#X}", GetLastError());
         }
     }
 
@@ -264,7 +264,7 @@ namespace ig
 
         if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize, sizeof(RAWINPUTHEADER)) != pcbSize)
         {
-            IG_LOG(InputManager, ELogVerbosity::Fatal, "GetRawInputData does not return correct size!");
+            IG_LOG(InputManager, Fatal, "GetRawInputData does not return correct size!");
             return;
         }
 

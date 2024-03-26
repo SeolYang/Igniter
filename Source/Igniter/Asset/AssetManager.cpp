@@ -7,10 +7,10 @@
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
 
+IG_DEFINE_LOG_CATEGORY(AssetManager);
+
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(AssetManager);
-
     AssetManager::AssetManager() : assetMonitor(std::make_unique<AssetMonitor>()),
                                    textureImporter(std::make_unique<TextureImporter>())
     {
@@ -44,7 +44,7 @@ namespace ig
                 }
 
                 // #sy_wip Force Unload Expired Assets!
-                IG_LOG(AssetManager, ELogVerbosity::Warning, "Asset {} expired.", assetPath.string());
+                IG_LOG(AssetManager, Warning, "Asset {} expired.", assetPath.string());
             }
         }
     }

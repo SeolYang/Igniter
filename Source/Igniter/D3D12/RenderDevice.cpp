@@ -14,10 +14,10 @@
 #include <D3D12/GPUTextureDesc.h>
 #include <D3D12/GPUTexture.h>
 
+IG_DEFINE_LOG_CATEGORY(RenderDevice);
+
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(RenderDevice);
-
     RenderDevice::RenderDevice()
     {
         const bool bIsAcquiredAdapter = AcquireAdapterFromFactory();
@@ -99,7 +99,7 @@ namespace ig
         const bool bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
         if (!bFactoryCreated)
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Fatal, "Failed to create factory.");
+            IG_LOG(RenderDevice, Fatal, "Failed to create factory.");
             return false;
         }
 
@@ -109,7 +109,7 @@ namespace ig
         if (!bIsAdapterAcquired)
         {
 
-            IG_LOG(RenderDevice, ELogVerbosity::Fatal, "Failed to acquire adapter from factory.");
+            IG_LOG(RenderDevice, Fatal, "Failed to acquire adapter from factory.");
             return false;
         }
 
@@ -121,13 +121,13 @@ namespace ig
         IG_CHECK(adapter);
         DXGI_ADAPTER_DESC adapterDesc;
         adapter->GetDesc(&adapterDesc);
-        IG_LOG(RenderDevice, ELogVerbosity::Info, "----------- The GPU Infos -----------");
-        IG_LOG(RenderDevice, ELogVerbosity::Info, "{}", Narrower(adapterDesc.Description));
-        IG_LOG(RenderDevice, ELogVerbosity::Info, "Vendor ID: {}", adapterDesc.VendorId);
-        IG_LOG(RenderDevice, ELogVerbosity::Info, "Dedicated Video Memory: {}", adapterDesc.DedicatedVideoMemory);
-        IG_LOG(RenderDevice, ELogVerbosity::Info, "Dedicated System Memory: {}", adapterDesc.DedicatedSystemMemory);
-        IG_LOG(RenderDevice, ELogVerbosity::Info, "Shared System Memory: {}", adapterDesc.SharedSystemMemory);
-        IG_LOG(RenderDevice, ELogVerbosity::Info, "-------------------------------------");
+        IG_LOG(RenderDevice, Info, "----------- The GPU Infos -----------");
+        IG_LOG(RenderDevice, Info, "{}", Narrower(adapterDesc.Description));
+        IG_LOG(RenderDevice, Info, "Vendor ID: {}", adapterDesc.VendorId);
+        IG_LOG(RenderDevice, Info, "Dedicated Video Memory: {}", adapterDesc.DedicatedVideoMemory);
+        IG_LOG(RenderDevice, Info, "Dedicated System Memory: {}", adapterDesc.DedicatedSystemMemory);
+        IG_LOG(RenderDevice, Info, "Shared System Memory: {}", adapterDesc.SharedSystemMemory);
+        IG_LOG(RenderDevice, Info, "-------------------------------------");
     }
 
     bool RenderDevice::CreateDevice()
@@ -136,7 +136,7 @@ namespace ig
         constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
         if (!SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device))))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Fatal, "Failed to create the device from the adapter.");
+            IG_LOG(RenderDevice, Fatal, "Failed to create the device from the adapter.");
             return false;
         }
 
@@ -230,7 +230,7 @@ namespace ig
         desc.pDevice = device.Get();
         if (!SUCCEEDED(D3D12MA::CreateAllocator(&desc, &allocator)))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Fatal, "Failed to create D3D12MA::Allocator.");
+            IG_LOG(RenderDevice, Fatal, "Failed to create D3D12MA::Allocator.");
             return false;
         }
 
@@ -253,7 +253,7 @@ namespace ig
         if (const HRESULT result = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create command queue. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create command queue. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -264,7 +264,7 @@ namespace ig
         if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create queue sync fence. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create queue sync fence. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -285,7 +285,7 @@ namespace ig
         if (const HRESULT result = device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create command allocator. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create command allocator. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -294,7 +294,7 @@ namespace ig
         if (const HRESULT result = device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create command list. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create command list. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -330,7 +330,7 @@ namespace ig
         if (const HRESULT result = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to serialize root signature. HRESULT: {:#X}, Message: {}", result, errorBlob->GetBufferPointer());
+            IG_LOG(RenderDevice, Error, "Failed to serialize root signature. HRESULT: {:#X}, Message: {}", result, errorBlob->GetBufferPointer());
             return {};
         }
 
@@ -338,7 +338,7 @@ namespace ig
         if (const HRESULT result = device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create root signature. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create root signature. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -355,7 +355,7 @@ namespace ig
         if (const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create graphics pipeline state. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create graphics pipeline state. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -372,7 +372,7 @@ namespace ig
         if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create compute pipeline state. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create compute pipeline state. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -399,7 +399,7 @@ namespace ig
         if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create descriptor heap. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create descriptor heap. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -445,7 +445,7 @@ namespace ig
                 allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -487,7 +487,7 @@ namespace ig
                 allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create texture resource. HRESULT: {:#X}", result);
+            IG_LOG(RenderDevice, Error, "Failed to create texture resource. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -506,7 +506,7 @@ namespace ig
         if (const HRESULT result = allocator->CreatePool(&desc, &customPool);
             !SUCCEEDED(result))
         {
-            IG_LOG(RenderDevice, ELogVerbosity::Error, "Failed to create custom gpu memory pool.");
+            IG_LOG(RenderDevice, Error, "Failed to create custom gpu memory pool.");
             return {};
         }
 

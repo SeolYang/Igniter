@@ -5,10 +5,10 @@
 #include <Core/Log.h>
 #include <ImGUi/ImGuiCanvas.h>
 
+IG_DEFINE_LOG_CATEGORY(Window);
+
 namespace ig
 {
-    IG_DEFINE_LOG_CATEGORY(Window);
-
     Window::Window(const WindowDescription& description) : windowDesc(description)
     {
         windowTitle = description.Title.ToWideString();
@@ -76,7 +76,7 @@ namespace ig
         clientRect.bottom = rightBottom.y;
         if (::ClipCursor(&clientRect) == FALSE)
         {
-            IG_LOG(Window, ELogVerbosity::Error, "Failed to clip cursor to main window.");
+            IG_LOG(Window, Error, "Failed to clip cursor to main window.");
         }
     }
 

@@ -94,8 +94,9 @@ namespace ig
     };
 } // namespace ig
 
+/* #sy_log 카테고리의 고유성을 보장하기 위해, 네임스페이스의 밖에 정의되어야 함. */
 #define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)                                \
-    namespace categories                                                         \
+    namespace ig::categories                                                     \
     {                                                                            \
         struct LOG_CATEGORY_NAME                                                 \
         {                                                                        \
@@ -106,10 +107,10 @@ namespace ig
 #if defined(DEBUG) || defined(_DEBUG)
     #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...)                                         \
         ig::Logger::GetInstance().Log<categories::LOG_CATEGORY, LOG_VERBOSITY>(MESSAGE, __VA_ARGS__); \
-        if constexpr (LOG_CATEGORY::Verbosity == ig::ELogVerbosity::Fatal)                            \
+        if constexpr (LOG_CATEGORY::Verbosity == ig::Fatal)                            \
         {                                                                                             \
             IG_CHECK_NO_ENTRY();                                                                      \
         }
 #else
-    #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...) ig::Logger::GetInstance().Log<categories::LOG_CATEGORY, LOG_VERBOSITY>(MESSAGE, __VA_ARGS__)
+    #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...) ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__)
 #endif
