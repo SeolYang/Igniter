@@ -318,6 +318,9 @@
     <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h">
       <Filter>Source\Filesystem</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">

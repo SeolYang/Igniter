@@ -109,7 +109,7 @@ namespace ig
             IG_CHECK_NO_ENTRY();                                                                                                  \
         }
 #else
-    #define IG_LOG(LOG_CATEGORY, ...) ig::Logger::GetInstance().Log<LOG_CATEGORY>(__VA_ARGS__)
+    #define IG_LOG(LOG_CATEGORY, MESSAGE, ...) ig::Logger::GetInstance().Log<LOG_CATEGORY>(MESSAGE, __VA_ARGS__)
 #endif
 
 #define IG_CONDITIONAL_LOG(LOG_CATEGORY, CONDITION, ...) \

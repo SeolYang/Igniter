@@ -43,10 +43,9 @@ namespace ig
     const json& TextureImportConfig::Deserialize(const json& archive)
     {
         *this = {};
-
         TextureImportConfig& config = *this;
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, CompressionMode, ETextureCompressionMode::None);
-        IG_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips);
+        IG_DESERIALIZE_JSON(TextureImportConfig, archive, config, bGenerateMips, false);
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         IG_DESERIALIZE_ENUM_JSON(TextureImportConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
@@ -79,14 +78,17 @@ namespace ig
     const json& TextureLoadConfig::Deserialize(const json& archive)
     {
         *this = {};
+
+        static_assert(std::is_convertible_v<uint64_t, uint64_t>);
+
         TextureLoadConfig& config = *this;
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Format, DXGI_FORMAT_UNKNOWN);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Dimension, ETextureDimension::Tex2D);
-        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width);
-        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Height);
-        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength);
-        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Mips);
-        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Width, 0);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Height, 0);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, DepthOrArrayLength, 0);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, Mips, 0);
+        IG_DESERIALIZE_JSON(TextureLoadConfig, archive, config, bIsCubemap, false);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         IG_DESERIALIZE_ENUM_JSON(TextureLoadConfig, archive, config, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);

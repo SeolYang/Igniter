@@ -38,7 +38,6 @@ namespace ig
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder);
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes);
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes);
-
         return archive;
     }
 
@@ -46,35 +45,29 @@ namespace ig
     {
         auto& config = *this;
         config = {};
-
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bSplitLargeMeshes);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bPreTransformVertices);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImproveCacheLocality);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateUVCoords);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipUVs);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes);
-
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMakeLeftHanded, config.bMakeLeftHanded);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipUVs, config.bFlipUVs);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder, config.bFlipWindingOrder);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateNormals, config.bGenerateNormals);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bSplitLargeMeshes, config.bSplitLargeMeshes);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bPreTransformVertices, config.bPreTransformVertices);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImproveCacheLocality, config.bImproveCacheLocality);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateUVCoords, config.bGenerateUVCoords);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes, config.bGenerateBoundingBoxes);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes, config.bMergeMeshes);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImportTextures, config.bImportTextures);
+        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImportMaterials, config.bImportMaterials);
         return archive;
     }
 
     json& StaticMeshLoadConfig::Serialize(json& archive) const
     {
-        IG_CHECK(NumVertices > 0);
-        IG_CHECK(NumIndices > 0);
-        IG_CHECK(CompressedVerticesSizeInBytes > 0);
-        IG_CHECK(CompressedIndicesSizeInBytes > 0);
-
         const auto& config = *this;
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
-
         return archive;
     }
 
@@ -82,17 +75,11 @@ namespace ig
     {
         auto& config = *this;
         config = {};
-
-        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
-        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
-        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
-        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
-        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes);
-
-        IG_CHECK(NumVertices > 0);
-        IG_CHECK(NumIndices > 0);
-        IG_CHECK(CompressedVerticesSizeInBytes > 0);
-        IG_CHECK(CompressedIndicesSizeInBytes > 0);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name, config.Name);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices, config.NumVertices);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices, config.NumIndices);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes, config.CompressedVerticesSizeInBytes);
+        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedIndicesSizeInBytes, config.CompressedIndicesSizeInBytes);
         return archive;
     }
 
@@ -269,18 +256,18 @@ namespace ig
 
                 /* #sy_wip 에셋 매니저 경유 */
                 textureImporter;
-                //if (!HasImportedBefore(texResPath))
+                // if (!HasImportedBefore(texResPath))
                 //{
-                //    std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr);
-                //    if (newTexAssetGuid)
-                //    {
-                //        IG_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
-                //    }
-                //    else
-                //    {
-                //        IG_LOG(ModelImporterErr, "Failed to import texture resource {}.", texResPathStr.AsStringView());
-                //    }
-                //}
+                //     std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr);
+                //     if (newTexAssetGuid)
+                //     {
+                //         IG_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
+                //     }
+                //     else
+                //     {
+                //         IG_LOG(ModelImporterErr, "Failed to import texture resource {}.", texResPathStr.AsStringView());
+                //     }
+                // }
             }
         }
 

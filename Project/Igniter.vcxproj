@@ -86,6 +86,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h" />
     <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
     <ClInclude Include="..\Source\Igniter\Render\Utils.h" />

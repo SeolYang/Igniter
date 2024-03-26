@@ -125,6 +125,7 @@ namespace ig
         {
             if (IsTracking())
             {
+                /* #sy_ambiguous_assert */
                 IG_CHECK_NO_ENTRY();
                 return std::nullopt;
             }
