@@ -21,7 +21,7 @@ namespace ig
     private:
         String path{};
         TextureImportConfig config;
-        EOpenFileDialogStatus status;
+        EOpenFileDialogStatus status{};
 
         int selectedCompModeIdx = 0;
         int selectedFilterIdx = 0;
