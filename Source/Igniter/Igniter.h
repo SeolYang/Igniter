@@ -113,7 +113,11 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 #else
 #endif
 
+#pragma warning(push)
+#pragma warning(disable : 26495)
+#pragma warning(disable : 6201)
 #include <tracy/Tracy.hpp>
+#pragma warning(pop)
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

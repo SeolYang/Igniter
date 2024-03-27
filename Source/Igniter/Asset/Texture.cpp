@@ -276,7 +276,7 @@ namespace ig
                 return std::nullopt;
             }
 
-            if (texMetadata.format != DXGI_FORMAT_UNKNOWN)
+            if (texMetadata.format == DXGI_FORMAT_UNKNOWN)
             {
                 IG_LOG(TextureImporter, Error, "Found 'Unknown' format from texture metadata.");
                 return std::nullopt;

@@ -10,6 +10,7 @@ namespace ig
     class EntityInspector;
     class StatisticsPanel;
     class FileNotificationPanel;
+    class TextureImportPanel;
 } // namespace ig
 
 namespace fe
@@ -30,6 +31,7 @@ namespace fe
         ig::EntityList& entityList;
         ig::EntityInspector& entityInspector;
         ig::FileNotificationPanel& fileNotificationPanel;
+        ig::TextureImportPanel& textureImportPanel;
 
     };
 } // namespace fe

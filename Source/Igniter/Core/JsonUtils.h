@@ -11,14 +11,14 @@ namespace ig::details
             archive[dataTypeName] = nlohmann::json{};
         }
 
-        IG_CHECK(!archive[dataTypeName].is_null());
+        IG_CHECK(!archive[dataTypeName].is_discarded());
         archive[dataTypeName][varName] = var;
     }
 
     template <typename VARType, typename F>
     void DeSerialize(const nlohmann::json& archive, VARType& var, const std::string_view dataTypeName, const std::string_view varName, F callback, VARType fallback)
     {
-        IG_CHECK(!archive.is_null());
+        IG_CHECK(!archive.is_discarded());
         bool bFALLBACKRequired = false;
         if (archive.contains(dataTypeName) && archive[dataTypeName].contains(varName))
         {

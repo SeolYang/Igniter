@@ -18,12 +18,22 @@ namespace ig
         virtual void Render() = 0;
 
         bool IsVisible() const { return bIsVisible; }
-        void SetVisibility(const bool bIsVisibleLayer) { bIsVisible = bIsVisibleLayer; }
+        void SetVisibility(const bool bIsVisibleLayer)
+        {
+            if (!bIsVisible && bIsVisibleLayer)
+            {
+                OnVisible();
+            }
+
+            bIsVisible = bIsVisibleLayer;
+        }
 
         uint64_t GetID() const { return id; }
 
         uint64_t GetPriority() const { return priority; }
         void SetPriority(const uint64_t newPriority) { priority = newPriority; }
+
+        virtual void OnVisible() {}
 
     protected:
         bool bIsVisible = false;
@@ -32,6 +42,5 @@ namespace ig
         uint64_t id = 0;
         /* lower value = high priority */
         uint64_t priority = 0;
-
     };
 } // namespace ig

@@ -85,6 +85,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiUtils.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h" />
     <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
@@ -167,6 +168,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Igniter.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\TextureImportPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\Renderer.cpp" />

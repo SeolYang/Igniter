@@ -13,7 +13,6 @@ namespace ig
         NotDirectoryPath,
         FileDoesNotExist,
         FailedToOpen,
-        FailedToCreateIOEventHandle,
     };
 
     enum class ETrackingFilterFlags : uint32_t
@@ -130,10 +129,8 @@ namespace ig
     private:
         fs::path path{};
         HANDLE directoryHandle{ INVALID_HANDLE_VALUE };
-        HANDLE ioEventHandle{ INVALID_HANDLE_VALUE };
 
         std::jthread trackingThread{};
-        std::promise<void> ioPromise{};
 
         constexpr static uint32_t ReservedRawBufferSizeInBytes = 1024Ui32 * 1024Ui32; /* 1 KB */
         std::vector<uint8_t> rawBuffer{ std::vector<uint8_t>(ReservedRawBufferSizeInBytes) };

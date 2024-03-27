@@ -59,6 +59,7 @@ namespace ig
         }
 
         // 성공 한 직후, 바로 Load 가능해야 하기 때문에 강제로 처리해주어야 함.
+        /* 이 지점에서, 확실하게 받아올 수 있는 방법이 필요 */
         Update();
         IG_CHECK(assetMonitor->Contains(*importedGuid));
         return MakeSuccess<xg::Guid, EAssetImportResult>(*importedGuid);

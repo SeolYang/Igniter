@@ -15,6 +15,4 @@ namespace ig
     private:
         const EntityList& entityList;
     };
-
-
 } // namespace ig

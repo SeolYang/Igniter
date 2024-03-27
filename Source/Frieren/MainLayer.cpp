@@ -6,6 +6,7 @@
 #include <ImGui/EntityInsepctor.h>
 #include <ImGui/EntityList.h>
 #include <ImGui/FileNotificationPanel.h>
+#include <ImGui/TextureImportPanel.h>
 
 namespace fe
 {
@@ -14,7 +15,8 @@ namespace fe
                                                     cachedStringDebugger(canvas.AddLayer<ig::CachedStringDebugger>()),
                                                     entityList(canvas.AddLayer<ig::EntityList>()),
                                                     entityInspector(canvas.AddLayer<ig::EntityInspector>(entityList)),
-                                                    fileNotificationPanel(canvas.AddLayer<ig::FileNotificationPanel>())
+                                                    fileNotificationPanel(canvas.AddLayer<ig::FileNotificationPanel>()),
+                                                    textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>())
     {
     }
 
@@ -28,6 +30,11 @@ namespace fe
         {
             if (ImGui::BeginMenu("File"))
             {
+                if (ImGui::MenuItem("Import Texture", "Ctrl+T"))
+                {
+                    textureImportPanel.SetVisibility(true);
+                }
+
                 if (ImGui::MenuItem("Exit (Alt+F4)"))
                 {
                     ig::Igniter::Exit();

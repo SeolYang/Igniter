@@ -27,11 +27,10 @@ namespace ig
         ReadWriteLock rwLock{ bufferMutex };
 
         bool bBufferProcessingPostponed = false;
-        for (size_t idx = 0; idx < buffer.size(); ++idx)
+        for (auto itr = buffer.begin(); itr != buffer.end(); ++itr)
         {
-            const auto& notification = buffer[idx];
+            const auto& notification = *itr;
             const bool bPossiblyDuplicatedModification = notification.Action == EFileTrackingAction::Modified && notification.FileSize == 0;
-
             if (bPossiblyDuplicatedModification)
             {
                 if (buffer.size() == 1)
@@ -40,9 +39,9 @@ namespace ig
                     break;
                 }
 
-                if (idx + 1 < buffer.size())
+                if (itr + 1 != buffer.end())
                 {
-                    const auto& nextNotification = buffer[idx + 1];
+                    const auto& nextNotification = *(itr+1);
                     const bool bDuplicatedModification = nextNotification.Action == EFileTrackingAction::Modified &&
                                                          nextNotification.Path == notification.Path;
                     if (bDuplicatedModification)
@@ -51,6 +50,12 @@ namespace ig
                     }
                 }
             }
+        }
+
+        for (size_t idx = 0; idx < buffer.size(); ++idx)
+        {
+            const auto& notification = buffer[idx];
+            //const bool bModifiedAfterAdded = notification.Action == EFileTrackingAction::Added;
 
             ProcessNotification(notification);
         }
@@ -204,7 +209,7 @@ namespace ig
                             buffer.emplace_back(newNotification);
                         });
 
-        const EFileTrackerStatus status = tracker->StartTracking(fs::path{ details::AssetRootPath }, EFileTrackingMode::Event);
+        const EFileTrackerStatus status = tracker->StartTracking(fs::path{ details::AssetRootPath }, EFileTrackingMode::Event, ETrackingFilterFlags::Default, true, 5000, 1ms);
 
         IG_LOG(AssetMonitor, Info, "Start Asset Tracking Status: {}", magic_enum::enum_name(status));
         IG_CHECK(status == EFileTrackerStatus::Success);
