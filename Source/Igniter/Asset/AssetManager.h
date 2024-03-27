@@ -14,7 +14,7 @@ namespace ig
     template <typename AssetType>
     using AssetRefHandle = RefHandle<AssetType, class AssetManager*>;
 
-    class AssetMonitor;
+    class AssetInfoMonitor;
     struct Texture;
     struct TextureImportConfig;
     class TextureImporter;
@@ -50,7 +50,7 @@ namespace ig
         }
 
     private:
-        std::unique_ptr<AssetMonitor> assetMonitor;
+        std::unique_ptr<AssetInfoMonitor> assetInfoMonitor;
 
         robin_hood::unordered_map<xg::Guid, uint32_t> guidReferenceCountTable;
 

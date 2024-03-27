@@ -309,7 +309,7 @@
     <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h">
+    <ClInclude Include="..\Source\Igniter\Asset\AssetInfoMonitor.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\ComInitializer.h">
@@ -485,7 +485,7 @@
     <ClCompile Include="..\Source\Igniter\Igniter.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp">
+    <ClCompile Include="..\Source\Igniter\Asset\AssetInfoMonitor.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\ComInitializer.cpp">

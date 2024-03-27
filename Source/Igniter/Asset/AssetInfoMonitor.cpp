@@ -4,13 +4,13 @@
 #include <Filesystem/Utils.h>
 #include <Filesystem/AsyncFileTracker.h>
 #include <Asset/Utils.h>
-#include <Asset/AssetMonitor.h>
+#include <Asset/AssetInfoMonitor.h>
 
-IG_DEFINE_LOG_CATEGORY(AssetMonitor);
+IG_DEFINE_LOG_CATEGORY(AssetInfoMonitor);
 
 namespace ig
 {
-    AssetMonitor::AssetMonitor() : tracker(std::make_unique<AsyncFileTracker>())
+    AssetInfoMonitor::AssetInfoMonitor() : tracker(std::make_unique<AsyncFileTracker>())
     {
         expiredAssetInfos.reserve(ReservedExpiredAssetInfoBufferSize);
         InitVirtualPathGuidTables();
@@ -18,11 +18,11 @@ namespace ig
         StartTracking();
     }
 
-    AssetMonitor::~AssetMonitor()
+    AssetInfoMonitor::~AssetInfoMonitor()
     {
     }
 
-    void AssetMonitor::ProcessBufferedNotifications()
+    void AssetInfoMonitor::ProcessBufferedNotifications()
     {
         ReadWriteLock rwLock{ bufferMutex };
 
@@ -66,23 +66,23 @@ namespace ig
         }
     }
 
-    bool AssetMonitor::HasExpiredAssets() const
+    bool AssetInfoMonitor::HasExpiredAssets() const
     {
         return !expiredAssetInfos.empty();
     }
 
-    bool AssetMonitor::Contains(const xg::Guid guid) const
+    bool AssetInfoMonitor::Contains(const xg::Guid guid) const
     {
         return guidAssetInfoTable.contains(guid);
     }
 
-    bool AssetMonitor::Contains(const EAssetType assetType, const String virtualPath) const
+    bool AssetInfoMonitor::Contains(const EAssetType assetType, const String virtualPath) const
     {
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
         return virtualPathGuidTable.contains(virtualPath);
     }
 
-    xg::Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
+    xg::Guid AssetInfoMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
     {
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
 
@@ -95,7 +95,7 @@ namespace ig
         return itr->second;
     }
 
-    std::optional<AssetInfo> AssetMonitor::GetAssetInfo(const xg::Guid guid) const
+    std::optional<AssetInfo> AssetInfoMonitor::GetAssetInfo(const xg::Guid guid) const
     {
         if (!guid.isValid())
         {
@@ -111,12 +111,12 @@ namespace ig
         return std::make_optional(itr->second);
     }
 
-    std::optional<AssetInfo> AssetMonitor::GetAssetInfo(const EAssetType assetType, const String virtualPath) const
+    std::optional<AssetInfo> AssetInfoMonitor::GetAssetInfo(const EAssetType assetType, const String virtualPath) const
     {
         return GetAssetInfo(GetGuid(assetType, virtualPath));
     }
 
-    void AssetMonitor::InitVirtualPathGuidTables()
+    void AssetInfoMonitor::InitVirtualPathGuidTables()
     {
         for (const auto assetType : magic_enum::enum_values<EAssetType>())
         {
@@ -133,7 +133,7 @@ namespace ig
         }
     }
 
-    void AssetMonitor::ParseAssetDirectory()
+    void AssetInfoMonitor::ParseAssetDirectory()
     {
         for (const auto assetType : magic_enum::enum_values<EAssetType>())
         {
@@ -145,7 +145,7 @@ namespace ig
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
             fs::directory_iterator directoryItr{ GetAssetDirectoryPath(assetType) };
 
-            IG_LOG(AssetMonitor, Debug, "Root Dir: {}", GetAssetDirectoryPath(assetType).string());
+            IG_LOG(AssetInfoMonitor, Debug, "Root Dir: {}", GetAssetDirectoryPath(assetType).string());
             while (directoryItr != fs::end(directoryItr))
             {
                 const fs::directory_entry& entry = *directoryItr;
@@ -155,7 +155,7 @@ namespace ig
                     const xg::Guid guidFromPath{ entry.path().filename().string() };
                     if (!guidFromPath.isValid())
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. {} is not valid guid.", entry.path().string(), entry.path().filename().string());
+                        IG_LOG(AssetInfoMonitor, Warning, "Asset {} ignored. {} is not valid guid.", entry.path().string(), entry.path().filename().string());
                         ++directoryItr;
                         continue;
                     }
@@ -164,7 +164,7 @@ namespace ig
                     metadataPath.replace_extension(details::MetadataExt);
                     if (!fs::exists(metadataPath))
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. The metadata does not exists.", entry.path().string());
+                        IG_LOG(AssetInfoMonitor, Warning, "Asset {} ignored. The metadata does not exists.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
@@ -175,21 +175,21 @@ namespace ig
 
                     if (!assetInfo.IsValid())
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. The asset info is invalid.", entry.path().string());
+                        IG_LOG(AssetInfoMonitor, Warning, "Asset {} ignored. The asset info is invalid.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
                     if (guidFromPath != assetInfo.Guid)
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. The guid from filename does not match asset info guid.", entry.path().string());
+                        IG_LOG(AssetInfoMonitor, Warning, "Asset {} ignored. The guid from filename does not match asset info guid.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
                     IG_CHECK(!virtualPathGuidTable.contains(assetInfo.VirtualPath));
                     virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
-                    IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
+                    IG_LOG(AssetInfoMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
                     IG_CHECK(!guidAssetInfoTable.contains(assetInfo.Guid));
                     guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
                 }
@@ -199,7 +199,7 @@ namespace ig
         }
     }
 
-    void AssetMonitor::StartTracking()
+    void AssetInfoMonitor::StartTracking()
     {
         auto& event = tracker->GetEvent();
         event.Subscribe("AssetMonitor"_fs,
@@ -211,11 +211,11 @@ namespace ig
 
         const EFileTrackerStatus status = tracker->StartTracking(fs::path{ details::AssetRootPath }, EFileTrackingMode::Event, ETrackingFilterFlags::Default, true, 5000, 1ms);
 
-        IG_LOG(AssetMonitor, Info, "Start Asset Tracking Status: {}", magic_enum::enum_name(status));
+        IG_LOG(AssetInfoMonitor, Info, "Start Asset Tracking Status: {}", magic_enum::enum_name(status));
         IG_CHECK(status == EFileTrackerStatus::Success);
     }
 
-    void AssetMonitor::ProcessNotification(const FileNotification& notification)
+    void AssetInfoMonitor::ProcessNotification(const FileNotification& notification)
     {
         /* AssetMonitor는 에셋의 정보의 변화만 감시한다. */
         if (!IsMetadataPath(notification.Path))
@@ -226,7 +226,7 @@ namespace ig
         const xg::Guid guidFromPath{ ConvertMetadataPathToGuid(notification.Path) };
         if (!guidFromPath.isValid())
         {
-            IG_LOG(AssetMonitor, Error, "Found invalid guid from {}.", notification.Path.string());
+            IG_LOG(AssetInfoMonitor, Error, "Found invalid guid from {}.", notification.Path.string());
             return;
         }
 
@@ -249,13 +249,13 @@ namespace ig
             if (!assetInfo.IsValid())
             {
                 bErrorOccurs = true;
-                IG_LOG(AssetMonitor, Error, "Asset info {} is invalid.", notification.Path.string());
+                IG_LOG(AssetInfoMonitor, Error, "Asset info {} is invalid.", notification.Path.string());
             }
 
             if (guidFromPath != assetInfo.Guid)
             {
                 bErrorOccurs = true;
-                IG_LOG(AssetMonitor, Error, "Guid from path {} != Asset Info Guid {}.", guidFromPath.str(), assetInfo.Guid.str());
+                IG_LOG(AssetInfoMonitor, Error, "Guid from path {} != Asset Info Guid {}.", guidFromPath.str(), assetInfo.Guid.str());
             }
 
             if (!bErrorOccurs)
@@ -267,19 +267,19 @@ namespace ig
                     expiredAssetInfos.emplace_back(guidAssetInfoTable[expiredGuid]);
                     guidAssetInfoTable.erase(expiredGuid);
 
-                    IG_LOG(AssetMonitor, Info, "Virtual path duplication found: {}. The old asset {} info has been expired.",
+                    IG_LOG(AssetInfoMonitor, Info, "Virtual path duplication found: {}. The old asset {} info has been expired.",
                            assetInfo.VirtualPath.ToStringView(), expiredGuid.str());
                 }
 
                 virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
                 guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
 
-                IG_LOG(AssetMonitor, Info, "{} => [Guid: {}, Virtual Path: {}, Type: {}] cached.",
+                IG_LOG(AssetInfoMonitor, Info, "{} => [Guid: {}, Virtual Path: {}, Type: {}] cached.",
                        magic_enum::enum_name(notification.Action), assetInfo.Guid.str(), assetInfo.VirtualPath.ToStringView(), magic_enum::enum_name(assetInfo.Type));
             }
             else
             {
-                IG_LOG(AssetMonitor, Error, "Error Occurs({})", magic_enum::enum_name(notification.Action));
+                IG_LOG(AssetInfoMonitor, Error, "Error Occurs({})", magic_enum::enum_name(notification.Action));
                 bRemoveRequired = true;
             }
         }
@@ -288,7 +288,7 @@ namespace ig
         {
             const AssetInfo cachedAssetInfo = guidAssetInfoTable[guidFromPath];
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(cachedAssetInfo.Type);
-            IG_LOG(AssetMonitor, Error, "{} => [Guid: {}, Virtual Path: {}, Type: {}] removed.",
+            IG_LOG(AssetInfoMonitor, Error, "{} => [Guid: {}, Virtual Path: {}, Type: {}] removed.",
                    magic_enum::enum_name(notification.Action), cachedAssetInfo.Guid.str(), cachedAssetInfo.VirtualPath.ToStringView(), magic_enum::enum_name(cachedAssetInfo.Type));
 
             virtualPathGuidTable.erase(cachedAssetInfo.VirtualPath);
@@ -296,14 +296,14 @@ namespace ig
         }
     }
 
-    std::vector<AssetInfo> AssetMonitor::FlushExpiredAssetInfos()
+    std::vector<AssetInfo> AssetInfoMonitor::FlushExpiredAssetInfos()
     {
         std::vector<AssetInfo> cloneOfAssetInfos{ expiredAssetInfos };
         expiredAssetInfos.clear();
         return cloneOfAssetInfos;
     }
 
-    AssetMonitor::VirtualPathGuidTable& AssetMonitor::GetVirtualPathGuidTable(const EAssetType assetType)
+    AssetInfoMonitor::VirtualPathGuidTable& AssetInfoMonitor::GetVirtualPathGuidTable(const EAssetType assetType)
     {
         IG_CHECK(assetType != EAssetType::Unknown);
         VirtualPathGuidTable* table = nullptr;
@@ -319,7 +319,7 @@ namespace ig
         return *table;
     }
 
-    const AssetMonitor::VirtualPathGuidTable& AssetMonitor::GetVirtualPathGuidTable(const EAssetType assetType) const
+    const AssetInfoMonitor::VirtualPathGuidTable& AssetInfoMonitor::GetVirtualPathGuidTable(const EAssetType assetType) const
     {
         IG_CHECK(assetType != EAssetType::Unknown);
         const VirtualPathGuidTable* table = nullptr;

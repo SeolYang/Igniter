@@ -6,13 +6,13 @@ namespace ig
 {
     class AsyncFileTracker;
     struct FileNotification;
-    class AssetMonitor
+    class AssetInfoMonitor
     {
         using VirtualPathGuidTable = robin_hood::unordered_map<String, xg::Guid>;
 
     public:
-        AssetMonitor();
-        ~AssetMonitor();
+        AssetInfoMonitor();
+        ~AssetInfoMonitor();
 
         void ProcessBufferedNotifications();
         [[nodiscard]] bool HasExpiredAssets() const;

@@ -3,7 +3,7 @@
 #include <Core/Serializable.h>
 #include <Render/GpuViewManager.h>
 #include <Asset/AssetManager.h>
-#include <Asset/AssetMonitor.h>
+#include <Asset/AssetInfoMonitor.h>
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
 
@@ -11,7 +11,7 @@ IG_DEFINE_LOG_CATEGORY(AssetManager);
 
 namespace ig
 {
-    AssetManager::AssetManager() : assetMonitor(std::make_unique<AssetMonitor>()),
+    AssetManager::AssetManager() : assetInfoMonitor(std::make_unique<AssetInfoMonitor>()),
                                    textureImporter(std::make_unique<TextureImporter>())
     {
     }
@@ -22,12 +22,12 @@ namespace ig
 
     void AssetManager::Update()
     {
-        IG_CHECK(assetMonitor != nullptr);
-        assetMonitor->ProcessBufferedNotifications();
+        IG_CHECK(assetInfoMonitor != nullptr);
+        assetInfoMonitor->ProcessBufferedNotifications();
 
-        if (assetMonitor->HasExpiredAssets())
+        if (assetInfoMonitor->HasExpiredAssets())
         {
-            std::vector<AssetInfo> expiredAssetInfos = assetMonitor->FlushExpiredAssetInfos();
+            std::vector<AssetInfo> expiredAssetInfos = assetInfoMonitor->FlushExpiredAssetInfos();
             for (const auto& assetInfo : expiredAssetInfos)
             {
                 const fs::path assetPath{ MakeAssetPath(assetInfo.Type, assetInfo.Guid) };
@@ -61,7 +61,7 @@ namespace ig
         // 성공 한 직후, 바로 Load 가능해야 하기 때문에 강제로 처리해주어야 함.
         /* 이 지점에서, 확실하게 받아올 수 있는 방법이 필요 */
         Update();
-        IG_CHECK(assetMonitor->Contains(*importedGuid));
+        IG_CHECK(assetInfoMonitor->Contains(*importedGuid));
         return MakeSuccess<xg::Guid, EAssetImportResult>(*importedGuid);
     }
 } // namespace ig
