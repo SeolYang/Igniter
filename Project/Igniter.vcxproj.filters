@@ -324,6 +324,9 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiUtils.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Filesystem\CoFileWatcher.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -493,6 +496,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\TextureImportPanel.cpp">
       <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Filesystem\CoFileWatcher.cpp">
+      <Filter>Source\Filesystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

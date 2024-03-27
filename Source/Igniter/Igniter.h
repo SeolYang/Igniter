@@ -30,6 +30,7 @@
 #include <variant>
 #include <any>
 #include <future>
+#include <coroutine>
 
 #ifndef UTF_CPP_CPLUSPLUS
     #define UTF_CPP_CPLUSPLUS 201703L

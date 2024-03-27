@@ -46,12 +46,12 @@ namespace ig
         }
 
         /* #sy_ref https://learn.microsoft.com/ko-kr/windows/win32/learnwin32/mouse-clicks#additional-flags */
-        if (BitFlagContains(wParam, MK_LBUTTON))
+        if (ContainsFlags(wParam, MK_LBUTTON))
         {
             return EInput::MouseLB;
         }
 
-        if (BitFlagContains(wParam, MK_RBUTTON))
+        if (ContainsFlags(wParam, MK_RBUTTON))
         {
             return EInput::MouseRB;
         }

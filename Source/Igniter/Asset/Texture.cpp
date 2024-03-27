@@ -664,7 +664,7 @@ namespace ig
             *newTex,
             D3D12_TEX2D_SRV{
                 .MostDetailedMip = 0,
-                .MipLevels = NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
+                .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
                 .PlaneSlice = 0,
                 .ResourceMinLODClamp = 0.f });
 
