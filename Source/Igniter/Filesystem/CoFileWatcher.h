@@ -2,7 +2,6 @@
 #include <Igniter.h>
 #include <Core/TypeUtils.h>
 #include <Core/String.h>
-#include <Core/Log.h>
 
 namespace ig::details
 {

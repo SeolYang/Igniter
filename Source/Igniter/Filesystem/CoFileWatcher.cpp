@@ -1,5 +1,8 @@
 #include <Igniter.h>
 #include <Filesystem/CoFileWatcher.h>
+#include <Core/Log.h>
+
+IG_DEFINE_LOG_CATEGORY(CoFileWatcher)
 
 namespace ig
 {
@@ -24,7 +27,7 @@ namespace ig
         }
     }
 
-    std::vector<ig::FileChangeInfo> CoFileWatcher::RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory)
+    std::vector<FileChangeInfo> CoFileWatcher::RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory)
     {
         IG_CHECK(IsReadyToWatch() && task.IsValid());
         this->bEnsureCatchChanges = bEnsureCatch;
@@ -34,8 +37,9 @@ namespace ig
         return tempBuffer;
     }
 
-    ig::details::FileWatchTask CoFileWatcher::Watch(CoFileWatcher* watcher)
+    details::FileWatchTask CoFileWatcher::Watch(CoFileWatcher* watcher)
     {
+        IG_CHECK(watcher != nullptr);
         IG_CHECK(watcher->IsReadyToWatch());
 
         constexpr size_t ReservedRawBufferSizeInBytes = 1024Ui64 * 1024Ui64;
@@ -87,13 +91,17 @@ namespace ig
                             continue;
                         }
 
-                        watcher->buffer.emplace_back(FileChangeInfo{ static_cast<EFileWatchAction>(notifyInfo->Action),
-                                                                     watcher->directoryPath / fileNameBuffer,
-                                                                     static_cast<uint64_t>(notifyInfo->CreationTime.QuadPart),
-                                                                     static_cast<uint64_t>(notifyInfo->LastModificationTime.QuadPart),
-                                                                     static_cast<uint64_t>(notifyInfo->LastChangeTime.QuadPart),
-                                                                     static_cast<uint64_t>(notifyInfo->LastAccessTime.QuadPart),
-                                                                     static_cast<uint64_t>(notifyInfo->FileSize.QuadPart) });
+                        const fs::path notifiedPath = watcher->directoryPath / fileNameBuffer;
+                        if (!fs::is_directory(notifiedPath) || !watcher->bIgnoreDirectoryChanges)
+                        {
+                            watcher->buffer.emplace_back(FileChangeInfo{ static_cast<EFileWatchAction>(notifyInfo->Action),
+                                                                         watcher->directoryPath / fileNameBuffer,
+                                                                         static_cast<uint64_t>(notifyInfo->CreationTime.QuadPart),
+                                                                         static_cast<uint64_t>(notifyInfo->LastModificationTime.QuadPart),
+                                                                         static_cast<uint64_t>(notifyInfo->LastChangeTime.QuadPart),
+                                                                         static_cast<uint64_t>(notifyInfo->LastAccessTime.QuadPart),
+                                                                         static_cast<uint64_t>(notifyInfo->FileSize.QuadPart) });
+                        }
 
                         if (notifyInfo->NextEntryOffset > 0)
                         {
@@ -105,11 +113,15 @@ namespace ig
                         }
                     }
                 }
+
+                CancelIo(overlapped.hEvent);
+            }
+            else
+            {
+                IG_LOG(CoFileWatcher, Warning, "Failed to request read directory changes.");
             }
 
-            CancelIo(overlapped.hEvent);
             CloseHandle(overlapped.hEvent);
         }
     }
-
 } // namespace ig
