@@ -72,5 +72,4 @@ namespace ig
 
         return xg::Guid{ path.replace_extension().filename().string() };
     }
-
 } // namespace ig

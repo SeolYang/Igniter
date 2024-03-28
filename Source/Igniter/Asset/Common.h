@@ -16,6 +16,35 @@ namespace ig
         // Scene
     };
 
+    template <typename T>
+    struct AssetTypeOf
+    {
+    public:
+        constexpr static EAssetType Val = EAssetType::Unknown;
+    };
+
+    struct Texture;
+    template <>
+    struct AssetTypeOf<Texture>
+    {
+    public:
+        constexpr static EAssetType Val = EAssetType::Texture;
+    };
+
+    struct StaticMesh;
+    template <>
+    struct AssetTypeOf<StaticMesh>
+    {
+    public:
+        constexpr static EAssetType Val = EAssetType::StaticMesh;
+    };
+
+    template <typename T>
+    constexpr EAssetType AssetTypeOf_v = AssetTypeOf<T>::Val;
+
+    template <typename T>
+    concept Asset = AssetTypeOf_v<T> != EAssetType::Unknown;
+
     struct ResourceInfo
     {
     public:
