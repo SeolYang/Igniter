@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h" />
     <ClInclude Include="..\Source\Igniter\Asset\AssetManager.h" />
-    <ClInclude Include="..\Source\Igniter\Asset\AssetInfoMonitor.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Common.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Model.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Texture.h" />
@@ -111,8 +111,9 @@
     <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Igniter\Asset\AssetCache.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp" />
-    <ClCompile Include="..\Source\Igniter\Asset\AssetInfoMonitor.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Model.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp" />
