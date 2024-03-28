@@ -160,6 +160,12 @@ namespace ig
         return std::make_optional(std::ref(ref));
     }
 
+    template <typename T>
+    using Ptr = std::unique_ptr<T>;
+
+    template <typename T>
+    using SharedPtr = std::shared_ptr<T>;
+
     using Entity = entt::entity;
     using Registry = entt::registry;
 
