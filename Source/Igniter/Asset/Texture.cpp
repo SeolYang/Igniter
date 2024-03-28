@@ -192,7 +192,7 @@ namespace ig
         }
     }
 
-    std::optional<xg::Guid> TextureImporter::Import(const String resPathStr,
+    std::optional<AssetInfo> TextureImporter::Import(const String resPathStr,
                                                     TextureImportConfig importConfig,
                                                     const bool bIsPersistent /*= false*/)
     {
@@ -446,7 +446,7 @@ namespace ig
         }
 
         IG_LOG(TextureImporter, Info, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.ToStringView(), assetPath.string(), tempTimer.End());
-        return std::make_optional(assetInfo.Guid);
+        return std::make_optional(assetInfo);
     }
 
     std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)

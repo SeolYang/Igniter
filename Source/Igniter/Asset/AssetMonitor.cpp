@@ -96,10 +96,6 @@ namespace ig
                     IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
                     IG_CHECK(!guidAssetInfoTable.contains(assetInfo.Guid));
                     guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
-
-                    /* #sy_wip Added 된 걸로 보고 변경 정보 캐싱 */
-                    // cachedAssetChangeInfo[entry.path()] = FileChangeInfo{ .Action = EFileWatchAction::Added,
-                    //                                                       .FileSize = fs::file_size(entry.path()) };
                 }
 
                 ++directoryItr;
@@ -216,10 +212,12 @@ namespace ig
         guidAssetInfoTable[newInfo.Guid] = newInfo;
     }
 
-    void AssetMonitor::Remove(const AssetInfo& info)
+    void AssetMonitor::Remove(const xg::Guid guid)
     {
+        IG_CHECK(guidAssetInfoTable.contains(guid));
+
+        const AssetInfo info = guidAssetInfoTable[guid];
         IG_CHECK(info.IsValid());
-        IG_CHECK(guidAssetInfoTable.contains(info.Guid));
 
         VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(info.Type);
         IG_CHECK(virtualPathGuidTable.contains(info.VirtualPath));
@@ -230,10 +228,12 @@ namespace ig
         guidAssetInfoTable.erase(info.Guid);
     }
 
-    void AssetMonitor::ReflectAllChanges()
+    void AssetMonitor::SaveAllChanges()
     {
+        IG_LOG(AssetMonitor, Info, "Save all chages...");
         ReflectExpiredToFiles();
         ReflectRemainedToFiles();
+        IG_LOG(AssetMonitor, Info, "All changes saved.");
     }
 
     void AssetMonitor::ReflectExpiredToFiles()
@@ -254,6 +254,8 @@ namespace ig
             {
                 IG_ENSURE(fs::remove(assetPath));
             }
+
+            IG_LOG(AssetMonitor, Debug, "Asset Expired: {} ({})", assetInfo.VirtualPath.ToStringView(), expiredAssetInfo.first.str());
         }
         expiredAssetInfos.clear();
     }
@@ -268,7 +270,7 @@ namespace ig
             json archive{ LoadJsonFromFile(metadataPath) };
             archive << assetInfo;
             IG_ENSURE(SaveJsonToFile(metadataPath, archive));
+            IG_LOG(AssetMonitor, Debug, "Asset Saved: {} ({})", assetInfo.VirtualPath.ToStringView(), guidAssetInfo.first.str());
         }
     }
-
 } // namespace ig

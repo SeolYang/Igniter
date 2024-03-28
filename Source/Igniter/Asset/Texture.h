@@ -70,7 +70,7 @@ namespace ig
         TextureImporter();
         ~TextureImporter();
 
-        std::optional<xg::Guid> Import(const String resPathStr, TextureImportConfig config, const bool bIsPersistent = false);
+        std::optional<AssetInfo> Import(const String resPathStr, TextureImportConfig config, const bool bIsPersistent = false);
 
     private:
         ID3D11Device* d3d11Device = nullptr;

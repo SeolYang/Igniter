@@ -1,5 +1,7 @@
 #include <Frieren.h>
 #include <MainLayer.h>
+#include <Core/Engine.h>
+#include <Asset/AssetManager.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/StatisticsPanel.h>
 #include <ImGui/CachedStringDebugger.h>
@@ -30,6 +32,12 @@ namespace fe
         {
             if (ImGui::BeginMenu("File"))
             {
+                if (ImGui::MenuItem("Save All Assets", "Ctrl+A+S"))
+                {
+                    ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+                    assetManager.SaveAllChanges();
+                }
+
                 if (ImGui::MenuItem("Import Texture", "Ctrl+T"))
                 {
                     textureImportPanel.SetVisibility(true);

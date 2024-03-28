@@ -24,8 +24,8 @@ namespace ig
 
         void Add(const AssetInfo& newInfo);
         void Update(const AssetInfo& newInfo);
-        void Remove(const AssetInfo& info);
-        void ReflectAllChanges();
+        void Remove(const xg::Guid guid);
+        void SaveAllChanges();
 
     private:
         VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetType assetType);

@@ -95,6 +95,8 @@ namespace ig
 
     void TextureImportPanel::SelectFileToImport()
     {
+        config = {};
+
         static const std::vector<DialogFilter> Filters{
             DialogFilter{ .Name = "JPEG Files"_fs, .FilterPattern = "*.jpg"_fs },
             DialogFilter{ .Name = "PNG Files"_fs, .FilterPattern = "*.png"_fs }

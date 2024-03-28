@@ -2,6 +2,7 @@
 #include <Core/Handle.h>
 #include <Core/Result.h>
 #include <Asset/Common.h>
+#include <Asset/AssetCache.h>
 
 namespace ig
 {
@@ -14,7 +15,7 @@ namespace ig
     template <typename AssetType>
     using AssetRefHandle = RefHandle<AssetType, class AssetManager*>;
 
-    class AssetInfoMonitor;
+    class AssetMonitor;
     struct Texture;
     struct TextureImportConfig;
     class TextureImporter;
@@ -33,8 +34,6 @@ namespace ig
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
-        void Update();
-
         Result<xg::Guid, EAssetImportResult> ImportTexture(const String resPath, const TextureImportConfig& config);
         AssetRefHandle<Texture> LoadTexture(const xg::Guid& guid);
         AssetRefHandle<Texture> LoadTexture(const String virtualPath);
@@ -42,19 +41,35 @@ namespace ig
         void Unload(const xg::Guid& guid);
         void Unload(const EAssetType assetType, const String virtualPath);
 
+        void Delete(const xg::Guid& guid);
+        void Delete(const EAssetType assetType, const String virtualPath);
+
+        void SaveAllChanges();
+
     private:
-        template <typename AssetType>
+        template <Asset AssetType>
         void operator()(const RefHandle<AssetType, AssetManager*>&, AssetType*)
         {
             IG_UNIMPLEMENTED();
         }
 
+        void InitAssetCaches();
+
+        template <Asset T>
+        AssetCache<T>& GetAssetCache()
+        {
+            return static_cast<AssetCache<T>&>(GetTypelessCache(AssetTypeOf_v<T>));
+        }
+
+        details::TypelessAssetCache& GetTypelessCache(const EAssetType assetType);
+
+        void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
+
     private:
-        std::unique_ptr<AssetInfoMonitor> assetInfoMonitor;
+        Ptr<AssetMonitor> assetMonitor;
+        std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
-        robin_hood::unordered_map<xg::Guid, uint32_t> guidReferenceCountTable;
-
-        std::unique_ptr<TextureImporter> textureImporter;
+        Ptr<TextureImporter> textureImporter;
         robin_hood::unordered_map<xg::Guid, Handle<Texture>> cachedTextures;
     };
 

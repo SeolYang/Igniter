@@ -111,7 +111,6 @@
     <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Igniter\Asset\AssetCache.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
