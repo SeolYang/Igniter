@@ -72,7 +72,6 @@
     <ClInclude Include="..\Source\Igniter\D3D12\RootSignature.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\ShaderBlob.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\Swapchain.h" />
-    <ClInclude Include="..\Source\Igniter\Filesystem\AsyncFileTracker.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\CoFileWatcher.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h" />
@@ -82,7 +81,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\CachedStringDebugger.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\EntityInsepctor.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\EntityList.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\FileNotificationPanel.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\AssetWatchPanel.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
@@ -148,7 +147,6 @@
     <ClCompile Include="..\Source\Igniter\D3D12\RootSignature.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp" />
-    <ClCompile Include="..\Source\Igniter\Filesystem\AsyncFileTracker.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\CoFileWatcher.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp" />
@@ -156,7 +154,7 @@
     <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\EntityInspector.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\FileNotificationPanel.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\AssetWatchPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp" />

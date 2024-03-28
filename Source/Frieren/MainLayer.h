@@ -9,7 +9,7 @@ namespace ig
     class EntityList;
     class EntityInspector;
     class StatisticsPanel;
-    class FileNotificationPanel;
+    class AssetWatchPanel;
     class TextureImportPanel;
 } // namespace ig
 
@@ -30,7 +30,7 @@ namespace fe
         ig::CachedStringDebugger& cachedStringDebugger;
         ig::EntityList& entityList;
         ig::EntityInspector& entityInspector;
-        ig::FileNotificationPanel& fileNotificationPanel;
+        ig::AssetWatchPanel& assetWatchPanel;
         ig::TextureImportPanel& textureImportPanel;
 
     };

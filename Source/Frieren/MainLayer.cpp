@@ -7,7 +7,7 @@
 #include <ImGui/CachedStringDebugger.h>
 #include <ImGui/EntityInsepctor.h>
 #include <ImGui/EntityList.h>
-#include <ImGui/FileNotificationPanel.h>
+#include <ImGui/AssetWatchPanel.h>
 #include <ImGui/TextureImportPanel.h>
 
 namespace fe
@@ -17,7 +17,7 @@ namespace fe
                                                     cachedStringDebugger(canvas.AddLayer<ig::CachedStringDebugger>()),
                                                     entityList(canvas.AddLayer<ig::EntityList>()),
                                                     entityInspector(canvas.AddLayer<ig::EntityInspector>(entityList)),
-                                                    fileNotificationPanel(canvas.AddLayer<ig::FileNotificationPanel>()),
+                                                    assetWatchPanel(canvas.AddLayer<ig::AssetWatchPanel>()),
                                                     textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>())
     {
     }
@@ -72,9 +72,9 @@ namespace fe
                     entityInspector.SetVisibility(true);
                 }
 
-                if (ImGui::MenuItem("File Notification Panel"))
+                if (ImGui::MenuItem("Asset Watch Panel"))
                 {
-                    fileNotificationPanel.SetVisibility(true);
+                    assetWatchPanel.SetVisibility(true);
                 }
 
                 ImGui::EndMenu();
