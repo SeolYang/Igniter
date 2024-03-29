@@ -5,6 +5,7 @@
 #include <Render/GpuViewManager.h>
 #include <Asset/AssetManager.h>
 #include <Asset/AssetMonitor.h>
+#include <Asset/AssetCache.h>
 #include <Asset/Texture.h>
 #include <Asset/Model.h>
 #include <Asset/Utils.h>
@@ -13,7 +14,7 @@ IG_DEFINE_LOG_CATEGORY(AssetManager);
 
 namespace ig
 {
-    AssetManager::AssetManager() : assetMonitor(std::make_unique<AssetMonitor>()),
+    AssetManager::AssetManager() : assetMonitor(std::make_unique<details::AssetMonitor>()),
                                    textureImporter(std::make_unique<TextureImporter>())
     {
         InitAssetCaches();
@@ -28,8 +29,8 @@ namespace ig
 
     void AssetManager::InitAssetCaches()
     {
-        assetCaches.emplace_back(std::make_unique<AssetCache<Texture>>());
-        assetCaches.emplace_back(std::make_unique<AssetCache<StaticMesh>>());
+        assetCaches.emplace_back(std::make_unique<details::AssetCache<Texture>>());
+        assetCaches.emplace_back(std::make_unique<details::AssetCache<StaticMesh>>());
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)

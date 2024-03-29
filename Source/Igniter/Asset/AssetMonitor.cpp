@@ -7,7 +7,7 @@
 
 IG_DEFINE_LOG_CATEGORY(AssetMonitor);
 
-namespace ig
+namespace ig::details
 {
     AssetMonitor::AssetMonitor()
     {
@@ -109,6 +109,9 @@ namespace ig
 
     bool AssetMonitor::Contains(const EAssetType assetType, const String virtualPath) const
     {
+        IG_CHECK(assetType != EAssetType::Unknown);
+        IG_CHECK(virtualPath.IsValid());
+
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
         const auto itr = virtualPathGuidTable.find(virtualPath);
         return itr != virtualPathGuidTable.cend() && Contains(itr->second);
@@ -116,13 +119,12 @@ namespace ig
 
     xg::Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
     {
-        const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
+        IG_CHECK(assetType != EAssetType::Unknown);
+        IG_CHECK(virtualPath.IsValid());
 
+        const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
         const auto itr = virtualPathGuidTable.find(virtualPath);
-        if (itr == virtualPathGuidTable.cend())
-        {
-            return xg::Guid{};
-        }
+        IG_CHECK(itr != virtualPathGuidTable.cend());
 
         return itr->second;
     }
@@ -130,14 +132,10 @@ namespace ig
     AssetInfo AssetMonitor::GetAssetInfo(const xg::Guid guid) const
     {
         IG_CHECK(Contains(guid));
+
         AssetInfo info{};
-
         const auto itr = guidSerializedMetaTable.find(guid);
-        if (itr != guidSerializedMetaTable.cend())
-        {
-            itr->second >> info;
-        }
-
+        itr->second >> info;
         return info;
     }
 
@@ -261,4 +259,4 @@ namespace ig
             IG_LOG(AssetMonitor, Debug, "Asset metadata Saved: {} ({})", assetInfo.VirtualPath.ToStringView(), guidSerializedMeta.first.str());
         }
     }
-} // namespace ig
+} // namespace ig::details

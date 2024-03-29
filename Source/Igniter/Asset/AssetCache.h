@@ -5,23 +5,20 @@
 #include <Asset/Common.h>
 #include <Asset/Utils.h>
 
-namespace ig
+namespace ig::details
 {
-    namespace details
+    class TypelessAssetCache
     {
-        class TypelessAssetCache
-        {
-        public:
-            virtual ~TypelessAssetCache() = default;
+    public:
+        virtual ~TypelessAssetCache() = default;
 
-            virtual EAssetType GetAssetType() const = 0;
-            virtual void Uncache(const xg::Guid guid) = 0;
-            virtual bool IsCached(const xg::Guid guid) = 0;
-        };
-    } // namespace details
+        virtual EAssetType GetAssetType() const = 0;
+        virtual void Uncache(const xg::Guid guid) = 0;
+        virtual bool IsCached(const xg::Guid guid) = 0;
+    };
 
     template <Asset T>
-    class AssetCache final : public details::TypelessAssetCache
+    class AssetCache final : public TypelessAssetCache
     {
     public:
         AssetCache() = default;
@@ -36,6 +33,7 @@ namespace ig
 
         void Cache(const xg::Guid guid, T)
         {
+            IG_CHECK(guid.isValid());
             IG_CHECK(!cachedAssets.contains(guid));
             IG_UNIMPLEMENTED();
         }
@@ -63,5 +61,4 @@ namespace ig
     private:
         robin_hood::unordered_map<xg::Guid, Handle<T>> cachedAssets{};
     };
-
-} // namespace ig
+} // namespace ig::details

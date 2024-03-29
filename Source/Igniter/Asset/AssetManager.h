@@ -2,7 +2,14 @@
 #include <Core/Handle.h>
 #include <Core/Result.h>
 #include <Asset/Common.h>
-#include <Asset/AssetCache.h>
+
+namespace ig::details
+{
+    class AssetMonitor;
+    class TypelessAssetCache;
+    template <Asset T>
+    class AssetCache;
+} // namespace ig::details
 
 namespace ig
 {
@@ -15,7 +22,6 @@ namespace ig
     template <typename AssetType>
     using AssetRefHandle = RefHandle<AssetType, class AssetManager*>;
 
-    class AssetMonitor;
     struct Texture;
     struct TextureImportConfig;
     class TextureImporter;
@@ -54,9 +60,9 @@ namespace ig
         }
 
         template <Asset T>
-        AssetCache<T>& GetAssetCache()
+        details::AssetCache<T>& GetAssetCache()
         {
-            return static_cast<AssetCache<T>&>(GetTypelessCache(AssetTypeOf_v<T>));
+            return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetTypeOf_v<T>));
         }
 
         details::TypelessAssetCache& GetTypelessCache(const EAssetType assetType);
@@ -66,7 +72,7 @@ namespace ig
         void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
 
     private:
-        Ptr<AssetMonitor> assetMonitor;
+        Ptr<details::AssetMonitor> assetMonitor;
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
         Ptr<TextureImporter> textureImporter;

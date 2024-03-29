@@ -1,13 +1,10 @@
 #pragma once
 #include <Igniter.h>
 #include <Core/Serializable.h>
-#include <Filesystem/CoFileWatcher.h>
 #include <Asset/Common.h>
 
-namespace ig
+namespace ig::details
 {
-    class CoFileWatcher;
-    struct FileChangeInfo;
     class AssetMonitor
     {
         using VirtualPathGuidTable = robin_hood::unordered_map<String, xg::Guid>;
@@ -91,6 +88,5 @@ namespace ig
         std::vector<std::pair<EAssetType, VirtualPathGuidTable>> virtualPathGuidTables;
         robin_hood::unordered_map<xg::Guid, json> guidSerializedMetaTable; // 오히려, 얘 자체를 들고있는 것도 나쁘진 않겠는데?
         robin_hood::unordered_map<xg::Guid, AssetInfo> expiredAssetInfos;
-
     };
-} // namespace ig
+} // namespace ig::details
