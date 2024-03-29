@@ -44,7 +44,7 @@ namespace ig
         void Delete(const xg::Guid& guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
-        void SaveAllChanges();
+        void SaveAllMetadataChanges();
 
     private:
         template <Asset AssetType>
@@ -53,8 +53,6 @@ namespace ig
             IG_UNIMPLEMENTED();
         }
 
-        void InitAssetCaches();
-
         template <Asset T>
         AssetCache<T>& GetAssetCache()
         {
@@ -62,6 +60,8 @@ namespace ig
         }
 
         details::TypelessAssetCache& GetTypelessCache(const EAssetType assetType);
+
+        void InitAssetCaches();
 
         void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
 

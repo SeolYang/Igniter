@@ -21,26 +21,53 @@ namespace ig
 
     AssetManager::~AssetManager()
     {
+        /* #sy_improvement 중간에 Pending 버퍼를 둬서, 실제로 저장하기 전까진 반영 X */
+        /* 만약 반영전에 종료되거나, 취소한다면 Pending 버퍼 내용을 지울 것. */
+        SaveAllMetadataChanges();
+    }
+
+    void AssetManager::InitAssetCaches()
+    {
+        assetCaches.emplace_back(std::make_unique<AssetCache<Texture>>());
+        assetCaches.emplace_back(std::make_unique<AssetCache<StaticMesh>>());
+    }
+
+    details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)
+    {
+        details::TypelessAssetCache* cachePtr = nullptr;
+        for (Ptr<details::TypelessAssetCache>& cache : assetCaches)
+        {
+            if (cache->GetAssetType() == assetType)
+            {
+                cachePtr = cache.get();
+                break;
+            }
+        }
+
+        IG_CHECK(cachePtr != nullptr);
+        return *cachePtr;
     }
 
     Result<xg::Guid, EAssetImportResult> AssetManager::ImportTexture(const String resPath, const TextureImportConfig& config)
     {
         IG_CHECK(textureImporter != nullptr);
-        std::optional<AssetInfo> importedAssetInfo = textureImporter->Import(resPath, config);
-        if (!importedAssetInfo)
+        std::optional<std::pair<AssetInfo, Texture::MetadataType>> assetMetadata = textureImporter->Import(resPath, config);
+        if (!assetMetadata)
         {
             return MakeFail<xg::Guid, EAssetImportResult::ImporterFailure>();
         }
 
-        IG_CHECK(importedAssetInfo->IsValid());
-        IG_CHECK(importedAssetInfo->VirtualPath.IsValid());
-        if (assetMonitor->Contains(importedAssetInfo->Type, importedAssetInfo->VirtualPath))
+        const AssetInfo& assetInfo = assetMetadata->first;
+
+        IG_CHECK(assetInfo.IsValid());
+        IG_CHECK(assetInfo.VirtualPath.IsValid());
+        if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
         {
-            Delete(importedAssetInfo->Type, importedAssetInfo->VirtualPath);
+            Delete(assetInfo.Type, assetInfo.VirtualPath);
         }
 
-        assetMonitor->Add(*importedAssetInfo);
-        return MakeSuccess<xg::Guid, EAssetImportResult>(importedAssetInfo->Guid);
+        assetMonitor->Create<Texture>(assetInfo, assetMetadata->second);
+        return MakeSuccess<xg::Guid, EAssetImportResult>(assetInfo.Guid);
     }
 
     void AssetManager::Unload(const EAssetType assetType, const String virtualPath)
@@ -68,16 +95,6 @@ namespace ig
         DeleteInternal(assetType, assetMonitor->GetGuid(assetType, virtualPath));
     }
 
-    void AssetManager::SaveAllChanges()
-    {
-        assetMonitor->SaveAllChanges();
-        /* #sy_wip 에셋 메타데이터 저장 */
-        // 에셋 순회 돌아서, 에셋 내부 메타데이터도 전부 업데이트 하는 방식 필요
-        // 에셋의 타입에 내부적으로 무조건 'Metadata' 를 들고있게 하는게 좋아보임.
-        // 1. Metadata type의 정의
-        // 2. Metadata 멤버 정의
-    }
-
     void AssetManager::DeleteInternal(const EAssetType assetType, const xg::Guid guid)
     {
         IG_CHECK(assetType != EAssetType::Unknown);
@@ -92,26 +109,8 @@ namespace ig
         assetMonitor->Remove(guid);
     }
 
-    void AssetManager::InitAssetCaches()
+    void AssetManager::SaveAllMetadataChanges()
     {
-        assetCaches.emplace_back(std::make_unique<AssetCache<Texture>>());
-        assetCaches.emplace_back(std::make_unique<AssetCache<StaticMesh>>());
+        assetMonitor->SaveAllChanges();
     }
-
-    details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)
-    {
-        details::TypelessAssetCache* cachePtr = nullptr;
-        for (Ptr<details::TypelessAssetCache>& cache : assetCaches)
-        {
-            if (cache->GetAssetType() == assetType)
-            {
-                cachePtr = cache.get();
-                break;
-            }
-        }
-
-        IG_CHECK(cachePtr != nullptr);
-        return *cachePtr;
-    }
-
 } // namespace ig

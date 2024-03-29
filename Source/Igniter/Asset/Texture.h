@@ -64,19 +64,6 @@ namespace ig
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     };
 
-    class TextureImporter
-    {
-    public:
-        TextureImporter();
-        ~TextureImporter();
-
-        std::optional<AssetInfo> Import(const String resPathStr, TextureImportConfig config, const bool bIsPersistent = false);
-
-    private:
-        ID3D11Device* d3d11Device = nullptr;
-    };
-
-    // 로드 후 셋업
     class RenderDevice;
     class GpuTexture;
     class GpuView;
@@ -93,9 +80,20 @@ namespace ig
         RefHandle<GpuView> TexSampler{};
     };
 
-
     template <>
     constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
+
+    class TextureImporter
+    {
+    public:
+        TextureImporter();
+        ~TextureImporter();
+
+        std::optional<std::pair<AssetInfo, Texture::MetadataType>> Import(const String resPathStr, TextureImportConfig config, const bool bIsPersistent = false);
+
+    private:
+        ID3D11Device* d3d11Device = nullptr;
+    };
 
     class GpuUploader;
     class TextureLoader

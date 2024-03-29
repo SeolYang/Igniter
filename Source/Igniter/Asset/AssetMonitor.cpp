@@ -2,7 +2,6 @@
 #include <Core/Log.h>
 #include <Core/Serializable.h>
 #include <Filesystem/Utils.h>
-#include <Filesystem/AsyncFileTracker.h>
 #include <Asset/Utils.h>
 #include <Asset/AssetMonitor.h>
 
@@ -94,8 +93,8 @@ namespace ig
                     IG_CHECK(!virtualPathGuidTable.contains(assetInfo.VirtualPath));
                     virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
                     IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
-                    IG_CHECK(!guidAssetInfoTable.contains(assetInfo.Guid));
-                    guidAssetInfoTable.insert_or_assign(assetInfo.Guid, assetInfo);
+                    IG_CHECK(!Contains(assetInfo.Guid));
+                    guidSerializedMetaTable[assetInfo.Guid] = serializedMetadata;
                 }
 
                 ++directoryItr;
@@ -105,13 +104,14 @@ namespace ig
 
     bool AssetMonitor::Contains(const xg::Guid guid) const
     {
-        return guidAssetInfoTable.contains(guid);
+        return guidSerializedMetaTable.contains(guid);
     }
 
     bool AssetMonitor::Contains(const EAssetType assetType, const String virtualPath) const
     {
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-        return virtualPathGuidTable.contains(virtualPath);
+        const auto itr = virtualPathGuidTable.find(virtualPath);
+        return itr != virtualPathGuidTable.cend() && Contains(itr->second);
     }
 
     xg::Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
@@ -127,23 +127,21 @@ namespace ig
         return itr->second;
     }
 
-    std::optional<AssetInfo> AssetMonitor::GetAssetInfo(const xg::Guid guid) const
+    AssetInfo AssetMonitor::GetAssetInfo(const xg::Guid guid) const
     {
-        if (!guid.isValid())
+        IG_CHECK(Contains(guid));
+        AssetInfo info{};
+
+        const auto itr = guidSerializedMetaTable.find(guid);
+        if (itr != guidSerializedMetaTable.cend())
         {
-            return std::nullopt;
+            itr->second >> info;
         }
 
-        const auto itr = guidAssetInfoTable.find(guid);
-        if (itr == guidAssetInfoTable.cend())
-        {
-            return std::nullopt;
-        }
-
-        return std::make_optional(itr->second);
+        return info;
     }
 
-    std::optional<AssetInfo> AssetMonitor::GetAssetInfo(const EAssetType assetType, const String virtualPath) const
+    AssetInfo AssetMonitor::GetAssetInfo(const EAssetType assetType, const String virtualPath) const
     {
         return GetAssetInfo(GetGuid(assetType, virtualPath));
     }
@@ -180,24 +178,12 @@ namespace ig
         return *table;
     }
 
-    void AssetMonitor::Add(const AssetInfo& newInfo)
+    void AssetMonitor::UpdateInfo(const AssetInfo& newInfo)
     {
         IG_CHECK(newInfo.IsValid());
-        IG_CHECK(!guidAssetInfoTable.contains(newInfo.Guid));
+        IG_CHECK(Contains(newInfo.Guid));
 
-        VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.Type);
-        IG_CHECK(!virtualPathGuidTable.contains(newInfo.VirtualPath));
-
-        guidAssetInfoTable[newInfo.Guid] = newInfo;
-        virtualPathGuidTable[newInfo.VirtualPath] = newInfo.Guid;
-    }
-
-    void AssetMonitor::Update(const AssetInfo& newInfo)
-    {
-        IG_CHECK(newInfo.IsValid());
-        IG_CHECK(guidAssetInfoTable.contains(newInfo.Guid));
-
-        const AssetInfo& oldInfo = guidAssetInfoTable[newInfo.Guid];
+        const AssetInfo& oldInfo = GetAssetInfo(newInfo.Guid);
         IG_CHECK(newInfo.Guid == oldInfo.Guid);
         IG_CHECK(newInfo.Type == oldInfo.Type);
 
@@ -209,14 +195,14 @@ namespace ig
             virtualPathGuidTable[newInfo.VirtualPath] = newInfo.Guid;
         }
 
-        guidAssetInfoTable[newInfo.Guid] = newInfo;
+        guidSerializedMetaTable[newInfo.Guid] << newInfo;
     }
 
     void AssetMonitor::Remove(const xg::Guid guid)
     {
-        IG_CHECK(guidAssetInfoTable.contains(guid));
+        IG_CHECK(Contains(guid));
 
-        const AssetInfo info = guidAssetInfoTable[guid];
+        const AssetInfo info = GetAssetInfo(guid);
         IG_CHECK(info.IsValid());
 
         VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(info.Type);
@@ -225,22 +211,22 @@ namespace ig
 
         expiredAssetInfos[info.Guid] = info;
         virtualPathGuidTable.erase(info.VirtualPath);
-        guidAssetInfoTable.erase(info.Guid);
+        guidSerializedMetaTable.erase(info.Guid);
     }
 
     void AssetMonitor::SaveAllChanges()
     {
-        IG_LOG(AssetMonitor, Info, "Save all chages...");
+        IG_LOG(AssetMonitor, Info, "Save all info chages...");
         ReflectExpiredToFiles();
         ReflectRemainedToFiles();
-        IG_LOG(AssetMonitor, Info, "All changes saved.");
+        IG_LOG(AssetMonitor, Info, "All info changes saved.");
     }
 
     void AssetMonitor::ReflectExpiredToFiles()
     {
         for (const auto& expiredAssetInfo : expiredAssetInfos)
         {
-            IG_CHECK(!guidAssetInfoTable.contains(expiredAssetInfo.first));
+            IG_CHECK(!Contains(expiredAssetInfo.first));
             const AssetInfo& assetInfo{ expiredAssetInfo.second };
             IG_CHECK(expiredAssetInfo.first == assetInfo.Guid);
             const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.Type, assetInfo.Guid) };
@@ -263,14 +249,16 @@ namespace ig
     void AssetMonitor::ReflectRemainedToFiles()
     {
         IG_CHECK(expiredAssetInfos.empty());
-        for (const auto& guidAssetInfo : guidAssetInfoTable)
+        for (const auto& guidSerializedMeta : guidSerializedMetaTable)
         {
-            const AssetInfo& assetInfo{ guidAssetInfo.second };
+            const json& serializedMeta = guidSerializedMeta.second;
+            AssetInfo assetInfo{};
+            serializedMeta >> assetInfo;
+            IG_CHECK(assetInfo.IsValid());
+
             const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.Type, assetInfo.Guid) };
-            json archive{ LoadJsonFromFile(metadataPath) };
-            archive << assetInfo;
-            IG_ENSURE(SaveJsonToFile(metadataPath, archive));
-            IG_LOG(AssetMonitor, Debug, "Asset Saved: {} ({})", assetInfo.VirtualPath.ToStringView(), guidAssetInfo.first.str());
+            IG_ENSURE(SaveJsonToFile(metadataPath, serializedMeta));
+            IG_LOG(AssetMonitor, Debug, "Asset metadata Saved: {} ({})", assetInfo.VirtualPath.ToStringView(), guidSerializedMeta.first.str());
         }
     }
 } // namespace ig
