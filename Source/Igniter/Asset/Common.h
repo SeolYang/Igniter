@@ -17,33 +17,19 @@ namespace ig
     };
 
     template <typename T>
-    struct AssetTypeOf
-    {
-    public:
-        constexpr static EAssetType Val = EAssetType::Unknown;
-    };
-
-    struct Texture;
-    template <>
-    struct AssetTypeOf<Texture>
-    {
-    public:
-        constexpr static EAssetType Val = EAssetType::Texture;
-    };
-
-    struct StaticMesh;
-    template <>
-    struct AssetTypeOf<StaticMesh>
-    {
-    public:
-        constexpr static EAssetType Val = EAssetType::StaticMesh;
-    };
+    constexpr EAssetType AssetTypeOf_v = EAssetType::Unknown;
 
     template <typename T>
-    constexpr EAssetType AssetTypeOf_v = AssetTypeOf<T>::Val;
+    concept Asset = requires 
+    {
+        typename T::MetadataType; 
+    } && AssetTypeOf_v<T> != EAssetType::Unknown;
 
     template <typename T>
-    concept Asset = AssetTypeOf_v<T> != EAssetType::Unknown;
+    constexpr inline bool IsAsset_v = false;
+
+    template <Asset T>
+    constexpr inline bool IsAsset_v<T> = true;
 
     struct ResourceInfo
     {

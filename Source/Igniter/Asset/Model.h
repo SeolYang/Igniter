@@ -63,7 +63,6 @@ namespace ig
     public:
         json& Serialize(json& archive) const;
         const json& Deserialize(const json& archive);
-
     };
 
     class TextureImporter;
@@ -79,12 +78,18 @@ namespace ig
     struct StaticMesh
     {
     public:
+        using MetadataType = StaticMeshLoadConfig;
+
+    public:
         StaticMeshLoadConfig LoadConfig;
         Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> VertexBufferInstance;
         Handle<GpuView, GpuViewManager*> VertexBufferSrv;
         Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> IndexBufferInstance;
         // RefHandle<Material>
     };
+
+    template<>
+    constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
 
     class StaticMeshLoader
     {

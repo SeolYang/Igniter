@@ -84,11 +84,18 @@ namespace ig
     struct Texture
     {
     public:
+        using MetadataType = TextureLoadConfig;
+
+    public:
         TextureLoadConfig LoadConfig{};
         Handle<GpuTexture, DeferredDestroyer<GpuTexture>> TextureInstance{}; // Using Deferred Deallocation
         Handle<GpuView, GpuViewManager*> ShaderResourceView{};
         RefHandle<GpuView> TexSampler{};
     };
+
+
+    template <>
+    constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
 
     class GpuUploader;
     class TextureLoader
