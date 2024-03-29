@@ -72,7 +72,9 @@ namespace ig
     struct Texture
     {
     public:
-        using MetadataType = TextureLoadConfig;
+        using ImportConfigType = TextureImportConfig;
+        using LoadConfigType = TextureLoadConfig;
+        using MetadataType = std::pair<AssetInfo, LoadConfigType>;
 
     public:
         TextureLoadConfig LoadConfig{};
@@ -102,13 +104,10 @@ namespace ig
     class TextureImporter
     {
     public:
-        using Metadata = std::pair<AssetInfo, Texture::MetadataType>;
-
-    public:
         TextureImporter();
         ~TextureImporter();
 
-        Result<Metadata, ETextureImportStatus> Import(const String resPathStr, TextureImportConfig config);
+        Result<Texture::MetadataType, ETextureImportStatus> Import(const String resPathStr, TextureImportConfig config);
 
     private:
         ID3D11Device* d3d11Device = nullptr;

@@ -192,14 +192,14 @@ namespace ig
         }
     }
 
-    Result<TextureImporter::Metadata, ETextureImportStatus> TextureImporter::Import(const String resPathStr, TextureImportConfig importConfig)
+    Result<Texture::MetadataType, ETextureImportStatus> TextureImporter::Import(const String resPathStr, TextureImportConfig importConfig)
     {
         CoInitializeUnique();
 
         const fs::path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
-            return MakeFail<Metadata, ETextureImportStatus::FileDoesNotExist>();
+            return MakeFail<Texture::MetadataType, ETextureImportStatus::FileDoesNotExist>();
         }
 
         const fs::path resExtension = resPath.extension();
@@ -238,12 +238,12 @@ namespace ig
         }
         else
         {
-            return MakeFail<Metadata, ETextureImportStatus::UnsupportedExtension>();
+            return MakeFail<Texture::MetadataType, ETextureImportStatus::UnsupportedExtension>();
         }
 
         if (FAILED(loadRes))
         {
-            return MakeFail<Metadata, ETextureImportStatus::FailedLoadFromFile>();
+            return MakeFail<Texture::MetadataType, ETextureImportStatus::FailedLoadFromFile>();
         }
 
         if (!bIsDDSFormat)
@@ -251,18 +251,18 @@ namespace ig
             const bool bValidDimensions = texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 && texMetadata.arraySize > 0;
             if (!bValidDimensions)
             {
-                return MakeFail<Metadata, ETextureImportStatus::InvalidDimensions>();
+                return MakeFail<Texture::MetadataType, ETextureImportStatus::InvalidDimensions>();
             }
 
             const bool bValidVolumemapArgs = !texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1);
             if (!bValidVolumemapArgs)
             {
-                return MakeFail<Metadata, ETextureImportStatus::InvalidVolumemap>();
+                return MakeFail<Texture::MetadataType, ETextureImportStatus::InvalidVolumemap>();
             }
 
             if (texMetadata.format == DXGI_FORMAT_UNKNOWN)
             {
-                return MakeFail<Metadata, ETextureImportStatus::UnknownFormat>();
+                return MakeFail<Texture::MetadataType, ETextureImportStatus::UnknownFormat>();
             }
 
             /* Generate full mipmap chain. */
@@ -275,7 +275,7 @@ namespace ig
                                                                 0, mipChain);
                 if (FAILED(genRes))
                 {
-                    return MakeFail<Metadata, ETextureImportStatus::FailedGenerateMips>();
+                    return MakeFail<Texture::MetadataType, ETextureImportStatus::FailedGenerateMips>();
                 }
 
                 texMetadata = mipChain.GetMetadata();
@@ -339,7 +339,7 @@ namespace ig
 
                 if (FAILED(compRes))
                 {
-                    return MakeFail<Metadata, ETextureImportStatus::FailedCompression>();
+                    return MakeFail<Texture::MetadataType, ETextureImportStatus::FailedCompression>();
                 }
 
                 texMetadata = compTex.GetMetadata();
@@ -389,7 +389,7 @@ namespace ig
         IG_CHECK(!assetMetadataPath.empty());
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
-            return MakeFail<Metadata, ETextureImportStatus::FailedSaveMetadataToFile>();
+            return MakeFail<Texture::MetadataType, ETextureImportStatus::FailedSaveMetadataToFile>();
         }
 
         /* Save data to asset file */
@@ -407,11 +407,11 @@ namespace ig
 
         if (FAILED(res))
         {
-            return MakeFail<Metadata, ETextureImportStatus::FailedSaveAssetToFile>();
+            return MakeFail<Texture::MetadataType, ETextureImportStatus::FailedSaveAssetToFile>();
         }
 
         IG_CHECK(assetInfo.IsValid() && assetInfo.Type == EAssetType::Texture);
-        return MakeSuccess<Metadata, ETextureImportStatus>(std::make_pair(assetInfo, newLoadConfig));
+        return MakeSuccess<Texture::MetadataType, ETextureImportStatus>(std::make_pair(assetInfo, newLoadConfig));
     }
 
     std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)

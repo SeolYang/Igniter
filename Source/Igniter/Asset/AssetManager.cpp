@@ -51,14 +51,14 @@ namespace ig
 
     xg::Guid AssetManager::ImportTexture(const String resPath, const TextureImportConfig& config)
     {
-        Result<TextureImporter::Metadata, ETextureImportStatus> result = textureImporter->Import(resPath, config);
+        Result<Texture::MetadataType, ETextureImportStatus> result = textureImporter->Import(resPath, config);
         if (!result.HasOwnership())
         {
             IG_LOG(AssetManager, Error, "Failed({}) to import texture \"{}\".", magic_enum::enum_name(result.GetStatus()), resPath.ToStringView());
             return {};
         }
 
-        const TextureImporter::Metadata metadata = result.Take();
+        const Texture::MetadataType metadata = result.Take();
         const AssetInfo& assetInfo = metadata.first;
 
         if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))

@@ -19,6 +19,7 @@ namespace ig
     struct Texture;
     struct TextureImportConfig;
     class TextureImporter;
+    struct StaticMeshImportConfig;
     class AssetManager final
     {
         friend class RefHandle<Texture, AssetManager*>;
@@ -37,6 +38,8 @@ namespace ig
         xg::Guid ImportTexture(const String resPath, const TextureImportConfig& config);
         AssetRefHandle<Texture> LoadTexture(const xg::Guid& guid);
         AssetRefHandle<Texture> LoadTexture(const String virtualPath);
+
+        std::vector<xg::Guid> ImportStaticMesh(const String resPath, const StaticMeshImportConfig& config);
 
         void Unload(const xg::Guid& guid);
         void Unload(const EAssetType assetType, const String virtualPath);

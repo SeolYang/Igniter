@@ -16,21 +16,6 @@ namespace ig
         // Scene
     };
 
-    template <typename T>
-    constexpr EAssetType AssetTypeOf_v = EAssetType::Unknown;
-
-    template <typename T>
-    concept Asset = requires 
-    {
-        typename T::MetadataType; 
-    } && AssetTypeOf_v<T> != EAssetType::Unknown;
-
-    template <typename T>
-    constexpr inline bool IsAsset_v = false;
-
-    template <Asset T>
-    constexpr inline bool IsAsset_v<T> = true;
-
     struct ResourceInfo
     {
     public:
@@ -57,6 +42,22 @@ namespace ig
         EAssetType Type = EAssetType::Unknown;
         bool bIsPersistent = false;
     };
+
+    template <typename T>
+    constexpr EAssetType AssetTypeOf_v = EAssetType::Unknown;
+
+    template <typename T>
+    concept Asset = requires {
+        typename T::ImportConfigType;
+        typename T::LoadConfigType;
+        typename T::MetadataType;
+    } && std::is_same_v<typename T::MetadataType, std::pair<AssetInfo, typename T::LoadConfigType>> && AssetTypeOf_v<T> != EAssetType::Unknown;
+
+    template <typename T>
+    constexpr inline bool IsAsset_v = false;
+
+    template <Asset T>
+    constexpr inline bool IsAsset_v<T> = true;
 
     namespace details
     {

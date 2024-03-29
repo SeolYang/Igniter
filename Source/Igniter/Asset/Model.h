@@ -78,7 +78,9 @@ namespace ig
     struct StaticMesh
     {
     public:
-        using MetadataType = StaticMeshLoadConfig;
+        using ImportConfigType = StaticMeshImportConfig;
+        using LoadConfigType = StaticMeshLoadConfig;
+        using MetadataType = std::pair<AssetInfo, StaticMeshLoadConfig>;
 
     public:
         StaticMeshLoadConfig LoadConfig;
