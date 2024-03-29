@@ -33,6 +33,16 @@ namespace ig
     {
     public:
         Result(const Result&) = delete;
+        Result(Result&& other) noexcept : status(other.status)
+        {
+            IG_CHECK(other.status != E::Success && other.bOwnershipTransferred);
+            if (!other.bOwnershipTransferred)
+            {
+                value = std::move(other.value);
+            }
+            bOwnershipTransferred = std::exchange(other.bOwnershipTransferred, true);
+        }
+
         ~Result()
         {
             IG_CHECK(!IsSuccess() || (IsSuccess() && bOwnershipTransferred) && "Result doesn't handled.");
@@ -85,6 +95,7 @@ namespace ig
             if (newStatus == E::Success)
             {
                 ::new (&value) T(std::forward<Args>(args)...);
+                bOwnershipTransferred = false;
             }
         }
 
@@ -99,7 +110,7 @@ namespace ig
         };
 
         const E status;
-        bool bOwnershipTransferred = false;
+        bool bOwnershipTransferred = true;
     };
 
     template <typename T, ResultStatus E, typename... Args>
