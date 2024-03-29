@@ -47,6 +47,8 @@ namespace ig
         void Delete(const xg::Guid& guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
+        [[nodiscard]] AssetInfo GetAssetInfo(const xg::Guid guid) const;
+
         void SaveAllMetadataChanges();
 
     private:

@@ -77,6 +77,7 @@ namespace ig
         using MetadataType = std::pair<AssetInfo, LoadConfigType>;
 
     public:
+        xg::Guid Guid {};
         TextureLoadConfig LoadConfig{};
         Handle<GpuTexture, DeferredDestroyer<GpuTexture>> TextureInstance{}; // Using Deferred Deallocation
         Handle<GpuView, GpuViewManager*> ShaderResourceView{};

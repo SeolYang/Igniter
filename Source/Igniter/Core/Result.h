@@ -35,7 +35,7 @@ namespace ig
         Result(const Result&) = delete;
         Result(Result&& other) noexcept : status(other.status)
         {
-            IG_CHECK(other.status != E::Success && other.bOwnershipTransferred);
+            IG_CHECK(other.status != E::Success && other.bOwnershipTransferred || other.status == E::Success && !other.bOwnershipTransferred);
             if (!other.bOwnershipTransferred)
             {
                 value = std::move(other.value);

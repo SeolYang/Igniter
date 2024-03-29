@@ -9,6 +9,7 @@
 #include <ImGui/EntityList.h>
 #include <ImGui/AssetWatchPanel.h>
 #include <ImGui/TextureImportPanel.h>
+#include <ImGui/StaticMeshImportPanel.h>
 
 namespace fe
 {
@@ -18,7 +19,8 @@ namespace fe
                                                     entityList(canvas.AddLayer<ig::EntityList>()),
                                                     entityInspector(canvas.AddLayer<ig::EntityInspector>(entityList)),
                                                     assetWatchPanel(canvas.AddLayer<ig::AssetWatchPanel>()),
-                                                    textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>())
+                                                    textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>()),
+                                                    staticMeshImportPanel(canvas.AddLayer<ig::StaticMeshImportPanel>())
     {
     }
 
@@ -41,6 +43,11 @@ namespace fe
                 if (ImGui::MenuItem("Import Texture", "Ctrl+T"))
                 {
                     textureImportPanel.SetVisibility(true);
+                }
+
+                if (ImGui::MenuItem("Import Static Mesh"))
+                {
+                    staticMeshImportPanel.SetVisibility(true);
                 }
 
                 if (ImGui::MenuItem("Exit (Alt+F4)"))

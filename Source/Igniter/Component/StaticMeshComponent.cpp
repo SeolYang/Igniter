@@ -1,5 +1,7 @@
 #include <Igniter.h>
+#include <Core/Engine.h>
 #include <Asset/Model.h>
+#include <Asset/AssetManager.h>
 #include <Component/StaticMeshComponent.h>
 
 namespace ig
@@ -11,6 +13,10 @@ namespace ig
     {
         StaticMeshComponent& staticMeshComponent = registry.get<StaticMeshComponent>(entity);
         IG_CHECK(staticMeshComponent.StaticMeshHandle);
-        ImGui::Text(staticMeshComponent.StaticMeshHandle->LoadConfig.Name.c_str());
+        StaticMesh& staticMesh = *staticMeshComponent.StaticMeshHandle;
+
+        AssetManager& assetManager = Igniter::GetAssetManager();
+        const AssetInfo info = assetManager.GetAssetInfo(staticMesh.Guid);
+        ImGui::Text(std::format("{}({})", info.VirtualPath.ToStringView(), staticMesh.Guid.str()).c_str());
     }
 } // namespace ig

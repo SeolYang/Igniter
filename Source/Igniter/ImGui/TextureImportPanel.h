@@ -10,7 +10,7 @@ namespace ig
     {
     public:
         TextureImportPanel() = default;
-        ~TextureImportPanel();
+        ~TextureImportPanel() = default;
 
         void Render() override;
         void OnVisible() override;

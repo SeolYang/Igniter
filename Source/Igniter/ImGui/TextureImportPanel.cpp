@@ -1,18 +1,11 @@
 #include <Igniter.h>
 #include <Core/Engine.h>
-#include <Core/Log.h>
 #include <Asset/AssetManager.h>
 #include <ImGui/TextureImportPanel.h>
 #include <ImGui/ImGuiUtils.h>
 
-IG_DEFINE_LOG_CATEGORY(TextureImportPanel);
-
 namespace ig
 {
-    TextureImportPanel::~TextureImportPanel()
-    {
-    }
-
     void TextureImportPanel::Render()
     {
         if (ImGui::Begin("Texture Import", &bIsVisible))
@@ -24,10 +17,13 @@ namespace ig
 
             if (status != EOpenFileDialogStatus::Success)
             {
-                ImGui::Text("Failed to select texture resource file. (Status: {})", magic_enum::enum_name(status).data());
+                ImGui::Text("Failed to select texture resource file. (Status: %s)", magic_enum::enum_name(status).data());
             }
             else
             {
+                ImGui::SameLine();
+                ImGui::Text("%s", path.ToStringView().data());
+
                 if (BeginEnumCombo<ETextureCompressionMode>("Compression Mode", selectedCompModeIdx))
                 {
                     EndEnumCombo();
@@ -88,7 +84,9 @@ namespace ig
 
         static const std::vector<DialogFilter> Filters{
             DialogFilter{ .Name = "JPEG Files"_fs, .FilterPattern = "*.jpg"_fs },
-            DialogFilter{ .Name = "PNG Files"_fs, .FilterPattern = "*.png"_fs }
+            DialogFilter{ .Name = "PNG Files"_fs, .FilterPattern = "*.png"_fs },
+            DialogFilter{ .Name = "HDR Files"_fs, .FilterPattern = "*.hdr"_fs },
+            DialogFilter{ .Name = "DDS Files"_fs, .FilterPattern = "*.dds"_fs }
         };
 
         Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(nullptr, "Texture to import"_fs, Filters);

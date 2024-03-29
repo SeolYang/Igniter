@@ -55,6 +55,15 @@
     <Filter Include="Source\Render">
       <UniqueIdentifier>{36ef20ca-725c-48ea-81d7-7a5cb33925a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\ImGui\File">
+      <UniqueIdentifier>{fc9fd23a-2418-4c29-8259-575cf23418ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ImGui\Debug">
+      <UniqueIdentifier>{684188c5-2d9d-488e-9ea0-8b72afd2b4e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ImGui\Gameplay">
+      <UniqueIdentifier>{75d4b0db-f9a7-4caf-a011-d2db346834a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
@@ -228,12 +237,6 @@
     <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h">
       <Filter>Source\Gameplay</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\CachedStringDebugger.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\EntityList.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
@@ -285,20 +288,11 @@
     <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h">
       <Filter>Source\Gameplay</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\EntityInsepctor.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Asset\Utils.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\D3D12\GpuSync.h">
       <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\AssetWatchPanel.h">
-      <Filter>Source\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Igniter.h">
       <Filter>Source</Filter>
@@ -315,14 +309,32 @@
     <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h">
       <Filter>Source\Filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiUtils.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Filesystem\CoFileWatcher.h">
       <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\AssetWatchPanel.h">
+      <Filter>Source\ImGui\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\CachedStringDebugger.h">
+      <Filter>Source\ImGui\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h">
+      <Filter>Source\ImGui\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h">
+      <Filter>Source\ImGui\File</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\EntityInsepctor.h">
+      <Filter>Source\ImGui\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\EntityList.h">
+      <Filter>Source\ImGui\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.h">
+      <Filter>Source\ImGui\File</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -419,12 +431,6 @@
     <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp">
       <Filter>Source\Gameplay</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
@@ -449,9 +455,6 @@
     <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp">
       <Filter>Source\Gameplay</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\EntityInspector.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Component\NameComponent.cpp">
       <Filter>Source\Component</Filter>
     </ClCompile>
@@ -464,17 +467,11 @@
     <ClCompile Include="..\Source\Igniter\Component\CameraComponent.cpp">
       <Filter>Source\Component</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Asset\Utils.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\D3D12\GpuSync.cpp">
       <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\AssetWatchPanel.cpp">
-      <Filter>Source\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Igniter.cpp">
       <Filter>Source</Filter>
@@ -488,11 +485,29 @@
     <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp">
       <Filter>Source\Filesystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\TextureImportPanel.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Filesystem\CoFileWatcher.cpp">
       <Filter>Source\Filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\AssetWatchPanel.cpp">
+      <Filter>Source\ImGui\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp">
+      <Filter>Source\ImGui\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp">
+      <Filter>Source\ImGui\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\TextureImportPanel.cpp">
+      <Filter>Source\ImGui\File</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\EntityInspector.cpp">
+      <Filter>Source\ImGui\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp">
+      <Filter>Source\ImGui\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.cpp">
+      <Filter>Source\ImGui\File</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

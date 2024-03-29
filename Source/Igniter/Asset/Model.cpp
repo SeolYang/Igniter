@@ -19,6 +19,8 @@ IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);
 
 namespace ig
 {
+    constexpr inline size_t NumIndicesPerFace = 3;
+
     json& StaticMeshImportConfig::Serialize(json& archive) const
     {
         const auto& config = *this;
@@ -31,7 +33,7 @@ namespace ig
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipUVs);
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bFlipWindingOrder);
         IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes);
-        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes);
+        IG_SERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImportMaterials);
         return archive;
     }
 
@@ -48,8 +50,6 @@ namespace ig
         IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImproveCacheLocality, config.bImproveCacheLocality);
         IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateUVCoords, config.bGenerateUVCoords);
         IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bGenerateBoundingBoxes, config.bGenerateBoundingBoxes);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bMergeMeshes, config.bMergeMeshes);
-        IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImportTextures, config.bImportTextures);
         IG_DESERIALIZE_JSON(StaticMeshImportConfig, archive, config, bImportMaterials, config.bImportMaterials);
         return archive;
     }
@@ -57,13 +57,6 @@ namespace ig
     json& StaticMeshLoadConfig::Serialize(json& archive) const
     {
         const auto& config = *this;
-        IG_CHECK(!config.Name.empty());
-        IG_CHECK(config.NumVertices > 0);
-        IG_CHECK(config.NumIndices > 0);
-        IG_CHECK(config.CompressedVerticesSizeInBytes > 0);
-        IG_CHECK(config.CompressedIndicesSizeInBytes > 0);
-
-        IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices);
         IG_SERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes);
@@ -75,7 +68,6 @@ namespace ig
     {
         auto& config = *this;
         config = {};
-        IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, Name, config.Name);
         IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumVertices, config.NumVertices);
         IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, NumIndices, config.NumIndices);
         IG_DESERIALIZE_JSON(StaticMeshLoadConfig, archive, config, CompressedVerticesSizeInBytes, config.CompressedVerticesSizeInBytes);
@@ -111,22 +103,20 @@ namespace ig
         for (size_t faceIdx = 0; faceIdx < mesh.mNumFaces; ++faceIdx)
         {
             const aiFace& face = mesh.mFaces[faceIdx];
+            IG_CHECK(face.mNumIndices == NumIndicesPerFace);
             indices.emplace_back(vertexIdxOffset + face.mIndices[0]);
             indices.emplace_back(vertexIdxOffset + face.mIndices[1]);
             indices.emplace_back(vertexIdxOffset + face.mIndices[2]);
         }
     }
 
-    static std::optional<xg::Guid> SaveStaticMeshAsset(const String resPathStr, const bool bIsPersistent, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
+    static Result<StaticMesh::MetadataType, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
     {
         IG_CHECK(!vertices.empty());
         IG_CHECK(!indices.empty());
         IG_CHECK(resPathStr);
 
-        const xg::Guid newGuid = xg::newGuid();
-        const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, newGuid);
         const std::string_view resPathStrView = resPathStr.ToStringView();
-        const std::string assetPathStr = assetPath.string();
 
         std::vector<uint32_t> remap(indices.size());
         const size_t remappedVertexCount = meshopt_generateVertexRemap(remap.data(),
@@ -146,12 +136,26 @@ namespace ig
         meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex));
 
         /* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
-        IG_LOG(ModelImporter, Info, "Optimization Statistics \"{}({}.{})\"", assetPathStr, resPathStrView, meshName);
-        const auto nvidiaVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 32, 32, 32);
-        const auto amdVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 14, 64, 128);
-        const auto intelVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 128, 0, 0);
-        const auto vfs = meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), sizeof(StaticMeshVertex));
-        const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex));
+        IG_LOG(ModelImporter, Info, "Optimization Statistics \"{}({})\"", resPathStrView, meshName);
+        const auto nvidiaVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(),
+                                                          remappedVertices.size(),
+                                                          32, 32, 32);
+
+        const auto amdVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(),
+                                                       remappedVertices.size(),
+                                                       14, 64, 128);
+
+        const auto intelVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(),
+                                                         remappedVertices.size(),
+                                                         128, 0, 0);
+
+        const auto vfs = meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(),
+                                                    remappedVertices.size(),
+                                                    sizeof(StaticMeshVertex));
+
+        const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x,
+                                                remappedVertices.size(), sizeof(StaticMeshVertex));
+
         IG_LOG(ModelImporter, Info, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
         IG_LOG(ModelImporter, Info, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
         IG_LOG(ModelImporter, Info, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
@@ -165,15 +169,17 @@ namespace ig
         std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(), sizeof(StaticMeshVertex)));
         std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(remappedIndices.size(), remappedVertices.size()));
 
-        encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex)));
-        encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(), remappedIndices.data(), remappedIndices.size()));
+        encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(),
+                                                          remappedVertices.data(), remappedVertices.size(),
+                                                          sizeof(StaticMeshVertex)));
+        encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(),
+                                                        remappedIndices.data(), remappedIndices.size()));
 
         const AssetInfo assetInfo{
             .CreationTime = Timer::Now(),
-            .Guid = newGuid,
+            .Guid = xg::newGuid(),
             .VirtualPath = meshName,
-            .Type = EAssetType::StaticMesh,
-            .bIsPersistent = bIsPersistent
+            .Type = EAssetType::StaticMesh
         };
 
         const StaticMeshLoadConfig newLoadConfig{
@@ -189,121 +195,59 @@ namespace ig
         const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, assetInfo.Guid);
         if (!SaveJsonToFile(newMetaPath, assetMetadata))
         {
-            IG_LOG(ModelImporter, Error, "Failed to save asset metadata to {}.", newMetaPath.string());
-            return std::nullopt;
+            return MakeFail<StaticMesh::MetadataType,
+                            EStaticMeshImportStatus::FailedSaveMetadataToFile>();
         }
 
+        const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.Guid);
         if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices }, std::span<const uint8_t>{ encodedIndices } }))
         {
-            IG_LOG(ModelImporter, Error, "Failed to save vertices/indices data to file {}.", assetPath.string());
-            return std::nullopt;
+            return MakeFail<StaticMesh::MetadataType,
+                            EStaticMeshImportStatus::FailedSaveAssetToFile>();
         }
 
-        return assetInfo.Guid;
+        IG_CHECK(assetInfo.IsValid());
+        IG_CHECK(newLoadConfig.NumVertices > 0 && newLoadConfig.NumIndices > 0);
+        IG_CHECK(newLoadConfig.CompressedVerticesSizeInBytes > 0 && newLoadConfig.CompressedIndicesSizeInBytes);
+        return MakeSuccess<StaticMesh::MetadataType, EStaticMeshImportStatus>(std::make_pair(assetInfo, newLoadConfig));
     }
 
-    std::vector<xg::Guid> ModelImporter::ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> importConfig /*= std::nullopt*/, const bool bIsPersistent /*= false*/)
+    std::vector<StaticMeshImporter::Result> StaticMeshImporter::ImportStaticMesh(AssetManager& /*assetManager*/, const String resPathStr, StaticMesh::ImportConfigType config)
     {
-        TempTimer tempTimer;
-        tempTimer.Begin();
-
-        IG_LOG(ModelImporter, Info, "Importing resource {} as static mesh assets ...", resPathStr.ToStringView());
+        std::vector<Result> results;
         const fs::path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
-            IG_LOG(ModelImporter, Error, "The resource does not exist at {}.", resPathStr.ToStringView());
-            return {};
-        }
-
-        const fs::path resMetaPath{ MakeResourceMetadataPath(resPath) };
-        if (!importConfig)
-        {
-            json resMetadata{ LoadJsonFromFile(resMetaPath) };
-            importConfig = StaticMeshImportConfig{};
-            resMetadata >> *importConfig;
+            results.emplace_back(MakeFail<Metadata, EStaticMeshImportStatus::FileDoesNotExist>());
+            return results;
         }
 
         uint32_t importFlags = aiProcess_Triangulate;
-        importFlags |= importConfig->bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0;
-        importFlags |= importConfig->bFlipUVs ? aiProcess_FlipUVs : 0;
-        importFlags |= importConfig->bFlipWindingOrder ? aiProcess_FlipWindingOrder : 0;
-
-        if (importConfig->bMergeMeshes)
-        {
-            importFlags |= aiProcess_PreTransformVertices;
-        }
-        else
-        {
-            importFlags |= importConfig->bSplitLargeMeshes ? aiProcess_SplitLargeMeshes : 0;
-            importFlags |= importConfig->bPreTransformVertices ? aiProcess_PreTransformVertices : 0;
-        }
-
-        importFlags |= importConfig->bGenerateNormals ? aiProcess_GenSmoothNormals : 0;
-        importFlags |= importConfig->bGenerateUVCoords ? aiProcess_GenUVCoords : 0;
-        importFlags |= importConfig->bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
+        importFlags |= config.bMakeLeftHanded ? aiProcess_MakeLeftHanded : 0;
+        importFlags |= config.bFlipUVs ? aiProcess_FlipUVs : 0;
+        importFlags |= config.bFlipWindingOrder ? aiProcess_FlipWindingOrder : 0;
+        importFlags |= config.bSplitLargeMeshes ? aiProcess_SplitLargeMeshes : 0;
+        importFlags |= config.bPreTransformVertices ? aiProcess_PreTransformVertices : 0;
+        importFlags |= config.bGenerateNormals ? aiProcess_GenSmoothNormals : 0;
+        importFlags |= config.bGenerateUVCoords ? aiProcess_GenUVCoords : 0;
+        importFlags |= config.bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
 
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(resPathStr.ToStandard(), importFlags);
-        if (!CheckAssimpSceneLoadingSucceed(resPathStr, importer, scene))
         {
-            return {};
-        }
-
-        /* Import Textures */
-        if (importConfig->bImportTextures)
-        {
-            for (size_t idx = 0; idx < scene->mNumTextures; ++idx)
+            if (!CheckAssimpSceneLoadingSucceed(resPathStr, importer, scene))
             {
-                const aiTexture& texture = *scene->mTextures[idx];
-                const String texResPathStr = String(texture.mFilename.C_Str());
-                const fs::path texResPath = texResPathStr.ToStringView();
-
-                /* #sy_wip 에셋 매니저 경유 */
-                textureImporter;
-                // if (!HasImportedBefore(texResPath))
-                //{
-                //     std::optional<xg::Guid> newTexAssetGuid = textureImporter.Import(texResPathStr);
-                //     if (newTexAssetGuid)
-                //     {
-                //         IG_LOG(ModelImporterInfo, "Success to import texture resource {} as asset {}.", texResPathStr.AsStringView(), newTexAssetGuid->str());
-                //     }
-                //     else
-                //     {
-                //         IG_LOG(ModelImporterErr, "Failed to import texture resource {}.", texResPathStr.AsStringView());
-                //     }
-                // }
-            }
-        }
-
-        /* Import Materials */
-        /* #sy_todo Impl Import Materials in aiScene */
-
-        /* Import Static Meshes */
-        const std::string meshName = resPath.filename().replace_extension().string();
-
-        constexpr size_t NumIndicesPerFace = 3;
-        std::vector<xg::Guid> importedStaticMeshGuid(importConfig->bMergeMeshes ? 1 : scene->mNumMeshes);
-        if (importConfig->bMergeMeshes)
-        {
-            std::vector<StaticMeshVertex> vertices;
-            std::vector<uint32_t> indices;
-
-            for (size_t meshIdx = 0; meshIdx < scene->mNumMeshes; ++meshIdx)
-            {
-                const aiMesh& mesh = *scene->mMeshes[meshIdx];
-                vertices.reserve(vertices.size() + mesh.mNumVertices);
-                indices.reserve(indices.size() + mesh.mNumFaces * NumIndicesPerFace);
-                ProcessStaticMeshData(mesh, vertices, indices, static_cast<uint32_t>(vertices.size()));
+                results.emplace_back(MakeFail<Metadata, EStaticMeshImportStatus::FailedLoadFromFile>());
+                return results;
             }
 
-            if (std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bIsPersistent, meshName, vertices, indices);
-                guid)
-            {
-                importedStaticMeshGuid[0] = *guid;
-            }
-        }
-        else
-        {
+            /* Create Materials */
+            /* #sy_todo Impl Create Materials in aiScene */
+
+            /* Import Static Meshes */
+            const std::string modelName = resPath.filename().replace_extension().string();
+            results.reserve(scene->mNumMeshes);
+            std::vector<xg::Guid> importedStaticMeshGuid(scene->mNumMeshes);
             for (size_t meshIdx = 0; meshIdx < scene->mNumMeshes; ++meshIdx)
             {
                 const aiMesh& mesh = *scene->mMeshes[meshIdx];
@@ -315,25 +259,35 @@ namespace ig
 
                 ProcessStaticMeshData(mesh, vertices, indices);
 
-                std::optional<xg::Guid> guid = SaveStaticMeshAsset(resPathStr, bIsPersistent, std::format("{}.{}", meshName, mesh.mName.C_Str()), vertices, indices);
-                if (guid)
+                if (vertices.empty())
                 {
-                    importedStaticMeshGuid[meshIdx] = *guid;
+                    results.emplace_back(MakeFail<StaticMesh::MetadataType, EStaticMeshImportStatus::EmptyVertices>());
+                    continue;
                 }
+
+                if (indices.empty())
+                {
+                    results.emplace_back(MakeFail<StaticMesh::MetadataType, EStaticMeshImportStatus::EmptyIndices>());
+                    continue;
+                }
+
+                const std::string meshName = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
+                results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, vertices, indices));
             }
         }
         importer.FreeScene();
 
         const ResourceInfo resInfo{ .Type = EAssetType::StaticMesh };
         json resMetadata{};
-        resMetadata << resInfo << *importConfig;
+        resMetadata << resInfo << config;
+        const fs::path resMetaPath = MakeResourceMetadataPath(resPath);
         if (!SaveJsonToFile(resMetaPath, resMetadata))
         {
-            IG_LOG(ModelImporter, Error, "Failed to save resource metadata to {}.", resMetaPath.string());
+            IG_LOG(ModelImporter, Warning, "Failed to save resource metadata to {}.", resMetaPath.string());
         }
 
-        IG_LOG(ModelImporter, Info, "Successfully imported resource {} as static mesh assets. Elapsed: {} ms", resPathStr.ToStringView(), tempTimer.End());
-        return importedStaticMeshGuid;
+        IG_CHECK(results.size() > 0);
+        return results;
     }
 
     std::optional<ig::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
@@ -495,6 +449,7 @@ namespace ig
                assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
 
         return StaticMesh{
+            .Guid = guid,
             .LoadConfig = loadConfig,
             .VertexBufferInstance = { handleManager, std::move(*vertexBuffer) },
             .VertexBufferSrv = std::move(vertexBufferSrv),

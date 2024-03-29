@@ -54,7 +54,8 @@ namespace ig
         Result<Texture::MetadataType, ETextureImportStatus> result = textureImporter->Import(resPath, config);
         if (!result.HasOwnership())
         {
-            IG_LOG(AssetManager, Error, "Failed({}) to import texture \"{}\".", magic_enum::enum_name(result.GetStatus()), resPath.ToStringView());
+            IG_LOG(AssetManager, Error, "Failed({}) to import texture \"{}\".",
+                   magic_enum::enum_name(result.GetStatus()), resPath.ToStringView());
             return {};
         }
 
@@ -63,12 +64,42 @@ namespace ig
 
         if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
         {
-            Delete(EAssetType::Texture, assetInfo.VirtualPath);
+            Delete(assetInfo.Type, assetInfo.VirtualPath);
         }
         assetMonitor->Create<Texture>(assetInfo, metadata.second);
 
-        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}.", resPath.ToStringView(), assetInfo.Guid.str());
+        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath.ToStringView(), assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
         return assetInfo.Guid;
+    }
+
+    std::vector<xg::Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportConfig& config)
+    {
+        std::vector<StaticMeshImporter::Result> results = StaticMeshImporter::ImportStaticMesh(*this, resPath, config);
+        std::vector<xg::Guid> output;
+        output.reserve(results.size());
+        for (StaticMeshImporter::Result& result : results)
+        {
+            if (!result.HasOwnership())
+            {
+                IG_LOG(AssetManager, Error, "Failed({}) to import static mesh \"{}\".",
+                       magic_enum::enum_name(result.GetStatus()), resPath.ToStringView());
+                continue;
+            }
+
+            const StaticMesh::MetadataType metadata = result.Take();
+            const AssetInfo& assetInfo = metadata.first;
+
+            if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
+            {
+                Delete(assetInfo.Type, assetInfo.VirtualPath);
+            }
+            assetMonitor->Create<StaticMesh>(assetInfo, metadata.second);
+
+            IG_LOG(AssetManager, Info, "\"{}\" imported as static mesh asset {}({})", resPath.ToStringView(), assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
+            output.emplace_back(assetInfo.Guid);
+        }
+
+        return output;
     }
 
     void AssetManager::Unload(const EAssetType assetType, const String virtualPath)
@@ -118,13 +149,23 @@ namespace ig
             return;
         }
 
-        if (assetMonitor->Contains(assetType, virtualPath))
+        if (!assetMonitor->Contains(assetType, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Failed to delete asset. The virtual path is invisible to asset manager or invalid.");
             return;
         }
 
         DeleteInternal(assetType, assetMonitor->GetGuid(assetType, virtualPath));
+    }
+
+    AssetInfo AssetManager::GetAssetInfo(const xg::Guid guid) const
+    {
+        if (!assetMonitor->Contains(guid))
+        {
+            IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid.str());
+        }
+
+        return assetMonitor->GetAssetInfo(guid);
     }
 
     void AssetManager::DeleteInternal(const EAssetType assetType, const xg::Guid guid)

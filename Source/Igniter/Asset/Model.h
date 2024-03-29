@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Handle.h>
 #include <Core/String.h>
+#include <Core/Result.h>
 #include <Asset/Common.h>
 
 namespace ig
@@ -25,13 +26,6 @@ namespace ig
         bool bGenerateUVCoords = false;
         bool bGenerateBoundingBoxes = false;
 
-        /*
-         * If enabled, Ignore 'bSplitLargeMeshes' and force enable 'PreTransformVertices'.
-         * It cause of loss material details.
-         */
-        bool bMergeMeshes = false;
-
-        bool bImportTextures = false;  /* Only if textures does not imported before. */
         bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
     };
 
@@ -42,7 +36,6 @@ namespace ig
         const json& Deserialize(const json& archive);
 
     public:
-        std::string Name{}; /* #sy_deprecated */
         uint32_t NumVertices{ 0 };
         uint32_t NumIndices{ 0 };
         size_t CompressedVerticesSizeInBytes{ 0 };
@@ -65,15 +58,6 @@ namespace ig
         const json& Deserialize(const json& archive);
     };
 
-    class TextureImporter;
-    class ModelImporter
-    {
-    public:
-        static std::vector<xg::Guid> ImportAsStatic(TextureImporter& textureImporter, const String resPathStr, std::optional<StaticMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
-        /* #sy_todo Impl import as Skeletal Meshes */
-        static std::vector<xg::Guid> ImportAsSkeletal(const String resPathStr, std::optional<SkeletalMeshImportConfig> config = std::nullopt, const bool bIsPersistent = false);
-    };
-
     /* Static Mesh */
     struct StaticMesh
     {
@@ -83,6 +67,7 @@ namespace ig
         using MetadataType = std::pair<AssetInfo, StaticMeshLoadConfig>;
 
     public:
+        xg::Guid Guid;
         StaticMeshLoadConfig LoadConfig;
         Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> VertexBufferInstance;
         Handle<GpuView, GpuViewManager*> VertexBufferSrv;
@@ -90,8 +75,31 @@ namespace ig
         // RefHandle<Material>
     };
 
-    template<>
+    template <>
     constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
+
+    enum class EStaticMeshImportStatus
+    {
+        Success,
+        FileDoesNotExist,
+        FailedLoadFromFile,
+        FailedSaveMetadataToFile,
+        FailedSaveAssetToFile,
+        EmptyVertices,
+        EmptyIndices,
+    };
+
+    class AssetManager;
+    class TextureImporter;
+    class StaticMeshImporter
+    {
+    public:
+        using Result = Result<StaticMesh::MetadataType, EStaticMeshImportStatus>;
+        using Metadata = StaticMesh::MetadataType;
+
+    public:
+        static std::vector<Result> ImportStaticMesh(AssetManager& assetManager, const String resPathStr, StaticMesh::ImportConfigType config);
+    };
 
     class StaticMeshLoader
     {
