@@ -13,12 +13,6 @@ namespace ig::details
 
 namespace ig
 {
-    enum class EAssetImportResult
-    {
-        Success,
-        ImporterFailure,
-    };
-
     template <typename AssetType>
     using AssetRefHandle = RefHandle<AssetType, class AssetManager*>;
 
@@ -40,7 +34,7 @@ namespace ig
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
-        Result<xg::Guid, EAssetImportResult> ImportTexture(const String resPath, const TextureImportConfig& config);
+        xg::Guid ImportTexture(const String resPath, const TextureImportConfig& config);
         AssetRefHandle<Texture> LoadTexture(const xg::Guid& guid);
         AssetRefHandle<Texture> LoadTexture(const String virtualPath);
 
@@ -76,7 +70,6 @@ namespace ig
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
         Ptr<TextureImporter> textureImporter;
-        robin_hood::unordered_map<xg::Guid, Handle<Texture>> cachedTextures;
     };
 
 } // namespace ig

@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Handle.h>
 #include <Core/String.h>
+#include <Core/Result.h>
 #include <D3D12/Common.h>
 #include <D3D12/GpuTexture.h>
 #include <Asset/Common.h>
@@ -83,13 +84,31 @@ namespace ig
     template <>
     constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
 
+    enum class ETextureImportStatus
+    {
+        Success,
+        FileDoesNotExist,
+        UnsupportedExtension,
+        FailedLoadFromFile,
+        InvalidDimensions,
+        InvalidVolumemap,
+        UnknownFormat,
+        FailedGenerateMips,
+        FailedCompression,
+        FailedSaveMetadataToFile,
+        FailedSaveAssetToFile
+    };
+
     class TextureImporter
     {
+    public:
+        using Metadata = std::pair<AssetInfo, Texture::MetadataType>;
+
     public:
         TextureImporter();
         ~TextureImporter();
 
-        std::optional<std::pair<AssetInfo, Texture::MetadataType>> Import(const String resPathStr, TextureImportConfig config, const bool bIsPersistent = false);
+        Result<Metadata, ETextureImportStatus> Import(const String resPathStr, TextureImportConfig config);
 
     private:
         ID3D11Device* d3d11Device = nullptr;
@@ -102,3 +121,7 @@ namespace ig
         static std::optional<Texture> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
     };
 } // namespace ig
+
+namespace ig::details
+{
+} // namespace ig::details

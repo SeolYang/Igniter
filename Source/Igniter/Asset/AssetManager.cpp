@@ -49,30 +49,46 @@ namespace ig
         return *cachePtr;
     }
 
-    Result<xg::Guid, EAssetImportResult> AssetManager::ImportTexture(const String resPath, const TextureImportConfig& config)
+    xg::Guid AssetManager::ImportTexture(const String resPath, const TextureImportConfig& config)
     {
-        IG_CHECK(textureImporter != nullptr);
-        std::optional<std::pair<AssetInfo, Texture::MetadataType>> assetMetadata = textureImporter->Import(resPath, config);
-        if (!assetMetadata)
+        Result<TextureImporter::Metadata, ETextureImportStatus> result = textureImporter->Import(resPath, config);
+        if (!result.HasOwnership())
         {
-            return MakeFail<xg::Guid, EAssetImportResult::ImporterFailure>();
+            IG_LOG(AssetManager, Error, "Failed({}) to import texture \"{}\".", magic_enum::enum_name(result.GetStatus()), resPath.ToStringView());
+            return {};
         }
 
-        const AssetInfo& assetInfo = assetMetadata->first;
+        const TextureImporter::Metadata metadata = result.Take();
+        const AssetInfo& assetInfo = metadata.first;
 
-        IG_CHECK(assetInfo.IsValid());
-        IG_CHECK(assetInfo.VirtualPath.IsValid());
         if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
         {
-            Delete(assetInfo.Type, assetInfo.VirtualPath);
+            Delete(EAssetType::Texture, assetInfo.VirtualPath);
         }
+        assetMonitor->Create<Texture>(assetInfo, metadata.second);
 
-        assetMonitor->Create<Texture>(assetInfo, assetMetadata->second);
-        return MakeSuccess<xg::Guid, EAssetImportResult>(assetInfo.Guid);
+        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}.", resPath.ToStringView(), assetInfo.Guid.str());
+        return assetInfo.Guid;
     }
 
     void AssetManager::Unload(const EAssetType assetType, const String virtualPath)
     {
+        if (assetType == EAssetType::Unknown)
+        {
+            IG_LOG(AssetManager, Error,
+                   "Failed to unload {}. The asset type is unknown.",
+                   virtualPath.ToStringView());
+            return;
+        }
+
+        if (!assetMonitor->Contains(assetType, virtualPath))
+        {
+            IG_LOG(AssetManager, Error,
+                   "Failed to unload {}. The virtual path is invisible to asset manager or invalid.",
+                   virtualPath.ToStringView());
+            return;
+        }
+
         Unload(assetMonitor->GetGuid(assetType, virtualPath));
     }
 
@@ -83,31 +99,47 @@ namespace ig
 
     void AssetManager::Delete(const xg::Guid& guid)
     {
-        IG_CHECK(guid.isValid());
-        IG_CHECK(assetMonitor->Contains(guid));
+        if (!assetMonitor->Contains(guid))
+        {
+            IG_LOG(AssetManager, Error,
+                   "Failed to delete asset. The asset guid (\"{}\") is invisible to asset manager or invalid.",
+                   guid.str());
+            return;
+        }
 
-        std::optional<AssetInfo> assetInfo = assetMonitor->GetAssetInfo(guid);
-        IG_CHECK(assetInfo);
-        DeleteInternal(assetInfo->Type, guid);
+        DeleteInternal(assetMonitor->GetAssetInfo(guid).Type, guid);
     }
 
     void AssetManager::Delete(const EAssetType assetType, const String virtualPath)
     {
+        if (assetType == EAssetType::Unknown)
+        {
+            IG_LOG(AssetManager, Error, "Failed to delete asset. The asset type is unknown.");
+            return;
+        }
+
+        if (assetMonitor->Contains(assetType, virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Failed to delete asset. The virtual path is invisible to asset manager or invalid.");
+            return;
+        }
+
         DeleteInternal(assetType, assetMonitor->GetGuid(assetType, virtualPath));
     }
 
     void AssetManager::DeleteInternal(const EAssetType assetType, const xg::Guid guid)
     {
         IG_CHECK(assetType != EAssetType::Unknown);
-        IG_CHECK(guid.isValid());
+        IG_CHECK(guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).Type == assetType);
 
         details::TypelessAssetCache& assetCache = GetTypelessCache(assetType);
         if (assetCache.IsCached(guid))
         {
             assetCache.Uncache(guid);
         }
-
         assetMonitor->Remove(guid);
+
+        IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid.str());
     }
 
     void AssetManager::SaveAllMetadataChanges()

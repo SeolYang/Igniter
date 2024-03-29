@@ -110,7 +110,6 @@ namespace ig::details
     bool AssetMonitor::Contains(const EAssetType assetType, const String virtualPath) const
     {
         IG_CHECK(assetType != EAssetType::Unknown);
-        IG_CHECK(virtualPath.IsValid());
 
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
         const auto itr = virtualPathGuidTable.find(virtualPath);
@@ -126,7 +125,10 @@ namespace ig::details
         const auto itr = virtualPathGuidTable.find(virtualPath);
         IG_CHECK(itr != virtualPathGuidTable.cend());
 
-        return itr->second;
+        const xg::Guid guid{ itr->second };
+        IG_CHECK(guid.isValid());
+
+        return guid;
     }
 
     AssetInfo AssetMonitor::GetAssetInfo(const xg::Guid guid) const
@@ -136,6 +138,8 @@ namespace ig::details
         AssetInfo info{};
         const auto itr = guidSerializedMetaTable.find(guid);
         itr->second >> info;
+
+        IG_CHECK(info.IsValid());
         return info;
     }
 
@@ -210,6 +214,7 @@ namespace ig::details
         expiredAssetInfos[info.Guid] = info;
         virtualPathGuidTable.erase(info.VirtualPath);
         guidSerializedMetaTable.erase(info.Guid);
+        IG_CHECK(!Contains(info.Guid));
     }
 
     void AssetMonitor::SaveAllChanges()

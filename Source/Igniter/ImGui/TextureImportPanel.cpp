@@ -68,18 +68,7 @@ namespace ig
                     config.AddressModeW = AddressModes[selectedAddressModeW];
 
                     AssetManager& assetManager = Igniter::GetAssetManager();
-                    Result<xg::Guid, EAssetImportResult> result = assetManager.ImportTexture(path, config);
-                    if (result.HasOwnership())
-                    {
-                        const xg::Guid importedGuid = result.Take();
-                        IG_CHECK(importedGuid.isValid());
-                        IG_LOG(TextureImportPanel, Info, "Texture {} imported as {}.", path.ToStringView(), importedGuid.str());
-                    }
-                    else
-                    {
-                        IG_LOG(TextureImportPanel, Error, "Failed to import texture {}. Status: {}", path.ToStringView(), magic_enum::enum_name(result.GetStatus()));
-                    }
-
+                    assetManager.ImportTexture(path, config);
                     SetVisibility(false);
                 }
             }

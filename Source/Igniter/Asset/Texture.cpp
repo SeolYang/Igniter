@@ -192,22 +192,14 @@ namespace ig
         }
     }
 
-    std::optional<std::pair<AssetInfo, Texture::MetadataType>> TextureImporter::Import(const String resPathStr,
-                                                                                       TextureImportConfig importConfig,
-                                                                                       const bool bIsPersistent /*= false*/)
+    Result<TextureImporter::Metadata, ETextureImportStatus> TextureImporter::Import(const String resPathStr, TextureImportConfig importConfig)
     {
-        IG_CHECK(resPathStr);
-
         CoInitializeUnique();
-        TempTimer tempTimer;
-        tempTimer.Begin();
-        IG_LOG(TextureImporter, Info, "Importing resource {} as texture asset...", resPathStr.ToStringView());
 
         const fs::path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
-            IG_LOG(TextureImporter, Error, "The resource does not exist at {}.", resPathStr.ToStringView());
-            return std::nullopt;
+            return MakeFail<Metadata, ETextureImportStatus::FileDoesNotExist>();
         }
 
         const fs::path resExtension = resPath.extension();
@@ -226,18 +218,16 @@ namespace ig
                    "and the supplied file is used as the asset as it is. File: {}",
                    resPathStr.ToStringView());
 
-            loadRes = DirectX::LoadFromDDSFile(
-                resPath.c_str(),
-                DirectX::DDS_FLAGS_NONE,
-                &texMetadata, targetTex);
+            loadRes = DirectX::LoadFromDDSFile(resPath.c_str(),
+                                               DirectX::DDS_FLAGS_NONE,
+                                               &texMetadata, targetTex);
             bIsDDSFormat = true;
         }
         else if (IsWICExtension(resExtension))
         {
-            loadRes = DirectX::LoadFromWICFile(
-                resPath.c_str(),
-                DirectX::WIC_FLAGS_FORCE_LINEAR,
-                &texMetadata, targetTex);
+            loadRes = DirectX::LoadFromWICFile(resPath.c_str(),
+                                               DirectX::WIC_FLAGS_FORCE_LINEAR,
+                                               &texMetadata, targetTex);
 
             IG_CHECK(!DirectX::IsSRGB(texMetadata.format));
         }
@@ -248,15 +238,12 @@ namespace ig
         }
         else
         {
-            IG_LOG(TextureImporter, Error, "Found not supported texture extension from \"{}\".",
-                   resPathStr.ToStringView());
-            return std::nullopt;
+            return MakeFail<Metadata, ETextureImportStatus::UnsupportedExtension>();
         }
 
         if (FAILED(loadRes))
         {
-            IG_LOG(TextureImporter, Error, "Failed to load texture from {}.", resPathStr.ToStringView());
-            return std::nullopt;
+            return MakeFail<Metadata, ETextureImportStatus::FailedLoadFromFile>();
         }
 
         if (!bIsDDSFormat)
@@ -264,22 +251,18 @@ namespace ig
             const bool bValidDimensions = texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 && texMetadata.arraySize > 0;
             if (!bValidDimensions)
             {
-                IG_LOG(TextureImporter, Error, "Found invalid dimensions in texture metadata.");
-                return std::nullopt;
-                ;
+                return MakeFail<Metadata, ETextureImportStatus::InvalidDimensions>();
             }
 
             const bool bValidVolumemapArgs = !texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1);
             if (!bValidVolumemapArgs)
             {
-                IG_LOG(TextureImporter, Error, "The volumemap can't be array.");
-                return std::nullopt;
+                return MakeFail<Metadata, ETextureImportStatus::InvalidVolumemap>();
             }
 
             if (texMetadata.format == DXGI_FORMAT_UNKNOWN)
             {
-                IG_LOG(TextureImporter, Error, "Found 'Unknown' format from texture metadata.");
-                return std::nullopt;
+                return MakeFail<Metadata, ETextureImportStatus::UnknownFormat>();
             }
 
             /* Generate full mipmap chain. */
@@ -292,9 +275,7 @@ namespace ig
                                                                 0, mipChain);
                 if (FAILED(genRes))
                 {
-                    IG_LOG(TextureImporter, Error, "Failed to generate mipchain. HRESULT: {:#X}, File: {}",
-                           genRes, resPathStr.ToStringView());
-                    return std::nullopt;
+                    return MakeFail<Metadata, ETextureImportStatus::FailedGenerateMips>();
                 }
 
                 texMetadata = mipChain.GetMetadata();
@@ -358,20 +339,7 @@ namespace ig
 
                 if (FAILED(compRes))
                 {
-                    if (bIsGPUCodecAvailable)
-                    {
-                        IG_LOG(TextureImporter, Error, "Failed to compress using GPU Codec.");
-                    }
-
-                    IG_LOG(TextureImporter, Error,
-                           "Failed to compress using {}. From {} to {}. HRESULT: {:#X}, "
-                           "File: {}",
-                           magic_enum::enum_name(importConfig.CompressionMode),
-                           magic_enum::enum_name(texMetadata.format), magic_enum::enum_name(compFormat),
-                           compRes,
-                           resPathStr.ToStringView());
-
-                    return std::nullopt;
+                    return MakeFail<Metadata, ETextureImportStatus::FailedCompression>();
                 }
 
                 texMetadata = compTex.GetMetadata();
@@ -397,8 +365,7 @@ namespace ig
             .CreationTime = Timer::Now(),
             .Guid = xg::newGuid(),
             .VirtualPath = String(resPath.filename().replace_extension().string()),
-            .Type = EAssetType::Texture,
-            .bIsPersistent = bIsPersistent
+            .Type = EAssetType::Texture
         };
 
         const TextureLoadConfig newLoadConfig{
@@ -422,8 +389,7 @@ namespace ig
         IG_CHECK(!assetMetadataPath.empty());
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
-            IG_LOG(TextureImporter, Error, "Failed to open asset metadata file {}.", assetMetadataPath.string());
-            return std::nullopt;
+            return MakeFail<Metadata, ETextureImportStatus::FailedSaveMetadataToFile>();
         }
 
         /* Save data to asset file */
@@ -441,12 +407,11 @@ namespace ig
 
         if (FAILED(res))
         {
-            IG_LOG(TextureImporter, Error, "Failed to save texture asset file {}. HRESULT: {:#X}", assetPath.string(), res);
-            return std::nullopt;
+            return MakeFail<Metadata, ETextureImportStatus::FailedSaveAssetToFile>();
         }
 
-        IG_LOG(TextureImporter, Info, "The resource {}, successfully imported as {}. Elapsed: {} ms", resPathStr.ToStringView(), assetPath.string(), tempTimer.End());
-        return std::make_optional(std::make_pair(assetInfo, newLoadConfig));
+        IG_CHECK(assetInfo.IsValid() && assetInfo.Type == EAssetType::Texture);
+        return MakeSuccess<Metadata, ETextureImportStatus>(std::make_pair(assetInfo, newLoadConfig));
     }
 
     std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)

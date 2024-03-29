@@ -86,7 +86,7 @@ namespace ig::details
 
     private:
         std::vector<std::pair<EAssetType, VirtualPathGuidTable>> virtualPathGuidTables;
-        robin_hood::unordered_map<xg::Guid, json> guidSerializedMetaTable; // 오히려, 얘 자체를 들고있는 것도 나쁘진 않겠는데?
+        robin_hood::unordered_map<xg::Guid, json> guidSerializedMetaTable;
         robin_hood::unordered_map<xg::Guid, AssetInfo> expiredAssetInfos;
     };
 } // namespace ig::details
