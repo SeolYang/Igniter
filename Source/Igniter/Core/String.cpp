@@ -70,21 +70,29 @@ namespace ig
 
     void String::SetString(const std::string_view strView)
     {
-        if (!strView.empty() && utf8::is_valid(strView))
+        if (utf8::is_valid(strView))
         {
-            hashOfString = String::EvalHash(strView);
-            IG_CHECK(hashOfString != InvalidHashVal);
-
-            HashStringMap& hashStringMap{ GetHashStringMap() };
-            ReadWriteLock lock{ GetHashStringMapMutex() };
-            if (!hashStringMap.contains(hashOfString))
+            if (strView.empty())
             {
-                hashStringMap[hashOfString] = strView;
+                hashOfString = 0;
+            }
+            else
+            {
+                hashOfString = String::EvalHash(strView);
+                IG_CHECK(hashOfString != InvalidHashVal);
+
+                HashStringMap& hashStringMap{ GetHashStringMap() };
+                ReadWriteLock lock{ GetHashStringMapMutex() };
+                if (!hashStringMap.contains(hashOfString))
+                {
+                    hashStringMap[hashOfString] = strView;
+                }
             }
         }
         else
         {
             hashOfString = InvalidHashVal;
+            IG_CHECK_NO_ENTRY();
         }
     }
 
@@ -97,7 +105,12 @@ namespace ig
     {
         if (hashOfString == InvalidHashVal)
         {
-            return std::string_view{};
+            return std::string_view{ "#INVALID_UTF8_STRING" };
+        }
+
+        if (hashOfString == 0)
+        {
+            return std::string_view{ "" };
         }
 
         ReadOnlyLock lock{ GetHashStringMapMutex() };
@@ -137,6 +150,7 @@ namespace ig
         {
             cachedStrs.emplace_back(itr.first, std::string_view{ itr.second });
         }
+        cachedStrs.emplace_back(0, std::string_view{ "" });
 
         return cachedStrs;
     }

@@ -88,7 +88,7 @@ namespace ig
         [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
 
     private:
-        uint64_t hashOfString = InvalidHashVal;
+        uint64_t hashOfString{ 0 };
     };
 
     inline String operator""_fs(const char* str, const size_t count)
@@ -106,5 +106,21 @@ template <>
 class std::hash<ig::String>
 {
 public:
-    [[nodiscard]] size_t operator()(const ig::String& name) const noexcept { return name.GetHash(); }
+    [[nodiscard]] size_t operator()(const ig::String& str) const noexcept { return str.GetHash(); }
+};
+
+template <>
+struct std::formatter<ig::String>
+{
+public:
+    constexpr auto parse(std::format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FrameContext>
+    auto format(const ig::String& str, FrameContext& ctx) const
+    {
+        return std::format_to(ctx.out(), "{}", str.ToStringView());
+    }
 };
