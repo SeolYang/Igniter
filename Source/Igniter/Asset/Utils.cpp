@@ -26,7 +26,10 @@ namespace ig
                 return fs::path{ details::AudioAssetRootPath };
             case EAssetType::Script:
                 return fs::path{ details::ScriptAssetRootPath };
+            case EAssetType::Material:
+                return fs::path{ details::MaterialAssetRootPath };
             [[unlikely]] default:
+                IG_CHECK_NO_ENTRY();
                 return fs::path{};
         }
     }

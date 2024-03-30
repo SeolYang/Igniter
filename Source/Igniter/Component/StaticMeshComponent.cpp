@@ -1,6 +1,6 @@
 #include <Igniter.h>
 #include <Core/Engine.h>
-#include <Asset/Model.h>
+#include <Asset/StaticMesh.h>
 #include <Component/StaticMeshComponent.h>
 
 namespace ig

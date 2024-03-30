@@ -13,6 +13,7 @@ namespace ig
         Shader,
         Audio,
         Script,
+        Material,
         // Scene
     };
 
@@ -81,6 +82,6 @@ namespace ig
         constexpr inline std::string_view ShaderAssetRootPath = "Assets\\Shaders";
         constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
         constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
-
+        constexpr inline std::string_view MaterialAssetRootPath = "Assets\\Materials";
     } // namespace details
 } // namespace ig

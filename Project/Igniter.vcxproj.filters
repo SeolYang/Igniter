@@ -108,7 +108,7 @@
     <ClInclude Include="..\Source\Igniter\Asset\Common.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Asset\Model.h">
+    <ClInclude Include="..\Source\Igniter\Asset\StaticMesh.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Asset\Texture.h">
@@ -353,7 +353,7 @@
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Asset\Model.cpp">
+    <ClCompile Include="..\Source\Igniter\Asset\StaticMesh.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp">

@@ -5,10 +5,9 @@
 
 namespace ig
 {
-    struct MaterialCreateConfig
-    {
-    public:
-    };
+    struct Material;
+    template<>
+    constexpr inline EAssetType AssetTypeOf_v<Material> = EAssetType::Material;
 
     struct Texture;
     struct Material

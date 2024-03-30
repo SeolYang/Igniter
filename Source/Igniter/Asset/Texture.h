@@ -3,13 +3,16 @@
 #include <Core/String.h>
 #include <Core/Result.h>
 #include <D3D12/Common.h>
-#include <D3D12/GpuTexture.h>
 #include <Asset/Common.h>
 
 struct ID3D11Device;
 
 namespace ig
 {
+    struct Texture;
+    template <>
+    constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
+
     enum class ETextureCompressionMode
     {
         None,
@@ -64,10 +67,6 @@ namespace ig
         D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     };
-
-    struct Texture;
-    template <>
-    constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
 
     class RenderDevice;
     class GpuTexture;

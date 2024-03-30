@@ -6,6 +6,10 @@
 
 namespace ig
 {
+    struct StaticMesh;
+    template <>
+    constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
+
     class GpuBuffer;
     class GpuView;
     struct StaticMeshImportDesc
@@ -42,10 +46,6 @@ namespace ig
         /* #sy_todo Add AABB Info */
         // std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
     };
-
-    struct StaticMesh;
-    template <>
-    constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
 
     struct StaticMesh final
     {

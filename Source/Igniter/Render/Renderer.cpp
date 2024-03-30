@@ -16,7 +16,7 @@
 #include <Render/Utils.h>
 #include <Render/GPUViewManager.h>
 #include <Render/Renderer.h>
-#include <Asset/Model.h>
+#include <Asset/StaticMesh.h>
 #include <Component/CameraComponent.h>
 #include <Component/StaticMeshComponent.h>
 #include <Component/TransformComponent.h>

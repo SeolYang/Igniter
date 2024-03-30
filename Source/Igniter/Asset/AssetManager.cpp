@@ -7,7 +7,7 @@
 #include <Asset/AssetMonitor.h>
 #include <Asset/AssetCache.h>
 #include <Asset/Texture.h>
-#include <Asset/Model.h>
+#include <Asset/StaticMesh.h>
 #include <Asset/Utils.h>
 
 IG_DEFINE_LOG_CATEGORY(AssetManager);

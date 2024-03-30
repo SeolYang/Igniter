@@ -1,7 +1,7 @@
 #pragma once
 #include <Igniter.h>
 #include <Filesystem/FileDialog.h>
-#include <Asset/Model.h>
+#include <Asset/StaticMesh.h>
 #include <ImGui/ImGuiLayer.h>
 
 namespace ig

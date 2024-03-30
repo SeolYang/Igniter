@@ -10,7 +10,7 @@
 #include <Render/GpuViewManager.h>
 #include <Render/GpuUploader.h>
 #include <Render/Vertex.h>
-#include <Asset/Model.h>
+#include <Asset/StaticMesh.h>
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
 

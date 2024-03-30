@@ -24,7 +24,7 @@
     <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Common.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Material.h" />
-    <ClInclude Include="..\Source\Igniter\Asset\Model.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\StaticMesh.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Texture.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Component\CameraArchetype.h" />
@@ -115,7 +115,7 @@
     <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
-    <ClCompile Include="..\Source\Igniter\Asset\Model.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\StaticMesh.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Utils.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\CameraComponent.cpp" />

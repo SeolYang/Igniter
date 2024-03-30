@@ -1,5 +1,5 @@
 #include <Frieren.h>
-#include <Asset/Model.h>
+#include <Asset/StaticMesh.h>
 #include <Asset/Texture.h>
 #include <Component/CameraArchetype.h>
 #include <Component/CameraComponent.h>
@@ -14,6 +14,7 @@
 #include <D3D12/CommandQueue.h>
 #include <D3D12/GPUBuffer.h>
 #include <D3D12/GPUBufferDesc.h>
+#include <D3D12/GpuTexture.h>
 #include <D3D12/GPUView.h>
 #include <D3D12/RenderDevice.h>
 #include <Gameplay/ComponentRegistry.h>

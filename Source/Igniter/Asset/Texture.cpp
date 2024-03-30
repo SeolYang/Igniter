@@ -8,8 +8,9 @@
 #include <Core/Serializable.h>
 #include <Core/ComInitializer.h>
 #include <Filesystem/Utils.h>
-#include <D3D12/GpuView.h>
 #include <D3D12/RenderDevice.h>
+#include <D3D12/GpuTexture.h>
+#include <D3D12/GpuView.h>
 #include <Render/GpuUploader.h>
 #include <Render/GpuViewManager.h>
 #include <Asset/Texture.h>
