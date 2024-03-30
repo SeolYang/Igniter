@@ -44,41 +44,48 @@ namespace ig
      */
     class String final
     {
+        using HashStringMap = robin_hood::unordered_map<uint64_t, std::string>;
+
     public:
         String() = default;
-        String(std::string_view name);
         String(const String& name);
+        String(const std::string_view Str);
+        String(const std::wstring_view str);
         ~String() = default;
 
-        void SetString(std::string_view string);
-
-        bool IsValid() const { return hashOfString != InvalidHashVal; }
-        uint64_t GetHash() const { return hashOfString; }
-
-        operator std::string() const { return ToStandard(); }
-        operator std::string_view() const { return ToStringView(); }
-        std::string ToStandard() const;
-        std::string_view ToStringView() const;
-        const char* ToCString() const;
-        std::wstring ToWideString() const;
-
-        operator bool() const { return IsValid(); }
-
         String& operator=(const String& rhs);
-        String& operator=(std::string_view rhs);
         String& operator=(const std::string& rhs);
+        String& operator=(const std::string_view rhs);
+        String& operator=(const std::wstring& rhs);
+        String& operator=(const std::wstring_view rhs);
 
-        bool operator==(std::string_view rhs) const;
-        bool operator!=(const std::string_view rhs) const { return !(*this == rhs); }
-        bool operator==(const String& rhs) const;
-        bool operator!=(const String& rhs) const { return !(*this == rhs); }
+        [[nodiscard]] operator std::string() const { return ToStandard(); }
+        [[nodiscard]] operator std::string_view() const { return ToStringView(); }
+        [[nodiscard]] operator std::wstring() const { return ToWideString(); }
+
+        [[nodiscard]] operator bool() const noexcept { return IsValid(); }
+        [[nodiscard]] bool operator==(std::string_view rhs) const noexcept;
+        [[nodiscard]] bool operator!=(const std::string_view rhs) const noexcept { return !(*this == rhs); }
+        [[nodiscard]] bool operator==(const String& rhs) const noexcept;
+        [[nodiscard]] bool operator!=(const String& rhs) const noexcept { return !(*this == rhs); }
+
+        void SetString(const std::string_view strView);
+
+        [[nodiscard]] std::string ToStandard() const;
+        [[nodiscard]] std::string_view ToStringView() const;
+        [[nodiscard]] const char* ToCString() const;
+        [[nodiscard]] std::wstring ToWideString() const;
+
+        [[nodiscard]] uint64_t GetHash() const noexcept { return hashOfString; }
+        [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
 
         static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
     private:
-        using HashStringMap = robin_hood::unordered_map<uint64_t, std::string>;
-        static HashStringMap hashStringMap;
-        static SharedMutex hashStringMapMutex;
+        [[nodiscard]] static constexpr uint64_t EvalHash(const std::string_view strView) noexcept;
+
+        [[nodiscard]] static HashStringMap& GetHashStringMap();
+        [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
 
     private:
         uint64_t hashOfString = InvalidHashVal;
@@ -91,16 +98,13 @@ namespace ig
 
     inline String operator""_fs(const wchar_t* wstr, const size_t count)
     {
-        return String(Narrower(std::wstring_view{wstr, count}));
+        return String(std::wstring_view{ wstr, count });
     }
 } // namespace ig
 
-namespace std
+template <>
+class std::hash<ig::String>
 {
-    template <>
-    class hash<ig::String>
-    {
-    public:
-        size_t operator()(const ig::String& name) const { return name.GetHash(); }
-    };
-} // namespace std
+public:
+    [[nodiscard]] size_t operator()(const ig::String& name) const noexcept { return name.GetHash(); }
+};

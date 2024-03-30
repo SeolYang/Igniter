@@ -59,7 +59,7 @@ namespace ig
     /**
      * #sy_ref	https://github.com/srned/baselib/blob/master/crc64.c
      */
-    constexpr uint64_t EvalCRC64(const std::string_view data)
+    constexpr uint64_t EvalCRC64(const std::string_view data) noexcept
     {
         uint64_t result = 0;
         for (const unsigned char byte : data)
@@ -74,7 +74,7 @@ namespace ig
      * #sy_ref https://stackoverflow.com/questions/56292104/hashing-types-at-compile-time-in-c17-c2a
      */
     template <typename T>
-    constexpr uint64_t EvalHashOfType()
+    constexpr uint64_t EvalHashOfType() noexcept
     {
         return EvalCRC64(__FUNCSIG__);
     }
