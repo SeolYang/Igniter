@@ -20,15 +20,13 @@ namespace ig
         return hashStringMapMutex;
     }
 
-    String::String(const String& other)
-        : hashOfString(other.hashOfString)
+    String::String(const String& other) : hashOfString(other.hashOfString)
     {
     }
 
-    String::String(const std::string_view stringView)
-        : hashOfString(InvalidHashVal)
+    String::String(const std::string_view strView)
     {
-        SetString(stringView);
+        SetString(strView);
     }
 
     String::String(const std::wstring_view strView)
@@ -42,21 +40,9 @@ namespace ig
         return *this;
     }
 
-    String& String::operator=(const std::string& rhs)
-    {
-        SetString(rhs);
-        return *this;
-    }
-
     String& String::operator=(const std::string_view rhs)
     {
         SetString(rhs);
-        return *this;
-    }
-
-    String& String::operator=(const std::wstring& rhs)
-    {
-        SetString(Narrower(rhs));
         return *this;
     }
 
@@ -66,14 +52,20 @@ namespace ig
         return *this;
     }
 
+    bool String::operator==(const String& rhs) const noexcept
+    {
+        return hashOfString == rhs.hashOfString;
+    }
+
     bool String::operator==(const std::string_view rhs) const noexcept
     {
         return this->hashOfString == String::EvalHash(rhs);
     }
 
-    bool String::operator==(const String& rhs) const noexcept
+    bool String::operator==(const std::wstring_view rhs) const
     {
-        return hashOfString == rhs.hashOfString;
+        const std::string narrower{ Narrower(rhs) };
+        return *this == narrower;
     }
 
     void String::SetString(const std::string_view strView)
@@ -122,6 +114,16 @@ namespace ig
     std::wstring String::ToWideString() const
     {
         return Wider(ToStringView());
+    }
+
+    fs::path String::ToPath() const
+    {
+        return fs::path{ ToStringView() };
+    }
+
+    String String::FromPath(const fs::path& path)
+    {
+        return String{ path.c_str() };
     }
 
     std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()

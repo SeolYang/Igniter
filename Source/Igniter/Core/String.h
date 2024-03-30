@@ -44,19 +44,15 @@ namespace ig
      */
     class String final
     {
-        using HashStringMap = robin_hood::unordered_map<uint64_t, std::string>;
-
     public:
         String() = default;
-        String(const String& name);
-        String(const std::string_view Str);
-        String(const std::wstring_view str);
+        String(const String& other);
+        String(const std::string_view strView);
+        String(const std::wstring_view strView);
         ~String() = default;
 
         String& operator=(const String& rhs);
-        String& operator=(const std::string& rhs);
         String& operator=(const std::string_view rhs);
-        String& operator=(const std::wstring& rhs);
         String& operator=(const std::wstring_view rhs);
 
         [[nodiscard]] operator std::string() const { return ToStandard(); }
@@ -64,10 +60,10 @@ namespace ig
         [[nodiscard]] operator std::wstring() const { return ToWideString(); }
 
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
-        [[nodiscard]] bool operator==(std::string_view rhs) const noexcept;
-        [[nodiscard]] bool operator!=(const std::string_view rhs) const noexcept { return !(*this == rhs); }
+
         [[nodiscard]] bool operator==(const String& rhs) const noexcept;
-        [[nodiscard]] bool operator!=(const String& rhs) const noexcept { return !(*this == rhs); }
+        [[nodiscard]] bool operator==(const std::string_view rhs) const noexcept;
+        [[nodiscard]] bool operator==(const std::wstring_view rhs) const;
 
         void SetString(const std::string_view strView);
 
@@ -75,6 +71,9 @@ namespace ig
         [[nodiscard]] std::string_view ToStringView() const;
         [[nodiscard]] const char* ToCString() const;
         [[nodiscard]] std::wstring ToWideString() const;
+        [[nodiscard]] fs::path ToPath() const;
+
+        [[nodiscard]] static String FromPath(const fs::path& path);
 
         [[nodiscard]] uint64_t GetHash() const noexcept { return hashOfString; }
         [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
@@ -84,6 +83,7 @@ namespace ig
     private:
         [[nodiscard]] static constexpr uint64_t EvalHash(const std::string_view strView) noexcept;
 
+        using HashStringMap = robin_hood::unordered_map<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
         [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
 
