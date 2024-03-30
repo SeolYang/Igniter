@@ -55,7 +55,7 @@ namespace ig
         String& operator=(const std::string_view rhs);
         String& operator=(const std::wstring_view rhs);
 
-        [[nodiscard]] operator std::string() const { return ToStandard(); }
+        [[nodiscard]] operator const std::string&() const { return ToStandard(); }
         [[nodiscard]] operator std::string_view() const { return ToStringView(); }
         [[nodiscard]] operator std::wstring() const { return ToWideString(); }
 
@@ -67,7 +67,7 @@ namespace ig
 
         void SetString(const std::string_view strView);
 
-        [[nodiscard]] std::string ToStandard() const;
+        [[nodiscard]] const std::string& ToStandard() const;
         [[nodiscard]] std::string_view ToStringView() const;
         [[nodiscard]] const char* ToCString() const;
         [[nodiscard]] std::wstring ToWideString() const;

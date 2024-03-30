@@ -96,27 +96,29 @@ namespace ig
         }
     }
 
-    std::string String::ToStandard() const
+    const std::string& String::ToStandard() const
     {
-        return std::string{ ToStringView() };
-    }
-
-    std::string_view String::ToStringView() const
-    {
+        static const std::string InvalidUtf8String{ "#INVALID_UTF8_STR" };
+        static const std::string Empty{};
         if (hashOfString == InvalidHashVal)
         {
-            return std::string_view{ "#INVALID_UTF8_STRING" };
+            return InvalidUtf8String;
         }
 
         if (hashOfString == 0)
         {
-            return std::string_view{ "" };
+            return Empty;
         }
 
         ReadOnlyLock lock{ GetHashStringMapMutex() };
         const HashStringMap& hashStringMap{ GetHashStringMap() };
         IG_CHECK(hashStringMap.contains(hashOfString));
         return hashStringMap.at(hashOfString);
+    }
+
+    std::string_view String::ToStringView() const
+    {
+        return std::string_view{ ToStandard() };
     }
 
     const char* String::ToCString() const

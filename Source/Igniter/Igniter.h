@@ -31,6 +31,7 @@
 #include <any>
 #include <future>
 #include <coroutine>
+#include <regex>
 
 #ifndef UTF_CPP_CPLUSPLUS
     #define UTF_CPP_CPLUSPLUS 201703L
