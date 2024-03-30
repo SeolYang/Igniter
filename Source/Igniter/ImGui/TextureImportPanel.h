@@ -20,7 +20,7 @@ namespace ig
 
     private:
         String path{};
-        TextureImportConfig config;
+        TextureImportDesc config;
         EOpenFileDialogStatus status{};
 
         int selectedCompModeIdx = 0;

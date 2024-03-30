@@ -21,7 +21,7 @@ namespace ig::details
         [[nodiscard]] AssetInfo GetAssetInfo(const EAssetType assetType, const String virtualPath) const;
 
         template <Asset T>
-        [[nodiscard]] T::LoadConfigType GetLoadConfig(const xg::Guid guid) const
+        [[nodiscard]] T::LoadDesc GetLoadDesc(const xg::Guid guid) const
         {
             IG_CHECK(Contains(guid));
 
@@ -33,29 +33,29 @@ namespace ig::details
         }
 
         template <Asset T>
-        [[nodiscard]] T::LoadConfigType GetLoadConfig(const String virtualPath) const
+        [[nodiscard]] T::LoadDesc GetLoadDesc(const String virtualPath) const
         {
             return GetMetadata<T>(GetGuid(AssetTypeOf_v<T>, virtualPath));
         }
 
         template <Asset T>
-        void SetMetadata(const xg::Guid guid, const typename T::LoadConfigType& metadata)
+        void SetLoadDesc(const xg::Guid guid, const typename T::LoadDesc& desc)
         {
             IG_CHECK(guid.isValid());
             IG_CHECK(Contains(guid));
 
             json& serializedMeta = guidSerializedMetaTable[guid];
-            serializedMeta << metadata;
+            serializedMeta << desc;
         }
 
         template <Asset T>
-        void SetMetadata(const String virtualPath, const typename T::LoadConfigType& metadata)
+        void SetLoadDesc(const String virtualPath, const typename T::LoadDesc& desc)
         {
-            SetMetadata<T>(GetGuid(AssetTypeOf_v<T>, virtualPath), metadata);
+            SetLoadDesc<T>(GetGuid(AssetTypeOf_v<T>, virtualPath), desc);
         }
 
         template <Asset T>
-        void Create(const AssetInfo& newInfo, const typename T::LoadConfigType& metadata)
+        void Create(const AssetInfo& newInfo, const typename T::LoadDesc& metadata)
         {
             IG_CHECK(newInfo.IsValid());
             IG_CHECK(!Contains(newInfo.Guid));

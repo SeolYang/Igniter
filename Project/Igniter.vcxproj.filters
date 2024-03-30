@@ -336,6 +336,9 @@
     <ClInclude Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.h">
       <Filter>Source\ImGui\File</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\Material.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">

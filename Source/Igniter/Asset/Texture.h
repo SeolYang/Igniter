@@ -26,7 +26,7 @@ namespace ig
         Tex3D
     };
 
-    struct TextureImportConfig
+    struct TextureImportDesc
     {
     public:
         json& Serialize(json& archive) const;
@@ -42,7 +42,7 @@ namespace ig
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     };
 
-    struct TextureLoadConfig
+    struct TextureLoadDesc
     {
     public:
         json& Serialize(json& archive) const;
@@ -72,13 +72,14 @@ namespace ig
     struct Texture
     {
     public:
-        using ImportConfigType = TextureImportConfig;
-        using LoadConfigType = TextureLoadConfig;
-        using MetadataType = std::pair<AssetInfo, LoadConfigType>;
+        using ImportDesc = TextureImportDesc;
+        using LoadDesc = TextureLoadDesc;
+        using Desc = std::pair<AssetInfo, LoadDesc>;
 
     public:
-        xg::Guid Guid {};
-        TextureLoadConfig LoadConfig{};
+        xg::Guid Guid{};
+        LoadDesc LoadDescSnapshot{};
+        Desc Snapshot;                                                       /* #wip_todo Guid-LoadDescSnapshot -> Snapshot */
         Handle<GpuTexture, DeferredDestroyer<GpuTexture>> TextureInstance{}; // Using Deferred Deallocation
         Handle<GpuView, GpuViewManager*> ShaderResourceView{};
         RefHandle<GpuView> TexSampler{};
@@ -108,7 +109,7 @@ namespace ig
         TextureImporter();
         ~TextureImporter();
 
-        Result<Texture::MetadataType, ETextureImportStatus> Import(const String resPathStr, TextureImportConfig config);
+        Result<Texture::Desc, ETextureImportStatus> Import(const String resPathStr, TextureImportDesc config);
 
     private:
         ID3D11Device* d3d11Device = nullptr;
@@ -121,7 +122,3 @@ namespace ig
         static std::optional<Texture> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
     };
 } // namespace ig
-
-namespace ig::details
-{
-} // namespace ig::details

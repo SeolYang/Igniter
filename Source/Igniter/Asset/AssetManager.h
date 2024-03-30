@@ -17,9 +17,9 @@ namespace ig
     using AssetRefHandle = RefHandle<AssetType, class AssetManager*>;
 
     struct Texture;
-    struct TextureImportConfig;
+    struct TextureImportDesc;
     class TextureImporter;
-    struct StaticMeshImportConfig;
+    struct StaticMeshImportDesc;
     class AssetManager final
     {
         friend class RefHandle<Texture, AssetManager*>;
@@ -35,11 +35,11 @@ namespace ig
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
-        xg::Guid ImportTexture(const String resPath, const TextureImportConfig& config);
+        xg::Guid ImportTexture(const String resPath, const TextureImportDesc& config);
         AssetRefHandle<Texture> LoadTexture(const xg::Guid& guid);
         AssetRefHandle<Texture> LoadTexture(const String virtualPath);
 
-        std::vector<xg::Guid> ImportStaticMesh(const String resPath, const StaticMeshImportConfig& config);
+        std::vector<xg::Guid> ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc);
 
         void Unload(const xg::Guid& guid);
         void Unload(const EAssetType assetType, const String virtualPath);

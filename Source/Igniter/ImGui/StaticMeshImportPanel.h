@@ -20,7 +20,7 @@ namespace ig
 
     private:
         String path{};
-        StaticMeshImportConfig config;
+        StaticMeshImportDesc config;
         EOpenFileDialogStatus status{};
     };
 } // namespace ig

@@ -185,7 +185,7 @@ namespace ig
                     renderCmdCtx->SetRoot32BitConstants(0, params, 0);
                 }
 
-                renderCmdCtx->DrawIndexed(staticMesh.LoadConfig.NumIndices);
+                renderCmdCtx->DrawIndexed(staticMesh.LoadDescSnapshot.NumIndices);
             }
         }
         renderCmdCtx->End();

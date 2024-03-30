@@ -48,10 +48,10 @@ namespace ig
 
     template <typename T>
     concept Asset = requires {
-        typename T::ImportConfigType;
-        typename T::LoadConfigType;
-        typename T::MetadataType;
-    } && std::is_same_v<typename T::MetadataType, std::pair<AssetInfo, typename T::LoadConfigType>> && AssetTypeOf_v<T> != EAssetType::Unknown;
+        typename T::ImportDesc;
+        typename T::LoadDesc;
+        typename T::Desc;
+    } && std::is_same_v<typename T::Desc, std::pair<AssetInfo, typename T::LoadDesc>> && AssetTypeOf_v<T> != EAssetType::Unknown;
 
     template <typename T>
     constexpr inline bool IsAsset_v = false;

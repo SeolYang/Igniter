@@ -49,9 +49,9 @@ namespace ig
         return *cachePtr;
     }
 
-    xg::Guid AssetManager::ImportTexture(const String resPath, const TextureImportConfig& config)
+    xg::Guid AssetManager::ImportTexture(const String resPath, const TextureImportDesc& config)
     {
-        Result<Texture::MetadataType, ETextureImportStatus> result = textureImporter->Import(resPath, config);
+        Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
         if (!result.HasOwnership())
         {
             IG_LOG(AssetManager, Error, "Failed({}) to import texture \"{}\".",
@@ -59,7 +59,7 @@ namespace ig
             return {};
         }
 
-        const Texture::MetadataType metadata = result.Take();
+        const Texture::Desc metadata = result.Take();
         const AssetInfo& assetInfo = metadata.first;
 
         if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
@@ -72,12 +72,12 @@ namespace ig
         return assetInfo.Guid;
     }
 
-    std::vector<xg::Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportConfig& config)
+    std::vector<xg::Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc)
     {
-        std::vector<StaticMeshImporter::Result> results = StaticMeshImporter::ImportStaticMesh(*this, resPath, config);
+        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = StaticMeshImporter::ImportStaticMesh(*this, resPath, desc);
         std::vector<xg::Guid> output;
         output.reserve(results.size());
-        for (StaticMeshImporter::Result& result : results)
+        for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
         {
             if (!result.HasOwnership())
             {
@@ -86,7 +86,7 @@ namespace ig
                 continue;
             }
 
-            const StaticMesh::MetadataType metadata = result.Take();
+            const StaticMesh::Desc metadata = result.Take();
             const AssetInfo& assetInfo = metadata.first;
 
             if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))

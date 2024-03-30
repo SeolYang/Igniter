@@ -244,7 +244,9 @@ namespace ig::details
                 IG_ENSURE(fs::remove(assetPath));
             }
 
-            IG_LOG(AssetMonitor, Debug, "Asset Expired: {} ({})", assetInfo.VirtualPath.ToStringView(), expiredAssetInfo.first.str());
+            IG_LOG(AssetMonitor, Debug, "{} Asset Expired: {} ({})",
+                   magic_enum::enum_name(assetInfo.Type),
+                   assetInfo.VirtualPath.ToStringView(), expiredAssetInfo.first.str());
         }
         expiredAssetInfos.clear();
     }
@@ -261,7 +263,9 @@ namespace ig::details
 
             const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.Type, assetInfo.Guid) };
             IG_ENSURE(SaveJsonToFile(metadataPath, serializedMeta));
-            IG_LOG(AssetMonitor, Debug, "Asset metadata Saved: {} ({})", assetInfo.VirtualPath.ToStringView(), guidSerializedMeta.first.str());
+            IG_LOG(AssetMonitor, Debug, "{} Asset metadata Saved: {} ({})",
+                   magic_enum::enum_name(assetInfo.Type),
+                   assetInfo.VirtualPath.ToStringView(), guidSerializedMeta.first.str());
         }
     }
 } // namespace ig::details

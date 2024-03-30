@@ -8,8 +8,7 @@ namespace ig
 {
     class GpuBuffer;
     class GpuView;
-
-    struct StaticMeshImportConfig
+    struct StaticMeshImportDesc
     {
     public:
         json& Serialize(json& archive) const;
@@ -29,7 +28,7 @@ namespace ig
         bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
     };
 
-    struct StaticMeshLoadConfig
+    struct StaticMeshLoadDesc
     {
     public:
         json& Serialize(json& archive) const;
@@ -44,31 +43,16 @@ namespace ig
         // std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
     };
 
-    struct SkeletalMeshImportConfig
-    {
-    public:
-        json& Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
-    };
-
-    struct SkeletalMeshLoadConfig
-    {
-    public:
-        json& Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
-    };
-
-    /* Static Mesh */
     struct StaticMesh
     {
     public:
-        using ImportConfigType = StaticMeshImportConfig;
-        using LoadConfigType = StaticMeshLoadConfig;
-        using MetadataType = std::pair<AssetInfo, StaticMeshLoadConfig>;
+        using ImportDesc = StaticMeshImportDesc;
+        using LoadDesc = StaticMeshLoadDesc;
+        using Desc = std::pair<AssetInfo, LoadDesc>;
 
     public:
         xg::Guid Guid;
-        StaticMeshLoadConfig LoadConfig;
+        LoadDesc LoadDescSnapshot;
         Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> VertexBufferInstance;
         Handle<GpuView, GpuViewManager*> VertexBufferSrv;
         Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> IndexBufferInstance;
@@ -94,11 +78,7 @@ namespace ig
     class StaticMeshImporter
     {
     public:
-        using Result = Result<StaticMesh::MetadataType, EStaticMeshImportStatus>;
-        using Metadata = StaticMesh::MetadataType;
-
-    public:
-        static std::vector<Result> ImportStaticMesh(AssetManager& assetManager, const String resPathStr, StaticMesh::ImportConfigType config);
+        static std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> ImportStaticMesh(AssetManager& assetManager, const String resPathStr, StaticMesh::ImportDesc desc);
     };
 
     class StaticMeshLoader
