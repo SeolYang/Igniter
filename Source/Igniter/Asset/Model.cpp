@@ -207,7 +207,7 @@ namespace ig
         IG_CHECK(assetInfo.IsValid());
         IG_CHECK(newLoadConfig.NumVertices > 0 && newLoadConfig.NumIndices > 0);
         IG_CHECK(newLoadConfig.CompressedVerticesSizeInBytes > 0 && newLoadConfig.CompressedIndicesSizeInBytes);
-        return MakeSuccess<StaticMesh::Desc, EStaticMeshImportStatus>(std::make_pair(assetInfo, newLoadConfig));
+        return MakeSuccess<StaticMesh::Desc, EStaticMeshImportStatus>(assetInfo, newLoadConfig);
     }
 
     std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::ImportStaticMesh(AssetManager& /*assetManager*/, const String resPathStr, StaticMesh::ImportDesc desc)
@@ -288,7 +288,7 @@ namespace ig
         return results;
     }
 
-    std::optional<ig::StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
+    std::optional<StaticMesh> StaticMeshLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
     {
         IG_LOG(ModelImporter, Info, "Load static mesh {}.", guid.str());
         TempTimer tempTimer;
@@ -447,11 +447,22 @@ namespace ig
                assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
 
         return StaticMesh{
-            .Guid = guid,
-            .LoadDescSnapshot = loadDesc,
-            .VertexBufferInstance = { handleManager, std::move(*vertexBuffer) },
-            .VertexBufferSrv = std::move(vertexBufferSrv),
-            .IndexBufferInstance = { handleManager, std::move(*indexBuffer) }
+            { assetInfo, loadDesc },
+            { handleManager, std::move(*vertexBuffer) },
+            std::move(vertexBufferSrv),
+            { handleManager, std::move(*indexBuffer) }
         };
+    }
+
+    StaticMesh::StaticMesh(Desc snapshot, DeferredHandle<GpuBuffer> vertexBuffer, Handle<GpuView, GpuViewManager*> vertexBufferSrv, DeferredHandle<GpuBuffer> indexBuffer)
+        : snapshot(snapshot),
+          vertexBuffer(std::move(vertexBuffer)),
+          vertexBufferSrv(std::move(vertexBufferSrv)),
+          indexBuffer(std::move(indexBuffer))
+    {
+    }
+
+    StaticMesh::~StaticMesh()
+    {
     }
 } // namespace ig

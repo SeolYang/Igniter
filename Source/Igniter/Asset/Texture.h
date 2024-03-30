@@ -65,28 +65,41 @@ namespace ig
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     };
 
+    struct Texture;
+    template <>
+    constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
+
     class RenderDevice;
     class GpuTexture;
     class GpuView;
     class GpuViewManager;
-    struct Texture
+    struct Texture final
     {
     public:
         using ImportDesc = TextureImportDesc;
         using LoadDesc = TextureLoadDesc;
-        using Desc = std::pair<AssetInfo, LoadDesc>;
+        using Desc = AssetDesc<Texture>;
 
     public:
-        xg::Guid Guid{};
-        LoadDesc LoadDescSnapshot{};
-        Desc Snapshot;                                                       /* #wip_todo Guid-LoadDescSnapshot -> Snapshot */
-        Handle<GpuTexture, DeferredDestroyer<GpuTexture>> TextureInstance{}; // Using Deferred Deallocation
-        Handle<GpuView, GpuViewManager*> ShaderResourceView{};
-        RefHandle<GpuView> TexSampler{};
-    };
+        Texture(Desc snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, RefHandle<GpuView> sampler);
+        Texture(const Texture&) = delete;
+        Texture(Texture&&) noexcept = default;
+        ~Texture();
 
-    template <>
-    constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
+        Texture& operator=(const Texture&) = delete;
+        Texture& operator=(Texture&&) noexcept = default;
+
+        Desc GetSnapshot() const { return snapshot; }
+        RefHandle<GpuTexture> GetGpuTexture() { return gpuTexture.MakeRef(); }
+        RefHandle<GpuView> GetShaderResourceView() { return srv.MakeRef(); }
+        RefHandle<GpuView> GetSampler() { return sampler; }
+
+    private:
+        Desc snapshot{};
+        DeferredHandle<GpuTexture> gpuTexture{};
+        Handle<GpuView, GpuViewManager*> srv{};
+        RefHandle<GpuView> sampler{};
+    };
 
     enum class ETextureImportStatus
     {

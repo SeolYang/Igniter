@@ -391,6 +391,9 @@ namespace ig
         details::HandleImpl handle;
         [[no_unique_address]] Destroyer destroyer;
     };
+
+    template <typename T>
+    using DeferredHandle = Handle<T, DeferredDestroyer<T>>;
 } // namespace ig
 
 namespace std

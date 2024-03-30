@@ -113,8 +113,8 @@
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
             staticMeshComponent.StaticMeshHandle = homuraStaticMeshHandle.MakeRef();
-            staticMeshComponent.DiffuseTex = homuraBodyTex->ShaderResourceView.MakeRef();
-            staticMeshComponent.DiffuseTexSampler = homuraBodyTex->TexSampler;
+            staticMeshComponent.DiffuseTex = homuraBodyTex->GetShaderResourceView();
+            staticMeshComponent.DiffuseTexSampler = homuraBodyTex->GetSampler();
         }
 
         auto ashBodyTex = ashBodyTexFuture.get();
@@ -133,8 +133,8 @@
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(ash);
             staticMeshComponent.StaticMeshHandle = ashStaticMeshHandle.MakeRef();
-            staticMeshComponent.DiffuseTex = ashBodyTex->ShaderResourceView.MakeRef();
-            staticMeshComponent.DiffuseTexSampler = ashBodyTex->TexSampler;
+            staticMeshComponent.DiffuseTex = ashBodyTex->GetShaderResourceView();
+            staticMeshComponent.DiffuseTexSampler = ashBodyTex->GetSampler();
         }
 
         /* Camera */

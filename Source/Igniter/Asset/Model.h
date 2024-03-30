@@ -43,24 +43,37 @@ namespace ig
         // std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
     };
 
-    struct StaticMesh
+    struct StaticMesh;
+    template <>
+    constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
+
+    struct StaticMesh final
     {
     public:
         using ImportDesc = StaticMeshImportDesc;
         using LoadDesc = StaticMeshLoadDesc;
-        using Desc = std::pair<AssetInfo, LoadDesc>;
+        using Desc = AssetDesc<StaticMesh>;
 
     public:
-        xg::Guid Guid;
-        LoadDesc LoadDescSnapshot;
-        Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> VertexBufferInstance;
-        Handle<GpuView, GpuViewManager*> VertexBufferSrv;
-        Handle<GpuBuffer, DeferredDestroyer<GpuBuffer>> IndexBufferInstance;
-        // RefHandle<Material>
-    };
+        StaticMesh(Desc snapshot, DeferredHandle<GpuBuffer> vertexBuffer, Handle<GpuView, GpuViewManager*> vertexBufferSrv, DeferredHandle<GpuBuffer> indexBuffer);
+        StaticMesh(const StaticMesh&) = delete;
+        StaticMesh(StaticMesh&&) noexcept = default;
+        ~StaticMesh();
 
-    template <>
-    constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
+        StaticMesh& operator=(const StaticMesh&) = delete;
+        StaticMesh& operator=(StaticMesh&&) noexcept = default;
+
+        Desc GetSnapshot() const { return snapshot; }
+        RefHandle<GpuBuffer> GetVertexBuffer() { return vertexBuffer.MakeRef(); }
+        RefHandle<GpuView> GetVertexBufferSrv() { return vertexBufferSrv.MakeRef(); }
+        RefHandle<GpuBuffer> GetIndexBuffer() { return indexBuffer.MakeRef(); }
+
+    private:
+        Desc snapshot{};
+        DeferredHandle<GpuBuffer> vertexBuffer{};
+        Handle<GpuView, GpuViewManager*> vertexBufferSrv{};
+        DeferredHandle<GpuBuffer> indexBuffer{};
+    };
 
     enum class EStaticMeshImportStatus
     {

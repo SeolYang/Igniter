@@ -60,13 +60,13 @@ namespace ig
         }
 
         const Texture::Desc metadata = result.Take();
-        const AssetInfo& assetInfo = metadata.first;
+        const AssetInfo& assetInfo = metadata.Info;
 
         if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
         {
             Delete(assetInfo.Type, assetInfo.VirtualPath);
         }
-        assetMonitor->Create<Texture>(assetInfo, metadata.second);
+        assetMonitor->Create<Texture>(assetInfo, metadata.LoadDescriptor);
 
         IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath.ToStringView(), assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
         return assetInfo.Guid;
@@ -87,13 +87,13 @@ namespace ig
             }
 
             const StaticMesh::Desc metadata = result.Take();
-            const AssetInfo& assetInfo = metadata.first;
+            const AssetInfo& assetInfo = metadata.Info;
 
             if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
             {
                 Delete(assetInfo.Type, assetInfo.VirtualPath);
             }
-            assetMonitor->Create<StaticMesh>(assetInfo, metadata.second);
+            assetMonitor->Create<StaticMesh>(assetInfo, metadata.LoadDescriptor);
 
             IG_LOG(AssetManager, Info, "\"{}\" imported as static mesh asset {}({})", resPath.ToStringView(), assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
             output.emplace_back(assetInfo.Guid);

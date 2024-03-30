@@ -168,14 +168,20 @@ namespace ig
             {
                 IG_CHECK(staticMeshComponent.StaticMeshHandle);
                 StaticMesh& staticMesh = *staticMeshComponent.StaticMeshHandle;
-                renderCmdCtx->SetIndexBuffer(*staticMesh.IndexBufferInstance);
+
+                RefHandle<GpuBuffer> indexBuffer = staticMesh.GetIndexBuffer();
+                IG_CHECK(indexBuffer);
+                RefHandle<GpuView> vertexBufferSrv = staticMesh.GetVertexBufferSrv();
+                IG_CHECK(vertexBufferSrv);
+
+                renderCmdCtx->SetIndexBuffer(*indexBuffer);
                 {
                     TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
                     const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
                     perObjectConstantBuffer.Write(perObjectBuffer);
 
                     const BasicRenderResources params{
-                        .VertexBufferIdx = staticMesh.VertexBufferSrv->Index,
+                        .VertexBufferIdx = vertexBufferSrv->Index,
                         .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
                         .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
                         .DiffuseTexIdx = staticMeshComponent.DiffuseTex->Index,
@@ -185,7 +191,9 @@ namespace ig
                     renderCmdCtx->SetRoot32BitConstants(0, params, 0);
                 }
 
-                renderCmdCtx->DrawIndexed(staticMesh.LoadDescSnapshot.NumIndices);
+                const StaticMesh::Desc& snapshot = staticMesh.GetSnapshot();
+                const StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
+                renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
             }
         }
         renderCmdCtx->End();

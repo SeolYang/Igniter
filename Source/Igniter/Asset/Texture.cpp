@@ -6,6 +6,7 @@
 #include <Core/Log.h>
 #include <Core/JsonUtils.h>
 #include <Core/Serializable.h>
+#include <Core/ComInitializer.h>
 #include <Filesystem/Utils.h>
 #include <D3D12/GpuView.h>
 #include <D3D12/RenderDevice.h>
@@ -13,8 +14,6 @@
 #include <Render/GpuViewManager.h>
 #include <Asset/Texture.h>
 #include <Asset/Utils.h>
-
-#include <Core/ComInitializer.h>
 
 IG_DEFINE_LOG_CATEGORY(TextureImporter);
 IG_DEFINE_LOG_CATEGORY(TextureLoader);
@@ -411,7 +410,7 @@ namespace ig
         }
 
         IG_CHECK(assetInfo.IsValid() && assetInfo.Type == EAssetType::Texture);
-        return MakeSuccess<Texture::Desc, ETextureImportStatus>(std::make_pair(assetInfo, newLoadConfig));
+        return MakeSuccess<Texture::Desc, ETextureImportStatus>(assetInfo, newLoadConfig);
     }
 
     std::optional<Texture> TextureLoader::Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
@@ -435,8 +434,8 @@ namespace ig
         }
 
         AssetInfo assetInfo{};
-        TextureLoadDesc loadConfig{};
-        assetMetadata >> loadConfig >> assetInfo;
+        TextureLoadDesc loadDesc{};
+        assetMetadata >> loadDesc >> assetInfo;
 
         /* Check Asset Metadata */
         if (assetInfo.Guid != guid)
@@ -455,14 +454,14 @@ namespace ig
         }
 
         /* Check TextureLoadDesc data */
-        if (loadConfig.Width == 0 || loadConfig.Height == 0 || loadConfig.DepthOrArrayLength == 0 || loadConfig.Mips == 0)
+        if (loadDesc.Width == 0 || loadDesc.Height == 0 || loadDesc.DepthOrArrayLength == 0 || loadDesc.Mips == 0)
         {
             IG_LOG(TextureImporter, Error, "Load Config has invalid values. Width: {}, Height: {}, DepthOrArrayLength: {}, Mips: {}",
-                   loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength, loadConfig.Mips);
+                   loadDesc.Width, loadDesc.Height, loadDesc.DepthOrArrayLength, loadDesc.Mips);
             return std::nullopt;
         }
 
-        if (loadConfig.Format == DXGI_FORMAT_UNKNOWN)
+        if (loadDesc.Format == DXGI_FORMAT_UNKNOWN)
         {
             IG_LOG(TextureImporter, Error, "Load Config format is unknown.");
             return std::nullopt;
@@ -486,33 +485,33 @@ namespace ig
         }
 
         /* Check metadata mismatch */
-        if (loadConfig.Width != ddsMeta.width ||
-            loadConfig.Height != ddsMeta.height ||
-            (loadConfig.DepthOrArrayLength != ddsMeta.depth && loadConfig.DepthOrArrayLength != ddsMeta.arraySize))
+        if (loadDesc.Width != ddsMeta.width ||
+            loadDesc.Height != ddsMeta.height ||
+            (loadDesc.DepthOrArrayLength != ddsMeta.depth && loadDesc.DepthOrArrayLength != ddsMeta.arraySize))
         {
             IG_LOG(TextureImporter, Error, "DDS Metadata does not match with texture asset metadata.");
             return std::nullopt;
         }
 
-        if (loadConfig.bIsCubemap != loadConfig.bIsCubemap)
+        if (loadDesc.bIsCubemap != loadDesc.bIsCubemap)
         {
             IG_LOG(TextureImporter, Error, "Texture asset cubemap flag does not match");
             return std::nullopt;
         }
 
-        if (loadConfig.bIsCubemap && (loadConfig.DepthOrArrayLength % 6 == 0))
+        if (loadDesc.bIsCubemap && (loadDesc.DepthOrArrayLength % 6 == 0))
         {
             IG_LOG(TextureImporter, Error, "Cubemap array length suppose to be multiple of \'6\'.");
             return std::nullopt;
         }
 
-        if (loadConfig.Dimension != AsTexDimension(ddsMeta.dimension))
+        if (loadDesc.Dimension != AsTexDimension(ddsMeta.dimension))
         {
             IG_LOG(TextureImporter, Error, "Texture Asset Dimension does not match with DDS Dimension.");
             return std::nullopt;
         }
 
-        if (loadConfig.Format != ddsMeta.format)
+        if (loadDesc.Format != ddsMeta.format)
         {
             IG_LOG(TextureImporter, Error, "Texture Asset Format does not match with DDS Format.");
             return std::nullopt;
@@ -521,49 +520,49 @@ namespace ig
         /* Configure Texture Description */
         /* #sy_todo Support MSAA */
         GPUTextureDesc texDesc{};
-        if (loadConfig.bIsCubemap)
+        if (loadDesc.bIsCubemap)
         {
             /* #sy_todo Support Cubemap Array */
-            texDesc.AsCubemap(loadConfig.Width, loadConfig.Height,
-                              loadConfig.Mips,
-                              loadConfig.Format);
+            texDesc.AsCubemap(loadDesc.Width, loadDesc.Height,
+                              loadDesc.Mips,
+                              loadDesc.Format);
         }
-        else if (loadConfig.Dimension == ETextureDimension::Tex1D)
+        else if (loadDesc.Dimension == ETextureDimension::Tex1D)
         {
-            if (loadConfig.IsArray())
+            if (loadDesc.IsArray())
             {
-                texDesc.AsTexture1DArray(loadConfig.Width, loadConfig.DepthOrArrayLength,
-                                         loadConfig.Mips,
-                                         loadConfig.Format);
+                texDesc.AsTexture1DArray(loadDesc.Width, loadDesc.DepthOrArrayLength,
+                                         loadDesc.Mips,
+                                         loadDesc.Format);
             }
             else
             {
-                texDesc.AsTexture1D(loadConfig.Width,
-                                    loadConfig.Mips,
-                                    loadConfig.Format);
+                texDesc.AsTexture1D(loadDesc.Width,
+                                    loadDesc.Mips,
+                                    loadDesc.Format);
             }
         }
-        else if (loadConfig.Dimension == ETextureDimension::Tex2D)
+        else if (loadDesc.Dimension == ETextureDimension::Tex2D)
         {
-            if (loadConfig.IsArray())
+            if (loadDesc.IsArray())
             {
-                texDesc.AsTexture2DArray(loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength,
-                                         loadConfig.Mips,
-                                         loadConfig.Format);
+                texDesc.AsTexture2DArray(loadDesc.Width, loadDesc.Height, loadDesc.DepthOrArrayLength,
+                                         loadDesc.Mips,
+                                         loadDesc.Format);
             }
             else
             {
-                texDesc.AsTexture2D(loadConfig.Width, loadConfig.Height,
-                                    loadConfig.Mips,
-                                    loadConfig.Format);
+                texDesc.AsTexture2D(loadDesc.Width, loadDesc.Height,
+                                    loadDesc.Mips,
+                                    loadDesc.Format);
             }
         }
         else
         {
-            IG_CHECK(!loadConfig.IsArray());
-            texDesc.AsTexture3D(loadConfig.Width, loadConfig.Height, loadConfig.DepthOrArrayLength,
-                                loadConfig.Mips,
-                                loadConfig.Format);
+            IG_CHECK(!loadDesc.IsArray());
+            texDesc.AsTexture3D(loadDesc.Width, loadDesc.Height, loadDesc.DepthOrArrayLength,
+                                loadDesc.Mips,
+                                loadDesc.Format);
         }
         texDesc.DebugName = String(guid.str());
         texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
@@ -640,13 +639,13 @@ namespace ig
         }
 
         auto samplerView = gpuViewManager.RequestSampler(D3D12_SAMPLER_DESC{
-            .Filter = loadConfig.Filter,
-            .AddressU = loadConfig.AddressModeU,
-            .AddressV = loadConfig.AddressModeV,
-            .AddressW = loadConfig.AddressModeW,
+            .Filter = loadDesc.Filter,
+            .AddressU = loadDesc.AddressModeU,
+            .AddressV = loadDesc.AddressModeV,
+            .AddressW = loadDesc.AddressModeW,
             .MipLODBias = 0.f,
             /* #sy_todo if filter ==  anisotropic, Add MaxAnisotropy at load config & import config */
-            .MaxAnisotropy = ((loadConfig.Filter == D3D12_FILTER_ANISOTROPIC || loadConfig.Filter == D3D12_FILTER_COMPARISON_ANISOTROPIC) ? 1u : 0u),
+            .MaxAnisotropy = ((loadDesc.Filter == D3D12_FILTER_ANISOTROPIC || loadDesc.Filter == D3D12_FILTER_COMPARISON_ANISOTROPIC) ? 1u : 0u),
             .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #sy_todo if filter == comparison, setup comparison func */,
             .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
             .MinLOD = 0.f,
@@ -661,11 +660,22 @@ namespace ig
         IG_LOG(TextureImporter, Info, "Successfully load texture asset {}, which from resource {}. Elapsed: {} ms", assetPath.string(), assetInfo.VirtualPath.ToStringView(), tempTimer.End());
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
         return Texture{
-            .Guid = guid,
-            .LoadDescSnapshot = loadConfig,
-            .TextureInstance = Handle<GpuTexture, DeferredDestroyer<GpuTexture>>{ handleManager, std::move(newTex.value()) },
-            .ShaderResourceView = std::move(srv),
-            .TexSampler = samplerView
+            { assetInfo, loadDesc },
+            { handleManager, std::move(newTex.value()) },
+            std::move(srv),
+            samplerView
         };
+    }
+
+    Texture::Texture(Desc snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, RefHandle<GpuView> sampler)
+        : snapshot(snapshot),
+          gpuTexture(std::move(gpuTexture)),
+          srv(std::move(srv)),
+          sampler(sampler)
+    {
+    }
+
+    Texture::~Texture()
+    {
     }
 } // namespace ig

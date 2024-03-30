@@ -47,11 +47,22 @@ namespace ig
     constexpr EAssetType AssetTypeOf_v = EAssetType::Unknown;
 
     template <typename T>
-    concept Asset = requires {
+        requires(AssetTypeOf_v<T> != EAssetType::Unknown)
+    struct AssetDesc
+    {
+        AssetInfo Info;
+        T::LoadDesc LoadDescriptor;
+    };
+
+    template <typename T>
+    concept Asset = requires(T asset) {
         typename T::ImportDesc;
         typename T::LoadDesc;
         typename T::Desc;
-    } && std::is_same_v<typename T::Desc, std::pair<AssetInfo, typename T::LoadDesc>> && AssetTypeOf_v<T> != EAssetType::Unknown;
+        {
+            asset.GetSnapshot()
+        } -> std::same_as<typename T::Desc>;
+    } && std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf_v<T> != EAssetType::Unknown;
 
     template <typename T>
     constexpr inline bool IsAsset_v = false;
