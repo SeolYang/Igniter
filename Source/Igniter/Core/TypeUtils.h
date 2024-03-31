@@ -43,6 +43,22 @@ public:
     }
 };
 
+template <>
+struct std::formatter<xg::Guid>
+{
+public:
+    constexpr auto parse(std::format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FrameContext>
+    auto format(const xg::Guid& guid, FrameContext& ctx) const
+    {
+        return std::format_to(ctx.out(), "{}", (guid.isValid() ? guid.str() : "#INVALID_GUID"));
+    }
+};
+
 #define IG_NUMERIC_MIN_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::min()
 #define IG_NUMERIC_MAX_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::max()
 
