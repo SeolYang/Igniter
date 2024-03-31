@@ -88,15 +88,17 @@ namespace ig
             requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
         friend Result<T, decltype(Status)> MakeFail();
 
-        template <typename... Args>
-        Result(const E newStatus, Args&&... args) : dummy{},
-                                                    status(newStatus)
+        Result(const E newStatus) : dummy{},
+                                    status(newStatus)
         {
-            if (newStatus == E::Success)
-            {
-                ::new (&value) T(std::forward<Args>(args)...);
-                bOwnershipTransferred = false;
-            }
+        }
+
+        template <typename... Args>
+        Result(Args&&... args) : dummy{},
+                                 status(E::Success),
+                                 bOwnershipTransferred(false)
+        {
+            ::new (&value) T(std::forward<Args>(args)...);
         }
 
     private:
@@ -116,15 +118,13 @@ namespace ig
     template <typename T, ResultStatus E, typename... Args>
     Result<T, E> MakeSuccess(Args&&... args)
     {
-        /* prvalue -> Guaranteed Copy Elision */
-        return Result<T, E>{ E::Success, std::forward<Args>(args)... };
+        return Result<T, E>{ std::forward<Args>(args)... };
     }
 
     template <typename T, auto Status>
         requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
     Result<T, decltype(Status)> MakeFail()
     {
-        /* prvalue -> Guaranteed Copy Elision */
         return Result<T, decltype(Status)>{ Status };
     }
 } // namespace ig
