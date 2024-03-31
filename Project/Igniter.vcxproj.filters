@@ -339,6 +339,9 @@
     <ClInclude Include="..\Source\Igniter\Asset\Material.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Regex.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -511,6 +514,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.cpp">
       <Filter>Source\ImGui\File</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\Regex.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

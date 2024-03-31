@@ -33,10 +33,9 @@ namespace ig
                 ImGuiTableFlags_Reorderable |
                 ImGuiTableFlags_Sortable |
                 ImGuiTableFlags_RowBg |
-                ImGuiTableFlags_BordersOuter |
-                ImGuiTableFlags_BordersV |
-                ImGuiTableFlags_NoBordersInBody |
-                ImGuiTableFlags_ScrollY;
+                ImGuiTableFlags_Borders |
+                ImGuiTableFlags_ScrollY |
+                ImGuiTableFlags_HighlightHoveredColumn ;
 
             if (ImGui::BeginTable("Cached Hash-String Table", 2, flags))
             {
@@ -87,16 +86,9 @@ namespace ig
                 }
                 else
                 {
-                    ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(cachedStrings.size()));
-                    while (clipper.Step())
+                    for (const auto& cachedStr : cachedStrings)
                     {
-                        for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row)
-                        {
-                            ImGui::PushID(row);
-                            renderElement(cachedStrings[row]);
-                            ImGui::PopID();
-                        }
+                        renderElement(cachedStr);
                     }
                 }
 

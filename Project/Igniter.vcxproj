@@ -48,6 +48,7 @@
     <ClInclude Include="..\Source\Igniter\Core\Log.h" />
     <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h" />
     <ClInclude Include="..\Source\Igniter\Core\MemUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Regex.h" />
     <ClInclude Include="..\Source\Igniter\Core\Result.h" />
     <ClInclude Include="..\Source\Igniter\Core\Serializable.h" />
     <ClInclude Include="..\Source\Igniter\Core\String.h" />
@@ -130,6 +131,7 @@
     <ClCompile Include="..\Source\Igniter\Core\InputManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Log.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\MemoryPool.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\Regex.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\String.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\ThreadUIDGenerator.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Window.cpp" />
