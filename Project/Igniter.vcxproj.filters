@@ -360,6 +360,9 @@
     <ClInclude Include="..\Source\Igniter\Asset\StaticMeshLoader.h">
       <Filter>Source\Asset\StaticMesh</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\MaterialLoader.h">
+      <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -544,6 +547,12 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Asset\StaticMeshLoader.cpp">
       <Filter>Source\Asset\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\Material.cpp">
+      <Filter>Source\Asset\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\MaterialLoader.cpp">
+      <Filter>Source\Asset\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

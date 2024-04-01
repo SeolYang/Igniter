@@ -24,6 +24,7 @@
     <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Common.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Material.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\MaterialLoader.h" />
     <ClInclude Include="..\Source\Igniter\Asset\StaticMesh.h" />
     <ClInclude Include="..\Source\Igniter\Asset\StaticMeshImporter.h" />
     <ClInclude Include="..\Source\Igniter\Asset\StaticMeshLoader.h" />
@@ -119,6 +120,8 @@
     <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\Material.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\MaterialLoader.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\StaticMesh.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\StaticMeshImporter.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\StaticMeshLoader.cpp" />

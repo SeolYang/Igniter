@@ -148,7 +148,7 @@ namespace ig
         }
 
         return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(StaticMesh{
-            { assetInfo, loadDesc },
+            desc,
             { handleManager, std::move(*vertexBuffer) },
             std::move(vertexBufferSrv),
             { handleManager, std::move(*indexBuffer) } });

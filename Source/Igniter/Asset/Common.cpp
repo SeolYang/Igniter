@@ -57,12 +57,8 @@ namespace ig
                 return fs::path{ details::StaticMeshAssetRootPath };
             case EAssetType::SkeletalMesh:
                 return fs::path{ details::SkeletalMeshAssetRootPath };
-            case EAssetType::Shader:
-                return fs::path{ details::ShaderAssetRootPath };
             case EAssetType::Audio:
                 return fs::path{ details::AudioAssetRootPath };
-            case EAssetType::Script:
-                return fs::path{ details::ScriptAssetRootPath };
             case EAssetType::Material:
                 return fs::path{ details::MaterialAssetRootPath };
             [[unlikely]] default:

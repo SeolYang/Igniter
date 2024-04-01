@@ -229,11 +229,10 @@ namespace ig
         }
 
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
-
         return MakeSuccess<Texture, ETextureLoaderStatus>(Texture{
-            { assetInfo, loadDesc },
+            desc,
             { handleManager, std::move(newTex.value()) },
             std::move(srv),
             samplerView });
     }
-}
+} // namespace ig
