@@ -35,9 +35,6 @@ namespace ig
 
         Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc);
 
-        /* #sy_deprecated */
-        static std::optional<StaticMesh> _Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
-
     public:
         HandleManager& handleManager;
         RenderDevice& renderDevice;

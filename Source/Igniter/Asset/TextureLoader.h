@@ -40,8 +40,6 @@ namespace ig
         TextureLoader& operator=(TextureLoader&&) noexcept = delete;
 
         Result<Texture, ETextureLoaderStatus> Load(const Texture::Desc& desc);
-        /* #sy_deprecated */
-        static std::optional<Texture> _Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
 
     private:
         HandleManager& handleManager;
