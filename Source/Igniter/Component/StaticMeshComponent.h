@@ -1,24 +1,21 @@
 #pragma once
 #include <Core/Handle.h>
 #include <Asset/Common.h>
+#include <Asset/Texture.h>
+#include <Asset/StaticMesh.h>
+#include <Asset/AssetCache.h>
 #include <Gameplay/ComponentRegistry.h>
 
 namespace ig
 {
-    class GpuBuffer;
-    class GpuView;
-} // namespace ig
-
-namespace ig
-{
     struct StaticMesh;
+    struct Texture;
     struct StaticMeshComponent
     {
     public:
-        CachedAsset<StaticMesh> CachedStaticMesh;
-        RefHandle<GpuView> DiffuseTex{};
-        RefHandle<GpuView> DiffuseTexSampler{};
+        CachedAsset<StaticMesh> Mesh{};
+        CachedAsset<Texture> DiffuseTex{};
     };
 
-    IG_DECLARE_COMPONENT(StaticMeshComponent);
+    IG_DECLARE_COMPONENT(StaticMeshComponent)
 } // namespace ig

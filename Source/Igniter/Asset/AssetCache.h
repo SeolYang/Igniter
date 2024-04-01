@@ -118,7 +118,6 @@ namespace ig::details
     private:
         HandleManager& handleManager;
 
-        /* #sy_wip 캐시된 에셋 맵에 대한 스레드 세이프 보장 할 것. */
         mutable SharedMutex mutex;
         robin_hood::unordered_map<xg::Guid, Handle<T>> cachedAssets{};
         robin_hood::unordered_map<xg::Guid, uint32_t> refCounterTable{};

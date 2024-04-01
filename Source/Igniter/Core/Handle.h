@@ -119,7 +119,7 @@ namespace ig
     public:
         static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
-    private:
+    protected:
         details::HandleImpl handle{};
     };
 
@@ -143,7 +143,7 @@ namespace ig
     public:
         UniqueRefHandle() = default;
 
-        explicit UniqueRefHandle(const details::HandleImpl newHandle) : RefHandle(newHandle)
+        explicit UniqueRefHandle(const details::HandleImpl newHandle) : RefHandle<T>(newHandle)
         {
             if constexpr (std::is_pointer_v<Finalizer>)
             {
@@ -159,7 +159,7 @@ namespace ig
         }
 
         UniqueRefHandle(const UniqueRefHandle& other) = delete;
-        UniqueRefHandle(UniqueRefHandle&& other) noexcept : RefHandle(std::move(other.handle))
+        UniqueRefHandle(UniqueRefHandle&& other) noexcept : RefHandle<T>(std::move(other.handle))
         {
             if constexpr (std::is_pointer_v<Finalizer>)
             {

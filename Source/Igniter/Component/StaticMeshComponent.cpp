@@ -11,8 +11,8 @@ namespace ig
     void OnImGui<StaticMeshComponent>(Registry& registry, const Entity entity)
     {
         StaticMeshComponent& staticMeshComponent = registry.get<StaticMeshComponent>(entity);
-        IG_CHECK(staticMeshComponent.StaticMeshHandle);
-        StaticMesh& staticMesh = *staticMeshComponent.StaticMeshHandle;
+        IG_CHECK(staticMeshComponent.Mesh);
+        StaticMesh& staticMesh = *staticMeshComponent.Mesh;
 
         const StaticMesh::Desc snapshot = staticMesh.GetSnapshot();
         const AssetInfo& assetInfo = snapshot.Info;

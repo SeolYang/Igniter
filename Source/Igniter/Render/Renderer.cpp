@@ -31,6 +31,8 @@ struct BasicRenderResources
 };
 #pragma endregion
 
+IG_DEFINE_LOG_CATEGORY(Renderer);
+
 namespace ig
 {
     struct PerFrameBuffer
@@ -42,8 +44,6 @@ namespace ig
     {
         Matrix LocalToWorld{};
     };
-
-    IG_DEFINE_LOG_CATEGORY(Renderer);
 
     Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager)
         : frameManager(engineFrameManager),
@@ -166,34 +166,41 @@ namespace ig
             const auto renderableView = registry.view<StaticMeshComponent, TransformComponent>();
             for (auto [entity, staticMeshComponent, transform] : renderableView.each())
             {
-                IG_CHECK(staticMeshComponent.StaticMeshHandle);
-                StaticMesh& staticMesh = *staticMeshComponent.StaticMeshHandle;
-
-                RefHandle<GpuBuffer> indexBuffer = staticMesh.GetIndexBuffer();
-                IG_CHECK(indexBuffer);
-                RefHandle<GpuView> vertexBufferSrv = staticMesh.GetVertexBufferSrv();
-                IG_CHECK(vertexBufferSrv);
-
-                renderCmdCtx->SetIndexBuffer(*indexBuffer);
+                if (staticMeshComponent.Mesh)
                 {
-                    TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
-                    const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
-                    perObjectConstantBuffer.Write(perObjectBuffer);
+                    StaticMesh& staticMesh = *staticMeshComponent.Mesh;
 
-                    const BasicRenderResources params{
-                        .VertexBufferIdx = vertexBufferSrv->Index,
-                        .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
-                        .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
-                        .DiffuseTexIdx = staticMeshComponent.DiffuseTex->Index,
-                        .DiffuseTexSamplerIdx = staticMeshComponent.DiffuseTexSampler->Index
-                    };
+                    RefHandle<GpuBuffer> indexBuffer = staticMesh.GetIndexBuffer();
+                    IG_CHECK(indexBuffer);
+                    RefHandle<GpuView> vertexBufferSrv = staticMesh.GetVertexBufferSrv();
+                    IG_CHECK(vertexBufferSrv);
 
-                    renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+                    renderCmdCtx->SetIndexBuffer(*indexBuffer);
+                    {
+                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
+                        const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
+                        perObjectConstantBuffer.Write(perObjectBuffer);
+
+                        Texture& diffuseTex{ *staticMeshComponent.DiffuseTex };
+                        const BasicRenderResources params{
+                            .VertexBufferIdx = vertexBufferSrv->Index,
+                            .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
+                            .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
+                            .DiffuseTexIdx = diffuseTex.GetShaderResourceView()->Index,
+                            .DiffuseTexSamplerIdx = diffuseTex.GetSampler()->Index
+                        };
+
+                        renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+                    }
+
+                    const StaticMesh::Desc& snapshot = staticMesh.GetSnapshot();
+                    const StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
+                    renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                 }
-
-                const StaticMesh::Desc& snapshot = staticMesh.GetSnapshot();
-                const StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
-                renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
+                else
+                {
+                    IG_LOG(Renderer, Error, "Invalid Static Mesh Component at {}", entt::to_integral(entity));
+                }
             }
         }
         renderCmdCtx->End();

@@ -3,6 +3,7 @@
 #include <Asset/Texture.h>
 #include <Asset/TextureLoader.h>
 #include <Asset/StaticMeshLoader.h>
+#include <Asset/AssetManager.h>
 #include <Component/CameraArchetype.h>
 #include <Component/CameraComponent.h>
 #include <Component/NameComponent.h>
@@ -34,7 +35,7 @@
 #include <FpsCameraController.h>
 #include <TestGameMode.h>
 
- int main()
+int main()
 {
     using namespace ig;
     using namespace fe;
@@ -43,42 +44,37 @@
         Igniter engine;
         Window& window = engine.GetWindow();
         InputManager& inputManager = engine.GetInputManager();
-        RenderDevice& renderDevice = engine.GetRenderDevice();
         GameInstance& gameInstance = engine.GetGameInstance();
-        HandleManager& handleManager = engine.GetHandleManager();
-        GpuViewManager& gpuViewManager = engine.GetGPUViewManager();
-        GpuUploader& gpuUploader = engine.GetGpuUploader();
+        AssetManager& assetManager = engine.GetAssetManager();
 
         /* #sy_test Asset System & Mechanism Test */
-        const xg::Guid ashBodyTexGuid = xg::Guid("4b2b2556-7d81-4884-ba50-777392ebc9ee");
-        const xg::Guid ashStaticMeshGuid = xg::Guid("e42f93b4-e57d-44ae-9fde-302013c6e9e8");
-
-        const xg::Guid homuraBodyTexGuid = xg::Guid("87949751-3431-45c7-bd57-0a1518649511");
-        const xg::Guid homuraStaticMeshGuid = xg::Guid("a717ff6e-129b-4c80-927a-a786a0b21128");
-
-        std::future<std::optional<Texture>> ashBodyTexFuture = std::async(
+        std::future<CachedAsset<StaticMesh>> ashMeshFuture = std::async(
             std::launch::async,
-            TextureLoader::_Load,
-            ashBodyTexGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
+            [&assetManager]()
+            {
+                return assetManager.LoadStaticMesh(xg::Guid{ "e42f93b4-e57d-44ae-9fde-302013c6e9e8" });
+            });
 
-        std::future<std::optional<StaticMesh>> ashStaticMeshFuture = std::async(
+        std::future<CachedAsset<Texture>> ashBodyTexFuture = std::async(
             std::launch::async,
-            StaticMeshLoader::_Load,
-            ashStaticMeshGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
+            [&assetManager]()
+            {
+                return assetManager.LoadTexture(xg::Guid{ "4b2b2556-7d81-4884-ba50-777392ebc9ee" });
+            });
 
-        std::future<std::optional<StaticMesh>> homuraStaticMeshFuture = std::async(
+        std::future<CachedAsset<StaticMesh>> homuraMeshFuture = std::async(
             std::launch::async,
-            StaticMeshLoader::_Load,
-            homuraStaticMeshGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
+            [&assetManager]()
+            {
+                return assetManager.LoadStaticMesh(xg::Guid{ "a717ff6e-129b-4c80-927a-a786a0b21128" });
+            });
 
-        std::future<std::optional<Texture>> homuraBodyTexFuture = std::async(
+        std::future<CachedAsset<Texture>> homuraBodyTexFuture = std::async(
             std::launch::async,
-            TextureLoader::_Load,
-            homuraBodyTexGuid,
-            std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
+            [&assetManager]()
+            {
+                return assetManager.LoadTexture(xg::Guid{ "87949751-3431-45c7-bd57-0a1518649511" });
+            });
         /******************************/
 
         /* #sy_test Input Manager Test */
@@ -99,14 +95,7 @@
         /* #sy_test ECS based Game flow & logic tests */
         Registry& registry = gameInstance.GetRegistry();
         gameInstance.SetGameMode(std::make_unique<TestGameMode>());
-
-        auto homuraBodyTex = homuraBodyTexFuture.get();
-        IG_CHECK(homuraBodyTex);
-        auto homuraStaticMesh = homuraStaticMeshFuture.get();
-        auto homuraStaticMeshHandle = Handle<StaticMesh>{ handleManager, std::move(homuraStaticMesh.value()) };
-
         const auto homura = registry.create();
-        IG_CHECK(homuraStaticMesh);
         {
             registry.emplace<NameComponent>(homura, "Homura"_fs);
 
@@ -115,16 +104,11 @@
             transformComponent.Scale = Vector3{ 0.35f, 0.35f, 0.35f };
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
-            staticMeshComponent.StaticMeshHandle = homuraStaticMeshHandle.MakeRef();
-            staticMeshComponent.DiffuseTex = homuraBodyTex->GetShaderResourceView();
-            staticMeshComponent.DiffuseTexSampler = homuraBodyTex->GetSampler();
+            staticMeshComponent.Mesh = homuraMeshFuture.get();
+            staticMeshComponent.DiffuseTex = homuraBodyTexFuture.get();
+            IG_CHECK(staticMeshComponent.Mesh);
+            IG_CHECK(staticMeshComponent.DiffuseTex);
         }
-
-        auto ashBodyTex = ashBodyTexFuture.get();
-        IG_CHECK(ashBodyTex);
-        auto ashStaticMesh = ashStaticMeshFuture.get();
-        IG_CHECK(ashStaticMesh);
-        auto ashStaticMeshHandle = Handle<StaticMesh>{ handleManager, std::move(ashStaticMesh.value()) };
 
         const auto ash = registry.create();
         {
@@ -135,9 +119,10 @@
             transformComponent.Scale = Vector3{ 40.f, 40.f, 40.f };
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(ash);
-            staticMeshComponent.StaticMeshHandle = ashStaticMeshHandle.MakeRef();
-            staticMeshComponent.DiffuseTex = ashBodyTex->GetShaderResourceView();
-            staticMeshComponent.DiffuseTexSampler = ashBodyTex->GetSampler();
+            staticMeshComponent.Mesh = ashMeshFuture.get();
+            staticMeshComponent.DiffuseTex = ashBodyTexFuture.get();
+            IG_CHECK(staticMeshComponent.Mesh);
+            IG_CHECK(staticMeshComponent.DiffuseTex);
         }
 
         /* Camera */
