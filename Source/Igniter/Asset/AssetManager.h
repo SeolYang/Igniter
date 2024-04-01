@@ -54,8 +54,6 @@ namespace ig
 
         void InitAssetCaches(HandleManager& handleManager);
 
-        void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
-        
         template <Asset T, typename AssetLoader>
         [[nodiscard]] CachedAsset<T> LoadInternal(const xg::Guid guid, AssetLoader& loader)
         {
@@ -65,6 +63,7 @@ namespace ig
                 return CachedAsset<T>{};
             }
 
+            UniqueLock assetLock{ RequestAssetLock(guid) };
             details::AssetCache<T>& assetCache{ GetCache<T>() };
             if (!assetCache.IsCached(guid))
             {
@@ -85,9 +84,16 @@ namespace ig
             return assetCache.Load(guid);
         }
 
+        void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
+
+        [[nodiscard]] UniqueLock RequestAssetLock(const xg::Guid guid);
+
     private:
         Ptr<details::AssetMonitor> assetMonitor;
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
+
+        Mutex assetMutexTableMutex;
+        robin_hood::unordered_map<xg::Guid, Mutex> assetMutexTable;
 
         Ptr<TextureImporter> textureImporter;
         Ptr<TextureLoader> textureLoader;

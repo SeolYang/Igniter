@@ -207,7 +207,7 @@ namespace ig
         }
 
     private:
-        [[no_unique_address]] Finalizer finalizer;
+        [[no_unique_address]] Finalizer finalizer{};
     };
 
     template <typename T>

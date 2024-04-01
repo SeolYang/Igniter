@@ -181,6 +181,7 @@ namespace ig
 
     void AssetManager::DeleteInternal(const EAssetType assetType, const xg::Guid guid)
     {
+        UniqueLock assetLock{ RequestAssetLock(guid) };
         IG_CHECK(assetType != EAssetType::Unknown);
         IG_CHECK(guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).Type == assetType);
 
@@ -192,6 +193,17 @@ namespace ig
         assetMonitor->Remove(guid);
 
         IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid.str());
+    }
+
+    UniqueLock AssetManager::RequestAssetLock(const xg::Guid guid)
+    {
+        UniqueLock lock{ assetMutexTableMutex };
+        if (!assetMutexTable.contains(guid))
+        {
+            assetMutexTable[guid];
+        }
+
+        return UniqueLock{ assetMutexTable[guid] };
     }
 
     void AssetManager::SaveAllChanges()

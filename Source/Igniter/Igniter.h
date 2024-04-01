@@ -152,6 +152,8 @@ namespace ig
     using ReadWriteLock = std::unique_lock<SharedMutex>;
     using RecursiveMutex = std::recursive_mutex;
     using RecursiveLock = std::unique_lock<RecursiveMutex>;
+    using Mutex = std::mutex;
+    using UniqueLock = std::unique_lock<Mutex>;
 
     template <typename T>
     using OptionalRef = std::optional<std::reference_wrapper<T>>;
