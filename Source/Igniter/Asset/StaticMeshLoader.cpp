@@ -104,7 +104,8 @@ namespace ig
         {
             const size_t compressedVerticesOffset = 0;
             const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(), loadDesc.NumVertices,
-                                                                sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, loadDesc.CompressedVerticesSizeInBytes);
+                                                                sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, 
+                                                                loadDesc.CompressedVerticesSizeInBytes);
             if (decodeResult == 0)
             {
                 verticesUploadCtx.CopyBuffer(0, vertexBufferDesc.GetSizeAsBytes(), *vertexBuffer);

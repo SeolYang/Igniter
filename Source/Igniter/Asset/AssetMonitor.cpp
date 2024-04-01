@@ -85,14 +85,19 @@ namespace ig::details
 
                     if (guidFromPath != assetInfo.Guid)
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. The guid from filename does not match asset info guid.", entry.path().string());
+                        IG_LOG(AssetMonitor, Warning, "{} Asset {} ignored. The guid from filename does not match asset info guid."
+                                                      " Which was {}.",
+                               assetInfo.Type,
+                               entry.path().string(),
+                               assetInfo.Guid);
                         ++directoryItr;
                         continue;
                     }
 
                     if (virtualPathGuidTable.contains(assetInfo.VirtualPath))
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {}({}) ignored. Because, it has duplicated virtual path.", assetInfo.VirtualPath, assetInfo.Guid);
+                        IG_LOG(AssetMonitor, Warning, "{} Asset {}({}) ignored. Which has duplicated virtual path.",
+                               assetInfo.Type, assetInfo.VirtualPath, assetInfo.Guid);
                         ++directoryItr;
                         continue;
                     }

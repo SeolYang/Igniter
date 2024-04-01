@@ -30,7 +30,8 @@ namespace ig
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
     private:
-        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> ImportStaticMesh(const String resPathStr, const StaticMesh::ImportDesc& desc);
+        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> ImportStaticMesh(const String resPathStr,
+                                                                                        const StaticMesh::ImportDesc& desc);
 
     private:
         AssetManager& assetManager;
