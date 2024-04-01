@@ -18,6 +18,8 @@ namespace ig
     class AssetManager;
     class StaticMeshImporter final
     {
+        friend class AssetManager;
+
     public:
         StaticMeshImporter(AssetManager& assetManager);
         StaticMeshImporter(const StaticMeshImporter&) = delete;
@@ -27,6 +29,7 @@ namespace ig
         StaticMeshImporter& operator=(const StaticMeshImporter&) = delete;
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
+    private:
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> ImportStaticMesh(const String resPathStr, const StaticMesh::ImportDesc& desc);
 
     private:

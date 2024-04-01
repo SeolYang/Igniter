@@ -34,13 +34,15 @@ namespace ig
         String DiffuseVirtualPath{};
     };
 
+    class AssetManager;
     struct Material final
     {
     public:
         using ImportDesc = void;
-        using CreateDesc = MaterialCreateDesc;
         using LoadDesc = MaterialLoadDesc;
         using Desc = AssetDesc<Material>;
+
+        friend class AssetManager;
 
     public:
         Material(Desc snapshot, CachedAsset<Texture> diffuse);
@@ -54,7 +56,7 @@ namespace ig
         const Desc& GetSnapshot() const { return snapshot; }
         Texture& GetDiffuse();
 
-    public:
+    private:
         static Result<Desc, EMaterialCreateStatus> Create(const String virtualPath, MaterialCreateDesc desc);
 
     private:

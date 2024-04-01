@@ -21,8 +21,11 @@ namespace ig
         FailedSaveAssetToFile
     };
 
+    class AssetManager;
     class TextureImporter final
     {
+        friend class AssetManager;
+
     public:
         TextureImporter();
         TextureImporter(const TextureImporter&) = delete;
@@ -32,6 +35,7 @@ namespace ig
         TextureImporter& operator=(const TextureImporter&) = delete;
         TextureImporter& operator=(TextureImporter&&) noexcept = delete;
 
+    private:
         Result<Texture::Desc, ETextureImportStatus> Import(const String resPathStr, TextureImportDesc config);
 
     private:

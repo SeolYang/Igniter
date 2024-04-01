@@ -22,8 +22,11 @@ namespace ig
         FailedDecodeIndexBuffer,
     };
 
+    class AssetManager;
     class StaticMeshLoader final
     {
+        friend class AssetManager;
+
     public:
         StaticMeshLoader(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
         StaticMeshLoader(const StaticMeshLoader&) = delete;
@@ -33,6 +36,7 @@ namespace ig
         StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
         StaticMeshLoader& operator=(StaticMeshLoader&&) noexcept = delete;
 
+    private:
         Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc);
 
     public:
@@ -41,4 +45,4 @@ namespace ig
         GpuUploader& gpuUploader;
         GpuViewManager& gpuViewManager;
     };
-}
+} // namespace ig
