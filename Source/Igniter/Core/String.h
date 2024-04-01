@@ -77,6 +77,7 @@ namespace ig
 
         [[nodiscard]] uint64_t GetHash() const noexcept { return hashOfString; }
         [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
+        [[nodiscard]] bool IsEmpty() const noexcept { return hashOfString == 0; }
 
         static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
