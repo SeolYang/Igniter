@@ -4,6 +4,24 @@
 
 namespace ig
 {
+    enum class EStaticMeshLoadStatus
+    {
+        Success,
+        InvalidAssetInfo,
+        AssetTypeMismatch,
+        InvalidArguments,
+        FileDoesNotExists,
+        EmptyBlob,
+        BlobSizeMismatch,
+        InvalidCompressedVerticesSize,
+        InvalidCompressedIndicesSize,
+        FailedCreateVertexBuffer,
+        FailedCreateVertexBufferSrv,
+        FailedCreateIndexBuffer,
+        FailedDecodeVertexBuffer,
+        FailedDecodeIndexBuffer,
+    };
+
     class StaticMeshLoader final
     {
     public:
@@ -14,6 +32,8 @@ namespace ig
 
         StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
         StaticMeshLoader& operator=(StaticMeshLoader&&) noexcept = delete;
+
+        Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc);
 
         /* #sy_deprecated */
         static std::optional<StaticMesh> _Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);

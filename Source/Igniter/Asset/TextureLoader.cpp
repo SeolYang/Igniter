@@ -16,7 +16,6 @@ IG_DEFINE_LOG_CATEGORY(TextureLoader);
 
 namespace ig
 {
-
     std::optional<Texture> TextureLoader::_Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
     {
         IG_LOG(TextureLoader, Info, "Load texture asset {}.", guid.str());
