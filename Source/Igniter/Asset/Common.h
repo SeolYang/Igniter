@@ -3,6 +3,20 @@
 #include <Core/String.h>
 #include <Core/Handle.h>
 
+namespace ig::details
+{
+    constexpr inline std::string_view MetadataExt = ".metadata";
+    constexpr inline std::string_view ResourceRootPath = "Resources";
+    constexpr inline std::string_view AssetRootPath = "Assets";
+    constexpr inline std::string_view TextureAssetRootPath = "Assets\\Textures";
+    constexpr inline std::string_view StaticMeshAssetRootPath = "Assets\\StaticMeshes";
+    constexpr inline std::string_view SkeletalMeshAssetRootPath = "Assets\\SkeletalMeshes";
+    constexpr inline std::string_view ShaderAssetRootPath = "Assets\\Shaders";
+    constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
+    constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
+    constexpr inline std::string_view MaterialAssetRootPath = "Assets\\Materials";
+} // namespace ig::details
+
 namespace ig
 {
     enum class EAssetType
@@ -74,22 +88,30 @@ namespace ig
 
     namespace details
     {
-        constexpr inline std::string_view MetadataExt = ".metadata";
-        constexpr inline std::string_view ResourceRootPath = "Resources";
-        constexpr inline std::string_view AssetRootPath = "Assets";
-        constexpr inline std::string_view TextureAssetRootPath = "Assets\\Textures";
-        constexpr inline std::string_view StaticMeshAssetRootPath = "Assets\\StaticMeshes";
-        constexpr inline std::string_view SkeletalMeshAssetRootPath = "Assets\\SkeletalMeshes";
-        constexpr inline std::string_view ShaderAssetRootPath = "Assets\\Shaders";
-        constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
-        constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
-        constexpr inline std::string_view MaterialAssetRootPath = "Assets\\Materials";
-
         template <Asset T>
         class AssetCache;
-    } // namespace details
+    }
 
-    
     template <Asset T>
     using CachedAsset = UniqueRefHandle<T, details::AssetCache<T>*>;
 } // namespace ig
+
+namespace ig
+{
+    /* Refer to {ResourcePath}.metadata */
+    fs::path MakeResourceMetadataPath(fs::path resPath);
+
+    fs::path GetAssetDirectoryPath(const EAssetType type);
+
+    /* Refer to ./Asset/{AssetType}/{GUID} */
+    fs::path MakeAssetPath(const EAssetType type, const xg::Guid& guid);
+
+    /* Refer to ./Assets/{AssetType}/{GUID}.metadata */
+    fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid);
+
+    bool HasImportedBefore(const fs::path& resPath);
+
+    bool IsMetadataPath(const fs::path& resPath);
+
+    xg::Guid ConvertMetadataPathToGuid(fs::path path);
+}

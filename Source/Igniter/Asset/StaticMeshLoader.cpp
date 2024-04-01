@@ -10,7 +10,6 @@
 #include <Render/Vertex.h>
 #include <Render/GpuViewManager.h>
 #include <Render/GpuUploader.h>
-#include <Asset/Utils.h>
 #include <Asset/StaticMeshLoader.h>
 
 IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);

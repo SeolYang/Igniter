@@ -4,7 +4,6 @@
 #include <Core/Serializable.h>
 #include <Filesystem/Utils.h>
 #include <Render/Vertex.h>
-#include <Asset/Utils.h>
 #include <Asset/StaticMeshImporter.h>
 
 IG_DEFINE_LOG_CATEGORY(StaticMeshImporter);

@@ -2,7 +2,6 @@
 #include <Core/Log.h>
 #include <Core/Serializable.h>
 #include <Filesystem/Utils.h>
-#include <Asset/Utils.h>
 #include <Asset/AssetMonitor.h>
 
 IG_DEFINE_LOG_CATEGORY(AssetMonitor);

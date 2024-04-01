@@ -3,7 +3,6 @@
 #include <Core/String.h>
 #include <Core/Handle.h>
 #include <Asset/Common.h>
-#include <Asset/Utils.h>
 
 namespace ig::details
 {

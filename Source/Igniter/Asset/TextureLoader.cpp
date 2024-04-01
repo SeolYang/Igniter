@@ -9,7 +9,7 @@
 #include <D3D12/GpuView.h>
 #include <Render/GpuUploader.h>
 #include <Render/GpuViewManager.h>
-#include <Asset/Utils.h>
+
 #include <Asset/TextureLoader.h>
 
 IG_DEFINE_LOG_CATEGORY(TextureLoader);

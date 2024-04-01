@@ -5,7 +5,7 @@
 #include <Core/ComInitializer.h>
 #include <Filesystem/Utils.h>
 #include <Asset/TextureImporter.h>
-#include <Asset/Utils.h>
+
 
 IG_DEFINE_LOG_CATEGORY(TextureImporter);
 

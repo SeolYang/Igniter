@@ -4,7 +4,6 @@
 #include <D3D12/GpuTexture.h>
 #include <D3D12/GpuBuffer.h>
 #include <Render/GpuViewManager.h>
-#include <Asset/Utils.h>
 #include <Asset/TextureImporter.h>
 #include <Asset/TextureLoader.h>
 #include <Asset/StaticMeshImporter.h>
