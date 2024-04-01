@@ -11,6 +11,13 @@ namespace ig
     template <>
     constexpr inline EAssetType AssetTypeOf_v<Material> = EAssetType::Material;
 
+    enum class EMaterialCreateStatus
+    {
+        Success,
+        FailedSaveMetadata,
+        FailedSaveAsset
+    };
+
     struct MaterialCreateDesc final
     {
     public:
@@ -19,6 +26,10 @@ namespace ig
 
     struct MaterialLoadDesc final
     {
+    public:
+        json& Serialize(json& archive) const;
+        const json& Deserialize(const json& archive);
+
     public:
         String DiffuseVirtualPath{};
     };
@@ -44,7 +55,7 @@ namespace ig
         Texture& GetDiffuse();
 
     public:
-        static Desc Create(const String virtualPath, MaterialCreateDesc desc);
+        static Result<Desc, EMaterialCreateStatus> Create(const String virtualPath, MaterialCreateDesc desc);
 
     private:
         Desc snapshot{};
