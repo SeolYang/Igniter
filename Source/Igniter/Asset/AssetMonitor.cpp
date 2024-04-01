@@ -56,7 +56,9 @@ namespace ig::details
                     const xg::Guid guidFromPath{ entry.path().filename().string() };
                     if (!guidFromPath.isValid())
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. {} is not valid guid.", entry.path().string(), entry.path().filename().string());
+                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. {} is not valid guid.",
+                               entry.path().string(),
+                               entry.path().filename().string());
                         ++directoryItr;
                         continue;
                     }

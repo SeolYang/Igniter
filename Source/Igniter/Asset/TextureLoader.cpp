@@ -14,10 +14,11 @@ IG_DEFINE_LOG_CATEGORY(TextureLoader);
 
 namespace ig
 {
-    TextureLoader::TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager) : handleManager(handleManager),
-                                                                                                                                                       renderDevice(renderDevice),
-                                                                                                                                                       gpuUploader(gpuUploader),
-                                                                                                                                                       gpuViewManager(gpuViewManager)
+    TextureLoader::TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice,
+                                 GpuUploader& gpuUploader, GpuViewManager& gpuViewManager) : handleManager(handleManager),
+                                                                                             renderDevice(renderDevice),
+                                                                                             gpuUploader(gpuUploader),
+                                                                                             gpuViewManager(gpuViewManager)
     {
     }
 

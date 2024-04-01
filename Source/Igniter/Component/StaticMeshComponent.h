@@ -15,6 +15,7 @@ namespace ig
     public:
         CachedAsset<StaticMesh> Mesh{};
         CachedAsset<Texture> DiffuseTex{};
+        /* 2024/04/02 여기서 부터! Material를 가지는 StaticMeshComponent! */
     };
 
     IG_DECLARE_COMPONENT(StaticMeshComponent)

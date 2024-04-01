@@ -55,7 +55,9 @@ namespace ig
         using Desc = AssetDesc<StaticMesh>;
 
     public:
-        StaticMesh(Desc snapshot, DeferredHandle<GpuBuffer> vertexBuffer, Handle<GpuView, GpuViewManager*> vertexBufferSrv, DeferredHandle<GpuBuffer> indexBuffer);
+        StaticMesh(Desc snapshot, DeferredHandle<GpuBuffer> vertexBuffer,
+                   Handle<GpuView, GpuViewManager*> vertexBufferSrv,
+                   DeferredHandle<GpuBuffer> indexBuffer);
         StaticMesh(const StaticMesh&) = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();

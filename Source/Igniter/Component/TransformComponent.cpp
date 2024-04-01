@@ -19,7 +19,9 @@ namespace ig
         eulerAngles.z = Rad2Deg(eulerAngles.z); 
         if (ImGui::DragFloat3("Rotation", &eulerAngles.x, 0.5f))
         {
-            transformComponent.Rotation = Quaternion::CreateFromYawPitchRoll(Vector3{Deg2Rad(eulerAngles.x), Deg2Rad(eulerAngles.y), Deg2Rad(eulerAngles.z)});
+            transformComponent.Rotation = Quaternion::CreateFromYawPitchRoll(Vector3{Deg2Rad(eulerAngles.x),
+                                                                             Deg2Rad(eulerAngles.y),
+                                                                             Deg2Rad(eulerAngles.z)});
         }
     }
 } // namespace ig

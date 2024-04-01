@@ -5,7 +5,6 @@
 #include <Filesystem/Utils.h>
 #include <Asset/TextureImporter.h>
 
-
 IG_DEFINE_LOG_CATEGORY(TextureImporter);
 
 namespace ig
@@ -161,7 +160,8 @@ namespace ig
 
         if (!bIsDDSFormat)
         {
-            const bool bValidDimensions = texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 && texMetadata.arraySize > 0;
+            const bool bValidDimensions = texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
+                                          texMetadata.arraySize > 0;
             if (!bValidDimensions)
             {
                 return MakeFail<Texture::Desc, ETextureImportStatus::InvalidDimensions>();

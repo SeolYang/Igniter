@@ -26,7 +26,9 @@ namespace ig
         return true;
     }
 
-    static void ProcessStaticMeshData(const aiMesh& mesh, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices, const uint32_t vertexIdxOffset = 0)
+    static void ProcessStaticMeshData(const aiMesh& mesh, std::vector<StaticMeshVertex>& vertices,
+                                      std::vector<uint32_t>& indices,
+                                      const uint32_t vertexIdxOffset = 0)
     {
         for (size_t vertexIdx = 0; vertexIdx < mesh.mNumVertices; ++vertexIdx)
         {
@@ -50,7 +52,10 @@ namespace ig
         }
     }
 
-    static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr, const std::string_view meshName, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
+    static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr,
+                                                                                 const std::string_view meshName,
+                                                                                 const std::vector<StaticMeshVertex>& vertices,
+                                                                                 const std::vector<uint32_t>& indices)
     {
         IG_CHECK(!vertices.empty());
         IG_CHECK(!indices.empty());
@@ -71,9 +76,13 @@ namespace ig
         IG_LOG(StaticMeshImporter, Info, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
 
         constexpr float CacheHitRatioThreshold = 1.02f;
-        meshopt_optimizeVertexCache(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.size());
-        meshopt_optimizeOverdraw(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex), CacheHitRatioThreshold);
-        meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex));
+        meshopt_optimizeVertexCache(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(),
+                                    remappedVertices.size());
+        meshopt_optimizeOverdraw(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(),
+                                 &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex),
+                                 CacheHitRatioThreshold);
+        meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(),
+                                    remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex));
 
         /* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
         IG_LOG(StaticMeshImporter, Info, "Optimization Statistics \"{}({})\"", resPathStrView, meshName);
@@ -93,12 +102,16 @@ namespace ig
                                                     remappedVertices.size(),
                                                     sizeof(StaticMeshVertex));
 
-        const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x,
+        const auto os = meshopt_analyzeOverdraw(remappedIndices.data(), remappedIndices.size(),
+                                                &remappedVertices[0].Position.x,
                                                 remappedVertices.size(), sizeof(StaticMeshVertex));
 
-        IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
-        IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
-        IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}", intelVcs.acmr, intelVcs.atvr);
+        IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}",
+               nvidiaVcs.acmr, nvidiaVcs.atvr);
+        IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}",
+               amdVcs.acmr, amdVcs.atvr);
+        IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(INTEL) - ACMR: {} / ATVR: {}",
+               intelVcs.acmr, intelVcs.atvr);
         IG_LOG(StaticMeshImporter, Info, "Overfecth: {}", vfs.overfetch);
         IG_LOG(StaticMeshImporter, Info, "Overdraw: {}", os.overdraw);
 
@@ -106,8 +119,10 @@ namespace ig
         meshopt_encodeVertexVersion(0);
         meshopt_encodeIndexVersion(1);
 
-        std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(), sizeof(StaticMeshVertex)));
-        std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(remappedIndices.size(), remappedVertices.size()));
+        std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(),
+                                                                             sizeof(StaticMeshVertex)));
+        std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(remappedIndices.size(),
+                                                                           remappedVertices.size()));
 
         encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(),
                                                           remappedVertices.data(), remappedVertices.size(),
@@ -139,7 +154,8 @@ namespace ig
         }
 
         const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.Guid);
-        if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices }, std::span<const uint8_t>{ encodedIndices } }))
+        if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices },
+                                             std::span<const uint8_t>{ encodedIndices } }))
         {
             return MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FailedSaveAssetToFile>();
         }
@@ -150,7 +166,8 @@ namespace ig
         return MakeSuccess<StaticMesh::Desc, EStaticMeshImportStatus>(assetInfo, newLoadConfig);
     }
 
-    std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::ImportStaticMesh(const String resPathStr, const StaticMesh::ImportDesc& desc)
+    std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::ImportStaticMesh(const String resPathStr,
+                                                                                                        const StaticMesh::ImportDesc& desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
         const fs::path resPath{ resPathStr.ToStringView() };

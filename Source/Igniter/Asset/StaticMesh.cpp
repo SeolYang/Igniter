@@ -60,11 +60,13 @@ namespace ig
         return archive;
     }
 
-    StaticMesh::StaticMesh(Desc snapshot, DeferredHandle<GpuBuffer> vertexBuffer, Handle<GpuView, GpuViewManager*> vertexBufferSrv, DeferredHandle<GpuBuffer> indexBuffer)
-        : snapshot(snapshot),
-          vertexBuffer(std::move(vertexBuffer)),
-          vertexBufferSrv(std::move(vertexBufferSrv)),
-          indexBuffer(std::move(indexBuffer))
+    StaticMesh::StaticMesh(Desc snapshot,
+                           DeferredHandle<GpuBuffer> vertexBuffer,
+                           Handle<GpuView, GpuViewManager*> vertexBufferSrv,
+                           DeferredHandle<GpuBuffer> indexBuffer) : snapshot(snapshot),
+                                                                    vertexBuffer(std::move(vertexBuffer)),
+                                                                    vertexBufferSrv(std::move(vertexBufferSrv)),
+                                                                    indexBuffer(std::move(indexBuffer))
     {
     }
 
