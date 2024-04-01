@@ -35,6 +35,7 @@ namespace ig
         Result<Texture::Desc, ETextureImportStatus> Import(const String resPathStr, TextureImportDesc config);
 
     private:
-        ID3D11Device* d3d11Device = nullptr;
+        Mutex compressionMutex{};
+        ID3D11Device* d3d11Device{ nullptr };
     };
-}
+} // namespace ig

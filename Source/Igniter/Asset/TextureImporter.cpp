@@ -230,25 +230,28 @@ namespace ig
 
                 HRESULT compRes = S_FALSE;
                 DirectX::ScratchImage compTex{};
-                if (bIsGPUCodecAvailable)
                 {
-                    compRes = DirectX::Compress(
-                        d3d11Device,
-                        targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
-                        compFormat,
-                        static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags),
-                        DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
-                        compTex);
-                }
-                else
-                {
-                    compRes = DirectX::Compress(
-                        targetTex.GetImages(), targetTex.GetImageCount(),
-                        targetTex.GetMetadata(),
-                        compFormat,
-                        static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags),
-                        DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
-                        compTex);
+                    UniqueLock lock{ compressionMutex };
+                    if (bIsGPUCodecAvailable)
+                    {
+                        compRes = DirectX::Compress(
+                            d3d11Device,
+                            targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
+                            compFormat,
+                            static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags),
+                            DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
+                            compTex);
+                    }
+                    else
+                    {
+                        compRes = DirectX::Compress(
+                            targetTex.GetImages(), targetTex.GetImageCount(),
+                            targetTex.GetMetadata(),
+                            compFormat,
+                            static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags),
+                            DirectX::TEX_ALPHA_WEIGHT_DEFAULT,
+                            compTex);
+                    }
                 }
 
                 if (FAILED(compRes))
@@ -327,4 +330,4 @@ namespace ig
         IG_CHECK(assetInfo.IsValid() && assetInfo.Type == EAssetType::Texture);
         return MakeSuccess<Texture::Desc, ETextureImportStatus>(assetInfo, newLoadConfig);
     }
-}
+} // namespace ig
