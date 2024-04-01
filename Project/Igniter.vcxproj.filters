@@ -64,6 +64,15 @@
     <Filter Include="Source\ImGui\Gameplay">
       <UniqueIdentifier>{75d4b0db-f9a7-4caf-a011-d2db346834a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Asset\Texture">
+      <UniqueIdentifier>{11672438-1ab0-4e75-ad1b-cbf06c5bdaa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset\StaticMesh">
+      <UniqueIdentifier>{c9c91145-aa18-46d0-8feb-d2afaf612d59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset\Material">
+      <UniqueIdentifier>{70e52e7d-fda1-48c9-b44f-c65f31f240f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
@@ -106,12 +115,6 @@
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Asset\Common.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Asset\StaticMesh.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Asset\Texture.h">
       <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Assert.h">
@@ -336,11 +339,29 @@
     <ClInclude Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.h">
       <Filter>Source\ImGui\File</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Asset\Material.h">
-      <Filter>Source\Asset</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Regex.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\TextureImporter.h">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\Texture.h">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\StaticMesh.h">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\Material.h">
+      <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\TextureLoader.h">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\StaticMeshImporter.h">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\StaticMeshLoader.h">
+      <Filter>Source\Asset\StaticMesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -354,12 +375,6 @@
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Asset\StaticMesh.cpp">
-      <Filter>Source\Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp">
@@ -517,6 +532,24 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\Regex.cpp">
       <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\TextureImporter.cpp">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\StaticMesh.cpp">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\TextureLoader.cpp">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\StaticMeshImporter.cpp">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\StaticMeshLoader.cpp">
+      <Filter>Source\Asset\StaticMesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

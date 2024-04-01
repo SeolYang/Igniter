@@ -23,42 +23,39 @@ namespace ig::details
         template <Asset T>
         [[nodiscard]] T::LoadDesc GetLoadDesc(const xg::Guid guid) const
         {
-            IG_CHECK(Contains(guid));
-
-            const json& serializedMeta = guidSerializedMetaTable[guid];
-            typename T::MetadataType result{};
-            serializedMeta >> result;
-
-            return result;
+            ReadOnlyLock lock{ mutex };
+            return GetLoadDescUnsafe<T>(guid);
         }
 
         template <Asset T>
         [[nodiscard]] T::LoadDesc GetLoadDesc(const String virtualPath) const
         {
-            return GetMetadata<T>(GetGuid(AssetTypeOf_v<T>, virtualPath));
+            ReadOnlyLock lock{ mutex };
+            IG_CHECK(ContainsUnsafe(AssetTypeOf_v<T>, virtualPath));
+            return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath));
         }
 
         template <Asset T>
-        void SetLoadDesc(const xg::Guid guid, const typename T::LoadDesc& desc)
+        [[nodiscard]] T::Desc GetDesc(const xg::Guid guid) const
         {
-            IG_CHECK(guid.isValid());
-            IG_CHECK(Contains(guid));
-
-            json& serializedMeta = guidSerializedMetaTable[guid];
-            serializedMeta << desc;
+            ReadOnlyLock lock{ mutex };
+            return GetDescUnsafe<T>(guid);
         }
 
         template <Asset T>
-        void SetLoadDesc(const String virtualPath, const typename T::LoadDesc& desc)
+        [[nodiscard]] T::Desc GetDesc(const String virtualPath) const
         {
-            SetLoadDesc<T>(GetGuid(AssetTypeOf_v<T>, virtualPath), desc);
+            ReadOnlyLock lock{ mutex };
+            IG_CHECK(ContainsUnsafe(AssetTypeOf_v<T>, virtualPath));
+            return GetDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath));
         }
 
         template <Asset T>
         void Create(const AssetInfo& newInfo, const typename T::LoadDesc& metadata)
         {
+            ReadWriteLock rwLock{ mutex };
             IG_CHECK(newInfo.IsValid());
-            IG_CHECK(!Contains(newInfo.Guid));
+            IG_CHECK(!ContainsUnsafe(newInfo.Guid));
 
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.Type);
             IG_CHECK(!virtualPathGuidTable.contains(newInfo.VirtualPath));
@@ -66,7 +63,7 @@ namespace ig::details
             json newSerialized{};
             newSerialized << newInfo;
             newSerialized << metadata;
-            guidSerializedMetaTable[newInfo.Guid] = newSerialized;
+            guidSerializedDescTable[newInfo.Guid] = newSerialized;
             virtualPathGuidTable[newInfo.VirtualPath] = newInfo.Guid;
         }
 
@@ -81,12 +78,43 @@ namespace ig::details
         void InitVirtualPathGuidTables();
         void ParseAssetDirectory();
 
-        void ReflectExpiredToFiles();
-        void ReflectRemainedToFiles();
+        [[nodiscard]] bool ContainsUnsafe(const xg::Guid guid) const;
+        [[nodiscard]] bool ContainsUnsafe(const EAssetType assetType, const String virtualPath) const;
+
+        [[nodiscard]] xg::Guid GetGuidUnsafe(const EAssetType assetType, const String virtualPath) const;
+        [[nodiscard]] AssetInfo GetAssetInfoUnsafe(const xg::Guid guid) const;
+
+        template <Asset T>
+        [[nodiscard]] T::LoadDesc GetLoadDescUnsafe(const xg::Guid guid) const
+        {
+            IG_CHECK(ContainsUnsafe(guid));
+
+            const json& serializedDesc = guidSerializedDescTable[guid];
+            typename T::LoadDesc loadDesc{};
+            serializedDesc >> loadDesc;
+
+            return loadDesc;
+        }
+
+        template <Asset T>
+        [[nodiscard]] T::Desc GetDescUnsafe(const xg::Guid guid) const
+        {
+            IG_CHECK(ContainsUnsafe(guid));
+
+            const json& serializedDesc{ guidSerializedDescTable.at(guid) };
+            typename T::Desc desc{};
+            serializedDesc >> desc.Info >> desc.LoadDescriptor;
+
+            return desc;
+        }
+
+        void ReflectExpiredToFilesUnsafe();
+        void ReflectRemainedToFilesUnsafe();
 
     private:
+        mutable SharedMutex mutex;
         std::vector<std::pair<EAssetType, VirtualPathGuidTable>> virtualPathGuidTables;
-        robin_hood::unordered_map<xg::Guid, json> guidSerializedMetaTable;
+        robin_hood::unordered_map<xg::Guid, json> guidSerializedDescTable;
         robin_hood::unordered_map<xg::Guid, AssetInfo> expiredAssetInfos;
     };
 } // namespace ig::details

@@ -56,7 +56,7 @@ namespace ig
             ////////////////////////////////////////////////////
 
             //////////////////////// L3 ////////////////////////
-            assetManager = std::make_unique<AssetManager>(); /* #sy_test Temporary */
+            assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *gpuUploader, *gpuViewManager); /* #sy_test Temporary */
             renderer = std::make_unique<Renderer>(*frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
             ////////////////////////////////////////////////////
 
@@ -94,7 +94,7 @@ namespace ig
         deferredDeallocator.reset();
         inputManager.reset();
         ////////////////////////////////////////////////////
-        
+
         //////////////////////// L0 ////////////////////////
         handleManager.reset();
         renderDevice.reset();
@@ -102,7 +102,7 @@ namespace ig
         timer.reset();
         frameManager.reset();
         ////////////////////////////////////////////////////
-        
+
         if (instance == this)
         {
             instance = nullptr;

@@ -6,7 +6,7 @@
 
 namespace ig
 {
-    template <typename T, typename Finalizer>
+    template <typename T>
     class RefHandle;
     template <typename T, typename Destroyer>
     class Handle;
@@ -16,7 +16,7 @@ namespace ig
     {
         class HandleImpl final
         {
-            template <typename T, typename Finalizer>
+            template <typename T>
             friend class RefHandle;
 
             template <typename T, typename Destroyer>
@@ -53,78 +53,25 @@ namespace ig
             static constexpr uint64_t InvalidHandle = 0xffffffffffffffffUi64;
 
         private:
-            HandleManager* owner = nullptr;
-            uint64_t handle = InvalidHandle;
+            HandleManager* owner{ nullptr };
+            uint64_t handle{ InvalidHandle };
         };
     } // namespace details
 
     template <typename T>
-    class DefaultFinalizer final
-    {
-    public:
-        void operator()(const T*)
-        {
-            /* Empty */
-            // DO NOT DESTROY INSTANCE IN FINALIZER -> It caused of access after delete.
-        }
-    };
-
-    template <typename T>
-    using FuncPtrFinalizer = void (*)(const T*);
-
-    template <typename T, typename Finalizer = DefaultFinalizer<T>>
-    class RefHandle final
+    class RefHandle
     {
     public:
         RefHandle() = default;
 
-        explicit RefHandle(const details::HandleImpl newHandle)
-            : handle(newHandle)
-        {
-            IG_CHECK(IsAlive());
-            if constexpr (std::is_pointer_v<Finalizer>)
-            {
-                finalizer = nullptr;
-            }
-        }
-
-        template <typename Fn>
-            requires(std::is_same_v<std::decay_t<Fn>, Finalizer>)
-        explicit RefHandle(const details::HandleImpl& newHandle, Fn&& finalizer)
-            : handle(newHandle),
-              finalizer(std::forward<Fn>(finalizer))
+        explicit RefHandle(const details::HandleImpl newHandle) : handle(newHandle)
         {
             IG_CHECK(IsAlive());
         }
 
         RefHandle(const RefHandle& other) = default;
-        RefHandle(RefHandle&& other) noexcept
-            : handle(std::move(other.handle)),
-              finalizer(std::move(other.finalizer))
-        {
-            if constexpr (std::is_pointer_v<Finalizer>)
-            {
-                this->finalizer = nullptr;
-            }
-        }
-
-        ~RefHandle()
-        {
-            if (IsAlive())
-            {
-                if constexpr (std::is_pointer_v<Finalizer>)
-                {
-                    if (finalizer != nullptr)
-                    {
-                        (*finalizer)(reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
-                    }
-                }
-                else
-                {
-                    finalizer(reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal)));
-                }
-            }
-        }
+        RefHandle(RefHandle&& other) noexcept = default;
+        virtual ~RefHandle() = default;
 
         RefHandle& operator=(const RefHandle& other) = default;
         RefHandle& operator=(RefHandle&& other) noexcept = default;
@@ -166,11 +113,100 @@ namespace ig
 
         [[nodiscard]] size_t GetHash() const { return handle.GetHash(); }
 
+    protected:
+        details::HandleImpl GetHandle() { return handle; }
+
     public:
         static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
     private:
         details::HandleImpl handle{};
+    };
+
+    template <typename T>
+    class DefaultFinalizer final
+    {
+    public:
+        void operator()(T*)
+        {
+            /* Empty */
+            // DO NOT DESTROY INSTANCE IN FINALIZER -> It caused of access after delete.
+        }
+    };
+
+    template <typename T>
+    using FuncPtrFinalizer = void (*)(T*);
+
+    template <typename T, typename Finalizer = DefaultFinalizer<T>>
+    class UniqueRefHandle final : public RefHandle<T>
+    {
+    public:
+        UniqueRefHandle() = default;
+
+        explicit UniqueRefHandle(const details::HandleImpl newHandle) : RefHandle(newHandle)
+        {
+            if constexpr (std::is_pointer_v<Finalizer>)
+            {
+                finalizer = nullptr;
+            }
+        }
+
+        template <typename Fn>
+            requires(std::is_same_v<std::decay_t<Fn>, Finalizer>)
+        explicit UniqueRefHandle(const details::HandleImpl newHandle, Fn&& finalizer) : finalizer(std::forward<Fn>(finalizer)),
+                                                                                        RefHandle<T>(newHandle)
+        {
+        }
+
+        UniqueRefHandle(const UniqueRefHandle& other) = delete;
+        UniqueRefHandle(UniqueRefHandle&& other) noexcept : RefHandle(std::move(other.handle))
+        {
+            if constexpr (std::is_pointer_v<Finalizer>)
+            {
+                this->finalizer = std::exchange(other.finalizer, nullptr);
+            }
+            else
+            {
+                this->finalizer = std::move(other.finalizer);
+            }
+        }
+
+        ~UniqueRefHandle()
+        {
+            if (RefHandle<T>::IsAlive())
+            {
+                details::HandleImpl handle = RefHandle<T>::GetHandle();
+                if constexpr (std::is_pointer_v<Finalizer>)
+                {
+                    if (finalizer != nullptr)
+                    {
+                        (*finalizer)(reinterpret_cast<T*>(handle.GetAddressOf(RefHandle<T>::EvaluatedTypeHashVal)));
+                    }
+                }
+                else
+                {
+                    finalizer(reinterpret_cast<T*>(handle.GetAddressOf(RefHandle<T>::EvaluatedTypeHashVal)));
+                }
+            }
+        }
+
+        UniqueRefHandle& operator=(const UniqueRefHandle&) = delete;
+        UniqueRefHandle& operator=(UniqueRefHandle&& other) noexcept
+        {
+            RefHandle<T>::operator=(other);
+            if constexpr (std::is_pointer_v<Finalizer>)
+            {
+                this->finalizer = std::exchange(other.finalizer, nullptr);
+            }
+            else
+            {
+                this->finalizer = std::move(other.finalizer);
+            }
+
+            return *this;
+        }
+
+    private:
         [[no_unique_address]] Finalizer finalizer;
     };
 
@@ -224,18 +260,7 @@ namespace ig
     class Handle final
     {
     public:
-        Handle()
-        {
-            if constexpr (std::is_pointer_v<Destroyer>)
-            {
-                this->destroyer = nullptr;
-            }
-            else
-            {
-                this->destroyer = {};
-            }
-        }
-
+        Handle() = default;
         Handle(const Handle&) = delete;
 
         Handle(Handle&& other) noexcept
@@ -288,24 +313,18 @@ namespace ig
         }
 
         Handle& operator=(const Handle&) = delete;
-
-        template <typename... Args, typename D = Destroyer>
-            requires(!std::is_pointer_v<D>)
         Handle& operator=(Handle&& other) noexcept
         {
             Destroy();
             handle = std::move(other.handle);
-            destroyer = std::move(other.destroyer);
-            return *this;
-        }
-
-        template <typename... Args>
-            requires(std::is_pointer_v<Destroyer>)
-        Handle& operator=(Handle&& other) noexcept
-        {
-            Destroy();
-            handle = std::move(other.handle);
-            destroyer = std::exchange(other.destroyer, nullptr);
+            if constexpr (std::is_pointer_v<Destroyer>)
+            {
+                destroyer = std::exchange(other.destroyer, nullptr);
+            }
+            else
+            {
+                destroyer = std::move(other.destroyer);
+            }
             return *this;
         }
 
@@ -371,15 +390,15 @@ namespace ig
         }
 
         template <typename Finalizer>
-        [[nodiscard]] RefHandle<const T, Finalizer> MakeRef(Finalizer&& finalizer) const
+        [[nodiscard]] UniqueRefHandle<const T, Finalizer> MakeUniqueRef(Finalizer&& finalizer) const
         {
-            return RefHandle<const T, Finalizer>{ handle, finalizer };
+            return UniqueRefHandle<const T, Finalizer>{ handle, finalizer };
         }
 
         template <typename Finalizer>
-        [[nodiscard]] RefHandle<T, Finalizer> MakeRef(Finalizer&& finalizer)
+        [[nodiscard]] UniqueRefHandle<T, Finalizer> MakeUniqueRef(Finalizer&& finalizer)
         {
-            return RefHandle<T, Finalizer>{ handle, finalizer };
+            return UniqueRefHandle<T, Finalizer>{ handle, finalizer };
         }
 
         [[nodiscard]] size_t GetHash() const { return handle.GetHash(); }
@@ -388,8 +407,8 @@ namespace ig
         static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
 
     private:
-        details::HandleImpl handle;
-        [[no_unique_address]] Destroyer destroyer;
+        details::HandleImpl handle{};
+        [[no_unique_address]] Destroyer destroyer{};
     };
 
     template <typename T>

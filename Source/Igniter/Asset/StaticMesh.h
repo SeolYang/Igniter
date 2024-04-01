@@ -10,8 +10,6 @@ namespace ig
     template <>
     constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
 
-    class GpuBuffer;
-    class GpuView;
     struct StaticMeshImportDesc
     {
     public:
@@ -47,6 +45,8 @@ namespace ig
         // std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
     };
 
+    class GpuBuffer;
+    class GpuView;
     struct StaticMesh final
     {
     public:
@@ -73,30 +73,5 @@ namespace ig
         DeferredHandle<GpuBuffer> vertexBuffer{};
         Handle<GpuView, GpuViewManager*> vertexBufferSrv{};
         DeferredHandle<GpuBuffer> indexBuffer{};
-    };
-
-    enum class EStaticMeshImportStatus
-    {
-        Success,
-        FileDoesNotExist,
-        FailedLoadFromFile,
-        FailedSaveMetadataToFile,
-        FailedSaveAssetToFile,
-        EmptyVertices,
-        EmptyIndices,
-    };
-
-    class AssetManager;
-    class TextureImporter;
-    class StaticMeshImporter
-    {
-    public:
-        static std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> ImportStaticMesh(AssetManager& assetManager, const String resPathStr, StaticMesh::ImportDesc desc);
-    };
-
-    class StaticMeshLoader
-    {
-    public:
-        static std::optional<StaticMesh> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
     };
 } // namespace ig

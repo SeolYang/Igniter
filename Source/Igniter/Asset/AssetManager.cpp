@@ -1,36 +1,44 @@
 #include <Igniter.h>
 #include <Core/Log.h>
 #include <Core/Serializable.h>
+#include <Core/TypeUtils.h>
+#include <D3D12/GpuTexture.h>
 #include <D3D12/GpuBuffer.h>
 #include <Render/GpuViewManager.h>
-#include <Asset/AssetManager.h>
+#include <Asset/Utils.h>
 #include <Asset/AssetMonitor.h>
 #include <Asset/AssetCache.h>
-#include <Asset/Texture.h>
-#include <Asset/StaticMesh.h>
-#include <Asset/Utils.h>
+#include <Asset/TextureImporter.h>
+#include <Asset/TextureLoader.h>
+#include <Asset/StaticMeshImporter.h>
+#include <Asset/StaticMeshLoader.h>
+#include <Asset/AssetManager.h>
 
 IG_DEFINE_LOG_CATEGORY(AssetManager);
 
 namespace ig
 {
-    AssetManager::AssetManager() : assetMonitor(std::make_unique<details::AssetMonitor>()),
-                                   textureImporter(std::make_unique<TextureImporter>())
+    AssetManager::AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
+        : assetMonitor(std::make_unique<details::AssetMonitor>()),
+          textureImporter(std::make_unique<TextureImporter>()),
+          textureLoader(std::make_unique<TextureLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
+          staticMeshImporter(std::make_unique<StaticMeshImporter>(*this)),
+          staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager))
     {
-        InitAssetCaches();
+        InitAssetCaches(handleManager);
     }
 
     AssetManager::~AssetManager()
     {
         /* #sy_improvement 중간에 Pending 버퍼를 둬서, 실제로 저장하기 전까진 반영 X */
         /* 만약 반영전에 종료되거나, 취소한다면 Pending 버퍼 내용을 지울 것. */
-        SaveAllMetadataChanges();
+        SaveAllChanges();
     }
 
-    void AssetManager::InitAssetCaches()
+    void AssetManager::InitAssetCaches(HandleManager& handleManager)
     {
-        assetCaches.emplace_back(std::make_unique<details::AssetCache<Texture>>());
-        assetCaches.emplace_back(std::make_unique<details::AssetCache<StaticMesh>>());
+        assetCaches.emplace_back(std::make_unique<details::AssetCache<Texture>>(handleManager));
+        assetCaches.emplace_back(std::make_unique<details::AssetCache<StaticMesh>>(handleManager));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)
@@ -72,9 +80,48 @@ namespace ig
         return assetInfo.Guid;
     }
 
+    CachedAsset<Texture> AssetManager::LoadTexture(const xg::Guid guid)
+    {
+        if (!assetMonitor->Contains(guid))
+        {
+            IG_LOG(AssetManager, Error, "Texture asset \"{}\" is invisible to asset manager.", guid);
+            return CachedAsset<Texture>{};
+        }
+
+        details::AssetCache<Texture>& textureCache{ GetCache<Texture>() };
+        if (!textureCache.IsCached(guid))
+        {
+            Texture::Desc desc{ assetMonitor->GetDesc<Texture>(guid) };
+            IG_CHECK(desc.Info.Guid == guid);
+            Result<Texture, ETextureLoaderStatus> result{ textureLoader->Load(desc) };
+            if (result.HasOwnership())
+            {
+                IG_LOG(AssetManager, Info, "Texture asset {}({}) cached.", desc.Info.VirtualPath, desc.Info.Guid);
+                return textureCache.Cache(guid, result.Take());
+            }
+
+            IG_LOG(AssetManager, Error, "Failed({}) to load texture asset {}({}).", result.GetStatus(), desc.Info.VirtualPath, desc.Info.Guid);
+            return CachedAsset<Texture>{};
+        }
+
+        IG_LOG(AssetManager, Info, "The Cached texture asset {} loaded.", guid);
+        return textureCache.Load(guid);
+    }
+
+    CachedAsset<Texture> AssetManager::LoadTexture(const String virtualPath)
+    {
+        if (!assetMonitor->Contains(EAssetType::Texture, virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Texture asset \"{}\" is invisible to asset manager.", virtualPath);
+            return CachedAsset<Texture>{};
+        }
+
+        return LoadTexture(assetMonitor->GetGuid(EAssetType::Texture, virtualPath));
+    }
+
     std::vector<xg::Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc)
     {
-        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = StaticMeshImporter::ImportStaticMesh(*this, resPath, desc);
+        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->ImportStaticMesh(resPath, desc);
         std::vector<xg::Guid> output;
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
@@ -102,33 +149,7 @@ namespace ig
         return output;
     }
 
-    void AssetManager::Unload(const EAssetType assetType, const String virtualPath)
-    {
-        if (assetType == EAssetType::Unknown)
-        {
-            IG_LOG(AssetManager, Error,
-                   "Failed to unload {}. The asset type is unknown.",
-                   virtualPath.ToStringView());
-            return;
-        }
-
-        if (!assetMonitor->Contains(assetType, virtualPath))
-        {
-            IG_LOG(AssetManager, Error,
-                   "Failed to unload {}. The virtual path is invisible to asset manager or invalid.",
-                   virtualPath.ToStringView());
-            return;
-        }
-
-        Unload(assetMonitor->GetGuid(assetType, virtualPath));
-    }
-
-    void AssetManager::Unload(const xg::Guid&)
-    {
-        IG_UNIMPLEMENTED();
-    }
-
-    void AssetManager::Delete(const xg::Guid& guid)
+    void AssetManager::Delete(const xg::Guid guid)
     {
         if (!assetMonitor->Contains(guid))
         {
@@ -176,14 +197,14 @@ namespace ig
         details::TypelessAssetCache& assetCache = GetTypelessCache(assetType);
         if (assetCache.IsCached(guid))
         {
-            assetCache.Uncache(guid);
+            assetCache.Invalidate(guid);
         }
         assetMonitor->Remove(guid);
 
         IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid.str());
     }
 
-    void AssetManager::SaveAllMetadataChanges()
+    void AssetManager::SaveAllChanges()
     {
         assetMonitor->SaveAllChanges();
     }

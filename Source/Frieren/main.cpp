@@ -1,6 +1,8 @@
 #include <Frieren.h>
 #include <Asset/StaticMesh.h>
 #include <Asset/Texture.h>
+#include <Asset/TextureLoader.h>
+#include <Asset/StaticMeshLoader.h>
 #include <Component/CameraArchetype.h>
 #include <Component/CameraComponent.h>
 #include <Component/NameComponent.h>
@@ -56,25 +58,25 @@
 
         std::future<std::optional<Texture>> ashBodyTexFuture = std::async(
             std::launch::async,
-            TextureLoader::Load,
+            TextureLoader::_Load,
             ashBodyTexGuid,
             std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
         std::future<std::optional<StaticMesh>> ashStaticMeshFuture = std::async(
             std::launch::async,
-            StaticMeshLoader::Load,
+            StaticMeshLoader::_Load,
             ashStaticMeshGuid,
             std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
         std::future<std::optional<StaticMesh>> homuraStaticMeshFuture = std::async(
             std::launch::async,
-            StaticMeshLoader::Load,
+            StaticMeshLoader::_Load,
             homuraStaticMeshGuid,
             std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
 
         std::future<std::optional<Texture>> homuraBodyTexFuture = std::async(
             std::launch::async,
-            TextureLoader::Load,
+            TextureLoader::_Load,
             homuraBodyTexGuid,
             std::ref(handleManager), std::ref(renderDevice), std::ref(gpuUploader), std::ref(gpuViewManager));
         /******************************/

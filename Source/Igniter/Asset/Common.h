@@ -1,6 +1,7 @@
 #pragma once
 #include <Igniter.h>
 #include <Core/String.h>
+#include <Core/Handle.h>
 
 namespace ig
 {
@@ -45,7 +46,7 @@ namespace ig
     };
 
     template <typename T>
-    constexpr EAssetType AssetTypeOf_v = EAssetType::Unknown;
+    inline constexpr EAssetType AssetTypeOf_v = EAssetType::Unknown;
 
     template <typename T>
         requires(AssetTypeOf_v<T> != EAssetType::Unknown)
@@ -66,10 +67,10 @@ namespace ig
     } && std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf_v<T> != EAssetType::Unknown;
 
     template <typename T>
-    constexpr inline bool IsAsset_v = false;
+    inline constexpr bool IsAsset_v = false;
 
     template <Asset T>
-    constexpr inline bool IsAsset_v<T> = true;
+    inline constexpr bool IsAsset_v<T> = true;
 
     namespace details
     {
@@ -83,5 +84,12 @@ namespace ig
         constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
         constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
         constexpr inline std::string_view MaterialAssetRootPath = "Assets\\Materials";
+
+        template <Asset T>
+        class AssetCache;
     } // namespace details
+
+    
+    template <Asset T>
+    using CachedAsset = UniqueRefHandle<T, details::AssetCache<T>*>;
 } // namespace ig

@@ -1,7 +1,8 @@
 #pragma once
-#include <Core/Handle.h>
 #include <Core/Result.h>
 #include <Asset/Common.h>
+#include <Asset/Texture.h>
+#include <Asset/StaticMesh.h>
 
 namespace ig::details
 {
@@ -13,21 +14,18 @@ namespace ig::details
 
 namespace ig
 {
-    template <typename AssetType>
-    using AssetRefHandle = RefHandle<AssetType, class AssetManager*>;
-
     struct Texture;
-    struct TextureImportDesc;
     class TextureImporter;
-    struct StaticMeshImportDesc;
+    class TextureLoader;
+    struct StaticMesh;
+    class StaticMeshImporter;
+    class StaticMeshLoader;
     class AssetManager final
     {
-        friend class RefHandle<Texture, AssetManager*>;
-        friend class Handle<Texture, AssetManager*>;
         using VirtualPathGuidTable = robin_hood::unordered_map<String, xg::Guid>;
 
     public:
-        AssetManager();
+        AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
         AssetManager(const AssetManager&) = delete;
         AssetManager(AssetManager&&) noexcept = delete;
         ~AssetManager();
@@ -36,37 +34,30 @@ namespace ig
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
         xg::Guid ImportTexture(const String resPath, const TextureImportDesc& config);
-        AssetRefHandle<Texture> LoadTexture(const xg::Guid& guid);
-        AssetRefHandle<Texture> LoadTexture(const String virtualPath);
+        CachedAsset<Texture> LoadTexture(const xg::Guid guid);
+        CachedAsset<Texture> LoadTexture(const String virtualPath);
 
         std::vector<xg::Guid> ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc);
+        CachedAsset<StaticMesh> LoadStaticMesh(const xg::Guid guid);
+        CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
-        void Unload(const xg::Guid& guid);
-        void Unload(const EAssetType assetType, const String virtualPath);
-
-        void Delete(const xg::Guid& guid);
+        void Delete(const xg::Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
         [[nodiscard]] AssetInfo GetAssetInfo(const xg::Guid guid) const;
 
-        void SaveAllMetadataChanges();
+        void SaveAllChanges();
 
     private:
-        template <Asset AssetType>
-        void operator()(const RefHandle<AssetType, AssetManager*>&, AssetType*)
-        {
-            IG_UNIMPLEMENTED();
-        }
-
         template <Asset T>
-        details::AssetCache<T>& GetAssetCache()
+        details::AssetCache<T>& GetCache()
         {
             return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetTypeOf_v<T>));
         }
 
         details::TypelessAssetCache& GetTypelessCache(const EAssetType assetType);
 
-        void InitAssetCaches();
+        void InitAssetCaches(HandleManager& handleManager);
 
         void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
 
@@ -75,6 +66,10 @@ namespace ig
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
         Ptr<TextureImporter> textureImporter;
+        Ptr<TextureLoader> textureLoader;
+
+        Ptr<StaticMeshImporter> staticMeshImporter;
+        Ptr<StaticMeshLoader> staticMeshLoader;
     };
 
 } // namespace ig

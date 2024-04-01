@@ -25,7 +25,11 @@
     <ClInclude Include="..\Source\Igniter\Asset\Common.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Material.h" />
     <ClInclude Include="..\Source\Igniter\Asset\StaticMesh.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\StaticMeshImporter.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\StaticMeshLoader.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Texture.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\TextureImporter.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\TextureLoader.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Component\CameraArchetype.h" />
     <ClInclude Include="..\Source\Igniter\Component\CameraComponent.h" />
@@ -117,7 +121,11 @@
     <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\StaticMesh.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\StaticMeshImporter.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\StaticMeshLoader.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Texture.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\TextureImporter.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\TextureLoader.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Utils.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\CameraComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\NameComponent.cpp" />

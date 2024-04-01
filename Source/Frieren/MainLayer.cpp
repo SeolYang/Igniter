@@ -34,10 +34,10 @@ namespace fe
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Save all Asset Metadata", "Ctrl+A+S"))
+                if (ImGui::MenuItem("Save All Asset Changes", "Ctrl+A+S"))
                 {
                     ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
-                    assetManager.SaveAllMetadataChanges();
+                    assetManager.SaveAllChanges();
                 }
 
                 if (ImGui::MenuItem("Import Texture", "Ctrl+T"))

@@ -1,11 +1,8 @@
 #pragma once
 #include <Core/Handle.h>
 #include <Core/String.h>
-#include <Core/Result.h>
 #include <D3D12/Common.h>
 #include <Asset/Common.h>
-
-struct ID3D11Device;
 
 namespace ig
 {
@@ -99,38 +96,9 @@ namespace ig
         Handle<GpuView, GpuViewManager*> srv{};
         RefHandle<GpuView> sampler{};
     };
-
-    enum class ETextureImportStatus
-    {
-        Success,
-        FileDoesNotExist,
-        UnsupportedExtension,
-        FailedLoadFromFile,
-        InvalidDimensions,
-        InvalidVolumemap,
-        UnknownFormat,
-        FailedGenerateMips,
-        FailedCompression,
-        FailedSaveMetadataToFile,
-        FailedSaveAssetToFile
-    };
-
-    class TextureImporter
-    {
-    public:
-        TextureImporter();
-        ~TextureImporter();
-
-        Result<Texture::Desc, ETextureImportStatus> Import(const String resPathStr, TextureImportDesc config);
-
-    private:
-        ID3D11Device* d3d11Device = nullptr;
-    };
-
-    class GpuUploader;
-    class TextureLoader
-    {
-    public:
-        static std::optional<Texture> Load(const xg::Guid& guid, HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
-    };
 } // namespace ig
+
+namespace ig::details
+{
+    ETextureDimension AsTexDimension(const DirectX::TEX_DIMENSION dim);
+}

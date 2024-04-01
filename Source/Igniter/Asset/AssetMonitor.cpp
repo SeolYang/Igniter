@@ -94,58 +94,12 @@ namespace ig::details
                     virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
                     IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
                     IG_CHECK(!Contains(assetInfo.Guid));
-                    guidSerializedMetaTable[assetInfo.Guid] = serializedMetadata;
+                    guidSerializedDescTable[assetInfo.Guid] = serializedMetadata;
                 }
 
                 ++directoryItr;
             }
         }
-    }
-
-    bool AssetMonitor::Contains(const xg::Guid guid) const
-    {
-        return guidSerializedMetaTable.contains(guid);
-    }
-
-    bool AssetMonitor::Contains(const EAssetType assetType, const String virtualPath) const
-    {
-        IG_CHECK(assetType != EAssetType::Unknown);
-
-        const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-        const auto itr = virtualPathGuidTable.find(virtualPath);
-        return itr != virtualPathGuidTable.cend() && Contains(itr->second);
-    }
-
-    xg::Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
-    {
-        IG_CHECK(assetType != EAssetType::Unknown);
-        IG_CHECK(virtualPath.IsValid());
-
-        const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-        const auto itr = virtualPathGuidTable.find(virtualPath);
-        IG_CHECK(itr != virtualPathGuidTable.cend());
-
-        const xg::Guid guid{ itr->second };
-        IG_CHECK(guid.isValid());
-
-        return guid;
-    }
-
-    AssetInfo AssetMonitor::GetAssetInfo(const xg::Guid guid) const
-    {
-        IG_CHECK(Contains(guid));
-
-        AssetInfo info{};
-        const auto itr = guidSerializedMetaTable.find(guid);
-        itr->second >> info;
-
-        IG_CHECK(info.IsValid());
-        return info;
-    }
-
-    AssetInfo AssetMonitor::GetAssetInfo(const EAssetType assetType, const String virtualPath) const
-    {
-        return GetAssetInfo(GetGuid(assetType, virtualPath));
     }
 
     AssetMonitor::VirtualPathGuidTable& AssetMonitor::GetVirtualPathGuidTable(const EAssetType assetType)
@@ -180,12 +134,84 @@ namespace ig::details
         return *table;
     }
 
+    bool AssetMonitor::ContainsUnsafe(const xg::Guid guid) const
+    {
+        return guidSerializedDescTable.contains(guid);
+    }
+
+    bool AssetMonitor::ContainsUnsafe(const EAssetType assetType, const String virtualPath) const
+    {
+        IG_CHECK(assetType != EAssetType::Unknown);
+
+        const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
+        const auto itr = virtualPathGuidTable.find(virtualPath);
+        return itr != virtualPathGuidTable.cend() && ContainsUnsafe(itr->second);
+    }
+
+    xg::Guid AssetMonitor::GetGuidUnsafe(const EAssetType assetType, const String virtualPath) const
+    {
+        IG_CHECK(assetType != EAssetType::Unknown);
+        IG_CHECK(virtualPath.IsValid());
+
+        const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
+        const auto itr = virtualPathGuidTable.find(virtualPath);
+        IG_CHECK(itr != virtualPathGuidTable.cend());
+
+        const xg::Guid guid{ itr->second };
+        IG_CHECK(guid.isValid());
+
+        return guid;
+    }
+
+    bool AssetMonitor::Contains(const xg::Guid guid) const
+    {
+        ReadOnlyLock lock{ mutex };
+        return ContainsUnsafe(guid);
+    }
+
+    bool AssetMonitor::Contains(const EAssetType assetType, const String virtualPath) const
+    {
+        ReadOnlyLock lock{ mutex };
+        return ContainsUnsafe(assetType, virtualPath);
+    }
+
+    xg::Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
+    {
+        ReadOnlyLock lock{ mutex };
+        return GetGuidUnsafe(assetType, virtualPath);
+    }
+
+    AssetInfo AssetMonitor::GetAssetInfoUnsafe(const xg::Guid guid) const
+    {
+        IG_CHECK(ContainsUnsafe(guid));
+
+        AssetInfo info{};
+        const auto itr = guidSerializedDescTable.find(guid);
+        itr->second >> info;
+
+        IG_CHECK(info.IsValid());
+        return info;
+    }
+
+    AssetInfo AssetMonitor::GetAssetInfo(const xg::Guid guid) const
+    {
+        ReadOnlyLock lock{ mutex };
+        return GetAssetInfoUnsafe(guid);
+    }
+
+    AssetInfo AssetMonitor::GetAssetInfo(const EAssetType assetType, const String virtualPath) const
+    {
+        ReadOnlyLock lock{ mutex };
+        return GetAssetInfoUnsafe(GetGuidUnsafe(assetType, virtualPath));
+    }
+
     void AssetMonitor::UpdateInfo(const AssetInfo& newInfo)
     {
+        ReadWriteLock rwLock{ mutex };
         IG_CHECK(newInfo.IsValid());
-        IG_CHECK(Contains(newInfo.Guid));
+        IG_CHECK(ContainsUnsafe(newInfo.Guid));
 
-        const AssetInfo& oldInfo = GetAssetInfo(newInfo.Guid);
+        const AssetInfo& oldInfo = GetAssetInfoUnsafe(newInfo.Guid);
         IG_CHECK(newInfo.Guid == oldInfo.Guid);
         IG_CHECK(newInfo.Type == oldInfo.Type);
 
@@ -197,14 +223,15 @@ namespace ig::details
             virtualPathGuidTable[newInfo.VirtualPath] = newInfo.Guid;
         }
 
-        guidSerializedMetaTable[newInfo.Guid] << newInfo;
+        guidSerializedDescTable[newInfo.Guid] << newInfo;
     }
 
     void AssetMonitor::Remove(const xg::Guid guid)
     {
-        IG_CHECK(Contains(guid));
+        ReadWriteLock rwLock{ mutex };
+        IG_CHECK(ContainsUnsafe(guid));
 
-        const AssetInfo info = GetAssetInfo(guid);
+        const AssetInfo info = GetAssetInfoUnsafe(guid);
         IG_CHECK(info.IsValid());
 
         VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(info.Type);
@@ -213,23 +240,15 @@ namespace ig::details
 
         expiredAssetInfos[info.Guid] = info;
         virtualPathGuidTable.erase(info.VirtualPath);
-        guidSerializedMetaTable.erase(info.Guid);
-        IG_CHECK(!Contains(info.Guid));
+        guidSerializedDescTable.erase(info.Guid);
+        IG_CHECK(!ContainsUnsafe(info.Guid));
     }
 
-    void AssetMonitor::SaveAllChanges()
-    {
-        IG_LOG(AssetMonitor, Info, "Save all info chages...");
-        ReflectExpiredToFiles();
-        ReflectRemainedToFiles();
-        IG_LOG(AssetMonitor, Info, "All info changes saved.");
-    }
-
-    void AssetMonitor::ReflectExpiredToFiles()
+    void AssetMonitor::ReflectExpiredToFilesUnsafe()
     {
         for (const auto& expiredAssetInfo : expiredAssetInfos)
         {
-            IG_CHECK(!Contains(expiredAssetInfo.first));
+            IG_CHECK(!ContainsUnsafe(expiredAssetInfo.first));
             const AssetInfo& assetInfo{ expiredAssetInfo.second };
             IG_CHECK(expiredAssetInfo.first == assetInfo.Guid);
             const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.Type, assetInfo.Guid) };
@@ -251,10 +270,10 @@ namespace ig::details
         expiredAssetInfos.clear();
     }
 
-    void AssetMonitor::ReflectRemainedToFiles()
+    void AssetMonitor::ReflectRemainedToFilesUnsafe()
     {
         IG_CHECK(expiredAssetInfos.empty());
-        for (const auto& guidSerializedMeta : guidSerializedMetaTable)
+        for (const auto& guidSerializedMeta : guidSerializedDescTable)
         {
             const json& serializedMeta = guidSerializedMeta.second;
             AssetInfo assetInfo{};
@@ -267,5 +286,16 @@ namespace ig::details
                    magic_enum::enum_name(assetInfo.Type),
                    assetInfo.VirtualPath.ToStringView(), guidSerializedMeta.first.str());
         }
+    }
+
+    void AssetMonitor::SaveAllChanges()
+    {
+        IG_LOG(AssetMonitor, Info, "Save all info chages...");
+        {
+            ReadWriteLock rwLock{ mutex };
+            ReflectExpiredToFilesUnsafe();
+            ReflectRemainedToFilesUnsafe();
+        }
+        IG_LOG(AssetMonitor, Info, "All info changes saved.");
     }
 } // namespace ig::details
