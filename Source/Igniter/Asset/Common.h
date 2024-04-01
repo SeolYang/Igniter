@@ -63,7 +63,7 @@ namespace ig
         typename T::Desc;
         {
             asset.GetSnapshot()
-        } -> std::same_as<typename T::Desc>;
+        } -> std::same_as<const typename T::Desc&>;
     } && std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf_v<T> != EAssetType::Unknown;
 
     template <typename T>

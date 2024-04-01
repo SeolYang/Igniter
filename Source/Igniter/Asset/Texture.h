@@ -85,7 +85,7 @@ namespace ig
         Texture& operator=(const Texture&) = delete;
         Texture& operator=(Texture&&) noexcept = default;
 
-        Desc GetSnapshot() const { return snapshot; }
+        const Desc& GetSnapshot() const { return snapshot; }
         RefHandle<GpuTexture> GetGpuTexture() { return gpuTexture.MakeRef(); }
         RefHandle<GpuView> GetShaderResourceView() { return srv.MakeRef(); }
         RefHandle<GpuView> GetSampler() { return sampler; }

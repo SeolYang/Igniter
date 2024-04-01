@@ -63,7 +63,7 @@ namespace ig
         StaticMesh& operator=(const StaticMesh&) = delete;
         StaticMesh& operator=(StaticMesh&&) noexcept = default;
 
-        Desc GetSnapshot() const { return snapshot; }
+        const Desc& GetSnapshot() const { return snapshot; }
         RefHandle<GpuBuffer> GetVertexBuffer() { return vertexBuffer.MakeRef(); }
         RefHandle<GpuView> GetVertexBufferSrv() { return vertexBufferSrv.MakeRef(); }
         RefHandle<GpuBuffer> GetIndexBuffer() { return indexBuffer.MakeRef(); }
