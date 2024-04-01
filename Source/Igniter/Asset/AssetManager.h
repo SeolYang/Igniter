@@ -16,6 +16,7 @@ namespace ig
     class TextureLoader;
     class StaticMeshImporter;
     class StaticMeshLoader;
+    class MaterialLoader;
     class AssetManager final
     {
         using VirtualPathGuidTable = robin_hood::unordered_map<String, xg::Guid>;
@@ -29,13 +30,17 @@ namespace ig
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
-        xg::Guid ImportTexture(const String resPath, const TextureImportDesc& config);
+        xg::Guid ImportTexture(const String resPath, const TextureImportDesc& desc);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const xg::Guid guid);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const String virtualPath);
 
         std::vector<xg::Guid> ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const xg::Guid guid);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
+
+        xg::Guid CreateMaterial(MaterialCreateDesc desc);
+        [[nodiscard]] CachedAsset<Material> LoadMaterial(const xg::Guid guid);
+        [[nodiscard]] CachedAsset<Material> LoadMaterial(const String virtualPath);
 
         void Delete(const xg::Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
@@ -101,6 +106,8 @@ namespace ig
 
         Ptr<StaticMeshImporter> staticMeshImporter;
         Ptr<StaticMeshLoader> staticMeshLoader;
+
+        Ptr<MaterialLoader> materialLoader;
     };
 
 } // namespace ig

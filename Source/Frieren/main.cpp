@@ -1,8 +1,7 @@
 #include <Frieren.h>
 #include <Asset/StaticMesh.h>
 #include <Asset/Texture.h>
-#include <Asset/TextureLoader.h>
-#include <Asset/StaticMeshLoader.h>
+#include <Asset/Material.h>
 #include <Asset/AssetManager.h>
 #include <Component/CameraArchetype.h>
 #include <Component/CameraComponent.h>
@@ -56,6 +55,13 @@ int main()
             });
 
         std::future<CachedAsset<Texture>> ashBodyTexFuture = std::async(
+            std::launch::async,
+            [&assetManager]()
+            {
+                return assetManager.LoadTexture(xg::Guid{ "4b2b2556-7d81-4884-ba50-777392ebc9ee" });
+            });
+
+        std::future<CachedAsset<Texture>> ashBodyTexOtherFuture = std::async(
             std::launch::async,
             [&assetManager]()
             {
@@ -146,6 +152,10 @@ int main()
         auto& mainLayer = canvas.AddLayer<MainLayer>(canvas);
         mainLayer.SetVisibility(true);
         /************************************/
+
+        /* #sy_test Material Creation */
+        //[[maybe_unused]] xg::Guid material{ assetManager.CreateMaterial({ .VirtualPath = "AshBody"_fs, .Diffuse = ashBodyTexOtherFuture.get() }) };
+        /******************************/
 
         result = engine.Execute();
     }

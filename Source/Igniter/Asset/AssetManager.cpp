@@ -8,6 +8,7 @@
 #include <Asset/TextureLoader.h>
 #include <Asset/StaticMeshImporter.h>
 #include <Asset/StaticMeshLoader.h>
+#include <Asset/MaterialLoader.h>
 #include <Asset/AssetManager.h>
 
 namespace ig
@@ -17,7 +18,8 @@ namespace ig
           textureImporter(std::make_unique<TextureImporter>()),
           textureLoader(std::make_unique<TextureLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
           staticMeshImporter(std::make_unique<StaticMeshImporter>(*this)),
-          staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager))
+          staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
+          materialLoader(std::make_unique<MaterialLoader>(*this))
     {
         InitAssetCaches(handleManager);
     }
@@ -72,7 +74,7 @@ namespace ig
         }
         assetMonitor->Create<Texture>(assetInfo, metadata.LoadDescriptor);
 
-        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath.ToStringView(), assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
+        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath, assetInfo.VirtualPath, assetInfo.Guid);
         return assetInfo.Guid;
     }
 
@@ -85,7 +87,7 @@ namespace ig
     {
         if (!assetMonitor->Contains(EAssetType::Texture, virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Texture asset \"{}\" is invisible to asset manager.", virtualPath);
+            IG_LOG(AssetManager, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
             return CachedAsset<Texture>{};
         }
 
@@ -101,8 +103,7 @@ namespace ig
         {
             if (!result.HasOwnership())
             {
-                IG_LOG(AssetManager, Error, "Failed({}) to import static mesh \"{}\".",
-                       magic_enum::enum_name(result.GetStatus()), resPath.ToStringView());
+                IG_LOG(AssetManager, Error, "Failed({}) to import static mesh \"{}\".", result.GetStatus(), resPath);
                 continue;
             }
 
@@ -115,7 +116,7 @@ namespace ig
             }
             assetMonitor->Create<StaticMesh>(assetInfo, metadata.LoadDescriptor);
 
-            IG_LOG(AssetManager, Info, "\"{}\" imported as static mesh asset {}({})", resPath.ToStringView(), assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
+            IG_LOG(AssetManager, Info, "\"{}\" imported as static mesh asset {}({})", resPath, assetInfo.VirtualPath, assetInfo.Guid);
             output.emplace_back(assetInfo.Guid);
         }
 
@@ -131,11 +132,49 @@ namespace ig
     {
         if (!assetMonitor->Contains(EAssetType::StaticMesh, virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Static mesh asset \"{}\" is invisible to asset manager.", virtualPath);
+            IG_LOG(AssetManager, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
             return CachedAsset<StaticMesh>{};
         }
 
         return LoadInternal<StaticMesh>(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath), *staticMeshLoader);
+    }
+
+    xg::Guid AssetManager::CreateMaterial(MaterialCreateDesc createDesc)
+    {
+        Result<Material::Desc, EMaterialCreateStatus> result{ Material::Create(std::move(createDesc)) };
+        if (!result.HasOwnership())
+        {
+            IG_LOG(AssetManager, Error, "Failed({}) to create material \"{}\".", result.GetStatus(), createDesc.VirtualPath);
+            return {};
+        }
+
+        const Material::Desc desc = result.Take();
+        const AssetInfo& assetInfo = desc.Info;
+
+        if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
+        {
+            Delete(assetInfo.Type, assetInfo.VirtualPath);
+        }
+        assetMonitor->Create<Material>(assetInfo, desc.LoadDescriptor);
+
+        IG_LOG(AssetManager, Info, "Material {}({}) created.", assetInfo.VirtualPath, assetInfo.Guid);
+        return assetInfo.Guid;
+    }
+
+    CachedAsset<Material> AssetManager::LoadMaterial(const xg::Guid guid)
+    {
+        return LoadInternal<Material>(guid, *materialLoader);
+    }
+
+    CachedAsset<Material> AssetManager::LoadMaterial(const String virtualPath)
+    {
+        if (!assetMonitor->Contains(EAssetType::Material, virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
+            return CachedAsset<Material>{};
+        }
+
+        return LoadInternal<Material>(assetMonitor->GetGuid(EAssetType::Material, virtualPath), *materialLoader);
     }
 
     void AssetManager::Delete(const xg::Guid guid)
@@ -172,7 +211,7 @@ namespace ig
     {
         if (!assetMonitor->Contains(guid))
         {
-            IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid.str());
+            IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid);
         }
 
         return assetMonitor->GetAssetInfo(guid);
@@ -191,7 +230,7 @@ namespace ig
         }
         assetMonitor->Remove(guid);
 
-        IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid.str());
+        IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid);
     }
 
     UniqueLock AssetManager::RequestAssetLock(const xg::Guid guid)
