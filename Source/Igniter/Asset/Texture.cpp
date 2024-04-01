@@ -1,6 +1,5 @@
 #include <Igniter.h>
 #include <Core/JsonUtils.h>
-#include <Core/Serializable.h>
 #include <D3D12/GpuTexture.h>
 #include <Render/GpuViewManager.h>
 #include <Asset/Texture.h>

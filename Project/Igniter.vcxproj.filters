@@ -174,9 +174,6 @@
     <ClInclude Include="..\Source\Igniter\Core\Timer.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\TypeUtils.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Version.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -362,6 +359,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Asset\MaterialLoader.h">
       <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Types.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Format.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

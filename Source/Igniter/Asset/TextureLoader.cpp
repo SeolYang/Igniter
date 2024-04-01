@@ -1,8 +1,6 @@
 #include <Igniter.h>
 #include <Core/Timer.h>
 #include <Core/Log.h>
-#include <Core/Serializable.h>
-#include <Core/TypeUtils.h>
 #include <Filesystem/Utils.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GpuTexture.h>

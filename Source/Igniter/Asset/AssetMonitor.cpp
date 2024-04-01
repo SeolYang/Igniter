@@ -1,6 +1,5 @@
 #include <Igniter.h>
 #include <Core/Log.h>
-#include <Core/Serializable.h>
 #include <Filesystem/Utils.h>
 #include <Asset/AssetMonitor.h>
 
@@ -89,9 +88,15 @@ namespace ig::details
                         continue;
                     }
 
-                    IG_CHECK(!virtualPathGuidTable.contains(assetInfo.VirtualPath));
-                    virtualPathGuidTable.insert_or_assign(assetInfo.VirtualPath, assetInfo.Guid);
-                    IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str());
+                    if (virtualPathGuidTable.contains(assetInfo.VirtualPath))
+                    {
+                        IG_LOG(AssetMonitor, Warning, "Asset {}({}) ignored. Because, it has duplicated virtual path.", assetInfo.VirtualPath, assetInfo.Guid);
+                        ++directoryItr;
+                        continue;
+                    }
+
+                    virtualPathGuidTable[assetInfo.VirtualPath] = assetInfo.Guid;
+                    IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath, assetInfo.Guid);
                     IG_CHECK(!Contains(assetInfo.Guid));
                     guidSerializedDescTable[assetInfo.Guid] = serializedMetadata;
                 }

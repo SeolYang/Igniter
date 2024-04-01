@@ -136,45 +136,9 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 #pragma warning(pop)
 
 #include <Core/Assert.h>
-namespace ig
-{
-    namespace fs = std::filesystem;
-    namespace chrono = std::chrono;
-    namespace ranges = std::ranges;
-    namespace views = std::views;
-
-    using namespace DirectX::SimpleMath;
-    using namespace std::chrono_literals;
-
-    using json = nlohmann::json;
-    using SharedMutex = std::shared_mutex;
-    using ReadOnlyLock = std::shared_lock<SharedMutex>;
-    using ReadWriteLock = std::unique_lock<SharedMutex>;
-    using RecursiveMutex = std::recursive_mutex;
-    using RecursiveLock = std::unique_lock<RecursiveMutex>;
-    using Mutex = std::mutex;
-    using UniqueLock = std::unique_lock<Mutex>;
-
-    template <typename T>
-    using OptionalRef = std::optional<std::reference_wrapper<T>>;
-    template <typename T>
-    OptionalRef<T> MakeOptionalRef(T& ref)
-    {
-        return std::make_optional(std::ref(ref));
-    }
-
-    template <typename T>
-    using Ptr = std::unique_ptr<T>;
-
-    template <typename T>
-    using SharedPtr = std::shared_ptr<T>;
-
-    using Entity = entt::entity;
-    using Registry = entt::registry;
-
-    constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
-    constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
-} // namespace ig
+#include <Core/Types.h>
+#include <Core/Serializable.h>
+#include <Core/Format.h>
 
 namespace ig /* Constants */
 {

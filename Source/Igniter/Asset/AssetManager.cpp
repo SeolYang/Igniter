@@ -1,6 +1,4 @@
 #include <Igniter.h>
-#include <Core/Serializable.h>
-#include <Core/TypeUtils.h>
 #include <D3D12/GpuTexture.h>
 #include <D3D12/GpuBuffer.h>
 #include <Render/GpuViewManager.h>
@@ -35,6 +33,7 @@ namespace ig
     {
         assetCaches.emplace_back(std::make_unique<details::AssetCache<Texture>>(handleManager));
         assetCaches.emplace_back(std::make_unique<details::AssetCache<StaticMesh>>(handleManager));
+        assetCaches.emplace_back(std::make_unique<details::AssetCache<Material>>(handleManager));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)

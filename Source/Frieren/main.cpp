@@ -154,7 +154,7 @@ int main()
         /************************************/
 
         /* #sy_test Material Creation */
-        //[[maybe_unused]] xg::Guid material{ assetManager.CreateMaterial({ .VirtualPath = "AshBody"_fs, .Diffuse = ashBodyTexOtherFuture.get() }) };
+        [[maybe_unused]] xg::Guid material{ assetManager.CreateMaterial({ .VirtualPath = "AshBody"_fs, .Diffuse = ashBodyTexOtherFuture.get() }) };
         /******************************/
 
         result = engine.Execute();

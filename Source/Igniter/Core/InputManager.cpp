@@ -1,7 +1,6 @@
 #include <Igniter.h>
 #include <Core/InputManager.h>
 #include <Core/Log.h>
-#include <Core/TypeUtils.h>
 
 IG_DEFINE_LOG_CATEGORY(InputManager);
 namespace ig

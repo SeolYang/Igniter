@@ -1,7 +1,6 @@
 #include <Igniter.h>
 #include <Core/Log.h>
 #include <Core/Timer.h>
-#include <Core/Serializable.h>
 #include <Filesystem/Utils.h>
 #include <Render/Vertex.h>
 #include <Asset/StaticMeshImporter.h>
