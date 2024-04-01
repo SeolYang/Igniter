@@ -90,7 +90,7 @@ namespace ig
             return CachedAsset<Texture>{};
         }
 
-        return LoadTexture(assetMonitor->GetGuid(EAssetType::Texture, virtualPath));
+        return LoadInternal<Texture>(assetMonitor->GetGuid(EAssetType::Texture, virtualPath), *textureLoader);
     }
 
     std::vector<xg::Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc)
@@ -136,7 +136,7 @@ namespace ig
             return CachedAsset<StaticMesh>{};
         }
 
-        return LoadStaticMesh(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath));
+        return LoadInternal<StaticMesh>(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath), *staticMeshLoader);
     }
 
     void AssetManager::Delete(const xg::Guid guid)

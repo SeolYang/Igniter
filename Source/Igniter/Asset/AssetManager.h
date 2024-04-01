@@ -29,12 +29,12 @@ namespace ig
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
         xg::Guid ImportTexture(const String resPath, const TextureImportDesc& config);
-        CachedAsset<Texture> LoadTexture(const xg::Guid guid);
-        CachedAsset<Texture> LoadTexture(const String virtualPath);
+        [[nodiscard]] CachedAsset<Texture> LoadTexture(const xg::Guid guid);
+        [[nodiscard]] CachedAsset<Texture> LoadTexture(const String virtualPath);
 
         std::vector<xg::Guid> ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc);
-        CachedAsset<StaticMesh> LoadStaticMesh(const xg::Guid guid);
-        CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
+        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const xg::Guid guid);
+        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
         void Delete(const xg::Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
@@ -57,7 +57,7 @@ namespace ig
         void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
         
         template <Asset T, typename AssetLoader>
-        CachedAsset<T> LoadInternal(const xg::Guid guid, AssetLoader& loader)
+        [[nodiscard]] CachedAsset<T> LoadInternal(const xg::Guid guid, AssetLoader& loader)
         {
             if (!assetMonitor->Contains(guid))
             {
