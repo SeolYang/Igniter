@@ -89,11 +89,8 @@ namespace ig
             {
                 debugController->EnableDebugLayer();
                 IG_LOG(RenderDevice, Info, "D3D12 Debug Layer Enabled.");
-    #if defined(ENABLE_GPU_VALIDATION)
-                // gpu based validation?
                 debugController->SetEnableGPUBasedValidation(true);
-                IG_LOG(RenderDevice, Info, "D3D12 GPU Based Validation Enabled.")''
-    #endif
+                IG_LOG(RenderDevice, Info, "D3D12 GPU Based Validation Enabled.");
             }
 #endif
         }
