@@ -1,20 +1,15 @@
 #include <Igniter.h>
-#include <Core/Log.h>
 #include <Core/Serializable.h>
 #include <Core/TypeUtils.h>
 #include <D3D12/GpuTexture.h>
 #include <D3D12/GpuBuffer.h>
 #include <Render/GpuViewManager.h>
 #include <Asset/Utils.h>
-#include <Asset/AssetMonitor.h>
-#include <Asset/AssetCache.h>
 #include <Asset/TextureImporter.h>
 #include <Asset/TextureLoader.h>
 #include <Asset/StaticMeshImporter.h>
 #include <Asset/StaticMeshLoader.h>
 #include <Asset/AssetManager.h>
-
-IG_DEFINE_LOG_CATEGORY(AssetManager);
 
 namespace ig
 {
@@ -43,6 +38,8 @@ namespace ig
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)
     {
+        IG_CHECK(assetCaches.size() > 0);
+
         details::TypelessAssetCache* cachePtr = nullptr;
         for (Ptr<details::TypelessAssetCache>& cache : assetCaches)
         {
@@ -82,30 +79,7 @@ namespace ig
 
     CachedAsset<Texture> AssetManager::LoadTexture(const xg::Guid guid)
     {
-        if (!assetMonitor->Contains(guid))
-        {
-            IG_LOG(AssetManager, Error, "Texture asset \"{}\" is invisible to asset manager.", guid);
-            return CachedAsset<Texture>{};
-        }
-
-        details::AssetCache<Texture>& textureCache{ GetCache<Texture>() };
-        if (!textureCache.IsCached(guid))
-        {
-            Texture::Desc desc{ assetMonitor->GetDesc<Texture>(guid) };
-            IG_CHECK(desc.Info.Guid == guid);
-            Result<Texture, ETextureLoaderStatus> result{ textureLoader->Load(desc) };
-            if (result.HasOwnership())
-            {
-                IG_LOG(AssetManager, Info, "Texture asset {}({}) cached.", desc.Info.VirtualPath, desc.Info.Guid);
-                return textureCache.Cache(guid, result.Take());
-            }
-
-            IG_LOG(AssetManager, Error, "Failed({}) to load texture asset {}({}).", result.GetStatus(), desc.Info.VirtualPath, desc.Info.Guid);
-            return CachedAsset<Texture>{};
-        }
-
-        IG_LOG(AssetManager, Info, "The Cached texture asset {} loaded.", guid);
-        return textureCache.Load(guid);
+        return LoadInternal<Texture>(guid, *textureLoader);
     }
 
     CachedAsset<Texture> AssetManager::LoadTexture(const String virtualPath)
@@ -147,6 +121,22 @@ namespace ig
         }
 
         return output;
+    }
+
+    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const xg::Guid guid)
+    {
+        return LoadInternal<StaticMesh>(guid, *staticMeshLoader);
+    }
+
+    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
+    {
+        if (!assetMonitor->Contains(EAssetType::StaticMesh, virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Static mesh asset \"{}\" is invisible to asset manager.", virtualPath);
+            return CachedAsset<StaticMesh>{};
+        }
+
+        return LoadStaticMesh(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath));
     }
 
     void AssetManager::Delete(const xg::Guid guid)

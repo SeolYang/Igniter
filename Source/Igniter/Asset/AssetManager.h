@@ -1,23 +1,18 @@
 #pragma once
 #include <Core/Result.h>
+#include <Core/Log.h>
 #include <Asset/Common.h>
+#include <Asset/AssetMonitor.h>
+#include <Asset/AssetCache.h>
 #include <Asset/Texture.h>
 #include <Asset/StaticMesh.h>
 
-namespace ig::details
-{
-    class AssetMonitor;
-    class TypelessAssetCache;
-    template <Asset T>
-    class AssetCache;
-} // namespace ig::details
+IG_DEFINE_LOG_CATEGORY(AssetManager);
 
 namespace ig
 {
-    struct Texture;
     class TextureImporter;
     class TextureLoader;
-    struct StaticMesh;
     class StaticMeshImporter;
     class StaticMeshLoader;
     class AssetManager final
@@ -60,6 +55,35 @@ namespace ig
         void InitAssetCaches(HandleManager& handleManager);
 
         void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
+        
+        template <Asset T, typename AssetLoader>
+        CachedAsset<T> LoadInternal(const xg::Guid guid, AssetLoader& loader)
+        {
+            if (!assetMonitor->Contains(guid))
+            {
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf_v<T>, guid);
+                return CachedAsset<T>{};
+            }
+
+            details::AssetCache<T>& assetCache{ GetCache<T>() };
+            if (!assetCache.IsCached(guid))
+            {
+                const T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
+                IG_CHECK(desc.Info.Guid == guid);
+                auto result{ loader.Load(desc) };
+                if (result.HasOwnership())
+                {
+                    IG_LOG(AssetManager, Info, "{} asset {}({}) cached.", AssetTypeOf_v<T>, desc.Info.VirtualPath, desc.Info.Guid);
+                    return assetCache.Cache(guid, result.Take());
+                }
+
+                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {}({}).", AssetTypeOf_v<T>, result.GetStatus(), desc.Info.VirtualPath, desc.Info.Guid);
+                return CachedAsset<T>{};
+            }
+
+            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf_v<T>, guid);
+            return assetCache.Load(guid);
+        }
 
     private:
         Ptr<details::AssetMonitor> assetMonitor;
