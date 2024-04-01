@@ -40,12 +40,22 @@ namespace ig
         return *diffuse;
     }
 
-    Result<Material::Desc, EMaterialCreateStatus> Material::Create(const String virtualPath, MaterialCreateDesc desc)
+    Result<Material::Desc, EMaterialCreateStatus> Material::Create(MaterialCreateDesc desc)
     {
+        if (!desc.VirtualPath.IsValid())
+        {
+            return MakeFail<Desc, EMaterialCreateStatus::InvalidVirtualPath>();
+        }
+
+        if (desc.VirtualPath.IsEmpty())
+        {
+            return MakeFail<Desc, EMaterialCreateStatus::EmptyVirtualPath>();
+        }
+
         const AssetInfo assetInfo{
             .CreationTime = Timer::Now(),
             .Guid = xg::newGuid(),
-            .VirtualPath = virtualPath,
+            .VirtualPath = desc.VirtualPath,
             .Type = EAssetType::Material,
         };
 

@@ -14,6 +14,8 @@ namespace ig
     enum class EMaterialCreateStatus
     {
         Success,
+        InvalidVirtualPath,
+        EmptyVirtualPath,
         FailedSaveMetadata,
         FailedSaveAsset
     };
@@ -21,6 +23,7 @@ namespace ig
     struct MaterialCreateDesc final
     {
     public:
+        String VirtualPath{};
         CachedAsset<Texture> Diffuse{};
     };
 
@@ -57,7 +60,7 @@ namespace ig
         Texture& GetDiffuse();
 
     private:
-        static Result<Desc, EMaterialCreateStatus> Create(const String virtualPath, MaterialCreateDesc desc);
+        static Result<Desc, EMaterialCreateStatus> Create(MaterialCreateDesc desc);
 
     private:
         Desc snapshot{};
