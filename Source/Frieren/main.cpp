@@ -178,8 +178,6 @@ int main()
         mainLayer.SetVisibility(true);
         /************************************/
 
-        [[maybe_unused]] std::vector<AssetManager::Snapshot> snapshots{ assetManager.TakeSnapshots() };
-
         result = engine.Execute();
     }
 

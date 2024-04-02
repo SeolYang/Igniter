@@ -10,17 +10,20 @@
 #include <ImGui/AssetWatchPanel.h>
 #include <ImGui/TextureImportPanel.h>
 #include <ImGui/StaticMeshImportPanel.h>
+#include <ImGui/AssetSnapshotPanel.h>
 
 namespace fe
 {
-    MainLayer::MainLayer(ig::ImGuiCanvas& canvas) : canvas(canvas),
-                                                    statisticsPanel(canvas.AddLayer<ig::StatisticsPanel>()),
-                                                    cachedStringDebugger(canvas.AddLayer<ig::CachedStringDebugger>()),
-                                                    entityList(canvas.AddLayer<ig::EntityList>()),
-                                                    entityInspector(canvas.AddLayer<ig::EntityInspector>(entityList)),
-                                                    assetWatchPanel(canvas.AddLayer<ig::AssetWatchPanel>()),
-                                                    textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>()),
-                                                    staticMeshImportPanel(canvas.AddLayer<ig::StaticMeshImportPanel>())
+    MainLayer::MainLayer(ig::ImGuiCanvas& canvas)
+        : canvas(canvas),
+          statisticsPanel(canvas.AddLayer<ig::StatisticsPanel>()),
+          cachedStringDebugger(canvas.AddLayer<ig::CachedStringDebugger>()),
+          entityList(canvas.AddLayer<ig::EntityList>()),
+          entityInspector(canvas.AddLayer<ig::EntityInspector>(entityList)),
+          assetWatchPanel(canvas.AddLayer<ig::AssetWatchPanel>()),
+          textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>()),
+          staticMeshImportPanel(canvas.AddLayer<ig::StaticMeshImportPanel>()),
+          assetSnapshotPanel(canvas.AddLayer<ig::AssetSnapshotPanel>())
     {
     }
 
@@ -69,14 +72,10 @@ namespace fe
                     cachedStringDebugger.SetVisibility(true);
                 }
 
-                if (ImGui::MenuItem("Entity List"))
-                {
-                    entityList.SetVisibility(true);
-                }
-
                 if (ImGui::MenuItem("Entity Inspector"))
                 {
                     entityInspector.SetVisibility(true);
+                    entityList.SetVisibility(true);
                 }
 
                 if (ImGui::MenuItem("Asset Watch Panel"))
@@ -84,6 +83,10 @@ namespace fe
                     assetWatchPanel.SetVisibility(true);
                 }
 
+                if (ImGui::MenuItem("Asset Snapshots"))
+                {
+                    assetSnapshotPanel.SetVisibility(true);
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
