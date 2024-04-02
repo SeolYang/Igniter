@@ -42,8 +42,8 @@ namespace ig
 
     enum class EAssetPersistency
     {
-        Default,    /* 수명: 레퍼런스 카운터 > 0, 중복 Virtual Path 발생 -> Deleted */
-        Persistent, /* 수명: 에셋 매니저 해제 까지, 중복 Virtual Path 발생 -> Deleted */
+        Default,    /* 수명: 레퍼런스 카운터 > 0 or 중복 Virtual Path 발생 -> Deleted */
+        Persistent, /* 수명: 에셋 매니저 해제 까지 or 중복 Virtual Path 발생 -> Deleted */
         Engine,     /* 수명: 에셋 매니저 해제 까지, 중복 Virtual Path 발생 -> Ignored */
     };
 
@@ -66,13 +66,17 @@ namespace ig
         xg::Guid GetGuid() const { return guid; }
         String GetVirtualPath() const { return virtualPath; }
         EAssetType GetType() const { return type; }
+        EAssetPersistency GetPersistency() const { return persistency; }
+
+        void SetVirtualPath(const String newVirtualPath) { virtualPath = newVirtualPath; }
+        void SetPersistency(const EAssetPersistency newPersistency) { persistency = newPersistency; }
 
     private:
         uint64_t creationTime = 0;
         xg::Guid guid{};
         String virtualPath{};
         EAssetType type = EAssetType::Unknown;
-        EAssetPersistency persistency = EAssetPersistency::Default; 
+        EAssetPersistency persistency = EAssetPersistency::Default;
     };
 
     template <typename T>

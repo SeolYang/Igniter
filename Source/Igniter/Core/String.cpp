@@ -1,5 +1,6 @@
 #include <Igniter.h>
 #include <Core/String.h>
+#include <Core/ContainerUtils.h>
 
 namespace ig
 {
@@ -20,7 +21,8 @@ namespace ig
         return hashStringMapMutex;
     }
 
-    String::String(const String& other) : hashOfString(other.hashOfString)
+    String::String(const String& other)
+        : hashOfString(other.hashOfString)
     {
     }
 
@@ -139,6 +141,18 @@ namespace ig
     String String::FromPath(const fs::path& path)
     {
         return String{ path.c_str() };
+    }
+
+    std::vector<String> String::Split(const String delimiter) const
+    {
+        auto splitStrViews{ ToStringView() |
+                            views::split(delimiter.ToStringView()) |
+                            views::transform([](auto&& element)
+                                             {
+                                                 return String{ std::string_view{ &*element.begin(), static_cast<size_t>(ranges::distance(element)) } };
+                                             }) };
+
+        return std::vector<String>{ splitStrViews.begin(), splitStrViews.end() };
     }
 
     std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()

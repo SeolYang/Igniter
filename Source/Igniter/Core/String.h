@@ -77,6 +77,8 @@ namespace ig
         [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
         [[nodiscard]] bool IsEmpty() const noexcept { return hashOfString == 0; }
 
+        [[nodiscard]] std::vector<String> Split(const String delimiter) const;
+
         static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
     private:
