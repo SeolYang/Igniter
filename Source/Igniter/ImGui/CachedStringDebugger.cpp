@@ -35,11 +35,11 @@ namespace ig
                 ImGuiTableFlags_RowBg |
                 ImGuiTableFlags_Borders |
                 ImGuiTableFlags_ScrollY |
-                ImGuiTableFlags_HighlightHoveredColumn ;
+                ImGuiTableFlags_HighlightHoveredColumn;
 
             if (ImGui::BeginTable("Cached Hash-String Table", 2, flags))
             {
-                ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("Hash", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableSetupColumn("String", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoSort);
                 ImGui::TableHeadersRow();
 

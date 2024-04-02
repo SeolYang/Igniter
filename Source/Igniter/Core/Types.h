@@ -60,6 +60,20 @@ namespace ig
         const auto bits = static_cast<F>(flags);
         return ((bits & flag) == flag);
     }
+
+    template <typename T>
+    requires std::is_enum_v<T>
+    constexpr std::string_view ToStringView(const T enumerator)
+    {
+        return magic_enum::enum_name(enumerator);
+    }
+
+    template <typename T>
+    requires std::is_enum_v<T>
+    constexpr const char* ToCStr(const T enumerator)
+    {
+        return magic_enum::enum_name(enumerator).data();
+    }
 } // namespace ig
 
 #define IG_NUMERIC_MIN_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::min()
