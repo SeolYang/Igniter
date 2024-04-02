@@ -59,8 +59,6 @@ namespace ig
         [[nodiscard]] operator std::string_view() const { return ToStringView(); }
         [[nodiscard]] operator std::wstring() const { return ToWideString(); }
 
-        [[nodiscard]] operator bool() const noexcept { return IsValid(); }
-
         [[nodiscard]] bool operator==(const String& rhs) const noexcept;
         [[nodiscard]] bool operator==(const std::string_view rhs) const noexcept;
         [[nodiscard]] bool operator==(const std::wstring_view rhs) const;

@@ -59,7 +59,7 @@ namespace ig
     {
         IG_CHECK(!vertices.empty());
         IG_CHECK(!indices.empty());
-        IG_CHECK(resPathStr);
+        IG_CHECK(resPathStr.IsValid());
 
         const std::string_view resPathStrView = resPathStr.ToStringView();
 

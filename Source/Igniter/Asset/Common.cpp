@@ -112,18 +112,26 @@ namespace ig
         return xg::Guid{ path.replace_extension().filename().string() };
     }
 
-    static const std::regex& GetVirtualPathRegex()
-    {
-        static const std::regex VirtualPathRegex{ "([a-zA-Z0-9_-])+([\\\\][a-zA-Z0-9_-]+)*", std::regex_constants::optimize };
-        return VirtualPathRegex;
-    }
-
     bool IsValidVirtualPath(const String virtualPath)
     {
         if (!virtualPath.IsValid())
         {
             return false;
         }
-        return RegexMatch(virtualPath, GetVirtualPathRegex());
+
+        static const std::regex VirtualPathRegex{ R"([^\s/\\]*(\\[^\s/\\]*)*)", std::regex_constants::optimize };
+        return RegexMatch(virtualPath, VirtualPathRegex);
+    }
+
+    String MakeVirtualPathPreferred(const String virtualPath)
+    {
+        if (!virtualPath.IsValid())
+        {
+            return String{};
+        }
+
+        static const std::regex ReplaceWhiteSpacesRegex{ R"(\s+)", std::regex_constants::optimize };
+        static const std::regex ReplaceUnpreferredSlash{ "/+", std::regex_constants::optimize };
+        return RegexReplace(RegexReplace(virtualPath, ReplaceWhiteSpacesRegex, "_"_fs), ReplaceUnpreferredSlash, R"(\)"_fs);
     }
 } // namespace ig

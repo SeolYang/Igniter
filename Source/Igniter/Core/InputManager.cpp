@@ -89,7 +89,7 @@ namespace ig
 
     void InputManager::BindAction(const String nameOfAction, const EInput input)
     {
-        IG_CHECK(nameOfAction);
+        IG_CHECK(nameOfAction.IsValid());
         IG_CHECK(input != EInput::None);
         IG_CHECK(!inputActionNameMap[input].contains(nameOfAction));
         inputActionNameMap[input].insert(nameOfAction);
@@ -101,7 +101,7 @@ namespace ig
 
     void InputManager::BindAxis(const String nameOfAxis, const EInput input, const float scale)
     {
-        IG_CHECK(nameOfAxis);
+        IG_CHECK(nameOfAxis.IsValid());
         IG_CHECK(input != EInput::None);
         if (!axisMap.contains(nameOfAxis))
         {

@@ -46,8 +46,6 @@ int main()
         GameInstance& gameInstance = engine.GetGameInstance();
         AssetManager& assetManager = engine.GetAssetManager();
 
-        IG_CHECK(IsValidVirtualPath("abc\\cd"_fs));
-
         /* #sy_test Asset System & Mechanism Test */
         std::future<CachedAsset<StaticMesh>> ashMeshFuture = std::async(
             std::launch::async,

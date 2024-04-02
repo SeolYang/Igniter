@@ -5,7 +5,7 @@ namespace ig
 {
     bool RegexMatch(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
-        if (!str)
+        if (!str.IsValid())
         {
             return false;
         }
@@ -16,7 +16,7 @@ namespace ig
     std::vector<String> RegexMatchN(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
         std::vector<String> result{};
-        if (str)
+        if (str.IsValid())
         {
             std::cmatch matches{};
             if (std::regex_match(str.ToCString(), matches, regex, flags))
@@ -35,7 +35,7 @@ namespace ig
     std::vector<String> RegexSearch(const String str, const std::regex& regex)
     {
         std::vector<String> result{};
-        if (str)
+        if (str.IsValid())
         {
             const char* searchBegin{ str.ToCString() };
             std::cmatch match{};
@@ -51,7 +51,7 @@ namespace ig
 
     String RegexReplace(const String str, const std::regex& regex, const String replacePattern, const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
-        if (!str)
+        if (!str.IsValid())
         {
             return {};
         }
