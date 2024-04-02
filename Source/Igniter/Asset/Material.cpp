@@ -10,16 +10,14 @@ namespace ig
 {
     json& MaterialLoadDesc::Serialize(json& archive) const
     {
-        const auto& desc{ *this };
-        IG_SERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, desc, DiffuseVirtualPath);
+        IG_SERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseVirtualPath);
         return archive;
     }
 
     const json& MaterialLoadDesc::Deserialize(const json& archive)
     {
-        auto& desc{ *this };
-        desc = {};
-        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, desc, DiffuseVirtualPath, String{ /* #sy_todo 추후에 엔진 기본 텍스처로 대체 */ });
+        *this = {};
+        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseVirtualPath, String{ /* #sy_todo 추후에 엔진 기본 텍스처로 대체 */ });
         return archive;
     }
 

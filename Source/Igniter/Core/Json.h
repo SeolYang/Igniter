@@ -93,14 +93,14 @@ namespace ig::details
 #define IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) \
     ig::details::Serialize(JSON_ARCHIVE, magic_enum::enum_name<std::decay_t<decltype(VAR)>>(VAR), CONTAINER_KEY, VALUE_KEY)
 
-#define IG_SERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
-    IG_SERIALIZE_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR)
+#define IG_SERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
+    IG_SERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
 
-#define IG_SERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
-    IG_SERIALIZE_GUID_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR)
+#define IG_SERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
+    IG_SERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
 
-#define IG_SERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
-    IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR)
+#define IG_SERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
+    IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
 
 /*
  * #sy_log Deserialize 하고 싶은 Json Archive 내부에 원하는 값이 없을 수도 있다. 그에 대해선 아래와 같이 대응 하기로 결정.
@@ -146,7 +146,7 @@ namespace ig::details
         FALLBACK)
 
 #define IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
-    ig::details::DeSerialize<std::decay_t<decltype(VAR)>>(                                                     \
+    ig::details::DeSerialize<std::decay_t<decltype(VAR)>>(                                                          \
         JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
         [](const nlohmann::json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
             IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
@@ -166,11 +166,11 @@ namespace ig::details
         },                                                                                                          \
         FALLBACK)
 
-#define IG_DESERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK) \
-    IG_DESERIALIZE_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR, FALLBACK)
+#define IG_DESERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
+    IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
 
-#define IG_DESERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK) \
-    IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR, FALLBACK)
+#define IG_DESERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
+    IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
 
-#define IG_DESERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK) \
-    IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR, FALLBACK)
+#define IG_DESERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
+    IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)

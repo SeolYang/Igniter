@@ -8,15 +8,13 @@ namespace ig
 {
     json& ResourceInfo::Serialize(json& archive) const
     {
-        const ResourceInfo& info = *this;
-        IG_SERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, info, Type);
+        IG_SERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Type);
         return archive;
     }
 
     const json& ResourceInfo::Deserialize(const json& archive)
     {
-        ResourceInfo& info = *this;
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, info, Type, EAssetType::Unknown);
+        IG_DESERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Type, EAssetType::Unknown);
         return archive;
     }
 
