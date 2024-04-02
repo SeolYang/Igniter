@@ -54,7 +54,7 @@ namespace ig
         template <typename T = std::chrono::milliseconds>
         static inline size_t Now()
         {
-            return std::chrono::duration_cast<T>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+            return std::chrono::duration_cast<T>(std::chrono::system_clock::now().time_since_epoch()).count();
         }
 
     private:

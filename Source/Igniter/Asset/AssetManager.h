@@ -65,7 +65,7 @@ namespace ig
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 
         /* #sy_wip Gathering All Asset Status & Informations */
-        std::vector<Snapshot> TakeSnapshots();
+        [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const;
 
     private:
         template <Asset T>
