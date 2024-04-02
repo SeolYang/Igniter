@@ -46,6 +46,8 @@ int main()
         GameInstance& gameInstance = engine.GetGameInstance();
         AssetManager& assetManager = engine.GetAssetManager();
 
+        IG_CHECK(IsValidVirtualPath("abc\\cd"_fs));
+
         /* #sy_test Asset System & Mechanism Test */
         std::future<CachedAsset<StaticMesh>> ashMeshFuture = std::async(
             std::launch::async,
@@ -79,7 +81,7 @@ int main()
             std::async(std::launch::async,
                        [&assetManager, &ashBodyTexFuture]
                        {
-                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash/Body"_fs, .Diffuse = ashBodyTexFuture.get() });
+                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash\\Body"_fs, .Diffuse = ashBodyTexFuture.get() });
                        })
         };
 
@@ -87,7 +89,7 @@ int main()
             std::async(std::launch::async,
                        [&assetManager, &homuraBodyTexFuture]
                        {
-                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Homura/Body"_fs, .Diffuse = homuraBodyTexFuture.get() });
+                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Homura\\Body"_fs, .Diffuse = homuraBodyTexFuture.get() });
                        })
         };
 

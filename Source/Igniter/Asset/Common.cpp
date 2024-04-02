@@ -114,7 +114,7 @@ namespace ig
 
     static const std::regex& GetVirtualPathRegex()
     {
-        static const std::regex VirtualPathRegex{ "([a-zA-Z0-9_-])+([/][a-zA-Z0-9_-]+)*", std::regex_constants::optimize };
+        static const std::regex VirtualPathRegex{ "([a-zA-Z0-9_-])+([\\\\][a-zA-Z0-9_-]+)*", std::regex_constants::optimize };
         return VirtualPathRegex;
     }
 
