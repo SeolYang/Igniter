@@ -113,7 +113,7 @@ namespace ig
 
     xg::Guid ConvertMetadataPathToGuid(fs::path path);
 
-    bool IsValidVirtualPathFormat(const String virtualPath);
+    bool IsValidVirtualPath(const String virtualPath);
 } // namespace ig
 
 template <>

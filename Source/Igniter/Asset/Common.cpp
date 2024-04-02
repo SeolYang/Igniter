@@ -95,7 +95,9 @@ namespace ig
         std::string extension = resPath.extension().string();
         std::transform(extension.begin(), extension.end(), extension.begin(),
                        [](const char character)
-                       { return static_cast<char>(::tolower(static_cast<int>(character))); });
+                       {
+                           return static_cast<char>(::tolower(static_cast<int>(character)));
+                       });
 
         return extension == details::MetadataExt;
     }
@@ -108,5 +110,20 @@ namespace ig
         }
 
         return xg::Guid{ path.replace_extension().filename().string() };
+    }
+
+    static const std::regex& GetVirtualPathRegex()
+    {
+        static const std::regex VirtualPathRegex{ "([a-zA-Z0-9_-])+([/][a-zA-Z0-9_-]+)*", std::regex_constants::optimize };
+        return VirtualPathRegex;
+    }
+
+    bool IsValidVirtualPath(const String virtualPath)
+    {
+        if (!virtualPath.IsValid())
+        {
+            return false;
+        }
+        return RegexMatch(virtualPath, GetVirtualPathRegex());
     }
 } // namespace ig
