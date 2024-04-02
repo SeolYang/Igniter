@@ -49,9 +49,7 @@ namespace ig
             return MakeFail<Desc, EMaterialCreateStatus::EmptyVirtualPath>();
         }
 
-        const AssetInfo assetInfo{ desc.VirtualPath,
-                                   EAssetType::Material,
-                                   EAssetPersistency::Default };
+        const AssetInfo assetInfo{ desc.VirtualPath, EAssetType::Material };
 
         String diffuseVirtualPath{};
         if (desc.Diffuse)

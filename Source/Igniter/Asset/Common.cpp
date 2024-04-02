@@ -18,12 +18,11 @@ namespace ig
         return archive;
     }
 
-    AssetInfo::AssetInfo(const String virtualPath, const EAssetType type, const EAssetPersistency persistency)
+    AssetInfo::AssetInfo(const String virtualPath, const EAssetType type)
         : creationTime(Timer::Now()),
           guid(xg::newGuid()),
           virtualPath(virtualPath),
-          type(type),
-          persistency(persistency)
+          type(type)
     {
         ConstructVirtualPathHierarchy();
     }

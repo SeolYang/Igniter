@@ -283,10 +283,7 @@ namespace ig
         /* Configure Texture Asset Metadata */
         texMetadata = targetTex.GetMetadata();
 
-        const AssetInfo assetInfo{ MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())),
-                                   EAssetType::Texture,
-                                   EAssetPersistency::Default };
-
+        const AssetInfo assetInfo{ MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetType::Texture };
         const TextureLoadDesc newLoadConfig{ .Format = texMetadata.format,
                                              .Dimension = details::AsTexDimension(texMetadata.dimension),
                                              .Width = static_cast<uint32_t>(texMetadata.width),

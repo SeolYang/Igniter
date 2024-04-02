@@ -131,9 +131,7 @@ namespace ig
         encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(),
                                                         remappedIndices.data(), remappedIndices.size()));
 
-        const AssetInfo assetInfo{ MakeVirtualPathPreferred(meshName),
-                                   EAssetType::StaticMesh,
-                                   EAssetPersistency::Default };
+        const AssetInfo assetInfo{ MakeVirtualPathPreferred(meshName), EAssetType::StaticMesh };
 
         const StaticMeshLoadDesc newLoadConfig{
             .NumVertices = static_cast<uint32_t>(remappedVertices.size()),

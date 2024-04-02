@@ -50,9 +50,11 @@ namespace ig
     /* Common Asset Metadata */
     struct AssetInfo
     {
+        friend class AssetManager;
+
     public:
         AssetInfo() = default;
-        AssetInfo(const String virtualPath, const EAssetType type, const EAssetPersistency persistency = EAssetPersistency::Default);
+        AssetInfo(const String virtualPath, const EAssetType type);
         ~AssetInfo() = default;
 
         json& Serialize(json& archive) const;
@@ -70,10 +72,10 @@ namespace ig
         const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
         void SetVirtualPath(const String newVirtualPath);
-        void SetPersistency(const EAssetPersistency newPersistency) { persistency = newPersistency; }
 
     private:
         void ConstructVirtualPathHierarchy();
+        void SetPersistency(const EAssetPersistency newPersistency) { persistency = newPersistency; }
 
     private:
         uint64_t creationTime = 0;

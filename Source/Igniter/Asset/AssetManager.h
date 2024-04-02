@@ -47,6 +47,8 @@ namespace ig
 
         [[nodiscard]] AssetInfo GetAssetInfo(const xg::Guid guid) const;
 
+        /* #sy_todo Reload ASSET! */
+
         void SaveAllChanges();
 
     private:
@@ -98,6 +100,8 @@ namespace ig
 
         [[nodiscard]] UniqueLock RequestAssetLock(const xg::Guid guid);
 
+        /* #sy_wip RegisterEngineAsset() */
+
     private:
         Ptr<details::AssetMonitor> assetMonitor;
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
@@ -113,5 +117,4 @@ namespace ig
 
         Ptr<MaterialLoader> materialLoader;
     };
-
 } // namespace ig
