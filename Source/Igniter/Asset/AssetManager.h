@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Result.h>
 #include <Core/Log.h>
+#include <Core/Event.h>
 #include <Asset/Common.h>
 #include <Asset/AssetMonitor.h>
 #include <Asset/AssetCache.h>
@@ -19,7 +20,11 @@ namespace ig
     class MaterialLoader;
     class AssetManager final
     {
+    private:
         using VirtualPathGuidTable = robin_hood::unordered_map<String, xg::Guid>;
+
+    public:
+        using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
 
     public:
         AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
@@ -50,6 +55,8 @@ namespace ig
         /* #sy_todo Reload ASSET! */
 
         void SaveAllChanges();
+
+        [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 
     private:
         template <Asset T>
@@ -83,6 +90,7 @@ namespace ig
                     IG_LOG(AssetManager, Info, "{} asset {}({}) cached.",
                            AssetTypeOf_v<T>,
                            desc.Info.GetVirtualPath(), guid);
+                    assetModifiedEvent.Notify(*this);
                     return assetCache.Cache(guid, result.Take());
                 }
 
@@ -93,6 +101,7 @@ namespace ig
             }
 
             IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf_v<T>, guid);
+            assetModifiedEvent.Notify(*this);
             return assetCache.Load(guid);
         }
 
@@ -116,5 +125,7 @@ namespace ig
         Ptr<StaticMeshLoader> staticMeshLoader;
 
         Ptr<MaterialLoader> materialLoader;
+
+        ModifiedEvent assetModifiedEvent;
     };
 } // namespace ig

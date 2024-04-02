@@ -77,6 +77,7 @@ namespace ig
         assetMonitor->Create<Texture>(assetInfo, metadata.LoadDescriptor);
 
         IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath, assetInfo.GetVirtualPath(), assetInfo.GetGuid());
+        assetModifiedEvent.Notify(*this);
         return assetInfo.GetGuid();
     }
 
@@ -131,6 +132,7 @@ namespace ig
             output.emplace_back(assetInfo.GetGuid());
         }
 
+        assetModifiedEvent.Notify(*this);
         return output;
     }
 
@@ -188,6 +190,7 @@ namespace ig
         assetMonitor->Create<Material>(assetInfo, desc.LoadDescriptor);
 
         IG_LOG(AssetManager, Info, "Material {}({}) created.", virtualPath, assetInfo.GetGuid());
+        assetModifiedEvent.Notify(*this);
         return assetInfo.GetGuid();
     }
 
@@ -267,6 +270,7 @@ namespace ig
         assetMonitor->Remove(guid);
 
         IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid);
+        assetModifiedEvent.Notify(*this);
     }
 
     UniqueLock AssetManager::RequestAssetLock(const xg::Guid guid)
