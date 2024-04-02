@@ -66,15 +66,18 @@ namespace ig
 
         const Texture::Desc metadata = result.Take();
         const AssetInfo& assetInfo = metadata.Info;
+        IG_CHECK(assetInfo.IsValid());
+        IG_CHECK(assetInfo.GetType() == EAssetType::Texture);
+        IG_CHECK(IsValidVirtualPath(assetInfo.GetVirtualPath()));
 
-        if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
+        if (assetMonitor->Contains(EAssetType::Texture, assetInfo.GetVirtualPath()))
         {
-            Delete(assetInfo.Type, assetInfo.VirtualPath);
+            Delete(EAssetType::Texture, assetInfo.GetVirtualPath());
         }
         assetMonitor->Create<Texture>(assetInfo, metadata.LoadDescriptor);
 
-        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath, assetInfo.VirtualPath, assetInfo.Guid);
-        return assetInfo.Guid;
+        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath, assetInfo.GetVirtualPath(), assetInfo.GetGuid());
+        return assetInfo.GetGuid();
     }
 
     CachedAsset<Texture> AssetManager::LoadTexture(const xg::Guid guid)
@@ -108,15 +111,18 @@ namespace ig
 
             const StaticMesh::Desc metadata = result.Take();
             const AssetInfo& assetInfo = metadata.Info;
+            IG_CHECK(assetInfo.IsValid());
+            IG_CHECK(assetInfo.GetType() == EAssetType::StaticMesh);
+            IG_CHECK(IsValidVirtualPath(assetInfo.GetVirtualPath()));
 
-            if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
+            if (assetMonitor->Contains(EAssetType::StaticMesh, assetInfo.GetVirtualPath()))
             {
-                Delete(assetInfo.Type, assetInfo.VirtualPath);
+                Delete(EAssetType::StaticMesh, assetInfo.GetVirtualPath());
             }
             assetMonitor->Create<StaticMesh>(assetInfo, metadata.LoadDescriptor);
 
-            IG_LOG(AssetManager, Info, "\"{}\" imported as static mesh asset {}({})", resPath, assetInfo.VirtualPath, assetInfo.Guid);
-            output.emplace_back(assetInfo.Guid);
+            IG_LOG(AssetManager, Info, "\"{}\" imported as static mesh asset {}({})", resPath, assetInfo.GetVirtualPath(), assetInfo.GetGuid());
+            output.emplace_back(assetInfo.GetGuid());
         }
 
         return output;
@@ -140,24 +146,31 @@ namespace ig
 
     xg::Guid AssetManager::CreateMaterial(MaterialCreateDesc createDesc)
     {
+        const String virtualPath{ MakeVirtualPathPreferred(createDesc.VirtualPath) };
+        createDesc.VirtualPath = virtualPath;
+        IG_CHECK(IsValidVirtualPath(virtualPath));
+
         Result<Material::Desc, EMaterialCreateStatus> result{ Material::Create(std::move(createDesc)) };
         if (!result.HasOwnership())
         {
-            IG_LOG(AssetManager, Error, "Failed({}) to create material \"{}\".", result.GetStatus(), createDesc.VirtualPath);
+            IG_LOG(AssetManager, Error, "Failed({}) to create material \"{}\".", result.GetStatus(), virtualPath);
             return {};
         }
 
         const Material::Desc desc = result.Take();
         const AssetInfo& assetInfo = desc.Info;
+        IG_CHECK(assetInfo.IsValid());
+        IG_CHECK(assetInfo.GetType() == EAssetType::Material);
+        IG_CHECK(assetInfo.GetVirtualPath() == virtualPath);
 
-        if (assetMonitor->Contains(assetInfo.Type, assetInfo.VirtualPath))
+        if (assetMonitor->Contains(EAssetType::Material, virtualPath))
         {
-            Delete(assetInfo.Type, assetInfo.VirtualPath);
+            Delete(EAssetType::Material, virtualPath);
         }
         assetMonitor->Create<Material>(assetInfo, desc.LoadDescriptor);
 
-        IG_LOG(AssetManager, Info, "Material {}({}) created.", assetInfo.VirtualPath, assetInfo.Guid);
-        return assetInfo.Guid;
+        IG_LOG(AssetManager, Info, "Material {}({}) created.", virtualPath, assetInfo.GetGuid());
+        return assetInfo.GetGuid();
     }
 
     CachedAsset<Material> AssetManager::LoadMaterial(const xg::Guid guid)
@@ -186,7 +199,7 @@ namespace ig
             return;
         }
 
-        DeleteInternal(assetMonitor->GetAssetInfo(guid).Type, guid);
+        DeleteInternal(assetMonitor->GetAssetInfo(guid).GetType(), guid);
     }
 
     void AssetManager::Delete(const EAssetType assetType, const String virtualPath)
@@ -220,7 +233,7 @@ namespace ig
     {
         UniqueLock assetLock{ RequestAssetLock(guid) };
         IG_CHECK(assetType != EAssetType::Unknown);
-        IG_CHECK(guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).Type == assetType);
+        IG_CHECK(guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).GetType() == assetType);
 
         details::TypelessAssetCache& assetCache = GetTypelessCache(assetType);
         if (assetCache.IsCached(guid))

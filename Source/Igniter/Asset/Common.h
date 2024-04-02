@@ -5,6 +5,7 @@
 
 namespace ig::details
 {
+    constexpr inline std::string_view VirtualPathSeparator = "\\";
     constexpr inline std::string_view MetadataExt = ".metadata";
     constexpr inline std::string_view ResourceRootPath = "Resources";
     constexpr inline std::string_view AssetRootPath = "Assets";
@@ -39,22 +40,39 @@ namespace ig
         EAssetType Type = EAssetType::Unknown;
     };
 
+    enum class EAssetPersistency
+    {
+        Default,    /* 수명: 레퍼런스 카운터 > 0, 중복 Virtual Path 발생 -> Deleted */
+        Persistent, /* 수명: 에셋 매니저 해제 까지, 중복 Virtual Path 발생 -> Deleted */
+        Engine,     /* 수명: 에셋 매니저 해제 까지, 중복 Virtual Path 발생 -> Ignored */
+    };
+
     /* Common Asset Metadata */
     struct AssetInfo
     {
     public:
+        AssetInfo() = default;
+        AssetInfo(const String virtualPath, const EAssetType type, const EAssetPersistency persistency = EAssetPersistency::Default);
+        ~AssetInfo() = default;
+
         json& Serialize(json& archive) const;
         const json& Deserialize(const json& archive);
 
-        [[nodiscard]] bool IsValid() const { return Guid.isValid() && VirtualPath.IsValid() && Type != EAssetType::Unknown; }
+        [[nodiscard]] bool IsValid() const
+        {
+            return guid.isValid() && virtualPath.IsValid() && !virtualPath.IsEmpty() && type != EAssetType::Unknown;
+        }
 
-    public:
-        uint64_t CreationTime = 0;
-        xg::Guid Guid{};
-        String VirtualPath{};
-        EAssetType Type = EAssetType::Unknown;
-        bool bIsPersistent = false;
-        bool bIsEngineDefault = false;
+        xg::Guid GetGuid() const { return guid; }
+        String GetVirtualPath() const { return virtualPath; }
+        EAssetType GetType() const { return type; }
+
+    private:
+        uint64_t creationTime = 0;
+        xg::Guid guid{};
+        String virtualPath{};
+        EAssetType type = EAssetType::Unknown;
+        EAssetPersistency persistency = EAssetPersistency::Default; 
     };
 
     template <typename T>
@@ -130,6 +148,6 @@ public:
     template <typename FrameContext>
     auto format(const ig::AssetInfo& info, FrameContext& ctx) const
     {
-        return std::format_to(ctx.out(), "{}:{}({})", info.Type, info.VirtualPath, info.Guid);
+        return std::format_to(ctx.out(), "{}:{}({})", info.GetType(), info.GetVirtualPath(), info.GetGuid());
     }
 };

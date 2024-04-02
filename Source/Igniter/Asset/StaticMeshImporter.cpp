@@ -11,7 +11,8 @@ namespace ig
 {
     constexpr inline size_t NumIndicesPerFace = 3;
 
-    StaticMeshImporter::StaticMeshImporter(AssetManager& assetManager) : assetManager(assetManager)
+    StaticMeshImporter::StaticMeshImporter(AssetManager& assetManager)
+        : assetManager(assetManager)
     {
     }
 
@@ -130,12 +131,9 @@ namespace ig
         encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(),
                                                         remappedIndices.data(), remappedIndices.size()));
 
-        const AssetInfo assetInfo{
-            .CreationTime = Timer::Now(),
-            .Guid = xg::newGuid(),
-            .VirtualPath = meshName,
-            .Type = EAssetType::StaticMesh
-        };
+        const AssetInfo assetInfo{ MakeVirtualPathPreferred(meshName),
+                                   EAssetType::StaticMesh,
+                                   EAssetPersistency::Default };
 
         const StaticMeshLoadDesc newLoadConfig{
             .NumVertices = static_cast<uint32_t>(remappedVertices.size()),
@@ -147,13 +145,13 @@ namespace ig
         json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;
 
-        const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, assetInfo.Guid);
+        const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, assetInfo.GetGuid());
         if (!SaveJsonToFile(newMetaPath, assetMetadata))
         {
             return MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FailedSaveMetadataToFile>();
         }
 
-        const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.Guid);
+        const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.GetGuid());
         if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices },
                                              std::span<const uint8_t>{ encodedIndices } }))
         {

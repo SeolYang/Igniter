@@ -34,7 +34,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidAssetInfo>();
         }
 
-        if (assetInfo.Type != EAssetType::StaticMesh)
+        if (assetInfo.GetType() != EAssetType::StaticMesh)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::AssetTypeMismatch>();
         }
@@ -47,7 +47,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidArguments>();
         }
 
-        const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.Guid);
+        const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.GetGuid());
         if (!fs::exists(assetPath))
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FileDoesNotExists>();
@@ -67,7 +67,7 @@ namespace ig
 
         GpuBufferDesc vertexBufferDesc{};
         vertexBufferDesc.AsStructuredBuffer<StaticMeshVertex>(loadDesc.NumVertices);
-        vertexBufferDesc.DebugName = String(std::format("{}({})_Vertices", assetInfo.VirtualPath, assetInfo.Guid));
+        vertexBufferDesc.DebugName = String(std::format("{}({})_Vertices", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
         if (vertexBufferDesc.GetSizeAsBytes() < loadDesc.CompressedVerticesSizeInBytes)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedVerticesSize>();
@@ -75,7 +75,7 @@ namespace ig
 
         GpuBufferDesc indexBufferDesc{};
         indexBufferDesc.AsIndexBuffer<uint32_t>(loadDesc.NumIndices);
-        indexBufferDesc.DebugName = String(std::format("{}({})_Indices", assetInfo.VirtualPath, assetInfo.Guid));
+        indexBufferDesc.DebugName = String(std::format("{}({})_Indices", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
         if (indexBufferDesc.GetSizeAsBytes() < loadDesc.CompressedIndicesSizeInBytes)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedIndicesSize>();

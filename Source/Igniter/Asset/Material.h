@@ -16,6 +16,7 @@ namespace ig
         Success,
         InvalidVirtualPath,
         EmptyVirtualPath,
+        InvalidVirtualPathFormat,
         FailedSaveMetadata,
         FailedSaveAsset
     };

@@ -22,7 +22,8 @@ namespace ig::details
         friend class UniqueRefHandle<T, class AssetCache<T>*>;
 
     public:
-        AssetCache(HandleManager& handleManager) : handleManager(handleManager)
+        AssetCache(HandleManager& handleManager)
+            : handleManager(handleManager)
         {
         }
 
@@ -99,15 +100,17 @@ namespace ig::details
             const AssetInfo& assetInfo{ snapshot.Info };
             IG_CHECK(assetInfo.IsValid());
 
+            const xg::Guid guid{ assetInfo.GetGuid() };
+
             /* #sy_wip 영속 에셋 인스턴스에 대한 처리 필요 */
             ReadWriteLock rwLock{ mutex };
-            IG_CHECK(cachedAssets.contains(assetInfo.Guid));
-            IG_CHECK(refCounterTable.contains(assetInfo.Guid));
-            IG_CHECK(refCounterTable[assetInfo.Guid] > 0);
-            const uint32_t refCount{ --refCounterTable[assetInfo.Guid] };
+            IG_CHECK(cachedAssets.contains(guid));
+            IG_CHECK(refCounterTable.contains(guid));
+            IG_CHECK(refCounterTable[guid] > 0);
+            const uint32_t refCount{ --refCounterTable[guid] };
             if (refCount == 0)
             {
-                InvalidateUnsafe(assetInfo.Guid);
+                InvalidateUnsafe(guid);
             }
         }
 

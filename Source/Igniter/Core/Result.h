@@ -33,7 +33,9 @@ namespace ig
     {
     public:
         Result(const Result&) = delete;
-        Result(Result&& other) noexcept : status(other.status)
+        Result(Result&& other) noexcept
+            : dummy{},
+              status(other.status)
         {
             IG_CHECK(other.status != E::Success && other.bOwnershipTransferred || other.status == E::Success && !other.bOwnershipTransferred);
             if (!other.bOwnershipTransferred)
@@ -88,15 +90,17 @@ namespace ig
             requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
         friend Result<T, decltype(Status)> MakeFail();
 
-        Result(const E newStatus) : dummy{},
-                                    status(newStatus)
+        Result(const E newStatus)
+            : dummy{},
+              status(newStatus)
         {
         }
 
         template <typename... Args>
-        Result(Args&&... args) : dummy{},
-                                 status(E::Success),
-                                 bOwnershipTransferred(false)
+        Result(Args&&... args)
+            : dummy{},
+              status(E::Success),
+              bOwnershipTransferred(false)
         {
             ::new (&value) T(std::forward<Args>(args)...);
         }

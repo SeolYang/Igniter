@@ -84,17 +84,23 @@ namespace ig::details
     using JsonInternal_t = JsonInternal<T>::Type;
 } // namespace ig::details
 
-#define IG_SERIALIZE_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
-    ig::details::Serialize(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR)
+#define IG_SERIALIZE_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) \
+    ig::details::Serialize(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY)
 
-#define IG_SERIALIZE_GUID_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
-    ig::details::Serialize(JSON_ARCHIVE, DATA.VAR.str(), #DATA_TYPE, #VAR)
+#define IG_SERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) \
+    ig::details::Serialize(JSON_ARCHIVE, VAR.str(), CONTAINER_KEY, VALUE_KEY)
 
-#define IG_SERIALIZE_ENUM_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
-    ig::details::Serialize(JSON_ARCHIVE, magic_enum::enum_name<std::decay_t<decltype(DATA.VAR)>>(DATA.VAR), #DATA_TYPE, #VAR)
+#define IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) \
+    ig::details::Serialize(JSON_ARCHIVE, magic_enum::enum_name<std::decay_t<decltype(VAR)>>(VAR), CONTAINER_KEY, VALUE_KEY)
 
-#define IG_SERIALIZE_STRING_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
-    ig::details::Serialize(JSON_ARCHIVE, DATA.VAR.ToStringView(), #DATA_TYPE, #VAR)
+#define IG_SERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
+    IG_SERIALIZE_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR)
+
+#define IG_SERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
+    IG_SERIALIZE_GUID_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR)
+
+#define IG_SERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR) \
+    IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR)
 
 /*
  * #sy_log Deserialize 하고 싶은 Json Archive 내부에 원하는 값이 없을 수도 있다. 그에 대해선 아래와 같이 대응 하기로 결정.
@@ -105,56 +111,66 @@ namespace ig::details
  *
  * 이렇게, Deserialize 과정에서 실제 값이 Json 에 없는 경우에 대한 오류 처리를 유연하게 할 수 있다.
  */
-#define IG_DESERIALIZE_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                                           \
-    ig::details::DeSerialize<std::decay_t<decltype(DATA.VAR)>>(                                                     \
-        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                                   \
-        [](const nlohmann::json& archive, std::decay_t<decltype(DATA.VAR)>& var) {                                  \
-            IG_CHECK(archive.contains(#DATA_TYPE) && archive[#DATA_TYPE].contains(#VAR));                           \
-            using JsonDATA_TYPE_t = ig::details::JsonInternal_t<std::decay_t<decltype(var)>>;                       \
-            const JsonDATA_TYPE_t* valuePtr = archive[#DATA_TYPE][#VAR].template get_ptr<const JsonDATA_TYPE_t*>(); \
+
+#define IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                                  \
+    ig::details::DeSerialize<std::decay_t<decltype(VAR)>>(                                                          \
+        JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
+        [](const nlohmann::json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
+            IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
+            using JsoInternal = ig::details::JsonInternal_t<std::decay_t<decltype(var)>>;                           \
+            const JsoInternal* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const JsoInternal*>(); \
             const bool bTypeMismatch = valuePtr == nullptr;                                                         \
             if (bTypeMismatch)                                                                                      \
             {                                                                                                       \
                 return false;                                                                                       \
             }                                                                                                       \
-            var = static_cast<std::decay_t<decltype(DATA.VAR)>>(*valuePtr);                                         \
+            var = static_cast<std::decay_t<decltype(VAR)>>(*valuePtr);                                              \
             return true;                                                                                            \
         },                                                                                                          \
         FALLBACK)
 
-#define IG_DESERIALIZE_GUID_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                              \
-    ig::details::DeSerialize<xg::Guid>(                                                                     \
-        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                           \
-        [](const nlohmann::json& archive, xg::Guid& var) {                                                  \
-            IG_CHECK(archive.contains(#DATA_TYPE) && archive[#DATA_TYPE].contains(#VAR));                           \
-            const std::string* valuePtr = archive[#DATA_TYPE][#VAR].template get_ptr<const std::string*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                 \
-            if (bTypeMismatch)                                                                              \
-            {                                                                                               \
-                return false;                                                                               \
-            }                                                                                               \
-            var = xg::Guid(valuePtr->c_str());                                                              \
-            return true;                                                                                    \
-        },                                                                                                  \
+#define IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
+    ig::details::DeSerialize<xg::Guid>(                                                                             \
+        JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
+        [](const nlohmann::json& archive, xg::Guid& var) {                                                          \
+            IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
+            const std::string* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const std::string*>(); \
+            const bool bTypeMismatch = valuePtr == nullptr;                                                         \
+            if (bTypeMismatch)                                                                                      \
+            {                                                                                                       \
+                return false;                                                                                       \
+            }                                                                                                       \
+            var = xg::Guid(valuePtr->c_str());                                                                      \
+            return true;                                                                                            \
+        },                                                                                                          \
         FALLBACK)
 
-#define IG_DESERIALIZE_ENUM_JSON(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK)                              \
-    ig::details::DeSerialize<std::decay_t<decltype(DATA.VAR)>>(                                             \
-        JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR,                                                           \
-        [](const nlohmann::json& archive, std::decay_t<decltype(DATA.VAR)>& var) {                          \
-            IG_CHECK(archive.contains(#DATA_TYPE) && archive[#DATA_TYPE].contains(#VAR));                           \
-            const std::string* valuePtr = archive[#DATA_TYPE][#VAR].template get_ptr<const std::string*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                 \
-            if (bTypeMismatch)                                                                              \
-            {                                                                                               \
-                return false;                                                                               \
-            }                                                                                               \
-            auto valueOpt = magic_enum::enum_cast<std::decay_t<decltype(DATA.VAR)>>(*valuePtr);             \
-            if (!valueOpt)                                                                                  \
-            {                                                                                               \
-                return false;                                                                               \
-            }                                                                                               \
-            var = *valueOpt;                                                                                \
-            return true;                                                                                    \
-        },                                                                                                  \
+#define IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
+    ig::details::DeSerialize<std::decay_t<decltype(VAR)>>(                                                     \
+        JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
+        [](const nlohmann::json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
+            IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
+            const std::string* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const std::string*>(); \
+            const bool bTypeMismatch = valuePtr == nullptr;                                                         \
+            if (bTypeMismatch)                                                                                      \
+            {                                                                                                       \
+                return false;                                                                                       \
+            }                                                                                                       \
+            auto valueOpt = magic_enum::enum_cast<std::decay_t<decltype(VAR)>>(*valuePtr);                          \
+            if (!valueOpt)                                                                                          \
+            {                                                                                                       \
+                return false;                                                                                       \
+            }                                                                                                       \
+            var = *valueOpt;                                                                                        \
+            return true;                                                                                            \
+        },                                                                                                          \
         FALLBACK)
+
+#define IG_DESERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK) \
+    IG_DESERIALIZE_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR, FALLBACK)
+
+#define IG_DESERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK) \
+    IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR, FALLBACK)
+
+#define IG_DESERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, DATA, VAR, FALLBACK) \
+    IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, DATA.VAR, #DATA_TYPE, #VAR, FALLBACK)

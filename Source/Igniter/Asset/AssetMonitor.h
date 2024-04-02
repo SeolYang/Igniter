@@ -54,16 +54,19 @@ namespace ig::details
         {
             ReadWriteLock rwLock{ mutex };
             IG_CHECK(newInfo.IsValid());
-            IG_CHECK(!ContainsUnsafe(newInfo.Guid));
+            IG_CHECK(!ContainsUnsafe(newInfo.GetGuid()));
+            
+            const xg::Guid guid{ newInfo.GetGuid() };
+            const String virtualPath{ newInfo.GetVirtualPath() };
 
-            VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.Type);
-            IG_CHECK(!virtualPathGuidTable.contains(newInfo.VirtualPath));
+            VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetType());
+            IG_CHECK(!virtualPathGuidTable.contains(virtualPath));
 
             json newSerialized{};
             newSerialized << newInfo;
             newSerialized << metadata;
-            guidSerializedDescTable[newInfo.Guid] = newSerialized;
-            virtualPathGuidTable[newInfo.VirtualPath] = newInfo.Guid;
+            guidSerializedDescTable[guid] = newSerialized;
+            virtualPathGuidTable[virtualPath] = guid;
         }
 
         void UpdateInfo(const AssetInfo& newInfo);

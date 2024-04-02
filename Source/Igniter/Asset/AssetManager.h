@@ -74,15 +74,19 @@ namespace ig
             if (!assetCache.IsCached(guid))
             {
                 const T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
-                IG_CHECK(desc.Info.Guid == guid);
+                IG_CHECK(desc.Info.GetGuid() == guid);
                 auto result{ loader.Load(desc) };
                 if (result.HasOwnership())
                 {
-                    IG_LOG(AssetManager, Info, "{} asset {}({}) cached.", AssetTypeOf_v<T>, desc.Info.VirtualPath, desc.Info.Guid);
+                    IG_LOG(AssetManager, Info, "{} asset {}({}) cached.",
+                           AssetTypeOf_v<T>,
+                           desc.Info.GetVirtualPath(), guid);
                     return assetCache.Cache(guid, result.Take());
                 }
 
-                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {}({}).", AssetTypeOf_v<T>, result.GetStatus(), desc.Info.VirtualPath, desc.Info.Guid);
+                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {}({}).",
+                       AssetTypeOf_v<T>, result.GetStatus(),
+                       desc.Info.GetVirtualPath(), guid);
                 return CachedAsset<T>{};
             }
 

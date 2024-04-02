@@ -76,6 +76,9 @@ namespace ig::details
                     AssetInfo assetInfo{};
                     serializedMetadata >> assetInfo;
 
+                    const xg::Guid guid{ assetInfo.GetGuid() };
+                    const String virtualPath{ assetInfo.GetVirtualPath() };
+
                     if (!assetInfo.IsValid())
                     {
                         IG_LOG(AssetMonitor, Warning, "Asset {} ignored. The asset info is invalid.", entry.path().string());
@@ -83,29 +86,37 @@ namespace ig::details
                         continue;
                     }
 
-                    if (guidFromPath != assetInfo.Guid)
+                    if (guidFromPath != guid)
                     {
                         IG_LOG(AssetMonitor, Warning, "{} Asset {} ignored. The guid from filename does not match asset info guid."
                                                       " Which was {}.",
-                               assetInfo.Type,
+                               assetInfo.GetType(),
                                entry.path().string(),
-                               assetInfo.Guid);
+                               guid);
                         ++directoryItr;
                         continue;
                     }
 
-                    if (virtualPathGuidTable.contains(assetInfo.VirtualPath))
+                    if (!IsValidVirtualPath(virtualPath))
+                    {
+                        IG_LOG(AssetMonitor, Warning, "{} Asset {}({}) ignored. Which has invalid virtual path.",
+                               assetInfo.GetType(), virtualPath, guid);
+                        ++directoryItr;
+                        continue;
+                    }
+
+                    if (virtualPathGuidTable.contains(virtualPath))
                     {
                         IG_LOG(AssetMonitor, Warning, "{} Asset {}({}) ignored. Which has duplicated virtual path.",
-                               assetInfo.Type, assetInfo.VirtualPath, assetInfo.Guid);
+                               assetInfo.GetType(), virtualPath, guid);
                         ++directoryItr;
                         continue;
                     }
 
-                    virtualPathGuidTable[assetInfo.VirtualPath] = assetInfo.Guid;
-                    IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", assetInfo.VirtualPath, assetInfo.Guid);
-                    IG_CHECK(!Contains(assetInfo.Guid));
-                    guidSerializedDescTable[assetInfo.Guid] = serializedMetadata;
+                    virtualPathGuidTable[virtualPath] = guid;
+                    IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", virtualPath, guid);
+                    IG_CHECK(!Contains(guid));
+                    guidSerializedDescTable[guid] = serializedMetadata;
                 }
 
                 ++directoryItr;
@@ -218,23 +229,28 @@ namespace ig::details
 
     void AssetMonitor::UpdateInfo(const AssetInfo& newInfo)
     {
+        const xg::Guid guid{ newInfo.GetGuid() };
+        const String virtualPath{ newInfo.GetVirtualPath() };
+
         ReadWriteLock rwLock{ mutex };
         IG_CHECK(newInfo.IsValid());
-        IG_CHECK(ContainsUnsafe(newInfo.Guid));
+        IG_CHECK(ContainsUnsafe(guid));
 
-        const AssetInfo& oldInfo = GetAssetInfoUnsafe(newInfo.Guid);
-        IG_CHECK(newInfo.Guid == oldInfo.Guid);
-        IG_CHECK(newInfo.Type == oldInfo.Type);
+        const AssetInfo& oldInfo = GetAssetInfoUnsafe(guid);
+        const xg::Guid oldGuid{ oldInfo.GetGuid() };
+        const String oldVirtualPath{ oldInfo.GetVirtualPath() };
+        IG_CHECK(guid == oldGuid);
+        IG_CHECK(newInfo.GetType() == oldInfo.GetType());
 
-        VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.Type);
-        if (newInfo.VirtualPath != oldInfo.VirtualPath)
+        VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetType());
+        if (virtualPath != oldVirtualPath)
         {
-            IG_CHECK(!virtualPathGuidTable.contains(newInfo.VirtualPath));
-            virtualPathGuidTable.erase(oldInfo.VirtualPath);
-            virtualPathGuidTable[newInfo.VirtualPath] = newInfo.Guid;
+            IG_CHECK(!virtualPathGuidTable.contains(virtualPath));
+            virtualPathGuidTable.erase(oldVirtualPath);
+            virtualPathGuidTable[virtualPath] = guid;
         }
 
-        guidSerializedDescTable[newInfo.Guid] << newInfo;
+        guidSerializedDescTable[guid] << newInfo;
     }
 
     void AssetMonitor::Remove(const xg::Guid guid)
@@ -244,26 +260,33 @@ namespace ig::details
 
         const AssetInfo info = GetAssetInfoUnsafe(guid);
         IG_CHECK(info.IsValid());
+        IG_CHECK(info.GetGuid() == guid);
 
-        VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(info.Type);
-        IG_CHECK(virtualPathGuidTable.contains(info.VirtualPath));
-        IG_CHECK(virtualPathGuidTable[info.VirtualPath] == info.Guid);
+        const String virtualPath{ info.GetVirtualPath() };
 
-        expiredAssetInfos[info.Guid] = info;
-        virtualPathGuidTable.erase(info.VirtualPath);
-        guidSerializedDescTable.erase(info.Guid);
-        IG_CHECK(!ContainsUnsafe(info.Guid));
+        VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(info.GetType());
+        IG_CHECK(virtualPathGuidTable.contains(virtualPath));
+        IG_CHECK(virtualPathGuidTable[virtualPath] == guid);
+
+        expiredAssetInfos[guid] = info;
+        virtualPathGuidTable.erase(virtualPath);
+        guidSerializedDescTable.erase(guid);
+        IG_CHECK(!ContainsUnsafe(guid));
     }
 
     void AssetMonitor::ReflectExpiredToFilesUnsafe()
     {
-        for (const auto& expiredAssetInfo : expiredAssetInfos)
+        for (const auto& expiredAssetInfoPair : expiredAssetInfos)
         {
-            IG_CHECK(!ContainsUnsafe(expiredAssetInfo.first));
-            const AssetInfo& assetInfo{ expiredAssetInfo.second };
-            IG_CHECK(expiredAssetInfo.first == assetInfo.Guid);
-            const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.Type, assetInfo.Guid) };
-            const fs::path assetPath{ MakeAssetPath(assetInfo.Type, assetInfo.Guid) };
+            IG_CHECK(!ContainsUnsafe(expiredAssetInfoPair.first));
+            const AssetInfo& expiredAssetInfo{ expiredAssetInfoPair.second };
+            IG_CHECK(expiredAssetInfo.IsValid());
+            const xg::Guid expiredGuid{ expiredAssetInfo.GetGuid() };
+            const String expiredVirtualPath{ expiredAssetInfo.GetVirtualPath() };
+
+            IG_CHECK(expiredAssetInfoPair.first == expiredGuid);
+            const fs::path metadataPath{ MakeAssetMetadataPath(expiredAssetInfo.GetType(), expiredGuid) };
+            const fs::path assetPath{ MakeAssetPath(expiredAssetInfo.GetType(), expiredGuid) };
             if (fs::exists(metadataPath))
             {
                 IG_ENSURE(fs::remove(metadataPath));
@@ -275,9 +298,10 @@ namespace ig::details
             }
 
             IG_LOG(AssetMonitor, Debug, "{} Asset Expired: {} ({})",
-                   magic_enum::enum_name(assetInfo.Type),
-                   assetInfo.VirtualPath.ToStringView(), expiredAssetInfo.first.str());
+                   expiredAssetInfo.GetType(),
+                   expiredVirtualPath, expiredGuid);
         }
+
         expiredAssetInfos.clear();
     }
 
@@ -291,11 +315,15 @@ namespace ig::details
             serializedMeta >> assetInfo;
             IG_CHECK(assetInfo.IsValid());
 
-            const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.Type, assetInfo.Guid) };
+            const xg::Guid guid{ assetInfo.GetGuid() };
+            IG_CHECK(guidSerializedMeta.first == guid);
+            const String virtualPath{ assetInfo.GetVirtualPath() };
+
+            const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.GetType(), guid) };
             IG_ENSURE(SaveJsonToFile(metadataPath, serializedMeta));
             IG_LOG(AssetMonitor, Debug, "{} Asset metadata Saved: {} ({})",
-                   magic_enum::enum_name(assetInfo.Type),
-                   assetInfo.VirtualPath.ToStringView(), guidSerializedMeta.first.str());
+                   assetInfo.GetType(),
+                   virtualPath, guid);
         }
     }
 

@@ -2,42 +2,58 @@
 #include <Asset/Common.h>
 #include <Core/Json.h>
 #include <Core/Regex.h>
+#include <Core/Timer.h>
 
 namespace ig
 {
     json& ResourceInfo::Serialize(json& archive) const
     {
         const ResourceInfo& info = *this;
-        IG_SERIALIZE_ENUM_JSON(ResourceInfo, archive, info, Type);
+        IG_SERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, info, Type);
         return archive;
     }
 
     const json& ResourceInfo::Deserialize(const json& archive)
     {
         ResourceInfo& info = *this;
-        IG_DESERIALIZE_ENUM_JSON(ResourceInfo, archive, info, Type, EAssetType::Unknown);
+        IG_DESERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, info, Type, EAssetType::Unknown);
         return archive;
     }
 
+    AssetInfo::AssetInfo(const String virtualPath, const EAssetType type, const EAssetPersistency persistency)
+        : creationTime(Timer::Now()),
+          guid(xg::newGuid()),
+          virtualPath(virtualPath),
+          type(type),
+          persistency(persistency)
+    {
+    }
+
+    namespace key
+    {
+        constexpr inline std::string_view AssetInfo{ "AssetInfo" };
+        constexpr inline std::string_view CreationTime{ "CreationTime" };
+        constexpr inline std::string_view Guid{ "Guid" };
+        constexpr inline std::string_view VirtualPath{ "VirtualPath" };
+        constexpr inline std::string_view Type{ "Type" };
+    } // namespace key
+
     json& AssetInfo::Serialize(json& archive) const
     {
-        const AssetInfo& info = *this;
-        IG_SERIALIZE_JSON(AssetInfo, archive, info, CreationTime);
-        IG_SERIALIZE_GUID_JSON(AssetInfo, archive, info, Guid);
-        IG_SERIALIZE_JSON(AssetInfo, archive, info, VirtualPath);
-        IG_SERIALIZE_ENUM_JSON(AssetInfo, archive, info, Type);
-        IG_SERIALIZE_JSON(AssetInfo, archive, info, bIsPersistent);
+        IG_SERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime);
+        IG_SERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid);
+        IG_SERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath);
+        IG_SERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type);
         return archive;
     }
 
     const json& AssetInfo::Deserialize(const json& archive)
     {
-        AssetInfo& info = *this;
-        IG_DESERIALIZE_JSON(AssetInfo, archive, info, CreationTime, 0);
-        IG_DESERIALIZE_GUID_JSON(AssetInfo, archive, info, Guid, xg::Guid{});
-        IG_DESERIALIZE_JSON(AssetInfo, archive, info, VirtualPath, String{});
-        IG_DESERIALIZE_ENUM_JSON(AssetInfo, archive, info, Type, EAssetType::Unknown);
-        IG_DESERIALIZE_JSON(AssetInfo, archive, info, bIsPersistent, false);
+        *this = {};
+        IG_DESERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime, 0);
+        IG_DESERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid, xg::Guid{});
+        IG_DESERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath, String{});
+        IG_DESERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type, EAssetType::Unknown);
         return archive;
     }
 
@@ -132,6 +148,7 @@ namespace ig
 
         static const std::regex ReplaceWhiteSpacesRegex{ R"(\s+)", std::regex_constants::optimize };
         static const std::regex ReplaceUnpreferredSlash{ "/+", std::regex_constants::optimize };
-        return RegexReplace(RegexReplace(virtualPath, ReplaceWhiteSpacesRegex, "_"_fs), ReplaceUnpreferredSlash, R"(\)"_fs);
+        return RegexReplace(RegexReplace(virtualPath, ReplaceWhiteSpacesRegex, "_"_fs),
+                            ReplaceUnpreferredSlash, details::VirtualPathSeparator);
     }
 } // namespace ig

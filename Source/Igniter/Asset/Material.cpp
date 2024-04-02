@@ -11,7 +11,7 @@ namespace ig
     json& MaterialLoadDesc::Serialize(json& archive) const
     {
         const auto& desc{ *this };
-        IG_SERIALIZE_JSON(MaterialLoadDesc, archive, desc, DiffuseVirtualPath);
+        IG_SERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, desc, DiffuseVirtualPath);
         return archive;
     }
 
@@ -19,7 +19,7 @@ namespace ig
     {
         auto& desc{ *this };
         desc = {};
-        IG_DESERIALIZE_JSON(MaterialLoadDesc, archive, desc, DiffuseVirtualPath, String{ /* #sy_todo 추후에 엔진 기본 텍스처로 대체 */ });
+        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, desc, DiffuseVirtualPath, String{ /* #sy_todo 추후에 엔진 기본 텍스처로 대체 */ });
         return archive;
     }
 
@@ -41,7 +41,7 @@ namespace ig
 
     Result<Material::Desc, EMaterialCreateStatus> Material::Create(MaterialCreateDesc desc)
     {
-        if (!desc.VirtualPath.IsValid())
+        if (!IsValidVirtualPath(desc.VirtualPath))
         {
             return MakeFail<Desc, EMaterialCreateStatus::InvalidVirtualPath>();
         }
@@ -51,18 +51,15 @@ namespace ig
             return MakeFail<Desc, EMaterialCreateStatus::EmptyVirtualPath>();
         }
 
-        const AssetInfo assetInfo{
-            .CreationTime = Timer::Now(),
-            .Guid = xg::newGuid(),
-            .VirtualPath = desc.VirtualPath,
-            .Type = EAssetType::Material,
-        };
+        const AssetInfo assetInfo{ desc.VirtualPath,
+                                   EAssetType::Material,
+                                   EAssetPersistency::Default };
 
         String diffuseVirtualPath{};
         if (desc.Diffuse)
         {
             const Texture::Desc& snapshot{ desc.Diffuse->GetSnapshot() };
-            diffuseVirtualPath = snapshot.Info.VirtualPath;
+            diffuseVirtualPath = snapshot.Info.GetVirtualPath();
         }
         else
         {
@@ -79,14 +76,14 @@ namespace ig
         json serializedMeta{};
         serializedMeta << assetInfo << loadDesc;
 
-        const fs::path metadataPath{ MakeAssetMetadataPath(EAssetType::Material, assetInfo.Guid) };
+        const fs::path metadataPath{ MakeAssetMetadataPath(EAssetType::Material, assetInfo.GetGuid()) };
         IG_CHECK(!metadataPath.empty());
         if (!SaveJsonToFile(metadataPath, serializedMeta))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveMetadata>();
         }
 
-        const fs::path assetPath{ MakeAssetPath(EAssetType::Material, assetInfo.Guid) };
+        const fs::path assetPath{ MakeAssetPath(EAssetType::Material, assetInfo.GetGuid()) };
         if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, std::array<uint8_t, 1>{ 0 }))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveAsset>();

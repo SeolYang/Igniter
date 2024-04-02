@@ -14,7 +14,9 @@ namespace ig
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
                        [](const char character)
-                       { return static_cast<char>(::tolower(static_cast<int>(character))); });
+                       {
+                           return static_cast<char>(::tolower(static_cast<int>(character)));
+                       });
 
         return ext == ".dds";
     }
@@ -24,7 +26,9 @@ namespace ig
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
                        [](const char character)
-                       { return static_cast<char>(::tolower(static_cast<int>(character))); });
+                       {
+                           return static_cast<char>(::tolower(static_cast<int>(character)));
+                       });
 
         return (ext == ".png") || (ext == ".jpg") || (ext == ".jpeg") || (ext == ".bmp") || (ext == ".gif") ||
                (ext == ".tiff");
@@ -35,7 +39,9 @@ namespace ig
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
                        [](const char character)
-                       { return static_cast<char>(::tolower(static_cast<int>(character))); });
+                       {
+                           return static_cast<char>(::tolower(static_cast<int>(character)));
+                       });
 
         return (ext == ".hdr");
     }
@@ -277,31 +283,28 @@ namespace ig
         /* Configure Texture Asset Metadata */
         texMetadata = targetTex.GetMetadata();
 
-        const AssetInfo assetInfo{
-            .CreationTime = Timer::Now(),
-            .Guid = xg::newGuid(),
-            .VirtualPath = String(resPath.filename().replace_extension().string()),
-            .Type = EAssetType::Texture
-        };
+        const AssetInfo assetInfo{ MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())),
+                                   EAssetType::Texture,
+                                   EAssetPersistency::Default };
 
-        const TextureLoadDesc newLoadConfig{
-            .Format = texMetadata.format,
-            .Dimension = details::AsTexDimension(texMetadata.dimension),
-            .Width = static_cast<uint32_t>(texMetadata.width),
-            .Height = static_cast<uint32_t>(texMetadata.height),
-            .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize),
-            .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
-            .bIsCubemap = texMetadata.IsCubemap(),
-            .Filter = importDesc.Filter,
-            .AddressModeU = importDesc.AddressModeU,
-            .AddressModeV = importDesc.AddressModeV,
-            .AddressModeW = importDesc.AddressModeW
-        };
+        const TextureLoadDesc newLoadConfig{ .Format = texMetadata.format,
+                                             .Dimension = details::AsTexDimension(texMetadata.dimension),
+                                             .Width = static_cast<uint32_t>(texMetadata.width),
+                                             .Height = static_cast<uint32_t>(texMetadata.height),
+                                             .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ?
+                                                                                             texMetadata.depth :
+                                                                                             texMetadata.arraySize),
+                                             .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
+                                             .bIsCubemap = texMetadata.IsCubemap(),
+                                             .Filter = importDesc.Filter,
+                                             .AddressModeU = importDesc.AddressModeU,
+                                             .AddressModeV = importDesc.AddressModeV,
+                                             .AddressModeW = importDesc.AddressModeW };
 
         json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;
 
-        const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, assetInfo.Guid);
+        const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, assetInfo.GetGuid());
         IG_CHECK(!assetMetadataPath.empty());
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
@@ -309,7 +312,7 @@ namespace ig
         }
 
         /* Save data to asset file */
-        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.Guid);
+        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.GetGuid());
         IG_CHECK(!assetPath.empty());
         if (fs::exists(assetPath))
         {
@@ -326,7 +329,7 @@ namespace ig
             return MakeFail<Texture::Desc, ETextureImportStatus::FailedSaveAssetToFile>();
         }
 
-        IG_CHECK(assetInfo.IsValid() && assetInfo.Type == EAssetType::Texture);
+        IG_CHECK(assetInfo.IsValid() && assetInfo.GetType() == EAssetType::Texture);
         return MakeSuccess<Texture::Desc, ETextureImportStatus>(assetInfo, newLoadConfig);
     }
 } // namespace ig

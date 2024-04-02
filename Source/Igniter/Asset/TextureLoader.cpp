@@ -30,7 +30,7 @@ namespace ig
             return MakeFail<Texture, ETextureLoaderStatus::InvalidAssetInfo>();
         }
 
-        if (assetInfo.Type != EAssetType::Texture)
+        if (assetInfo.GetType() != EAssetType::Texture)
         {
             return MakeFail<Texture, ETextureLoaderStatus::AssetTypeMismatch>();
         }
@@ -48,7 +48,7 @@ namespace ig
         }
 
         /* Load asset from file */
-        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.Guid);
+        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.GetGuid());
         if (!fs::exists(assetPath))
         {
             return MakeFail<Texture, ETextureLoaderStatus::FileDoesNotExists>();
@@ -137,7 +137,7 @@ namespace ig
                                 loadDesc.Mips,
                                 loadDesc.Format);
         }
-        texDesc.DebugName = String(std::format("{}({})", assetInfo.VirtualPath, assetInfo.Guid));
+        texDesc.DebugName = String(std::format("{}({})", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
         texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
         /* Create Texture from RenderDevice */
