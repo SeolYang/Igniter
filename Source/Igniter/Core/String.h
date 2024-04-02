@@ -84,7 +84,7 @@ namespace ig
     private:
         [[nodiscard]] static constexpr uint64_t EvalHash(const std::string_view strView) noexcept;
 
-        using HashStringMap = robin_hood::unordered_map<uint64_t, std::string>;
+        using HashStringMap = robin_hood::unordered_node_map<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
         [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
 
