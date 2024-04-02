@@ -147,7 +147,7 @@
     <ClInclude Include="..\Source\Igniter\Core\InputManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\JsonUtils.h">
+    <ClInclude Include="..\Source\Igniter\Core\Json.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Log.h">

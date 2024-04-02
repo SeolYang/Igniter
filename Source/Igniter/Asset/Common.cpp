@@ -1,6 +1,7 @@
 #include <Igniter.h>
 #include <Asset/Common.h>
-#include <Core/JsonUtils.h>
+#include <Core/Json.h>
+#include <Core/Regex.h>
 
 namespace ig
 {

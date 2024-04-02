@@ -12,10 +12,14 @@ namespace ig
     {
         StaticMeshComponent& staticMeshComponent = registry.get<StaticMeshComponent>(entity);
         IG_CHECK(staticMeshComponent.Mesh);
-        StaticMesh& staticMesh = *staticMeshComponent.Mesh;
+        StaticMesh& staticMesh{ *staticMeshComponent.Mesh };
 
-        const StaticMesh::Desc snapshot = staticMesh.GetSnapshot();
-        const AssetInfo& assetInfo = snapshot.Info;
-        ImGui::Text(std::format("{}({})", assetInfo.VirtualPath.ToStringView(), assetInfo.Guid.str()).c_str());
+        const StaticMesh::Desc& staticMeshSnapshot{ staticMesh.GetSnapshot() };
+        ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
+
+        IG_CHECK(staticMeshComponent.Mat);
+        Material& material{ *staticMeshComponent.Mat };
+        const Material::Desc& materialSnapshot{ material.GetSnapshot() };
+        ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
     }
 } // namespace ig

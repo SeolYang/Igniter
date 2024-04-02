@@ -17,6 +17,7 @@
 #include <Render/GPUViewManager.h>
 #include <Render/Renderer.h>
 #include <Asset/StaticMesh.h>
+#include <Asset/Material.h>
 #include <Component/CameraComponent.h>
 #include <Component/StaticMeshComponent.h>
 #include <Component/TransformComponent.h>
@@ -181,7 +182,9 @@ namespace ig
                         const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
                         perObjectConstantBuffer.Write(perObjectBuffer);
 
-                        Texture& diffuseTex{ *staticMeshComponent.DiffuseTex };
+                        IG_CHECK(staticMeshComponent.Mat);
+                        Material& material{ *staticMeshComponent.Mat };
+                        Texture& diffuseTex{ material.GetDiffuse() };
                         const BasicRenderResources params{
                             .VertexBufferIdx = vertexBufferSrv->Index,
                             .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,

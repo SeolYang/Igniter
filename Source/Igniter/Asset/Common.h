@@ -112,4 +112,22 @@ namespace ig
     bool IsMetadataPath(const fs::path& resPath);
 
     xg::Guid ConvertMetadataPathToGuid(fs::path path);
-}
+
+    bool IsValidVirtualPathFormat(const String virtualPath);
+} // namespace ig
+
+template <>
+struct std::formatter<ig::AssetInfo>
+{
+public:
+    constexpr auto parse(std::format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FrameContext>
+    auto format(const ig::AssetInfo& info, FrameContext& ctx) const
+    {
+        return std::format_to(ctx.out(), "{}:{}({})", info.Type, info.VirtualPath, info.Guid);
+    }
+};

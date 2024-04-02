@@ -49,7 +49,7 @@
     <ClInclude Include="..\Source\Igniter\Core\HashUtils.h" />
     <ClInclude Include="..\Source\Igniter\Core\Engine.h" />
     <ClInclude Include="..\Source\Igniter\Core\InputManager.h" />
-    <ClInclude Include="..\Source\Igniter\Core\JsonUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Json.h" />
     <ClInclude Include="..\Source\Igniter\Core\Log.h" />
     <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h" />
     <ClInclude Include="..\Source\Igniter\Core\MemUtils.h" />

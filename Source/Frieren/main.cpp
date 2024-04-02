@@ -61,13 +61,6 @@ int main()
                 return assetManager.LoadTexture(xg::Guid{ "4b2b2556-7d81-4884-ba50-777392ebc9ee" });
             });
 
-        std::future<CachedAsset<Texture>> ashBodyTexOtherFuture = std::async(
-            std::launch::async,
-            [&assetManager]()
-            {
-                return assetManager.LoadTexture(xg::Guid{ "4b2b2556-7d81-4884-ba50-777392ebc9ee" });
-            });
-
         std::future<CachedAsset<StaticMesh>> homuraMeshFuture = std::async(
             std::launch::async,
             [&assetManager]()
@@ -81,6 +74,38 @@ int main()
             {
                 return assetManager.LoadTexture(xg::Guid{ "87949751-3431-45c7-bd57-0a1518649511" });
             });
+
+        std::future<xg::Guid> ashBodyMatCreateFuture{
+            std::async(std::launch::async,
+                       [&assetManager, &ashBodyTexFuture]
+                       {
+                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash/Body"_fs, .Diffuse = ashBodyTexFuture.get() });
+                       })
+        };
+
+        std::future<xg::Guid> homuraBodyMatCreateFuture{
+            std::async(std::launch::async,
+                       [&assetManager, &homuraBodyTexFuture]
+                       {
+                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Homura/Body"_fs, .Diffuse = homuraBodyTexFuture.get() });
+                       })
+        };
+
+        std::future<CachedAsset<Material>> ashBodyMatFuture{
+            std::async(std::launch::async,
+                       [&assetManager, &ashBodyMatCreateFuture]()
+                       {
+                           return assetManager.LoadMaterial(ashBodyMatCreateFuture.get());
+                       })
+        };
+
+        std::future<CachedAsset<Material>> homuraBodyMatFuture{
+            std::async(std::launch::async,
+                       [&assetManager, &homuraBodyMatCreateFuture]()
+                       {
+                           return assetManager.LoadMaterial(homuraBodyMatCreateFuture.get());
+                       })
+        };
         /******************************/
 
         /* #sy_test Input Manager Test */
@@ -111,9 +136,9 @@ int main()
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
             staticMeshComponent.Mesh = homuraMeshFuture.get();
-            staticMeshComponent.DiffuseTex = homuraBodyTexFuture.get();
+            staticMeshComponent.Mat = homuraBodyMatFuture.get();
             IG_CHECK(staticMeshComponent.Mesh);
-            IG_CHECK(staticMeshComponent.DiffuseTex);
+            IG_CHECK(staticMeshComponent.Mat);
         }
 
         const auto ash = registry.create();
@@ -126,9 +151,9 @@ int main()
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(ash);
             staticMeshComponent.Mesh = ashMeshFuture.get();
-            staticMeshComponent.DiffuseTex = ashBodyTexFuture.get();
+            staticMeshComponent.Mat = ashBodyMatFuture.get();
             IG_CHECK(staticMeshComponent.Mesh);
-            IG_CHECK(staticMeshComponent.DiffuseTex);
+            IG_CHECK(staticMeshComponent.Mat);
         }
 
         /* Camera */
@@ -152,10 +177,6 @@ int main()
         auto& mainLayer = canvas.AddLayer<MainLayer>(canvas);
         mainLayer.SetVisibility(true);
         /************************************/
-
-        /* #sy_test Material Creation */
-        [[maybe_unused]] xg::Guid material{ assetManager.CreateMaterial({ .VirtualPath = "AshBody"_fs, .Diffuse = ashBodyTexOtherFuture.get() }) };
-        /******************************/
 
         result = engine.Execute();
     }
