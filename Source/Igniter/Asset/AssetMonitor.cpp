@@ -338,4 +338,18 @@ namespace ig::details
         }
         IG_LOG(AssetMonitor, Info, "All info changes saved.");
     }
+
+    std::vector<AssetInfo> AssetMonitor::TakeSnapshots() const
+    {
+        ReadOnlyLock lock{ mutex };
+        std::vector<AssetInfo> assetInfoSnapshots{};
+        assetInfoSnapshots.reserve(guidSerializedDescTable.size());
+        for (const auto& guidSerializedDesc : guidSerializedDescTable)
+        {
+            AssetInfo assetInfo{};
+            guidSerializedDesc.second >> assetInfo;
+            assetInfoSnapshots.emplace_back(assetInfo);
+        }
+        return assetInfoSnapshots;
+    }
 } // namespace ig::details

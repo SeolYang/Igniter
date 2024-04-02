@@ -52,6 +52,7 @@ namespace ig
         IG_DESERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid, xg::Guid{});
         IG_DESERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath, String{});
         IG_DESERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type, EAssetType::Unknown);
+        ConstructVirtualPathHierarchy();
         return archive;
     }
 

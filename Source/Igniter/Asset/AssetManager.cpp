@@ -256,6 +256,38 @@ namespace ig
         return assetMonitor->GetAssetInfo(guid);
     }
 
+    std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots()
+    {
+        robin_hood::unordered_map<xg::Guid, Snapshot> intermediateSnapshots{};
+        std::vector<AssetInfo> assetInfoSnapshots{ assetMonitor->TakeSnapshots() };
+        for (const AssetInfo& assetInfoSnapshot : assetInfoSnapshots)
+        {
+            if (assetInfoSnapshot.IsValid())
+            {
+                intermediateSnapshots[assetInfoSnapshot.GetGuid()] = Snapshot{ .Info = assetInfoSnapshot, .RefCount = 0 };
+            }
+        }
+
+        for (const Ptr<details::TypelessAssetCache>& assetCache : assetCaches)
+        {
+            std::vector<details::TypelessAssetCache::Snapshot> assetCacheSnapshots{ assetCache->TakeSnapshots() };
+            for (const details::TypelessAssetCache::Snapshot& cacheSnapshot : assetCacheSnapshots)
+            {
+                IG_CHECK(intermediateSnapshots.contains(cacheSnapshot.Guid));
+                Snapshot& snapshot{ intermediateSnapshots.at(cacheSnapshot.Guid) };
+                snapshot.RefCount = cacheSnapshot.RefCount;
+            }
+        }
+
+        std::vector<Snapshot> snapshots{};
+        snapshots.reserve(intermediateSnapshots.size());
+        for (const auto& guidSnapshot : intermediateSnapshots)
+        {
+            snapshots.emplace_back(guidSnapshot.second);
+        }
+        return snapshots;
+    }
+
     void AssetManager::DeleteInternal(const EAssetType assetType, const xg::Guid guid)
     {
         UniqueLock assetLock{ RequestAssetLock(guid) };

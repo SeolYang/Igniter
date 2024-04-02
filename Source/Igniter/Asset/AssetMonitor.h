@@ -74,6 +74,8 @@ namespace ig::details
         void Remove(const xg::Guid guid);
         void SaveAllChanges();
 
+        [[nodiscard]] std::vector<AssetInfo> TakeSnapshots() const;
+
     private:
         VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetType assetType);
         const VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetType assetType) const;

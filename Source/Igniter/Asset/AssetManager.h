@@ -26,6 +26,13 @@ namespace ig
     public:
         using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
 
+        struct Snapshot
+        {
+        public:
+            AssetInfo Info{};
+            uint32_t RefCount{};
+        };
+
     public:
         AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
         AssetManager(const AssetManager&) = delete;
@@ -50,13 +57,15 @@ namespace ig
         void Delete(const xg::Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
-        [[nodiscard]] AssetInfo GetAssetInfo(const xg::Guid guid) const;
-
         /* #sy_todo Reload ASSET! */
 
         void SaveAllChanges();
 
+        [[nodiscard]] AssetInfo GetAssetInfo(const xg::Guid guid) const;
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
+
+        /* #sy_wip Gathering All Asset Status & Informations */
+        std::vector<Snapshot> TakeSnapshots();
 
     private:
         template <Asset T>

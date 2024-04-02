@@ -9,11 +9,19 @@ namespace ig::details
     class TypelessAssetCache
     {
     public:
+        struct Snapshot
+        {
+            const xg::Guid Guid{};
+            const uint32_t RefCount{};
+        };
+
+    public:
         virtual ~TypelessAssetCache() = default;
 
         virtual EAssetType GetAssetType() const = 0;
         virtual void Invalidate(const xg::Guid guid) = 0;
-        virtual bool IsCached(const xg::Guid guid) const = 0;
+        virtual [[nodiscard]] bool IsCached(const xg::Guid guid) const = 0;
+        virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
     };
 
     template <Asset T>
@@ -64,6 +72,19 @@ namespace ig::details
         {
             ReadOnlyLock lock{ mutex };
             return IsCachedUnsafe(guid);
+        }
+
+        [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const override
+        {
+            ReadOnlyLock lock{ mutex };
+            std::vector<Snapshot> refCounterSnapshots{};
+            refCounterSnapshots.reserve(refCounterTable.size());
+            for (const auto& guidRefCounter : refCounterTable)
+            {
+                refCounterSnapshots.emplace_back(Snapshot{ .Guid = guidRefCounter.first, .RefCount = guidRefCounter.second });
+            }
+
+            return refCounterSnapshots;
         }
 
     private:
