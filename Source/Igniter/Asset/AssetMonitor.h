@@ -58,6 +58,7 @@ namespace ig::details
             
             const xg::Guid guid{ newInfo.GetGuid() };
             const String virtualPath{ newInfo.GetVirtualPath() };
+            IG_CHECK(IsValidVirtualPath(virtualPath));
 
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetType());
             IG_CHECK(!virtualPathGuidTable.contains(virtualPath));

@@ -87,8 +87,7 @@ namespace ig
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveAsset>();
         }
 
-        return MakeSuccess<Material::Desc, EMaterialCreateStatus>(Desc{
-            .Info = assetInfo,
-            .LoadDescriptor = loadDesc });
+        return MakeSuccess<Material::Desc, EMaterialCreateStatus>(Desc{ .Info = assetInfo,
+                                                                        .LoadDescriptor = loadDesc });
     }
 } // namespace ig

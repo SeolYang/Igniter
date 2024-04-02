@@ -173,7 +173,7 @@ namespace ig::details
     xg::Guid AssetMonitor::GetGuidUnsafe(const EAssetType assetType, const String virtualPath) const
     {
         IG_CHECK(assetType != EAssetType::Unknown);
-        IG_CHECK(virtualPath.IsValid());
+        IG_CHECK(IsValidVirtualPath(virtualPath));
 
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
         const auto itr = virtualPathGuidTable.find(virtualPath);
@@ -231,6 +231,7 @@ namespace ig::details
     {
         const xg::Guid guid{ newInfo.GetGuid() };
         const String virtualPath{ newInfo.GetVirtualPath() };
+        IG_CHECK(IsValidVirtualPath(virtualPath));
 
         ReadWriteLock rwLock{ mutex };
         IG_CHECK(newInfo.IsValid());

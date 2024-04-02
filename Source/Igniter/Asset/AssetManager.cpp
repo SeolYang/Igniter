@@ -87,6 +87,12 @@ namespace ig
 
     CachedAsset<Texture> AssetManager::LoadTexture(const String virtualPath)
     {
+        if (!IsValidVirtualPath(virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Load Texture: Invalid Virtual Path {}", virtualPath);
+            return CachedAsset<Texture>{};
+        }
+
         if (!assetMonitor->Contains(EAssetType::Texture, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
@@ -135,6 +141,12 @@ namespace ig
 
     CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
     {
+        if (!IsValidVirtualPath(virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Load Static Mesh: Invalid Virtual Path {}", virtualPath);
+            return CachedAsset<StaticMesh>{};
+        }
+
         if (!assetMonitor->Contains(EAssetType::StaticMesh, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
@@ -146,7 +158,13 @@ namespace ig
 
     xg::Guid AssetManager::CreateMaterial(MaterialCreateDesc createDesc)
     {
-        const String virtualPath{ MakeVirtualPathPreferred(createDesc.VirtualPath) };
+        const String virtualPath{ createDesc.VirtualPath };
+        if (!IsValidVirtualPath(virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Create Material: Invalid Virtual Path {}", virtualPath);
+            return xg::Guid{};
+        }
+
         createDesc.VirtualPath = virtualPath;
         IG_CHECK(IsValidVirtualPath(virtualPath));
 
@@ -154,7 +172,7 @@ namespace ig
         if (!result.HasOwnership())
         {
             IG_LOG(AssetManager, Error, "Failed({}) to create material \"{}\".", result.GetStatus(), virtualPath);
-            return {};
+            return xg::Guid{};
         }
 
         const Material::Desc desc = result.Take();
@@ -180,6 +198,12 @@ namespace ig
 
     CachedAsset<Material> AssetManager::LoadMaterial(const String virtualPath)
     {
+        if (!IsValidVirtualPath(virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Load Material: Invalid Virtual Path {}", virtualPath);
+            return CachedAsset<Material>{};
+        }
+
         if (!assetMonitor->Contains(EAssetType::Material, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
