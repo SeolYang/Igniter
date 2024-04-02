@@ -25,6 +25,7 @@ namespace ig
           type(type),
           persistency(persistency)
     {
+        ConstructVirtualPathHierarchy();
     }
 
     namespace key
@@ -53,6 +54,18 @@ namespace ig
         IG_DESERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath, String{});
         IG_DESERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type, EAssetType::Unknown);
         return archive;
+    }
+
+    void AssetInfo::SetVirtualPath(const String newVirtualPath)
+    {
+        virtualPath = newVirtualPath;
+        ConstructVirtualPathHierarchy();
+    }
+
+    void AssetInfo::ConstructVirtualPathHierarchy()
+    {
+        IG_CHECK(IsValidVirtualPath(virtualPath));
+        virtualPathHierarchy = virtualPath.Split(details::VirtualPathSeparator);
     }
 
     fs::path MakeResourceMetadataPath(fs::path resPath)

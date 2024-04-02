@@ -67,14 +67,19 @@ namespace ig
         String GetVirtualPath() const { return virtualPath; }
         EAssetType GetType() const { return type; }
         EAssetPersistency GetPersistency() const { return persistency; }
+        const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
-        void SetVirtualPath(const String newVirtualPath) { virtualPath = newVirtualPath; }
+        void SetVirtualPath(const String newVirtualPath);
         void SetPersistency(const EAssetPersistency newPersistency) { persistency = newPersistency; }
+
+    private:
+        void ConstructVirtualPathHierarchy();
 
     private:
         uint64_t creationTime = 0;
         xg::Guid guid{};
         String virtualPath{};
+        std::vector<String> virtualPathHierarchy{};
         EAssetType type = EAssetType::Unknown;
         EAssetPersistency persistency = EAssetPersistency::Default;
     };
