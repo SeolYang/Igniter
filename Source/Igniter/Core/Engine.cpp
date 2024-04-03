@@ -79,6 +79,7 @@ namespace ig
         deferredDeallocator->FlushAllFrames();
 
         //////////////////////// L3 ////////////////////////
+        assetManager.reset();
         renderer.reset();
         ////////////////////////////////////////////////////
 
