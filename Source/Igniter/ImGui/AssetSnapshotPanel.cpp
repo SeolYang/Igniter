@@ -86,11 +86,11 @@ namespace ig
             if (ImGui::BeginTable("Asset Snapshots", NumColumns, TableFlags))
             {
                 constexpr ImGuiTableColumnFlags ColumnFlags = ImGuiTableColumnFlags_WidthFixed;
-                ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_DefaultSort | ColumnFlags);
+                ImGui::TableSetupColumn("Type", ColumnFlags | ImGuiTableColumnFlags_DefaultSort);
                 ImGui::TableSetupColumn("Guid", ColumnFlags);
                 ImGui::TableSetupColumn("Virtual Path", ColumnFlags);
                 ImGui::TableSetupColumn("Persistency", ColumnFlags);
-                ImGui::TableSetupColumn("Refs", ColumnFlags);
+                ImGui::TableSetupColumn("Refs", ColumnFlags | ImGuiTableColumnFlags_PreferSortDescending);
                 ImGui::TableHeadersRow();
 
                 ImGuiTableSortSpecs* sortSpecs{ ImGui::TableGetSortSpecs() };
