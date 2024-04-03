@@ -42,10 +42,34 @@ namespace ig
 
             UniqueLock lock{ mutex };
             ImGui::Text(std::format("Last Update at {:%Y/%m/%d %H:%M:%S}", lastUpdated).data());
-            ImGui::Text(std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(), 
-                        std::count_if(snapshots.begin(), snapshots.end(), 
-                        [](const AssetManager::Snapshot& snapshot) { return snapshot.RefCount > 0; }))
-                            .c_str());
+
+            if (selectedTypeFilter)
+            {
+                ImGui::Text(std::format("#Imported {}: {}\t#Cached {}: {}", 
+                            *selectedTypeFilter,
+                                        std::count_if(snapshots.begin(), snapshots.end(),
+                                                      [selectedTypeFilter = *selectedTypeFilter](const AssetManager::Snapshot& snapshot)
+                                                      {
+                                                          return snapshot.Info.GetType() == selectedTypeFilter;
+                                                      }),
+                                        *selectedTypeFilter,
+                                        std::count_if(snapshots.begin(), snapshots.end(),
+                                                      [selectedTypeFilter = *selectedTypeFilter](const AssetManager::Snapshot& snapshot)
+                                                      {
+                                                          return snapshot.Info.GetType() == selectedTypeFilter && snapshot.RefCount > 0;
+                                                      }))
+                                .c_str());
+            }
+            else
+            {
+                ImGui::Text(std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(),
+                                        std::count_if(snapshots.begin(), snapshots.end(),
+                                                      [](const AssetManager::Snapshot& snapshot)
+                                                      {
+                                                          return snapshot.RefCount > 0;
+                                                      }))
+                                .c_str());
+            }
             
             constexpr ImGuiTableFlags TableFlags =
                 ImGuiTableFlags_Reorderable |
