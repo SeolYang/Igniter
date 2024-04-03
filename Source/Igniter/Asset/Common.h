@@ -72,10 +72,14 @@ namespace ig
         const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
         void SetVirtualPath(const String newVirtualPath);
+        void SetPersistency(const EAssetPersistency newPersistency)
+        {
+            persistency = (newPersistency == EAssetPersistency::Engine) ? EAssetPersistency::Persistent : newPersistency;
+        }
 
     private:
         void ConstructVirtualPathHierarchy();
-        void SetPersistency(const EAssetPersistency newPersistency) { persistency = newPersistency; }
+        void MarkAsEngineDefault() { persistency = EAssetPersistency::Engine; }
 
     private:
         uint64_t creationTime = 0;
