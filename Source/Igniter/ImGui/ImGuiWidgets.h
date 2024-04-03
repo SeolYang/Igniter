@@ -1,0 +1,55 @@
+#pragma once
+#include <Igniter.h>
+#include <Core/String.h>
+
+namespace ig
+{
+    template <typename E>
+        requires std::is_enum_v<E>
+    bool BeginEnumCombo(const std::string_view name, int& selectedIdx)
+    {
+        constexpr auto EnumNames = magic_enum::enum_names<E>();
+        if (!ImGui::BeginCombo(name.data(), EnumNames[selectedIdx].data()))
+        {
+            return false;
+        }
+
+        for (int idx = 0; idx < EnumNames.size(); ++idx)
+        {
+            if (ImGui::Selectable(EnumNames[idx].data(), selectedIdx == idx))
+            {
+                selectedIdx = idx;
+            }
+        }
+
+        return true;
+    }
+
+    inline void EndEnumCombo()
+    {
+        ImGui::EndCombo();
+    }
+
+    template <typename E, typename... Excludes>
+    requires std::is_enum_v<E> && (std::is_same_v<E, Excludes> && ...)
+    std::optional<E> EnumMenuItems(std::optional<E> lastSelection = std::nullopt, [[maybe_unused]] const Excludes... excludes)
+    {
+        constexpr auto EnumNames = magic_enum::enum_names<E>();
+        constexpr auto EnumVals = magic_enum::enum_values<E>();
+        static_assert(EnumNames.size() == EnumVals.size());
+        std::optional<E> selection{lastSelection};
+        for (size_t idx = 0; idx < EnumVals.size(); ++idx)
+        {
+            if (((EnumVals[idx] != excludes) && ...))
+            {
+                if (ImGui::MenuItem(EnumNames[idx].data(), nullptr, lastSelection ? (*lastSelection == EnumVals[idx]) : false))
+                {
+                    selection = EnumVals[idx];
+                    break;
+                }
+            }
+        }
+
+        return selection;
+    }
+} // namespace ig

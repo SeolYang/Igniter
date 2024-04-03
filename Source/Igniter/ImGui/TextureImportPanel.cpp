@@ -2,7 +2,7 @@
 #include <Core/Engine.h>
 #include <Asset/AssetManager.h>
 #include <ImGui/TextureImportPanel.h>
-#include <ImGui/ImGuiUtils.h>
+#include <ImGui/ImGuiWidgets.h>
 
 namespace ig
 {
