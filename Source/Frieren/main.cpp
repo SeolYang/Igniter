@@ -79,7 +79,8 @@ int main()
             std::async(std::launch::async,
                        [&assetManager, &ashBodyTexFuture]
                        {
-                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash\\Body"_fs, .Diffuse = ashBodyTexFuture.get() });
+                           // return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash\\Body"_fs, .Diffuse = ashBodyTexFuture.get() });
+                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash\\Body"_fs, .Diffuse = assetManager.LoadTexture("Engine\\Default"_fs) });
                        })
         };
 

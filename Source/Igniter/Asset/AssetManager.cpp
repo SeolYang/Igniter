@@ -20,6 +20,7 @@ namespace ig
           materialLoader(std::make_unique<MaterialLoader>(*this))
     {
         InitAssetCaches(handleManager);
+        InitEngineDefaultAssets();
     }
 
     AssetManager::~AssetManager()
@@ -34,6 +35,13 @@ namespace ig
         assetCaches.emplace_back(std::make_unique<details::AssetCache<Texture>>(handleManager));
         assetCaches.emplace_back(std::make_unique<details::AssetCache<StaticMesh>>(handleManager));
         assetCaches.emplace_back(std::make_unique<details::AssetCache<Material>>(handleManager));
+    }
+
+    void AssetManager::InitEngineDefaultAssets()
+    {
+        AssetInfo defaultTexInfo{ Texture::EngineDefault, EAssetType::Texture };
+        defaultTexInfo.MarkAsEngineDefault();
+        RegisterEngineDefault<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)

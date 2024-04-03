@@ -3,6 +3,17 @@
 #include <Core/Result.h>
 #include <Asset/Texture.h>
 
+namespace ig::details
+{
+    enum class EMakeDefaultTexStatus
+    {
+        Success,
+        FailedCreateTexture,
+        FailedCreateShaderResourceView,
+        FailedCreateSamplerView,
+    };
+}
+
 namespace ig
 {
     enum class ETextureLoaderStatus
@@ -43,8 +54,8 @@ namespace ig
         TextureLoader& operator=(TextureLoader&&) noexcept = delete;
 
     private:
-
         Result<Texture, ETextureLoaderStatus> Load(const Texture::Desc& desc);
+        Result<Texture, details::EMakeDefaultTexStatus> MakeDefault(const AssetInfo& assetInfo);
 
     private:
         HandleManager& handleManager;

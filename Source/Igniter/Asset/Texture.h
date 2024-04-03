@@ -90,11 +90,15 @@ namespace ig
         RefHandle<GpuView> GetShaderResourceView() { return srv.MakeRef(); }
         RefHandle<GpuView> GetSampler() { return sampler; }
 
+    public:
+        static constexpr std::string_view EngineDefault = "Engine\\Default";
+
     private:
         Desc snapshot{};
         DeferredHandle<GpuTexture> gpuTexture{};
         Handle<GpuView, GpuViewManager*> srv{};
         RefHandle<GpuView> sampler{};
+
     };
 } // namespace ig
 

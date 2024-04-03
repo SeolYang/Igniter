@@ -11,6 +11,14 @@
 
 IG_DEFINE_LOG_CATEGORY(AssetManager);
 
+namespace ig::details
+{
+    enum class EDefaultDummyStatus
+    {
+        Success,
+    };
+}
+
 namespace ig
 {
     class TextureImporter;
@@ -28,6 +36,14 @@ namespace ig
 
         struct Snapshot
         {
+        public:
+            bool IsCached() const
+            {
+                return RefCount > 0 ||
+                       Info.GetPersistency() == EAssetPersistency::Persistent ||
+                       Info.GetPersistency() == EAssetPersistency::Engine;
+            }
+
         public:
             AssetInfo Info{};
             uint32_t RefCount{};
@@ -64,7 +80,6 @@ namespace ig
         [[nodiscard]] AssetInfo GetAssetInfo(const Guid guid) const;
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 
-        /* #sy_wip Gathering All Asset Status & Informations */
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const;
 
     private:
@@ -77,6 +92,8 @@ namespace ig
         details::TypelessAssetCache& GetTypelessCache(const EAssetType assetType);
 
         void InitAssetCaches(HandleManager& handleManager);
+
+        void InitEngineDefaultAssets();
 
         template <Asset T, typename AssetLoader>
         [[nodiscard]] CachedAsset<T> LoadInternal(const Guid guid, AssetLoader& loader)
@@ -96,14 +113,14 @@ namespace ig
                 auto result{ loader.Load(desc) };
                 if (result.HasOwnership())
                 {
-                    IG_LOG(AssetManager, Info, "{} asset {}({}) cached.",
+                    IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.",
                            AssetTypeOf_v<T>,
                            desc.Info.GetVirtualPath(), guid);
                     assetModifiedEvent.Notify(*this);
                     return assetCache.Cache(guid, result.Take());
                 }
 
-                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {}({}).",
+                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).",
                        AssetTypeOf_v<T>, result.GetStatus(),
                        desc.Info.GetVirtualPath(), guid);
                 return CachedAsset<T>{};
@@ -132,7 +149,6 @@ namespace ig
             const AssetInfo& assetInfo{ desc.Info };
             IG_CHECK(assetInfo.IsValid());
             IG_CHECK(assetInfo.GetType() == AssetType);
-            IG_CHECK(assetInfo.GetPersistency() != EAssetPersistency::Engine);
 
             const String virtualPath{ assetInfo.GetVirtualPath() };
             IG_CHECK(IsValidVirtualPath(virtualPath));
@@ -147,7 +163,7 @@ namespace ig
                            AssetType,
                            resPath,
                            virtualPath);
-                    
+
                     return std::nullopt;
                 }
 
@@ -155,7 +171,7 @@ namespace ig
             }
             assetMonitor->Create<T>(assetInfo, desc.LoadDescriptor);
 
-            IG_LOG(AssetManager, Info, "{}: \"{}\" imported as {}({}).",
+            IG_LOG(AssetManager, Info, "{}: \"{}\" imported as {} ({}).",
                    AssetType,
                    resPath,
                    virtualPath,
@@ -167,8 +183,37 @@ namespace ig
 
         [[nodiscard]] UniqueLock RequestAssetLock(const Guid guid);
 
-        /* #sy_wip RegisterEngineAsset() */
-        // template <Asset T>
+        template <Asset T, ResultStatus Status>
+        void RegisterEngineDefault(const String requiredVirtualPath, Result<T, Status> assetResult)
+        {
+            if (!assetResult.HasOwnership())
+            {
+                IG_LOG(AssetManager, Error, "{}: Failed({}) to create engine default asset {}.",
+                       AssetTypeOf_v<T>, assetResult.GetStatus(), requiredVirtualPath);
+                return;
+            }
+
+            T asset{ assetResult.Take() };
+            const typename T::Desc& desc{ asset.GetSnapshot() };
+            const AssetInfo& assetInfo{ desc.Info };
+            IG_CHECK(assetInfo.IsValid());
+            IG_CHECK(assetInfo.GetType() == AssetTypeOf_v<T>);
+            IG_CHECK(assetInfo.GetPersistency() == EAssetPersistency::Engine);
+
+            /* #sy_note GUID를 고정으로 할지 말지.. 일단 Virtual Path는 고정적이고, Import 되고난 이후엔 Virtual Path로 접근 가능하니 유동적으로 */
+            Result<typename T::Desc, details::EDefaultDummyStatus> dummyResult{ MakeSuccess<typename T::Desc, details::EDefaultDummyStatus>(desc) };
+            IG_CHECK(dummyResult.HasOwnership());
+            std::optional<Guid> guidOpt{ ImportInternal<T>(assetInfo.GetVirtualPath(), dummyResult) };
+            IG_CHECK(guidOpt);
+
+            const Guid guid{ *guidOpt };
+            IG_CHECK(guid.isValid());
+            UniqueLock assetLock{ RequestAssetLock(guid) };
+            details::AssetCache<T>& assetCache{ GetCache<T>() };
+            IG_CHECK(!assetCache.IsCached(guid));
+            [[maybe_unused]] CachedAsset<T> cachedAsset{ assetCache.Cache(guid, std::move(asset)) };
+            IG_CHECK(cachedAsset);
+        }
 
     private:
         Ptr<details::AssetMonitor> assetMonitor;
