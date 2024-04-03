@@ -11,7 +11,6 @@ namespace ig
     using namespace DirectX::SimpleMath;
     using namespace std::chrono_literals;
 
-    using json = nlohmann::json;
     using SharedMutex = std::shared_mutex;
     using ReadOnlyLock = std::shared_lock<SharedMutex>;
     using ReadWriteLock = std::unique_lock<SharedMutex>;
@@ -48,6 +47,9 @@ namespace ig
 
     using Entity = entt::entity;
     using Registry = entt::registry;
+
+    using json = nlohmann::json;
+    using Guid = xg::Guid;
 
     constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
     constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
