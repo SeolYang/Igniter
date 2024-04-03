@@ -8,7 +8,7 @@ namespace ig
         requires std::is_enum_v<E>
     bool BeginEnumCombo(const std::string_view name, int& selectedIdx)
     {
-        constexpr auto EnumNames = magic_enum::enum_names<E>();
+        constexpr auto& EnumNames = magic_enum::enum_names<E>();
         if (!ImGui::BeginCombo(name.data(), EnumNames[selectedIdx].data()))
         {
             return false;
@@ -34,8 +34,8 @@ namespace ig
     requires std::is_enum_v<E> && (std::is_same_v<E, Excludes> && ...)
     std::optional<E> EnumMenuItems(std::optional<E> lastSelection = std::nullopt, [[maybe_unused]] const Excludes... excludes)
     {
-        constexpr auto EnumNames = magic_enum::enum_names<E>();
-        constexpr auto EnumVals = magic_enum::enum_values<E>();
+        constexpr auto& EnumNames = magic_enum::enum_names<E>();
+        constexpr auto& EnumVals = magic_enum::enum_values<E>();
         static_assert(EnumNames.size() == EnumVals.size());
         std::optional<E> selection{lastSelection};
         for (size_t idx = 0; idx < EnumVals.size(); ++idx)

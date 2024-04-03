@@ -21,7 +21,7 @@ namespace ig
     class AssetManager final
     {
     private:
-        using VirtualPathGuidTable = UnorderedMap<String, xg::Guid>;
+        using VirtualPathGuidTable = UnorderedMap<String, Guid>;
 
     public:
         using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
@@ -42,26 +42,26 @@ namespace ig
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
-        xg::Guid ImportTexture(const String resPath, const TextureImportDesc& desc);
-        [[nodiscard]] CachedAsset<Texture> LoadTexture(const xg::Guid guid);
+        Guid ImportTexture(const String resPath, const TextureImportDesc& desc);
+        [[nodiscard]] CachedAsset<Texture> LoadTexture(const Guid guid);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const String virtualPath);
 
-        std::vector<xg::Guid> ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc);
-        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const xg::Guid guid);
+        std::vector<Guid> ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc);
+        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const Guid guid);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
-        xg::Guid CreateMaterial(MaterialCreateDesc desc);
-        [[nodiscard]] CachedAsset<Material> LoadMaterial(const xg::Guid guid);
+        Guid CreateMaterial(MaterialCreateDesc desc);
+        [[nodiscard]] CachedAsset<Material> LoadMaterial(const Guid guid);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const String virtualPath);
 
-        void Delete(const xg::Guid guid);
+        void Delete(const Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
         /* #sy_todo Reload ASSET! */
 
         void SaveAllChanges();
 
-        [[nodiscard]] AssetInfo GetAssetInfo(const xg::Guid guid) const;
+        [[nodiscard]] AssetInfo GetAssetInfo(const Guid guid) const;
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 
         /* #sy_wip Gathering All Asset Status & Informations */
@@ -79,7 +79,7 @@ namespace ig
         void InitAssetCaches(HandleManager& handleManager);
 
         template <Asset T, typename AssetLoader>
-        [[nodiscard]] CachedAsset<T> LoadInternal(const xg::Guid guid, AssetLoader& loader)
+        [[nodiscard]] CachedAsset<T> LoadInternal(const Guid guid, AssetLoader& loader)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -114,18 +114,68 @@ namespace ig
             return assetCache.Load(guid);
         }
 
-        void DeleteInternal(const EAssetType assetType, const xg::Guid guid);
+        template <Asset T, ResultStatus ImportStatus>
+        std::optional<Guid> ImportInternal(String resPath, Result<typename T::Desc, ImportStatus>& result)
+        {
+            constexpr auto AssetType{ AssetTypeOf_v<T> };
+            if (!result.HasOwnership())
+            {
+                IG_LOG(AssetManager, Error, "{}: Failed({}) to import  \"{}\".",
+                       AssetType,
+                       result.GetStatus(),
+                       resPath);
 
-        [[nodiscard]] UniqueLock RequestAssetLock(const xg::Guid guid);
+                return std::nullopt;
+            }
+
+            const T::Desc desc{ result.Take() };
+            const AssetInfo& assetInfo{ desc.Info };
+            IG_CHECK(assetInfo.IsValid());
+            IG_CHECK(assetInfo.GetType() == AssetType);
+            IG_CHECK(assetInfo.GetPersistency() != EAssetPersistency::Engine);
+
+            const String virtualPath{ assetInfo.GetVirtualPath() };
+            IG_CHECK(IsValidVirtualPath(virtualPath));
+
+            if (assetMonitor->Contains(AssetType, virtualPath))
+            {
+                const AssetInfo currentAssetInfo{ assetMonitor->GetAssetInfo(AssetType, virtualPath) };
+                IG_CHECK(currentAssetInfo.IsValid());
+                if (currentAssetInfo.GetPersistency() == EAssetPersistency::Engine)
+                {
+                    IG_LOG(AssetManager, Error, "{}: Failed to import \"{}\". Given virtual path {} was reserved by engine.",
+                           AssetType,
+                           resPath,
+                           virtualPath);
+                    
+                    return std::nullopt;
+                }
+
+                Delete(AssetType, virtualPath);
+            }
+            assetMonitor->Create<T>(assetInfo, desc.LoadDescriptor);
+
+            IG_LOG(AssetManager, Info, "{}: \"{}\" imported as {}({}).",
+                   AssetType,
+                   resPath,
+                   virtualPath,
+                   assetInfo.GetGuid());
+            return assetInfo.GetGuid();
+        }
+
+        void DeleteInternal(const EAssetType assetType, const Guid guid);
+
+        [[nodiscard]] UniqueLock RequestAssetLock(const Guid guid);
 
         /* #sy_wip RegisterEngineAsset() */
+        // template <Asset T>
 
     private:
         Ptr<details::AssetMonitor> assetMonitor;
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
         Mutex assetMutexTableMutex;
-        StableUnorderedMap<xg::Guid, Mutex> assetMutexTable;
+        StableUnorderedMap<Guid, Mutex> assetMutexTable;
 
         Ptr<TextureImporter> textureImporter;
         Ptr<TextureLoader> textureLoader;

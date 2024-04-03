@@ -54,34 +54,20 @@ namespace ig
         return *cachePtr;
     }
 
-    xg::Guid AssetManager::ImportTexture(const String resPath, const TextureImportDesc& config)
+    Guid AssetManager::ImportTexture(const String resPath, const TextureImportDesc& config)
     {
         Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
-        if (!result.HasOwnership())
+        std::optional<Guid> guidOpt{ ImportInternal<Texture>(resPath, result) };
+        if (!guidOpt)
         {
-            IG_LOG(AssetManager, Error, "Failed({}) to import texture \"{}\".",
-                   magic_enum::enum_name(result.GetStatus()), resPath.ToStringView());
-            return {};
+            return Guid{};
         }
 
-        const Texture::Desc metadata = result.Take();
-        const AssetInfo& assetInfo = metadata.Info;
-        IG_CHECK(assetInfo.IsValid());
-        IG_CHECK(assetInfo.GetType() == EAssetType::Texture);
-        IG_CHECK(IsValidVirtualPath(assetInfo.GetVirtualPath()));
-
-        if (assetMonitor->Contains(EAssetType::Texture, assetInfo.GetVirtualPath()))
-        {
-            Delete(EAssetType::Texture, assetInfo.GetVirtualPath());
-        }
-        assetMonitor->Create<Texture>(assetInfo, metadata.LoadDescriptor);
-
-        IG_LOG(AssetManager, Info, "\"{}\" imported as texture asset {}({}).", resPath, assetInfo.GetVirtualPath(), assetInfo.GetGuid());
         assetModifiedEvent.Notify(*this);
-        return assetInfo.GetGuid();
+        return *guidOpt;
     }
 
-    CachedAsset<Texture> AssetManager::LoadTexture(const xg::Guid guid)
+    CachedAsset<Texture> AssetManager::LoadTexture(const Guid guid)
     {
         return LoadInternal<Texture>(guid, *textureLoader);
     }
@@ -103,40 +89,25 @@ namespace ig
         return LoadInternal<Texture>(assetMonitor->GetGuid(EAssetType::Texture, virtualPath), *textureLoader);
     }
 
-    std::vector<xg::Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc)
+    std::vector<Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->ImportStaticMesh(resPath, desc);
-        std::vector<xg::Guid> output;
+        std::vector<Guid> output;
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
         {
-            if (!result.HasOwnership())
+            std::optional<Guid> guidOpt{ ImportInternal<StaticMesh>(resPath, result) };
+            if (guidOpt)
             {
-                IG_LOG(AssetManager, Error, "Failed({}) to import static mesh \"{}\".", result.GetStatus(), resPath);
-                continue;
+                output.emplace_back(*guidOpt);
             }
-
-            const StaticMesh::Desc metadata = result.Take();
-            const AssetInfo& assetInfo = metadata.Info;
-            IG_CHECK(assetInfo.IsValid());
-            IG_CHECK(assetInfo.GetType() == EAssetType::StaticMesh);
-            IG_CHECK(IsValidVirtualPath(assetInfo.GetVirtualPath()));
-
-            if (assetMonitor->Contains(EAssetType::StaticMesh, assetInfo.GetVirtualPath()))
-            {
-                Delete(EAssetType::StaticMesh, assetInfo.GetVirtualPath());
-            }
-            assetMonitor->Create<StaticMesh>(assetInfo, metadata.LoadDescriptor);
-
-            IG_LOG(AssetManager, Info, "\"{}\" imported as static mesh asset {}({})", resPath, assetInfo.GetVirtualPath(), assetInfo.GetGuid());
-            output.emplace_back(assetInfo.GetGuid());
         }
 
         assetModifiedEvent.Notify(*this);
         return output;
     }
 
-    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const xg::Guid guid)
+    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid guid)
     {
         return LoadInternal<StaticMesh>(guid, *staticMeshLoader);
     }
@@ -158,43 +129,29 @@ namespace ig
         return LoadInternal<StaticMesh>(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath), *staticMeshLoader);
     }
 
-    xg::Guid AssetManager::CreateMaterial(MaterialCreateDesc createDesc)
+    Guid AssetManager::CreateMaterial(MaterialCreateDesc createDesc)
     {
         const String virtualPath{ createDesc.VirtualPath };
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Create Material: Invalid Virtual Path {}", virtualPath);
-            return xg::Guid{};
+            return Guid{};
         }
 
         createDesc.VirtualPath = virtualPath;
-        IG_CHECK(IsValidVirtualPath(virtualPath));
 
         Result<Material::Desc, EMaterialCreateStatus> result{ Material::Create(std::move(createDesc)) };
-        if (!result.HasOwnership())
+        std::optional<Guid> guidOpt{ ImportInternal<Material>(virtualPath, result) };
+        if (!guidOpt)
         {
-            IG_LOG(AssetManager, Error, "Failed({}) to create material \"{}\".", result.GetStatus(), virtualPath);
-            return xg::Guid{};
+            return Guid{};
         }
 
-        const Material::Desc desc = result.Take();
-        const AssetInfo& assetInfo = desc.Info;
-        IG_CHECK(assetInfo.IsValid());
-        IG_CHECK(assetInfo.GetType() == EAssetType::Material);
-        IG_CHECK(assetInfo.GetVirtualPath() == virtualPath);
-
-        if (assetMonitor->Contains(EAssetType::Material, virtualPath))
-        {
-            Delete(EAssetType::Material, virtualPath);
-        }
-        assetMonitor->Create<Material>(assetInfo, desc.LoadDescriptor);
-
-        IG_LOG(AssetManager, Info, "Material {}({}) created.", virtualPath, assetInfo.GetGuid());
         assetModifiedEvent.Notify(*this);
-        return assetInfo.GetGuid();
+        return *guidOpt;
     }
 
-    CachedAsset<Material> AssetManager::LoadMaterial(const xg::Guid guid)
+    CachedAsset<Material> AssetManager::LoadMaterial(const Guid guid)
     {
         return LoadInternal<Material>(guid, *materialLoader);
     }
@@ -216,7 +173,7 @@ namespace ig
         return LoadInternal<Material>(assetMonitor->GetGuid(EAssetType::Material, virtualPath), *materialLoader);
     }
 
-    void AssetManager::Delete(const xg::Guid guid)
+    void AssetManager::Delete(const Guid guid)
     {
         if (!assetMonitor->Contains(guid))
         {
@@ -246,7 +203,7 @@ namespace ig
         DeleteInternal(assetType, assetMonitor->GetGuid(assetType, virtualPath));
     }
 
-    AssetInfo AssetManager::GetAssetInfo(const xg::Guid guid) const
+    AssetInfo AssetManager::GetAssetInfo(const Guid guid) const
     {
         if (!assetMonitor->Contains(guid))
         {
@@ -258,7 +215,7 @@ namespace ig
 
     std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots() const
     {
-        UnorderedMap<xg::Guid, Snapshot> intermediateSnapshots{};
+        UnorderedMap<Guid, Snapshot> intermediateSnapshots{};
         std::vector<AssetInfo> assetInfoSnapshots{ assetMonitor->TakeSnapshots() };
         for (const AssetInfo& assetInfoSnapshot : assetInfoSnapshots)
         {
@@ -288,7 +245,7 @@ namespace ig
         return snapshots;
     }
 
-    void AssetManager::DeleteInternal(const EAssetType assetType, const xg::Guid guid)
+    void AssetManager::DeleteInternal(const EAssetType assetType, const Guid guid)
     {
         UniqueLock assetLock{ RequestAssetLock(guid) };
         IG_CHECK(assetType != EAssetType::Unknown);
@@ -305,7 +262,7 @@ namespace ig
         assetModifiedEvent.Notify(*this);
     }
 
-    UniqueLock AssetManager::RequestAssetLock(const xg::Guid guid)
+    UniqueLock AssetManager::RequestAssetLock(const Guid guid)
     {
         UniqueLock lock{ assetMutexTableMutex };
         if (!assetMutexTable.contains(guid))

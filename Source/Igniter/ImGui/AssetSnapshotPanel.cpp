@@ -45,32 +45,35 @@ namespace ig
 
             if (selectedTypeFilter)
             {
-                ImGui::Text(std::format("#Imported {}: {}\t#Cached {}: {}", 
-                            *selectedTypeFilter,
-                                        std::count_if(snapshots.begin(), snapshots.end(),
-                                                      [selectedTypeFilter = *selectedTypeFilter](const AssetManager::Snapshot& snapshot)
-                                                      {
-                                                          return snapshot.Info.GetType() == selectedTypeFilter;
-                                                      }),
+                const auto IsSelected = [selectedTypeFilter = *selectedTypeFilter](const AssetManager::Snapshot& snapshot)
+                {
+                    return snapshot.Info.GetType() == selectedTypeFilter;
+                };
+
+                const auto IsSelectedCached = [selectedTypeFilter = *selectedTypeFilter](const AssetManager::Snapshot& snapshot)
+                {
+                    return snapshot.Info.GetType() == selectedTypeFilter && snapshot.RefCount > 0;
+                };
+
+                ImGui::Text(std::format("#Imported {}: {}\t#Cached {}: {}",
                                         *selectedTypeFilter,
-                                        std::count_if(snapshots.begin(), snapshots.end(),
-                                                      [selectedTypeFilter = *selectedTypeFilter](const AssetManager::Snapshot& snapshot)
-                                                      {
-                                                          return snapshot.Info.GetType() == selectedTypeFilter && snapshot.RefCount > 0;
-                                                      }))
+                                        std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
+                                        *selectedTypeFilter,
+                                        std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
                                 .c_str());
             }
             else
             {
+                const auto IsCached = [](const AssetManager::Snapshot& snapshot)
+                {
+                    return snapshot.RefCount > 0;
+                };
+
                 ImGui::Text(std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(),
-                                        std::count_if(snapshots.begin(), snapshots.end(),
-                                                      [](const AssetManager::Snapshot& snapshot)
-                                                      {
-                                                          return snapshot.RefCount > 0;
-                                                      }))
+                                        std::count_if(snapshots.begin(), snapshots.end(), IsCached))
                                 .c_str());
             }
-            
+
             constexpr ImGuiTableFlags TableFlags =
                 ImGuiTableFlags_Reorderable |
                 ImGuiTableFlags_Sortable |
@@ -94,7 +97,7 @@ namespace ig
                 if (sortSpecs->SpecsDirty || bDirty)
                 {
                     IG_CHECK(sortSpecs->SpecsCount > 0);
-                    const ImGuiSortDirection sortDirection{sortSpecs->Specs[0].SortDirection};
+                    const ImGuiSortDirection sortDirection{ sortSpecs->Specs[0].SortDirection };
                     const int16_t selectedColumn{ sortSpecs->Specs[0].ColumnIndex };
                     const bool bAscendingRequired{ sortDirection == ImGuiSortDirection_Ascending };
                     std::sort(snapshots.begin(), snapshots.end(),
