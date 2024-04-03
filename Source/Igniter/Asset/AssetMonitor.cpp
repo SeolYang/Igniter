@@ -56,7 +56,7 @@ namespace ig::details
                     const xg::Guid guidFromPath{ entry.path().filename().string() };
                     if (!guidFromPath.isValid())
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. {} is not valid guid.",
+                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. {} is not valid guid.",
                                entry.path().string(),
                                entry.path().filename().string());
                         ++directoryItr;
@@ -67,12 +67,12 @@ namespace ig::details
                     metadataPath.replace_extension(details::MetadataExt);
                     if (!fs::exists(metadataPath))
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. The metadata does not exists.", entry.path().string());
+                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The metadata does not exists.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
-                    const json serializedMetadata{ LoadJsonFromFile(metadataPath) };
+                    json serializedMetadata{ LoadJsonFromFile(metadataPath) };
                     AssetInfo assetInfo{};
                     serializedMetadata >> assetInfo;
 
@@ -81,14 +81,14 @@ namespace ig::details
 
                     if (!assetInfo.IsValid())
                     {
-                        IG_LOG(AssetMonitor, Warning, "Asset {} ignored. The asset info is invalid.", entry.path().string());
+                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The asset info is invalid.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
                     if (guidFromPath != guid)
                     {
-                        IG_LOG(AssetMonitor, Warning, "{} Asset {} ignored. The guid from filename does not match asset info guid."
+                        IG_LOG(AssetMonitor, Error, "{}: Asset {} ignored. The guid from filename does not match asset info guid."
                                                       " Which was {}.",
                                assetInfo.GetType(),
                                entry.path().string(),
@@ -99,7 +99,7 @@ namespace ig::details
 
                     if (!IsValidVirtualPath(virtualPath))
                     {
-                        IG_LOG(AssetMonitor, Warning, "{} Asset {}({}) ignored. Which has invalid virtual path.",
+                        IG_LOG(AssetMonitor, Error, "{}: Asset {} ({}) ignored. Which has invalid virtual path.",
                                assetInfo.GetType(), virtualPath, guid);
                         ++directoryItr;
                         continue;
@@ -107,10 +107,18 @@ namespace ig::details
 
                     if (virtualPathGuidTable.contains(virtualPath))
                     {
-                        IG_LOG(AssetMonitor, Warning, "{} Asset {}({}) ignored. Which has duplicated virtual path.",
+                        IG_LOG(AssetMonitor, Error, "{}: Asset {} ({}) ignored. Which has duplicated virtual path.",
                                assetInfo.GetType(), virtualPath, guid);
                         ++directoryItr;
                         continue;
+                    }
+
+                    if (assetInfo.GetPersistency() == EAssetPersistency::Engine)
+                    {
+                        IG_LOG(AssetMonitor, Warning, "{}: Found invalid asset persistency Asset {} ({}). Assumes as Default.",
+                               assetInfo.GetType(), virtualPath, guid);
+                        assetInfo.SetPersistency(EAssetPersistency::Default);
+                        serializedMetadata << assetInfo;
                     }
 
                     virtualPathGuidTable[virtualPath] = guid;
