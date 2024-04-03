@@ -52,7 +52,7 @@ namespace ig
 
                 const auto IsSelectedCached = [selectedTypeFilter = *selectedTypeFilter](const AssetManager::Snapshot& snapshot)
                 {
-                    return snapshot.Info.GetType() == selectedTypeFilter && snapshot.RefCount > 0;
+                    return snapshot.Info.GetType() == selectedTypeFilter && snapshot.IsCached();
                 };
 
                 ImGui::Text(std::format("#Imported {}: {}\t#Cached {}: {}",
@@ -66,7 +66,7 @@ namespace ig
             {
                 const auto IsCached = [](const AssetManager::Snapshot& snapshot)
                 {
-                    return snapshot.RefCount > 0;
+                    return snapshot.IsCached();
                 };
 
                 ImGui::Text(std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(),
