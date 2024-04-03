@@ -123,13 +123,12 @@ namespace ig::details
 
             const xg::Guid guid{ assetInfo.GetGuid() };
 
-            /* #sy_wip 영속 에셋 인스턴스에 대한 처리 필요 */
             ReadWriteLock rwLock{ mutex };
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
             IG_CHECK(refCounterTable[guid] > 0);
             const uint32_t refCount{ --refCounterTable[guid] };
-            if (refCount == 0)
+            if (refCount == 0 && assetInfo.GetPersistency() == EAssetPersistency::Default)
             {
                 InvalidateUnsafe(guid);
             }
