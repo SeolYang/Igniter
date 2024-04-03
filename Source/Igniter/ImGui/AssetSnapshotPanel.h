@@ -18,5 +18,7 @@ namespace ig
         std::vector<AssetManager::Snapshot> snapshots{};
         bool bDirty{ true };
         chrono::system_clock::time_point lastUpdated{ chrono::system_clock::now() };
+
+        std::optional<EAssetType> selectedTypeFilter{};
     };
 } // namespace ig

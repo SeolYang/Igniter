@@ -1,6 +1,7 @@
 #include <Igniter.h>
 #include <Core/Engine.h>
 #include <Core/Timer.h>
+#include <ImGui/ImGuiWidgets.h>
 #include <ImGui/AssetSnapshotPanel.h>
 
 namespace ig
@@ -23,8 +24,22 @@ namespace ig
 
     void AssetSnapshotPanel::Render()
     {
-        if (ImGui::Begin("Asset Snapshots Panel", &bIsVisible, ImGuiWindowFlags_NoCollapse))
+        if (ImGui::Begin("Asset Snapshots Panel", &bIsVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar))
         {
+            if (ImGui::BeginMenuBar())
+            {
+                if (ImGui::BeginMenu("Filters"))
+                {
+                    selectedTypeFilter = EnumMenuItems<EAssetType>(selectedTypeFilter, EAssetType::Unknown);
+                    if (ImGui::MenuItem("No Filters"))
+                    {
+                        selectedTypeFilter = std::nullopt;
+                    }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenuBar();
+            }
+
             UniqueLock lock{ mutex };
             ImGui::Text(std::format("Last Update at {:%Y/%m/%d %H:%M:%S}", lastUpdated).data());
             ImGui::Text(std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(), 
@@ -95,17 +110,21 @@ namespace ig
 
                 for (const AssetManager::Snapshot& snapshot : snapshots)
                 {
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::Text(ToCStr(snapshot.Info.GetType()));
-                    ImGui::TableNextColumn();
-                    ImGui::Text(snapshot.Info.GetGuid().str().c_str());
-                    ImGui::TableNextColumn();
-                    ImGui::Text(snapshot.Info.GetVirtualPath().ToCString());
-                    ImGui::TableNextColumn();
-                    ImGui::Text(ToCStr(snapshot.Info.GetPersistency()));
-                    ImGui::TableNextColumn();
-                    ImGui::Text("%u", snapshot.RefCount);
+                    const EAssetType assetType{ snapshot.Info.GetType() };
+                    if (!selectedTypeFilter || *selectedTypeFilter == assetType)
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::Text(ToCStr(snapshot.Info.GetType()));
+                        ImGui::TableNextColumn();
+                        ImGui::Text(snapshot.Info.GetGuid().str().c_str());
+                        ImGui::TableNextColumn();
+                        ImGui::Text(snapshot.Info.GetVirtualPath().ToCString());
+                        ImGui::TableNextColumn();
+                        ImGui::Text(ToCStr(snapshot.Info.GetPersistency()));
+                        ImGui::TableNextColumn();
+                        ImGui::Text("%u", snapshot.RefCount);
+                    }
                 }
 
                 ImGui::EndTable();
