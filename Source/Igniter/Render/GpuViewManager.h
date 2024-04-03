@@ -58,7 +58,7 @@ namespace ig
         std::unique_ptr<DescriptorHeap> rtvHeap;
         std::unique_ptr<DescriptorHeap> dsvHeap;
 
-        robin_hood::unordered_map<uint64_t, Handle<GpuView, GpuViewManager*>> cachedSamplerView;
+        UnorderedMap<uint64_t, Handle<GpuView, GpuViewManager*>> cachedSamplerView;
 
         static constexpr uint32_t NumCbvSrvUavDescriptors = 4096;
         static constexpr uint32_t NumSamplerDescriptors = 64;

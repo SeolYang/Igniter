@@ -84,7 +84,7 @@ namespace ig
     private:
         [[nodiscard]] static constexpr uint64_t EvalHash(const std::string_view strView) noexcept;
 
-        using HashStringMap = robin_hood::unordered_node_map<uint64_t, std::string>;
+        using HashStringMap = StableUnorderedMap<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
         [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
 
@@ -99,7 +99,7 @@ namespace ig
 
     inline String operator""_fs(const wchar_t* wstr, const size_t count)
     {
-        return String(std::wstring_view{ wstr, count });
+        return std::wstring_view{ wstr, count };
     }
 } // namespace ig
 

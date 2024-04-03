@@ -87,7 +87,7 @@ namespace ig
         mutable SharedMutex mutex;
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
         std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
-        robin_hood::unordered_map<uint64_t, spdlog::logger*> categoryMap;
+        UnorderedMap<uint64_t, spdlog::logger*> categoryMap;
 
     private:
         static constexpr std::string_view FileName = "Log";

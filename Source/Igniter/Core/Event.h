@@ -56,6 +56,6 @@ namespace ig
         }
 
     private:
-        robin_hood::unordered_map<Identifier, DelegateType> subscribeTable{};
+        UnorderedMap<Identifier, DelegateType> subscribeTable{};
     };
 } // namespace ig

@@ -44,6 +44,7 @@
 #pragma warning(disable : 6305)
 #include <robin_hood.h>
 #pragma warning(pop)
+#include <ankerl/unordered_dense.h>
 #include <crossguid/guid.hpp>
 #include <magic_enum.hpp>
 

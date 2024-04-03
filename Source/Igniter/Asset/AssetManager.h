@@ -21,7 +21,7 @@ namespace ig
     class AssetManager final
     {
     private:
-        using VirtualPathGuidTable = robin_hood::unordered_map<String, xg::Guid>;
+        using VirtualPathGuidTable = UnorderedMap<String, xg::Guid>;
 
     public:
         using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
@@ -125,7 +125,7 @@ namespace ig
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
         Mutex assetMutexTableMutex;
-        robin_hood::unordered_map<xg::Guid, Mutex> assetMutexTable;
+        StableUnorderedMap<xg::Guid, Mutex> assetMutexTable;
 
         Ptr<TextureImporter> textureImporter;
         Ptr<TextureLoader> textureLoader;

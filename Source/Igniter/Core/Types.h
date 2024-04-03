@@ -34,6 +34,18 @@ namespace ig
     template <typename T>
     using SharedPtr = std::shared_ptr<T>;
 
+    template <typename Key, typename T>
+    using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;
+
+    template <typename Key>
+    using StableUnorderedSet = robin_hood::unordered_node_set<Key>;
+
+    template <typename Key, typename T>
+    using UnorderedMap = ankerl::unordered_dense::map<Key, T>;
+
+    template <typename Key>
+    using UnorderedSet = ankerl::unordered_dense::set<Key>;
+
     using Entity = entt::entity;
     using Registry = entt::registry;
 

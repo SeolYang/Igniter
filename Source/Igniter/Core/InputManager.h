@@ -57,12 +57,12 @@ namespace ig
     class HandleManager;
     class InputManager final
     {
-        using NameSet = robin_hood::unordered_set<String>;
-        using InputNameMap = robin_hood::unordered_map<EInput, NameSet>;
-        using ScaleMap = robin_hood::unordered_map<String, float>;
-        using InputNameScaleMap = robin_hood::unordered_map<EInput, ScaleMap>;
+        using NameSet = UnorderedSet<String>;
+        using InputNameMap = UnorderedMap<EInput, NameSet>;
+        using ScaleMap = UnorderedMap<String, float>;
+        using InputNameScaleMap = UnorderedMap<EInput, ScaleMap>;
         template <typename T>
-        using EventMap = robin_hood::unordered_map<String, Handle<T>>;
+        using EventMap = UnorderedMap<String, Handle<T>>;
 
     public:
         InputManager(HandleManager& handleManager);
@@ -107,7 +107,7 @@ namespace ig
         EventMap<Action> actionMap{};
         EventMap<Axis> axisMap{};
 
-        robin_hood::unordered_set<EInput> scopedInputs{};
+        UnorderedSet<EInput> scopedInputs{};
 
         std::vector<uint8_t> rawInputBuffer;
     };

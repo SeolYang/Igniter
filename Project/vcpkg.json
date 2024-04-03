@@ -11,6 +11,7 @@
     "meshoptimizer",
     "stb",
     "robin-hood-hashing",
+    "unordered-dense",
     "nlohmann-json",
     "magic-enum",
     "spdlog",

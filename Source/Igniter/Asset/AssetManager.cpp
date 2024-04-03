@@ -258,7 +258,7 @@ namespace ig
 
     std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots() const
     {
-        robin_hood::unordered_map<xg::Guid, Snapshot> intermediateSnapshots{};
+        UnorderedMap<xg::Guid, Snapshot> intermediateSnapshots{};
         std::vector<AssetInfo> assetInfoSnapshots{ assetMonitor->TakeSnapshots() };
         for (const AssetInfo& assetInfoSnapshot : assetInfoSnapshots)
         {

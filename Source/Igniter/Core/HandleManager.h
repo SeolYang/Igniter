@@ -60,8 +60,8 @@ namespace ig
         mutable SharedMutex mutex;
 
         /* key: Hash value of unique type.  */
-        robin_hood::unordered_map<uint64_t, MemoryPool> memPools{};
-        robin_hood::unordered_map<uint64_t, robin_hood::unordered_set<uint64_t>> pendingDeallocationSets;
+        UnorderedMap<uint64_t, MemoryPool> memPools{};
+        UnorderedMap<uint64_t, UnorderedSet<uint64_t>> pendingDeallocationSets;
 
         constexpr static size_t SizeOfChunkBytes = 65536;
         constexpr static uint32_t NumInitialChunkPerPool = 2;

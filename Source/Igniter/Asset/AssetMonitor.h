@@ -6,7 +6,7 @@ namespace ig::details
 {
     class AssetMonitor
     {
-        using VirtualPathGuidTable = robin_hood::unordered_map<String, xg::Guid>;
+        using VirtualPathGuidTable = UnorderedMap<String, xg::Guid>;
 
     public:
         AssetMonitor();
@@ -119,7 +119,7 @@ namespace ig::details
     private:
         mutable SharedMutex mutex;
         std::vector<std::pair<EAssetType, VirtualPathGuidTable>> virtualPathGuidTables;
-        robin_hood::unordered_map<xg::Guid, json> guidSerializedDescTable;
-        robin_hood::unordered_map<xg::Guid, AssetInfo> expiredAssetInfos;
+        UnorderedMap<xg::Guid, json> guidSerializedDescTable;
+        UnorderedMap<xg::Guid, AssetInfo> expiredAssetInfos;
     };
 } // namespace ig::details

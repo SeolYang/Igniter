@@ -142,7 +142,7 @@ namespace ig::details
         HandleManager& handleManager;
 
         mutable SharedMutex mutex;
-        robin_hood::unordered_map<xg::Guid, Handle<T>> cachedAssets{};
-        robin_hood::unordered_map<xg::Guid, uint32_t> refCounterTable{};
+        UnorderedMap<xg::Guid, Handle<T>> cachedAssets{};
+        UnorderedMap<xg::Guid, uint32_t> refCounterTable{};
     };
 } // namespace ig::details
