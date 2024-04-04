@@ -324,15 +324,18 @@ namespace ig::details
             serializedMeta >> assetInfo;
             IG_CHECK(assetInfo.IsValid());
 
-            const xg::Guid guid{ assetInfo.GetGuid() };
-            IG_CHECK(guidSerializedMeta.first == guid);
-            const String virtualPath{ assetInfo.GetVirtualPath() };
+            if (assetInfo.GetPersistency() != EAssetPersistency::Engine)
+            {
+                const xg::Guid guid{ assetInfo.GetGuid() };
+                IG_CHECK(guidSerializedMeta.first == guid);
+                const String virtualPath{ assetInfo.GetVirtualPath() };
 
-            const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.GetType(), guid) };
-            IG_ENSURE(SaveJsonToFile(metadataPath, serializedMeta));
-            IG_LOG(AssetMonitor, Debug, "{} Asset metadata Saved: {} ({})",
-                   assetInfo.GetType(),
-                   virtualPath, guid);
+                const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.GetType(), guid) };
+                IG_ENSURE(SaveJsonToFile(metadataPath, serializedMeta));
+                IG_LOG(AssetMonitor, Debug, "{} Asset metadata Saved: {} ({})",
+                       assetInfo.GetType(),
+                       virtualPath, guid);
+            }
         }
     }
 
