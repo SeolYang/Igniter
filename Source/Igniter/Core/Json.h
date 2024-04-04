@@ -1,34 +1,39 @@
 #pragma once
 #include <Igniter.h>
+#include <Core/Log.h>
+
+IG_DEFINE_LOG_CATEGORY(JsonDeserializer);
 
 namespace ig::details
 {
-    template <typename VARType>
-    void Serialize(nlohmann::json& archive, const VARType& var, const std::string_view dataTypeName, const std::string_view varName)
+    template <typename VarType>
+    void Serialize(nlohmann::json& archive, const VarType& var, const std::string_view containerKey, const std::string_view varKey)
     {
-        if (!archive.contains(dataTypeName))
+        if (!archive.contains(containerKey))
         {
-            archive[dataTypeName] = nlohmann::json{};
+            archive[containerKey] = nlohmann::json{};
         }
 
-        IG_CHECK(!archive[dataTypeName].is_discarded());
-        archive[dataTypeName][varName] = var;
+        IG_CHECK(!archive[containerKey].is_discarded());
+        archive[containerKey][varKey] = var;
     }
 
-    template <typename VARType, typename F>
-    void DeSerialize(const nlohmann::json& archive, VARType& var, const std::string_view dataTypeName, const std::string_view varName, F callback, VARType fallback)
+    template <typename VarType, typename F>
+    void Deserialize(const nlohmann::json& archive, VarType& var, const std::string_view containerKey, const std::string_view varKey, F callback, VarType fallback)
     {
         IG_CHECK(!archive.is_discarded());
-        bool bFALLBACKRequired = false;
-        if (archive.contains(dataTypeName) && archive[dataTypeName].contains(varName))
+        if (!archive.contains(containerKey) || !archive[containerKey].contains(varKey))
         {
-            bFALLBACKRequired = !callback(archive, var);
+            var = fallback;
+            IG_LOG(JsonDeserializer, Warning, "{}::{} does not exists in json archive.", containerKey, varKey);
+            return;
         }
 
-        if (bFALLBACKRequired)
+        if (!callback(archive, var))
         {
-            /* #sy_improvement FALLBACK 이 발생 하였음을 어떻게 알리면 좋을까? */
             var = fallback;
+            IG_LOG(JsonDeserializer, Warning, "Type mismatch/Invalid value found in Variable {} which in Container {}.", varKey, containerKey);
+            return;
         }
     }
 
@@ -113,7 +118,7 @@ namespace ig::details
  */
 
 #define IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                                  \
-    ig::details::DeSerialize<std::decay_t<decltype(VAR)>>(                                                          \
+    ig::details::Deserialize<std::decay_t<decltype(VAR)>>(                                                          \
         JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
         [](const nlohmann::json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
             IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
@@ -130,7 +135,7 @@ namespace ig::details
         FALLBACK)
 
 #define IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
-    ig::details::DeSerialize<xg::Guid>(                                                                             \
+    ig::details::Deserialize<xg::Guid>(                                                                             \
         JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
         [](const nlohmann::json& archive, xg::Guid& var) {                                                          \
             IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
@@ -146,7 +151,7 @@ namespace ig::details
         FALLBACK)
 
 #define IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
-    ig::details::DeSerialize<std::decay_t<decltype(VAR)>>(                                                          \
+    ig::details::Deserialize<std::decay_t<decltype(VAR)>>(                                                          \
         JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
         [](const nlohmann::json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
             IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
