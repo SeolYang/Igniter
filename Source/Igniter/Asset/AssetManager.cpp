@@ -43,6 +43,7 @@ namespace ig
     {
         AssetInfo defaultTexInfo{ Texture::EngineDefault, EAssetType::Texture };
         defaultTexInfo.MarkAsEngineDefault();
+        defaultTexGuid = defaultTexInfo.GetGuid();
         RegisterEngineDefault<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
     }
 
@@ -79,7 +80,13 @@ namespace ig
 
     CachedAsset<Texture> AssetManager::LoadTexture(const Guid guid)
     {
-        return LoadInternal<Texture>(guid, *textureLoader);
+        CachedAsset<Texture> cachedTex{ LoadInternal<Texture>(guid, *textureLoader) };
+        if (!cachedTex)
+        {
+            return LoadInternal<Texture>(defaultTexGuid, *textureLoader);
+        }
+
+        return cachedTex;
     }
 
     CachedAsset<Texture> AssetManager::LoadTexture(const String virtualPath)
@@ -87,16 +94,22 @@ namespace ig
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Load Texture: Invalid Virtual Path {}", virtualPath);
-            return CachedAsset<Texture>{};
+            return LoadInternal<Texture>(defaultTexGuid, *textureLoader);
         }
 
         if (!assetMonitor->Contains(EAssetType::Texture, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
-            return CachedAsset<Texture>{};
+            return LoadInternal<Texture>(defaultTexGuid, *textureLoader);
         }
 
-        return LoadInternal<Texture>(assetMonitor->GetGuid(EAssetType::Texture, virtualPath), *textureLoader);
+        CachedAsset<Texture> cachedTex{ LoadInternal<Texture>(assetMonitor->GetGuid(EAssetType::Texture, virtualPath), *textureLoader) };
+        if (!cachedTex)
+        {
+            return LoadInternal<Texture>(defaultTexGuid, *textureLoader);
+        }
+
+        return cachedTex;
     }
 
     std::vector<Guid> AssetManager::ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc)
