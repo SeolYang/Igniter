@@ -6,7 +6,7 @@
 
 namespace ig
 {
-    struct StaticMesh;
+    class StaticMesh;
     template <>
     constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
 
@@ -41,13 +41,14 @@ namespace ig
         uint32_t NumIndices{ 0 };
         size_t CompressedVerticesSizeInBytes{ 0 };
         size_t CompressedIndicesSizeInBytes{ 0 };
+        String MaterialVirtualPath{};
         /* #sy_todo Add AABB Info */
         // std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
     };
 
     class GpuBuffer;
     class GpuView;
-    struct StaticMesh final
+    class StaticMesh final
     {
     public:
         using ImportDesc = StaticMeshImportDesc;

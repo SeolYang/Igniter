@@ -6,7 +6,7 @@
 
 namespace ig
 {
-    struct Texture;
+    class Texture;
     template <>
     constexpr inline EAssetType AssetTypeOf_v<Texture> = EAssetType::Texture;
 
@@ -69,7 +69,7 @@ namespace ig
     class GpuTexture;
     class GpuView;
     class GpuViewManager;
-    struct Texture final
+    class Texture final
     {
     public:
         using ImportDesc = TextureImportDesc;

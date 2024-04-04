@@ -8,8 +8,8 @@
 
 namespace ig
 {
-    struct StaticMesh;
-    struct Texture;
+    class StaticMesh;
+    class Texture;
     struct StaticMeshComponent
     {
     public:

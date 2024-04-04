@@ -7,7 +7,7 @@
 
 namespace ig
 {
-    struct Material;
+    class Material;
     template <>
     constexpr inline EAssetType AssetTypeOf_v<Material> = EAssetType::Material;
 
@@ -28,7 +28,7 @@ namespace ig
     };
 
     class AssetManager;
-    struct Material final
+    class Material final
     {
     public:
         using ImportDesc = void;
