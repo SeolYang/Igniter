@@ -104,6 +104,7 @@ namespace ig
         frameManager.reset();
         ////////////////////////////////////////////////////
 
+        IG_LOG(Engine, Info, "Engine Runtime Extinguished");
         if (instance == this)
         {
             instance = nullptr;

@@ -10,6 +10,7 @@ namespace ig::details
     AssetMonitor::AssetMonitor()
     {
         InitVirtualPathGuidTables();
+        CleanupOrphanFiles();
         ParseAssetDirectory();
     }
 
@@ -46,14 +47,14 @@ namespace ig::details
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
             fs::directory_iterator directoryItr{ GetAssetDirectoryPath(assetType) };
 
-            IG_LOG(AssetMonitor, Debug, "Root Dir: {}", GetAssetDirectoryPath(assetType).string());
+            IG_LOG(AssetMonitor, Debug, "Parsing {} type root dir ({})...", assetType, GetAssetDirectoryPath(assetType).string());
             while (directoryItr != fs::end(directoryItr))
             {
                 const fs::directory_entry& entry = *directoryItr;
                 if (entry.is_regular_file() && !entry.path().has_extension())
                 {
                     /* 최초에 온건한 형식의 메타데이터만 캐싱 됨을 보장 하여야 함! */
-                    const xg::Guid guidFromPath{ entry.path().filename().string() };
+                    const Guid guidFromPath{ entry.path().filename().string() };
                     if (!guidFromPath.isValid())
                     {
                         IG_LOG(AssetMonitor, Error, "Asset {} ignored. {} is not valid guid.",
@@ -76,7 +77,7 @@ namespace ig::details
                     AssetInfo assetInfo{};
                     serializedMetadata >> assetInfo;
 
-                    const xg::Guid guid{ assetInfo.GetGuid() };
+                    const Guid guid{ assetInfo.GetGuid() };
                     const String virtualPath{ assetInfo.GetVirtualPath() };
 
                     if (!assetInfo.IsValid())
@@ -89,7 +90,7 @@ namespace ig::details
                     if (guidFromPath != guid)
                     {
                         IG_LOG(AssetMonitor, Error, "{}: Asset {} ignored. The guid from filename does not match asset info guid."
-                                                      " Which was {}.",
+                                                    " Which was {}.",
                                assetInfo.GetType(),
                                entry.path().string(),
                                guid);
@@ -164,7 +165,7 @@ namespace ig::details
         return *table;
     }
 
-    bool AssetMonitor::ContainsUnsafe(const xg::Guid guid) const
+    bool AssetMonitor::ContainsUnsafe(const Guid guid) const
     {
         return guidSerializedDescTable.contains(guid);
     }
@@ -178,7 +179,7 @@ namespace ig::details
         return itr != virtualPathGuidTable.cend() && ContainsUnsafe(itr->second);
     }
 
-    xg::Guid AssetMonitor::GetGuidUnsafe(const EAssetType assetType, const String virtualPath) const
+    Guid AssetMonitor::GetGuidUnsafe(const EAssetType assetType, const String virtualPath) const
     {
         IG_CHECK(assetType != EAssetType::Unknown);
         IG_CHECK(IsValidVirtualPath(virtualPath));
@@ -187,13 +188,13 @@ namespace ig::details
         const auto itr = virtualPathGuidTable.find(virtualPath);
         IG_CHECK(itr != virtualPathGuidTable.cend());
 
-        const xg::Guid guid{ itr->second };
+        const Guid guid{ itr->second };
         IG_CHECK(guid.isValid());
 
         return guid;
     }
 
-    bool AssetMonitor::Contains(const xg::Guid guid) const
+    bool AssetMonitor::Contains(const Guid guid) const
     {
         ReadOnlyLock lock{ mutex };
         return ContainsUnsafe(guid);
@@ -205,13 +206,13 @@ namespace ig::details
         return ContainsUnsafe(assetType, virtualPath);
     }
 
-    xg::Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
+    Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
     {
         ReadOnlyLock lock{ mutex };
         return GetGuidUnsafe(assetType, virtualPath);
     }
 
-    AssetInfo AssetMonitor::GetAssetInfoUnsafe(const xg::Guid guid) const
+    AssetInfo AssetMonitor::GetAssetInfoUnsafe(const Guid guid) const
     {
         IG_CHECK(ContainsUnsafe(guid));
 
@@ -223,7 +224,7 @@ namespace ig::details
         return info;
     }
 
-    AssetInfo AssetMonitor::GetAssetInfo(const xg::Guid guid) const
+    AssetInfo AssetMonitor::GetAssetInfo(const Guid guid) const
     {
         ReadOnlyLock lock{ mutex };
         return GetAssetInfoUnsafe(guid);
@@ -237,7 +238,7 @@ namespace ig::details
 
     void AssetMonitor::UpdateInfo(const AssetInfo& newInfo)
     {
-        const xg::Guid guid{ newInfo.GetGuid() };
+        const Guid guid{ newInfo.GetGuid() };
         const String virtualPath{ newInfo.GetVirtualPath() };
         IG_CHECK(IsValidVirtualPath(virtualPath));
 
@@ -246,7 +247,7 @@ namespace ig::details
         IG_CHECK(ContainsUnsafe(guid));
 
         const AssetInfo& oldInfo = GetAssetInfoUnsafe(guid);
-        const xg::Guid oldGuid{ oldInfo.GetGuid() };
+        const Guid oldGuid{ oldInfo.GetGuid() };
         const String oldVirtualPath{ oldInfo.GetVirtualPath() };
         IG_CHECK(guid == oldGuid);
         IG_CHECK(newInfo.GetType() == oldInfo.GetType());
@@ -262,7 +263,7 @@ namespace ig::details
         guidSerializedDescTable[guid] << newInfo;
     }
 
-    void AssetMonitor::Remove(const xg::Guid guid)
+    void AssetMonitor::Remove(const Guid guid)
     {
         ReadWriteLock rwLock{ mutex };
         IG_CHECK(ContainsUnsafe(guid));
@@ -290,7 +291,7 @@ namespace ig::details
             IG_CHECK(!ContainsUnsafe(expiredAssetInfoPair.first));
             const AssetInfo& expiredAssetInfo{ expiredAssetInfoPair.second };
             IG_CHECK(expiredAssetInfo.IsValid());
-            const xg::Guid expiredGuid{ expiredAssetInfo.GetGuid() };
+            const Guid expiredGuid{ expiredAssetInfo.GetGuid() };
             const String expiredVirtualPath{ expiredAssetInfo.GetVirtualPath() };
 
             IG_CHECK(expiredAssetInfoPair.first == expiredGuid);
@@ -326,7 +327,7 @@ namespace ig::details
 
             if (assetInfo.GetPersistency() != EAssetPersistency::Engine)
             {
-                const xg::Guid guid{ assetInfo.GetGuid() };
+                const Guid guid{ assetInfo.GetGuid() };
                 IG_CHECK(guidSerializedMeta.first == guid);
                 const String virtualPath{ assetInfo.GetVirtualPath() };
 
@@ -339,6 +340,51 @@ namespace ig::details
         }
     }
 
+    void AssetMonitor::CleanupOrphanFiles()
+    {
+        std::vector<fs::path> orphanFiles{};
+        for (const auto assetType : magic_enum::enum_values<EAssetType>())
+        {
+            if (assetType == EAssetType::Unknown)
+            {
+                continue;
+            }
+
+            fs::directory_iterator directoryItr{ GetAssetDirectoryPath(assetType) };
+            while (directoryItr != fs::end(directoryItr))
+            {
+                fs::path path{ directoryItr->path() };
+                if (!fs::is_regular_file(path))
+                {
+                    ++directoryItr;
+                    continue;
+                }
+
+                Guid guid{ path.filename().replace_extension().string() };
+                if (!guid.isValid())
+                {
+                    ++directoryItr;
+                    continue;
+                }
+
+                const bool bIsOrphanMetadata{ path.has_extension() && !fs::exists(path.replace_extension()) };
+                const bool bIsOrphanAssetFile{ !path.has_extension() && !fs::exists(path.replace_extension(details::MetadataExt)) };
+                if (bIsOrphanMetadata || bIsOrphanAssetFile)
+                {
+                    orphanFiles.emplace_back(directoryItr->path());
+                }
+
+                ++directoryItr;
+            }
+        }
+
+        for (const fs::path& orphanFilePath : orphanFiles)
+        {
+            IG_LOG(AssetMonitor, Info, "Removing unreferenced(orphan) file: {}...", orphanFilePath.string());
+            fs::remove(orphanFilePath);
+        }
+    }
+
     void AssetMonitor::SaveAllChanges()
     {
         IG_LOG(AssetMonitor, Info, "Save all info chages...");
@@ -346,6 +392,7 @@ namespace ig::details
             ReadWriteLock rwLock{ mutex };
             ReflectExpiredToFilesUnsafe();
             ReflectRemainedToFilesUnsafe();
+            CleanupOrphanFiles();
         }
         IG_LOG(AssetMonitor, Info, "All info changes saved.");
     }
