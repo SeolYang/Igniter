@@ -92,6 +92,8 @@ namespace ig
 
     public:
         static constexpr std::string_view EngineDefault = "Engine\\Default";
+        static constexpr std::string_view EngineDefaultWhite = "Engine\\White";
+        static constexpr std::string_view EngineDefaultBlack = "Engine\\Black";
 
     private:
         Desc snapshot{};

@@ -57,6 +57,7 @@ namespace ig
     private:
         Result<Texture, ETextureLoaderStatus> Load(const Texture::Desc& desc);
         Result<Texture, details::EMakeDefaultTexStatus> MakeDefault(const AssetInfo& assetInfo);
+        Result<Texture, details::EMakeDefaultTexStatus> MakeMonochrome(const AssetInfo& assetInfo, const Color& color);
 
     private:
         HandleManager& handleManager;

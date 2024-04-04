@@ -7,7 +7,6 @@
 #include <D3D12/GpuView.h>
 #include <Render/GpuUploader.h>
 #include <Render/GpuViewManager.h>
-
 #include <Asset/TextureLoader.h>
 
 IG_DEFINE_LOG_CATEGORY(TextureLoader);
@@ -209,7 +208,6 @@ namespace ig
                                                                    samplerView });
     }
 
-    /* #sy_todo 어떤 타입의 데이터도 텍스처로 만들 수 있도록 일반화 할 것 */
     Result<Texture, details::EMakeDefaultTexStatus> TextureLoader::MakeDefault(const AssetInfo& assetInfo)
     {
         constexpr DXGI_FORMAT Format{ DXGI_FORMAT_R8G8B8A8_UNORM };
@@ -262,6 +260,93 @@ namespace ig
             .SlicePitch = SlicePitch,
         };
 
+        std::vector<D3D12_SUBRESOURCE_DATA> subresources{ subresource };
+
+        const GpuCopyableFootprints dstCopyableFootprints{ renderDevice.GetCopyableFootprints(texDesc, 0, 1, 0) };
+        UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
+        uploadCtx.CopyTexture(*newTex, dstCopyableFootprints, subresources);
+        std::optional<GpuSync> sync{ gpuUploader.Submit(uploadCtx) };
+        IG_CHECK(sync);
+        sync->WaitOnCpu();
+
+        Handle<GpuView, GpuViewManager*> srv = gpuViewManager.RequestShaderResourceView(
+            *newTex,
+            D3D12_TEX2D_SRV{
+                .MostDetailedMip = 0,
+                .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
+                .PlaneSlice = 0,
+                .ResourceMinLODClamp = 0.f });
+
+        if (!srv)
+        {
+            return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateShaderResourceView>();
+        }
+
+        const Texture::LoadDesc loadDesc{
+            .Format = Format,
+            .Width = Width,
+            .Height = Height,
+            .Filter = D3D12_FILTER_MIN_MAG_MIP_POINT,
+        };
+
+        auto samplerView = gpuViewManager.RequestSampler(D3D12_SAMPLER_DESC{
+            .Filter = loadDesc.Filter,
+            .AddressU = loadDesc.AddressModeU,
+            .AddressV = loadDesc.AddressModeV,
+            .AddressW = loadDesc.AddressModeW,
+            .MipLODBias = 0.f,
+            .MaxAnisotropy = 0,
+            .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE,
+            .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
+            .MinLOD = 0.f,
+            .MaxLOD = 0.f });
+
+        if (!samplerView)
+        {
+            return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateSamplerView>();
+        }
+
+        return MakeSuccess<Texture, details::EMakeDefaultTexStatus>(Texture{ Texture::Desc{ .Info = assetInfo, .LoadDescriptor = loadDesc },
+                                                                             { handleManager, std::move(newTex.value()) },
+                                                                             std::move(srv),
+                                                                             samplerView });
+    }
+
+    Result<Texture, details::EMakeDefaultTexStatus> TextureLoader::MakeMonochrome(const AssetInfo& assetInfo, const Color& color)
+    {
+        constexpr DXGI_FORMAT Format{ DXGI_FORMAT_R8G8B8A8_UNORM };
+        constexpr LONG_PTR BytesPerPixel{ 4 };
+
+        constexpr LONG_PTR Width{ 1 };
+        constexpr LONG_PTR Height{ 1 };
+        constexpr LONG_PTR NumPixels{ Width * Height };
+        std::vector<uint8_t> bytes(NumPixels * BytesPerPixel);
+
+        Color saturatedColor{};
+        color.Saturate(saturatedColor);
+        bytes[0] = static_cast<uint8_t>(saturatedColor.R() * 255);
+        bytes[1] = static_cast<uint8_t>(saturatedColor.G() * 255);
+        bytes[2] = static_cast<uint8_t>(saturatedColor.B() * 255);
+        bytes[3] = 255;
+
+        GPUTextureDesc texDesc{};
+        texDesc.AsTexture2D(Width, Height, 1, Format);
+        texDesc.DebugName = String(assetInfo.GetVirtualPath());
+        std::optional<GpuTexture> newTex{ renderDevice.CreateTexture(texDesc) };
+        if (!newTex)
+        {
+            return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateTexture>();
+        }
+
+        constexpr LONG_PTR RowPitch{ Width * BytesPerPixel };
+        constexpr LONG_PTR SlicePitch{ Height * RowPitch };
+        IG_CHECK(SlicePitch == bytes.size());
+
+        const D3D12_SUBRESOURCE_DATA subresource{
+            .pData = reinterpret_cast<const void*>(bytes.data()),
+            .RowPitch = RowPitch,
+            .SlicePitch = SlicePitch,
+        };
         std::vector<D3D12_SUBRESOURCE_DATA> subresources{ subresource };
 
         const GpuCopyableFootprints dstCopyableFootprints{ renderDevice.GetCopyableFootprints(texDesc, 0, 1, 0) };
