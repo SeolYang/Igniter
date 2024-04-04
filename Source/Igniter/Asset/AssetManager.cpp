@@ -6,6 +6,7 @@
 #include <Asset/TextureLoader.h>
 #include <Asset/StaticMeshImporter.h>
 #include <Asset/StaticMeshLoader.h>
+#include <Asset/MaterialImporter.h>
 #include <Asset/MaterialLoader.h>
 #include <Asset/AssetManager.h>
 
@@ -17,6 +18,7 @@ namespace ig
           textureLoader(std::make_unique<TextureLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
           staticMeshImporter(std::make_unique<StaticMeshImporter>(*this)),
           staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
+          materialImporter(std::make_unique<MaterialImporter>(*this)),
           materialLoader(std::make_unique<MaterialLoader>(*this))
     {
         InitAssetCaches(handleManager);
@@ -137,18 +139,16 @@ namespace ig
         return LoadInternal<StaticMesh>(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath), *staticMeshLoader);
     }
 
-    Guid AssetManager::CreateMaterial(MaterialCreateDesc createDesc)
+    Guid AssetManager::CreateMaterial(const String virtualPath, const MaterialCreateDesc createDesc)
     {
-        const String virtualPath{ createDesc.VirtualPath };
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Create Material: Invalid Virtual Path {}", virtualPath);
             return Guid{};
         }
 
-        createDesc.VirtualPath = virtualPath;
-
-        Result<Material::Desc, EMaterialCreateStatus> result{ Material::Create(std::move(createDesc)) };
+        Result<Material::Desc, EMaterialCreateStatus> result{ materialImporter->Create(AssetInfo{ virtualPath, EAssetType::Material },
+                                                                                       createDesc) };
         std::optional<Guid> guidOpt{ ImportInternal<Material>(virtualPath, result) };
         if (!guidOpt)
         {

@@ -79,8 +79,8 @@ int main()
             std::async(std::launch::async,
                        [&assetManager, &ashBodyTexFuture]
                        {
-                           // return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash\\Body"_fs, .Diffuse = ashBodyTexFuture.get() });
-                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Ash\\Body"_fs, .Diffuse = assetManager.LoadTexture("Engine\\Default"_fs) });
+                           return assetManager.CreateMaterial(R"(Ash\Body)"_fs,
+                                                              MaterialCreateDesc{ .DiffuseVirtualPath = R"(Engine\Defasdault)"_fs });
                        })
         };
 
@@ -88,7 +88,8 @@ int main()
             std::async(std::launch::async,
                        [&assetManager, &homuraBodyTexFuture]
                        {
-                           return assetManager.CreateMaterial(MaterialCreateDesc{ .VirtualPath = "Homura\\Body"_fs, .Diffuse = homuraBodyTexFuture.get() });
+                           return assetManager.CreateMaterial(R"(Homura\Body)"_fs,
+                                                              MaterialCreateDesc{ .DiffuseVirtualPath = R"(Homura\Body)"_fs });
                        })
         };
 

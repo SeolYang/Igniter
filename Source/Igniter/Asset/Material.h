@@ -11,21 +11,10 @@ namespace ig
     template <>
     constexpr inline EAssetType AssetTypeOf_v<Material> = EAssetType::Material;
 
-    enum class EMaterialCreateStatus
-    {
-        Success,
-        InvalidVirtualPath,
-        EmptyVirtualPath,
-        InvalidVirtualPathFormat,
-        FailedSaveMetadata,
-        FailedSaveAsset
-    };
-
     struct MaterialCreateDesc final
     {
     public:
-        String VirtualPath{};
-        CachedAsset<Texture> Diffuse{};
+        String DiffuseVirtualPath{};
     };
 
     struct MaterialLoadDesc final
@@ -59,9 +48,6 @@ namespace ig
 
         const Desc& GetSnapshot() const { return snapshot; }
         Texture& GetDiffuse();
-
-    private:
-        static Result<Desc, EMaterialCreateStatus> Create(MaterialCreateDesc desc);
 
     private:
         Desc snapshot{};

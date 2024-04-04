@@ -25,6 +25,7 @@ namespace ig
     class TextureLoader;
     class StaticMeshImporter;
     class StaticMeshLoader;
+    class MaterialImporter;
     class MaterialLoader;
     class AssetManager final
     {
@@ -66,7 +67,7 @@ namespace ig
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const Guid guid);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
-        Guid CreateMaterial(MaterialCreateDesc desc);
+        Guid CreateMaterial(const String virtualPath, const MaterialCreateDesc desc);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const Guid guid);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const String virtualPath);
 
@@ -228,6 +229,7 @@ namespace ig
         Ptr<StaticMeshImporter> staticMeshImporter;
         Ptr<StaticMeshLoader> staticMeshLoader;
 
+        Ptr <MaterialImporter> materialImporter;
         Ptr<MaterialLoader> materialLoader;
 
         ModifiedEvent assetModifiedEvent;

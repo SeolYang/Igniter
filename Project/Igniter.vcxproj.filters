@@ -369,6 +369,9 @@
     <ClInclude Include="..\Source\Igniter\ImGui\AssetSnapshotPanel.h">
       <Filter>Source\ImGui\Debug</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\MaterialImporter.h">
+      <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -562,6 +565,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\AssetSnapshotPanel.cpp">
       <Filter>Source\ImGui\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\MaterialImporter.cpp">
+      <Filter>Source\Asset\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
