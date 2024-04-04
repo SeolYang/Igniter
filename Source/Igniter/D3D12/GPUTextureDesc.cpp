@@ -977,7 +977,7 @@ namespace ig
         result.reserve(this->GetNumSubresources());
         const size_t bytesPerPixel{ SizeOfPixelInBytes(Format) };
         const uint8_t* ptr{ memoryBlock.data() };
-        const uint8_t* const ptrEnd{ ptr + memoryBlock.size_bytes() };
+        [[maybe_unused]] const uint8_t* const ptrEnd{ ptr + memoryBlock.size_bytes() };
         switch (Dimension)
         {
             case D3D12_RESOURCE_DIMENSION_TEXTURE1D:

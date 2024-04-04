@@ -61,16 +61,12 @@ namespace ig
 #pragma region test
         bindlessRootSignature = std::make_unique<RootSignature>(device.CreateBindlessRootSignature().value());
 
-        const ShaderCompileDesc vsDesc{
-            .SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
-            .Type = EShaderType::Vertex,
-            .OptimizationLevel = EShaderOptimizationLevel::None
-        };
+        const ShaderCompileDesc vsDesc{ .SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
+                                        .Type = EShaderType::Vertex,
+                                        .OptimizationLevel = EShaderOptimizationLevel::None };
 
-        const ShaderCompileDesc psDesc{
-            .SourcePath = String("Assets/Shader/BasicPixelShader.hlsl"),
-            .Type = EShaderType::Pixel
-        };
+        const ShaderCompileDesc psDesc{ .SourcePath = String("Assets/Shader/BasicPixelShader.hlsl"),
+                                        .Type = EShaderType::Pixel };
 
         vs = std::make_unique<ShaderBlob>(vsDesc);
         ps = std::make_unique<ShaderBlob>(psDesc);
@@ -93,11 +89,10 @@ namespace ig
         auto cmdCtx = gfxCmdCtxPool.Submit();
         cmdCtx->Begin();
         {
-            cmdCtx->AddPendingTextureBarrier(
-                *depthStencilBuffer,
-                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
-                D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
+            cmdCtx->AddPendingTextureBarrier(*depthStencilBuffer,
+                                             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
+                                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
+                                             D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
             cmdCtx->FlushBarriers();
         }
         cmdCtx->End();
