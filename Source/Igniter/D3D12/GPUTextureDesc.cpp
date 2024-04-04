@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    size_t SizeOfTexelInBits(const DXGI_FORMAT format)
+    static inline size_t SizeOfPixelInBits(const DXGI_FORMAT format)
     {
         switch (static_cast<int>(format))
         {
@@ -147,6 +147,11 @@ namespace ig
             default:
                 return 0;
         }
+    }
+
+    static inline size_t SizeOfPixelInBytes(const DXGI_FORMAT format)
+    {
+        return SizeOfPixelInBits(format) / 8;
     }
 
     uint16_t CalculateMaxNumMipLevels(const uint64_t width, const uint64_t height, const uint64_t depth)
@@ -959,5 +964,89 @@ namespace ig
         Layout = desc.Layout;
         Flags = desc.Flags;
         SamplerFeedbackMipRegion = {};
+    }
+
+    std::vector<D3D12_SUBRESOURCE_DATA> GPUTextureDesc::GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const
+    {
+        /* #sy_ref 텍스처 서브-리소스 데이터 생성
+         * https://github.com/microsoft/DirectXTex/blob/main/DirectXTex/DirectXTexImage.cpp#L145
+         * https://github.com/microsoft/DirectXTex/blob/main/DirectXTex/DirectXTexUtil.cpp#L924
+         * https://learn.microsoft.com/en-us/windows/win32/direct3d12/subresources
+         */
+        std::vector<D3D12_SUBRESOURCE_DATA> result{ };
+        result.reserve(this->GetNumSubresources());
+        const size_t bytesPerPixel{ SizeOfPixelInBytes(Format) };
+        const uint8_t* ptr{ memoryBlock.data() };
+        const uint8_t* const ptrEnd{ ptr + memoryBlock.size_bytes() };
+        switch (Dimension)
+        {
+            case D3D12_RESOURCE_DIMENSION_TEXTURE1D:
+            case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
+                for (uint16_t arraySlice = 0; arraySlice < DepthOrArraySize; ++arraySlice)
+                {
+                    uint64_t width{ Width };
+                    uint32_t height{ Height };
+
+                    for (uint16_t mipSlice = 0; mipSlice < MipLevels; ++mipSlice)
+                    {
+                        IG_CHECK(ptr < ptrEnd);
+                        size_t rowPitch{ 0 };
+                        size_t slicePitch{ 0 };
+                        IG_VERIFY_SUCCEEDED(DirectX::ComputePitch(Format, width, height, rowPitch, slicePitch));
+
+                        result.emplace_back(D3D12_SUBRESOURCE_DATA{ .pData = reinterpret_cast<const void*>(ptr),
+                                                                    .RowPitch = static_cast<LONG_PTR>(rowPitch),
+                                                                    .SlicePitch = static_cast<LONG_PTR>(slicePitch) });
+
+                        ptr += slicePitch;
+                        if (width > 1)
+                        {
+                            width >>= 1;
+                        }
+                        if (height > 1)
+                        {
+                            height >>= 1;
+                        }
+                    }
+                }
+                break;
+
+            case D3D12_RESOURCE_DIMENSION_TEXTURE3D:
+                uint64_t width{ Width };
+                uint32_t height{ Height };
+                uint16_t depth{ DepthOrArraySize };
+
+                for (uint16_t mipSlice = 0; mipSlice < MipLevels; ++mipSlice)
+                {
+                    IG_CHECK(ptr < ptrEnd);
+                    const size_t rowPitch{ width * bytesPerPixel };
+                    const size_t slicePitch{ height * rowPitch };
+
+                    for (uint16_t slice = 0; slice < depth; ++slice)
+                    {
+                        result.emplace_back(D3D12_SUBRESOURCE_DATA{ .pData = reinterpret_cast<const void*>(ptr),
+                                                                    .RowPitch = static_cast<LONG_PTR>(rowPitch),
+                                                                    .SlicePitch = static_cast<LONG_PTR>(slicePitch) });
+                        ptr += slicePitch;
+                    }
+
+                    if (width > 1)
+                    {
+                        width >>= 1;
+                    }
+                    if (height > 1)
+                    {
+                        height >>= 1;
+                    }
+                    if (depth >>= 1)
+                    {
+                        depth >>= 1;
+                    }
+                }
+                break;
+        }
+
+        IG_CHECK(result.size() == this->GetNumSubresources());
+        return result;
     }
 } // namespace ig
