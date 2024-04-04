@@ -3,6 +3,7 @@
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/GpuBuffer.h>
+#include <D3D12/GpuTexture.h>
 #include <D3D12/RenderDevice.h>
 #include <Render/GpuUploader.h>
 
@@ -276,4 +277,33 @@ namespace ig
         cmdCtx.CopyTextureRegion(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, dst, subresourceIdx, layout);
     }
 
+    void UploadContext::CopyTexture(GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources)
+    {
+        /* Write subresources to upload buffer */
+        for (uint32_t idx = 0; idx < subresources.size(); ++idx)
+        {
+            const D3D12_SUBRESOURCE_DATA& srcSubresource = subresources[idx];
+            const D3D12_SUBRESOURCE_FOOTPRINT& dstFootprint = dstCopyableFootprints.Layouts[idx].Footprint;
+            const size_t rowSizesInBytes = dstCopyableFootprints.RowSizesInBytes[idx];
+            for (uint32_t z = 0; z < dstFootprint.Depth; ++z)
+            {
+                const size_t dstSlicePitch = static_cast<size_t>(dstFootprint.RowPitch) * dstCopyableFootprints.NumRows[idx];
+                const size_t dstSliceOffset = dstSlicePitch * z;
+                const size_t srcSliceOffset = srcSubresource.SlicePitch * z;
+                for (uint32_t y = 0; y < dstCopyableFootprints.NumRows[idx]; ++y)
+                {
+                    const size_t dstRowOffset = static_cast<size_t>(dstFootprint.RowPitch) * y;
+                    const size_t srcRowOffset = srcSubresource.RowPitch * y;
+
+                    const size_t dstOffset = dstCopyableFootprints.Layouts[idx].Offset + dstSliceOffset + dstRowOffset;
+                    const size_t srcOffset = srcSliceOffset + srcRowOffset;
+                    WriteData(reinterpret_cast<const uint8_t*>(srcSubresource.pData),
+                              srcOffset, dstOffset,
+                              rowSizesInBytes);
+                }
+            }
+
+            CopyTextureRegion(0, dst, idx, dstCopyableFootprints.Layouts[idx]);
+        }
+    }
 } // namespace ig

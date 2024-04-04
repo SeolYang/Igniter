@@ -60,6 +60,7 @@ namespace ig
 
         void CopyBuffer(const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes = 0);
         void CopyTextureRegion(const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
+        void CopyTexture(GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources);
 
     private:
         UploadContext();

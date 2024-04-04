@@ -28,7 +28,7 @@ namespace ig
         RTV,
         DSV
     };
-    inline D3D12_DESCRIPTOR_HEAP_TYPE ToNativeDescriptorHeapType(const EDescriptorHeapType type)
+    constexpr inline D3D12_DESCRIPTOR_HEAP_TYPE ToNativeDescriptorHeapType(const EDescriptorHeapType type)
     {
         switch (type)
         {
@@ -48,7 +48,7 @@ namespace ig
         return D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
     }
 
-    inline bool IsShaderVisibleDescriptorHeapType(const EDescriptorHeapType type)
+    constexpr inline bool IsShaderVisibleDescriptorHeapType(const EDescriptorHeapType type)
     {
         return type == EDescriptorHeapType::CBV_SRV_UAV || type == EDescriptorHeapType::Sampler;
     }
@@ -74,12 +74,12 @@ namespace ig
     {
     public:
         size_t RequiredSize = 0;
-        std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts;
-        std::vector<uint32_t> NumRows;
-        std::vector<size_t> RowSizesInBytes;
+        std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
+        std::vector<uint32_t> NumRows{};
+        std::vector<size_t> RowSizesInBytes{};
     };
 
-    inline bool IsGreyScaleFormat(const DXGI_FORMAT format)
+    constexpr inline bool IsGreyScaleFormat(const DXGI_FORMAT format)
     {
         switch (format)
         {
@@ -105,7 +105,7 @@ namespace ig
         }
     }
 
-    inline bool IsUnormFormat(const DXGI_FORMAT format)
+    constexpr inline bool IsUnormFormat(const DXGI_FORMAT format)
     {
         switch (format)
         {
@@ -145,7 +145,7 @@ namespace ig
         }
     }
 
-    inline bool IsUintFormat(const DXGI_FORMAT format)
+    constexpr inline bool IsUintFormat(const DXGI_FORMAT format)
     {
         switch (format)
         {
@@ -167,12 +167,12 @@ namespace ig
         }
     }
 
-    inline bool IsUnsignedFormat(const DXGI_FORMAT format)
+    constexpr inline bool IsUnsignedFormat(const DXGI_FORMAT format)
     {
         return IsUnormFormat(format) || IsUintFormat(format);
     }
 
-    inline bool IsFloatFormat(const DXGI_FORMAT format)
+    constexpr inline bool IsFloatFormat(const DXGI_FORMAT format)
     {
         switch (format)
         {
