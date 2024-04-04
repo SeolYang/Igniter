@@ -225,13 +225,14 @@ namespace ig
 
         Ptr<TextureImporter> textureImporter;
         Ptr<TextureLoader> textureLoader;
-        Guid defaultTexGuid;
+        Guid defaultTexGuid{};
 
         Ptr<StaticMeshImporter> staticMeshImporter;
         Ptr<StaticMeshLoader> staticMeshLoader;
 
-        Ptr <MaterialImporter> materialImporter;
+        Ptr<MaterialImporter> materialImporter;
         Ptr<MaterialLoader> materialLoader;
+        Guid defaultMatGuid{};
 
         ModifiedEvent assetModifiedEvent;
     };

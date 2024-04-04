@@ -66,7 +66,6 @@ namespace ig
 
         explicit RefHandle(const details::HandleImpl newHandle) : handle(newHandle)
         {
-            IG_CHECK(IsAlive());
         }
 
         RefHandle(const RefHandle& other) = default;

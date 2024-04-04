@@ -49,6 +49,9 @@ namespace ig
         const Desc& GetSnapshot() const { return snapshot; }
         Texture& GetDiffuse();
 
+    public:
+        static constexpr std::string_view EngineDefault{ "Engine\\Default" };
+
     private:
         Desc snapshot{};
         CachedAsset<Texture> diffuse{};

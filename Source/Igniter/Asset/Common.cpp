@@ -59,6 +59,11 @@ namespace ig
         return archive;
     }
 
+    bool AssetInfo::IsValid() const
+    {
+        return guid.isValid() && IsValidVirtualPath(virtualPath) && type != EAssetType::Unknown;
+    }
+
     void AssetInfo::SetVirtualPath(const String newVirtualPath)
     {
         virtualPath = newVirtualPath;

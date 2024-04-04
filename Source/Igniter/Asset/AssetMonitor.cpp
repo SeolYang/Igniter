@@ -98,14 +98,6 @@ namespace ig::details
                         continue;
                     }
 
-                    if (!IsValidVirtualPath(virtualPath))
-                    {
-                        IG_LOG(AssetMonitor, Error, "{}: Asset {} ({}) ignored. Which has invalid virtual path.",
-                               assetInfo.GetType(), virtualPath, guid);
-                        ++directoryItr;
-                        continue;
-                    }
-
                     if (virtualPathGuidTable.contains(virtualPath))
                     {
                         IG_LOG(AssetMonitor, Error, "{}: Asset {} ({}) ignored. Which has duplicated virtual path.",

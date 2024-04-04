@@ -26,11 +26,6 @@ namespace ig
             return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetType>();
         }
 
-        if (!IsValidVirtualPath(assetInfo.GetVirtualPath()))
-        {
-            return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetVirtualPathFormat>();
-        }
-
         CachedAsset<Texture> diffuse{ assetManager.LoadTexture(desc.DiffuseVirtualPath) };
         if (!diffuse)
         {

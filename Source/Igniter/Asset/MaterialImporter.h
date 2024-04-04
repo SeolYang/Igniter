@@ -9,7 +9,6 @@ namespace ig
         Success,
         InvalidAssetInfo,
         InvalidAssetType,
-        InvalidAssetVirtualPathFormat,
         FailedSaveMetadata,
         FailedSaveAsset
     };

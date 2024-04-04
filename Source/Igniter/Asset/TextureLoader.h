@@ -8,6 +8,7 @@ namespace ig::details
     enum class EMakeDefaultTexStatus
     {
         Success,
+        InvalidAssetInfo,
         FailedCreateTexture,
         FailedCreateShaderResourceView,
         FailedCreateSamplerView,

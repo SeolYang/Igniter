@@ -60,10 +60,7 @@ namespace ig
         json& Serialize(json& archive) const;
         const json& Deserialize(const json& archive);
 
-        [[nodiscard]] bool IsValid() const
-        {
-            return guid.isValid() && virtualPath.IsValid() && !virtualPath.IsEmpty() && type != EAssetType::Unknown;
-        }
+        [[nodiscard]] bool IsValid() const;
 
         xg::Guid GetGuid() const { return guid; }
         String GetVirtualPath() const { return virtualPath; }

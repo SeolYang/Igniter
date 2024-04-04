@@ -2,6 +2,8 @@
 #include <Core/Handle.h>
 #include <Core/String.h>
 #include <Core/Result.h>
+#include <Asset/Material.h>
+#include <Asset/AssetCache.h>
 #include <Asset/Common.h>
 
 namespace ig
@@ -48,6 +50,7 @@ namespace ig
 
     class GpuBuffer;
     class GpuView;
+    class Material;
     class StaticMesh final
     {
     public:
@@ -70,11 +73,13 @@ namespace ig
         RefHandle<GpuBuffer> GetVertexBuffer() { return vertexBuffer.MakeRef(); }
         RefHandle<GpuView> GetVertexBufferSrv() { return vertexBufferSrv.MakeRef(); }
         RefHandle<GpuBuffer> GetIndexBuffer() { return indexBuffer.MakeRef(); }
+        Material& GetMaterial() { return *material; }
 
     private:
         Desc snapshot{};
         DeferredHandle<GpuBuffer> vertexBuffer{};
         Handle<GpuView, GpuViewManager*> vertexBufferSrv{};
         DeferredHandle<GpuBuffer> indexBuffer{};
+        CachedAsset<Material> material{};
     };
 } // namespace ig

@@ -45,6 +45,11 @@ namespace ig
         defaultTexInfo.MarkAsEngineDefault();
         defaultTexGuid = defaultTexInfo.GetGuid();
         RegisterEngineDefault<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
+
+        AssetInfo defaultMatInfo{ Material::EngineDefault, EAssetType::Material };
+        defaultMatInfo.MarkAsEngineDefault();
+        defaultMatGuid = defaultMatInfo.GetGuid();
+        RegisterEngineDefault<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)

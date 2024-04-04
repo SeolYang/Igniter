@@ -3,6 +3,15 @@
 #include <Core/Result.h>
 #include <Asset/Material.h>
 
+namespace ig::details
+{
+    enum class EMakeDefaultMatStatus
+    {
+        Success,
+        InvalidAssetInfo
+    };
+}
+
 namespace ig
 {
     enum class EMaterialLoadStatus
@@ -17,6 +26,8 @@ namespace ig
     class AssetManager;
     class MaterialLoader final
     {
+        friend class AssetManager;
+
     public:
         MaterialLoader(AssetManager& assetManager);
         MaterialLoader(const MaterialLoader&) = delete;
@@ -26,7 +37,9 @@ namespace ig
         MaterialLoader& operator=(const MaterialLoader&) = delete;
         MaterialLoader& operator=(MaterialLoader&&) noexcept = delete;
 
+    private:
         Result<Material, EMaterialLoadStatus> Load(const Material::Desc& desc);
+        Result<Material, details::EMakeDefaultMatStatus> MakeDefault(const AssetInfo& assetInfo);
 
     private:
         AssetManager& assetManager;
