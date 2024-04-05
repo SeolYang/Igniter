@@ -19,7 +19,6 @@ namespace ig
         Success,
         InvalidAssetInfo,
         AssetTypeMismatch,
-        InvalidDiffuseVirtualPath, /* #sy_todo 추후 엔진 기본 텍스처가 추가되면 대체 */
         FailedLoadDiffuse,         /* #sy_todo 추후 엔진 기본 텍스처가 추가되면 대체 */
     };
 

@@ -24,12 +24,7 @@ namespace ig
             return MakeFail<Material, EMaterialLoadStatus::AssetTypeMismatch>();
         }
 
-        if (!loadDesc.DiffuseVirtualPath.IsValid())
-        {
-            return MakeFail<Material, EMaterialLoadStatus::InvalidDiffuseVirtualPath>();
-        }
-
-        CachedAsset<Texture> diffuse{ assetManager.LoadTexture(loadDesc.DiffuseVirtualPath) };
+        CachedAsset<Texture> diffuse{ assetManager.LoadTexture(loadDesc.DiffuseTexGuid) };
         if (!diffuse)
         {
             return MakeFail<Material, EMaterialLoadStatus::FailedLoadDiffuse>();
@@ -46,7 +41,7 @@ namespace ig
         }
 
         Material::Desc snapshot{ .Info = assetInfo,
-                                 .LoadDescriptor = { .DiffuseVirtualPath = Material::EngineDefault } };
+                                 .LoadDescriptor = { .DiffuseTexGuid = Guid{ DefaultTextureGuid } } };
         CachedAsset<Texture> defaultEngineTex{ assetManager.LoadTexture(Material::EngineDefault) };
         IG_CHECK(defaultEngineTex);
         return MakeSuccess<Material, details::EMakeDefaultMatStatus>(Material{ snapshot, std::move(defaultEngineTex) });

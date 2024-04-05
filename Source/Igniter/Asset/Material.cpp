@@ -8,14 +8,14 @@ namespace ig
 {
     json& MaterialLoadDesc::Serialize(json& archive) const
     {
-        IG_SERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseVirtualPath);
+        IG_SERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseTexGuid);
         return archive;
     }
 
     const json& MaterialLoadDesc::Deserialize(const json& archive)
     {
         *this = {};
-        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseVirtualPath, String{ /* #sy_todo 추후에 엔진 기본 텍스처로 대체 */ });
+        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseTexGuid, Guid{ DefaultTextureGuid });
         return archive;
     }
 

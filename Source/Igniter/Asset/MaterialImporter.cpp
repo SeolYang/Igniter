@@ -27,14 +27,17 @@ namespace ig
         }
 
         CachedAsset<Texture> diffuse{ assetManager.LoadTexture(desc.DiffuseVirtualPath) };
-        if (!diffuse)
+        Guid diffuseTexGuid{ DefaultTextureGuid };
+        if (diffuse)
         {
-            IG_LOG(MaterialImporter, Warning, "Failed to load texture {} to create material {}.", desc.DiffuseVirtualPath, assetInfo.GetVirtualPath());
-            desc.DiffuseVirtualPath = String(Texture::EngineDefault);
+            const Texture::Desc& diffuseDescSnapshot{ diffuse->GetSnapshot() };
+            const AssetInfo& diffuseInfo{ diffuseDescSnapshot.Info };
+            diffuseTexGuid = diffuseInfo.GetGuid();
         }
+        IG_CHECK(diffuseTexGuid.isValid());
 
         const Material::LoadDesc loadDesc{
-            .DiffuseVirtualPath = desc.DiffuseVirtualPath
+            .DiffuseTexGuid = diffuseTexGuid
         };
 
         json serializedMeta{};

@@ -24,8 +24,7 @@ namespace ig
         const json& Deserialize(const json& archive);
 
     public:
-        /* #sy_wip Guid로 대체 */
-        String DiffuseVirtualPath{};
+        Guid DiffuseTexGuid{ DefaultTextureGuid };
     };
 
     class AssetManager;
@@ -51,6 +50,7 @@ namespace ig
         Texture& GetDiffuse();
 
     public:
+        /* #sy_wip Common 헤더로 이동 */
         static constexpr std::string_view EngineDefault{ "Engine\\Default" };
 
     private:
