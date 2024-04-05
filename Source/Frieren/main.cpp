@@ -69,7 +69,7 @@ int main()
         Registry& registry = gameInstance.GetRegistry();
         gameInstance.SetGameMode(std::make_unique<TestGameMode>());
 
-        Guid staticMeshGuids[] = {
+        Guid homuraMeshGuids[] = {
             Guid{ "0c5a8c40-a6d9-4b6a-bcc9-616b3cef8450" },
             Guid{ "5e6a8a5a-4358-47a9-93e6-0e7ed165dbc0" },
             Guid{ "ad4921ad-3654-4ce4-a626-6568ce399dba" },
@@ -79,10 +79,10 @@ int main()
             Guid{ "f9ed3d69-d906-4b03-9def-16b6b37211e7" },
         };
 
-        std::vector<std::future<CachedAsset<StaticMesh>>> staticMeshFutures{};
-        for (Guid guid : staticMeshGuids)
+        std::vector<std::future<CachedAsset<StaticMesh>>> homuraMeshFutures{};
+        for (Guid guid : homuraMeshGuids)
         {
-            staticMeshFutures.emplace_back(std::async(
+            homuraMeshFutures.emplace_back(std::async(
                 std::launch::async,
                 [&assetManager](const Guid guid)
                 {
@@ -91,7 +91,7 @@ int main()
                 guid));
         }
 
-        for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : staticMeshFutures)
+        for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : homuraMeshFutures)
         {
             CachedAsset<StaticMesh> staticMesh{ staticMeshFuture.get() };
             if (staticMesh)

@@ -49,6 +49,8 @@ namespace ig
         const Desc& GetSnapshot() const { return snapshot; }
         Texture& GetDiffuse();
 
+        void OnImGui() { IG_UNIMPLEMENTED(); }
+
     public:
         /* #sy_wip Common 헤더로 이동 */
         static constexpr std::string_view EngineDefault{ "Engine\\Default" };

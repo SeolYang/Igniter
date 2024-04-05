@@ -75,6 +75,8 @@ namespace ig
         RefHandle<GpuBuffer> GetIndexBuffer() { return indexBuffer.MakeRef(); }       // StaticMesh가 생성 되었다면 항상 valid
         Material& GetMaterial() { return *material; }                                 /* #sy_todo material이 invalidated 되면 engine default로 변환 */
 
+        void OnImGui() { IG_UNIMPLEMENTED(); }
+
     private:
         Desc snapshot{};
         DeferredHandle<GpuBuffer> vertexBuffer{};

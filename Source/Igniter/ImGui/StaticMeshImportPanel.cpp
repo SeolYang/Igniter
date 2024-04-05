@@ -24,6 +24,7 @@ namespace ig
 
                 ImGui::Checkbox("Make Left Handed", &config.bMakeLeftHanded);
                 ImGui::Checkbox("Flip UV Coordinates", &config.bFlipUVs);
+                ImGui::Checkbox("Flip Winding Order", &config.bFlipWindingOrder);
                 ImGui::Checkbox("Generate Normals", &config.bGenerateNormals);
                 ImGui::Checkbox("Split Large Meshes", &config.bSplitLargeMeshes);
                 ImGui::Checkbox("Pre-Transform Vertices", &config.bPreTransformVertices);
