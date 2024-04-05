@@ -43,8 +43,7 @@ namespace ig
     {
         AssetInfo defaultTexInfo{ Texture::EngineDefault, EAssetType::Texture };
         defaultTexInfo.MarkAsEngineDefault();
-        defaultTexGuid = Guid{ DefaultTextureGuid };
-        defaultTexInfo.SetGuid(defaultTexGuid);
+        defaultTexInfo.SetGuid(Guid{ DefaultTextureGuid });
         RegisterEngineDefault<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
 
         AssetInfo defaultWhiteTexInfo{ Texture::EngineDefaultWhite, EAssetType::Texture };
@@ -61,8 +60,7 @@ namespace ig
 
         AssetInfo defaultMatInfo{ Material::EngineDefault, EAssetType::Material };
         defaultMatInfo.MarkAsEngineDefault();
-        defaultMatGuid = Guid{ DefaultMaterialGuid };
-        defaultMatInfo.SetGuid(defaultMatGuid);
+        defaultMatInfo.SetGuid(Guid{ DefaultMaterialGuid });
         RegisterEngineDefault<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
     }
 
@@ -102,7 +100,7 @@ namespace ig
         CachedAsset<Texture> cachedTex{ LoadInternal<Texture>(guid, *textureLoader) };
         if (!cachedTex)
         {
-            return LoadInternal<Texture>(defaultTexGuid, *textureLoader);
+            return LoadInternal<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
         }
 
         return cachedTex;
@@ -113,13 +111,13 @@ namespace ig
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Load Texture: Invalid Virtual Path {}", virtualPath);
-            return LoadInternal<Texture>(defaultTexGuid, *textureLoader);
+            return LoadInternal<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
         }
 
         if (!assetMonitor->Contains(EAssetType::Texture, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
-            return LoadInternal<Texture>(defaultTexGuid, *textureLoader);
+            return LoadInternal<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
         }
 
         return LoadTexture(assetMonitor->GetGuid(EAssetType::Texture, virtualPath));
@@ -190,7 +188,7 @@ namespace ig
         CachedAsset<Material> cachedMat{ LoadInternal<Material>(guid, *materialLoader) };
         if (!cachedMat)
         {
-            return LoadInternal<Material>(defaultMatGuid, *materialLoader);
+            return LoadInternal<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
         }
 
         return cachedMat;
@@ -201,13 +199,13 @@ namespace ig
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Load Material: Invalid Virtual Path {}", virtualPath);
-            return LoadInternal<Material>(defaultMatGuid, *materialLoader);
+            return LoadInternal<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
         }
 
         if (!assetMonitor->Contains(EAssetType::Material, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
-            return LoadInternal<Material>(defaultMatGuid, *materialLoader);
+            return LoadInternal<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
         }
 
         return LoadMaterial(assetMonitor->GetGuid(EAssetType::Material, virtualPath));
