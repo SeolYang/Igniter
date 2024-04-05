@@ -14,7 +14,6 @@ namespace ig
     {
     public:
         CachedAsset<StaticMesh> Mesh{};
-        CachedAsset<Material> Mat{};
     };
 
     IG_DECLARE_COMPONENT(StaticMeshComponent)

@@ -32,7 +32,7 @@ namespace ig::details
         if (!callback(archive, var))
         {
             var = fallback;
-            IG_LOG(JsonDeserializer, Warning, "Type mismatch/Invalid value found in Variable {} which in Container {}.", varKey, containerKey);
+            IG_LOG(JsonDeserializer, Warning, "Type mismatch/Invalid value found in {}::{}.", containerKey, varKey);
             return;
         }
     }

@@ -8,6 +8,7 @@
 #include <Render/Vertex.h>
 #include <Render/GpuViewManager.h>
 #include <Render/GpuUploader.h>
+#include <Asset/AssetManager.h>
 #include <Asset/StaticMeshLoader.h>
 
 IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);
@@ -17,10 +18,13 @@ namespace ig
     StaticMeshLoader::StaticMeshLoader(HandleManager& handleManager,
                                        RenderDevice& renderDevice,
                                        GpuUploader& gpuUploader,
-                                       GpuViewManager& gpuViewManager) : handleManager(handleManager),
-                                                                         renderDevice(renderDevice),
-                                                                         gpuUploader(gpuUploader),
-                                                                         gpuViewManager(gpuViewManager)
+                                       GpuViewManager& gpuViewManager,
+                                       AssetManager& assetManager)
+        : handleManager(handleManager),
+          renderDevice(renderDevice),
+          gpuUploader(gpuUploader),
+          gpuViewManager(gpuViewManager),
+          assetManager(assetManager)
     {
     }
 
@@ -104,7 +108,7 @@ namespace ig
         {
             const size_t compressedVerticesOffset = 0;
             const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(), loadDesc.NumVertices,
-                                                                sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, 
+                                                                sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset,
                                                                 loadDesc.CompressedVerticesSizeInBytes);
             if (decodeResult == 0)
             {
@@ -133,6 +137,9 @@ namespace ig
         std::optional<GpuSync> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
         IG_CHECK(indicesUploadSync);
 
+        CachedAsset<Material> material{ assetManager.LoadMaterial(loadDesc.MaterialVirtualPath) };
+        IG_CHECK(material);
+
         verticesUploadSync->WaitOnCpu();
         indicesUploadSync->WaitOnCpu();
 
@@ -146,10 +153,10 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedDecodeIndexBuffer>();
         }
 
-        return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(StaticMesh{
-            desc,
-            { handleManager, std::move(*vertexBuffer) },
-            std::move(vertexBufferSrv),
-            { handleManager, std::move(*indexBuffer) } });
+        return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(StaticMesh{ desc,
+                                                                          { handleManager, std::move(*vertexBuffer) },
+                                                                          std::move(vertexBufferSrv),
+                                                                          { handleManager, std::move(*indexBuffer) },
+                                                                          std::move(material) });
     }
 } // namespace ig

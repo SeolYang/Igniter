@@ -28,7 +28,12 @@ namespace ig
         friend class AssetManager;
 
     public:
-        StaticMeshLoader(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
+        StaticMeshLoader(HandleManager& handleManager,
+                         RenderDevice& renderDevice,
+                         GpuUploader& gpuUploader,
+                         GpuViewManager& gpuViewManager,
+                         AssetManager& assetManager);
+
         StaticMeshLoader(const StaticMeshLoader&) = delete;
         StaticMeshLoader(StaticMeshLoader&&) noexcept = delete;
         ~StaticMeshLoader() = default;
@@ -44,5 +49,6 @@ namespace ig
         RenderDevice& renderDevice;
         GpuUploader& gpuUploader;
         GpuViewManager& gpuViewManager;
+        AssetManager& assetManager;
     };
 } // namespace ig

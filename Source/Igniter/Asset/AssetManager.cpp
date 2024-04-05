@@ -17,7 +17,7 @@ namespace ig
           textureImporter(std::make_unique<TextureImporter>()),
           textureLoader(std::make_unique<TextureLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
           staticMeshImporter(std::make_unique<StaticMeshImporter>(*this)),
-          staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
+          staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager, *this)),
           materialImporter(std::make_unique<MaterialImporter>(*this)),
           materialLoader(std::make_unique<MaterialLoader>(*this))
     {
@@ -41,6 +41,7 @@ namespace ig
 
     void AssetManager::InitEngineDefaultAssets()
     {
+        /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
         AssetInfo defaultTexInfo{ Texture::EngineDefault, EAssetType::Texture };
         defaultTexInfo.MarkAsEngineDefault();
         defaultTexInfo.SetGuid(Guid{ DefaultTextureGuid });

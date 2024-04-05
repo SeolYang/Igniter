@@ -177,8 +177,7 @@ namespace ig
                         const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
                         perObjectConstantBuffer.Write(perObjectBuffer);
 
-                        IG_CHECK(staticMeshComponent.Mat);
-                        Material& material{ *staticMeshComponent.Mat };
+                        Material& material{ staticMesh.GetMaterial() };
                         Texture& diffuseTex{ material.GetDiffuse() };
                         const BasicRenderResources params{
                             .VertexBufferIdx = vertexBufferSrv->Index,

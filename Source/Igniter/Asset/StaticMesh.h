@@ -61,7 +61,8 @@ namespace ig
     public:
         StaticMesh(Desc snapshot, DeferredHandle<GpuBuffer> vertexBuffer,
                    Handle<GpuView, GpuViewManager*> vertexBufferSrv,
-                   DeferredHandle<GpuBuffer> indexBuffer);
+                   DeferredHandle<GpuBuffer> indexBuffer,
+                   CachedAsset<Material> material);
         StaticMesh(const StaticMesh&) = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();

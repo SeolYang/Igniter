@@ -75,30 +75,6 @@ int main()
                 return assetManager.LoadTexture(xg::Guid{ "87949751-3431-45c7-bd57-0a1518649511" });
             });
 
-        std::future<xg::Guid> homuraBodyMatCreateFuture{
-            std::async(std::launch::async,
-                       [&assetManager, &homuraBodyTexFuture]
-                       {
-                           return assetManager.CreateMaterial(R"(Homura\Body)"_fs,
-                                                              MaterialCreateDesc{ .DiffuseVirtualPath = R"(Homura\Body)"_fs });
-                       })
-        };
-
-        std::future<CachedAsset<Material>> ashBodyMatFuture{
-            std::async(std::launch::async,
-                       [&assetManager]()
-                       {
-                           return assetManager.LoadMaterial(R"(Engine\Default)"_fs);
-                       })
-        };
-
-        std::future<CachedAsset<Material>> homuraBodyMatFuture{
-            std::async(std::launch::async,
-                       [&assetManager, &homuraBodyMatCreateFuture]()
-                       {
-                           return assetManager.LoadMaterial(homuraBodyMatCreateFuture.get());
-                       })
-        };
         /******************************/
 
         /* #sy_test Input Manager Test */
@@ -129,9 +105,7 @@ int main()
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
             staticMeshComponent.Mesh = homuraMeshFuture.get();
-            staticMeshComponent.Mat = homuraBodyMatFuture.get();
             IG_CHECK(staticMeshComponent.Mesh);
-            IG_CHECK(staticMeshComponent.Mat);
         }
 
         const auto ash = registry.create();
@@ -144,9 +118,7 @@ int main()
 
             auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(ash);
             staticMeshComponent.Mesh = ashMeshFuture.get();
-            staticMeshComponent.Mat = ashBodyMatFuture.get();
             IG_CHECK(staticMeshComponent.Mesh);
-            IG_CHECK(staticMeshComponent.Mat);
         }
 
         /* Camera */
