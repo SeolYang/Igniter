@@ -43,9 +43,8 @@ namespace ig
         uint32_t NumIndices{ 0 };
         size_t CompressedVerticesSizeInBytes{ 0 };
         size_t CompressedIndicesSizeInBytes{ 0 };
-        String MaterialVirtualPath{};
+        Guid MaterialGuid{};
         /* #sy_todo Add AABB Info */
-        // std::vector<xg::Guid> ... or std::vector<std::string> materials; Material?
     };
 
     class GpuBuffer;

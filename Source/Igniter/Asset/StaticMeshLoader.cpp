@@ -137,7 +137,7 @@ namespace ig
         std::optional<GpuSync> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
         IG_CHECK(indicesUploadSync);
 
-        CachedAsset<Material> material{ assetManager.LoadMaterial(loadDesc.MaterialVirtualPath) };
+        CachedAsset<Material> material{ assetManager.LoadMaterial(loadDesc.MaterialGuid) };
         IG_CHECK(material);
 
         verticesUploadSync->WaitOnCpu();

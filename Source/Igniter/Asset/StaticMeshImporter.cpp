@@ -56,7 +56,7 @@ namespace ig
 
     static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr,
                                                                                  const std::string_view meshName,
-                                                                                 const String materialVirtualPath,
+                                                                                 const Guid materialGuid,
                                                                                  const std::vector<StaticMeshVertex>& vertices,
                                                                                  const std::vector<uint32_t>& indices)
     {
@@ -140,7 +140,7 @@ namespace ig
             .NumIndices = static_cast<uint32_t>(remappedIndices.size()),
             .CompressedVerticesSizeInBytes = encodedVertices.size(),
             .CompressedIndicesSizeInBytes = encodedIndices.size(),
-            .MaterialVirtualPath = materialVirtualPath
+            .MaterialGuid = materialGuid
         };
 
         json assetMetadata{};
@@ -196,15 +196,14 @@ namespace ig
             }
 
             /* Create Materials */
-            UnorderedMap<uint32_t, String> materialVirtualPathTable{};
+            UnorderedMap<uint32_t, Guid> materialGuidTable{};
             if (desc.bImportMaterials)
             {
                 for (uint32_t materialIdx = 0; materialIdx < scene->mNumMaterials; ++materialIdx)
                 {
                     const aiMaterial& material = *scene->mMaterials[materialIdx];
-                    const String materialVirtualPath{ MakeVirtualPathPreferred(String(material.GetName().C_Str())) };
-                    materialVirtualPathTable[materialIdx] = materialVirtualPath;
-                    assetManager.CreateMaterial(materialVirtualPath, MaterialCreateDesc{ .DiffuseVirtualPath = Texture::EngineDefault });
+                    materialGuidTable[materialIdx] = assetManager.CreateMaterial(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
+                                                                                 MaterialCreateDesc{ .DiffuseVirtualPath = Texture::EngineDefault });
                 }
             }
 
@@ -235,10 +234,10 @@ namespace ig
                     continue;
                 }
 
-                const String materialVirtualPath = desc.bImportMaterials ? materialVirtualPathTable[mesh.mMaterialIndex] :
-                                                                           String{ Material::EngineDefault };
+                const Guid materialGuid = desc.bImportMaterials ? materialGuidTable[mesh.mMaterialIndex] :
+                                                                  Guid{ DefaultMaterialGuid };
                 const std::string meshName = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
-                results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, materialVirtualPath, vertices, indices));
+                results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, materialGuid, vertices, indices));
             }
         }
         importer.FreeScene();

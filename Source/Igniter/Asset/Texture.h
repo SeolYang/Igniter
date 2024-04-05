@@ -91,6 +91,7 @@ namespace ig
         RefHandle<GpuView> GetSampler() { return sampler; }                    // 이 셋은 Texture 에셋 자체가 소유하므로 레퍼런스를 반환해도 무관 할 것 같음
 
     public:
+        /* #sy_wip Common으로 이동 */
         static constexpr std::string_view EngineDefault = "Engine\\Default";
         static constexpr std::string_view EngineDefaultWhite = "Engine\\White";
         static constexpr std::string_view EngineDefaultBlack = "Engine\\Black";
