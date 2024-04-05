@@ -44,36 +44,9 @@ int main()
         Window& window = engine.GetWindow();
         InputManager& inputManager = engine.GetInputManager();
         GameInstance& gameInstance = engine.GetGameInstance();
-        AssetManager& assetManager = engine.GetAssetManager();
+        [[maybe_unused]] AssetManager& assetManager = engine.GetAssetManager();
 
         /* #sy_test Asset System & Mechanism Test */
-        std::future<CachedAsset<StaticMesh>> ashMeshFuture = std::async(
-            std::launch::async,
-            [&assetManager]()
-            {
-                return assetManager.LoadStaticMesh(xg::Guid{ "e42f93b4-e57d-44ae-9fde-302013c6e9e8" });
-            });
-
-        std::future<CachedAsset<Texture>> ashBodyTexFuture = std::async(
-            std::launch::async,
-            [&assetManager]()
-            {
-                return assetManager.LoadTexture(xg::Guid{ "4b2b2556-7d81-4884-ba50-777392ebc9ee" });
-            });
-
-        std::future<CachedAsset<StaticMesh>> homuraMeshFuture = std::async(
-            std::launch::async,
-            [&assetManager]()
-            {
-                return assetManager.LoadStaticMesh(xg::Guid{ "a717ff6e-129b-4c80-927a-a786a0b21128" });
-            });
-
-        std::future<CachedAsset<Texture>> homuraBodyTexFuture = std::async(
-            std::launch::async,
-            [&assetManager]()
-            {
-                return assetManager.LoadTexture(xg::Guid{ "87949751-3431-45c7-bd57-0a1518649511" });
-            });
 
         /******************************/
 
@@ -95,30 +68,54 @@ int main()
         /* #sy_test ECS based Game flow & logic tests */
         Registry& registry = gameInstance.GetRegistry();
         gameInstance.SetGameMode(std::make_unique<TestGameMode>());
-        const auto homura = registry.create();
+        // const auto homura = registry.create();
+        //{
+        //     registry.emplace<NameComponent>(homura, "Homura"_fs);
+
+        //    auto& transformComponent = registry.emplace<TransformComponent>(homura);
+        //    transformComponent.Position = Vector3{ 10.5f, -30.f, 10.f };
+        //    transformComponent.Scale = Vector3{ 0.35f, 0.35f, 0.35f };
+
+        //    auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
+        //    staticMeshComponent.Mesh = homuraMeshFuture.get();
+        //    IG_CHECK(staticMeshComponent.Mesh);
+        //}
+
+        Guid guids[] = {
+            Guid{ "3c8b4a59-2fd9-4f48-9e37-18093bb56acf" },
+            Guid{ "4f745e72-67b2-48ba-a7d9-a69ee7d0ed37" },
+            Guid{ "51f5f83c-1c65-4ecf-87d2-ccd78660c0f3" },
+            Guid{ "64bc86b2-0960-4e6a-8bfe-b16e96a1a3e3" },
+            Guid{ "47654f75-741a-479a-846c-5f2743119496" },
+            Guid{ "a10161d2-aca1-491a-9673-3d58a2894f19" },
+            Guid{ "ab23d0e4-0b61-4a3d-8511-90a8680869eb" },
+            Guid{ "bf77c2fa-f940-40c4-9a3b-9b205953a0fc" },
+            Guid{ "da784c45-debc-48e1-9619-8c0d4125c348" },
+            Guid{ "eaefbad6-fcb4-4e38-9ab2-c5370f2c7746" },
+            Guid{ "f9b7cce6-f8e0-40a8-b821-6a6666432625" },
+            Guid{ "f891ae20-efad-4b55-92f1-2579de1c6460" },
+            Guid{ "fdac596c-938a-4275-8b1b-7d77ae377e84" }
+        };
+
+        std::vector<std::future<CachedAsset<StaticMesh>>> staticMeshFutures{};
+        for (Guid guid : guids)
         {
-            registry.emplace<NameComponent>(homura, "Homura"_fs);
-
-            auto& transformComponent = registry.emplace<TransformComponent>(homura);
-            transformComponent.Position = Vector3{ 10.5f, -30.f, 10.f };
-            transformComponent.Scale = Vector3{ 0.35f, 0.35f, 0.35f };
-
-            auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
-            staticMeshComponent.Mesh = homuraMeshFuture.get();
-            IG_CHECK(staticMeshComponent.Mesh);
+            staticMeshFutures.emplace_back(std::async(
+                std::launch::async,
+                [&assetManager](const Guid guid)
+                {
+                    return assetManager.LoadStaticMesh(guid);
+                }, guid));
         }
 
-        const auto ash = registry.create();
+        for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : staticMeshFutures)
         {
-            registry.emplace<NameComponent>(ash, "Ash"_fs);
+            const auto newEntity{ registry.create() };
+            auto& staticMeshComponent{ registry.emplace<StaticMeshComponent>(newEntity) };
+            staticMeshComponent.Mesh = staticMeshFuture.get();
 
-            auto& transformComponent = registry.emplace<TransformComponent>(ash);
-            transformComponent.Position = Vector3{ -10.f, -30.f, 35.f };
-            transformComponent.Scale = Vector3{ 40.f, 40.f, 40.f };
-
-            auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(ash);
-            staticMeshComponent.Mesh = ashMeshFuture.get();
-            IG_CHECK(staticMeshComponent.Mesh);
+            registry.emplace<TransformComponent>(newEntity);
+            registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
         }
 
         /* Camera */

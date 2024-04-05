@@ -286,7 +286,7 @@ namespace ig
 
     void AssetManager::DeleteInternal(const EAssetType assetType, const Guid guid)
     {
-        UniqueLock assetLock{ RequestAssetLock(guid) };
+        UniqueLock assetLock{ RequestAssetMutex(guid) };
         IG_CHECK(assetType != EAssetType::Unknown);
         IG_CHECK(guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).GetType() == assetType);
 
@@ -301,7 +301,7 @@ namespace ig
         assetModifiedEvent.Notify(*this);
     }
 
-    UniqueLock AssetManager::RequestAssetLock(const Guid guid)
+    Mutex& AssetManager::RequestAssetMutex(const Guid guid)
     {
         UniqueLock lock{ assetMutexTableMutex };
         if (!assetMutexTable.contains(guid))
@@ -309,7 +309,7 @@ namespace ig
             assetMutexTable[guid];
         }
 
-        return UniqueLock{ assetMutexTable[guid] };
+        return assetMutexTable[guid];
     }
 
     void AssetManager::SaveAllChanges()

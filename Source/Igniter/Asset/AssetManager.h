@@ -105,7 +105,7 @@ namespace ig
                 return CachedAsset<T>{};
             }
 
-            UniqueLock assetLock{ RequestAssetLock(guid) };
+            UniqueLock assetLock{ RequestAssetMutex(guid) };
             details::AssetCache<T>& assetCache{ GetCache<T>() };
             if (!assetCache.IsCached(guid))
             {
@@ -182,7 +182,7 @@ namespace ig
 
         void DeleteInternal(const EAssetType assetType, const Guid guid);
 
-        [[nodiscard]] UniqueLock RequestAssetLock(const Guid guid);
+        [[nodiscard]] Mutex& RequestAssetMutex(const Guid guid);
 
         template <Asset T, ResultStatus Status>
         void RegisterEngineDefault(const String requiredVirtualPath, Result<T, Status> assetResult)
@@ -209,7 +209,7 @@ namespace ig
 
             const Guid guid{ *guidOpt };
             IG_CHECK(guid.isValid());
-            UniqueLock assetLock{ RequestAssetLock(guid) };
+            UniqueLock assetLock{ RequestAssetMutex(guid) };
             details::AssetCache<T>& assetCache{ GetCache<T>() };
             IG_CHECK(!assetCache.IsCached(guid));
             [[maybe_unused]] CachedAsset<T> cachedAsset{ assetCache.Cache(guid, std::move(asset)) };
