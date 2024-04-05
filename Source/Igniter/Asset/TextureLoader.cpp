@@ -163,7 +163,7 @@ namespace ig
         // COMMON Layout 인 상태에서 텍스처가 GPU 메모리 상에서 어떻게 배치되어있는지
         const GpuCopyableFootprints destCopyableFootprints = renderDevice.GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
         UploadContext texUploadCtx = gpuUploader.Reserve(destCopyableFootprints.RequiredSize);
-        texUploadCtx.CopyTexture(*newTex, destCopyableFootprints, subresources);
+        texUploadCtx.CopyTextureSimple(*newTex, destCopyableFootprints, subresources);
 
         std::optional<GpuSync> texUploadSync = gpuUploader.Submit(texUploadCtx);
         IG_CHECK(texUploadSync);
@@ -264,7 +264,7 @@ namespace ig
 
         const GpuCopyableFootprints dstCopyableFootprints{ renderDevice.GetCopyableFootprints(texDesc, 0, 1, 0) };
         UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
-        uploadCtx.CopyTexture(*newTex, dstCopyableFootprints, subresources);
+        uploadCtx.CopyTextureSimple(*newTex, dstCopyableFootprints, subresources);
         std::optional<GpuSync> sync{ gpuUploader.Submit(uploadCtx) };
         IG_CHECK(sync);
         sync->WaitOnCpu();
@@ -351,7 +351,7 @@ namespace ig
 
         const GpuCopyableFootprints dstCopyableFootprints{ renderDevice.GetCopyableFootprints(texDesc, 0, 1, 0) };
         UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
-        uploadCtx.CopyTexture(*newTex, dstCopyableFootprints, subresources);
+        uploadCtx.CopyTextureSimple(*newTex, dstCopyableFootprints, subresources);
         std::optional<GpuSync> sync{ gpuUploader.Submit(uploadCtx) };
         IG_CHECK(sync);
         sync->WaitOnCpu();

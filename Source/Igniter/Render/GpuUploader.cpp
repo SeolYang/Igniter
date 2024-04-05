@@ -277,7 +277,7 @@ namespace ig
         cmdCtx.CopyTextureRegion(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, dst, subresourceIdx, layout);
     }
 
-    void UploadContext::CopyTexture(GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources)
+    void UploadContext::CopyTextureSimple(GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources)
     {
         /* Write subresources to upload buffer */
         for (uint32_t idx = 0; idx < subresources.size(); ++idx)

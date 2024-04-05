@@ -68,54 +68,41 @@ int main()
         /* #sy_test ECS based Game flow & logic tests */
         Registry& registry = gameInstance.GetRegistry();
         gameInstance.SetGameMode(std::make_unique<TestGameMode>());
-        // const auto homura = registry.create();
-        //{
-        //     registry.emplace<NameComponent>(homura, "Homura"_fs);
 
-        //    auto& transformComponent = registry.emplace<TransformComponent>(homura);
-        //    transformComponent.Position = Vector3{ 10.5f, -30.f, 10.f };
-        //    transformComponent.Scale = Vector3{ 0.35f, 0.35f, 0.35f };
-
-        //    auto& staticMeshComponent = registry.emplace<StaticMeshComponent>(homura);
-        //    staticMeshComponent.Mesh = homuraMeshFuture.get();
-        //    IG_CHECK(staticMeshComponent.Mesh);
-        //}
-
-        Guid guids[] = {
-            Guid{ "3c8b4a59-2fd9-4f48-9e37-18093bb56acf" },
-            Guid{ "4f745e72-67b2-48ba-a7d9-a69ee7d0ed37" },
-            Guid{ "51f5f83c-1c65-4ecf-87d2-ccd78660c0f3" },
-            Guid{ "64bc86b2-0960-4e6a-8bfe-b16e96a1a3e3" },
-            Guid{ "47654f75-741a-479a-846c-5f2743119496" },
-            Guid{ "a10161d2-aca1-491a-9673-3d58a2894f19" },
-            Guid{ "ab23d0e4-0b61-4a3d-8511-90a8680869eb" },
-            Guid{ "bf77c2fa-f940-40c4-9a3b-9b205953a0fc" },
-            Guid{ "da784c45-debc-48e1-9619-8c0d4125c348" },
-            Guid{ "eaefbad6-fcb4-4e38-9ab2-c5370f2c7746" },
-            Guid{ "f9b7cce6-f8e0-40a8-b821-6a6666432625" },
-            Guid{ "f891ae20-efad-4b55-92f1-2579de1c6460" },
-            Guid{ "fdac596c-938a-4275-8b1b-7d77ae377e84" }
+        Guid staticMeshGuids[] = {
+            Guid{ "0c5a8c40-a6d9-4b6a-bcc9-616b3cef8450" },
+            Guid{ "5e6a8a5a-4358-47a9-93e6-0e7ed165dbc0" },
+            Guid{ "ad4921ad-3654-4ce4-a626-6568ce399dba" },
+            Guid{ "9bbce66e-2292-489f-8e6b-c0f9427fff29" },
+            Guid{ "731d273c-c9e1-4ee1-acaa-6be8d4d54853" },
+            Guid{ "de7ff053-c224-4623-bb0f-17372c2ddb82" },
+            Guid{ "f9ed3d69-d906-4b03-9def-16b6b37211e7" },
         };
 
         std::vector<std::future<CachedAsset<StaticMesh>>> staticMeshFutures{};
-        for (Guid guid : guids)
+        for (Guid guid : staticMeshGuids)
         {
             staticMeshFutures.emplace_back(std::async(
                 std::launch::async,
                 [&assetManager](const Guid guid)
                 {
                     return assetManager.LoadStaticMesh(guid);
-                }, guid));
+                },
+                guid));
         }
 
         for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : staticMeshFutures)
         {
-            const auto newEntity{ registry.create() };
-            auto& staticMeshComponent{ registry.emplace<StaticMeshComponent>(newEntity) };
-            staticMeshComponent.Mesh = staticMeshFuture.get();
+            CachedAsset<StaticMesh> staticMesh{ staticMeshFuture.get() };
+            if (staticMesh)
+            {
+                const auto newEntity{ registry.create() };
+                auto& staticMeshComponent{ registry.emplace<StaticMeshComponent>(newEntity) };
+                staticMeshComponent.Mesh = std::move(staticMesh);
 
-            registry.emplace<TransformComponent>(newEntity);
-            registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+                registry.emplace<TransformComponent>(newEntity);
+                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+            }
         }
 
         /* Camera */
