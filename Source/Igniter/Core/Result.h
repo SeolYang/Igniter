@@ -40,7 +40,7 @@ namespace ig
             IG_CHECK(other.status != E::Success && other.bOwnershipTransferred || other.status == E::Success && !other.bOwnershipTransferred);
             if (!other.bOwnershipTransferred)
             {
-                value = std::move(other.value);
+                ::new (&value) T(std::move(other.value));
             }
             bOwnershipTransferred = std::exchange(other.bOwnershipTransferred, true);
         }

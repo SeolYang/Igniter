@@ -54,8 +54,13 @@ namespace ig
 
     public:
         AssetInfo() = default;
+        AssetInfo(const AssetInfo&) = default;
+        AssetInfo(AssetInfo&&) noexcept = default;
         AssetInfo(const String virtualPath, const EAssetType type);
         ~AssetInfo() = default;
+
+        AssetInfo& operator=(const AssetInfo&) = default;
+        AssetInfo& operator=(AssetInfo&&) noexcept = default;
 
         json& Serialize(json& archive) const;
         const json& Deserialize(const json& archive);
