@@ -68,6 +68,9 @@ namespace ig
           srv(std::move(srv)),
           sampler(sampler)
     {
+        IG_CHECK(this->gpuTexture);
+        IG_CHECK(this->srv);
+        IG_CHECK(this->sampler);
     }
 
     Texture::~Texture()

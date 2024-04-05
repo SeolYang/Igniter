@@ -86,9 +86,9 @@ namespace ig
         Texture& operator=(Texture&&) noexcept = default;
 
         const Desc& GetSnapshot() const { return snapshot; }
-        RefHandle<GpuTexture> GetGpuTexture() { return gpuTexture.MakeRef(); }
-        RefHandle<GpuView> GetShaderResourceView() { return srv.MakeRef(); }
-        RefHandle<GpuView> GetSampler() { return sampler; }
+        RefHandle<GpuTexture> GetGpuTexture() { return gpuTexture.MakeRef(); } // 이 셋은 Texture 에셋 자체가 소유하므로 레퍼런스를 반환해도 무관 할 것 같음
+        RefHandle<GpuView> GetShaderResourceView() { return srv.MakeRef(); }   // 이 셋은 Texture 에셋 자체가 소유하므로 레퍼런스를 반환해도 무관 할 것 같음
+        RefHandle<GpuView> GetSampler() { return sampler; }                    // 이 셋은 Texture 에셋 자체가 소유하므로 레퍼런스를 반환해도 무관 할 것 같음
 
     public:
         static constexpr std::string_view EngineDefault = "Engine\\Default";
@@ -100,7 +100,6 @@ namespace ig
         DeferredHandle<GpuTexture> gpuTexture{};
         Handle<GpuView, GpuViewManager*> srv{};
         RefHandle<GpuView> sampler{};
-
     };
 } // namespace ig
 

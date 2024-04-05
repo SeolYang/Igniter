@@ -75,15 +75,6 @@ int main()
                 return assetManager.LoadTexture(xg::Guid{ "87949751-3431-45c7-bd57-0a1518649511" });
             });
 
-        std::future<xg::Guid> ashBodyMatCreateFuture{
-            std::async(std::launch::async,
-                       [&assetManager, &ashBodyTexFuture]
-                       {
-                           return assetManager.CreateMaterial(R"(Ash\Body)"_fs,
-                                                              MaterialCreateDesc{ .DiffuseVirtualPath = R"(Engine\Defasdault)"_fs });
-                       })
-        };
-
         std::future<xg::Guid> homuraBodyMatCreateFuture{
             std::async(std::launch::async,
                        [&assetManager, &homuraBodyTexFuture]
@@ -95,9 +86,9 @@ int main()
 
         std::future<CachedAsset<Material>> ashBodyMatFuture{
             std::async(std::launch::async,
-                       [&assetManager, &ashBodyMatCreateFuture]()
+                       [&assetManager]()
                        {
-                           return assetManager.LoadMaterial(ashBodyMatCreateFuture.get());
+                           return assetManager.LoadMaterial(R"(Engine\Default)"_fs);
                        })
         };
 

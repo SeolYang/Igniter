@@ -65,6 +65,9 @@ namespace ig
           vertexBufferSrv(std::move(vertexBufferSrv)),
           indexBuffer(std::move(indexBuffer))
     {
+        IG_CHECK(this->vertexBuffer);
+        IG_CHECK(this->vertexBufferSrv);
+        IG_CHECK(this->indexBuffer);
     }
 
     StaticMesh::~StaticMesh()
