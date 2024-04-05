@@ -2,20 +2,29 @@
 #include <Igniter.h>
 #include <Core/String.h>
 #include <Core/Handle.h>
+#include <Core/GuidBytes.h>
 
 namespace ig::details
 {
-    constexpr inline std::string_view VirtualPathSeparator = "\\";
-    constexpr inline std::string_view MetadataExt = ".metadata";
-    constexpr inline std::string_view ResourceRootPath = "Resources";
-    constexpr inline std::string_view AssetRootPath = "Assets";
-    constexpr inline std::string_view TextureAssetRootPath = "Assets\\Textures";
-    constexpr inline std::string_view StaticMeshAssetRootPath = "Assets\\StaticMeshes";
-    constexpr inline std::string_view SkeletalMeshAssetRootPath = "Assets\\SkeletalMeshes";
-    constexpr inline std::string_view AudioAssetRootPath = "Assets\\Audios";
-    constexpr inline std::string_view ScriptAssetRootPath = "Assets\\Scripts";
-    constexpr inline std::string_view MaterialAssetRootPath = "Assets\\Materials";
+    inline constexpr std::string_view VirtualPathSeparator = "\\";
+    inline constexpr std::string_view MetadataExt = ".metadata";
+    inline constexpr std::string_view ResourceRootPath = "Resources";
+    inline constexpr std::string_view AssetRootPath = "Assets";
+    inline constexpr std::string_view TextureAssetRootPath = "Assets\\Textures";
+    inline constexpr std::string_view StaticMeshAssetRootPath = "Assets\\StaticMeshes";
+    inline constexpr std::string_view SkeletalMeshAssetRootPath = "Assets\\SkeletalMeshes";
+    inline constexpr std::string_view AudioAssetRootPath = "Assets\\Audios";
+    inline constexpr std::string_view ScriptAssetRootPath = "Assets\\Scripts";
+    inline constexpr std::string_view MaterialAssetRootPath = "Assets\\Materials";
 } // namespace ig::details
+
+namespace ig
+{
+    inline constexpr GuidBytes DefaultTextureGuid{ GuidBytesFrom("ec5ba4d0-9b40-40d7-bec6-c4dd41809fd2") };
+    inline constexpr GuidBytes DefaultWhiteTextureGuid{ GuidBytesFrom("b4595432-4968-4dd6-b766-13fdcf7435da") };
+    inline constexpr GuidBytes DefaultBlackTextureGuid{ GuidBytesFrom("d923e9f9-1651-4393-9636-1a231c7a2b6d") };
+    inline constexpr GuidBytes DefaultMaterialGuid{ GuidBytesFrom("ca932248-e2d7-4b4f-9d28-2140f1bf30e3") };
+} // namespace ig
 
 namespace ig
 {

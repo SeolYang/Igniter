@@ -1,7 +1,6 @@
 #pragma once
 #include <Core/Result.h>
 #include <Core/Log.h>
-#include <Core/GuidBytes.h>
 #include <Core/Event.h>
 #include <Asset/Common.h>
 #include <Asset/AssetMonitor.h>
@@ -216,12 +215,6 @@ namespace ig
             [[maybe_unused]] CachedAsset<T> cachedAsset{ assetCache.Cache(guid, std::move(asset)) };
             IG_CHECK(cachedAsset);
         }
-
-    public:
-        static constexpr GuidBytes DefaultTextureGuid{ GuidBytesFrom("ec5ba4d0-9b40-40d7-bec6-c4dd41809fd2") };
-        static constexpr GuidBytes DefaultWhiteTextureGuid{ GuidBytesFrom("b4595432-4968-4dd6-b766-13fdcf7435da") };
-        static constexpr GuidBytes DefaultBlackTextureGuid{ GuidBytesFrom("d923e9f9-1651-4393-9636-1a231c7a2b6d") };
-        static constexpr GuidBytes DefaultMaterialGuid{ GuidBytesFrom("ca932248-e2d7-4b4f-9d28-2140f1bf30e3") };
 
     private:
         Ptr<details::AssetMonitor> assetMonitor;
