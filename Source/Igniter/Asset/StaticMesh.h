@@ -43,7 +43,7 @@ namespace ig
         uint32_t NumIndices{ 0 };
         size_t CompressedVerticesSizeInBytes{ 0 };
         size_t CompressedIndicesSizeInBytes{ 0 };
-        Guid MaterialGuid{};
+        Guid MaterialGuid{ DefaultMaterialGuid };
         /* #sy_todo Add AABB Info */
     };
 
@@ -73,7 +73,7 @@ namespace ig
         RefHandle<GpuBuffer> GetVertexBuffer() { return vertexBuffer.MakeRef(); }     // StaticMesh가 생성 되었다면 항상 valid
         RefHandle<GpuView> GetVertexBufferSrv() { return vertexBufferSrv.MakeRef(); } // StaticMesh가 생성 되었다면 항상 valid
         RefHandle<GpuBuffer> GetIndexBuffer() { return indexBuffer.MakeRef(); }       // StaticMesh가 생성 되었다면 항상 valid
-        Material& GetMaterial() { return *material; } /* #sy_todo material이 invalidated 되면 engine default로 변환 */
+        Material& GetMaterial() { return *material; }                                 /* #sy_todo material이 invalidated 되면 engine default로 변환 */
 
     private:
         Desc snapshot{};
