@@ -45,6 +45,7 @@
     <ClInclude Include="..\Source\Igniter\Core\Event.h" />
     <ClInclude Include="..\Source\Igniter\Core\Format.h" />
     <ClInclude Include="..\Source\Igniter\Core\FrameManager.h" />
+    <ClInclude Include="..\Source\Igniter\Core\GuidBytes.h" />
     <ClInclude Include="..\Source\Igniter\Core\Handle.h" />
     <ClInclude Include="..\Source\Igniter\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Igniter\Core\HashUtils.h" />

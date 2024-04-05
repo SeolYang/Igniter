@@ -43,22 +43,26 @@ namespace ig
     {
         AssetInfo defaultTexInfo{ Texture::EngineDefault, EAssetType::Texture };
         defaultTexInfo.MarkAsEngineDefault();
-        defaultTexGuid = defaultTexInfo.GetGuid();
+        defaultTexGuid = Guid{ DefaultTextureGuid };
+        defaultTexInfo.SetGuid(defaultTexGuid);
         RegisterEngineDefault<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
 
         AssetInfo defaultWhiteTexInfo{ Texture::EngineDefaultWhite, EAssetType::Texture };
         defaultWhiteTexInfo.MarkAsEngineDefault();
+        defaultWhiteTexInfo.SetGuid(Guid{ DefaultWhiteTextureGuid });
         RegisterEngineDefault<Texture>(defaultWhiteTexInfo.GetVirtualPath(),
                                        textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{ 1.f, 1.f, 1.f }));
 
         AssetInfo defaultBlackTexInfo{ Texture::EngineDefaultBlack, EAssetType::Texture };
         defaultBlackTexInfo.MarkAsEngineDefault();
+        defaultBlackTexInfo.SetGuid(Guid{ DefaultBlackTextureGuid });
         RegisterEngineDefault<Texture>(defaultBlackTexInfo.GetVirtualPath(),
                                        textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{ 0.f, 0.f, 0.f }));
 
         AssetInfo defaultMatInfo{ Material::EngineDefault, EAssetType::Material };
         defaultMatInfo.MarkAsEngineDefault();
-        defaultMatGuid = defaultMatInfo.GetGuid();
+        defaultMatGuid = Guid{ DefaultMaterialGuid };
+        defaultMatInfo.SetGuid(defaultMatGuid);
         RegisterEngineDefault<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
     }
 

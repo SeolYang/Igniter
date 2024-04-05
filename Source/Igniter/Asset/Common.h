@@ -67,7 +67,7 @@ namespace ig
 
         [[nodiscard]] bool IsValid() const;
 
-        xg::Guid GetGuid() const { return guid; }
+        Guid GetGuid() const { return guid; }
         String GetVirtualPath() const { return virtualPath; }
         EAssetType GetType() const { return type; }
         EAssetPersistency GetPersistency() const { return persistency; }
@@ -82,10 +82,11 @@ namespace ig
     private:
         void ConstructVirtualPathHierarchy();
         void MarkAsEngineDefault() { persistency = EAssetPersistency::Engine; }
+        void SetGuid(const Guid newGuid) { guid = newGuid; }
 
     private:
         uint64_t creationTime = 0;
-        xg::Guid guid{};
+        Guid guid{};
         String virtualPath{};
         std::vector<String> virtualPathHierarchy{};
         EAssetType type = EAssetType::Unknown;
@@ -137,16 +138,16 @@ namespace ig
     fs::path GetAssetDirectoryPath(const EAssetType type);
 
     /* Refer to ./Asset/{AssetType}/{GUID} */
-    fs::path MakeAssetPath(const EAssetType type, const xg::Guid& guid);
+    fs::path MakeAssetPath(const EAssetType type, const Guid& guid);
 
     /* Refer to ./Assets/{AssetType}/{GUID}.metadata */
-    fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid);
+    fs::path MakeAssetMetadataPath(const EAssetType type, const Guid& guid);
 
     bool HasImportedBefore(const fs::path& resPath);
 
     bool IsMetadataPath(const fs::path& resPath);
 
-    xg::Guid ConvertMetadataPathToGuid(fs::path path);
+    Guid ConvertMetadataPathToGuid(fs::path path);
 
     bool IsValidVirtualPath(const String virtualPath);
 

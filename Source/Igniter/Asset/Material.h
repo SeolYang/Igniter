@@ -24,6 +24,7 @@ namespace ig
         const json& Deserialize(const json& archive);
 
     public:
+        /* #sy_wip Guid로 대체 */
         String DiffuseVirtualPath{};
     };
 

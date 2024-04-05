@@ -28,9 +28,6 @@
     <Filter Include="Source\Asset">
       <UniqueIdentifier>{3c18d2ba-7e87-4165-9442-349c99f3e97e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Core">
-      <UniqueIdentifier>{1bda930a-08a2-46c9-a9ce-cb49bf7105b4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\D3D12">
       <UniqueIdentifier>{058964cd-5d0e-4a04-81a2-a256387061be}</UniqueIdentifier>
     </Filter>
@@ -72,6 +69,9 @@
     </Filter>
     <Filter Include="Source\Asset\Material">
       <UniqueIdentifier>{70e52e7d-fda1-48c9-b44f-c65f31f240f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Core">
+      <UniqueIdentifier>{1bda930a-08a2-46c9-a9ce-cb49bf7105b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -371,6 +371,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Asset\MaterialImporter.h">
       <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\GuidBytes.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
