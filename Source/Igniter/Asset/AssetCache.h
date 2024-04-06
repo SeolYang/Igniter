@@ -128,7 +128,7 @@ namespace ig::details
             IG_CHECK(refCounterTable.contains(guid));
             IG_CHECK(refCounterTable[guid] > 0);
             const uint32_t refCount{ --refCounterTable[guid] };
-            if (refCount == 0 && assetInfo.GetPersistency() == EAssetPersistency::Default)
+            if (refCount == 0 && assetInfo.GetScope() == EAssetScope::Managed)
             {
                 InvalidateUnsafe(guid);
             }

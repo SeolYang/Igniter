@@ -41,8 +41,8 @@ namespace ig
             bool IsCached() const
             {
                 return RefCount > 0 ||
-                       Info.GetPersistency() == EAssetPersistency::Persistent ||
-                       Info.GetPersistency() == EAssetPersistency::Engine;
+                       Info.GetScope() == EAssetScope::Static ||
+                       Info.GetScope() == EAssetScope::Engine;
             }
 
         public:
@@ -158,7 +158,7 @@ namespace ig
             {
                 const AssetInfo currentAssetInfo{ assetMonitor->GetAssetInfo(AssetType, virtualPath) };
                 IG_CHECK(currentAssetInfo.IsValid());
-                if (currentAssetInfo.GetPersistency() == EAssetPersistency::Engine)
+                if (currentAssetInfo.GetScope() == EAssetScope::Engine)
                 {
                     IG_LOG(AssetManager, Error, "{}: Failed to import \"{}\". Given virtual path {} was reserved by engine.",
                            AssetType,
@@ -199,7 +199,7 @@ namespace ig
             const AssetInfo& assetInfo{ desc.Info };
             IG_CHECK(assetInfo.IsValid());
             IG_CHECK(assetInfo.GetType() == AssetTypeOf_v<T>);
-            IG_CHECK(assetInfo.GetPersistency() == EAssetPersistency::Engine);
+            IG_CHECK(assetInfo.GetScope() == EAssetScope::Engine);
 
             /* #sy_note GUID를 고정으로 할지 말지.. 일단 Virtual Path는 고정적이고, Import 되고난 이후엔 Virtual Path로 접근 가능하니 유동적으로 */
             Result<typename T::Desc, details::EDefaultDummyStatus> dummyResult{ MakeSuccess<typename T::Desc, details::EDefaultDummyStatus>(desc) };

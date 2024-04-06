@@ -118,8 +118,8 @@ namespace ig
                                           return bAscendingRequired ? comp < 0 : comp > 0;
 
                                       case 3:
-                                          return bAscendingRequired ? lhs.Info.GetPersistency() < rhs.Info.GetPersistency() :
-                                                                      lhs.Info.GetPersistency() > rhs.Info.GetPersistency();
+                                          return bAscendingRequired ? lhs.Info.GetScope() < rhs.Info.GetScope() :
+                                                                      lhs.Info.GetScope() > rhs.Info.GetScope();
                                       case 4:
                                           return bAscendingRequired ? lhs.RefCount < rhs.RefCount :
                                                                       lhs.RefCount > rhs.RefCount;
@@ -148,7 +148,7 @@ namespace ig
                         ImGui::TableNextColumn();
                         ImGui::Text(snapshot.Info.GetVirtualPath().ToCString());
                         ImGui::TableNextColumn();
-                        ImGui::Text(ToCStr(snapshot.Info.GetPersistency()));
+                        ImGui::Text(ToCStr(snapshot.Info.GetScope()));
                         ImGui::TableNextColumn();
                         ImGui::Text("%u", snapshot.RefCount);
                     }

@@ -34,7 +34,7 @@ namespace ig
         constexpr inline std::string_view Guid{ "Guid" };
         constexpr inline std::string_view VirtualPath{ "VirtualPath" };
         constexpr inline std::string_view Type{ "Type" };
-        constexpr inline std::string_view Persistency{ "Persistency" };
+        constexpr inline std::string_view Scope{ "Scope" };
     } // namespace key
 
     json& AssetInfo::Serialize(json& archive) const
@@ -43,7 +43,7 @@ namespace ig
         IG_SERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid);
         IG_SERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath);
         IG_SERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type);
-        IG_SERIALIZE_ENUM_JSON(archive, persistency, key::AssetInfo, key::Persistency);
+        IG_SERIALIZE_ENUM_JSON(archive, scope, key::AssetInfo, key::Scope);
         return archive;
     }
 
@@ -54,7 +54,7 @@ namespace ig
         IG_DESERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid, xg::Guid{});
         IG_DESERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath, String{});
         IG_DESERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type, EAssetType::Unknown);
-        IG_DESERIALIZE_ENUM_JSON(archive, persistency, key::AssetInfo, key::Persistency, EAssetPersistency::Default);
+        IG_DESERIALIZE_ENUM_JSON(archive, scope, key::AssetInfo, key::Scope, EAssetScope::Managed);
         ConstructVirtualPathHierarchy();
         return archive;
     }

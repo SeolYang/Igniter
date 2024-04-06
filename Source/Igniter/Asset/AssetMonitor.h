@@ -83,7 +83,6 @@ namespace ig::details
             guidSerializedDescTable[guid] = newSerialized;
             virtualPathGuidTable[virtualPath] = guid;
         }
-
         void UpdateInfo(const AssetInfo& newInfo);
         void Remove(const Guid guid);
         void SaveAllChanges();

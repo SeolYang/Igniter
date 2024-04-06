@@ -106,11 +106,11 @@ namespace ig::details
                         continue;
                     }
 
-                    if (assetInfo.GetPersistency() == EAssetPersistency::Engine)
+                    if (assetInfo.GetScope() == EAssetScope::Engine)
                     {
-                        IG_LOG(AssetMonitor, Warning, "{}: Found invalid asset persistency Asset {} ({}). Assumes as Default.",
+                        IG_LOG(AssetMonitor, Warning, "{}: Found invalid asset scope Asset {} ({}). Assumes as Managed.",
                                assetInfo.GetType(), virtualPath, guid);
-                        assetInfo.SetPersistency(EAssetPersistency::Default);
+                        assetInfo.SetScope(EAssetScope::Managed);
                         serializedMetadata << assetInfo;
                     }
 
@@ -317,7 +317,7 @@ namespace ig::details
             serializedMeta >> assetInfo;
             IG_CHECK(assetInfo.IsValid());
 
-            if (assetInfo.GetPersistency() != EAssetPersistency::Engine)
+            if (assetInfo.GetScope() != EAssetScope::Engine)
             {
                 const Guid guid{ assetInfo.GetGuid() };
                 IG_CHECK(guidSerializedMeta.first == guid);

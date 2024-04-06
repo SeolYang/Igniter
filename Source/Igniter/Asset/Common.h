@@ -49,11 +49,11 @@ namespace ig
         EAssetType Type = EAssetType::Unknown;
     };
 
-    enum class EAssetPersistency
+    enum class EAssetScope
     {
-        Default,    /* 수명: 레퍼런스 카운터 > 0 or 중복 Virtual Path 발생 -> Deleted */
-        Persistent, /* 수명: 에셋 매니저 해제 까지 or 중복 Virtual Path 발생 -> Deleted */
-        Engine,     /* 수명: 에셋 매니저 해제 까지, 중복 Virtual Path 발생 -> Ignored */
+        Managed, /* 수명: 레퍼런스 카운터 > 0 or 중복 Virtual Path 발생 -> Deleted */
+        Static,  /* 수명: 에셋 매니저 해제 까지 or 중복 Virtual Path 발생 -> Deleted */
+        Engine,  /* 수명: 에셋 매니저 해제 까지, 중복 Virtual Path 발생 -> Ignored */
     };
 
     /* Common Asset Metadata */
@@ -79,18 +79,18 @@ namespace ig
         Guid GetGuid() const { return guid; }
         String GetVirtualPath() const { return virtualPath; }
         EAssetType GetType() const { return type; }
-        EAssetPersistency GetPersistency() const { return persistency; }
+        EAssetScope GetScope() const { return scope; }
         const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
         void SetVirtualPath(const String newVirtualPath);
-        void SetPersistency(const EAssetPersistency newPersistency)
+        void SetScope(const EAssetScope newScope)
         {
-            persistency = (newPersistency == EAssetPersistency::Engine) ? EAssetPersistency::Persistent : newPersistency;
+            scope = (newScope == EAssetScope::Engine) ? EAssetScope::Static : newScope;
         }
 
     private:
         void ConstructVirtualPathHierarchy();
-        void MarkAsEngineDefault() { persistency = EAssetPersistency::Engine; }
+        void MarkAsEngineDefault() { scope = EAssetScope::Engine; }
         void SetGuid(const Guid newGuid) { guid = newGuid; }
 
     private:
@@ -99,7 +99,7 @@ namespace ig
         String virtualPath{};
         std::vector<String> virtualPathHierarchy{};
         EAssetType type = EAssetType::Unknown;
-        EAssetPersistency persistency = EAssetPersistency::Default;
+        EAssetScope scope = EAssetScope::Managed;
     };
 
     template <typename T>
