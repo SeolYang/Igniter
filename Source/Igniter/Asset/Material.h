@@ -47,7 +47,7 @@ namespace ig
         Material& operator=(Material&&) noexcept = default;
 
         const Desc& GetSnapshot() const { return snapshot; }
-        Texture& GetDiffuse();
+        RefHandle<Texture> GetDiffuse() { return diffuse.MakeRef(); }
 
         void OnImGui() { IG_UNIMPLEMENTED(); }
 

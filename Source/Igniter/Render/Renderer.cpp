@@ -177,8 +177,9 @@ namespace ig
                         const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
                         perObjectConstantBuffer.Write(perObjectBuffer);
 
-                        Material& material{ staticMesh.GetMaterial() };
-                        Texture& diffuseTex{ material.GetDiffuse() };
+                        /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
+                        Material& material{ *staticMesh.GetMaterial() };
+                        Texture& diffuseTex{ *material.GetDiffuse() };
                         const BasicRenderResources params{
                             .VertexBufferIdx = vertexBufferSrv->Index,
                             .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,

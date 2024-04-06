@@ -28,11 +28,4 @@ namespace ig
     Material::~Material()
     {
     }
-
-    Texture& Material::GetDiffuse()
-    {
-        /* #sy_tood Diffuse가 invalidated 된 경우, Engine Default 를 대신 설정 */
-        IG_CHECK(diffuse);
-        return *diffuse;
-    }
 } // namespace ig

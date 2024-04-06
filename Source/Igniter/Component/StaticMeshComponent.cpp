@@ -17,7 +17,7 @@ namespace ig
         const StaticMesh::Desc& staticMeshSnapshot{ staticMesh.GetSnapshot() };
         ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
 
-        Material& material{ staticMesh.GetMaterial() };
+        Material& material{ *staticMesh.GetMaterial() };
         const Material::Desc& materialSnapshot{ material.GetSnapshot() };
         ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
     }

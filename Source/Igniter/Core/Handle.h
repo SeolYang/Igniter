@@ -207,12 +207,12 @@ namespace ig
 
         [[nodiscard]] RefHandle<const T> MakeRef() const
         {
-            return RefHandle<const T>{ handle };
+            return RefHandle<const T>{ RefHandle<T>::handle };
         }
 
         [[nodiscard]] RefHandle<T> MakeRef()
         {
-            return RefHandle<T>{ handle };
+            return RefHandle<T>{ RefHandle<T>::handle };
         }
 
     private:
