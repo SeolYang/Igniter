@@ -194,10 +194,6 @@ namespace ig
                     const StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
                     renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                 }
-                else
-                {
-                    IG_LOG(Renderer, Error, "Invalid Static Mesh Component at {}", entt::to_integral(entity));
-                }
             }
         }
         renderCmdCtx->End();
