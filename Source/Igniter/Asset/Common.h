@@ -89,9 +89,13 @@ namespace ig
         }
 
     private:
+        AssetInfo(const Guid guid, const String virtualPath, const EAssetType type, const EAssetScope scope);
         void ConstructVirtualPathHierarchy();
-        void MarkAsEngineDefault() { scope = EAssetScope::Engine; }
-        void SetGuid(const Guid newGuid) { guid = newGuid; }
+
+        static AssetInfo MakeEngineInternal(const Guid guid, const String virtualPath, const EAssetType type)
+        {
+            return AssetInfo{ guid, virtualPath, type, EAssetScope::Engine };
+        }
 
     private:
         uint64_t creationTime = 0;

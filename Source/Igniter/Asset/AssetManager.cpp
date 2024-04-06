@@ -22,7 +22,7 @@ namespace ig
           materialLoader(std::make_unique<MaterialLoader>(*this))
     {
         InitAssetCaches(handleManager);
-        InitEngineDefaultAssets();
+        InitEngineInternalAssets();
     }
 
     AssetManager::~AssetManager()
@@ -39,30 +39,30 @@ namespace ig
         assetCaches.emplace_back(std::make_unique<details::AssetCache<Material>>(handleManager));
     }
 
-    void AssetManager::InitEngineDefaultAssets()
+    void AssetManager::InitEngineInternalAssets()
     {
         /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
-        AssetInfo defaultTexInfo{ Texture::EngineDefault, EAssetType::Texture };
-        defaultTexInfo.MarkAsEngineDefault();
-        defaultTexInfo.SetGuid(Guid{ DefaultTextureGuid });
-        RegisterEngineDefault<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
+        AssetInfo defaultTexInfo{ AssetInfo::MakeEngineInternal(Guid{DefaultTextureGuid}, 
+                                                                Texture::EngineDefault,
+                                                                EAssetType::Texture) };
+        RegisterEngineInternal<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
 
-        AssetInfo defaultWhiteTexInfo{ Texture::EngineDefaultWhite, EAssetType::Texture };
-        defaultWhiteTexInfo.MarkAsEngineDefault();
-        defaultWhiteTexInfo.SetGuid(Guid{ DefaultWhiteTextureGuid });
-        RegisterEngineDefault<Texture>(defaultWhiteTexInfo.GetVirtualPath(),
+        AssetInfo defaultWhiteTexInfo{ AssetInfo::MakeEngineInternal(Guid{DefaultWhiteTextureGuid}, 
+                                                                     Texture::EngineDefaultWhite,
+                                                                     EAssetType::Texture) };
+        RegisterEngineInternal<Texture>(defaultWhiteTexInfo.GetVirtualPath(),
                                        textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{ 1.f, 1.f, 1.f }));
 
-        AssetInfo defaultBlackTexInfo{ Texture::EngineDefaultBlack, EAssetType::Texture };
-        defaultBlackTexInfo.MarkAsEngineDefault();
-        defaultBlackTexInfo.SetGuid(Guid{ DefaultBlackTextureGuid });
-        RegisterEngineDefault<Texture>(defaultBlackTexInfo.GetVirtualPath(),
+        AssetInfo defaultBlackTexInfo{ AssetInfo::MakeEngineInternal(Guid{ DefaultBlackTextureGuid },
+                                                                     Texture::EngineDefaultBlack,
+                                                                     EAssetType::Texture) };
+        RegisterEngineInternal<Texture>(defaultBlackTexInfo.GetVirtualPath(),
                                        textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{ 0.f, 0.f, 0.f }));
 
-        AssetInfo defaultMatInfo{ Material::EngineDefault, EAssetType::Material };
-        defaultMatInfo.MarkAsEngineDefault();
-        defaultMatInfo.SetGuid(Guid{ DefaultMaterialGuid });
-        RegisterEngineDefault<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
+        AssetInfo defaultMatInfo{ AssetInfo::MakeEngineInternal(Guid{ DefaultMaterialGuid },
+                                                                     Material::EngineDefault,
+                                                                     EAssetType::Material) };
+        RegisterEngineInternal<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)

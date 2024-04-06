@@ -19,10 +19,16 @@ namespace ig
     }
 
     AssetInfo::AssetInfo(const String virtualPath, const EAssetType type)
+        : AssetInfo(xg::newGuid(), virtualPath, type, EAssetScope::Managed)
+    {
+    }
+
+    AssetInfo::AssetInfo(const Guid guid, const String virtualPath, const EAssetType type, const EAssetScope scope)
         : creationTime(Timer::Now()),
-          guid(xg::newGuid()),
+          guid(guid),
           virtualPath(virtualPath),
-          type(type)
+          type(type),
+          scope(scope)
     {
         ConstructVirtualPathHierarchy();
     }

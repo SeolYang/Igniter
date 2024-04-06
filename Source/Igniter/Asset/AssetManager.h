@@ -94,7 +94,7 @@ namespace ig
 
         void InitAssetCaches(HandleManager& handleManager);
 
-        void InitEngineDefaultAssets();
+        void InitEngineInternalAssets();
 
         template <Asset T, typename AssetLoader>
         [[nodiscard]] CachedAsset<T> LoadInternal(const Guid guid, AssetLoader& loader)
@@ -185,7 +185,7 @@ namespace ig
         [[nodiscard]] Mutex& RequestAssetMutex(const Guid guid);
 
         template <Asset T, ResultStatus Status>
-        void RegisterEngineDefault(const String requiredVirtualPath, Result<T, Status> assetResult)
+        void RegisterEngineInternal(const String requiredVirtualPath, Result<T, Status> assetResult)
         {
             if (!assetResult.HasOwnership())
             {
