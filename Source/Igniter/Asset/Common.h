@@ -24,10 +24,7 @@ namespace ig
     inline constexpr GuidBytes DefaultWhiteTextureGuid{ GuidBytesFrom("b4595432-4968-4dd6-b766-13fdcf7435da") };
     inline constexpr GuidBytes DefaultBlackTextureGuid{ GuidBytesFrom("d923e9f9-1651-4393-9636-1a231c7a2b6d") };
     inline constexpr GuidBytes DefaultMaterialGuid{ GuidBytesFrom("ca932248-e2d7-4b4f-9d28-2140f1bf30e3") };
-} // namespace ig
 
-namespace ig
-{
     enum class EAssetType
     {
         Unknown,
@@ -145,10 +142,7 @@ namespace ig
 
     template <Asset T>
     using CachedAsset = UniqueRefHandle<T, details::AssetCache<T>*>;
-} // namespace ig
 
-namespace ig
-{
     /* Refer to {ResourcePath}.metadata */
     fs::path MakeResourceMetadataPath(fs::path resPath);
 

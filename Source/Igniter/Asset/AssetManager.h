@@ -74,7 +74,14 @@ namespace ig
         void Delete(const Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
-        /* #sy_todo Reload ASSET! */
+        /* #sy_wip Reload ASSET! */
+        template <Asset T>
+        void Reload(const Guid guid, const typename T::LoadDesc& newLoadDesc)
+        {
+            guid;
+            newLoadDesc;
+            IG_UNIMPLEMENTED();
+        }
 
         void SaveAllChanges();
 
@@ -97,7 +104,7 @@ namespace ig
         void InitEngineInternalAssets();
 
         template <Asset T, typename AssetLoader>
-        [[nodiscard]] CachedAsset<T> LoadInternal(const Guid guid, AssetLoader& loader)
+        [[nodiscard]] CachedAsset<T> LoadImpl(const Guid guid, AssetLoader& loader)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -133,12 +140,12 @@ namespace ig
         }
 
         template <Asset T, ResultStatus ImportStatus>
-        std::optional<Guid> ImportInternal(String resPath, Result<typename T::Desc, ImportStatus>& result)
+        std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)
         {
             constexpr auto AssetType{ AssetTypeOf_v<T> };
             if (!result.HasOwnership())
             {
-                IG_LOG(AssetManager, Error, "{}: Failed({}) to import  \"{}\".",
+                IG_LOG(AssetManager, Error, "{}: Failed({}) to import \"{}\".",
                        AssetType,
                        result.GetStatus(),
                        resPath);
@@ -180,7 +187,7 @@ namespace ig
             return assetInfo.GetGuid();
         }
 
-        void DeleteInternal(const EAssetType assetType, const Guid guid);
+        void DeleteImpl(const EAssetType assetType, const Guid guid);
 
         [[nodiscard]] Mutex& RequestAssetMutex(const Guid guid);
 
@@ -204,7 +211,7 @@ namespace ig
             /* #sy_note GUID를 고정으로 할지 말지.. 일단 Virtual Path는 고정적이고, Import 되고난 이후엔 Virtual Path로 접근 가능하니 유동적으로 */
             Result<typename T::Desc, details::EDefaultDummyStatus> dummyResult{ MakeSuccess<typename T::Desc, details::EDefaultDummyStatus>(desc) };
             IG_CHECK(dummyResult.HasOwnership());
-            std::optional<Guid> guidOpt{ ImportInternal<T>(assetInfo.GetVirtualPath(), dummyResult) };
+            std::optional<Guid> guidOpt{ ImportImpl<T>(assetInfo.GetVirtualPath(), dummyResult) };
             IG_CHECK(guidOpt);
 
             const Guid guid{ *guidOpt };

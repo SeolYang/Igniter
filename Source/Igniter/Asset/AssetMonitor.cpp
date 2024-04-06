@@ -47,7 +47,7 @@ namespace ig::details
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
             fs::directory_iterator directoryItr{ GetAssetDirectoryPath(assetType) };
 
-            IG_LOG(AssetMonitor, Debug, "Parsing {} type root dir ({})...", assetType, GetAssetDirectoryPath(assetType).string());
+            IG_LOG(AssetMonitor, Debug, "* Parsing {} type root dir ({})...", assetType, GetAssetDirectoryPath(assetType).string());
             while (directoryItr != fs::end(directoryItr))
             {
                 const fs::directory_entry& entry = *directoryItr;
@@ -255,7 +255,7 @@ namespace ig::details
         guidSerializedDescTable[guid] << newInfo;
     }
 
-    void AssetMonitor::Remove(const Guid guid)
+    void AssetMonitor::Remove(const Guid guid, const bool bShouldExpired)
     {
         ReadWriteLock rwLock{ mutex };
         IG_CHECK(ContainsUnsafe(guid));
@@ -270,7 +270,11 @@ namespace ig::details
         IG_CHECK(virtualPathGuidTable.contains(virtualPath));
         IG_CHECK(virtualPathGuidTable[virtualPath] == guid);
 
-        expiredAssetInfos[guid] = info;
+        if (bShouldExpired)
+        {
+            expiredAssetInfos[guid] = info;
+        }
+
         virtualPathGuidTable.erase(virtualPath);
         guidSerializedDescTable.erase(guid);
         IG_CHECK(!ContainsUnsafe(guid));

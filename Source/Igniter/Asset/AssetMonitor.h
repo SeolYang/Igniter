@@ -84,7 +84,7 @@ namespace ig::details
             virtualPathGuidTable[virtualPath] = guid;
         }
         void UpdateInfo(const AssetInfo& newInfo);
-        void Remove(const Guid guid);
+        void Remove(const Guid guid, const bool bShouldExpired = true);
         void SaveAllChanges();
 
         [[nodiscard]] std::vector<AssetInfo> TakeSnapshots() const;

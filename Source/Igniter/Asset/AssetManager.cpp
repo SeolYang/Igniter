@@ -86,7 +86,7 @@ namespace ig
     Guid AssetManager::ImportTexture(const String resPath, const TextureImportDesc& config)
     {
         Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
-        std::optional<Guid> guidOpt{ ImportInternal<Texture>(resPath, result) };
+        std::optional<Guid> guidOpt{ ImportImpl<Texture>(resPath, result) };
         if (!guidOpt)
         {
             return Guid{};
@@ -98,10 +98,10 @@ namespace ig
 
     CachedAsset<Texture> AssetManager::LoadTexture(const Guid guid)
     {
-        CachedAsset<Texture> cachedTex{ LoadInternal<Texture>(guid, *textureLoader) };
+        CachedAsset<Texture> cachedTex{ LoadImpl<Texture>(guid, *textureLoader) };
         if (!cachedTex)
         {
-            return LoadInternal<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
+            return LoadImpl<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
         }
 
         return cachedTex;
@@ -112,13 +112,13 @@ namespace ig
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Load Texture: Invalid Virtual Path {}", virtualPath);
-            return LoadInternal<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
+            return LoadImpl<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
         }
 
         if (!assetMonitor->Contains(EAssetType::Texture, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
-            return LoadInternal<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
+            return LoadImpl<Texture>(Guid{ DefaultTextureGuid }, *textureLoader);
         }
 
         return LoadTexture(assetMonitor->GetGuid(EAssetType::Texture, virtualPath));
@@ -131,7 +131,7 @@ namespace ig
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
         {
-            std::optional<Guid> guidOpt{ ImportInternal<StaticMesh>(resPath, result) };
+            std::optional<Guid> guidOpt{ ImportImpl<StaticMesh>(resPath, result) };
             if (guidOpt)
             {
                 output.emplace_back(*guidOpt);
@@ -144,7 +144,7 @@ namespace ig
 
     CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid guid)
     {
-        return LoadInternal<StaticMesh>(guid, *staticMeshLoader);
+        return LoadImpl<StaticMesh>(guid, *staticMeshLoader);
     }
 
     CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
@@ -161,7 +161,7 @@ namespace ig
             return CachedAsset<StaticMesh>{};
         }
 
-        return LoadInternal<StaticMesh>(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath), *staticMeshLoader);
+        return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath), *staticMeshLoader);
     }
 
     Guid AssetManager::CreateMaterial(const String virtualPath, const MaterialCreateDesc createDesc)
@@ -174,7 +174,7 @@ namespace ig
 
         Result<Material::Desc, EMaterialCreateStatus> result{ materialImporter->Create(AssetInfo{ virtualPath, EAssetType::Material },
                                                                                        createDesc) };
-        std::optional<Guid> guidOpt{ ImportInternal<Material>(virtualPath, result) };
+        std::optional<Guid> guidOpt{ ImportImpl<Material>(virtualPath, result) };
         if (!guidOpt)
         {
             return Guid{};
@@ -186,10 +186,10 @@ namespace ig
 
     CachedAsset<Material> AssetManager::LoadMaterial(const Guid guid)
     {
-        CachedAsset<Material> cachedMat{ LoadInternal<Material>(guid, *materialLoader) };
+        CachedAsset<Material> cachedMat{ LoadImpl<Material>(guid, *materialLoader) };
         if (!cachedMat)
         {
-            return LoadInternal<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
+            return LoadImpl<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
         }
 
         return cachedMat;
@@ -200,13 +200,13 @@ namespace ig
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Load Material: Invalid Virtual Path {}", virtualPath);
-            return LoadInternal<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
+            return LoadImpl<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
         }
 
         if (!assetMonitor->Contains(EAssetType::Material, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
-            return LoadInternal<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
+            return LoadImpl<Material>(Guid{ DefaultMaterialGuid }, *materialLoader);
         }
 
         return LoadMaterial(assetMonitor->GetGuid(EAssetType::Material, virtualPath));
@@ -222,7 +222,7 @@ namespace ig
             return;
         }
 
-        DeleteInternal(assetMonitor->GetAssetInfo(guid).GetType(), guid);
+        DeleteImpl(assetMonitor->GetAssetInfo(guid).GetType(), guid);
     }
 
     void AssetManager::Delete(const EAssetType assetType, const String virtualPath)
@@ -239,7 +239,7 @@ namespace ig
             return;
         }
 
-        DeleteInternal(assetType, assetMonitor->GetGuid(assetType, virtualPath));
+        DeleteImpl(assetType, assetMonitor->GetGuid(assetType, virtualPath));
     }
 
     AssetInfo AssetManager::GetAssetInfo(const Guid guid) const
@@ -284,7 +284,7 @@ namespace ig
         return snapshots;
     }
 
-    void AssetManager::DeleteInternal(const EAssetType assetType, const Guid guid)
+    void AssetManager::DeleteImpl(const EAssetType assetType, const Guid guid)
     {
         UniqueLock assetLock{ RequestAssetMutex(guid) };
         IG_CHECK(assetType != EAssetType::Unknown);

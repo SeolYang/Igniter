@@ -105,6 +105,24 @@ int main()
             }
         }
 
+        std::future<CachedAsset<StaticMesh>> homuraAxeMeshFutures{ std::async(std::launch::async,
+                                                                              [&assetManager]()
+                                                                              {
+                                                                                  return assetManager.LoadStaticMesh(Guid{ "b77399f0-98ec-47cb-ad80-e7287d5833c2" });
+                                                                              }) };
+        {
+            CachedAsset<StaticMesh> staticMesh{ homuraAxeMeshFutures.get() };
+            if (staticMesh)
+            {
+                const auto newEntity{ registry.create() };
+                auto& staticMeshComponent{ registry.emplace<StaticMeshComponent>(newEntity) };
+                staticMeshComponent.Mesh = std::move(staticMesh);
+
+                registry.emplace<TransformComponent>(newEntity);
+                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+            }
+        }
+
         /* Camera */
         const Entity cameraEntity = CameraArchetype::Create(registry);
         {
