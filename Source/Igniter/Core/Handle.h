@@ -205,6 +205,16 @@ namespace ig
             return *this;
         }
 
+        [[nodiscard]] RefHandle<const T> MakeRef() const
+        {
+            return RefHandle<const T>{ handle };
+        }
+
+        [[nodiscard]] RefHandle<T> MakeRef()
+        {
+            return RefHandle<T>{ handle };
+        }
+
     private:
         [[no_unique_address]] Finalizer finalizer{};
     };
