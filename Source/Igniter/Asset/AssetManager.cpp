@@ -257,7 +257,7 @@ namespace ig
         assetModifiedEvent.Notify(*this);
     }
 
-    Mutex& AssetManager::RequestAssetMutex(const Guid guid)
+    AssetManager::AssetMutex& AssetManager::RequestAssetMutex(const Guid guid)
     {
         UniqueLock lock{ assetMutexTableMutex };
         if (!assetMutexTable.contains(guid))
