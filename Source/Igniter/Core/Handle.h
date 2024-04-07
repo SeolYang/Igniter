@@ -172,27 +172,14 @@ namespace ig
 
         ~UniqueRefHandle()
         {
-            if (RefHandle<T>::IsAlive())
-            {
-                details::HandleImpl handle = RefHandle<T>::GetHandle();
-                if constexpr (std::is_pointer_v<Finalizer>)
-                {
-                    if (finalizer != nullptr)
-                    {
-                        (*finalizer)(reinterpret_cast<T*>(handle.GetAddressOf(RefHandle<T>::EvaluatedTypeHashVal)));
-                    }
-                }
-                else
-                {
-                    finalizer(reinterpret_cast<T*>(handle.GetAddressOf(RefHandle<T>::EvaluatedTypeHashVal)));
-                }
-            }
+            Finalize();
         }
 
         UniqueRefHandle& operator=(const UniqueRefHandle&) = delete;
         UniqueRefHandle& operator=(UniqueRefHandle&& other) noexcept
         {
-            RefHandle<T>::operator=(other);
+            Finalize();
+            RefHandle<T>::operator=(std::move(other));
             if constexpr (std::is_pointer_v<Finalizer>)
             {
                 this->finalizer = std::exchange(other.finalizer, nullptr);
@@ -213,6 +200,26 @@ namespace ig
         [[nodiscard]] RefHandle<T> MakeRef()
         {
             return RefHandle<T>{ RefHandle<T>::handle };
+        }
+
+    private:
+        void Finalize()
+        {
+            if (RefHandle<T>::IsAlive())
+            {
+                details::HandleImpl handle = RefHandle<T>::GetHandle();
+                if constexpr (std::is_pointer_v<Finalizer>)
+                {
+                    if (finalizer != nullptr)
+                    {
+                        (*finalizer)(reinterpret_cast<T*>(handle.GetAddressOf(RefHandle<T>::EvaluatedTypeHashVal)));
+                    }
+                }
+                else
+                {
+                    finalizer(reinterpret_cast<T*>(handle.GetAddressOf(RefHandle<T>::EvaluatedTypeHashVal)));
+                }
+            }
         }
 
     private:
