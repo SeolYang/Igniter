@@ -59,17 +59,20 @@ namespace ig
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
-        Guid ImportTexture(const String resPath, const TextureImportDesc& desc);
+        Guid Import(const String resPath, const TextureImportDesc& desc);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const Guid guid);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const String virtualPath);
+        void Reload(const Guid guid, const TextureLoadDesc& newLoadDesc);
 
-        std::vector<Guid> ImportStaticMesh(const String resPath, const StaticMeshImportDesc& desc);
+        std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const Guid guid);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
+        void Reload(const Guid guid, const StaticMeshLoadDesc& newLoadDesc);
 
-        Guid CreateMaterial(const String virtualPath, const MaterialCreateDesc desc);
+        Guid Import(const String virtualPath, const MaterialCreateDesc& createDesc);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const Guid guid);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const String virtualPath);
+        void Reload(const Guid guid, const MaterialLoadDesc& newLoadDesc);
 
         void Delete(const Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
@@ -214,10 +217,11 @@ namespace ig
                 }
                 else
                 {
-                    assetCache.Cache(guid, result.Take());
+                    cachedAsset = assetCache.Cache(guid, result.Take());
                 }
 
-                assetMonitor->SetLoadDesc(guid, desc.LoadDescriptor);
+                IG_CHECK(cachedAsset);
+                assetMonitor->SetLoadDesc<T>(guid, desc.LoadDescriptor);
             }
 
             assetModifiedEvent.Notify(*this);

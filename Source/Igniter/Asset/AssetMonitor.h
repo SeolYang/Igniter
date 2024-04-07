@@ -115,7 +115,7 @@ namespace ig::details
         }
 
         template <Asset T>
-        void SetLoadDescUnsafe(const Guid guid, typename T::LoadDesc& loadDesc)
+        void SetLoadDescUnsafe(const Guid guid, const typename T::LoadDesc& loadDesc)
         {
             IG_CHECK(ContainsUnsafe(guid));
 

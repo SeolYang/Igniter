@@ -64,7 +64,7 @@ namespace ig
                     config.AddressModeW = AddressModes[selectedAddressModeW];
 
                     AssetManager& assetManager = Igniter::GetAssetManager();
-                    assetManager.ImportTexture(path, config);
+                    assetManager.Import(path, config);
                     SetVisibility(false);
                 }
             }

@@ -36,7 +36,7 @@ namespace ig
                 if (ImGui::Button("Import"))
                 {
                     AssetManager& assetManager = Igniter::GetAssetManager();
-                    assetManager.ImportStaticMesh(path, config);
+                    assetManager.Import(path, config);
                     SetVisibility(false);
                 }
             }

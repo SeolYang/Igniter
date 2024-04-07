@@ -202,7 +202,7 @@ namespace ig
                 for (uint32_t materialIdx = 0; materialIdx < scene->mNumMaterials; ++materialIdx)
                 {
                     const aiMaterial& material = *scene->mMaterials[materialIdx];
-                    materialGuidTable[materialIdx] = assetManager.CreateMaterial(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
+                    materialGuidTable[materialIdx] = assetManager.Import(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
                                                                                  MaterialCreateDesc{ .DiffuseVirtualPath = Texture::EngineDefault });
                 }
             }
