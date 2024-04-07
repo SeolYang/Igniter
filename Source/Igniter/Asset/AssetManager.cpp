@@ -43,24 +43,24 @@ namespace ig
         AssetInfo defaultTexInfo{ AssetInfo::MakeEngineInternal(Guid{ DefaultTextureGuid },
                                                                 Texture::EngineDefault,
                                                                 EAssetType::Texture) };
-        RegisterEngineInternal<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
+        RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
 
         AssetInfo defaultWhiteTexInfo{ AssetInfo::MakeEngineInternal(Guid{ DefaultWhiteTextureGuid },
                                                                      Texture::EngineDefaultWhite,
                                                                      EAssetType::Texture) };
-        RegisterEngineInternal<Texture>(defaultWhiteTexInfo.GetVirtualPath(),
+        RegisterEngineInternalAsset<Texture>(defaultWhiteTexInfo.GetVirtualPath(),
                                         textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{ 1.f, 1.f, 1.f }));
 
         AssetInfo defaultBlackTexInfo{ AssetInfo::MakeEngineInternal(Guid{ DefaultBlackTextureGuid },
                                                                      Texture::EngineDefaultBlack,
                                                                      EAssetType::Texture) };
-        RegisterEngineInternal<Texture>(defaultBlackTexInfo.GetVirtualPath(),
+        RegisterEngineInternalAsset<Texture>(defaultBlackTexInfo.GetVirtualPath(),
                                         textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{ 0.f, 0.f, 0.f }));
 
         AssetInfo defaultMatInfo{ AssetInfo::MakeEngineInternal(Guid{ DefaultMaterialGuid },
                                                                 Material::EngineDefault,
                                                                 EAssetType::Material) };
-        RegisterEngineInternal<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
+        RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)
@@ -273,11 +273,12 @@ namespace ig
         assetMonitor->SaveAllChanges();
     }
 
-    AssetInfo AssetManager::GetAssetInfo(const Guid guid) const
+    std::optional<AssetInfo> AssetManager::GetAssetInfo(const Guid guid) const
     {
         if (!assetMonitor->Contains(guid))
         {
             IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid);
+            return std::nullopt;
         }
 
         return assetMonitor->GetAssetInfo(guid);

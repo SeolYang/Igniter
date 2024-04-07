@@ -117,11 +117,35 @@ namespace ig
 
         void SaveAllChanges();
 
-        [[nodiscard]] AssetInfo GetAssetInfo(const Guid guid) const;
-        [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
+        [[nodiscard]] std::optional<AssetInfo> GetAssetInfo(const Guid guid) const;
+
+        template <Asset T>
+        [[nodiscard]] std::optional<typename T::LoadDesc> GetLoadDesc(const Guid guid) const
+        {
+            if (!assetMonitor->Contains(guid))
+            {
+                IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid);
+                return std::nullopt;
+            }
+
+            return assetMonitor->GetLoadDesc(guid);
+        }
+
+        template <Asset T>
+        void SetLoadDesc(const Guid guid, const typename T::LoadDesc& newLoadDesc)
+        {
+            if (!assetMonitor->Contains(guid))
+            {
+                IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid);
+                return;
+            }
+
+            assetMonitor->SetLoadDesc(guid, newLoadDesc);
+        }
 
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const;
 
+        [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
     private:
         template <Asset T>
         details::AssetCache<T>& GetCache()
@@ -263,7 +287,7 @@ namespace ig
         [[nodiscard]] AssetMutex& RequestAssetMutex(const Guid guid);
 
         template <Asset T, ResultStatus Status>
-        void RegisterEngineInternal(const String requiredVirtualPath, Result<T, Status> assetResult)
+        void RegisterEngineInternalAsset(const String requiredVirtualPath, Result<T, Status> assetResult)
         {
             if (!assetResult.HasOwnership())
             {
