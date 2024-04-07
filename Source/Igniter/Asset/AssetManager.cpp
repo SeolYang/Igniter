@@ -210,21 +210,6 @@ namespace ig
         return LoadMaterial(assetMonitor->GetGuid(EAssetType::Material, virtualPath));
     }
 
-    void AssetManager::Reload(const Guid guid, const TextureLoadDesc& newLoadDesc)
-    {
-        ReloadImpl<Texture>(guid, newLoadDesc, *textureLoader);
-    }
-
-    void AssetManager::Reload(const Guid guid, const StaticMeshLoadDesc& newLoadDesc)
-    {
-        ReloadImpl<StaticMesh>(guid, newLoadDesc, *staticMeshLoader);
-    }
-
-    void AssetManager::Reload(const Guid guid, const MaterialLoadDesc& newLoadDesc)
-    {
-        ReloadImpl<Material>(guid, newLoadDesc, *materialLoader);
-    }
-
     void AssetManager::Delete(const Guid guid)
     {
         if (!assetMonitor->Contains(guid))

@@ -62,17 +62,43 @@ namespace ig
         Guid Import(const String resPath, const TextureImportDesc& desc);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const Guid guid);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const String virtualPath);
-        void Reload(const Guid guid, const TextureLoadDesc& newLoadDesc);
 
         std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const Guid guid);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
-        void Reload(const Guid guid, const StaticMeshLoadDesc& newLoadDesc);
 
         Guid Import(const String virtualPath, const MaterialCreateDesc& createDesc);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const Guid guid);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const String virtualPath);
-        void Reload(const Guid guid, const MaterialLoadDesc& newLoadDesc);
+
+        template <Asset T>
+        void Reload(const Guid guid, const typename T::LoadDesc& newLoadDesc)
+        {
+            if constexpr (AssetTypeOf_v<T> == EAssetType::Texture)
+            {
+                ReloadImpl<Texture>(guid, newLoadDesc, *textureLoader);
+            }
+            else if (AssetTypeOf_v<T> == EAssetType::StaticMesh)
+            {
+                ReloadImpl<StaticMesh>(guid, newLoadDesc, *staticMeshLoader);
+            }
+            else if (AssetTypeOf_v<T> == EAssetType::Material)
+            {
+                ReloadImpl<Material>(guid, newLoadDesc, *materialLoader);
+            }
+            else
+            {
+                IG_CHECK_NO_ENTRY();
+            }
+        }
+
+        template <Asset T>
+        bool Reimport(const Guid guid, const String resPath, const typename T::ImportDesc& importDesc)
+        {
+            /* #sy_todo Reimport 구현 할 것 */
+            IG_UNIMPLEMENTED();
+            return false;
+        }
 
         void Delete(const Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
