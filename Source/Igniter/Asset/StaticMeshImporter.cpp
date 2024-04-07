@@ -165,7 +165,7 @@ namespace ig
         return MakeSuccess<StaticMesh::Desc, EStaticMeshImportStatus>(assetInfo, newLoadConfig);
     }
 
-    std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::ImportStaticMesh(const String resPathStr,
+    std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::Import(const String resPathStr,
                                                                                                         const StaticMesh::ImportDesc& desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;

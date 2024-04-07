@@ -124,7 +124,7 @@ namespace ig
 
     std::vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc)
     {
-        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->ImportStaticMesh(resPath, desc);
+        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(resPath, desc);
         std::vector<Guid> output;
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
