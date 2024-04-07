@@ -126,7 +126,7 @@ namespace ig
         {
             asset.OnImGui()
         };
-    } && std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf_v<T> != EAssetType::Unknown;
+    } && std::is_move_constructible_v<T> && std::is_move_assignable_v<T> && std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf_v<T> != EAssetType::Unknown;
 
     template <typename T>
     inline constexpr bool IsAsset_v = false;

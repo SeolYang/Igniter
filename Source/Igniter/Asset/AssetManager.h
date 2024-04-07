@@ -74,15 +74,6 @@ namespace ig
         void Delete(const Guid guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
-        /* #sy_wip Reload ASSET! */
-        template <Asset T>
-        void Reload(const Guid guid, const typename T::LoadDesc& newLoadDesc)
-        {
-            guid;
-            newLoadDesc;
-            IG_UNIMPLEMENTED();
-        }
-
         void SaveAllChanges();
 
         [[nodiscard]] AssetInfo GetAssetInfo(const Guid guid) const;
@@ -102,42 +93,6 @@ namespace ig
         void InitAssetCaches(HandleManager& handleManager);
 
         void InitEngineInternalAssets();
-
-        template <Asset T, typename AssetLoader>
-        [[nodiscard]] CachedAsset<T> LoadImpl(const Guid guid, AssetLoader& loader)
-        {
-            if (!assetMonitor->Contains(guid))
-            {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf_v<T>, guid);
-                return CachedAsset<T>{};
-            }
-
-            UniqueLock assetLock{ RequestAssetMutex(guid) };
-            details::AssetCache<T>& assetCache{ GetCache<T>() };
-            if (!assetCache.IsCached(guid))
-            {
-                const T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
-                IG_CHECK(desc.Info.GetGuid() == guid);
-                auto result{ loader.Load(desc) };
-                if (result.HasOwnership())
-                {
-                    IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.",
-                           AssetTypeOf_v<T>,
-                           desc.Info.GetVirtualPath(), guid);
-                    assetModifiedEvent.Notify(*this);
-                    return assetCache.Cache(guid, result.Take());
-                }
-
-                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).",
-                       AssetTypeOf_v<T>, result.GetStatus(),
-                       desc.Info.GetVirtualPath(), guid);
-                return CachedAsset<T>{};
-            }
-
-            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf_v<T>, guid);
-            assetModifiedEvent.Notify(*this);
-            return assetCache.Load(guid);
-        }
 
         template <Asset T, ResultStatus ImportStatus>
         std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)
@@ -185,6 +140,87 @@ namespace ig
                    virtualPath,
                    assetInfo.GetGuid());
             return assetInfo.GetGuid();
+        }
+ 
+        template <Asset T, typename AssetLoader>
+        [[nodiscard]] CachedAsset<T> LoadImpl(const Guid guid, AssetLoader& loader)
+        {
+            if (!assetMonitor->Contains(guid))
+            {
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf_v<T>, guid);
+                return CachedAsset<T>{};
+            }
+
+            UniqueLock assetLock{ RequestAssetMutex(guid) };
+            details::AssetCache<T>& assetCache{ GetCache<T>() };
+            if (!assetCache.IsCached(guid))
+            {
+                const T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
+                IG_CHECK(desc.Info.GetGuid() == guid);
+                auto result{ loader.Load(desc) };
+                if (result.HasOwnership())
+                {
+                    IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.",
+                           AssetTypeOf_v<T>,
+                           desc.Info.GetVirtualPath(), guid);
+                    assetModifiedEvent.Notify(*this);
+                    return assetCache.Cache(guid, result.Take());
+                }
+
+                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).",
+                       AssetTypeOf_v<T>, result.GetStatus(),
+                       desc.Info.GetVirtualPath(), guid);
+                return CachedAsset<T>{};
+            }
+
+            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf_v<T>, guid);
+            assetModifiedEvent.Notify(*this);
+            return assetCache.Load(guid);
+        }
+
+        template <Asset T, typename AssetLoader>
+        void ReloadImpl(const Guid guid, const typename T::LoadDesc& newLoadDesc, AssetLoader& loader)
+        {
+            /* #sy_note
+             * 현재 구현은 핸들이 가르키는 메모리 공간의 인스턴스를 replace 하는 방식으로 구현
+             * 이 경우, 해당 메모리 공간에 대한 스레드 안전성은 보장 되지 않음.
+             * 이후, 해당 메모리 공간에 대한 스레드 안전성을 보장하기 위해서는 이전 핸들을 invalidate 시키고
+             * 해당 핸들을 참조하는 측에서 별도의 fallback (예시. 1차 fallback => 캐시된 guid로 재 로드 시도, 2차 fallback => 엔진 기본 에셋)
+             * 을 제공하는 방식으로 구현하는 것이 좋아 보임.
+             */
+            if (!assetMonitor->Contains(guid))
+            {
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf_v<T>, guid);
+                return;
+            }
+
+            const T::Desc desc{ .Info = assetMonitor->GetAssetInfo(guid), .LoadDescriptor = newLoadDesc };
+            IG_CHECK(desc.Info.GetGuid() == guid);
+
+            auto result{ loader.Load(desc) };
+            if (!result.HasOwnership())
+            {
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" failed to reload.", AssetTypeOf_v<T>, guid);
+                return;
+            }
+
+            {
+                UniqueLock assetLock{ RequestAssetMutex(guid) };
+                details::AssetCache<T>& assetCache{ GetCache<T>() };
+                CachedAsset<T> cachedAsset{ assetCache.Load(guid) };
+                if (cachedAsset)
+                {
+                    *cachedAsset = result.Take();
+                }
+                else
+                {
+                    assetCache.Cache(guid, result.Take());
+                }
+
+                assetMonitor->SetLoadDesc(guid, desc.LoadDescriptor);
+            }
+
+            assetModifiedEvent.Notify(*this);
         }
 
         void DeleteImpl(const EAssetType assetType, const Guid guid);
