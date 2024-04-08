@@ -131,7 +131,7 @@ namespace ig
                 return;
             }
 
-            assetMonitor->SetLoadDesc(guid, newLoadDesc);
+            assetMonitor->UpdateLoadDesc(guid, newLoadDesc);
         }
 
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const;

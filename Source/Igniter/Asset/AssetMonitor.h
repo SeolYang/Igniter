@@ -1,9 +1,115 @@
 #pragma once
 #include <Igniter.h>
+#include <Core/Serializable.h>
 #include <Asset/Common.h>
 
 namespace ig::details
 {
+    class TypelessAssetDescMap
+    {
+    public:
+        virtual ~TypelessAssetDescMap() = default;
+
+        virtual void Insert(const json& serializedMetadata) = 0;
+        virtual void Erase(const Guid guid) = 0;
+        virtual bool Contains(const Guid guid) const = 0;
+        virtual std::vector<json> GetSerializedDescs() const = 0;
+        virtual std::vector<AssetInfo> GetAssetInfos() const = 0;
+        virtual AssetInfo GetAssetInfo(const Guid guid) const = 0;
+        virtual void Update(const AssetInfo& assetInfo) = 0;
+        virtual size_t GetSize() const = 0;
+        virtual bool IsEmpty() const = 0;
+    };
+
+    template <Asset T>
+    class AssetDescMap : public TypelessAssetDescMap
+    {
+    public:
+        AssetDescMap() = default;
+        ~AssetDescMap() = default;
+
+        void Insert(const Guid guid, const typename T::Desc& newDesc)
+        {
+            container[guid] = newDesc;
+        }
+
+        void Insert(const json& serializedMetadata) override
+        {
+            typename T::Desc newDesc{};
+            serializedMetadata >> newDesc.Info >> newDesc.LoadDescriptor;
+            container[newDesc.Info.GetGuid()] = newDesc;
+        }
+
+        void Update(const Guid guid, const typename T::LoadDesc& newLoadDesc)
+        {
+            container.at(guid).LoadDescriptor = newLoadDesc;
+        }
+
+        void Update(const AssetInfo& assetInfo) override
+        {
+            container.at(assetInfo.GetGuid()).Info = assetInfo;
+        }
+
+        void Erase(const Guid guid) override
+        {
+            container.erase(guid);
+        }
+
+        bool Contains(const Guid guid) const override
+        {
+            return container.contains(guid);
+        }
+
+        std::vector<json> GetSerializedDescs() const override
+        {
+            std::vector<json> result;
+            result.reserve(container.size());
+            for (auto guidDescPair : container)
+            {
+                json serialized{};
+                serialized << guidDescPair.second.Info << guidDescPair.second.LoadDescriptor;
+                result.emplace_back(serialized);
+            }
+
+            return result;
+        }
+
+        std::vector<AssetInfo> GetAssetInfos() const override
+        {
+            std::vector<AssetInfo> assetInfos;
+            assetInfos.reserve(GetSize());
+            for (const auto& guidDescPair : container)
+            {
+                assetInfos.emplace_back(guidDescPair.second.Info);
+            }
+
+            return assetInfos;
+        }
+
+        AssetInfo GetAssetInfo(const Guid guid) const override
+        {
+            return GetDesc(guid).Info;
+        }
+
+        typename T::Desc GetDesc(const Guid guid) const
+        {
+            return container.at(guid);
+        }
+
+        size_t GetSize() const override
+        {
+            return container.size();
+        }
+
+        bool IsEmpty() const override
+        {
+            return container.empty();
+        }
+
+    private:
+        UnorderedMap<Guid, typename T::Desc> container{};
+    };
+
     class AssetMonitor
     {
         using VirtualPathGuidTable = UnorderedMap<String, Guid>;
@@ -34,19 +140,19 @@ namespace ig::details
             return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath));
         }
 
-         template <Asset T>
-        [[nodiscard]] void SetLoadDesc(const Guid guid, const typename T::LoadDesc& loadDesc)
+        template <Asset T>
+        [[nodiscard]] void UpdateLoadDesc(const Guid guid, const typename T::LoadDesc& loadDesc)
         {
-             ReadWriteLock rwLock{ mutex };
-             SetLoadDescUnsafe<T>(guid, loadDesc);
+            ReadWriteLock rwLock{ mutex };
+            UpdateLoadDescUnsafe<T>(guid, loadDesc);
         }
 
         template <Asset T>
-        [[nodiscard]] void SetLoadDesc(const String virtualPath, const typename T::LoadDesc& loadDesc)
+        [[nodiscard]] void UpdateLoadDesc(const String virtualPath, const typename T::LoadDesc& loadDesc)
         {
             ReadWriteLock rwLock{ mutex };
             IG_CHECK(ContainsUnsafe(AssetTypeOf_v<T>, virtualPath));
-            SetLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath), loadDesc);
+            UpdateLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath), loadDesc);
         }
 
         template <Asset T>
@@ -78,11 +184,11 @@ namespace ig::details
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetType());
             IG_CHECK(!virtualPathGuidTable.contains(virtualPath));
 
-            json newSerialized{};
-            newSerialized << newInfo << loadDesc;
-            guidSerializedDescTable[guid] = newSerialized;
+            AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
+            assetDescTable.Insert(guid, typename T::Desc{ newInfo, loadDesc });
             virtualPathGuidTable[virtualPath] = guid;
         }
+
         void UpdateInfo(const AssetInfo& newInfo);
         void Remove(const Guid guid, const bool bShouldExpired = true);
         void SaveAllChanges();
@@ -90,11 +196,28 @@ namespace ig::details
         [[nodiscard]] std::vector<AssetInfo> TakeSnapshots() const;
 
     private:
+        void InitAssetDescTables();
+        void InitVirtualPathGuidTables();
+        void ParseAssetDirectory();
+
         VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetType assetType);
         const VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetType assetType) const;
 
-        void InitVirtualPathGuidTables();
-        void ParseAssetDirectory();
+
+        template <Asset T>
+        AssetDescMap<T>& GetDescMap() 
+        {
+            return static_cast<AssetDescMap<T>&>(GetDescMap(AssetTypeOf_v<T>));
+        }
+
+        template <Asset T>
+        const AssetDescMap<T>& GetDescMap() const
+        {
+            return static_cast<const AssetDescMap<T>&>(GetDescMap(AssetTypeOf_v<T>));
+        }
+
+        TypelessAssetDescMap& GetDescMap(const EAssetType assetType);
+        const TypelessAssetDescMap& GetDescMap(const EAssetType assetType) const;
 
         [[nodiscard]] bool ContainsUnsafe(const Guid guid) const;
         [[nodiscard]] bool ContainsUnsafe(const EAssetType assetType, const String virtualPath) const;
@@ -106,33 +229,24 @@ namespace ig::details
         [[nodiscard]] T::LoadDesc GetLoadDescUnsafe(const Guid guid) const
         {
             IG_CHECK(ContainsUnsafe(guid));
-
-            const json& serializedDesc = guidSerializedDescTable[guid];
-            typename T::LoadDesc loadDesc{};
-            serializedDesc >> loadDesc;
-
-            return loadDesc;
+            const AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
+            return assetDescTable.GetDesc(guid).LoadDescriptor;
         }
 
         template <Asset T>
-        void SetLoadDescUnsafe(const Guid guid, const typename T::LoadDesc& loadDesc)
+        void UpdateLoadDescUnsafe(const Guid guid, const typename T::LoadDesc& loadDesc)
         {
             IG_CHECK(ContainsUnsafe(guid));
-
-            json& serializedDesc{ guidSerializedDescTable[guid] };
-            serializedDesc << loadDesc;
+            AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
+            assetDescTable.Update(guid, loadDesc);
         }
 
         template <Asset T>
         [[nodiscard]] T::Desc GetDescUnsafe(const Guid guid) const
         {
             IG_CHECK(ContainsUnsafe(guid));
-
-            const json& serializedDesc{ guidSerializedDescTable.at(guid) };
-            typename T::Desc desc{};
-            serializedDesc >> desc.Info >> desc.LoadDescriptor;
-
-            return desc;
+            const AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
+            return assetDescTable.GetDesc(guid);
         }
 
         void ReflectExpiredToFilesUnsafe();
@@ -142,7 +256,7 @@ namespace ig::details
     private:
         mutable SharedMutex mutex;
         std::vector<std::pair<EAssetType, VirtualPathGuidTable>> virtualPathGuidTables;
-        UnorderedMap<Guid, json> guidSerializedDescTable;
+        std::vector<std::pair<EAssetType, Ptr<TypelessAssetDescMap>>> guidDescTables;
         UnorderedMap<Guid, AssetInfo> expiredAssetInfos;
     };
 } // namespace ig::details
