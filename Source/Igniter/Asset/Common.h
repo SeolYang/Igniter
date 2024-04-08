@@ -48,9 +48,9 @@ namespace ig
 
     enum class EAssetScope
     {
-        Managed, /* 수명: 레퍼런스 카운터 > 0 or 중복 Virtual Path 발생 -> Deleted */
-        Static,  /* 수명: 에셋 매니저 해제 까지 or 중복 Virtual Path 발생 -> Deleted */
-        Engine,  /* 수명: 에셋 매니저 해제 까지, 중복 Virtual Path 발생 -> Ignored */
+        Managed, /* 수명: 레퍼런스 카운터 > 0*/
+        Static,  /* 수명: 에셋 매니저 해제 까지, 에셋 인스턴스 대체 가능 */
+        Engine,  /* 수명: 에셋 매니저 해제 까지, 에셋 인스턴스 대체 불가  */
     };
 
     /* Common Asset Metadata */
@@ -93,6 +93,8 @@ namespace ig
         {
             return AssetInfo{ guid, virtualPath, type, EAssetScope::Engine };
         }
+
+        void SetGuid(const Guid newGuid) { this->guid = newGuid; }
 
     private:
         uint64_t creationTime = 0;
