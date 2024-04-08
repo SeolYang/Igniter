@@ -123,7 +123,7 @@ namespace ig
         }
 
         template <Asset T>
-        void SetLoadDesc(const Guid guid, const typename T::LoadDesc& newLoadDesc)
+        void UpdateLoadDesc(const Guid guid, const typename T::LoadDesc& newLoadDesc)
         {
             if (!assetMonitor->Contains(guid))
             {
