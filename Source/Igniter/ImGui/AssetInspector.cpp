@@ -17,9 +17,21 @@ namespace ig
         {
             RecursiveLock lock{ mutex };
             const AssetManager& assetManager{ assetManagerRef.get() };
+
+            const Guid lastSelectedGuid{ mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : Guid{} };
             snapshots = assetManager.TakeSnapshots();
             bDirty = true;
             mainTableSelectedIdx = -1;
+            if (lastSelectedGuid.isValid())
+            {
+                const auto foundItr = std::find_if(snapshots.cbegin(), snapshots.cend(), [lastSelectedGuid](const AssetManager::Snapshot& snapshot)
+                {
+                    return snapshot.Info.GetGuid() == lastSelectedGuid;
+                });
+
+                mainTableSelectedIdx = foundItr != snapshots.cend() ? static_cast<int>(foundItr - snapshots.cbegin()) : -1;
+            }
+
             lastUpdated = chrono::system_clock::now();
         });
 
@@ -167,8 +179,8 @@ namespace ig
                 sortSpecs->SpecsDirty = false;
                 bDirty = false;
             }
-            // Type // GUID // VIRTUAL PATH // PERSISTENCY // REF COUNT
 
+            // Type // GUID // VIRTUAL PATH // PERSISTENCY // REF COUNT
             for (int idx = 0; idx < snapshots.size(); ++idx)
             {
                 const AssetManager::Snapshot& snapshot{ snapshots[idx] };
