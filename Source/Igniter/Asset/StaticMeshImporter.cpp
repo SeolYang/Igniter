@@ -123,15 +123,15 @@ namespace ig
         meshopt_encodeIndexVersion(1);
 
         std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(),
-                                                                             sizeof(StaticMeshVertex)));
+                                             sizeof(StaticMeshVertex)));
         std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(remappedIndices.size(),
-                                                                           remappedVertices.size()));
+                                            remappedVertices.size()));
 
         encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(),
-                                                          remappedVertices.data(), remappedVertices.size(),
-                                                          sizeof(StaticMeshVertex)));
+                               remappedVertices.data(), remappedVertices.size(),
+                               sizeof(StaticMeshVertex)));
         encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(),
-                                                        remappedIndices.data(), remappedIndices.size()));
+                              remappedIndices.data(), remappedIndices.size()));
 
         const AssetInfo assetInfo{ MakeVirtualPathPreferred(meshName), EAssetType::StaticMesh };
 
@@ -166,7 +166,7 @@ namespace ig
     }
 
     std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::Import(const String resPathStr,
-                                                                                                        const StaticMesh::ImportDesc& desc)
+                                                                                              const StaticMesh::ImportDesc& desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
         const fs::path resPath{ resPathStr.ToStringView() };
@@ -203,7 +203,7 @@ namespace ig
                 {
                     const aiMaterial& material = *scene->mMaterials[materialIdx];
                     materialGuidTable[materialIdx] = assetManager.Import(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
-                                                                                 MaterialCreateDesc{ .DiffuseVirtualPath = Texture::EngineDefault });
+                                                                         MaterialCreateDesc{ .DiffuseVirtualPath = Texture::EngineDefault });
                 }
             }
 
@@ -235,7 +235,7 @@ namespace ig
                 }
 
                 const Guid materialGuid = desc.bImportMaterials ? materialGuidTable[mesh.mMaterialIndex] :
-                                                                  Guid{ DefaultMaterialGuid };
+                    Guid{ DefaultMaterialGuid };
                 const std::string meshName = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
                 results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, materialGuid, vertices, indices));
             }

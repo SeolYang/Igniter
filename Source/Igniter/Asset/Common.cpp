@@ -23,7 +23,7 @@ namespace ig
     {
     }
 
-    AssetInfo::AssetInfo(const Guid guid, const String virtualPath, const EAssetType type, const EAssetScope scope)
+    AssetInfo::AssetInfo(const Guid& guid, const String virtualPath, const EAssetType type, const EAssetScope scope)
         : creationTime(Timer::Now()),
           guid(guid),
           virtualPath(virtualPath),

@@ -65,19 +65,19 @@ namespace ig
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
         Guid Import(const String resPath, const TextureImportDesc& desc);
-        [[nodiscard]] CachedAsset<Texture> LoadTexture(const Guid guid);
+        [[nodiscard]] CachedAsset<Texture> LoadTexture(const Guid& guid);
         [[nodiscard]] CachedAsset<Texture> LoadTexture(const String virtualPath);
 
         std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc);
-        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const Guid guid);
+        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const Guid& guid);
         [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
         Guid Import(const String virtualPath, const MaterialCreateDesc& createDesc);
-        [[nodiscard]] CachedAsset<Material> LoadMaterial(const Guid guid);
+        [[nodiscard]] CachedAsset<Material> LoadMaterial(const Guid& guid);
         [[nodiscard]] CachedAsset<Material> LoadMaterial(const String virtualPath);
 
         template <Asset T>
-        bool Reload(const Guid guid)
+        bool Reload(const Guid& guid)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -113,15 +113,15 @@ namespace ig
             return bSuceeded;
         }
 
-        void Delete(const Guid guid);
+        void Delete(const Guid& guid);
         void Delete(const EAssetType assetType, const String virtualPath);
 
         void SaveAllChanges();
 
-        [[nodiscard]] std::optional<AssetInfo> GetAssetInfo(const Guid guid) const;
+        [[nodiscard]] std::optional<AssetInfo> GetAssetInfo(const Guid& guid) const;
 
         template <Asset T>
-        [[nodiscard]] std::optional<typename T::LoadDesc> GetLoadDesc(const Guid guid) const
+        [[nodiscard]] std::optional<typename T::LoadDesc> GetLoadDesc(const Guid& guid) const
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -133,7 +133,7 @@ namespace ig
         }
 
         template <Asset T>
-        void UpdateLoadDesc(const Guid guid, const typename T::LoadDesc& newLoadDesc)
+        void UpdateLoadDesc(const Guid& guid, const typename T::LoadDesc& newLoadDesc)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -234,7 +234,7 @@ namespace ig
         }
 
         template <Asset T, typename AssetLoader>
-        [[nodiscard]] CachedAsset<T> LoadImpl(const Guid guid, AssetLoader& loader)
+        [[nodiscard]] CachedAsset<T> LoadImpl(const Guid& guid, AssetLoader& loader)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -267,7 +267,7 @@ namespace ig
         }
 
         template <Asset T, typename AssetLoader>
-        bool ReloadImpl(const Guid guid, const typename T::Desc& desc, AssetLoader& loader)
+        bool ReloadImpl(const Guid& guid, const typename T::Desc& desc, AssetLoader& loader)
         {
             /* #sy_note
              * 현재 구현은 핸들이 가르키는 메모리 공간의 인스턴스를 replace 하는 방식으로 구현
@@ -305,9 +305,9 @@ namespace ig
             return true;
         }
 
-        void DeleteImpl(const EAssetType assetType, const Guid guid);
+        void DeleteImpl(const EAssetType assetType, const Guid& guid);
 
-        [[nodiscard]] AssetMutex& GetAssetMutex(const Guid guid);
+        [[nodiscard]] AssetMutex& GetAssetMutex(const Guid& guid);
 
         template <Asset T, ResultStatus Status>
         void RegisterEngineInternalAsset(const String requiredVirtualPath, Result<T, Status> assetResult)
@@ -332,7 +332,7 @@ namespace ig
             std::optional<Guid> guidOpt{ ImportImpl<T>(assetInfo.GetVirtualPath(), dummyResult) };
             IG_CHECK(guidOpt);
 
-            const Guid guid{ *guidOpt };
+            const Guid& guid{ *guidOpt };
             IG_CHECK(guid.isValid());
             AssetLock assetLock{ GetAssetMutex(guid) };
             details::AssetCache<T>& assetCache{ GetCache<T>() };

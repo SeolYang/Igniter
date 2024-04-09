@@ -91,7 +91,7 @@ namespace ig
         return *guidOpt;
     }
 
-    CachedAsset<Texture> AssetManager::LoadTexture(const Guid guid)
+    CachedAsset<Texture> AssetManager::LoadTexture(const Guid& guid)
     {
         CachedAsset<Texture> cachedTex{ LoadImpl<Texture>(guid, *textureLoader) };
         if (!cachedTex)
@@ -137,7 +137,7 @@ namespace ig
         return output;
     }
 
-    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid guid)
+    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid)
     {
         return LoadImpl<StaticMesh>(guid, *staticMeshLoader);
     }
@@ -179,7 +179,7 @@ namespace ig
         return *guidOpt;
     }
 
-    CachedAsset<Material> AssetManager::LoadMaterial(const Guid guid)
+    CachedAsset<Material> AssetManager::LoadMaterial(const Guid& guid)
     {
         CachedAsset<Material> cachedMat{ LoadImpl<Material>(guid, *materialLoader) };
         if (!cachedMat)
@@ -207,7 +207,7 @@ namespace ig
         return LoadMaterial(assetMonitor->GetGuid(EAssetType::Material, virtualPath));
     }
 
-    void AssetManager::Delete(const Guid guid)
+    void AssetManager::Delete(const Guid& guid)
     {
         if (!assetMonitor->Contains(guid))
         {
@@ -237,7 +237,7 @@ namespace ig
         DeleteImpl(assetType, assetMonitor->GetGuid(assetType, virtualPath));
     }
 
-    void AssetManager::DeleteImpl(const EAssetType assetType, const Guid guid)
+    void AssetManager::DeleteImpl(const EAssetType assetType, const Guid& guid)
     {
         UniqueLock assetLock{ GetAssetMutex(guid) };
         IG_CHECK(assetType != EAssetType::Unknown);
@@ -254,7 +254,7 @@ namespace ig
         assetModifiedEvent.Notify(*this);
     }
 
-    AssetManager::AssetMutex& AssetManager::GetAssetMutex(const Guid guid)
+    AssetManager::AssetMutex& AssetManager::GetAssetMutex(const Guid& guid)
     {
         UniqueLock lock{ assetMutexTableMutex };
         if (!assetMutexTable.contains(guid))
@@ -270,7 +270,7 @@ namespace ig
         assetMonitor->SaveAllChanges();
     }
 
-    std::optional<AssetInfo> AssetManager::GetAssetInfo(const Guid guid) const
+    std::optional<AssetInfo> AssetManager::GetAssetInfo(const Guid& guid) const
     {
         if (!assetMonitor->Contains(guid))
         {

@@ -38,7 +38,7 @@ namespace ig
         friend class AssetManager;
 
     public:
-        Material(Desc snapshot, CachedAsset<Texture> diffuse);
+        Material(const Desc& snapshot, CachedAsset<Texture> diffuse);
         Material(const Material&) = delete;
         Material(Material&&) noexcept = default;
         ~Material();
@@ -48,8 +48,6 @@ namespace ig
 
         const Desc& GetSnapshot() const { return snapshot; }
         RefHandle<Texture> GetDiffuse() { return diffuse.MakeRef(); }
-
-        void OnImGui() { IG_UNIMPLEMENTED(); }
 
     public:
         /* #sy_wip Common 헤더로 이동 */

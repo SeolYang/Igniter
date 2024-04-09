@@ -73,7 +73,7 @@ namespace ig
 
         [[nodiscard]] bool IsValid() const;
 
-        Guid GetGuid() const { return guid; }
+        const Guid& GetGuid() const { return guid; }
         String GetVirtualPath() const { return virtualPath; }
         EAssetType GetType() const { return type; }
         EAssetScope GetScope() const { return scope; }
@@ -86,15 +86,15 @@ namespace ig
         }
 
     private:
-        AssetInfo(const Guid guid, const String virtualPath, const EAssetType type, const EAssetScope scope);
+        AssetInfo(const Guid& guid, const String virtualPath, const EAssetType type, const EAssetScope scope);
         void ConstructVirtualPathHierarchy();
 
-        static AssetInfo MakeEngineInternal(const Guid guid, const String virtualPath, const EAssetType type)
+        static AssetInfo MakeEngineInternal(const Guid& guid, const String virtualPath, const EAssetType type)
         {
             return AssetInfo{ guid, virtualPath, type, EAssetScope::Engine };
         }
 
-        void SetGuid(const Guid newGuid) { this->guid = newGuid; }
+        void SetGuid(const Guid& newGuid) { this->guid = newGuid; }
 
     private:
         uint64_t creationTime = 0;
@@ -124,10 +124,6 @@ namespace ig
         {
             asset.GetSnapshot()
         } -> std::same_as<const typename T::Desc&>;
-
-        {
-            asset.OnImGui()
-        };
     } && std::is_move_constructible_v<T> && std::is_move_assignable_v<T> && std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf_v<T> != EAssetType::Unknown;
 
     template <typename T>

@@ -58,7 +58,7 @@ namespace ig
         return archive;
     }
 
-    StaticMesh::StaticMesh(Desc snapshot,
+    StaticMesh::StaticMesh(const Desc& snapshot,
                            DeferredHandle<GpuBuffer> vertexBuffer,
                            Handle<GpuView, GpuViewManager*> vertexBufferSrv,
                            DeferredHandle<GpuBuffer> indexBuffer,

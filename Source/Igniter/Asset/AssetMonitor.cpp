@@ -169,7 +169,7 @@ namespace ig::details
         return *table;
     }
 
-    bool AssetMonitor::ContainsUnsafe(const Guid guid) const
+    bool AssetMonitor::ContainsUnsafe(const Guid& guid) const
     {
         for (const auto& typeDescTablePair : guidDescTables)
         {
@@ -206,7 +206,7 @@ namespace ig::details
         return guid;
     }
 
-    bool AssetMonitor::Contains(const Guid guid) const
+    bool AssetMonitor::Contains(const Guid& guid) const
     {
         ReadOnlyLock lock{ mutex };
         return ContainsUnsafe(guid);
@@ -224,7 +224,7 @@ namespace ig::details
         return GetGuidUnsafe(assetType, virtualPath);
     }
 
-    AssetInfo AssetMonitor::GetAssetInfoUnsafe(const Guid guid) const
+    AssetInfo AssetMonitor::GetAssetInfoUnsafe(const Guid& guid) const
     {
         IG_CHECK(ContainsUnsafe(guid));
 
@@ -241,7 +241,7 @@ namespace ig::details
         return {};
     }
 
-    AssetInfo AssetMonitor::GetAssetInfo(const Guid guid) const
+    AssetInfo AssetMonitor::GetAssetInfo(const Guid& guid) const
     {
         ReadOnlyLock lock{ mutex };
         return GetAssetInfoUnsafe(guid);
@@ -281,7 +281,7 @@ namespace ig::details
         descMap.Update(newInfo);
     }
 
-    void AssetMonitor::Remove(const Guid guid, const bool bShouldExpired)
+    void AssetMonitor::Remove(const Guid& guid, const bool bShouldExpired)
     {
         ReadWriteLock rwLock{ mutex };
         IG_CHECK(ContainsUnsafe(guid));

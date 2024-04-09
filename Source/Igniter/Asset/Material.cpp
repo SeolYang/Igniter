@@ -19,7 +19,7 @@ namespace ig
         return archive;
     }
 
-    Material::Material(Desc snapshot, CachedAsset<Texture> diffuse)
+    Material::Material(const Desc& snapshot, CachedAsset<Texture> diffuse)
         : snapshot(snapshot),
           diffuse(std::move(diffuse))
     {

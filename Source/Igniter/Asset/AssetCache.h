@@ -11,7 +11,7 @@ namespace ig::details
     public:
         struct Snapshot
         {
-            const xg::Guid Guid{};
+            const Guid Guid{};
             const uint32_t RefCount{};
         };
 
@@ -19,8 +19,8 @@ namespace ig::details
         virtual ~TypelessAssetCache() = default;
 
         virtual EAssetType GetAssetType() const = 0;
-        virtual void Invalidate(const xg::Guid guid) = 0;
-        virtual [[nodiscard]] bool IsCached(const xg::Guid guid) const = 0;
+        virtual void Invalidate(const Guid& guid) = 0;
+        virtual [[nodiscard]] bool IsCached(const Guid& guid) const = 0;
         virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
     };
 
@@ -44,7 +44,7 @@ namespace ig::details
 
         EAssetType GetAssetType() const override { return AssetType; }
 
-        void Cache(const xg::Guid guid, T&& asset)
+        void Cache(const Guid& guid, T&& asset)
         {
             IG_CHECK(guid.isValid());
 
@@ -55,19 +55,19 @@ namespace ig::details
             refCounterTable[guid] = 0;
         }
 
-        void Invalidate(const xg::Guid guid) override
+        void Invalidate(const Guid& guid) override
         {
             ReadWriteLock rwLock{ mutex };
             InvalidateUnsafe(guid);
         }
 
-        [[nodiscard]] CachedAsset<T> Load(const xg::Guid guid)
+        [[nodiscard]] CachedAsset<T> Load(const Guid& guid)
         {
             ReadWriteLock rwLock{ mutex };
             return LoadUnsafe(guid);
         }
 
-        [[nodiscard]] bool IsCached(const xg::Guid guid) const
+        [[nodiscard]] bool IsCached(const Guid& guid) const
         {
             ReadOnlyLock lock{ mutex };
             return IsCachedUnsafe(guid);
@@ -87,13 +87,13 @@ namespace ig::details
         }
 
     private:
-        [[nodiscard]] bool IsCachedUnsafe(const xg::Guid guid) const
+        [[nodiscard]] bool IsCachedUnsafe(const Guid& guid) const
         {
             IG_CHECK(guid.isValid());
             return cachedAssets.contains(guid) && refCounterTable.contains(guid);
         }
 
-        [[nodiscard]] CachedAsset<T> LoadUnsafe(const xg::Guid guid)
+        [[nodiscard]] CachedAsset<T> LoadUnsafe(const Guid& guid)
         {
             IG_CHECK(guid.isValid());
             IG_CHECK(cachedAssets.contains(guid));
@@ -103,7 +103,7 @@ namespace ig::details
             return cachedAssets[guid].MakeUniqueRef(this);
         }
 
-        void InvalidateUnsafe(const xg::Guid guid)
+        void InvalidateUnsafe(const Guid& guid)
         {
             IG_CHECK(guid.isValid());
             IG_CHECK(cachedAssets.contains(guid));
@@ -120,7 +120,7 @@ namespace ig::details
             const AssetInfo& assetInfo{ snapshot.Info };
             IG_CHECK(assetInfo.IsValid());
 
-            const xg::Guid guid{ assetInfo.GetGuid() };
+            const Guid& guid{ assetInfo.GetGuid() };
 
             ReadWriteLock rwLock{ mutex };
             IG_CHECK(cachedAssets.contains(guid));
@@ -140,7 +140,7 @@ namespace ig::details
         HandleManager& handleManager;
 
         mutable SharedMutex mutex;
-        UnorderedMap<xg::Guid, Handle<T>> cachedAssets{};
-        UnorderedMap<xg::Guid, uint32_t> refCounterTable{};
+        UnorderedMap<Guid, Handle<T>> cachedAssets{};
+        UnorderedMap<Guid, uint32_t> refCounterTable{};
     };
 } // namespace ig::details

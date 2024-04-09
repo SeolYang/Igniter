@@ -21,10 +21,10 @@ namespace ig
                                        GpuViewManager& gpuViewManager,
                                        AssetManager& assetManager)
         : handleManager(handleManager),
-          renderDevice(renderDevice),
-          gpuUploader(gpuUploader),
-          gpuViewManager(gpuViewManager),
-          assetManager(assetManager)
+        renderDevice(renderDevice),
+        gpuUploader(gpuUploader),
+        gpuViewManager(gpuViewManager),
+        assetManager(assetManager)
     {
     }
 

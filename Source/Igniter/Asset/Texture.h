@@ -77,7 +77,7 @@ namespace ig
         using Desc = AssetDesc<Texture>;
 
     public:
-        Texture(Desc snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, RefHandle<GpuView> sampler);
+        Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, RefHandle<GpuView> sampler);
         Texture(const Texture&) = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();
@@ -89,8 +89,6 @@ namespace ig
         RefHandle<GpuTexture> GetGpuTexture() { return gpuTexture.MakeRef(); }
         RefHandle<GpuView> GetShaderResourceView() { return srv.MakeRef(); }
         RefHandle<GpuView> GetSampler() { return sampler; }
-
-        void OnImGui() { IG_UNIMPLEMENTED(); }
 
     public:
         /* #sy_wip Common으로 이동 */

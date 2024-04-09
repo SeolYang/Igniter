@@ -58,7 +58,7 @@ namespace ig
         using Desc = AssetDesc<StaticMesh>;
 
     public:
-        StaticMesh(Desc snapshot, DeferredHandle<GpuBuffer> vertexBuffer,
+        StaticMesh(const Desc& snapshot, DeferredHandle<GpuBuffer> vertexBuffer,
                    Handle<GpuView, GpuViewManager*> vertexBufferSrv,
                    DeferredHandle<GpuBuffer> indexBuffer,
                    CachedAsset<Material> material);
@@ -74,8 +74,6 @@ namespace ig
         RefHandle<GpuView> GetVertexBufferSrv() { return vertexBufferSrv.MakeRef(); }
         RefHandle<GpuBuffer> GetIndexBuffer() { return indexBuffer.MakeRef(); }
         RefHandle<Material> GetMaterial() { return material.MakeRef(); }
-
-        void OnImGui() { IG_UNIMPLEMENTED(); }
 
     private:
         Desc snapshot{};

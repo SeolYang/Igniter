@@ -31,7 +31,7 @@ namespace ig
 
     private:
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr,
-                                                                                        const StaticMesh::ImportDesc& desc);
+                                                                              const StaticMesh::ImportDesc& desc);
 
     private:
         AssetManager& assetManager;
