@@ -68,7 +68,7 @@ namespace ig
             newRequest->PaddingInBytes = 0;
             newRequest->Sync = {};
 
-            bufferHead = (bufferUsedSizeInBytes + alignedRequestSize) % bufferCapacity;
+            bufferHead = (bufferHead + alignedRequestSize) % bufferCapacity;
             bufferUsedSizeInBytes += alignedRequestSize;
         }
         else
