@@ -85,25 +85,32 @@ namespace ig
                 return false;
             }
 
+            bool bSuceeded = false;
             const typename T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
             if constexpr (AssetTypeOf_v<T> == EAssetType::Texture)
             {
-                return ReloadImpl<Texture>(guid, desc, *textureLoader);
+                bSuceeded = ReloadImpl<Texture>(guid, desc, *textureLoader);
             }
             else if constexpr (AssetTypeOf_v<T> == EAssetType::StaticMesh)
             {
-                return ReloadImpl<StaticMesh>(guid, desc, *staticMeshLoader);
+                bSuceeded = ReloadImpl<StaticMesh>(guid, desc, *staticMeshLoader);
             }
             else if constexpr (AssetTypeOf_v<T> == EAssetType::Material)
             {
-                return ReloadImpl<Material>(guid, desc, *materialLoader);
+                bSuceeded = ReloadImpl<Material>(guid, desc, *materialLoader);
             }
             else
             {
                 IG_CHECK_NO_ENTRY();
                 IG_LOG(AssetManager, Error, "Reload Unsupported Asset Type {}.", AssetTypeOf_v<T>);
             }
-            return false;
+
+            if (bSuceeded)
+            {
+                assetModifiedEvent.Notify(*this);
+            }
+
+            return bSuceeded;
         }
 
         void Delete(const Guid guid);
@@ -297,6 +304,7 @@ namespace ig
             {
                 cachedAsset = assetCache.Cache(guid, result.Take());
             }
+
             IG_CHECK(cachedAsset);
             return true;
         }
