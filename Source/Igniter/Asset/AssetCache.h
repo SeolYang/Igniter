@@ -44,7 +44,7 @@ namespace ig::details
 
         EAssetType GetAssetType() const override { return AssetType; }
 
-        [[nodiscard]] CachedAsset<T> Cache(const xg::Guid guid, T&& asset)
+        void Cache(const xg::Guid guid, T&& asset)
         {
             IG_CHECK(guid.isValid());
 
@@ -53,7 +53,6 @@ namespace ig::details
             IG_CHECK(!refCounterTable.contains(guid));
             cachedAssets[guid] = Handle<T>{ handleManager, std::move(asset) };
             refCounterTable[guid] = 0;
-            return LoadUnsafe(guid);
         }
 
         void Invalidate(const xg::Guid guid) override

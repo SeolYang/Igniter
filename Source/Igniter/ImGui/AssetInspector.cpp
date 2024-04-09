@@ -332,16 +332,16 @@ namespace ig
 
         if (ImGui::BeginPopupModal(std::format("{} selector", selectAssetType).c_str()))
         {
-            if (ImGui::Button("Select") || ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+            if (ImGui::Button("Select", ImVec2{ 100.f, 30.f }) || ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
             {
                 selectedIdx = selectorTableSelectedIdx;
                 ImGui::CloseCurrentPopup();
             }
-            if (ImGui::Button("Close"))
+            ImGui::SameLine();
+            if (ImGui::Button("Close", ImVec2{ 80.f, 30.f }))
             {
                 ImGui::CloseCurrentPopup();
             }
-
             RenderAssetTable(selectAssetType, selectorTableSelectedIdx);
             ImGui::EndPopup();
         }

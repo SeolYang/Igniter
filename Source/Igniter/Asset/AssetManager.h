@@ -46,8 +46,8 @@ namespace ig
             bool IsCached() const
             {
                 return RefCount > 0 ||
-                       Info.GetScope() == EAssetScope::Static ||
-                       Info.GetScope() == EAssetScope::Engine;
+                    Info.GetScope() == EAssetScope::Static ||
+                    Info.GetScope() == EAssetScope::Engine;
             }
 
         public:
@@ -249,19 +249,16 @@ namespace ig
                 const T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
                 IG_CHECK(desc.Info.GetGuid() == guid);
                 auto result{ loader.Load(desc) };
-                if (result.HasOwnership())
+                if (!result.HasOwnership())
                 {
-                    IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.",
-                           AssetTypeOf_v<T>,
+                    IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).",
+                           AssetTypeOf_v<T>, result.GetStatus(),
                            desc.Info.GetVirtualPath(), guid);
-                    assetModifiedEvent.Notify(*this);
-                    return assetCache.Cache(guid, result.Take());
+                    return CachedAsset<T>{};
                 }
 
-                IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).",
-                       AssetTypeOf_v<T>, result.GetStatus(),
-                       desc.Info.GetVirtualPath(), guid);
-                return CachedAsset<T>{};
+                assetCache.Cache(guid, result.Take());
+                IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.", AssetTypeOf_v<T>, desc.Info.GetVirtualPath(), guid);
             }
 
             IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf_v<T>, guid);
@@ -302,10 +299,9 @@ namespace ig
             }
             else
             {
-                cachedAsset = assetCache.Cache(guid, result.Take());
+                assetCache.Cache(guid, result.Take());
             }
 
-            IG_CHECK(cachedAsset);
             return true;
         }
 
@@ -341,8 +337,7 @@ namespace ig
             AssetLock assetLock{ GetAssetMutex(guid) };
             details::AssetCache<T>& assetCache{ GetCache<T>() };
             IG_CHECK(!assetCache.IsCached(guid));
-            [[maybe_unused]] CachedAsset<T> cachedAsset{ assetCache.Cache(guid, std::move(asset)) };
-            IG_CHECK(cachedAsset);
+            assetCache.Cache(guid, std::move(asset));
         }
 
     private:
