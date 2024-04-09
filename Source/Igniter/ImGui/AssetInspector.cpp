@@ -135,7 +135,7 @@ namespace ig
             ImGui::TableSetupColumn("Type", ColumnFlags | ImGuiTableColumnFlags_DefaultSort);
             ImGui::TableSetupColumn("Guid", ColumnFlags);
             ImGui::TableSetupColumn("Virtual Path", ColumnFlags);
-            ImGui::TableSetupColumn("Persistency", ColumnFlags);
+            ImGui::TableSetupColumn("Scope", ColumnFlags);
             ImGui::TableSetupColumn("Refs", ColumnFlags | ImGuiTableColumnFlags_PreferSortDescending);
             ImGui::TableHeadersRow();
 
@@ -180,7 +180,7 @@ namespace ig
                 bDirty = false;
             }
 
-            // Type // GUID // VIRTUAL PATH // PERSISTENCY // REF COUNT
+            // Type // GUID // VIRTUAL PATH // Scope // REF COUNT
             for (int idx = 0; idx < snapshots.size(); ++idx)
             {
                 const AssetManager::Snapshot& snapshot{ snapshots[idx] };
