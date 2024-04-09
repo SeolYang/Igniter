@@ -323,7 +323,7 @@ namespace ig
 
         if (ImGui::BeginPopupModal(std::format("{} selector", selectAssetType).c_str()))
         {
-            if (ImGui::Button("Select"))
+            if (ImGui::Button("Select") || ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
             {
                 selectedIdx = selectorTableSelectedIdx;
                 ImGui::CloseCurrentPopup();
