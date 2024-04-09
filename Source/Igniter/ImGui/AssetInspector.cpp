@@ -95,15 +95,23 @@ namespace ig
                             .c_str());
             }
 
+            const ImVec2 contentRegion{ ImGui::GetContentRegionAvail() };
+            constexpr float PaddingRatio = 0.01f;
+            constexpr float SpaceRatio = 0.02f;
+            constexpr float MainTableRatio = 0.5f;
+            constexpr float InspectorRatio = 1.f - MainTableRatio - (PaddingRatio * 2.f) - SpaceRatio - MainTableRatio;
 
-
-            ImGui::BeginChild("Table", ImVec2{ 300, 0 }, ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+            float cursorPosX = contentRegion.x * PaddingRatio;
+            ImGui::SetCursorPosX(cursorPosX);
+            ImGui::BeginChild("Table", ImVec2{ contentRegion.x * MainTableRatio, 0.f }, ImGuiChildFlags_Border);
             ImGui::SeparatorText("Assets");
             RenderAssetTable(mainTableAssetFilter, mainTableSelectedIdx);
             ImGui::EndChild();
 
             ImGui::SameLine();
-            ImGui::BeginChild("Edit");
+            cursorPosX += contentRegion.x * (MainTableRatio + SpaceRatio);
+            ImGui::SetCursorPosX(cursorPosX);
+            ImGui::BeginChild("Edit", ImVec2{ contentRegion.x * InspectorRatio, 0.f }, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
             ImGui::SeparatorText("Inspector");
             if (mainTableSelectedIdx != -1)
             {
@@ -137,6 +145,7 @@ namespace ig
             ImGui::TableSetupColumn("Virtual Path", ColumnFlags);
             ImGui::TableSetupColumn("Scope", ColumnFlags);
             ImGui::TableSetupColumn("Refs", ColumnFlags | ImGuiTableColumnFlags_PreferSortDescending);
+            ImGui::TableSetupScrollFreeze(1, 1);
             ImGui::TableHeadersRow();
 
             ImGuiTableSortSpecs* sortSpecs{ ImGui::TableGetSortSpecs() };
