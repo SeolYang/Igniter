@@ -6,8 +6,11 @@
 #include <Asset/AssetMonitor.h>
 #include <Asset/AssetCache.h>
 #include <Asset/Texture.h>
+#include <Asset/TextureLoader.h>
 #include <Asset/StaticMesh.h>
+#include <Asset/StaticMeshLoader.h>
 #include <Asset/Material.h>
+#include <Asset/MaterialLoader.h>
 
 IG_DEFINE_LOG_CATEGORY(AssetManager);
 
@@ -119,7 +122,7 @@ namespace ig
                 return std::nullopt;
             }
 
-            return assetMonitor->GetLoadDesc(guid);
+            return assetMonitor->GetLoadDesc<T>(guid);
         }
 
         template <Asset T>
@@ -131,7 +134,7 @@ namespace ig
                 return;
             }
 
-            assetMonitor->UpdateLoadDesc(guid, newLoadDesc);
+            assetMonitor->UpdateLoadDesc<T>(guid, newLoadDesc);
         }
 
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const;
@@ -295,8 +298,6 @@ namespace ig
                 cachedAsset = assetCache.Cache(guid, result.Take());
             }
             IG_CHECK(cachedAsset);
-
-            assetModifiedEvent.Notify(*this);
             return true;
         }
 

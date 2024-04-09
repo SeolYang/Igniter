@@ -3,11 +3,8 @@
 #include <D3D12/GpuBuffer.h>
 #include <Render/GpuViewManager.h>
 #include <Asset/TextureImporter.h>
-#include <Asset/TextureLoader.h>
 #include <Asset/StaticMeshImporter.h>
-#include <Asset/StaticMeshLoader.h>
 #include <Asset/MaterialImporter.h>
-#include <Asset/MaterialLoader.h>
 #include <Asset/AssetManager.h>
 
 namespace ig

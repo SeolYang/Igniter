@@ -37,7 +37,7 @@ namespace ig::ImGuiX
         constexpr auto& EnumNames = magic_enum::enum_names<E>();
         constexpr auto& EnumVals = magic_enum::enum_values<E>();
         static_assert(EnumNames.size() == EnumVals.size());
-        std::optional<E> selection{lastSelection};
+        std::optional<E> selection = std::nullopt;
         for (size_t idx = 0; idx < EnumVals.size(); ++idx)
         {
             if (((EnumVals[idx] != excludes) && ...))

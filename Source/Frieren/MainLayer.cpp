@@ -43,7 +43,22 @@ namespace fe
                     assetManager.SaveAllChanges();
                 }
 
-                if (ImGui::MenuItem("Import Texture", "Ctrl+T"))
+                if (ImGui::MenuItem("Exit (Alt+F4)"))
+                {
+                    ig::Igniter::Exit();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Assets"))
+            {
+                if (ImGui::MenuItem("Asset Inspector"))
+                {
+                    assetSnapshotPanel.SetVisibility(true);
+                }
+
+                if (ImGui::MenuItem("Import Texture"))
                 {
                     textureImportPanel.SetVisibility(true);
                 }
@@ -53,10 +68,6 @@ namespace fe
                     staticMeshImportPanel.SetVisibility(true);
                 }
 
-                if (ImGui::MenuItem("Exit (Alt+F4)"))
-                {
-                    ig::Igniter::Exit();
-                }
                 ImGui::EndMenu();
             }
 
@@ -83,12 +94,9 @@ namespace fe
                     assetWatchPanel.SetVisibility(true);
                 }
 
-                if (ImGui::MenuItem("Asset Snapshots"))
-                {
-                    assetSnapshotPanel.SetVisibility(true);
-                }
                 ImGui::EndMenu();
             }
+
             ImGui::EndMainMenuBar();
         }
     }

@@ -14,13 +14,24 @@ namespace ig
         void Render() override;
 
     private:
-        Mutex mutex{};
+        void RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx);
+        void RenderEdit();
+        void RenderMaterialEdit(const AssetInfo& assetInfo);
+        void RenderStaticMeshEdit(const AssetInfo& assetInfo);
+        void RenderAssetInfo(const AssetInfo& assetInfo);
+        void RenderSelector(const char* label, const Guid guid);
+        int RenderSelectorPopup(const EAssetType selectAssetType);
+
+    private:
+        RecursiveMutex mutex{};
         std::vector<AssetManager::Snapshot> snapshots{};
         bool bDirty{ true };
         chrono::system_clock::time_point lastUpdated{ chrono::system_clock::now() };
 
-        std::optional<EAssetType> selectedTypeFilter{};
-        int selectedIdx{ -1 };
-        AssetManager::Snapshot selectedSnapshot{};
+        EAssetType mainTableAssetFilter{EAssetType::Unknown};
+        int mainTableSelectedIdx{ -1 };
+
+        int selectorTableSelectedIdx{ -1 };
+        bool bOpenSelectorPopup = false;
     };
 } // namespace ig
