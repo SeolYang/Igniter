@@ -2,7 +2,7 @@
 #include <Igniter.h>
 #include <Core/String.h>
 
-namespace ig
+namespace ig::ImGuiX
 {
     template <typename E>
         requires std::is_enum_v<E>

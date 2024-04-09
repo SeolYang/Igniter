@@ -12,7 +12,7 @@ namespace ig
     class AssetWatchPanel;
     class TextureImportPanel;
     class StaticMeshImportPanel;
-    class AssetSnapshotPanel;
+    class AssetInspector;
 } // namespace ig
 
 namespace fe
@@ -35,6 +35,6 @@ namespace fe
         ig::AssetWatchPanel& assetWatchPanel;
         ig::TextureImportPanel& textureImportPanel;
         ig::StaticMeshImportPanel& staticMeshImportPanel;
-        ig::AssetSnapshotPanel& assetSnapshotPanel;
+        ig::AssetInspector& assetSnapshotPanel;
     };
 } // namespace fe

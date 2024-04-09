@@ -24,31 +24,31 @@ namespace ig
                 ImGui::SameLine();
                 ImGui::Text("%s", path.ToStringView().data());
 
-                if (BeginEnumCombo<ETextureCompressionMode>("Compression Mode", selectedCompModeIdx))
+                if (ImGuiX::BeginEnumCombo<ETextureCompressionMode>("Compression Mode", selectedCompModeIdx))
                 {
-                    EndEnumCombo();
+                    ImGuiX::EndEnumCombo();
                 }
 
                 ImGui::Checkbox("Generate Mips", &config.bGenerateMips);
 
-                if (BeginEnumCombo<D3D12_FILTER>("Filter", selectedFilterIdx))
+                if (ImGuiX::BeginEnumCombo<D3D12_FILTER>("Filter", selectedFilterIdx))
                 {
-                    EndEnumCombo();
+                    ImGuiX::EndEnumCombo();
                 }
 
-                if (BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(U)", selectedAddressModeU))
+                if (ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(U)", selectedAddressModeU))
                 {
-                    EndEnumCombo();
+                    ImGuiX::EndEnumCombo();
                 }
 
-                if (BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(V)", selectedAddressModeV))
+                if (ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(V)", selectedAddressModeV))
                 {
-                    EndEnumCombo();
+                    ImGuiX::EndEnumCombo();
                 }
 
-                if (BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(W)", selectedAddressModeW))
+                if (ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(W)", selectedAddressModeW))
                 {
-                    EndEnumCombo();
+                    ImGuiX::EndEnumCombo();
                 }
 
                 if (ImGui::Button("Import"))
@@ -83,10 +83,7 @@ namespace ig
         config = {};
 
         static const std::vector<DialogFilter> Filters{
-            DialogFilter{ .Name = "JPEG Files"_fs, .FilterPattern = "*.jpg"_fs },
-            DialogFilter{ .Name = "PNG Files"_fs, .FilterPattern = "*.png"_fs },
-            DialogFilter{ .Name = "HDR Files"_fs, .FilterPattern = "*.hdr"_fs },
-            DialogFilter{ .Name = "DDS Files"_fs, .FilterPattern = "*.dds"_fs }
+            DialogFilter{ .Name = "Texture Resources"_fs, .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"_fs },
         };
 
         Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(nullptr, "Texture to import"_fs, Filters);

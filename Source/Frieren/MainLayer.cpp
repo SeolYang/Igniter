@@ -10,7 +10,7 @@
 #include <ImGui/AssetWatchPanel.h>
 #include <ImGui/TextureImportPanel.h>
 #include <ImGui/StaticMeshImportPanel.h>
-#include <ImGui/AssetSnapshotPanel.h>
+#include <ImGui/AssetInspector.h>
 
 namespace fe
 {
@@ -23,7 +23,7 @@ namespace fe
           assetWatchPanel(canvas.AddLayer<ig::AssetWatchPanel>()),
           textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>()),
           staticMeshImportPanel(canvas.AddLayer<ig::StaticMeshImportPanel>()),
-          assetSnapshotPanel(canvas.AddLayer<ig::AssetSnapshotPanel>())
+          assetSnapshotPanel(canvas.AddLayer<ig::AssetInspector>())
     {
     }
 

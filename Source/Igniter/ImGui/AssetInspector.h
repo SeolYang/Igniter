@@ -5,11 +5,11 @@
 
 namespace ig
 {
-    class AssetSnapshotPanel : public ImGuiLayer
+    class AssetInspector : public ImGuiLayer
     {
     public:
-        AssetSnapshotPanel();
-        ~AssetSnapshotPanel() = default;
+        AssetInspector();
+        ~AssetInspector() = default;
 
         void Render() override;
 
@@ -20,5 +20,7 @@ namespace ig
         chrono::system_clock::time_point lastUpdated{ chrono::system_clock::now() };
 
         std::optional<EAssetType> selectedTypeFilter{};
+        int selectedIdx{ -1 };
+        AssetManager::Snapshot selectedSnapshot{};
     };
 } // namespace ig
