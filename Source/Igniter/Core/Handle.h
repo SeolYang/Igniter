@@ -64,7 +64,7 @@ namespace ig
     public:
         RefHandle() = default;
 
-        explicit RefHandle(const details::HandleImpl newHandle) : handle(newHandle)
+        explicit RefHandle(const details::HandleImpl& newHandle) : handle(newHandle)
         {
         }
 
@@ -142,7 +142,7 @@ namespace ig
     public:
         UniqueRefHandle() = default;
 
-        explicit UniqueRefHandle(const details::HandleImpl newHandle) : RefHandle<T>(newHandle)
+        explicit UniqueRefHandle(const details::HandleImpl& newHandle) : RefHandle<T>(newHandle)
         {
             if constexpr (std::is_pointer_v<Finalizer>)
             {

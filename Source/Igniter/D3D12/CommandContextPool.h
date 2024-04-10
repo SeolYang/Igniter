@@ -5,7 +5,7 @@
 namespace ig
 {
     class DeferredDeallocator;
-    void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, std::function<void()> requester);
+    void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, std::function<void()>&& requester);
 } // namespace ig
 
 namespace ig

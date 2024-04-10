@@ -77,7 +77,7 @@ namespace ig
         using Desc = AssetDesc<Texture>;
 
     public:
-        Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, RefHandle<GpuView> sampler);
+        Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, const RefHandle<GpuView>& sampler);
         Texture(const Texture&) = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();

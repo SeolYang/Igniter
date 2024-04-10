@@ -62,7 +62,7 @@ namespace ig
         return archive;
     }
 
-    Texture::Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, RefHandle<GpuView> sampler)
+    Texture::Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, const RefHandle<GpuView>& sampler)
         : snapshot(snapshot),
           gpuTexture(std::move(gpuTexture)),
           srv(std::move(srv)),

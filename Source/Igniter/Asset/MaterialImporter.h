@@ -28,7 +28,7 @@ namespace ig
         MaterialImporter& operator=(MaterialImporter&&) noexcept = delete;
 
     private:
-        Result<Material::Desc, EMaterialCreateStatus> Import(const AssetInfo& assetInfo, MaterialCreateDesc desc);
+        Result<Material::Desc, EMaterialCreateStatus> Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc);
 
     private:
         AssetManager& assetManager;

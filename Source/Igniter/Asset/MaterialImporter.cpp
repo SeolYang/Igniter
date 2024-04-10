@@ -14,7 +14,7 @@ namespace ig
     {
     }
 
-    Result<Material::Desc, EMaterialCreateStatus> MaterialImporter::Import(const AssetInfo& assetInfo, MaterialCreateDesc desc)
+    Result<Material::Desc, EMaterialCreateStatus> MaterialImporter::Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc)
     {
         if (!assetInfo.IsValid())
         {

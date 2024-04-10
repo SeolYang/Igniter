@@ -19,7 +19,7 @@ public:
 };
 
 template <>
-struct std::formatter<xg::Guid>
+struct std::formatter<ig::Guid>
 {
 public:
     constexpr auto parse(std::format_parse_context& ctx)
@@ -28,7 +28,7 @@ public:
     }
 
     template <typename FrameContext>
-    auto format(const xg::Guid& guid, FrameContext& ctx) const
+    auto format(const ig::Guid& guid, FrameContext& ctx) const
     {
         return std::format_to(ctx.out(), "{}", (guid.isValid() ? guid.str() : "#INVALID_GUID"));
     }

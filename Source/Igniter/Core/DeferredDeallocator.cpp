@@ -14,7 +14,7 @@ namespace ig
         FlushAllFrames();
     }
 
-    void DeferredDeallocator::RequestDeallocation(std::function<void()> requester)
+    void DeferredDeallocator::RequestDeallocation(std::function<void()>&& requester)
     {
         const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 
@@ -50,7 +50,7 @@ namespace ig
         }
     }
 
-    void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, std::function<void()> requester)
+    void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, std::function<void()>&& requester)
     {
         deferredDeallocator.RequestDeallocation(std::move(requester));
     }
