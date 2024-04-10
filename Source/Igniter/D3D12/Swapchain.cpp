@@ -8,7 +8,7 @@
 namespace ig
 {
     Swapchain::Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& mainGfxQueue, const uint8_t desiredNumBackBuffers, const bool bEnableVSync)
-        : numBackBuffers(desiredNumBackBuffers),
+        : numBackBuffers(desiredNumBackBuffers + 2),
           bVSyncEnabled(bEnableVSync)
     {
         InitSwapchain(window, mainGfxQueue);

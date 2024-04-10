@@ -30,7 +30,6 @@ namespace ig
         // void Resize(const uint32_t width, const uint32_t height);
         // #sy_todo Impl Change Color Space
         // void SetColorSpace(DXGI_COLOR_SPACE_TYPE newColorSpace);
-
         void Present();
 
     private:

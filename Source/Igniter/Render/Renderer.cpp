@@ -115,7 +115,6 @@ namespace ig
         {
             mainGfxLocalFrameSync.WaitOnCpu();
         }
-
         tempConstantBufferAllocator.DeallocateCurrentFrame();
     }
 
@@ -168,10 +167,10 @@ namespace ig
                 {
                     StaticMesh& staticMesh = *staticMeshComponent.Mesh;
 
-                    RefHandle<GpuBuffer> indexBuffer = staticMesh.GetIndexBuffer();
-                    RefHandle<GpuView> vertexBufferSrv = staticMesh.GetVertexBufferSrv();
+                    GpuBuffer& indexBuffer = *staticMesh.GetIndexBuffer();
+                    GpuView& vertexBufferSrv = *staticMesh.GetVertexBufferSrv();
 
-                    renderCmdCtx->SetIndexBuffer(*indexBuffer);
+                    renderCmdCtx->SetIndexBuffer(indexBuffer);
                     {
                         TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
                         const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
@@ -180,8 +179,9 @@ namespace ig
                         /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
                         Material& material{ *staticMesh.GetMaterial() };
                         Texture& diffuseTex{ *material.GetDiffuse() };
+
                         const BasicRenderResources params{
-                            .VertexBufferIdx = vertexBufferSrv->Index,
+                            .VertexBufferIdx = vertexBufferSrv.Index,
                             .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
                             .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
                             .DiffuseTexIdx = diffuseTex.GetShaderResourceView()->Index,

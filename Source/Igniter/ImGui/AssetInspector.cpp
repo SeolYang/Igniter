@@ -219,7 +219,7 @@ namespace ig
 
     void AssetInspector::RenderEdit()
     {
-        AssetManager::Snapshot& selectedSnapshot{ snapshots[mainTableSelectedIdx] };
+        AssetManager::Snapshot selectedSnapshot{ snapshots[mainTableSelectedIdx] };
         const AssetInfo& assetInfo{ selectedSnapshot.Info };
         RenderAssetInfo(assetInfo);
 
