@@ -184,6 +184,7 @@ namespace ig
 
     void InputManager::PostUpdate()
     {
+        ZoneScoped;
         if (!scopedInputs.empty())
         {
             for (const auto& input : scopedInputs)

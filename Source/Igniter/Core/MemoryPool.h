@@ -23,14 +23,14 @@ namespace ig
         uint64_t Allocate();
         void Deallocate(const uint64_t handle);
 
-        uint8_t* GetAddressOf(const uint64_t handle)
+        uint8_t* GetAliveAddressOf(const uint64_t handle)
         {
-            return IsValid(handle) ? (chunks[MaskChunkIndex(handle)] + GetElementOffset(MaskElementIndex(handle))) : nullptr;
+            return IsAlive(handle) ? GetAddressOf(handle) : nullptr;
         }
 
-        const uint8_t* GetAddressOf(const uint64_t handle) const
+        const uint8_t* GetAliveAddressOf(const uint64_t handle) const
         {
-            return IsValid(handle) ? (chunks[MaskChunkIndex(handle)] + GetElementOffset(MaskElementIndex(handle))) : nullptr;
+            return IsAlive(handle) ? GetAddressOf(handle) : nullptr;
         }
 
         bool IsValid(const uint64_t handle) const
@@ -69,6 +69,16 @@ namespace ig
 
         uint64_t* GetHandleInUseFlagPtr(const uint64_t handle) { return reinterpret_cast<uint64_t*>(GetAddressOf(handle)); }
         const uint64_t* GetHandleInUseFlagPtr(const uint64_t handle) const { return reinterpret_cast<const uint64_t*>(GetAddressOf(handle)); }
+
+        uint8_t* GetAddressOf(const uint64_t handle)
+        {
+            return IsValid(handle) ? (chunks[MaskChunkIndex(handle)] + GetElementOffset(MaskElementIndex(handle))) : nullptr;
+        }
+
+        const uint8_t* GetAddressOf(const uint64_t handle) const
+        {
+            return IsValid(handle) ? (chunks[MaskChunkIndex(handle)] + GetElementOffset(MaskElementIndex(handle))) : nullptr;
+        }
 
     private:
         size_t sizeOfElement;

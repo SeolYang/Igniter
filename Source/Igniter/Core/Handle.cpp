@@ -47,11 +47,6 @@ namespace ig
             return IsValid() && owner->IsAlive(typeHashValue, handle);
         }
 
-        bool HandleImpl::IsPendingDeallocation(const uint64_t typeHashValue) const
-        {
-            return owner != nullptr && owner->IsPendingDeallocation(typeHashValue, handle);
-        }
-
         void HandleImpl::Deallocate(const uint64_t typeHashValue)
         {
             if (IsValid())

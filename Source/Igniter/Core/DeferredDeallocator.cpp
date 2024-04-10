@@ -26,6 +26,7 @@ namespace ig
 
     void DeferredDeallocator::FlushCurrentFrame()
     {
+        ZoneScoped;
         FlushFrame(frameManager.GetLocalFrameIndex());
     }
 

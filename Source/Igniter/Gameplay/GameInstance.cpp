@@ -13,6 +13,7 @@ namespace ig
 
     void GameInstance::Update()
     {
+        ZoneScoped;
         if (gameMode)
         {
             gameMode->Update(registry);

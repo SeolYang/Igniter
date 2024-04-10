@@ -54,7 +54,6 @@ namespace ig
         bool IsAlive(const uint64_t typeHashVal, const uint64_t handle) const;
 
         bool IsPendingDeallocationUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
-        bool IsPendingDeallocation(const uint64_t typeHashVal, const uint64_t handle) const;
 
     private:
         mutable SharedMutex mutex;

@@ -109,6 +109,7 @@ namespace ig
 
     void Renderer::BeginFrame()
     {
+        ZoneScoped;
         GpuSync& mainGfxLocalFrameSync = mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()];
         if (mainGfxLocalFrameSync)
         {
@@ -120,6 +121,7 @@ namespace ig
 
     void Renderer::Render(Registry& registry)
     {
+        ZoneScoped;
         IG_CHECK(mainGfxQueue);
 
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
@@ -167,9 +169,7 @@ namespace ig
                     StaticMesh& staticMesh = *staticMeshComponent.Mesh;
 
                     RefHandle<GpuBuffer> indexBuffer = staticMesh.GetIndexBuffer();
-                    IG_CHECK(indexBuffer);
                     RefHandle<GpuView> vertexBufferSrv = staticMesh.GetVertexBufferSrv();
-                    IG_CHECK(vertexBufferSrv);
 
                     renderCmdCtx->SetIndexBuffer(*indexBuffer);
                     {
@@ -203,6 +203,7 @@ namespace ig
 
     void Renderer::EndFrame()
     {
+        ZoneScoped;
         mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()] = mainGfxQueue.Submit();
         swapchain.Present();
     }

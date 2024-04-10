@@ -116,6 +116,7 @@ namespace ig
         IG_LOG(Engine, Info, "Igniting Main Loop!");
         while (!bShouldExit)
         {
+            ZoneScoped;
             timer->Begin();
 
             MSG msg;
