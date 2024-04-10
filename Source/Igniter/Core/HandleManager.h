@@ -47,8 +47,8 @@ namespace ig
         const uint8_t* GetAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
 
         /* Validated Address = handle.alived && !pending-deallocation */
-        uint8_t* GetVaildAddressOf(const uint64_t typeHashVal, const uint64_t handle);
-        const uint8_t* GetVaildAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
+        uint8_t* GetAliveAddressOf(const uint64_t typeHashVal, const uint64_t handle);
+        const uint8_t* GetAliveAddressOf(const uint64_t typeHashVal, const uint64_t handle) const;
 
         bool IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const;
         bool IsAlive(const uint64_t typeHashVal, const uint64_t handle) const;

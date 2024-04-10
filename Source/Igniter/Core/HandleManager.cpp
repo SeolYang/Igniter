@@ -98,26 +98,26 @@ namespace ig
         return GetAddressOfUnsafe(typeHashVal, handle);
     }
 
-    uint8_t* HandleManager::GetVaildAddressOf(const uint64_t typeHashVal, const uint64_t handle)
+    uint8_t* HandleManager::GetAliveAddressOf(const uint64_t typeHashVal, const uint64_t handle)
     {
         ReadOnlyLock lock{ mutex };
         IG_CHECK(memPools.contains(typeHashVal));
-        return !IsPendingDeallocationUnsafe(typeHashVal, handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
+        return IsAliveUnsafe(typeHashVal, handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
     }
 
-    const uint8_t* HandleManager::GetVaildAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
+    const uint8_t* HandleManager::GetAliveAddressOf(const uint64_t typeHashVal, const uint64_t handle) const
     {
         ReadOnlyLock lock{ mutex };
-        return !IsPendingDeallocationUnsafe(typeHashVal, handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
+        return IsAliveUnsafe(typeHashVal, handle) ? GetAddressOfUnsafe(typeHashVal, handle) : nullptr;
     }
 
     bool HandleManager::IsAliveUnsafe(const uint64_t typeHashVal, const uint64_t handle) const
     {
         IG_CHECK(typeHashVal != InvalidHashVal);
         IG_CHECK(handle != details::HandleImpl::InvalidHandle);
+        IG_CHECK(memPools.contains(typeHashVal));
         const bool bPendingDeallocations = IsPendingDeallocationUnsafe(typeHashVal, handle);
-        const bool bMemPoolExists = memPools.contains(typeHashVal);
-        if (!bPendingDeallocations && bMemPoolExists)
+        if (!bPendingDeallocations)
         {
             const MemoryPool& pool = memPools.at(typeHashVal);
             return pool.IsAlive(handle);

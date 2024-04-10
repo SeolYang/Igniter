@@ -32,14 +32,14 @@ namespace ig
             return owner->GetAddressOf(typeHashValue, handle);
         }
 
-        uint8_t* HandleImpl::GetVaildAddressOf(const uint64_t typeHashValue)
+        uint8_t* HandleImpl::GetAliveAddressOf(const uint64_t typeHashValue)
         {
-            return owner->GetVaildAddressOf(typeHashValue, handle);
+            return owner->GetAliveAddressOf(typeHashValue, handle);
         }
 
-        const uint8_t* HandleImpl::GetVaildAddressOf(const uint64_t typeHashValue) const
+        const uint8_t* HandleImpl::GetAliveAddressOf(const uint64_t typeHashValue) const
         {
-            return owner->GetVaildAddressOf(typeHashValue, handle);
+            return owner->GetAliveAddressOf(typeHashValue, handle);
         }
 
         bool HandleImpl::IsAlive(const uint64_t typeHashValue) const

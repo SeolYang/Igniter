@@ -33,8 +33,8 @@ namespace ig
             uint8_t* GetAddressOf(const uint64_t typeHashValue);
             const uint8_t* GetAddressOf(const uint64_t typeHashValue) const;
 
-            uint8_t* GetVaildAddressOf(const uint64_t typeHashValue);
-            const uint8_t* GetVaildAddressOf(const uint64_t typeHashValue) const;
+            uint8_t* GetAliveAddressOf(const uint64_t typeHashValue);
+            const uint8_t* GetAliveAddressOf(const uint64_t typeHashValue) const;
 
             bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
             bool IsAlive(const uint64_t typeHashValue) const;
@@ -77,37 +77,33 @@ namespace ig
 
         [[nodiscard]] T& operator*()
         {
-            IG_CHECK(IsAlive());
-            T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] const T& operator*() const
         {
-            IG_CHECK(IsAlive());
-            T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            IG_CHECK(IsAlive());
-            T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            IG_CHECK(IsAlive());
-            T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
-        [[nodiscard]] bool IsAlive() const { return handle.IsValid() && handle.IsAlive(EvaluatedTypeHashVal); }
+        [[nodiscard]] bool IsAlive() const { return handle.IsAlive(EvaluatedTypeHashVal); }
         [[nodiscard]] operator bool() const { return IsAlive(); }
 
         [[nodiscard]] size_t GetHash() const { return handle.GetHash(); }
@@ -301,13 +297,12 @@ namespace ig
             : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)),
               destroyer(std::forward<Dx>(destroyer))
         {
-            IG_CHECK(IsAlive());
             if constexpr (std::is_pointer_v<Destroyer>)
             {
                 IG_CHECK(destroyer != nullptr);
             }
 
-            T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             new (instancePtr) T(std::forward<Args>(args)...);
         }
@@ -317,8 +312,7 @@ namespace ig
         Handle(HandleManager& handleManager, Args&&... args)
             : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
         {
-            IG_CHECK(IsAlive());
-            T* instancePtr = reinterpret_cast<T*>(handle.GetAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             new (instancePtr) T(std::forward<Args>(args)...);
         }
@@ -346,28 +340,28 @@ namespace ig
 
         [[nodiscard]] T& operator*()
         {
-            T* instancePtr = reinterpret_cast<T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] const T& operator*() const
         {
-            const T* instancePtr = reinterpret_cast<const T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
+            const T* instancePtr = reinterpret_cast<const T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return *instancePtr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            T* instancePtr = reinterpret_cast<T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
+            T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            const T* instancePtr = reinterpret_cast<const T*>(handle.GetVaildAddressOf(EvaluatedTypeHashVal));
+            const T* instancePtr = reinterpret_cast<const T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
             return instancePtr;
         }
