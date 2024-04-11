@@ -9,7 +9,6 @@ namespace ig
     class DescriptorHeap final
     {
         friend class RenderDevice;
-        friend class GpuViewManager;
 
     public:
         DescriptorHeap(const DescriptorHeap&) = delete;
@@ -27,13 +26,13 @@ namespace ig
         D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
         D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
 
+        std::optional<GpuView> Allocate(const EGpuViewType desiredType);
+        void Deallocate(const GpuView& gpuView);
+
     private:
         DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
                        const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap,
                        const uint32_t descriptorHandleIncSizeInHeap);
-
-        std::optional<GpuView> Allocate(const EGpuViewType desiredType);
-        void Deallocate(const GpuView& gpuView);
 
     private:
         EDescriptorHeapType descriptorHeapType;
