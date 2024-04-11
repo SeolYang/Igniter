@@ -23,6 +23,9 @@ namespace ig
         void Render(ImGuiCanvas& canvas, Renderer& renderer);
 
     private:
+        void SetupDefaultTheme();
+
+    private:
         const FrameManager& frameManager;
         std::unique_ptr<DescriptorHeap> descriptorHeap;
         std::vector<std::unique_ptr<CommandContext>> commandContexts;
