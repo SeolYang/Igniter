@@ -52,4 +52,8 @@ namespace ig::ImGuiX
 
         return selection;
     }
+
+    bool EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format);
+
+    bool EditTransform(const std::string_view label, struct TransformComponent& transform);
 } // namespace ig

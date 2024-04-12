@@ -306,7 +306,7 @@
     <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h">
       <Filter>Source\Filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiWidgets.h">
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Filesystem\CoFileWatcher.h">
@@ -571,6 +571,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\TextureImportPanel.cpp">
       <Filter>Source\ImGui\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiExtensions.cpp">
+      <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

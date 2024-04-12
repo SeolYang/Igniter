@@ -8,7 +8,7 @@
 #include <D3D12/GpuView.h>
 #include <D3D12/RenderDevice.h>
 #include <Render/GpuViewManager.h>
-#include <ImGui/ImGuiWidgets.h>
+#include <ImGui/ImGuiExtensions.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/AssetInspector.h>
 
@@ -358,7 +358,7 @@ namespace ig
     void AssetInspector::RenderSelector(const char* label, const Guid guid)
     {
         IG_CHECK(label != nullptr);
-        if (!ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen))
+        if (!ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
         {
             return;
         }

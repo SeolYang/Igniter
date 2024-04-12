@@ -95,7 +95,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiWidgets.h" />
+    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h" />
@@ -175,6 +175,7 @@
     <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\AssetWatchPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
+    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp" />
