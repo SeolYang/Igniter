@@ -154,8 +154,9 @@ namespace ig
 
         details::UploadRequest& request = context.GetRequest();
         request.CmdCtx->End();
-        copyQueue->AddPendingContext(*request.CmdCtx);
-        request.Sync = copyQueue->Submit();
+        std::reference_wrapper<CommandContext> cmdCtxRef[] = { std::ref(*request.CmdCtx) };
+        copyQueue->ExecuteContexts(cmdCtxRef);
+        request.Sync = copyQueue->MakeSync();
         IG_CHECK(request.Sync.IsValid());
         context.Reset();
         reservedThreadID.store(InvalidThreadID, std::memory_order::release);
@@ -229,7 +230,7 @@ namespace ig
 
     void GpuUploader::FlushQueue()
     {
-        GpuSync copyQueueFlushSync = copyQueue->Flush();
+        GpuSync copyQueueFlushSync = copyQueue->MakeSync();
         copyQueueFlushSync.WaitOnCpu();
     }
 

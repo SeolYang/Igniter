@@ -25,26 +25,22 @@ namespace ig
         auto& GetNative() { return *native.Get(); }
         EQueueType GetType() const { return type; }
 
-        void AddPendingContext(CommandContext& cmdCtx);
-        GpuSync Submit();
+        void ExecuteContexts(const std::span<Ref<CommandContext>> cmdCtxs);
+        GpuSync MakeSync();
         void SyncWith(GpuSync& sync);
-        GpuSync Flush();
 
     private:
         CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, ComPtr<ID3D12Fence> newFence);
 
-        GpuSync FlushUnsafe();
-
     private:
-        static constexpr size_t RecommendedMinNumCommandContexts = 15;
+        static constexpr size_t RecommendedMinNumCommandContexts = 16;
 
     private:
         ComPtr<ID3D12CommandQueue> native;
         const EQueueType type;
 
-        SharedMutex mutex;
+        Mutex mutex;
         ComPtr<ID3D12Fence> fence;
-        uint64_t syncCounter = 0;
-        std::vector<ID3D12CommandList*> pendingContexts;
+        std::atomic_uint64_t syncCounter{ 1 };
     };
 } // namespace ig

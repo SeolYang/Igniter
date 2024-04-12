@@ -1,4 +1,5 @@
 #include <Igniter.h>
+#include <Core/ContainerUtils.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/RenderDevice.h>
@@ -7,61 +8,35 @@ namespace ig
 {
     CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, ComPtr<ID3D12Fence> newFence)
         : native(std::move(newNativeQueue)),
-          type(specifiedType),
-          fence(std::move(newFence))
+        type(specifiedType),
+        fence(std::move(newFence))
     {
-        pendingContexts.reserve(RecommendedMinNumCommandContexts);
     }
 
     CommandQueue::CommandQueue(CommandQueue&& other) noexcept
         : native(std::move(other.native)),
-          type(other.type),
-          fence(std::move(other.fence)),
-          syncCounter(std::exchange(other.syncCounter, 0)),
-          pendingContexts(std::move(other.pendingContexts))
+        type(other.type),
+        fence(std::move(other.fence)),
+        syncCounter(other.syncCounter.exchange(1))
     {
     }
 
     CommandQueue::~CommandQueue() {}
 
-    GpuSync CommandQueue::FlushUnsafe()
+    GpuSync CommandQueue::MakeSync()
     {
-        ++syncCounter;
-        IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncCounter));
-        return { *fence.Get(), syncCounter };
+        IG_CHECK(fence);
+        const uint64_t syncPoint{ syncCounter.fetch_add(1) };
+        IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
+        return GpuSync{ *fence.Get(), syncPoint };
     }
 
-    GpuSync CommandQueue::Flush()
-    {
-        ReadWriteLock lock{ mutex };
-        return FlushUnsafe();
-    }
-
-    void CommandQueue::AddPendingContext(CommandContext& cmdCtx)
-    {
-        if (!cmdCtx)
-        {
-            IG_CHECK_NO_ENTRY();
-            return;
-        }
-
-        ReadWriteLock lock{ mutex };
-        pendingContexts.emplace_back(&cmdCtx.GetNative());
-    }
-
-    GpuSync CommandQueue::Submit()
+    void CommandQueue::ExecuteContexts(const std::span<Ref<CommandContext>> cmdCtxs)
     {
         IG_CHECK(IsValid());
-        IG_CHECK(fence);
-
-        ReadWriteLock lock{ mutex };
-        IG_CHECK(!pendingContexts.empty());
-
-        native->ExecuteCommandLists(static_cast<uint32_t>(pendingContexts.size()),
-                                    reinterpret_cast<ID3D12CommandList* const*>(pendingContexts.data()));
-        pendingContexts.clear();
-
-        return FlushUnsafe();
+        auto cmdLists{ ToVector(views::all(cmdCtxs) | views::transform([](auto& cmdCtxRef) { return &cmdCtxRef.get().GetNative(); })) };
+        IG_CHECK(!cmdLists.empty());
+        native->ExecuteCommandLists(static_cast<uint32_t>(cmdLists.size()), reinterpret_cast<ID3D12CommandList**>(cmdLists.data()));
     }
 
     void CommandQueue::SyncWith(GpuSync& sync)

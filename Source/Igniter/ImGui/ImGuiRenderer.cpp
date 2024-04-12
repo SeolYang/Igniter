@@ -1,6 +1,7 @@
 #include <Igniter.h>
 #include <Core/Window.h>
 #include <Core/FrameManager.h>
+#include <Core/ContainerUtils.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/Swapchain.h>
@@ -88,7 +89,8 @@ namespace ig
         cmdCtx.End();
 
         CommandQueue& mainGfxQueue = renderer.GetMainGfxQueue();
-        mainGfxQueue.AddPendingContext(cmdCtx);
+        auto cmdCtxRefs{ MakeRefArray(cmdCtx) };
+        mainGfxQueue.ExecuteContexts(cmdCtxRefs);
     }
 
     GpuView ImGuiRenderer::GetReservedShaderResourceView() const

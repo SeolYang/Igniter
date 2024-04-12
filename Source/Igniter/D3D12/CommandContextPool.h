@@ -18,7 +18,7 @@ namespace ig
         CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device, const EQueueType queueType);
         ~CommandContextPool();
 
-        std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> Submit(const std::string_view debugName = "");
+        std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> Request(const std::string_view debugName = "");
 
     private:
         void Return(CommandContext* cmdContext);

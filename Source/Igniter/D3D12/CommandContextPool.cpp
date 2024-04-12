@@ -32,7 +32,7 @@ namespace ig
         }
     }
 
-    std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> CommandContextPool::Submit(const std::string_view debugName)
+    std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> CommandContextPool::Request(const std::string_view debugName)
     {
         const auto deleter = [this](CommandContext* ptr)
         {

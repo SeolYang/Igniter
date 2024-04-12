@@ -1,6 +1,7 @@
 #include <Igniter.h>
 #include <Core/Window.h>
 #include <Core/Log.h>
+#include <Core/ContainerUtils.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/DescriptorHeap.h>
 #include <D3D12/GPUBuffer.h>
@@ -86,24 +87,24 @@ namespace ig
         depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
         dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{ .MipSlice = 0 });
 
-        auto cmdCtx = gfxCmdCtxPool.Submit();
-        cmdCtx->Begin();
+        auto initialCmdCtx = gfxCmdCtxPool.Request();
+        initialCmdCtx->Begin();
         {
-            cmdCtx->AddPendingTextureBarrier(*depthStencilBuffer,
-                                             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
-                                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
+            initialCmdCtx->AddPendingTextureBarrier(*depthStencilBuffer,
+                                             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                              D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
-            cmdCtx->FlushBarriers();
+            initialCmdCtx->FlushBarriers();
         }
-        cmdCtx->End();
-
-        mainGfxQueue.AddPendingContext(*cmdCtx);
+        initialCmdCtx->End();
+        auto initialCmdCtxRef = MakeRefArray(*initialCmdCtx);
+        mainGfxQueue.ExecuteContexts(initialCmdCtxRef);
 #pragma endregion
     }
 
     Renderer::~Renderer()
     {
-        GpuSync mainGfxQueueSync = mainGfxQueue.Flush();
+        GpuSync mainGfxQueueSync = mainGfxQueue.MakeSync();
         mainGfxQueueSync.WaitOnCpu();
     }
 
@@ -138,7 +139,7 @@ namespace ig
         }
         perFrameConstantBuffer.Write(perFrameBuffer);
 
-        auto renderCmdCtx = gfxCmdCtxPool.Submit();
+        auto renderCmdCtx = gfxCmdCtxPool.Request();
         renderCmdCtx->Begin(pso.get());
         {
             auto bindlessDescriptorHeaps = gpuViewManager.GetBindlessDescriptorHeaps();
@@ -198,19 +199,21 @@ namespace ig
             }
         }
         renderCmdCtx->End();
-        mainGfxQueue.AddPendingContext(*renderCmdCtx);
+
+        Ref<CommandContext> renderCmdCtxs[] = { *renderCmdCtx };
+        mainGfxQueue.ExecuteContexts(renderCmdCtxs);
     }
 
     void Renderer::EndFrame()
     {
         ZoneScoped;
-        mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()] = mainGfxQueue.Submit();
+        mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()] = mainGfxQueue.MakeSync();
         swapchain.Present();
     }
 
     void Renderer::FlushQueues()
     {
-        GpuSync mainGfxSync = mainGfxQueue.Flush();
+        GpuSync mainGfxSync = mainGfxQueue.MakeSync();
         mainGfxSync.WaitOnCpu();
     }
 } // namespace ig
