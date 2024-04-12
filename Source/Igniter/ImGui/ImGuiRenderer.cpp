@@ -9,6 +9,7 @@
 #include <D3D12/CommandContext.h>
 #include <D3D12/GpuView.h>
 #include <Render/Renderer.h>
+#include <Render/RenderContext.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 
@@ -88,7 +89,8 @@ namespace ig
         cmdCtx.FlushBarriers();
         cmdCtx.End();
 
-        CommandQueue& mainGfxQueue = renderer.GetMainGfxQueue();
+        RenderContext& renderContext{ Igniter::GetRenderContext() };
+        CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
         auto cmdCtxRefs{ MakeRefArray(cmdCtx) };
         mainGfxQueue.ExecuteContexts(cmdCtxRefs);
     }

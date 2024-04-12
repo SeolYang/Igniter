@@ -17,6 +17,7 @@
 #include <Render/Utils.h>
 #include <Render/GPUViewManager.h>
 #include <Render/Renderer.h>
+#include <Render/RenderContext.h>
 #include <Asset/StaticMesh.h>
 #include <Asset/Material.h>
 #include <Component/CameraComponent.h>
@@ -47,17 +48,14 @@ namespace ig
         Matrix LocalToWorld{};
     };
 
-    Renderer::Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager)
-        : frameManager(engineFrameManager),
-          deferredDeallocator(engineDefferedDeallocator),
-          renderDevice(device),
-          handleManager(handleManager),
-          gpuViewManager(gpuViewManager),
-          mainViewport(window.GetViewport()),
-          mainGfxQueue(device.CreateCommandQueue("Main Gfx Queue", EQueueType::Direct).value()),
-          gfxCmdCtxPool(deferredDeallocator, device, EQueueType::Direct),
-          swapchain(window, gpuViewManager, mainGfxQueue, NumFramesInFlight),
-          tempConstantBufferAllocator(frameManager, device, handleManager, gpuViewManager)
+    Renderer::Renderer(const FrameManager& frameManager, Window& window, RenderDevice& device, HandleManager& handleManager, RenderContext& renderContext) :
+        frameManager(frameManager),
+        renderDevice(device),
+        handleManager(handleManager),
+        renderContext(renderContext),
+        tempConstantBufferAllocator(frameManager, renderDevice, handleManager, renderContext.GetGpuViewManager()),
+        mainViewport(window.GetViewport()),
+        swapchain(window, renderContext.GetGpuViewManager(), renderContext.GetMainGfxQueue(), NumFramesInFlight)
     {
 #pragma region test
         bindlessRootSignature = std::make_unique<RootSignature>(device.CreateBindlessRootSignature().value());
@@ -81,29 +79,34 @@ namespace ig
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         pso = std::make_unique<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
 
+        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
         GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = String("DepthStencilBufferTex");
         depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
         depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
         dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{ .MipSlice = 0 });
 
-        auto initialCmdCtx = gfxCmdCtxPool.Request();
+        CommandContextPool& mainGfxCmdCtxPool{ renderContext.GetMainGfxCommandContextPool() };
+        auto initialCmdCtx = mainGfxCmdCtxPool.Request();
         initialCmdCtx->Begin();
         {
             initialCmdCtx->AddPendingTextureBarrier(*depthStencilBuffer,
-                                             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                             D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
+                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                                    D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
             initialCmdCtx->FlushBarriers();
         }
         initialCmdCtx->End();
         auto initialCmdCtxRef = MakeRefArray(*initialCmdCtx);
+
+        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
         mainGfxQueue.ExecuteContexts(initialCmdCtxRef);
 #pragma endregion
     }
 
     Renderer::~Renderer()
     {
+        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
         GpuSync mainGfxQueueSync = mainGfxQueue.MakeSync();
         mainGfxQueueSync.WaitOnCpu();
     }
@@ -122,8 +125,6 @@ namespace ig
     void Renderer::Render(Registry& registry)
     {
         ZoneScoped;
-        IG_CHECK(mainGfxQueue);
-
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
@@ -139,7 +140,10 @@ namespace ig
         }
         perFrameConstantBuffer.Write(perFrameBuffer);
 
-        auto renderCmdCtx = gfxCmdCtxPool.Request();
+        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
+        CommandContextPool& mainGfxCmdCtxPool{ renderContext.GetMainGfxCommandContextPool() };
+        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
+        auto renderCmdCtx = mainGfxCmdCtxPool.Request();
         renderCmdCtx->Begin(pso.get());
         {
             auto bindlessDescriptorHeaps = gpuViewManager.GetBindlessDescriptorHeaps();
@@ -207,13 +211,8 @@ namespace ig
     void Renderer::EndFrame()
     {
         ZoneScoped;
+        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
         mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()] = mainGfxQueue.MakeSync();
         swapchain.Present();
-    }
-
-    void Renderer::FlushQueues()
-    {
-        GpuSync mainGfxSync = mainGfxQueue.MakeSync();
-        mainGfxSync.WaitOnCpu();
     }
 } // namespace ig

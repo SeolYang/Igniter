@@ -12,6 +12,7 @@
 #include <Core/EmbededSettings.h>
 #include <Core/ComInitializer.h>
 #include <D3D12/RenderDevice.h>
+#include <Render/RenderContext.h>
 #include <Render/GpuUploader.h>
 #include <Render/GPUViewManager.h>
 #include <Render/Renderer.h>
@@ -47,17 +48,19 @@ namespace ig
             //////////////////////// L1 ////////////////////////
             inputManager = std::make_unique<InputManager>(*handleManager);
             deferredDeallocator = std::make_unique<DeferredDeallocator>(*frameManager);
-            gpuUploader = std::make_unique<GpuUploader>(*renderDevice);
-            imguiRenderer = std::make_unique<ImGuiRenderer>(*frameManager, *window, *renderDevice);
             ////////////////////////////////////////////////////
 
             //////////////////////// L2 ////////////////////////
-            gpuViewManager = std::make_unique<GpuViewManager>(*handleManager, *deferredDeallocator, *renderDevice);
+            renderContext = std::make_unique<RenderContext>(*deferredDeallocator, *renderDevice, *handleManager);
             ////////////////////////////////////////////////////
 
             //////////////////////// L3 ////////////////////////
-            assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *gpuUploader, *gpuViewManager); /* #sy_test Temporary */
-            renderer = std::make_unique<Renderer>(*frameManager, *deferredDeallocator, *window, *renderDevice, *handleManager, *gpuViewManager);
+            assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *renderContext); /* #sy_test Temporary */
+            ////////////////////////////////////////////////////
+
+            //////////////////////// L4 ////////////////////////
+            renderer = std::make_unique<Renderer>(*frameManager, *window, *renderDevice, *handleManager, *renderContext);
+            imguiRenderer = std::make_unique<ImGuiRenderer>(*frameManager, *window, *renderDevice);
             ////////////////////////////////////////////////////
 
             //////////////////////// APP ///////////////////////
@@ -78,20 +81,22 @@ namespace ig
         /* #sy_note 각 계층에서 여전히 지연 해제하는 경우, 상위 계층을 해제하기 전에 중간에 수동으로 처리 해주어야 함. */
         deferredDeallocator->FlushAllFrames();
 
+        //////////////////////// L4 ////////////////////////
+        imguiRenderer.reset();
+        renderer.reset();
+        ////////////////////////////////////////////////////
+
         //////////////////////// L3 ////////////////////////
         assetManager.reset();
-        renderer.reset();
         ////////////////////////////////////////////////////
 
         deferredDeallocator->FlushAllFrames();
 
         //////////////////////// L2 ////////////////////////
-        gpuViewManager.reset();
+        renderContext.reset();
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        imguiRenderer.reset();
-        gpuUploader.reset();
         deferredDeallocator.reset();
         inputManager.reset();
         ////////////////////////////////////////////////////
@@ -149,7 +154,7 @@ namespace ig
             frameManager->NextFrame();
         }
 
-        renderer->FlushQueues();
+        renderContext->FlushQueues();
 
         IG_LOG(Engine, Info, "Extinguishing Engine Main Loop.");
         return 0;
@@ -191,10 +196,10 @@ namespace ig
         return *instance->renderDevice;
     }
 
-    GpuUploader& Igniter::GetGpuUploader()
+    RenderContext& Igniter::GetRenderContext()
     {
         IG_CHECK(instance != nullptr);
-        return *instance->gpuUploader;
+        return *instance->renderContext;
     }
 
     InputManager& Igniter::GetInputManager()
@@ -207,12 +212,6 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->deferredDeallocator;
-    }
-
-    GpuViewManager& Igniter::GetGPUViewManager()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->gpuViewManager;
     }
 
     Renderer& Igniter::GetRenderer()

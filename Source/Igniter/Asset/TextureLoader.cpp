@@ -1,24 +1,26 @@
 #include <Igniter.h>
 #include <Core/Timer.h>
 #include <Core/Log.h>
+#include <Core/ContainerUtils.h>
 #include <Filesystem/Utils.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GpuTexture.h>
 #include <D3D12/GpuView.h>
+#include <D3D12/CommandContext.h>
 #include <Render/GpuUploader.h>
 #include <Render/GpuViewManager.h>
+#include <Render/Renderer.h>
+#include <Render/RenderContext.h>
 #include <Asset/TextureLoader.h>
 
 IG_DEFINE_LOG_CATEGORY(TextureLoader);
 
 namespace ig
 {
-    TextureLoader::TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice,
-                                 GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
-        : handleManager(handleManager),
-          renderDevice(renderDevice),
-          gpuUploader(gpuUploader),
-          gpuViewManager(gpuViewManager)
+    TextureLoader::TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext) :
+        handleManager(handleManager),
+        renderDevice(renderDevice),
+        renderContext(renderContext)
     {
     }
 
@@ -141,11 +143,12 @@ namespace ig
         texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
         /* Create Texture from RenderDevice */
-        std::optional<GpuTexture> newTex = renderDevice.CreateTexture(texDesc);
-        if (!newTex)
+        std::optional<GpuTexture> newTexOpt = renderDevice.CreateTexture(texDesc);
+        if (!newTexOpt)
         {
             return MakeFail<Texture, ETextureLoaderStatus::FailedCreateTexture>();
         }
+        GpuTexture newTex{ std::move(*newTexOpt) };
 
         /* Upload texture subresources from sysram to vram */
         const size_t numSubresources = scratchImage.GetImageCount();
@@ -161,17 +164,32 @@ namespace ig
         }
 
         // COMMON Layout 인 상태에서 텍스처가 GPU 메모리 상에서 어떻게 배치되어있는지
+        GpuUploader& gpuUploader{ renderContext.GetGpuUploader() };
         const GpuCopyableFootprints destCopyableFootprints = renderDevice.GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
         UploadContext texUploadCtx = gpuUploader.Reserve(destCopyableFootprints.RequiredSize);
-        texUploadCtx.CopyTextureSimple(*newTex, destCopyableFootprints, subresources);
+        texUploadCtx.CopyTextureSimple(newTex, destCopyableFootprints, subresources);
 
         std::optional<GpuSync> texUploadSync = gpuUploader.Submit(texUploadCtx);
         IG_CHECK(texUploadSync);
         texUploadSync->WaitOnCpu();
 
+        CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+        CommandContext cmdCtx{ *renderDevice.CreateCommandContext("BarrierAfterUploadCmdCtx", EQueueType::Direct) };
+        cmdCtx.Begin();
+        cmdCtx.AddPendingTextureBarrier(newTex,
+                                        D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                        D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                        D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+        cmdCtx.End();
+        auto cmdCtxRefs{ MakeRefArray(cmdCtx) };
+        mainGfxQueue.ExecuteContexts(cmdCtxRefs);
+        GpuSync barrierSync{ mainGfxQueue.MakeSync() };
+        barrierSync.WaitOnCpu();
+
         /* Create Shader Resource View (GpuView) */
+        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
         Handle<GpuView, GpuViewManager*> srv = gpuViewManager.RequestShaderResourceView(
-            *newTex,
+            newTex,
             D3D12_TEX2D_SRV{
                 .MostDetailedMip = 0,
                 .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
@@ -203,7 +221,7 @@ namespace ig
 
         /* #sy_todo Layout transition COMMON -> SHADER_RESOURCE? */
         return MakeSuccess<Texture, ETextureLoaderStatus>(Texture{ desc,
-                                                                   { handleManager, std::move(newTex.value()) },
+                                                                   { handleManager, std::move(newTex) },
                                                                    std::move(srv),
                                                                    samplerView });
     }
@@ -233,22 +251,23 @@ namespace ig
 
             ++pixelCounter;
             bUseBrightPixel = (pixelCounter % BlockSizeInPixels == 0) ?
-                                  !bUseBrightPixel :
-                                  bUseBrightPixel;
+                !bUseBrightPixel :
+                bUseBrightPixel;
 
             bUseBrightPixel = (pixelCounter % (BlockSizeInPixels * BlockSizeInPixels * NumBlocksPerAxis) == 0) ?
-                                  !bUseBrightPixel :
-                                  bUseBrightPixel;
+                !bUseBrightPixel :
+                bUseBrightPixel;
         }
 
         GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
-        std::optional<GpuTexture> newTex{ renderDevice.CreateTexture(texDesc) };
-        if (!newTex)
+        std::optional<GpuTexture> newTexOpt{ renderDevice.CreateTexture(texDesc) };
+        if (!newTexOpt)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateTexture>();
         }
+        GpuTexture newTex{ std::move(*newTexOpt) };
 
         constexpr LONG_PTR RowPitch{ Width * BytesPerPixel };
         constexpr LONG_PTR SlicePitch{ Height * RowPitch };
@@ -262,15 +281,30 @@ namespace ig
 
         std::vector<D3D12_SUBRESOURCE_DATA> subresources{ subresource };
 
+        GpuUploader& gpuUploader{ renderContext.GetGpuUploader() };
         const GpuCopyableFootprints dstCopyableFootprints{ renderDevice.GetCopyableFootprints(texDesc, 0, 1, 0) };
         UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
-        uploadCtx.CopyTextureSimple(*newTex, dstCopyableFootprints, subresources);
+        uploadCtx.CopyTextureSimple(newTex, dstCopyableFootprints, subresources);
         std::optional<GpuSync> sync{ gpuUploader.Submit(uploadCtx) };
         IG_CHECK(sync);
         sync->WaitOnCpu();
 
+        CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+        CommandContext cmdCtx{ *renderDevice.CreateCommandContext("BarrierAfterUploadCmdCtx", EQueueType::Direct) };
+        cmdCtx.Begin();
+        cmdCtx.AddPendingTextureBarrier(newTex,
+                                        D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                        D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                        D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+        cmdCtx.End();
+        auto cmdCtxRefs{ MakeRefArray(cmdCtx) };
+        mainGfxQueue.ExecuteContexts(cmdCtxRefs);
+        GpuSync barrierSync{ mainGfxQueue.MakeSync() };
+        barrierSync.WaitOnCpu();
+
+        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
         Handle<GpuView, GpuViewManager*> srv = gpuViewManager.RequestShaderResourceView(
-            *newTex,
+            newTex,
             D3D12_TEX2D_SRV{
                 .MostDetailedMip = 0,
                 .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
@@ -306,8 +340,8 @@ namespace ig
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateSamplerView>();
         }
 
-        return MakeSuccess<Texture, details::EMakeDefaultTexStatus>(Texture{ Texture::Desc{ .Info = assetInfo, .LoadDescriptor = loadDesc },
-                                                                             { handleManager, std::move(newTex.value()) },
+        return MakeSuccess<Texture, details::EMakeDefaultTexStatus>(Texture{ Texture::Desc{.Info = assetInfo, .LoadDescriptor = loadDesc },
+                                                                             { handleManager, std::move(newTex) },
                                                                              std::move(srv),
                                                                              samplerView });
     }
@@ -332,12 +366,12 @@ namespace ig
         GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
-        std::optional<GpuTexture> newTex{ renderDevice.CreateTexture(texDesc) };
-        if (!newTex)
+        std::optional<GpuTexture> newTexOpt{ renderDevice.CreateTexture(texDesc) };
+        if (!newTexOpt)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateTexture>();
         }
-
+        GpuTexture newTex{ std::move(*newTexOpt) };
         constexpr LONG_PTR RowPitch{ Width * BytesPerPixel };
         constexpr LONG_PTR SlicePitch{ Height * RowPitch };
         IG_CHECK(SlicePitch == bytes.size());
@@ -349,15 +383,30 @@ namespace ig
         };
         std::vector<D3D12_SUBRESOURCE_DATA> subresources{ subresource };
 
+        GpuUploader& gpuUploader{ renderContext.GetGpuUploader() };
         const GpuCopyableFootprints dstCopyableFootprints{ renderDevice.GetCopyableFootprints(texDesc, 0, 1, 0) };
         UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
-        uploadCtx.CopyTextureSimple(*newTex, dstCopyableFootprints, subresources);
+        uploadCtx.CopyTextureSimple(newTex, dstCopyableFootprints, subresources);
         std::optional<GpuSync> sync{ gpuUploader.Submit(uploadCtx) };
         IG_CHECK(sync);
         sync->WaitOnCpu();
 
+        CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+        CommandContext cmdCtx{ *renderDevice.CreateCommandContext("BarrierAfterUploadCmdCtx", EQueueType::Direct) };
+        cmdCtx.Begin();
+        cmdCtx.AddPendingTextureBarrier(newTex,
+                                        D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                        D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                        D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+        cmdCtx.End();
+        auto cmdCtxRefs{ MakeRefArray(cmdCtx) };
+        mainGfxQueue.ExecuteContexts(cmdCtxRefs);
+        GpuSync barrierSync{ mainGfxQueue.MakeSync() };
+        barrierSync.WaitOnCpu();
+
+        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
         Handle<GpuView, GpuViewManager*> srv = gpuViewManager.RequestShaderResourceView(
-            *newTex,
+            newTex,
             D3D12_TEX2D_SRV{
                 .MostDetailedMip = 0,
                 .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
@@ -393,8 +442,8 @@ namespace ig
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateSamplerView>();
         }
 
-        return MakeSuccess<Texture, details::EMakeDefaultTexStatus>(Texture{ Texture::Desc{ .Info = assetInfo, .LoadDescriptor = loadDesc },
-                                                                             { handleManager, std::move(newTex.value()) },
+        return MakeSuccess<Texture, details::EMakeDefaultTexStatus>(Texture{ Texture::Desc{.Info = assetInfo, .LoadDescriptor = loadDesc },
+                                                                             { handleManager, std::move(newTex) },
                                                                              std::move(srv),
                                                                              samplerView });
     }

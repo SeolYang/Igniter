@@ -38,15 +38,14 @@ namespace ig
 
     class HandleManager;
     class RenderDevice;
-    class GpuUploader;
-    class GpuViewManager;
+    class RenderContext;
     class AssetManager;
     class TextureLoader final
     {
         friend class AssetManager;
 
     public:
-        TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
+        TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext);
         TextureLoader(const TextureLoader&) = delete;
         TextureLoader(TextureLoader&&) noexcept = delete;
         ~TextureLoader() = default;
@@ -62,7 +61,6 @@ namespace ig
     private:
         HandleManager& handleManager;
         RenderDevice& renderDevice;
-        GpuUploader& gpuUploader;
-        GpuViewManager& gpuViewManager;
+        RenderContext& renderContext;
     };
 } // namespace ig

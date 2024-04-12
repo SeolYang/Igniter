@@ -8,6 +8,7 @@
 #include <Render/Vertex.h>
 #include <Render/GpuViewManager.h>
 #include <Render/GpuUploader.h>
+#include <Render/RenderContext.h>
 #include <Asset/AssetManager.h>
 #include <Asset/StaticMeshLoader.h>
 
@@ -17,13 +18,11 @@ namespace ig
 {
     StaticMeshLoader::StaticMeshLoader(HandleManager& handleManager,
                                        RenderDevice& renderDevice,
-                                       GpuUploader& gpuUploader,
-                                       GpuViewManager& gpuViewManager,
-                                       AssetManager& assetManager)
-        : handleManager(handleManager),
+                                       RenderContext& renderContext,
+                                       AssetManager& assetManager) :
+        handleManager(handleManager),
         renderDevice(renderDevice),
-        gpuUploader(gpuUploader),
-        gpuViewManager(gpuViewManager),
+        renderContext(renderContext),
         assetManager(assetManager)
     {
     }
@@ -91,6 +90,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBuffer>();
         }
 
+        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
         auto vertexBufferSrv = gpuViewManager.RequestShaderResourceView(*vertexBuffer);
         if (!vertexBufferSrv)
         {
@@ -103,6 +103,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateIndexBuffer>();
         }
 
+        GpuUploader& gpuUploader{ renderContext.GetGpuUploader() };
         bool bVertexBufferDecodeSucceed = false;
         UploadContext verticesUploadCtx = gpuUploader.Reserve(vertexBufferDesc.GetSizeAsBytes());
         {

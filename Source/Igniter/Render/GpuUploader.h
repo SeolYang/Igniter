@@ -91,10 +91,11 @@ namespace ig
 
     // Reserve Upload -> setup data & fill up copy cmd ctx -> Submit Upload -> Submit to Async Copy Queue
     class CommandQueue;
+    class RenderContext;
     class GpuUploader final
     {
     public:
-        GpuUploader(RenderDevice& renderDevice);
+        GpuUploader(RenderDevice& renderDevice, CommandQueue& asyncCopyQueue);
         GpuUploader(const GpuUploader&) = delete;
         GpuUploader(GpuUploader&&) noexcept = delete;
         ~GpuUploader();
@@ -103,25 +104,20 @@ namespace ig
         GpuUploader& operator=(GpuUploader&&) noexcept = delete;
 
         [[nodiscard]] UploadContext Reserve(const size_t requestSize);
-
         std::optional<GpuSync> Submit(UploadContext& context);
 
     private:
         details::UploadRequest* AllocateRequestUnsafe();
-
         void WaitForRequestUnsafe(const size_t numWaitFor);
-
         void ResizeUnsafe(const size_t newSize);
-
         void FlushQueue();
 
     private:
         RenderDevice& renderDevice;
+        CommandQueue& asyncCopyQueue;
 
         constexpr static uint64_t InvalidThreadID = std::numeric_limits<uint64_t>::max();
         std::atomic_uint64_t reservedThreadID = InvalidThreadID;
-
-        std::unique_ptr<CommandQueue> copyQueue;
 
         constexpr static size_t InitialBufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
         size_t bufferCapacity = 0;

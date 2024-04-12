@@ -375,6 +375,9 @@
     <ClInclude Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.h">
       <Filter>Source\ImGui\Asset</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\RenderContext.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -574,6 +577,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiExtensions.cpp">
       <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

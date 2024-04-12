@@ -1,6 +1,7 @@
 #include <Igniter.h>
 #include <D3D12/GpuTexture.h>
 #include <D3D12/GpuBuffer.h>
+#include <Render/RenderContext.h>
 #include <Render/GpuViewManager.h>
 #include <Asset/TextureImporter.h>
 #include <Asset/StaticMeshImporter.h>
@@ -9,12 +10,12 @@
 
 namespace ig
 {
-    AssetManager::AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager)
+    AssetManager::AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext)
         : assetMonitor(std::make_unique<details::AssetMonitor>()),
           textureImporter(std::make_unique<TextureImporter>()),
-          textureLoader(std::make_unique<TextureLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager)),
+          textureLoader(std::make_unique<TextureLoader>(handleManager, renderDevice, renderContext)),
           staticMeshImporter(std::make_unique<StaticMeshImporter>(*this)),
-          staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, gpuUploader, gpuViewManager, *this)),
+          staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, renderContext, *this)),
           materialImporter(std::make_unique<MaterialImporter>(*this)),
           materialLoader(std::make_unique<MaterialLoader>(*this))
     {

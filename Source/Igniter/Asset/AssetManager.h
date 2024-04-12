@@ -56,7 +56,7 @@ namespace ig
         };
 
     public:
-        AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, GpuUploader& gpuUploader, GpuViewManager& gpuViewManager);
+        AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext);
         AssetManager(const AssetManager&) = delete;
         AssetManager(AssetManager&&) noexcept = delete;
         ~AssetManager();

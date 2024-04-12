@@ -23,6 +23,7 @@ namespace ig
     };
 
     class AssetManager;
+    class RenderContext;
     class StaticMeshLoader final
     {
         friend class AssetManager;
@@ -30,8 +31,7 @@ namespace ig
     public:
         StaticMeshLoader(HandleManager& handleManager,
                          RenderDevice& renderDevice,
-                         GpuUploader& gpuUploader,
-                         GpuViewManager& gpuViewManager,
+                         RenderContext& renderContext,
                          AssetManager& assetManager);
 
         StaticMeshLoader(const StaticMeshLoader&) = delete;
@@ -47,8 +47,7 @@ namespace ig
     public:
         HandleManager& handleManager;
         RenderDevice& renderDevice;
-        GpuUploader& gpuUploader;
-        GpuViewManager& gpuViewManager;
+        RenderContext& renderContext;
         AssetManager& assetManager;
     };
 } // namespace ig

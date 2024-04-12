@@ -23,20 +23,20 @@ namespace ig
 
     CommandQueue::~CommandQueue() {}
 
-    GpuSync CommandQueue::MakeSync()
-    {
-        IG_CHECK(fence);
-        const uint64_t syncPoint{ syncCounter.fetch_add(1) };
-        IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
-        return GpuSync{ *fence.Get(), syncPoint };
-    }
-
     void CommandQueue::ExecuteContexts(const std::span<Ref<CommandContext>> cmdCtxs)
     {
         IG_CHECK(IsValid());
         auto cmdLists{ ToVector(views::all(cmdCtxs) | views::transform([](auto& cmdCtxRef) { return &cmdCtxRef.get().GetNative(); })) };
         IG_CHECK(!cmdLists.empty());
         native->ExecuteCommandLists(static_cast<uint32_t>(cmdLists.size()), reinterpret_cast<ID3D12CommandList**>(cmdLists.data()));
+    }
+
+    GpuSync CommandQueue::MakeSync()
+    {
+        IG_CHECK(fence);
+        const uint64_t syncPoint{ syncCounter.fetch_add(1) };
+        IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
+        return GpuSync{ *fence.Get(), syncPoint };
     }
 
     void CommandQueue::SyncWith(GpuSync& sync)

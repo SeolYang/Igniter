@@ -7,6 +7,7 @@ namespace ig
     class Timer;
     class Window;
     class RenderDevice;
+    class RenderContext;
     class GpuUploader;
     class HandleManager;
     class InputManager;
@@ -27,17 +28,13 @@ namespace ig
         [[nodiscard]] static Timer& GetTimer();
         [[nodiscard]] static Window& GetWindow();
         [[nodiscard]] static RenderDevice& GetRenderDevice();
-        [[nodiscard]] static GpuUploader& GetGpuUploader();
         [[nodiscard]] static HandleManager& GetHandleManager();
-
         [[nodiscard]] static InputManager& GetInputManager();
         [[nodiscard]] static DeferredDeallocator& GetDeferredDeallocator();
-        [[nodiscard]] static GpuViewManager& GetGPUViewManager();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
-
+        [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static Renderer& GetRenderer();
-
         [[nodiscard]] static ImGuiCanvas& GetImGuiCanvas();
         [[nodiscard]] static OptionalRef<ImGuiCanvas> TryGetImGuiCanvas();
         [[nodiscard]] static GameInstance& GetGameInstance();
@@ -54,34 +51,36 @@ namespace ig
         static Igniter* instance;
         bool bShouldExit = false;
 
-        /* L# stand for Dependency Level */
+        /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////
-        std::unique_ptr<FrameManager> frameManager;
-        std::unique_ptr<Timer> timer;
-        std::unique_ptr<Window> window;
-        std::unique_ptr<RenderDevice> renderDevice;
-        std::unique_ptr<HandleManager> handleManager;
+        Ptr<FrameManager> frameManager;
+        Ptr<Timer> timer;
+        Ptr<Window> window;
+        Ptr<RenderDevice> renderDevice;
+        Ptr<HandleManager> handleManager;
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        std::unique_ptr<InputManager> inputManager;
-        std::unique_ptr<DeferredDeallocator> deferredDeallocator;
-        std::unique_ptr<GpuUploader> gpuUploader;
-        std::unique_ptr<ImGuiRenderer> imguiRenderer;
+        Ptr<InputManager> inputManager;
+        Ptr<DeferredDeallocator> deferredDeallocator;
         ////////////////////////////////////////////////////
 
         //////////////////////// L2 ////////////////////////
-        std::unique_ptr<GpuViewManager> gpuViewManager;
+        Ptr<RenderContext> renderContext;
         ////////////////////////////////////////////////////
 
         //////////////////////// L3 ////////////////////////
-        std::unique_ptr<AssetManager> assetManager;
-        std::unique_ptr<Renderer> renderer;
+        Ptr<AssetManager> assetManager;
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L4 ////////////////////////
+        Ptr<Renderer> renderer;
+        Ptr<ImGuiRenderer> imguiRenderer;
         ////////////////////////////////////////////////////
 
         //////////////////////// APP ///////////////////////
-        std::unique_ptr<ImGuiCanvas> imguiCanvas;
-        std::unique_ptr<GameInstance> gameInstance;
+        Ptr<ImGuiCanvas> imguiCanvas;
+        Ptr<GameInstance> gameInstance;
         ////////////////////////////////////////////////////
     };
 } // namespace ig

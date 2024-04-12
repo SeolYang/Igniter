@@ -1,9 +1,8 @@
 #pragma once
-#include <Render/TempConstantBufferAllocator.h>
 #include <D3D12/CommandQueue.h>
-#include <D3D12/CommandContextPool.h>
 #include <D3D12/Swapchain.h>
 #include <Core/Handle.h>
+#include <Render/TempConstantBufferAllocator.h>
 
 namespace ig
 {
@@ -20,6 +19,7 @@ namespace ig
     class PipelineState;
     class GpuView;
     class GpuViewManager;
+    class RenderContext;
 #pragma endregion
 } // namespace ig
 
@@ -30,7 +30,7 @@ namespace ig
     class Renderer final
     {
     public:
-        Renderer(const FrameManager& engineFrameManager, DeferredDeallocator& engineDefferedDeallocator, Window& window, RenderDevice& device, HandleManager& handleManager, GpuViewManager& gpuViewManager);
+        Renderer(const FrameManager& frameManager, Window& window, RenderDevice& device, HandleManager& handleManager, RenderContext& renderContext);
         Renderer(const Renderer&) = delete;
         Renderer(Renderer&&) noexcept = delete;
         ~Renderer();
@@ -38,32 +38,25 @@ namespace ig
         Renderer& operator=(const Renderer&) = delete;
         Renderer& operator=(Renderer&&) noexcept = delete;
 
-        CommandQueue& GetMainGfxQueue() { return mainGfxQueue; }
         Swapchain& GetSwapchain() { return swapchain; }
+        TempConstantBufferAllocator& GetTempConstantBufferAllocator() { return tempConstantBufferAllocator; }
 
         void BeginFrame();
         void Render(Registry& registry);
         void EndFrame();
 
-        void FlushQueues();
-
-        auto& GetTempConstantBufferAllocator() { return tempConstantBufferAllocator; }
-
     private:
         const FrameManager& frameManager;
-        DeferredDeallocator& deferredDeallocator;
         RenderDevice& renderDevice;
         HandleManager& handleManager;
-        GpuViewManager& gpuViewManager;
+        RenderContext& renderContext;
+
+        TempConstantBufferAllocator tempConstantBufferAllocator;
 
         Viewport mainViewport{};
 
-        CommandQueue mainGfxQueue;
-        CommandContextPool gfxCmdCtxPool;
         Swapchain swapchain;
         GpuSync mainGfxFrameSyncs[NumFramesInFlight];
-
-        TempConstantBufferAllocator tempConstantBufferAllocator;
 
 #pragma region test
         // #sy_test
