@@ -33,6 +33,9 @@ namespace ig
     template <typename T>
     using SharedPtr = std::shared_ptr<T>;
 
+    template <typename T>
+    using Ref = std::reference_wrapper<T>;
+
     template <typename Key, typename T>
     using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;
 
