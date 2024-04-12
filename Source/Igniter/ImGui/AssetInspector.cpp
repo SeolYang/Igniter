@@ -68,7 +68,11 @@ namespace ig
 
             RecursiveLock lock{ mutex };
             ImGui::Text(std::format("Last Update at {:%Y/%m/%d %H:%M:%S}", lastUpdated).data());
-
+            Color color{ 0.f, 0.f, 0.f, 1.f };
+            if (ImGuiX::EditColor3("tesfffsssst", color))
+            {
+                color;
+            }
             if (mainTableAssetFilter != EAssetType::Unknown)
             {
                 const auto IsSelected = [selectedTypeFilter = mainTableAssetFilter](const AssetManager::Snapshot& snapshot)
@@ -109,7 +113,7 @@ namespace ig
             float cursorPosX = contentRegion.x * PaddingRatio;
             ImGui::SetCursorPosX(cursorPosX);
             ImGui::BeginChild("Table", ImVec2{ contentRegion.x * MainTableRatio, 0.f }, ImGuiChildFlags_Border);
-            ImGui::SeparatorText("Assets");
+            ImGuiX::SeparatorText("Assets");
             RenderAssetTable(mainTableAssetFilter, mainTableSelectedIdx, &bIsMainSelectionDirty);
             ImGui::EndChild();
 
@@ -223,7 +227,7 @@ namespace ig
 
     void AssetInspector::RenderInspector()
     {
-        ImGui::SeparatorText("Inspector");
+        ImGuiX::SeparatorText("Inspector");
         if (mainTableSelectedIdx != -1)
         {
             AssetManager::Snapshot selectedSnapshot{ snapshots[mainTableSelectedIdx] };
@@ -252,7 +256,7 @@ namespace ig
 
     void AssetInspector::RenderPreview(const AssetInfo& assetInfo)
     {
-        ImGui::SeparatorText("Preview");
+        ImGuiX::SeparatorText("Preview");
         switch (assetInfo.GetType())
         {
         case EAssetType::Texture:
@@ -301,7 +305,7 @@ namespace ig
     {
         AssetManager& assetManager{ Igniter::GetAssetManager() };
         std::optional<Material::LoadDesc> loadDescOpt{ assetManager.GetLoadDesc<Material>(assetInfo.GetGuid()) };
-        ImGui::SeparatorText("Material");
+        ImGuiX::SeparatorText("Material");
         if (!loadDescOpt)
         {
             ImGui::Text("Invalid Material!");
@@ -326,7 +330,7 @@ namespace ig
     {
         AssetManager& assetManager{ Igniter::GetAssetManager() };
         std::optional<StaticMesh::LoadDesc> loadDescOpt{ assetManager.GetLoadDesc<StaticMesh>(assetInfo.GetGuid()) };
-        ImGui::SeparatorText("Static Mesh");
+        ImGuiX::SeparatorText("Static Mesh");
         if (!loadDescOpt)
         {
             ImGui::Text("Invalid Static Mesh!");

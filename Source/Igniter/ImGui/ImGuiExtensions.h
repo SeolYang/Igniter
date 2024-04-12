@@ -54,6 +54,8 @@ namespace ig::ImGuiX
     }
 
     bool EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format);
-
     bool EditTransform(const std::string_view label, struct TransformComponent& transform);
+    void SeparatorText(const std::string_view text);
+    bool EditColor3(const std::string_view label, Color& color);
+    bool EditColor4(const std::string_view label, Color& color);
 } // namespace ig

@@ -108,4 +108,47 @@ namespace ig::ImGuiX
         ImGui::PopID();
         return bModifiedVal;
     }
+
+    void SeparatorText(const std::string_view text)
+    {
+        constexpr float SeparatorThickness = 1.0f;
+        constexpr float SeparatorOffset = 10.f;
+        const ImVec2 textSize{ ImGui::CalcTextSize(text.data()) };
+        ImGui::Text(text.data());
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + SeparatorOffset);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y * 0.5f - SeparatorThickness * 0.5f);
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, SeparatorThickness);
+    }
+
+    bool EditColor3(const std::string_view label, Color& color)
+    {
+        /* #sy_todo 사이즈 조절 */
+        float colorVal[3]{ color.R(), color.G(), color.B() };
+        if (ImGui::ColorEdit3(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
+        {
+            color.x = colorVal[0];
+            color.y = colorVal[1];
+            color.z = colorVal[2];
+            return true;
+        }
+
+        return false;
+    }
+
+    bool EditColor4(const std::string_view label, Color& color)
+    {
+        /* #sy_todo 사이즈 조절 (원본 구현 참고) */
+        float colorVal[4]{ color.R(), color.G(), color.B(), color.A()};
+        if (ImGui::ColorEdit4(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
+        {
+            color.x = colorVal[0];
+            color.y = colorVal[1];
+            color.z = colorVal[2];
+            color.w = colorVal[3];
+            return true;
+        }
+
+        return false;
+    }
 }
