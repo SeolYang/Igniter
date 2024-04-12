@@ -87,7 +87,7 @@ namespace ig
             return Guid{};
         }
 
-        assetModifiedEvent.Notify(*this);
+        bIsDirty = true;
         return *guidOpt;
     }
 
@@ -133,7 +133,7 @@ namespace ig
             }
         }
 
-        assetModifiedEvent.Notify(*this);
+        bIsDirty = true;
         return output;
     }
 
@@ -175,7 +175,7 @@ namespace ig
             return Guid{};
         }
 
-        assetModifiedEvent.Notify(*this);
+        bIsDirty = true;
         return *guidOpt;
     }
 
@@ -251,7 +251,7 @@ namespace ig
         assetMonitor->Remove(guid);
 
         IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid);
-        assetModifiedEvent.Notify(*this);
+        bIsDirty = true;
     }
 
     AssetManager::AssetMutex& AssetManager::GetAssetMutex(const Guid& guid)
@@ -311,5 +311,14 @@ namespace ig
             snapshots.emplace_back(guidSnapshot.second);
         }
         return snapshots;
+    }
+
+    void AssetManager::Update()
+    {
+        if (bIsDirty)
+        {
+            assetModifiedEvent.Notify(*this);
+            bIsDirty = false;
+        }
     }
 } // namespace ig

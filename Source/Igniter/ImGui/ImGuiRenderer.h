@@ -1,15 +1,13 @@
 #pragma once
 #include <Igniter.h>
+#include <D3D12/GpuView.h>
 
 namespace ig
 {
     class RenderDevice;
     class DescriptorHeap;
     class CommandContext;
-} // namespace ig
-
-namespace ig
-{
+    class GpuView;
     class FrameManager;
     class Window;
     class Renderer;
@@ -17,17 +15,23 @@ namespace ig
     class ImGuiRenderer final
     {
     public:
-        ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, RenderDevice& device);
+        ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderDevice& device);
         ~ImGuiRenderer();
 
         void Render(ImGuiCanvas& canvas, Renderer& renderer);
+
+        GpuView GetReservedShaderResourceView() const;
 
     private:
         void SetupDefaultTheme();
 
     private:
         const FrameManager& frameManager;
-        std::unique_ptr<DescriptorHeap> descriptorHeap;
-        std::vector<std::unique_ptr<CommandContext>> commandContexts;
+
+        Ptr<DescriptorHeap> descriptorHeap;
+        GpuView mainSrv;
+        std::vector<GpuView> reservedSharedResourceViews;
+
+        std::vector<Ptr<CommandContext>> commandContexts;
     };
 } // namespace ig

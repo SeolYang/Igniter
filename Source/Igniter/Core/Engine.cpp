@@ -133,6 +133,7 @@ namespace ig
             }
 
             deferredDeallocator->FlushCurrentFrame();
+            assetManager->Update();
 
             gameInstance->Update();
             inputManager->PostUpdate();

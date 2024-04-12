@@ -455,7 +455,7 @@ namespace ig
         return GpuBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
     }
 
-    std::optional<GpuTexture> RenderDevice::CreateTexture(const GPUTextureDesc& textureDesc)
+    std::optional<GpuTexture> RenderDevice::CreateTexture(const GpuTextureDesc& textureDesc)
     {
         IG_CHECK(device);
         IG_CHECK(allocator);
@@ -607,7 +607,7 @@ namespace ig
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
-        const GPUTextureDesc& desc = texture.GetDesc();
+        const GpuTextureDesc& desc = texture.GetDesc();
         std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvDesc, desireViewFormat);
 
         if (nativeDesc)
@@ -625,7 +625,7 @@ namespace ig
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
-        const GPUTextureDesc& desc = texture.GetDesc();
+        const GpuTextureDesc& desc = texture.GetDesc();
         std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavDesc, desireViewFormat);
 
         if (nativeDesc)
@@ -643,7 +643,7 @@ namespace ig
         IG_CHECK(gpuView.Type == EGpuViewType::RenderTargetView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
-        const GPUTextureDesc& desc = texture.GetDesc();
+        const GpuTextureDesc& desc = texture.GetDesc();
         std::optional<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvDesc, desireViewFormat);
         if (nativeDesc)
         {
@@ -660,7 +660,7 @@ namespace ig
         IG_CHECK(gpuView.Type == EGpuViewType::DepthStencilView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
-        const GPUTextureDesc& desc = texture.GetDesc();
+        const GpuTextureDesc& desc = texture.GetDesc();
         std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvDesc, desireViewFormat);
 
         if (nativeDesc)

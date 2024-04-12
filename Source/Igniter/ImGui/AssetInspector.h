@@ -14,10 +14,13 @@ namespace ig
         void Render() override;
 
     private:
-        void RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx);
-        void RenderEdit();
+        void RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx, bool* bSelectionDirtyFlagPtr = nullptr);
+        void RenderInspector();
+        void RenderEdit(const AssetInfo& assetInfo);
         void RenderMaterialEdit(const AssetInfo& assetInfo);
         void RenderStaticMeshEdit(const AssetInfo& assetInfo);
+        void RenderPreview(const AssetInfo& assetInfo);
+        void RenderTexturePreview(const AssetInfo& assetInfo);
         void RenderAssetInfo(const AssetInfo& assetInfo);
         void RenderSelector(const char* label, const Guid guid);
         int RenderSelectorPopup(const EAssetType selectAssetType);
@@ -30,6 +33,9 @@ namespace ig
 
         EAssetType mainTableAssetFilter{EAssetType::Unknown};
         int mainTableSelectedIdx{ -1 };
+        bool bIsMainSelectionDirty = false;
+        CachedAsset<Texture> previewTextures[NumFramesInFlight];
+        bool bIsPreviewSrvUpdated[NumFramesInFlight]{ false, };
 
         int selectorTableSelectedIdx{ -1 };
         bool bOpenSelectorPopup = false;

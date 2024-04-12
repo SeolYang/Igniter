@@ -1,10 +1,15 @@
 #include <Igniter.h>
 #include <Core/Engine.h>
 #include <Core/Timer.h>
+#include <Core/FrameManager.h>
 #include <D3D12/GpuBuffer.h>
+#include <D3D12/GpuTextureDesc.h>
 #include <D3D12/GpuTexture.h>
+#include <D3D12/GpuView.h>
+#include <D3D12/RenderDevice.h>
 #include <Render/GpuViewManager.h>
 #include <ImGui/ImGuiWidgets.h>
+#include <ImGui/ImGuiRenderer.h>
 #include <ImGui/AssetInspector.h>
 
 namespace ig
@@ -105,25 +110,20 @@ namespace ig
             ImGui::SetCursorPosX(cursorPosX);
             ImGui::BeginChild("Table", ImVec2{ contentRegion.x * MainTableRatio, 0.f }, ImGuiChildFlags_Border);
             ImGui::SeparatorText("Assets");
-            RenderAssetTable(mainTableAssetFilter, mainTableSelectedIdx);
+            RenderAssetTable(mainTableAssetFilter, mainTableSelectedIdx, &bIsMainSelectionDirty);
             ImGui::EndChild();
 
             ImGui::SameLine();
             cursorPosX += contentRegion.x * (MainTableRatio + SpaceRatio);
             ImGui::SetCursorPosX(cursorPosX);
-            ImGui::BeginChild("Edit", ImVec2{ contentRegion.x * InspectorRatio, 0.f }, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
-            ImGui::SeparatorText("Inspector");
-            if (mainTableSelectedIdx != -1)
-            {
-                RenderEdit();
-            }
+            ImGui::BeginChild("Inspector", ImVec2{ contentRegion.x * InspectorRatio, 0.f }, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
+            RenderInspector();
             ImGui::EndChild();
-
             ImGui::End();
         }
     }
 
-    void AssetInspector::RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx)
+    void AssetInspector::RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx, bool* bSelectionDirtyFlagPtr)
     {
         constexpr ImGuiTableFlags TableFlags =
             ImGuiTableFlags_Reorderable |
@@ -161,25 +161,25 @@ namespace ig
                     int comp{};
                     switch (selectedColumn)
                     {
-                        case 0:
+                    case 0:
                         return bAscendingRequired ? lhs.Info.GetType() < rhs.Info.GetType() :
                             lhs.Info.GetType() > rhs.Info.GetType();
 
-                        case 1:
+                    case 1:
                         return bAscendingRequired ? lhs.Info.GetGuid().bytes() < rhs.Info.GetGuid().bytes() :
                             lhs.Info.GetGuid().bytes() > rhs.Info.GetGuid().bytes();
-                        case 2:
+                    case 2:
                         comp = lhs.Info.GetVirtualPath().ToStringView().compare(rhs.Info.GetVirtualPath().ToStringView());
                         return bAscendingRequired ? comp < 0 : comp > 0;
 
-                        case 3:
+                    case 3:
                         return bAscendingRequired ? lhs.Info.GetScope() < rhs.Info.GetScope() :
                             lhs.Info.GetScope() > rhs.Info.GetScope();
-                        case 4:
+                    case 4:
                         return bAscendingRequired ? lhs.RefCount < rhs.RefCount :
                             lhs.RefCount > rhs.RefCount;
 
-                        default:
+                    default:
                         IG_CHECK_NO_ENTRY();
                         return false;
                     };
@@ -203,6 +203,10 @@ namespace ig
                     if (ImGui::Selectable(std::format("{}", snapshot.Info.GetGuid()).c_str(), (selectedIdx == idx), ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
                     {
                         selectedIdx = idx;
+                        if (bSelectionDirtyFlagPtr != nullptr)
+                        {
+                            *bSelectionDirtyFlagPtr = true;
+                        }
                     }
 
                     ImGui::TableNextColumn();
@@ -217,23 +221,79 @@ namespace ig
         }
     }
 
-    void AssetInspector::RenderEdit()
+    void AssetInspector::RenderInspector()
     {
-        AssetManager::Snapshot selectedSnapshot{ snapshots[mainTableSelectedIdx] };
-        const AssetInfo& assetInfo{ selectedSnapshot.Info };
-        RenderAssetInfo(assetInfo);
+        ImGui::SeparatorText("Inspector");
+        if (mainTableSelectedIdx != -1)
+        {
+            AssetManager::Snapshot selectedSnapshot{ snapshots[mainTableSelectedIdx] };
+            const AssetInfo& assetInfo{ selectedSnapshot.Info };
+            RenderAssetInfo(assetInfo);
+            RenderEdit(assetInfo);
+            RenderPreview(assetInfo);
+        }
+    }
 
+    void AssetInspector::RenderEdit(const AssetInfo& assetInfo)
+    {
         if (assetInfo.GetScope() != EAssetScope::Engine)
         {
             switch (assetInfo.GetType())
             {
-                case EAssetType::Material:
+            case EAssetType::Material:
                 RenderMaterialEdit(assetInfo);
                 break;
-                case EAssetType::StaticMesh:
+            case EAssetType::StaticMesh:
                 RenderStaticMeshEdit(assetInfo);
                 break;
             }
+        }
+    }
+
+    void AssetInspector::RenderPreview(const AssetInfo& assetInfo)
+    {
+        ImGui::SeparatorText("Preview");
+        switch (assetInfo.GetType())
+        {
+        case EAssetType::Texture:
+            RenderTexturePreview(assetInfo);
+            break;
+        }
+    }
+
+    void AssetInspector::RenderTexturePreview(const AssetInfo& assetInfo)
+    {
+        ImGuiRenderer& imguiRenderer{ Igniter::GetImGuiRenderer() };
+        GpuView reservedSrv{ imguiRenderer.GetReservedShaderResourceView() };
+        if (bIsMainSelectionDirty)
+        {
+            for (bool& previewSrvUpdateFlag : bIsPreviewSrvUpdated)
+            {
+                previewSrvUpdateFlag = false;
+            }
+
+            bIsMainSelectionDirty = false;
+        }
+
+        const FrameManager& frameManager{ Igniter::GetFrameManager() };
+        const uint8_t localFrameIdx{ frameManager.GetLocalFrameIndex() };
+        if (!bIsPreviewSrvUpdated[localFrameIdx])
+        {
+            AssetManager& assetManager{ Igniter::GetAssetManager() };
+            previewTextures[localFrameIdx] = assetManager.LoadTexture(assetInfo.GetGuid());
+            if (previewTextures[localFrameIdx])
+            {
+                GpuTexture& gpuTexture{ *previewTextures[localFrameIdx]->GetGpuTexture() };
+                const GpuTextureDesc& gpuTexDesc{ gpuTexture.GetDesc() };
+                RenderDevice& renderDevice{ Igniter::GetRenderDevice() };
+                renderDevice.UpdateShaderResourceView(reservedSrv, gpuTexture, GpuTextureSrvDesc{ D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1} }, gpuTexDesc.Format);
+                bIsPreviewSrvUpdated[localFrameIdx] = true;
+            }
+        }
+
+        if (bIsPreviewSrvUpdated[localFrameIdx])
+        {
+            ImGui::Image(reinterpret_cast<ImTextureID>(reservedSrv.GPUHandle.ptr), ImVec2{ 256, 256 });
         }
     }
 

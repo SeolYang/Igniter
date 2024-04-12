@@ -92,7 +92,7 @@ namespace ig
 
         /* Configure Texture Description */
         /* #sy_todo Support MSAA */
-        GPUTextureDesc texDesc{};
+        GpuTextureDesc texDesc{};
         if (loadDesc.bIsCubemap)
         {
             /* #sy_todo Support Cubemap Array */
@@ -241,7 +241,7 @@ namespace ig
                                   bUseBrightPixel;
         }
 
-        GPUTextureDesc texDesc{};
+        GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
         std::optional<GpuTexture> newTex{ renderDevice.CreateTexture(texDesc) };
@@ -329,7 +329,7 @@ namespace ig
         bytes[2] = static_cast<uint8_t>(saturatedColor.B() * 255);
         bytes[3] = 255;
 
-        GPUTextureDesc texDesc{};
+        GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
         std::optional<GpuTexture> newTex{ renderDevice.CreateTexture(texDesc) };

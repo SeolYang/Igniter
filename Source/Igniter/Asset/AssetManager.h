@@ -107,7 +107,7 @@ namespace ig
 
             if (bSuceeded)
             {
-                assetModifiedEvent.Notify(*this);
+                bIsDirty = true;
             }
 
             return bSuceeded;
@@ -147,6 +147,8 @@ namespace ig
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const;
 
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
+
+        void Update();
 
     private:
         template <Asset T>
@@ -262,7 +264,7 @@ namespace ig
             }
 
             IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf_v<T>, guid);
-            assetModifiedEvent.Notify(*this);
+            bIsDirty = true;
             return assetCache.Load(guid);
         }
 
@@ -356,6 +358,7 @@ namespace ig
         Ptr<MaterialImporter> materialImporter;
         Ptr<MaterialLoader> materialLoader;
 
+        bool bIsDirty = false;
         ModifiedEvent assetModifiedEvent;
     };
 } // namespace ig

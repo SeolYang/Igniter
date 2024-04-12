@@ -6,15 +6,17 @@
 #include <D3D12/Swapchain.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
+#include <D3D12/GpuView.h>
 #include <Render/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 
 namespace ig
 {
-    ImGuiRenderer::ImGuiRenderer(const FrameManager& engineFrameManager, Window& window, RenderDevice& device)
-        : frameManager(engineFrameManager),
-        descriptorHeap(std::make_unique<DescriptorHeap>(device.CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 1).value()))
+    ImGuiRenderer::ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderDevice& device)
+        : frameManager(frameManager),
+        descriptorHeap(std::make_unique<DescriptorHeap>(device.CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 3).value())),
+        mainSrv(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView))
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -28,13 +30,16 @@ namespace ig
 
         ImGui_ImplWin32_Init(window.GetNative());
         ImGui_ImplDX12_Init(&device.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM, &descriptorHeap->GetNative(),
-                            descriptorHeap->GetIndexedCPUDescriptorHandle(0), descriptorHeap->GetIndexedGPUDescriptorHandle(0));
+                            mainSrv.CPUHandle, mainSrv.GPUHandle);
 
         commandContexts.reserve(NumFramesInFlight);
+        reservedSharedResourceViews.reserve(NumFramesInFlight);
         for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
             commandContexts.emplace_back(std::make_unique<CommandContext>(device.CreateCommandContext("ImGui Cmd Ctx", EQueueType::Direct).value()));
+            reservedSharedResourceViews.emplace_back(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView));
         }
+
     }
 
     ImGuiRenderer::~ImGuiRenderer()
@@ -44,6 +49,12 @@ namespace ig
         ImGui::DestroyContext();
 
         commandContexts.clear();
+
+        descriptorHeap->Deallocate(mainSrv);
+        for (auto& reservedView : reservedSharedResourceViews)
+        {
+            descriptorHeap->Deallocate(reservedView);
+        }
         descriptorHeap.reset();
     }
 
@@ -78,6 +89,11 @@ namespace ig
 
         CommandQueue& mainGfxQueue = renderer.GetMainGfxQueue();
         mainGfxQueue.AddPendingContext(cmdCtx);
+    }
+
+    GpuView ImGuiRenderer::GetReservedShaderResourceView() const
+    {
+        return reservedSharedResourceViews[frameManager.GetLocalFrameIndex()];
     }
 
     void ImGuiRenderer::SetupDefaultTheme()

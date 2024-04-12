@@ -80,7 +80,7 @@ namespace ig
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         pso = std::make_unique<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
 
-        GPUTextureDesc depthStencilDesc;
+        GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = String("DepthStencilBufferTex");
         depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
         depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());

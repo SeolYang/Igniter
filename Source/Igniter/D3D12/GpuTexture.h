@@ -21,7 +21,7 @@ namespace ig
         bool IsValid() const { return (allocation && resource) || resource; }
         operator bool() const { return IsValid(); }
 
-        const GPUTextureDesc& GetDesc() const { return desc; }
+        const GpuTextureDesc& GetDesc() const { return desc; }
 
         const auto& GetNative() const
         {
@@ -38,11 +38,11 @@ namespace ig
         [[nodiscard]] size_t GetIntermediateSize() const { return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<uint32_t>(desc.GetNumSubresources())); }
 
     private:
-        GpuTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+        GpuTexture(const GpuTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
                    ComPtr<ID3D12Resource> newResource);
 
     private:
-        GPUTextureDesc desc;
+        GpuTextureDesc desc;
         ComPtr<D3D12MA::Allocation> allocation;
         ComPtr<ID3D12Resource> resource;
     };

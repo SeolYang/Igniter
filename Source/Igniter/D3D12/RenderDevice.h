@@ -9,7 +9,7 @@ namespace ig
     class GpuView;
     class GpuBufferDesc;
     class GpuBuffer;
-    class GPUTextureDesc;
+    class GpuTextureDesc;
     class GpuTexture;
     class GraphicsPipelineStateDesc;
     class ComputePipelineStateDesc;
@@ -38,7 +38,7 @@ namespace ig
         std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
 
         std::optional<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
-        std::optional<GpuTexture> CreateTexture(const GPUTextureDesc& textureDesc);
+        std::optional<GpuTexture> CreateTexture(const GpuTextureDesc& textureDesc);
 
         std::optional<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 

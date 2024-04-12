@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    GpuTexture::GpuTexture(const GPUTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+    GpuTexture::GpuTexture(const GpuTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
                            ComPtr<ID3D12Resource> newResource)
         : desc(newDesc),
           allocation(std::move(newAllocation)),

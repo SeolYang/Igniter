@@ -184,7 +184,7 @@ namespace ig
                format == DXGI_FORMAT_BC6H_TYPELESS || format == DXGI_FORMAT_BC7_TYPELESS;
     }
 
-    void GPUTextureDesc::AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format,
+    void GpuTextureDesc::AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format,
                                      const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess)
     {
         bIsArray = false;
@@ -209,7 +209,7 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    void GPUTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
+    void GpuTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
                                      const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/,
                                      const bool bEnableSimultaneousAccess /*= false*/,
                                      const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
@@ -238,7 +238,7 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    void GPUTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth,
+    void GpuTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth,
                                      const uint16_t mipLevels, const DXGI_FORMAT format,
                                      const bool bEnableShaderReadWrite,
                                      const bool bEnableSimultaneousAccess /*= false*/,
@@ -268,7 +268,7 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    void GPUTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
+    void GpuTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
                                         const DXGI_FORMAT format, const bool bEnableSimultaneousAccess /*= false*/,
                                         const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
                                         uint32_t sampleQuality /*= 0*/)
@@ -297,7 +297,7 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    void GPUTextureDesc::AsDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format)
+    void GpuTextureDesc::AsDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format)
     {
         bIsArray = false;
         bIsMSAAEnabled = false;
@@ -322,7 +322,7 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    void GPUTextureDesc::AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels,
+    void GpuTextureDesc::AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels,
                                           const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/,
                                           const bool bEnableSimultaneousAccess /*= false*/)
     {
@@ -348,7 +348,7 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    void GPUTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength,
+    void GpuTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength,
                                           const uint16_t mipLevels, const DXGI_FORMAT format,
                                           const bool bEnableShaderReadWrite /*= false*/,
                                           const bool bEnableSimultaneousAccess /*= false*/,
@@ -378,7 +378,7 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    void GPUTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
+    void GpuTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels,
                                    const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/,
                                    const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
                                    const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
@@ -406,31 +406,31 @@ namespace ig
         SamplerFeedbackMipRegion = { .Width = 0, .Height = 0, .Depth = 0 };
     }
 
-    bool GPUTextureDesc::IsUnorderedAccessCompatible() const
+    bool GpuTextureDesc::IsUnorderedAccessCompatible() const
     {
         return bIsShaderReadWrite;
     }
 
-    bool GPUTextureDesc::IsDepthStencilCompatible() const
+    bool GpuTextureDesc::IsDepthStencilCompatible() const
     {
         return IsTexture2D() && IsDepthStencilFormat(Format);
     }
 
-    bool GPUTextureDesc::IsRenderTargetCompatible() const
+    bool GpuTextureDesc::IsRenderTargetCompatible() const
     {
         return ((Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) == D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) &&
                !IsUnorderedAccessCompatible() &&
                !IsDepthStencilCompatible();
     }
 
-    D3D12MA::ALLOCATION_DESC GPUTextureDesc::GetAllocationDesc() const
+    D3D12MA::ALLOCATION_DESC GpuTextureDesc::GetAllocationDesc() const
     {
         D3D12MA::ALLOCATION_DESC desc{};
         desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
         return desc;
     }
 
-    std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat) const
+    std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat) const
     {
         if (Format == DXGI_FORMAT_UNKNOWN)
         {
@@ -586,7 +586,7 @@ namespace ig
         return std::make_optional(newDesc);
     }
 
-    std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat) const
+    std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat) const
     {
         if (!IsUnorderedAccessCompatible())
         {
@@ -713,7 +713,7 @@ namespace ig
         return std::make_optional(newDesc);
     }
 
-    std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat) const
+    std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat) const
     {
         if (!IsRenderTargetCompatible())
         {
@@ -840,7 +840,7 @@ namespace ig
         return std::make_optional(newDesc);
     }
 
-    std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GPUTextureDesc::ConvertToNativeDesc(const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat) const
+    std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat) const
     {
         if (!IsDepthStencilCompatible())
         {
@@ -950,7 +950,7 @@ namespace ig
         return std::make_optional(newDesc);
     }
 
-    void GPUTextureDesc::From(const D3D12_RESOURCE_DESC& desc)
+    void GpuTextureDesc::From(const D3D12_RESOURCE_DESC& desc)
     {
         IG_VERIFY(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.Dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
         Dimension = desc.Dimension;
@@ -966,7 +966,7 @@ namespace ig
         SamplerFeedbackMipRegion = {};
     }
 
-    std::vector<D3D12_SUBRESOURCE_DATA> GPUTextureDesc::GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const
+    std::vector<D3D12_SUBRESOURCE_DATA> GpuTextureDesc::GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const
     {
         /* #sy_ref 텍스처 서브-리소스 데이터 생성
          * https://github.com/microsoft/DirectXTex/blob/main/DirectXTex/DirectXTexImage.cpp#L145
