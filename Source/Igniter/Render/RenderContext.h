@@ -32,7 +32,6 @@ namespace ig
     private:
         CommandQueue mainGfxQueue;
         CommandContextPool mainGfxCmdCtxPool;
-
         CommandQueue asyncComputeQueue;
         CommandQueue asyncCopyQueue;
 

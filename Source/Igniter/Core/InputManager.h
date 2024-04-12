@@ -90,8 +90,8 @@ namespace ig
         void Clear();
 
     private:
-        void HandleKeyDown(WPARAM wParam, LPARAM lParam);
-        void HandleKeyUp(WPARAM wParam, LPARAM lParam);
+        void HandleKeyDown(WPARAM wParam, const bool bIsMouseKey);
+        void HandleKeyUp(WPARAM wParam, const bool bIsMouseKey);
         void HandleRawInputDevices(const WPARAM wParam, const LPARAM lParam);
 
         bool HandlePressAction(EInput input);

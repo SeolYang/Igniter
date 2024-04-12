@@ -5,12 +5,26 @@
 IG_DEFINE_LOG_CATEGORY(InputManager);
 namespace ig
 {
-
-    static EInput WParamToInput(const WPARAM wParam)
+    static EInput WParamToInput(const WPARAM wParam, const bool bIsMouseKey)
     {
-        switch (wParam)
+        if (bIsMouseKey)
         {
-            /** Characters */
+            /* #sy_ref https://learn.microsoft.com/ko-kr/windows/win32/learnwin32/mouse-clicks#additional-flags */
+            if (ContainsFlags(wParam, MK_LBUTTON))
+            {
+                return EInput::MouseLB;
+            }
+
+            if (ContainsFlags(wParam, MK_RBUTTON))
+            {
+                return EInput::MouseRB;
+            }
+        }
+        else
+        {
+            switch (wParam)
+            {
+                /** Characters */
             case 'W':
             case 'w':
                 return EInput::W;
@@ -27,7 +41,7 @@ namespace ig
             case 'd':
                 return EInput::D;
 
-            /** Virtual Keys */
+                /** Virtual Keys */
             case VK_SPACE:
                 return EInput::Space;
 
@@ -42,17 +56,7 @@ namespace ig
 
             case VK_CONTROL:
                 return EInput::Control;
-        }
-
-        /* #sy_ref https://learn.microsoft.com/ko-kr/windows/win32/learnwin32/mouse-clicks#additional-flags */
-        if (ContainsFlags(wParam, MK_LBUTTON))
-        {
-            return EInput::MouseLB;
-        }
-
-        if (ContainsFlags(wParam, MK_RBUTTON))
-        {
-            return EInput::MouseRB;
+            }
         }
 
         return EInput::None;
@@ -161,19 +165,22 @@ namespace ig
         {
             case WM_LBUTTONDOWN:
             case WM_RBUTTONDOWN:
+                HandleKeyDown(wParam, true);
+                break;
+
             case WM_KEYDOWN:
-                HandleKeyDown(wParam, lParam);
+                HandleKeyDown(wParam, false);
                 break;
 
             case WM_LBUTTONUP:
-                HandleKeyUp(MouseLBWParam, lParam);
+                HandleKeyUp(MouseLBWParam, true);
                 break;
             case WM_RBUTTONUP:
-                HandleKeyUp(MouseRBWParam, lParam);
+                HandleKeyUp(MouseRBWParam, true);
                 break;
 
             case WM_KEYUP:
-                HandleKeyUp(wParam, lParam);
+                HandleKeyUp(wParam, false);
                 break;
 
             case WM_INPUT:
@@ -236,9 +243,9 @@ namespace ig
         scopedInputs.clear();
     }
 
-    void InputManager::HandleKeyDown(const WPARAM wParam, const LPARAM /** unused */)
+    void InputManager::HandleKeyDown(const WPARAM wParam, const bool bIsMouseKey)
     {
-        const EInput input = WParamToInput(wParam);
+        const EInput input = WParamToInput(wParam, bIsMouseKey);
         const bool bKeyDownHandled = HandlePressAction(input) || HandleAxis(input, 1.f);
         if (bKeyDownHandled)
         {
@@ -246,9 +253,9 @@ namespace ig
         }
     }
 
-    void InputManager::HandleKeyUp(const WPARAM wParam, const LPARAM /* unused */)
+    void InputManager::HandleKeyUp(const WPARAM wParam, const bool bIsMouseKey)
     {
-        const EInput input = WParamToInput(wParam);
+        const EInput input = WParamToInput(wParam, bIsMouseKey);
         HandleReleaseAction(input);
         HandleAxis(input, 0.f);
     }

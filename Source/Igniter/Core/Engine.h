@@ -31,10 +31,10 @@ namespace ig
         [[nodiscard]] static HandleManager& GetHandleManager();
         [[nodiscard]] static InputManager& GetInputManager();
         [[nodiscard]] static DeferredDeallocator& GetDeferredDeallocator();
-        [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
         [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static Renderer& GetRenderer();
+        [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
         [[nodiscard]] static ImGuiCanvas& GetImGuiCanvas();
         [[nodiscard]] static OptionalRef<ImGuiCanvas> TryGetImGuiCanvas();
         [[nodiscard]] static GameInstance& GetGameInstance();
