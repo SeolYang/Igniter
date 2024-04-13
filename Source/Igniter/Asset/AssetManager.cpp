@@ -318,6 +318,7 @@ namespace ig
     {
         if (bIsDirty)
         {
+            ZoneScoped;
             assetModifiedEvent.Notify(*this);
             bIsDirty = false;
         }

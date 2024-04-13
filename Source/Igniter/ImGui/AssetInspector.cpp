@@ -47,83 +47,94 @@ namespace ig
     {
         if (ImGui::Begin("Asset Inspector", &bIsVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar))
         {
-            if (ImGui::BeginMenuBar())
-            {
-                if (ImGui::BeginMenu("Filters"))
-                {
-                    std::optional<EAssetType> selectedFilter = ImGuiX::EnumMenuItems<EAssetType>(mainTableAssetFilter, EAssetType::Unknown);
-                    if (ImGui::MenuItem("No Filters") && !selectedFilter)
-                    {
-                        mainTableAssetFilter = EAssetType::Unknown;
-                    }
-                    else if (selectedFilter)
-                    {
-                        mainTableAssetFilter = *selectedFilter;
-                        mainTableSelectedIdx = -1;
-                    }
-                    ImGui::EndMenu();
-                }
-                ImGui::EndMenuBar();
-            }
-
-            RecursiveLock lock{ mutex };
-            ImGui::Text(std::format("Last Update at {:%Y/%m/%d %H:%M:%S}", lastUpdated).data());
-            Color color{ 0.f, 0.f, 0.f, 1.f };
-            if (ImGuiX::EditColor3("tesfffsssst", color))
-            {
-                color;
-            }
-            if (mainTableAssetFilter != EAssetType::Unknown)
-            {
-                const auto IsSelected = [selectedTypeFilter = mainTableAssetFilter](const AssetManager::Snapshot& snapshot)
-                {
-                    return snapshot.Info.GetType() == selectedTypeFilter;
-                };
-
-                const auto IsSelectedCached = [selectedTypeFilter = mainTableAssetFilter](const AssetManager::Snapshot& snapshot)
-                {
-                    return snapshot.Info.GetType() == selectedTypeFilter && snapshot.IsCached();
-                };
-
-                ImGui::Text(std::format("#Imported {}: {}\t#Cached {}: {}",
-                            mainTableAssetFilter,
-                            std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
-                            mainTableAssetFilter,
-                            std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
-                            .c_str());
-            }
-            else
-            {
-                const auto IsCached = [](const AssetManager::Snapshot& snapshot)
-                {
-                    return snapshot.IsCached();
-                };
-
-                ImGui::Text(std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(),
-                            std::count_if(snapshots.begin(), snapshots.end(), IsCached))
-                            .c_str());
-            }
-
-            const ImVec2 contentRegion{ ImGui::GetContentRegionAvail() };
-            constexpr float PaddingRatio = 0.01f;
-            constexpr float SpaceRatio = 0.02f;
-            constexpr float MainTableRatio = 0.5f;
-            constexpr float InspectorRatio = 1.f - MainTableRatio - (PaddingRatio * 2.f) - SpaceRatio - MainTableRatio;
-
-            float cursorPosX = contentRegion.x * PaddingRatio;
-            ImGui::SetCursorPosX(cursorPosX);
-            ImGui::BeginChild("Table", ImVec2{ contentRegion.x * MainTableRatio, 0.f }, ImGuiChildFlags_Border);
-            ImGuiX::SeparatorText("Assets");
-            RenderAssetTable(mainTableAssetFilter, mainTableSelectedIdx, &bIsMainSelectionDirty);
-            ImGui::EndChild();
-
-            ImGui::SameLine();
-            cursorPosX += contentRegion.x * (MainTableRatio + SpaceRatio);
-            ImGui::SetCursorPosX(cursorPosX);
-            ImGui::BeginChild("Inspector", ImVec2{ contentRegion.x * InspectorRatio, 0.f }, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
-            RenderInspector();
-            ImGui::EndChild();
+            RenderMenuBar();
+            RenderMainFrame();
             ImGui::End();
+        }
+    }
+
+    void AssetInspector::RenderMenuBar()
+    {
+        if (ImGui::BeginMenuBar())
+        {
+            RenderFilterMenu();
+            ImGui::EndMenuBar();
+        }
+    }
+
+    void AssetInspector::RenderFilterMenu()
+    {
+        if (ImGui::BeginMenu("Filters"))
+        {
+            std::optional<EAssetType> selectedFilter = ImGuiX::EnumMenuItems<EAssetType>(mainTableAssetFilter, EAssetType::Unknown);
+            if (ImGui::MenuItem("No Filters") && !selectedFilter)
+            {
+                mainTableAssetFilter = EAssetType::Unknown;
+            }
+            else if (selectedFilter)
+            {
+                mainTableAssetFilter = *selectedFilter;
+                mainTableSelectedIdx = -1;
+            }
+            ImGui::EndMenu();
+        }
+    }
+
+    void AssetInspector::RenderMainFrame()
+    {
+        RenderAssetStats();
+
+        RecursiveLock lock{ mutex };
+        constexpr float MainTableRatio = 0.6f;
+        constexpr float InspectorRatio = 1.f - MainTableRatio;
+
+        const float width{ ImGui::GetContentRegionAvail().x };
+
+        ImGui::BeginGroup();
+        ImGui::BeginChild("Table", ImVec2{ width * MainTableRatio, 0.f }, ImGuiChildFlags_Border);
+        ImGuiX::SeparatorText("Assets");
+        RenderAssetTable(mainTableAssetFilter, mainTableSelectedIdx, &bIsMainSelectionDirty);
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+        ImGui::BeginChild("Inspector", ImVec2{ width * InspectorRatio - ImGuiX::GetFramePadding().x, 0.f }, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
+        RenderInspector();
+        ImGui::EndChild();
+        ImGui::EndGroup();
+    }
+
+    void AssetInspector::RenderAssetStats()
+    {
+        ImGui::Text(std::format("Last Update at {:%Y/%m/%d %H:%M:%S}", lastUpdated).data());
+        if (mainTableAssetFilter != EAssetType::Unknown)
+        {
+            const auto IsSelected = [selectedTypeFilter = mainTableAssetFilter](const AssetManager::Snapshot& snapshot)
+            {
+                return snapshot.Info.GetType() == selectedTypeFilter;
+            };
+
+            const auto IsSelectedCached = [selectedTypeFilter = mainTableAssetFilter](const AssetManager::Snapshot& snapshot)
+            {
+                return snapshot.Info.GetType() == selectedTypeFilter && snapshot.IsCached();
+            };
+
+            ImGui::Text(std::format("#Imported {}: {}\t#Cached {}: {}",
+                        mainTableAssetFilter,
+                        std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
+                        mainTableAssetFilter,
+                        std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
+                        .c_str());
+        }
+        else
+        {
+            const auto IsCached = [](const AssetManager::Snapshot& snapshot)
+            {
+                return snapshot.IsCached();
+            };
+
+            ImGui::Text(std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(),
+                        std::count_if(snapshots.begin(), snapshots.end(), IsCached))
+                        .c_str());
         }
     }
 

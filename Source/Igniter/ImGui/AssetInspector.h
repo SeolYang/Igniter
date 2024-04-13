@@ -14,6 +14,10 @@ namespace ig
         void Render() override;
 
     private:
+        void RenderMenuBar();
+        void RenderFilterMenu();
+        void RenderMainFrame();
+        void RenderAssetStats();
         void RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx, bool* bSelectionDirtyFlagPtr = nullptr);
         void RenderInspector();
         void RenderEdit(const AssetInfo& assetInfo);

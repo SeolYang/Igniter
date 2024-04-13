@@ -5,6 +5,11 @@
 
 namespace ig::ImGuiX
 {
+    ImVec2 GetFramePadding()
+    {
+        return ImGui::GetCurrentContext()->Style.FramePadding;
+    }
+
     bool EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format)
     {
         bool bModified = false;
