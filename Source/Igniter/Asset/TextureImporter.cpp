@@ -9,7 +9,7 @@ IG_DEFINE_LOG_CATEGORY(TextureImporter);
 
 namespace ig
 {
-    inline bool IsDDSExtnsion(const fs::path& extension)
+    static bool IsDDSExtnsion(const fs::path& extension)
     {
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -21,7 +21,7 @@ namespace ig
         return ext == ".dds";
     }
 
-    inline bool IsWICExtension(const fs::path& extension)
+    static bool IsWICExtension(const fs::path& extension)
     {
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -34,7 +34,7 @@ namespace ig
                (ext == ".tiff");
     }
 
-    inline bool IsHDRExtnsion(const fs::path& extension)
+    static bool IsHDRExtnsion(const fs::path& extension)
     {
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -46,42 +46,21 @@ namespace ig
         return (ext == ".hdr");
     }
 
-    inline DXGI_FORMAT AsBCnFormat(const ETextureCompressionMode compMode, const DXGI_FORMAT format)
+    static DXGI_FORMAT AsBCnFormat(const ETextureCompressionMode compMode, const DXGI_FORMAT format)
     {
-        if (compMode == ETextureCompressionMode::BC4)
+        switch (compMode)
         {
-            if (IsUnormFormat(format))
-            {
-                return DXGI_FORMAT_BC4_UNORM;
-            }
-
-            return DXGI_FORMAT_BC4_SNORM;
+        case ETextureCompressionMode::BC4:
+            return IsUnormFormat(format) ? DXGI_FORMAT_BC4_UNORM : DXGI_FORMAT_BC4_SNORM;
+        case ETextureCompressionMode::BC5:
+            return IsUnormFormat(format) ? DXGI_FORMAT_BC5_UNORM : DXGI_FORMAT_BC5_SNORM;
+        case ETextureCompressionMode::BC6H:
+            return IsUnsignedFormat(format) ? DXGI_FORMAT_BC6H_UF16 : DXGI_FORMAT_BC6H_SF16;
+        case ETextureCompressionMode::BC7:
+            return DirectX::IsSRGB(format) ? DXGI_FORMAT_BC7_UNORM_SRGB : DXGI_FORMAT_BC7_UNORM;
+        default:
+            return DXGI_FORMAT_UNKNOWN;
         }
-        else if (compMode == ETextureCompressionMode::BC5)
-        {
-            if (IsUnormFormat(format))
-            {
-                return DXGI_FORMAT_BC5_UNORM;
-            }
-
-            return DXGI_FORMAT_BC5_SNORM;
-        }
-        else if (compMode == ETextureCompressionMode::BC6H)
-        {
-            // #sy_todo 정확히 HDR 파일을 읽어왔을 때, 어떤 포맷으로 들어오는지 확인 필
-            if (IsUnsignedFormat(format))
-            {
-                return DXGI_FORMAT_BC6H_UF16;
-            }
-
-            return DXGI_FORMAT_BC6H_SF16;
-        }
-        else if (compMode == ETextureCompressionMode::BC7)
-        {
-            return DXGI_FORMAT_BC7_UNORM;
-        }
-
-        return DXGI_FORMAT_UNKNOWN;
     }
 
     TextureImporter::TextureImporter()
@@ -144,10 +123,8 @@ namespace ig
         else if (IsWICExtension(resExtension))
         {
             loadRes = DirectX::LoadFromWICFile(resPath.c_str(),
-                                               DirectX::WIC_FLAGS_FORCE_LINEAR,
+                                               DirectX::WIC_FLAGS_NONE,
                                                &texMetadata, targetTex);
-
-            IG_CHECK(!DirectX::IsSRGB(texMetadata.format));
         }
         else if (IsHDRExtnsion(resExtension))
         {
