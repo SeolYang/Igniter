@@ -62,7 +62,7 @@ namespace ig
         UnorderedMap<uint64_t, MemoryPool> memPools{};
         UnorderedMap<uint64_t, UnorderedSet<uint64_t>> pendingDeallocationSets;
 
-        constexpr static size_t SizeOfChunkBytes = 65536;
-        constexpr static uint32_t NumInitialChunkPerPool = 2;
+        constexpr static size_t SizeOfChunkBytes = 4096;
+        constexpr static uint32_t NumInitialChunkPerPool = 4;
     };
 } // namespace ig
