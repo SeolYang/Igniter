@@ -12,6 +12,7 @@ namespace ig
     class Window;
     class Renderer;
     class ImGuiCanvas;
+
     class ImGuiRenderer final
     {
     public:
@@ -28,8 +29,8 @@ namespace ig
     private:
         const FrameManager& frameManager;
 
-        Ptr<DescriptorHeap> descriptorHeap;
-        GpuView mainSrv;
+        Ptr<DescriptorHeap>  descriptorHeap;
+        GpuView              mainSrv;
         std::vector<GpuView> reservedSharedResourceViews;
 
         std::vector<Ptr<CommandContext>> commandContexts;

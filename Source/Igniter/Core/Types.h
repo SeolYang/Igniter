@@ -11,16 +11,17 @@ namespace ig
     using namespace DirectX::SimpleMath;
     using namespace std::chrono_literals;
 
-    using SharedMutex = std::shared_mutex;
-    using ReadOnlyLock = std::shared_lock<SharedMutex>;
-    using ReadWriteLock = std::unique_lock<SharedMutex>;
+    using SharedMutex    = std::shared_mutex;
+    using ReadOnlyLock   = std::shared_lock<SharedMutex>;
+    using ReadWriteLock  = std::unique_lock<SharedMutex>;
     using RecursiveMutex = std::recursive_mutex;
-    using RecursiveLock = std::unique_lock<RecursiveMutex>;
-    using Mutex = std::mutex;
-    using UniqueLock = std::unique_lock<Mutex>;
+    using RecursiveLock  = std::unique_lock<RecursiveMutex>;
+    using Mutex          = std::mutex;
+    using UniqueLock     = std::unique_lock<Mutex>;
 
     template <typename T>
     using OptionalRef = std::optional<std::reference_wrapper<T>>;
+
     template <typename T>
     OptionalRef<T> MakeOptionalRef(T& ref)
     {
@@ -48,13 +49,13 @@ namespace ig
     template <typename Key>
     using UnorderedSet = ankerl::unordered_dense::set<Key>;
 
-    using Entity = entt::entity;
+    using Entity   = entt::entity;
     using Registry = entt::registry;
 
     using json = nlohmann::json;
     using Guid = xg::Guid;
 
-    constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
+    constexpr uint64_t InvalidIndex    = 0xffffffffffffffffUi64;
     constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
 
     template <typename T>
@@ -79,14 +80,14 @@ namespace ig
     }
 
     template <typename T>
-    requires std::is_enum_v<T>
+        requires std::is_enum_v<T>
     constexpr std::string_view ToStringView(const T enumerator)
     {
         return magic_enum::enum_name(enumerator);
     }
 
     template <typename T>
-    requires std::is_enum_v<T>
+        requires std::is_enum_v<T>
     constexpr const char* ToCStr(const T enumerator)
     {
         return magic_enum::enum_name(enumerator).data();

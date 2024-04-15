@@ -6,10 +6,10 @@ namespace ig
     class FrameManager final
     {
     public:
-        FrameManager() = default;
-        FrameManager(const FrameManager&) = delete;
+        FrameManager()                        = default;
+        FrameManager(const FrameManager&)     = delete;
         FrameManager(FrameManager&&) noexcept = delete;
-        ~FrameManager() = default;
+        ~FrameManager()                       = default;
 
         void NextFrame()
         {
@@ -17,11 +17,11 @@ namespace ig
             localFrameIdx = globalFrameIdx % NumFramesInFlight;
         }
 
-        size_t GetGlobalFrameIndex() const { return globalFrameIdx; }
+        size_t  GetGlobalFrameIndex() const { return globalFrameIdx; }
         uint8_t GetLocalFrameIndex() const { return localFrameIdx; }
 
     private:
-        size_t globalFrameIdx = 0;
-        uint8_t localFrameIdx = 0;
+        size_t  globalFrameIdx = 0;
+        uint8_t localFrameIdx  = 0;
     };
 } // namespace ig

@@ -26,6 +26,7 @@ IG_DEFINE_LOG_CATEGORY(Engine);
 namespace ig
 {
     Igniter* Igniter::instance = nullptr;
+
     Igniter::Igniter()
     {
         CoInitializeUnique();
@@ -38,15 +39,17 @@ namespace ig
             IG_LOG(Engine, Info, "Igniting Engine Runtime!");
             //////////////////////// L0 ////////////////////////
             frameManager = std::make_unique<FrameManager>();
-            timer = std::make_unique<Timer>();
+            timer        = std::make_unique<Timer>();
             /* #sy_test 임시 윈도우 설명자 */
-            window = std::make_unique<Window>(WindowDescription{ .Width = 1920, .Height = 1080, .Title = String(settings::GameName) });
-            renderDevice = std::make_unique<RenderDevice>();
+            window = std::make_unique<Window>(WindowDescription{
+                .Width = 1920, .Height = 1080, .Title = String(settings::GameName)
+            });
+            renderDevice  = std::make_unique<RenderDevice>();
             handleManager = std::make_unique<HandleManager>();
             ////////////////////////////////////////////////////
 
             //////////////////////// L1 ////////////////////////
-            inputManager = std::make_unique<InputManager>(*handleManager);
+            inputManager        = std::make_unique<InputManager>(*handleManager);
             deferredDeallocator = std::make_unique<DeferredDeallocator>(*frameManager);
             ////////////////////////////////////////////////////
 
@@ -55,16 +58,18 @@ namespace ig
             ////////////////////////////////////////////////////
 
             //////////////////////// L3 ////////////////////////
-            assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *renderContext); /* #sy_test Temporary */
+            assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *renderContext);
+            /* #sy_test Temporary */
             ////////////////////////////////////////////////////
 
             //////////////////////// L4 ////////////////////////
-            renderer = std::make_unique<Renderer>(*frameManager, *window, *renderDevice, *handleManager, *renderContext);
+            renderer = std::make_unique<Renderer>(*frameManager, *window, *renderDevice, *handleManager,
+                                                  *renderContext);
             imguiRenderer = std::make_unique<ImGuiRenderer>(*frameManager, *window, *renderDevice);
             ////////////////////////////////////////////////////
 
             //////////////////////// APP ///////////////////////
-            imguiCanvas = std::make_unique<ImGuiCanvas>();
+            imguiCanvas  = std::make_unique<ImGuiCanvas>();
             gameInstance = std::make_unique<GameInstance>();
             ////////////////////////////////////////////////////
         }

@@ -14,15 +14,17 @@ namespace ig
         std::wstring FilterPattern;
     };
 
-    Result<String, EOpenFileDialogStatus> OpenFileDialog::Show(const HWND parentWindowHandle, const String dialogTitle, const std::span<const DialogFilter> filters)
+    Result<String, EOpenFileDialogStatus> OpenFileDialog::Show(const HWND parentWindowHandle, const String dialogTitle,
+                                                               const std::span<const DialogFilter> filters)
     {
         CoInitializeUnique();
-        Microsoft::WRL::ComPtr<IFileDialog> fileDialog;
+        Microsoft::WRL::ComPtr<IFileDialog>       fileDialog;
         Microsoft::WRL::ComPtr<IFileDialogEvents> fileDialogEvents;
-        Microsoft::WRL::ComPtr<IShellItem> shellItem;
+        Microsoft::WRL::ComPtr<IShellItem>        shellItem;
 
         // #sy_log Save 다이얼로그엔 CLSID_FileSaveDialog
-        HRESULT result = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
+        HRESULT result = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER,
+                                          IID_PPV_ARGS(&fileDialog));
         if (FAILED(result))
         {
             return MakeFail<String, EOpenFileDialogStatus::CreateDialog>();
@@ -32,14 +34,18 @@ namespace ig
         std::transform(filters.begin(), filters.end(), wideFilters.begin(),
                        [](const DialogFilter& filter)
                        {
-                           return WideDialogFilter{ .Name = filter.Name.ToWideString(), .FilterPattern = filter.FilterPattern.ToWideString() };
+                           return WideDialogFilter{
+                               .Name = filter.Name.ToWideString(), .FilterPattern = filter.FilterPattern.ToWideString()
+                           };
                        });
 
         std::vector<COMDLG_FILTERSPEC> filterSpecs(filters.size());
         std::transform(wideFilters.begin(), wideFilters.end(), filterSpecs.begin(),
                        [](const WideDialogFilter& filter)
                        {
-                           return COMDLG_FILTERSPEC{ .pszName = filter.Name.c_str(), .pszSpec = filter.FilterPattern.c_str() };
+                           return COMDLG_FILTERSPEC{
+                               .pszName = filter.Name.c_str(), .pszSpec = filter.FilterPattern.c_str()
+                           };
                        });
 
         result = fileDialog->SetFileTypes(static_cast<uint32_t>(filterSpecs.size()), filterSpecs.data());
@@ -62,14 +68,14 @@ namespace ig
             return MakeFail<String, EOpenFileDialogStatus::GetResult>();
         }
 
-        PWSTR filePath{ nullptr };
+        PWSTR filePath{nullptr};
         result = shellItem->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
         if (FAILED(result))
         {
             return MakeFail<String, EOpenFileDialogStatus::GetDisplayName>();
         }
 
-        String resultPath{ Narrower(filePath) };
+        String resultPath{Narrower(filePath)};
         CoTaskMemFree(filePath);
         return MakeSuccess<String, EOpenFileDialogStatus>(resultPath);
     }

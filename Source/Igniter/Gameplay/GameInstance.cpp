@@ -4,7 +4,9 @@
 
 namespace ig
 {
-    GameInstance::GameInstance() {}
+    GameInstance::GameInstance()
+    {
+    }
 
     GameInstance::~GameInstance()
     {

@@ -9,7 +9,7 @@ namespace ig
     class StaticMeshImportPanel : public ImGuiLayer
     {
     public:
-        StaticMeshImportPanel() = default;
+        StaticMeshImportPanel()  = default;
         ~StaticMeshImportPanel() = default;
 
         void Render() override;
@@ -19,8 +19,8 @@ namespace ig
         void SelectFileToImport();
 
     private:
-        String path{};
-        StaticMeshImportDesc config;
+        String                path{};
+        StaticMeshImportDesc  config;
         EOpenFileDialogStatus status{};
     };
 } // namespace ig

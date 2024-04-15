@@ -55,10 +55,11 @@ namespace ig
         config = {};
 
         static const std::vector<DialogFilter> Filters{
-            DialogFilter{ .Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs },
+            DialogFilter{.Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs},
         };
 
-        Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(nullptr, "Model resource to import"_fs, Filters);
+        Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(
+            nullptr, "Model resource to import"_fs, Filters);
         status = result.GetStatus();
         if (result.HasOwnership())
         {

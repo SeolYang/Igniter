@@ -10,7 +10,8 @@ namespace ig
         [[nodiscard]] Matrix CreateTransformation() const
         {
             // TRS -> Column Vector ; SRT -> Row Vector
-            return Matrix::CreateScale(Scale) * Matrix::CreateFromQuaternion(Rotation) * Matrix::CreateTranslation(Position);
+            return Matrix::CreateScale(Scale) * Matrix::CreateFromQuaternion(Rotation) * Matrix::CreateTranslation(
+                Position);
         }
 
         [[nodiscard]] Matrix CreateView() const
@@ -50,8 +51,8 @@ namespace ig
         }
 
     public:
-        Vector3 Position{};
-        Vector3 Scale{ 1.f, 1.f, 1.f };
+        Vector3    Position{};
+        Vector3    Scale{1.f, 1.f, 1.f};
         Quaternion Rotation;
     };
 

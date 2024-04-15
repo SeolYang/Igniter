@@ -101,6 +101,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h" />
     <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
+    <ClInclude Include="..\Source\Igniter\Reflection\Type.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
     <ClInclude Include="..\Source\Igniter\Render\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Render\GpuUploader.h" />

@@ -66,7 +66,7 @@ namespace ig
 
     bool String::operator==(const std::wstring_view rhs) const
     {
-        const std::string narrower{ Narrower(rhs) };
+        const std::string narrower{Narrower(rhs)};
         return *this == narrower;
     }
 
@@ -83,8 +83,8 @@ namespace ig
                 hashOfString = String::EvalHash(strView);
                 IG_CHECK(hashOfString != InvalidHashVal);
 
-                HashStringMap& hashStringMap{ GetHashStringMap() };
-                ReadWriteLock lock{ GetHashStringMapMutex() };
+                HashStringMap& hashStringMap{GetHashStringMap()};
+                ReadWriteLock  lock{GetHashStringMapMutex()};
                 if (!hashStringMap.contains(hashOfString))
                 {
                     hashStringMap[hashOfString] = strView;
@@ -100,7 +100,7 @@ namespace ig
 
     const std::string& String::ToStandard() const
     {
-        static const std::string InvalidUtf8String{ "#INVALID_UTF8_STR" };
+        static const std::string InvalidUtf8String{"#INVALID_UTF8_STR"};
         static const std::string Empty{};
         if (hashOfString == InvalidHashVal)
         {
@@ -112,15 +112,15 @@ namespace ig
             return Empty;
         }
 
-        ReadOnlyLock lock{ GetHashStringMapMutex() };
-        const HashStringMap& hashStringMap{ GetHashStringMap() };
+        ReadOnlyLock         lock{GetHashStringMapMutex()};
+        const HashStringMap& hashStringMap{GetHashStringMap()};
         IG_CHECK(hashStringMap.contains(hashOfString));
         return hashStringMap.at(hashOfString);
     }
 
     std::string_view String::ToStringView() const
     {
-        return std::string_view{ ToStandard() };
+        return std::string_view{ToStandard()};
     }
 
     const char* String::ToCString() const
@@ -135,38 +135,40 @@ namespace ig
 
     fs::path String::ToPath() const
     {
-        return fs::path{ ToStringView() };
+        return fs::path{ToStringView()};
     }
 
     String String::FromPath(const fs::path& path)
     {
-        return String{ path.c_str() };
+        return String{path.c_str()};
     }
 
     std::vector<String> String::Split(const String delimiter) const
     {
-        auto splitStrViews{ ToStringView() |
-                            views::split(delimiter.ToStringView()) |
-                            views::transform([](auto&& element)
-                                             {
-                                                 return String{ std::string_view{ &*element.begin(), static_cast<size_t>(ranges::distance(element)) } };
-                                             }) };
+        auto splitStrViews{
+            ToStringView() |
+            views::split(delimiter.ToStringView()) |
+            views::transform([](auto&& element)
+            {
+                return String{std::string_view{&*element.begin(), static_cast<size_t>(ranges::distance(element))}};
+            })
+        };
 
-        return std::vector<String>{ splitStrViews.begin(), splitStrViews.end() };
+        return std::vector<String>{splitStrViews.begin(), splitStrViews.end()};
     }
 
     std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()
     {
-        ReadOnlyLock lock{ GetHashStringMapMutex() };
-        HashStringMap& hashStringMap{ GetHashStringMap() };
+        ReadOnlyLock   lock{GetHashStringMapMutex()};
+        HashStringMap& hashStringMap{GetHashStringMap()};
 
         std::vector<std::pair<uint64_t, std::string_view>> cachedStrs;
         cachedStrs.reserve(hashStringMap.size());
         for (const auto& itr : hashStringMap)
         {
-            cachedStrs.emplace_back(itr.first, std::string_view{ itr.second });
+            cachedStrs.emplace_back(itr.first, std::string_view{itr.second});
         }
-        cachedStrs.emplace_back(0, std::string_view{ "" });
+        cachedStrs.emplace_back(0, std::string_view{""});
 
         return cachedStrs;
     }

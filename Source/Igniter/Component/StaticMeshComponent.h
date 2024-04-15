@@ -10,6 +10,7 @@ namespace ig
 {
     class StaticMesh;
     class Texture;
+
     struct StaticMeshComponent
     {
     public:

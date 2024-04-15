@@ -8,7 +8,7 @@ namespace ig
     {
         IG_CHECK(size >= sizeof(void*));
         IG_CHECK(alignment > 0 && IsPowOf2(alignment));
-        const size_t mask = alignment - 1;
+        const size_t mask         = alignment - 1;
         const size_t misalignment = size & mask;
         return (alignment - misalignment);
     }

@@ -7,7 +7,8 @@ IG_DEFINE_LOG_CATEGORY(JsonDeserializer);
 namespace ig::details
 {
     template <typename VarType>
-    void Serialize(json& archive, const VarType& var, const std::string_view containerKey, const std::string_view varKey)
+    void Serialize(json&                  archive, const VarType& var, const std::string_view containerKey,
+                   const std::string_view varKey)
     {
         if (!archive.contains(containerKey))
         {
@@ -19,7 +20,8 @@ namespace ig::details
     }
 
     template <typename VarType, typename F>
-    void Deserialize(const json& archive, VarType& var, const std::string_view containerKey, const std::string_view varKey, F callback, VarType fallback)
+    void Deserialize(const json&            archive, VarType& var, const std::string_view containerKey,
+                     const std::string_view varKey, F         callback, VarType           fallback)
     {
         IG_CHECK(!archive.is_discarded());
         if (!archive.contains(containerKey) || !archive[containerKey].contains(varKey))
@@ -41,10 +43,12 @@ namespace ig::details
     concept ConvertibleJsonInternalArray = std::is_same<T, json::array_t>::value;
 
     template <typename T>
-    concept ConvertibleJsonInternalUnsigned = !std::is_same_v<T, bool>&& std::is_unsigned_v<T>&& std::is_convertible_v<T, json::number_unsigned_t>;
+    concept ConvertibleJsonInternalUnsigned = !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v
+            <T, json::number_unsigned_t>;
 
     template <typename T>
-    concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, json::number_float_t>;
+    concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, json::number_float_t>
+            ;
 
     template <typename T>
     concept ConvertibleJsonInternalBoolean = std::is_same_v<T, json::boolean_t>;

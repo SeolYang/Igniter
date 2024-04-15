@@ -5,6 +5,7 @@
 namespace ig
 {
     class RenderDevice;
+
     class GpuTexture final
     {
         friend class RenderDevice;
@@ -35,15 +36,18 @@ namespace ig
             return *resource.Get();
         }
 
-        [[nodiscard]] size_t GetIntermediateSize() const { return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<uint32_t>(desc.GetNumSubresources())); }
+        [[nodiscard]] size_t GetIntermediateSize() const
+        {
+            return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<uint32_t>(desc.GetNumSubresources()));
+        }
 
     private:
-        GpuTexture(const GpuTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+        GpuTexture(const GpuTextureDesc&  newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
                    ComPtr<ID3D12Resource> newResource);
 
     private:
-        GpuTextureDesc desc;
+        GpuTextureDesc              desc;
         ComPtr<D3D12MA::Allocation> allocation;
-        ComPtr<ID3D12Resource> resource;
+        ComPtr<ID3D12Resource>      resource;
     };
 } // namespace ig

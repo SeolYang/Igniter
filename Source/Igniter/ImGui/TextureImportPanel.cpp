@@ -17,7 +17,8 @@ namespace ig
 
             if (status != EOpenFileDialogStatus::Success)
             {
-                ImGui::Text("Failed to select texture resource file. (Status: %s)", magic_enum::enum_name(status).data());
+                ImGui::Text("Failed to select texture resource file. (Status: %s)",
+                            magic_enum::enum_name(status).data());
             }
             else
             {
@@ -54,14 +55,14 @@ namespace ig
                 if (ImGui::Button("Import"))
                 {
                     constexpr auto CompressionModes = magic_enum::enum_values<ETextureCompressionMode>();
-                    constexpr auto Filters = magic_enum::enum_values<D3D12_FILTER>();
-                    constexpr auto AddressModes = magic_enum::enum_values<D3D12_TEXTURE_ADDRESS_MODE>();
+                    constexpr auto Filters          = magic_enum::enum_values<D3D12_FILTER>();
+                    constexpr auto AddressModes     = magic_enum::enum_values<D3D12_TEXTURE_ADDRESS_MODE>();
 
                     config.CompressionMode = CompressionModes[selectedCompModeIdx];
-                    config.Filter = Filters[selectedFilterIdx];
-                    config.AddressModeU = AddressModes[selectedAddressModeU];
-                    config.AddressModeV = AddressModes[selectedAddressModeV];
-                    config.AddressModeW = AddressModes[selectedAddressModeW];
+                    config.Filter          = Filters[selectedFilterIdx];
+                    config.AddressModeU    = AddressModes[selectedAddressModeU];
+                    config.AddressModeV    = AddressModes[selectedAddressModeV];
+                    config.AddressModeW    = AddressModes[selectedAddressModeW];
 
                     AssetManager& assetManager = Igniter::GetAssetManager();
                     assetManager.Import(path, config);
@@ -83,15 +84,14 @@ namespace ig
         config = {};
 
         static const std::vector<DialogFilter> Filters{
-            DialogFilter{ .Name = "Texture Resources"_fs, .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"_fs },
+            DialogFilter{.Name = "Texture Resources"_fs, .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"_fs},
         };
 
         Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(nullptr, "Texture to import"_fs, Filters);
-        status = result.GetStatus();
+        status                                       = result.GetStatus();
         if (result.HasOwnership())
         {
             path = result.Take();
         }
     }
-
 } // namespace ig

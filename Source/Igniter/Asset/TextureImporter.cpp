@@ -31,7 +31,7 @@ namespace ig
                        });
 
         return (ext == ".png") || (ext == ".jpg") || (ext == ".jpeg") || (ext == ".bmp") || (ext == ".gif") ||
-               (ext == ".tiff");
+                (ext == ".tiff");
     }
 
     static bool IsHDRExtnsion(const fs::path& extension)
@@ -70,10 +70,10 @@ namespace ig
         creationFlags |= static_cast<uint32_t>(D3D11_CREATE_DEVICE_DEBUG);
 #endif
         const D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_10_0;
-        const HRESULT res = D3D11CreateDevice(nullptr,
-                                              D3D_DRIVER_TYPE_HARDWARE, nullptr,
-                                              creationFlags, &featureLevel, 1, D3D11_SDK_VERSION,
-                                              &d3d11Device, nullptr, nullptr);
+        const HRESULT           res          = D3D11CreateDevice(nullptr,
+                                                                 D3D_DRIVER_TYPE_HARDWARE, nullptr,
+                                                                 creationFlags, &featureLevel, 1, D3D11_SDK_VERSION,
+                                                                 &d3d11Device, nullptr, nullptr);
 
         if (FAILED(res))
         {
@@ -89,23 +89,24 @@ namespace ig
         }
     }
 
-    Result<Texture::Desc, ETextureImportStatus> TextureImporter::Import(const String resPathStr, TextureImportDesc importDesc)
+    Result<Texture::Desc, ETextureImportStatus> TextureImporter::Import(
+        const String resPathStr, TextureImportDesc importDesc)
     {
         CoInitializeUnique();
 
-        const fs::path resPath{ resPathStr.ToStringView() };
+        const fs::path resPath{resPathStr.ToStringView()};
         if (!fs::exists(resPath))
         {
             return MakeFail<Texture::Desc, ETextureImportStatus::FileDoesNotExists>();
         }
 
-        const fs::path resExtension = resPath.extension();
+        const fs::path        resExtension = resPath.extension();
         DirectX::ScratchImage targetTex{};
-        DirectX::TexMetadata texMetadata{};
+        DirectX::TexMetadata  texMetadata{};
 
-        HRESULT loadRes = S_OK;
-        bool bIsDDSFormat = false;
-        bool bIsHDRFormat = false;
+        HRESULT loadRes      = S_OK;
+        bool    bIsDDSFormat = false;
+        bool    bIsHDRFormat = false;
         if (IsDDSExtnsion(resExtension))
         {
             // 만약 DDS 타입이면, 바로 가공 없이 에셋으로 사용한다. 이 경우,
@@ -128,7 +129,7 @@ namespace ig
         }
         else if (IsHDRExtnsion(resExtension))
         {
-            loadRes = DirectX::LoadFromHDRFile(resPath.c_str(), &texMetadata, targetTex);
+            loadRes      = DirectX::LoadFromHDRFile(resPath.c_str(), &texMetadata, targetTex);
             bIsHDRFormat = true;
         }
         else
@@ -144,13 +145,14 @@ namespace ig
         if (!bIsDDSFormat)
         {
             const bool bValidDimensions = texMetadata.width > 0 && texMetadata.height > 0 && texMetadata.depth > 0 &&
-                                          texMetadata.arraySize > 0;
+                    texMetadata.arraySize > 0;
             if (!bValidDimensions)
             {
                 return MakeFail<Texture::Desc, ETextureImportStatus::InvalidDimensions>();
             }
 
-            const bool bValidVolumemapArgs = !texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.arraySize == 1);
+            const bool bValidVolumemapArgs = !texMetadata.IsVolumemap() || (texMetadata.IsVolumemap() && texMetadata.
+                arraySize == 1);
             if (!bValidVolumemapArgs)
             {
                 return MakeFail<Texture::Desc, ETextureImportStatus::InvalidVolumemap>();
@@ -167,7 +169,9 @@ namespace ig
                 DirectX::ScratchImage mipChain{};
                 const HRESULT genRes = DirectX::GenerateMipMaps(targetTex.GetImages(), targetTex.GetImageCount(),
                                                                 targetTex.GetMetadata(),
-                                                                bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR,
+                                                                bIsHDRFormat ?
+                                                                    DirectX::TEX_FILTER_FANT :
+                                                                    DirectX::TEX_FILTER_LINEAR,
                                                                 0, mipChain);
                 if (FAILED(genRes))
                 {
@@ -175,7 +179,7 @@ namespace ig
                 }
 
                 texMetadata = mipChain.GetMetadata();
-                targetTex = std::move(mipChain);
+                targetTex   = std::move(mipChain);
             }
 
             /* Compress Texture*/
@@ -192,7 +196,7 @@ namespace ig
                     importDesc.CompressionMode = ETextureCompressionMode::BC6H;
                 }
                 else if (IsGreyScaleFormat(texMetadata.format) &&
-                         importDesc.CompressionMode == ETextureCompressionMode::BC4)
+                    importDesc.CompressionMode == ETextureCompressionMode::BC4)
                 {
                     IG_LOG(TextureImporter, Warning,
                            "The compression method for greyscale-formatted "
@@ -203,17 +207,17 @@ namespace ig
                     importDesc.CompressionMode = ETextureCompressionMode::BC4;
                 }
 
-                auto compFlags = static_cast<unsigned long>(DirectX::TEX_COMPRESS_PARALLEL);
+                auto              compFlags  = static_cast<unsigned long>(DirectX::TEX_COMPRESS_PARALLEL);
                 const DXGI_FORMAT compFormat = AsBCnFormat(importDesc.CompressionMode, texMetadata.format);
 
                 const bool bIsGPUCodecAvailable = d3d11Device != nullptr &&
-                                                  (importDesc.CompressionMode == ETextureCompressionMode::BC6H ||
-                                                   importDesc.CompressionMode == ETextureCompressionMode::BC7);
+                (importDesc.CompressionMode == ETextureCompressionMode::BC6H ||
+                    importDesc.CompressionMode == ETextureCompressionMode::BC7);
 
-                HRESULT compRes = S_FALSE;
+                HRESULT               compRes = S_FALSE;
                 DirectX::ScratchImage compTex{};
                 {
-                    UniqueLock lock{ compressionMutex };
+                    UniqueLock lock{compressionMutex};
                     if (bIsGPUCodecAvailable)
                     {
                         compRes = DirectX::Compress(
@@ -242,16 +246,16 @@ namespace ig
                 }
 
                 texMetadata = compTex.GetMetadata();
-                targetTex = std::move(compTex);
+                targetTex   = std::move(compTex);
             }
         }
 
         /* Configure Texture Resource Metadata */
-        const ResourceInfo resInfo{ .Type = EAssetType::Texture };
-        json resMetadata{};
+        const ResourceInfo resInfo{.Type = EAssetType::Texture};
+        json               resMetadata{};
         resMetadata << resInfo << importDesc;
 
-        const fs::path resMetadataPath{ MakeResourceMetadataPath(resPath) };
+        const fs::path resMetadataPath{MakeResourceMetadataPath(resPath)};
         if (SaveJsonToFile(resMetadataPath, resMetadata))
         {
             IG_LOG(TextureImporter, Warning, "Failed to create resource metadata {}.", resMetadataPath.string());
@@ -260,20 +264,24 @@ namespace ig
         /* Configure Texture Asset Metadata */
         texMetadata = targetTex.GetMetadata();
 
-        const AssetInfo assetInfo{ MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetType::Texture };
-        const TextureLoadDesc newLoadConfig{ .Format = texMetadata.format,
-                                             .Dimension = details::AsTexDimension(texMetadata.dimension),
-                                             .Width = static_cast<uint32_t>(texMetadata.width),
-                                             .Height = static_cast<uint32_t>(texMetadata.height),
-                                             .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ?
-                                                                                             texMetadata.depth :
-                                                                                             texMetadata.arraySize),
-                                             .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
-                                             .bIsCubemap = texMetadata.IsCubemap(),
-                                             .Filter = importDesc.Filter,
-                                             .AddressModeU = importDesc.AddressModeU,
-                                             .AddressModeV = importDesc.AddressModeV,
-                                             .AddressModeW = importDesc.AddressModeW };
+        const AssetInfo assetInfo{
+            MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetType::Texture
+        };
+        const TextureLoadDesc newLoadConfig{
+            .Format = texMetadata.format,
+            .Dimension = details::AsTexDimension(texMetadata.dimension),
+            .Width = static_cast<uint32_t>(texMetadata.width),
+            .Height = static_cast<uint32_t>(texMetadata.height),
+            .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ?
+                                                            texMetadata.depth :
+                                                            texMetadata.arraySize),
+            .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
+            .bIsCubemap = texMetadata.IsCubemap(),
+            .Filter = importDesc.Filter,
+            .AddressModeU = importDesc.AddressModeU,
+            .AddressModeV = importDesc.AddressModeV,
+            .AddressModeW = importDesc.AddressModeW
+        };
 
         json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;

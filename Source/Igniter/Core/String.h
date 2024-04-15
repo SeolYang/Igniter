@@ -66,16 +66,16 @@ namespace ig
         void SetString(const std::string_view strView);
 
         [[nodiscard]] const std::string& ToStandard() const;
-        [[nodiscard]] std::string_view ToStringView() const;
-        [[nodiscard]] const char* ToCString() const;
-        [[nodiscard]] std::wstring ToWideString() const;
-        [[nodiscard]] fs::path ToPath() const;
+        [[nodiscard]] std::string_view   ToStringView() const;
+        [[nodiscard]] const char*        ToCString() const;
+        [[nodiscard]] std::wstring       ToWideString() const;
+        [[nodiscard]] fs::path           ToPath() const;
 
         [[nodiscard]] static String FromPath(const fs::path& path);
 
         [[nodiscard]] uint64_t GetHash() const noexcept { return hashOfString; }
-        [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
-        [[nodiscard]] bool IsEmpty() const noexcept { return hashOfString == 0; }
+        [[nodiscard]] bool     IsValid() const noexcept { return hashOfString != InvalidHashVal; }
+        [[nodiscard]] bool     IsEmpty() const noexcept { return hashOfString == 0; }
 
         [[nodiscard]] std::vector<String> Split(const String delimiter) const;
 
@@ -86,20 +86,20 @@ namespace ig
 
         using HashStringMap = StableUnorderedMap<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
-        [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
+        [[nodiscard]] static SharedMutex&   GetHashStringMapMutex();
 
     private:
-        uint64_t hashOfString{ 0 };
+        uint64_t hashOfString{0};
     };
 
     inline String operator""_fs(const char* str, const size_t count)
     {
-        return std::string_view{ str, count };
+        return std::string_view{str, count};
     }
 
     inline String operator""_fs(const wchar_t* wstr, const size_t count)
     {
-        return std::wstring_view{ wstr, count };
+        return std::wstring_view{wstr, count};
     }
 } // namespace ig
 

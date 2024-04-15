@@ -29,13 +29,13 @@ namespace ig
     class ShaderCompileDesc final
     {
     public:
-        String SourcePath;
-        EShaderType Type;
-        bool bPackMarticesInRowMajor = false;                                      // -Zpr
-        EShaderOptimizationLevel OptimizationLevel = EShaderOptimizationLevel::O3; // -Od~-O3
-        bool bDisableValidation = false;                                           // -Vd
-        bool bTreatWarningAsErrors = false;                                        // -WX
-        bool bForceEnableDebugInformation = false;                                 // -Zi
+        String                   SourcePath;
+        EShaderType              Type;
+        bool                     bPackMarticesInRowMajor      = false;                        // -Zpr
+        EShaderOptimizationLevel OptimizationLevel            = EShaderOptimizationLevel::O3; // -Od~-O3
+        bool                     bDisableValidation           = false;                        // -Vd
+        bool                     bTreatWarningAsErrors        = false;                        // -WX
+        bool                     bForceEnableDebugInformation = false;                        // -Zi
     };
 
     class ShaderBlob final
@@ -45,11 +45,11 @@ namespace ig
         ~ShaderBlob() = default;
 
         EShaderType GetType() const { return type; }
-        auto& GetNative() { return *shader.Get(); }
+        auto&       GetNative() { return *shader.Get(); }
 
     private:
-        const EShaderType type;
+        const EShaderType  type;
         ComPtr<IDxcResult> compiledResult;
-        ComPtr<IDxcBlob> shader;
+        ComPtr<IDxcBlob>   shader;
     };
 } // namespace ig

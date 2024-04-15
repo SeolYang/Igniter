@@ -15,10 +15,10 @@ namespace ig
     T Random(const T min, const T max = std::numeric_limits<T>::max())
     {
         static thread_local std::mt19937_64 generator;
-        return std::uniform_int_distribution<T>{ min, max }(generator);
+        return std::uniform_int_distribution<T>{min, max}(generator);
     }
 
-    inline constexpr float Pi32 = 3.1415926535897932384626433832795028841971693993751058209749445923078164062f;
+    inline constexpr float Pi32        = 3.1415926535897932384626433832795028841971693993751058209749445923078164062f;
     inline constexpr float InversePi32 = 1.f / Pi32;
 
     inline constexpr float Rad2Deg(const float radians)

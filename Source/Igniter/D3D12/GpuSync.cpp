@@ -3,8 +3,8 @@
 
 namespace ig
 {
-    GpuSync::GpuSync(ID3D12Fence& fence, const size_t syncPoint) : fence(&fence),
-                                                                   syncPoint(syncPoint)
+    GpuSync::GpuSync(ID3D12Fence& fence, const size_t syncPoint) : fence(&fence)
+                                                                 , syncPoint(syncPoint)
     {
         IG_CHECK(IsValid());
     }
@@ -12,19 +12,19 @@ namespace ig
     bool GpuSync::operator<(const GpuSync& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) &&
-               syncPoint < rhs.syncPoint;
+                syncPoint < rhs.syncPoint;
     }
 
     bool GpuSync::operator>(const GpuSync& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) &&
-               syncPoint > rhs.syncPoint;
+                syncPoint > rhs.syncPoint;
     }
 
     bool GpuSync::operator>=(const GpuSync& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) &&
-               syncPoint >= rhs.syncPoint;
+                syncPoint >= rhs.syncPoint;
     }
 
     bool GpuSync::operator!=(const GpuSync& rhs) const noexcept
@@ -35,13 +35,13 @@ namespace ig
     bool GpuSync::operator==(const GpuSync& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) &&
-               syncPoint == rhs.syncPoint;
+                syncPoint == rhs.syncPoint;
     }
 
     bool GpuSync::operator<=(const GpuSync& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) &&
-               syncPoint <= rhs.syncPoint;
+                syncPoint <= rhs.syncPoint;
     }
 
     size_t GpuSync::GetCompletedSyncPoint() const
@@ -63,5 +63,4 @@ namespace ig
             fence->SetEventOnCompletion(syncPoint, nullptr);
         }
     }
-
 } // namespace ig

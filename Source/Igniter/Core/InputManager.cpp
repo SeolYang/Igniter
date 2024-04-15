@@ -3,6 +3,7 @@
 #include <Core/Log.h>
 
 IG_DEFINE_LOG_CATEGORY(InputManager);
+
 namespace ig
 {
     static EInput WParamToInput(const WPARAM wParam, const bool bIsMouseKey)
@@ -24,7 +25,7 @@ namespace ig
         {
             switch (wParam)
             {
-                /** Characters */
+            /** Characters */
             case 'W':
             case 'w':
                 return EInput::W;
@@ -41,7 +42,7 @@ namespace ig
             case 'd':
                 return EInput::D;
 
-                /** Virtual Keys */
+            /** Virtual Keys */
             case VK_SPACE:
                 return EInput::Space;
 
@@ -67,9 +68,9 @@ namespace ig
     {
         RAWINPUTDEVICE mouseRID{};
         mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-        mouseRID.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
-        mouseRID.dwFlags = 0;
-        mouseRID.hwndTarget = nullptr;
+        mouseRID.usUsage     = 0x02; /* HID_USAGE_GENERIC_MOUSE */
+        mouseRID.dwFlags     = 0;
+        mouseRID.hwndTarget  = nullptr;
 
         if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
         {
@@ -81,9 +82,9 @@ namespace ig
     {
         RAWINPUTDEVICE mouseRID{};
         mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-        mouseRID.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
-        mouseRID.dwFlags = RIDEV_REMOVE;
-        mouseRID.hwndTarget = nullptr;
+        mouseRID.usUsage     = 0x02; /* HID_USAGE_GENERIC_MOUSE */
+        mouseRID.dwFlags     = RIDEV_REMOVE;
+        mouseRID.hwndTarget  = nullptr;
 
         if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
         {
@@ -99,7 +100,7 @@ namespace ig
         inputActionNameMap[input].insert(nameOfAction);
         if (!actionMap.contains(nameOfAction))
         {
-            actionMap[nameOfAction] = Handle<Action>{ handleManager };
+            actionMap[nameOfAction] = Handle<Action>{handleManager};
         }
     }
 
@@ -110,7 +111,7 @@ namespace ig
         if (!axisMap.contains(nameOfAxis))
         {
             inputAxisNameScaleMap[input][nameOfAxis] = scale;
-            axisMap[nameOfAxis] = Handle<Axis>{ handleManager };
+            axisMap[nameOfAxis]                      = Handle<Axis>{handleManager};
         }
     }
 
@@ -131,8 +132,8 @@ namespace ig
         auto itr = inputAxisNameScaleMap.find(input);
         if (itr != inputAxisNameScaleMap.cend())
         {
-            const ScaleMap& scaleMap = itr->second;
-            auto scaleMapItr = scaleMap.find(nameOfAxis);
+            const ScaleMap& scaleMap    = itr->second;
+            auto            scaleMapItr = scaleMap.find(nameOfAxis);
             if (scaleMapItr != scaleMap.cend())
             {
                 return scaleMapItr->second;
@@ -147,8 +148,8 @@ namespace ig
         auto itr = inputAxisNameScaleMap.find(input);
         if (itr != inputAxisNameScaleMap.end())
         {
-            ScaleMap& scaleMap = itr->second;
-            auto scaleMapItr = scaleMap.find(nameOfAxis);
+            ScaleMap& scaleMap    = itr->second;
+            auto      scaleMapItr = scaleMap.find(nameOfAxis);
             if (scaleMapItr != scaleMap.end())
             {
                 scaleMapItr->second = scale;
@@ -163,29 +164,29 @@ namespace ig
 
         switch (message)
         {
-            case WM_LBUTTONDOWN:
-            case WM_RBUTTONDOWN:
-                HandleKeyDown(wParam, true);
-                break;
+        case WM_LBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+            HandleKeyDown(wParam, true);
+            break;
 
-            case WM_KEYDOWN:
-                HandleKeyDown(wParam, false);
-                break;
+        case WM_KEYDOWN:
+            HandleKeyDown(wParam, false);
+            break;
 
-            case WM_LBUTTONUP:
-                HandleKeyUp(MouseLBWParam, true);
-                break;
-            case WM_RBUTTONUP:
-                HandleKeyUp(MouseRBWParam, true);
-                break;
+        case WM_LBUTTONUP:
+            HandleKeyUp(MouseLBWParam, true);
+            break;
+        case WM_RBUTTONUP:
+            HandleKeyUp(MouseRBWParam, true);
+            break;
 
-            case WM_KEYUP:
-                HandleKeyUp(wParam, false);
-                break;
+        case WM_KEYUP:
+            HandleKeyUp(wParam, false);
+            break;
 
-            case WM_INPUT:
-                HandleRawInputDevices(wParam, lParam);
-                break;
+        case WM_INPUT:
+            HandleRawInputDevices(wParam, lParam);
+            break;
         }
     }
 
@@ -245,8 +246,8 @@ namespace ig
 
     void InputManager::HandleKeyDown(const WPARAM wParam, const bool bIsMouseKey)
     {
-        const EInput input = WParamToInput(wParam, bIsMouseKey);
-        const bool bKeyDownHandled = HandlePressAction(input) || HandleAxis(input, 1.f);
+        const EInput input           = WParamToInput(wParam, bIsMouseKey);
+        const bool   bKeyDownHandled = HandlePressAction(input) || HandleAxis(input, 1.f);
         if (bKeyDownHandled)
         {
             scopedInputs.insert(input);
@@ -269,7 +270,8 @@ namespace ig
             rawInputBuffer.resize(pcbSize);
         }
 
-        if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize, sizeof(RAWINPUTHEADER)) != pcbSize)
+        if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize,
+                            sizeof(RAWINPUTHEADER)) != pcbSize)
         {
             IG_LOG(InputManager, Fatal, "GetRawInputData does not return correct size!");
             return;
@@ -296,7 +298,7 @@ namespace ig
     bool InputManager::HandlePressAction(const EInput input)
     {
         bool bPressActionHandled = false;
-        auto inputActionNameItr = inputActionNameMap.find(input);
+        auto inputActionNameItr  = inputActionNameMap.find(input);
         if (inputActionNameItr != inputActionNameMap.end())
         {
             for (const String& actionName : inputActionNameItr->second)
@@ -304,10 +306,10 @@ namespace ig
                 RefHandle<Action> action = actionMap[actionName].MakeRef();
                 switch (action->State)
                 {
-                    case EInputState::None:
-                    case EInputState::Released:
-                        action->State = EInputState::Pressed;
-                        bPressActionHandled = true;
+                case EInputState::None:
+                case EInputState::Released:
+                    action->State = EInputState::Pressed;
+                    bPressActionHandled = true;
                 }
             }
         }
@@ -323,14 +325,14 @@ namespace ig
             for (const String& actionName : inputActionNameItr->second)
             {
                 RefHandle<Action> action = actionMap[actionName].MakeRef();
-                action->State = EInputState::None;
+                action->State            = EInputState::None;
             }
         }
     }
 
     bool InputManager::HandleAxis(const EInput input, const float value, const bool bIsDifferential)
     {
-        bool bAxisHandled = false;
+        bool bAxisHandled             = false;
         auto inputAxisNameScaleMapItr = inputAxisNameScaleMap.find(input);
         if (inputAxisNameScaleMapItr != inputAxisNameScaleMap.end())
         {

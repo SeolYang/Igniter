@@ -6,6 +6,7 @@
 namespace ig
 {
     class RenderDevice;
+
     class GpuBuffer final
     {
         friend class RenderDevice;
@@ -38,9 +39,9 @@ namespace ig
         }
 
         uint8_t* Map(const uint64_t offset = 0);
-        void Unmap();
+        void     Unmap();
 
-        GPUResourceMapGuard MapGuard(const uint64_t offset = 0);
+        GPUResourceMapGuard                 MapGuard(const uint64_t offset = 0);
         Handle<MappedGpuBuffer, GpuBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
 
         std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
@@ -74,15 +75,14 @@ namespace ig
         }
 
     private:
-        GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+        GpuBuffer(const GpuBufferDesc&   newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
                   ComPtr<ID3D12Resource> newResource);
 
         void operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer);
 
     private:
-        GpuBufferDesc desc;
+        GpuBufferDesc               desc;
         ComPtr<D3D12MA::Allocation> allocation;
-        ComPtr<ID3D12Resource> resource;
+        ComPtr<ID3D12Resource>      resource;
     };
-
 } // namespace ig

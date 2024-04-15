@@ -18,7 +18,8 @@ namespace ig
         void RenderFilterMenu();
         void RenderMainFrame();
         void RenderAssetStats();
-        void RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx, bool* bSelectionDirtyFlagPtr = nullptr);
+        void RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx,
+                              bool*            bSelectionDirtyFlagPtr = nullptr);
         void RenderInspector();
         void RenderEdit(const AssetInfo& assetInfo);
         void RenderMaterialEdit(const AssetInfo& assetInfo);
@@ -27,21 +28,21 @@ namespace ig
         void RenderTexturePreview(const AssetInfo& assetInfo);
         void RenderAssetInfo(const AssetInfo& assetInfo);
         void RenderSelector(const char* label, const Guid guid);
-        int RenderSelectorPopup(const EAssetType selectAssetType);
+        int  RenderSelectorPopup(const EAssetType selectAssetType);
 
     private:
-        RecursiveMutex mutex{};
+        RecursiveMutex                      mutex{};
         std::vector<AssetManager::Snapshot> snapshots{};
-        bool bDirty{ true };
-        chrono::system_clock::time_point lastUpdated{ chrono::system_clock::now() };
+        bool                                bDirty{true};
+        chrono::system_clock::time_point    lastUpdated{chrono::system_clock::now()};
 
-        EAssetType mainTableAssetFilter{EAssetType::Unknown};
-        int mainTableSelectedIdx{ -1 };
-        bool bIsMainSelectionDirty = false;
+        EAssetType           mainTableAssetFilter{EAssetType::Unknown};
+        int                  mainTableSelectedIdx{-1};
+        bool                 bIsMainSelectionDirty = false;
         CachedAsset<Texture> previewTextures[NumFramesInFlight];
-        bool bIsPreviewSrvUpdated[NumFramesInFlight]{ false, };
+        bool                 bIsPreviewSrvUpdated[NumFramesInFlight]{false,};
 
-        int selectorTableSelectedIdx{ -1 };
+        int  selectorTableSelectedIdx{-1};
         bool bOpenSelectorPopup = false;
     };
 } // namespace ig

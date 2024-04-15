@@ -24,7 +24,8 @@ namespace ig
         componentIDSet.insert(componentTypeID);
     }
 
-    std::vector<std::pair<entt::id_type, ComponentRegistry::ComponentInfo>>& ComponentRegistry::GetComponentInfosInternal()
+    std::vector<std::pair<entt::id_type, ComponentRegistry::ComponentInfo>>&
+    ComponentRegistry::GetComponentInfosInternal()
     {
         static std::vector<std::pair<entt::id_type, ComponentRegistry::ComponentInfo>> componentInfoInstance{};
         return componentInfoInstance;
@@ -33,7 +34,7 @@ namespace ig
     std::span<const std::pair<entt::id_type, ComponentRegistry::ComponentInfo>> ComponentRegistry::GetComponentInfos()
     {
         static std::once_flag sorted{};
-        auto& componentInfos = GetComponentInfosInternal();
+        auto&                 componentInfos = GetComponentInfosInternal();
         std::call_once(sorted,
                        [&componentInfos]()
                        {

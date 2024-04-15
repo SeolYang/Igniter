@@ -4,7 +4,11 @@
 
 namespace ig
 {
-    AssetWatchPanel::AssetWatchPanel() : watcher{ "Assets"_fs, ig::EFileWatchFilterFlags::ChangeLastWrite | ig::EFileWatchFilterFlags::ChangeFileName }
+    AssetWatchPanel::AssetWatchPanel() : watcher{
+                                           "Assets"_fs,
+                                           ig::EFileWatchFilterFlags::ChangeLastWrite |
+                                           ig::EFileWatchFilterFlags::ChangeFileName
+                                       }
     {
         infoBuffer.reserve(64);
     }
@@ -21,12 +25,12 @@ namespace ig
             ImGui::SameLine();
 
             constexpr ImGuiTableFlags TableFlags =
-                ImGuiTableFlags_Reorderable |
-                ImGuiTableFlags_RowBg |
-                ImGuiTableFlags_BordersOuter |
-                ImGuiTableFlags_BordersV |
-                ImGuiTableFlags_NoBordersInBody |
-                ImGuiTableFlags_ScrollY;
+                    ImGuiTableFlags_Reorderable |
+                    ImGuiTableFlags_RowBg |
+                    ImGuiTableFlags_BordersOuter |
+                    ImGuiTableFlags_BordersV |
+                    ImGuiTableFlags_NoBordersInBody |
+                    ImGuiTableFlags_ScrollY;
 
             if (ImGui::BeginTable("Latest Changes", 6, TableFlags))
             {

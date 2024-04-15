@@ -25,7 +25,8 @@ namespace ig::details
     void AssetMonitor::InitAssetDescTables()
     {
         guidDescTables.emplace_back(std::make_pair(EAssetType::Texture, std::make_unique<AssetDescMap<Texture>>()));
-        guidDescTables.emplace_back(std::make_pair(EAssetType::StaticMesh, std::make_unique<AssetDescMap<StaticMesh>>()));
+        guidDescTables.emplace_back(
+            std::make_pair(EAssetType::StaticMesh, std::make_unique<AssetDescMap<StaticMesh>>()));
         guidDescTables.emplace_back(std::make_pair(EAssetType::Material, std::make_unique<AssetDescMap<Material>>()));
     }
 
@@ -37,7 +38,7 @@ namespace ig::details
 
             if (assetType != EAssetType::Unknown)
             {
-                const fs::path typeDirPath{ GetAssetDirectoryPath(assetType) };
+                const fs::path typeDirPath{GetAssetDirectoryPath(assetType)};
                 if (!fs::exists(typeDirPath))
                 {
                     fs::create_directories(typeDirPath);
@@ -55,17 +56,18 @@ namespace ig::details
                 continue;
             }
 
-            VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-            fs::directory_iterator directoryItr{ GetAssetDirectoryPath(assetType) };
+            VirtualPathGuidTable&  virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
+            fs::directory_iterator directoryItr{GetAssetDirectoryPath(assetType)};
 
-            IG_LOG(AssetMonitor, Debug, "* Parsing {} type root dir ({})...", assetType, GetAssetDirectoryPath(assetType).string());
+            IG_LOG(AssetMonitor, Debug, "* Parsing {} type root dir ({})...", assetType,
+                   GetAssetDirectoryPath(assetType).string());
             while (directoryItr != fs::end(directoryItr))
             {
                 const fs::directory_entry& entry = *directoryItr;
                 if (entry.is_regular_file() && !entry.path().has_extension())
                 {
                     /* 최초에 온건한 형식의 메타데이터만 캐싱 됨을 보장 하여야 함! */
-                    const Guid guidFromPath{ entry.path().filename().string() };
+                    const Guid guidFromPath{entry.path().filename().string()};
                     if (!guidFromPath.isValid())
                     {
                         IG_LOG(AssetMonitor, Error, "Asset {} ignored. {} is not valid guid.",
@@ -75,33 +77,36 @@ namespace ig::details
                         continue;
                     }
 
-                    fs::path metadataPath{ entry.path() };
+                    fs::path metadataPath{entry.path()};
                     metadataPath.replace_extension(details::MetadataExt);
                     if (!fs::exists(metadataPath))
                     {
-                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The metadata does not exists.", entry.path().string());
+                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The metadata does not exists.",
+                               entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
-                    json serializedMetadata{ LoadJsonFromFile(metadataPath) };
+                    json      serializedMetadata{LoadJsonFromFile(metadataPath)};
                     AssetInfo assetInfo{};
                     serializedMetadata >> assetInfo;
 
-                    const Guid guid{ assetInfo.GetGuid() };
-                    const String virtualPath{ assetInfo.GetVirtualPath() };
+                    const Guid   guid{assetInfo.GetGuid()};
+                    const String virtualPath{assetInfo.GetVirtualPath()};
 
                     if (!assetInfo.IsValid())
                     {
-                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The asset info is invalid.", entry.path().string());
+                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The asset info is invalid.",
+                               entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
                     if (guidFromPath != guid)
                     {
-                        IG_LOG(AssetMonitor, Error, "{}: Asset {} ignored. The guid from filename does not match asset info guid."
-                                                    " Which was {}.",
+                        IG_LOG(AssetMonitor, Error,
+                               "{}: Asset {} ignored. The guid from filename does not match asset info guid."
+                               " Which was {}.",
                                assetInfo.GetType(),
                                entry.path().string(),
                                guid);
@@ -119,7 +124,8 @@ namespace ig::details
 
                     if (assetInfo.GetScope() == EAssetScope::Engine)
                     {
-                        IG_LOG(AssetMonitor, Warning, "{}: Found invalid asset scope Asset {} ({}). Assumes as Managed.",
+                        IG_LOG(AssetMonitor, Warning,
+                               "{}: Found invalid asset scope Asset {} ({}). Assumes as Managed.",
                                assetInfo.GetType(), virtualPath, guid);
                         assetInfo.SetScope(EAssetScope::Managed);
                         serializedMetadata << assetInfo;
@@ -128,7 +134,7 @@ namespace ig::details
                     virtualPathGuidTable[virtualPath] = guid;
                     IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", virtualPath, guid);
                     IG_CHECK(!Contains(guid));
-                    TypelessAssetDescMap& descTable{ GetDescMap(assetInfo.GetType()) };
+                    TypelessAssetDescMap& descTable{GetDescMap(assetInfo.GetType())};
                     descTable.Insert(serializedMetadata);
                 }
 
@@ -187,7 +193,7 @@ namespace ig::details
         IG_CHECK(assetType != EAssetType::Unknown);
 
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-        const auto itr = virtualPathGuidTable.find(virtualPath);
+        const auto                  itr                  = virtualPathGuidTable.find(virtualPath);
         return itr != virtualPathGuidTable.cend() && ContainsUnsafe(itr->second);
     }
 
@@ -197,10 +203,10 @@ namespace ig::details
         IG_CHECK(IsValidVirtualPath(virtualPath));
 
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-        const auto itr = virtualPathGuidTable.find(virtualPath);
+        const auto                  itr                  = virtualPathGuidTable.find(virtualPath);
         IG_CHECK(itr != virtualPathGuidTable.cend());
 
-        const Guid guid{ itr->second };
+        const Guid guid{itr->second};
         IG_CHECK(guid.isValid());
 
         return guid;
@@ -208,19 +214,19 @@ namespace ig::details
 
     bool AssetMonitor::Contains(const Guid& guid) const
     {
-        ReadOnlyLock lock{ mutex };
+        ReadOnlyLock lock{mutex};
         return ContainsUnsafe(guid);
     }
 
     bool AssetMonitor::Contains(const EAssetType assetType, const String virtualPath) const
     {
-        ReadOnlyLock lock{ mutex };
+        ReadOnlyLock lock{mutex};
         return ContainsUnsafe(assetType, virtualPath);
     }
 
     Guid AssetMonitor::GetGuid(const EAssetType assetType, const String virtualPath) const
     {
-        ReadOnlyLock lock{ mutex };
+        ReadOnlyLock lock{mutex};
         return GetGuidUnsafe(assetType, virtualPath);
     }
 
@@ -230,7 +236,7 @@ namespace ig::details
 
         for (const auto& typeDescTablePair : guidDescTables)
         {
-            const TypelessAssetDescMap& descMap{ *typeDescTablePair.second };
+            const TypelessAssetDescMap& descMap{*typeDescTablePair.second};
             if (descMap.Contains(guid))
             {
                 return descMap.GetAssetInfo(guid);
@@ -243,29 +249,29 @@ namespace ig::details
 
     AssetInfo AssetMonitor::GetAssetInfo(const Guid& guid) const
     {
-        ReadOnlyLock lock{ mutex };
+        ReadOnlyLock lock{mutex};
         return GetAssetInfoUnsafe(guid);
     }
 
     AssetInfo AssetMonitor::GetAssetInfo(const EAssetType assetType, const String virtualPath) const
     {
-        ReadOnlyLock lock{ mutex };
+        ReadOnlyLock lock{mutex};
         return GetAssetInfoUnsafe(GetGuidUnsafe(assetType, virtualPath));
     }
 
     void AssetMonitor::UpdateInfo(const AssetInfo& newInfo)
     {
-        const Guid guid{ newInfo.GetGuid() };
-        const String virtualPath{ newInfo.GetVirtualPath() };
+        const Guid   guid{newInfo.GetGuid()};
+        const String virtualPath{newInfo.GetVirtualPath()};
         IG_CHECK(IsValidVirtualPath(virtualPath));
 
-        ReadWriteLock rwLock{ mutex };
+        ReadWriteLock rwLock{mutex};
         IG_CHECK(newInfo.IsValid());
         IG_CHECK(ContainsUnsafe(guid));
 
         const AssetInfo& oldInfo = GetAssetInfoUnsafe(guid);
-        const Guid oldGuid{ oldInfo.GetGuid() };
-        const String oldVirtualPath{ oldInfo.GetVirtualPath() };
+        const Guid       oldGuid{oldInfo.GetGuid()};
+        const String     oldVirtualPath{oldInfo.GetVirtualPath()};
         IG_CHECK(guid == oldGuid);
         IG_CHECK(newInfo.GetType() == oldInfo.GetType());
 
@@ -277,20 +283,20 @@ namespace ig::details
             virtualPathGuidTable[virtualPath] = guid;
         }
 
-        TypelessAssetDescMap& descMap{ GetDescMap(newInfo.GetType()) };
+        TypelessAssetDescMap& descMap{GetDescMap(newInfo.GetType())};
         descMap.Update(newInfo);
     }
 
     void AssetMonitor::Remove(const Guid& guid, const bool bShouldExpired)
     {
-        ReadWriteLock rwLock{ mutex };
+        ReadWriteLock rwLock{mutex};
         IG_CHECK(ContainsUnsafe(guid));
 
         const AssetInfo info = GetAssetInfoUnsafe(guid);
         IG_CHECK(info.IsValid());
         IG_CHECK(info.GetGuid() == guid);
 
-        const String virtualPath{ info.GetVirtualPath() };
+        const String virtualPath{info.GetVirtualPath()};
 
         VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(info.GetType());
         IG_CHECK(virtualPathGuidTable.contains(virtualPath));
@@ -305,8 +311,8 @@ namespace ig::details
 
         for (auto& assetTypeDescTablePair : guidDescTables)
         {
-            TypelessAssetDescMap& descMap{ *assetTypeDescTablePair.second };
-            if(descMap.Contains(guid))
+            TypelessAssetDescMap& descMap{*assetTypeDescTablePair.second};
+            if (descMap.Contains(guid))
             {
                 descMap.Erase(guid);
             }
@@ -319,14 +325,14 @@ namespace ig::details
         for (const auto& expiredAssetInfoPair : expiredAssetInfos)
         {
             IG_CHECK(!ContainsUnsafe(expiredAssetInfoPair.first));
-            const AssetInfo& expiredAssetInfo{ expiredAssetInfoPair.second };
+            const AssetInfo& expiredAssetInfo{expiredAssetInfoPair.second};
             IG_CHECK(expiredAssetInfo.IsValid());
-            const Guid expiredGuid{ expiredAssetInfo.GetGuid() };
-            const String expiredVirtualPath{ expiredAssetInfo.GetVirtualPath() };
+            const Guid   expiredGuid{expiredAssetInfo.GetGuid()};
+            const String expiredVirtualPath{expiredAssetInfo.GetVirtualPath()};
 
             IG_CHECK(expiredAssetInfoPair.first == expiredGuid);
-            const fs::path metadataPath{ MakeAssetMetadataPath(expiredAssetInfo.GetType(), expiredGuid) };
-            const fs::path assetPath{ MakeAssetPath(expiredAssetInfo.GetType(), expiredGuid) };
+            const fs::path metadataPath{MakeAssetMetadataPath(expiredAssetInfo.GetType(), expiredGuid)};
+            const fs::path assetPath{MakeAssetPath(expiredAssetInfo.GetType(), expiredGuid)};
             if (fs::exists(metadataPath))
             {
                 IG_ENSURE(fs::remove(metadataPath));
@@ -350,8 +356,8 @@ namespace ig::details
         IG_CHECK(expiredAssetInfos.empty());
         for (const auto& assetTypeDescTablePair : guidDescTables)
         {
-            TypelessAssetDescMap& descMap{ *assetTypeDescTablePair.second };
-            std::vector<json> serializedDescs{ descMap.GetSerializedDescs() };
+            TypelessAssetDescMap& descMap{*assetTypeDescTablePair.second};
+            std::vector<json>     serializedDescs{descMap.GetSerializedDescs()};
             for (const json& serializedDesc : serializedDescs)
             {
                 AssetInfo assetInfo{};
@@ -360,10 +366,10 @@ namespace ig::details
 
                 if (assetInfo.GetScope() != EAssetScope::Engine)
                 {
-                    const Guid guid{ assetInfo.GetGuid() };
-                    const String virtualPath{ assetInfo.GetVirtualPath() };
+                    const Guid   guid{assetInfo.GetGuid()};
+                    const String virtualPath{assetInfo.GetVirtualPath()};
 
-                    const fs::path metadataPath{ MakeAssetMetadataPath(assetInfo.GetType(), guid) };
+                    const fs::path metadataPath{MakeAssetMetadataPath(assetInfo.GetType(), guid)};
                     IG_ENSURE(SaveJsonToFile(metadataPath, serializedDesc));
                     IG_LOG(AssetMonitor, Debug, "{} Asset metadata Saved: {} ({})",
                            assetInfo.GetType(),
@@ -383,25 +389,27 @@ namespace ig::details
                 continue;
             }
 
-            fs::directory_iterator directoryItr{ GetAssetDirectoryPath(assetType) };
+            fs::directory_iterator directoryItr{GetAssetDirectoryPath(assetType)};
             while (directoryItr != fs::end(directoryItr))
             {
-                fs::path path{ directoryItr->path() };
+                fs::path path{directoryItr->path()};
                 if (!fs::is_regular_file(path))
                 {
                     ++directoryItr;
                     continue;
                 }
 
-                Guid guid{ path.filename().replace_extension().string() };
+                Guid guid{path.filename().replace_extension().string()};
                 if (!guid.isValid())
                 {
                     ++directoryItr;
                     continue;
                 }
 
-                const bool bIsOrphanMetadata{ path.has_extension() && !fs::exists(path.replace_extension()) };
-                const bool bIsOrphanAssetFile{ !path.has_extension() && !fs::exists(path.replace_extension(details::MetadataExt)) };
+                const bool bIsOrphanMetadata{path.has_extension() && !fs::exists(path.replace_extension())};
+                const bool bIsOrphanAssetFile{
+                    !path.has_extension() && !fs::exists(path.replace_extension(details::MetadataExt))
+                };
                 if (bIsOrphanMetadata || bIsOrphanAssetFile)
                 {
                     orphanFiles.emplace_back(directoryItr->path());
@@ -422,7 +430,7 @@ namespace ig::details
     {
         IG_LOG(AssetMonitor, Info, "Save all info chages...");
         {
-            ReadWriteLock rwLock{ mutex };
+            ReadWriteLock rwLock{mutex};
             ReflectExpiredToFilesUnsafe();
             ReflectRemainedToFilesUnsafe();
             CleanupOrphanFiles();
@@ -432,12 +440,12 @@ namespace ig::details
 
     std::vector<AssetInfo> AssetMonitor::TakeSnapshots() const
     {
-        ReadOnlyLock lock{ mutex };
-        size_t numDescs{ 0 };
+        ReadOnlyLock lock{mutex};
+        size_t       numDescs{0};
 
         for (const auto& typeDescTablePair : guidDescTables)
         {
-            const TypelessAssetDescMap& descMap{ *typeDescTablePair.second };
+            const TypelessAssetDescMap& descMap{*typeDescTablePair.second};
             numDescs += descMap.GetSize();
         }
 
@@ -445,8 +453,8 @@ namespace ig::details
         assetInfoSnapshots.reserve(numDescs);
         for (const auto& typeDescTablePair : guidDescTables)
         {
-            const TypelessAssetDescMap& descMap{ *typeDescTablePair.second };
-            std::vector<AssetInfo> assetInfos{ descMap.GetAssetInfos() };
+            const TypelessAssetDescMap& descMap{*typeDescTablePair.second};
+            std::vector<AssetInfo>      assetInfos{descMap.GetAssetInfos()};
             assetInfoSnapshots.insert(assetInfoSnapshots.end(), assetInfos.begin(), assetInfos.end());
         }
 
@@ -455,7 +463,7 @@ namespace ig::details
 
     TypelessAssetDescMap& AssetMonitor::GetDescMap(const EAssetType assetType)
     {
-        TypelessAssetDescMap* ptr{ nullptr };
+        TypelessAssetDescMap* ptr{nullptr};
         for (auto& typeMapPair : guidDescTables)
         {
             if (typeMapPair.first == assetType)
@@ -470,7 +478,7 @@ namespace ig::details
 
     const TypelessAssetDescMap& AssetMonitor::GetDescMap(const EAssetType assetType) const
     {
-        TypelessAssetDescMap* ptr{ nullptr };
+        TypelessAssetDescMap* ptr{nullptr};
         for (auto& typeMapPair : guidDescTables)
         {
             if (typeMapPair.first == assetType)

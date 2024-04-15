@@ -62,11 +62,12 @@ namespace ig
         return archive;
     }
 
-    Texture::Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, const RefHandle<GpuView>& sampler)
-        : snapshot(snapshot),
-          gpuTexture(std::move(gpuTexture)),
-          srv(std::move(srv)),
-          sampler(sampler)
+    Texture::Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv,
+                     const RefHandle<GpuView>& sampler)
+        : snapshot(snapshot)
+        , gpuTexture(std::move(gpuTexture))
+        , srv(std::move(srv))
+        , sampler(sampler)
     {
         IG_CHECK(this->gpuTexture);
         IG_CHECK(this->srv);
@@ -84,13 +85,13 @@ namespace ig::details
     {
         switch (dim)
         {
-            case DirectX::TEX_DIMENSION_TEXTURE1D:
-                return ETextureDimension::Tex1D;
-            default:
-            case DirectX::TEX_DIMENSION_TEXTURE2D:
-                return ETextureDimension::Tex2D;
-            case DirectX::TEX_DIMENSION_TEXTURE3D:
-                return ETextureDimension::Tex3D;
+        case DirectX::TEX_DIMENSION_TEXTURE1D:
+            return ETextureDimension::Tex1D;
+        default:
+        case DirectX::TEX_DIMENSION_TEXTURE2D:
+            return ETextureDimension::Tex2D;
+        case DirectX::TEX_DIMENSION_TEXTURE3D:
+            return ETextureDimension::Tex3D;
         }
     }
 } // namespace ig::details

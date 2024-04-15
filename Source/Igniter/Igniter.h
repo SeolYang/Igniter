@@ -34,7 +34,7 @@
 #include <regex>
 
 #ifndef UTF_CPP_CPLUSPLUS
-    #define UTF_CPP_CPLUSPLUS 201703L
+#define UTF_CPP_CPLUSPLUS 201703L
 #endif
 #include <utf8cpp/utf8.h>
 
@@ -112,7 +112,7 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 #pragma warning(pop)
 
 #if defined(DEBUG) || defined(_DEBUG)
-    #define TRACY_ENABLE
+#define TRACY_ENABLE
 #else
 #endif
 
@@ -147,14 +147,14 @@ namespace ig /* Constants */
 }
 
 #ifdef _M_X64
-    #define ENABLE_SSE_CRC32 1
+#define ENABLE_SSE_CRC32 1
 #else
     #define ENABLE_SSE_CRC32 0
 #endif
 
 #if ENABLE_SSE_CRC32
-    #pragma intrinsic(_mm_crc32_u32)
-    #pragma intrinsic(_mm_crc32_u64)
+#pragma intrinsic(_mm_crc32_u32)
+#pragma intrinsic(_mm_crc32_u64)
 #endif
 
 namespace ig::table

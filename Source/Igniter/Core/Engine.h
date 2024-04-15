@@ -18,26 +18,27 @@ namespace ig
     class ImGuiCanvas;
     class ImGuiRenderer;
     class GameInstance;
+
     class Igniter final
     {
     public:
         Igniter();
         ~Igniter();
 
-        [[nodiscard]] static FrameManager& GetFrameManager();
-        [[nodiscard]] static Timer& GetTimer();
-        [[nodiscard]] static Window& GetWindow();
-        [[nodiscard]] static RenderDevice& GetRenderDevice();
-        [[nodiscard]] static HandleManager& GetHandleManager();
-        [[nodiscard]] static InputManager& GetInputManager();
-        [[nodiscard]] static DeferredDeallocator& GetDeferredDeallocator();
-        [[nodiscard]] static RenderContext& GetRenderContext();
-        [[nodiscard]] static AssetManager& GetAssetManager();
-        [[nodiscard]] static Renderer& GetRenderer();
-        [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
-        [[nodiscard]] static ImGuiCanvas& GetImGuiCanvas();
+        [[nodiscard]] static FrameManager&            GetFrameManager();
+        [[nodiscard]] static Timer&                   GetTimer();
+        [[nodiscard]] static Window&                  GetWindow();
+        [[nodiscard]] static RenderDevice&            GetRenderDevice();
+        [[nodiscard]] static HandleManager&           GetHandleManager();
+        [[nodiscard]] static InputManager&            GetInputManager();
+        [[nodiscard]] static DeferredDeallocator&     GetDeferredDeallocator();
+        [[nodiscard]] static RenderContext&           GetRenderContext();
+        [[nodiscard]] static AssetManager&            GetAssetManager();
+        [[nodiscard]] static Renderer&                GetRenderer();
+        [[nodiscard]] static ImGuiRenderer&           GetImGuiRenderer();
+        [[nodiscard]] static ImGuiCanvas&             GetImGuiCanvas();
         [[nodiscard]] static OptionalRef<ImGuiCanvas> TryGetImGuiCanvas();
-        [[nodiscard]] static GameInstance& GetGameInstance();
+        [[nodiscard]] static GameInstance&            GetGameInstance();
 
         bool IsValid() const { return this == instance; }
 
@@ -49,19 +50,19 @@ namespace ig
 
     private:
         static Igniter* instance;
-        bool bShouldExit = false;
+        bool            bShouldExit = false;
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////
-        Ptr<FrameManager> frameManager;
-        Ptr<Timer> timer;
-        Ptr<Window> window;
-        Ptr<RenderDevice> renderDevice;
+        Ptr<FrameManager>  frameManager;
+        Ptr<Timer>         timer;
+        Ptr<Window>        window;
+        Ptr<RenderDevice>  renderDevice;
         Ptr<HandleManager> handleManager;
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        Ptr<InputManager> inputManager;
+        Ptr<InputManager>        inputManager;
         Ptr<DeferredDeallocator> deferredDeallocator;
         ////////////////////////////////////////////////////
 
@@ -74,12 +75,12 @@ namespace ig
         ////////////////////////////////////////////////////
 
         //////////////////////// L4 ////////////////////////
-        Ptr<Renderer> renderer;
+        Ptr<Renderer>      renderer;
         Ptr<ImGuiRenderer> imguiRenderer;
         ////////////////////////////////////////////////////
 
         //////////////////////// APP ///////////////////////
-        Ptr<ImGuiCanvas> imguiCanvas;
+        Ptr<ImGuiCanvas>  imguiCanvas;
         Ptr<GameInstance> gameInstance;
         ////////////////////////////////////////////////////
     };

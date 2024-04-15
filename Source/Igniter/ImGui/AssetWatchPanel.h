@@ -14,8 +14,7 @@ namespace ig
         void Render() override;
 
     private:
-        CoFileWatcher watcher;
+        CoFileWatcher               watcher;
         std::vector<FileChangeInfo> infoBuffer;
     };
-
 } // namespace ig

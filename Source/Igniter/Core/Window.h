@@ -8,7 +8,7 @@ namespace ig
     {
         const uint32_t Width;
         const uint32_t Height;
-        const String Title;
+        const String   Title;
     };
 
     // @dependency	ig::Engine, ig::Logger, ig::InputManager
@@ -17,10 +17,10 @@ namespace ig
     public:
         Window(const WindowDescription& description);
         ~Window();
-        Window(const Window&) = delete;
+        Window(const Window&)     = delete;
         Window(Window&&) noexcept = delete;
 
-        Window& operator=(const Window&) = delete;
+        Window& operator=(const Window&)     = delete;
         Window& operator=(Window&&) noexcept = delete;
 
         const WindowDescription& GetDescription() const { return windowDesc; }
@@ -41,8 +41,8 @@ namespace ig
         WindowDescription windowDesc;
 
         std::wstring windowTitle;
-        WNDCLASSEX windowClass;
-        HWND windowHandle = nullptr;
+        WNDCLASSEX   windowClass;
+        HWND         windowHandle = nullptr;
 
         Viewport viewport;
 

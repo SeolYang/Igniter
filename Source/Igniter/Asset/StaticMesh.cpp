@@ -52,22 +52,24 @@ namespace ig
         *this = {};
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices, NumVertices);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices, NumIndices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes, CompressedVerticesSizeInBytes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes, CompressedIndicesSizeInBytes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes,
+                                   CompressedVerticesSizeInBytes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes,
+                                   CompressedIndicesSizeInBytes);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, MaterialGuid, MaterialGuid);
         return archive;
     }
 
-    StaticMesh::StaticMesh(const Desc& snapshot,
-                           DeferredHandle<GpuBuffer> vertexBuffer,
+    StaticMesh::StaticMesh(const Desc&                      snapshot,
+                           DeferredHandle<GpuBuffer>        vertexBuffer,
                            Handle<GpuView, GpuViewManager*> vertexBufferSrv,
-                           DeferredHandle<GpuBuffer> indexBuffer,
-                           CachedAsset<Material> material)
-        : snapshot(snapshot),
-          vertexBuffer(std::move(vertexBuffer)),
-          vertexBufferSrv(std::move(vertexBufferSrv)),
-          indexBuffer(std::move(indexBuffer)),
-          material(std::move(material))
+                           DeferredHandle<GpuBuffer>        indexBuffer,
+                           CachedAsset<Material>            material)
+        : snapshot(snapshot)
+        , vertexBuffer(std::move(vertexBuffer))
+        , vertexBufferSrv(std::move(vertexBufferSrv))
+        , indexBuffer(std::move(indexBuffer))
+        , material(std::move(material))
     {
         IG_CHECK(this->vertexBuffer);
         IG_CHECK(this->vertexBufferSrv);

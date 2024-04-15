@@ -17,10 +17,12 @@ namespace ig
             {
                 if (ImGui::TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen))
                 {
-                    auto& registry = Igniter::GetGameInstance().GetRegistry();
-                    auto entityView = std::views::all(registry.template storage<Entity>());
-                    auto validEntityView = std::views::filter([&registry](const Entity entity)
-                                                              { return registry.valid(entity); });
+                    auto& registry        = Igniter::GetGameInstance().GetRegistry();
+                    auto  entityView      = std::views::all(registry.template storage<Entity>());
+                    auto  validEntityView = std::views::filter([&registry](const Entity entity)
+                    {
+                        return registry.valid(entity);
+                    });
                     auto entityNameView = std::views::transform(
                         [&registry](const Entity entity)
                         {
@@ -29,7 +31,8 @@ namespace ig
                             if (registry.all_of<NameComponent>(entity))
                             {
                                 auto& nameComponent = registry.get<NameComponent>(entity);
-                                formattedName = std::format("{} ({})", nameComponent.Name.ToStringView(), entt::to_integral(entity));
+                                formattedName       = std::format("{} ({})", nameComponent.Name.ToStringView(),
+                                                                  entt::to_integral(entity));
                             }
                             else
                             {
@@ -39,17 +42,20 @@ namespace ig
                             return std::make_pair(entity, formattedName);
                         });
 
-                    std::vector<std::pair<Entity, std::string>> entityNames{ ToVector(entityView | validEntityView | entityNameView) };
+                    std::vector<std::pair<Entity, std::string>> entityNames{
+                        ToVector(entityView | validEntityView | entityNameView)
+                    };
                     std::sort(entityNames.begin(), entityNames.end(),
                               [](const auto& lhs, const auto& rhs)
                               {
                                   return lhs.second < rhs.second;
                               });
 
-                    constexpr ImGuiTreeNodeFlags TreeNodeBaseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+                    constexpr ImGuiTreeNodeFlags TreeNodeBaseFlags = ImGuiTreeNodeFlags_OpenOnArrow |
+                            ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
                     for (const auto& [entity, entityName] : entityNames)
                     {
-                        auto nodeFlags = TreeNodeBaseFlags;
+                        auto       nodeFlags   = TreeNodeBaseFlags;
                         const bool bIsSelected = entity == selectedEntity;
                         if (bIsSelected)
                         {
@@ -69,7 +75,6 @@ namespace ig
                             ImGui::TreePop();
                         }
                     }
-
 
                     ImGui::TreePop();
                 }

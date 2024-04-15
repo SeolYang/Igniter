@@ -14,7 +14,8 @@ namespace ig
     {
     }
 
-    Result<Material::Desc, EMaterialCreateStatus> MaterialImporter::Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc)
+    Result<Material::Desc, EMaterialCreateStatus> MaterialImporter::Import(
+        const AssetInfo& assetInfo, const MaterialCreateDesc& desc)
     {
         if (!assetInfo.IsValid())
         {
@@ -26,12 +27,12 @@ namespace ig
             return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetType>();
         }
 
-        CachedAsset<Texture> diffuse{ assetManager.LoadTexture(desc.DiffuseVirtualPath) };
-        Guid diffuseTexGuid{ DefaultTextureGuid };
+        CachedAsset<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
+        Guid                 diffuseTexGuid{DefaultTextureGuid};
         if (diffuse)
         {
-            const Texture::Desc& diffuseDescSnapshot{ diffuse->GetSnapshot() };
-            const AssetInfo& diffuseInfo{ diffuseDescSnapshot.Info };
+            const Texture::Desc& diffuseDescSnapshot{diffuse->GetSnapshot()};
+            const AssetInfo&     diffuseInfo{diffuseDescSnapshot.Info};
             diffuseTexGuid = diffuseInfo.GetGuid();
         }
         IG_CHECK(diffuseTexGuid.isValid());
@@ -43,20 +44,22 @@ namespace ig
         json serializedMeta{};
         serializedMeta << assetInfo << loadDesc;
 
-        const fs::path metadataPath{ MakeAssetMetadataPath(EAssetType::Material, assetInfo.GetGuid()) };
+        const fs::path metadataPath{MakeAssetMetadataPath(EAssetType::Material, assetInfo.GetGuid())};
         IG_CHECK(!metadataPath.empty());
         if (!SaveJsonToFile(metadataPath, serializedMeta))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveMetadata>();
         }
 
-        const fs::path assetPath{ MakeAssetPath(EAssetType::Material, assetInfo.GetGuid()) };
-        if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, std::array<uint8_t, 1>{ 0 }))
+        const fs::path assetPath{MakeAssetPath(EAssetType::Material, assetInfo.GetGuid())};
+        if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, std::array<uint8_t, 1>{0}))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveAsset>();
         }
 
-        return MakeSuccess<Material::Desc, EMaterialCreateStatus>(Material::Desc{ .Info = assetInfo,
-                                                                                  .LoadDescriptor = loadDesc });
+        return MakeSuccess<Material::Desc, EMaterialCreateStatus>(Material::Desc{
+            .Info = assetInfo,
+            .LoadDescriptor = loadDesc
+        });
     }
 } // namespace ig

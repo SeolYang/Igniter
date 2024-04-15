@@ -55,22 +55,23 @@ namespace ig
     };
 
     class HandleManager;
+
     class InputManager final
     {
-        using NameSet = UnorderedSet<String>;
-        using InputNameMap = UnorderedMap<EInput, NameSet>;
-        using ScaleMap = UnorderedMap<String, float>;
+        using NameSet           = UnorderedSet<String>;
+        using InputNameMap      = UnorderedMap<EInput, NameSet>;
+        using ScaleMap          = UnorderedMap<String, float>;
         using InputNameScaleMap = UnorderedMap<EInput, ScaleMap>;
         template <typename T>
         using EventMap = UnorderedMap<String, Handle<T>>;
 
     public:
         InputManager(HandleManager& handleManager);
-        InputManager(const InputManager&) = delete;
+        InputManager(const InputManager&)     = delete;
         InputManager(InputManager&&) noexcept = delete;
         ~InputManager();
 
-        InputManager& operator=(const InputManager&) = delete;
+        InputManager& operator=(const InputManager&)     = delete;
         InputManager& operator=(InputManager&&) noexcept = delete;
 
         void BindAction(String nameOfAction, EInput input);
@@ -79,8 +80,8 @@ namespace ig
         // #sy_todo UnbindAction/Axis
 
         RefHandle<const Action> QueryAction(String nameOfAction) const;
-        RefHandle<const Axis> QueryAxis(String nameOfAxis) const;
-        float QueryScaleOfAxis(String nameOfAxis, EInput input) const;
+        RefHandle<const Axis>   QueryAxis(String nameOfAxis) const;
+        float                   QueryScaleOfAxis(String nameOfAxis, EInput input) const;
 
         void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);
 
@@ -101,11 +102,11 @@ namespace ig
     private:
         HandleManager& handleManager;
 
-        InputNameMap inputActionNameMap{};
+        InputNameMap      inputActionNameMap{};
         InputNameScaleMap inputAxisNameScaleMap{};
 
         EventMap<Action> actionMap{};
-        EventMap<Axis> axisMap{};
+        EventMap<Axis>   axisMap{};
 
         UnorderedSet<EInput> scopedInputs{};
 

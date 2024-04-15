@@ -6,7 +6,7 @@ namespace ig
     class EntityList final : public ImGuiLayer
     {
     public:
-        EntityList() = default;
+        EntityList()  = default;
         ~EntityList() = default;
 
         void Render() override;

@@ -11,11 +11,15 @@ namespace ig::details
         {
             FileWatchTask get_return_object()
             {
-                return FileWatchTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
+                return FileWatchTask{std::coroutine_handle<promise_type>::from_promise(*this)};
             }
 
             auto initial_suspend() { return std::suspend_never{}; }
-            void return_void() {}
+
+            void return_void()
+            {
+            }
+
             auto final_suspend() noexcept { return std::suspend_never{}; }
             auto unhandled_exception() { throw; }
         };
@@ -26,7 +30,7 @@ namespace ig::details
         }
 
         FileWatchTask(const FileWatchTask&) = delete;
-        FileWatchTask(FileWatchTask&&) = delete;
+        FileWatchTask(FileWatchTask&&)      = delete;
 
         ~FileWatchTask()
         {
@@ -37,7 +41,7 @@ namespace ig::details
         }
 
         FileWatchTask& operator=(const FileWatchTask&) = delete;
-        FileWatchTask& operator=(FileWatchTask&&) = delete;
+        FileWatchTask& operator=(FileWatchTask&&)      = delete;
 
         void Resume()
         {
@@ -58,22 +62,23 @@ namespace ig
 {
     enum class EFileWatchFilterFlags
     {
-        ChangeFileName = FILE_NOTIFY_CHANGE_FILE_NAME,
-        ChangeDirName = FILE_NOTIFY_CHANGE_DIR_NAME,
+        ChangeFileName   = FILE_NOTIFY_CHANGE_FILE_NAME,
+        ChangeDirName    = FILE_NOTIFY_CHANGE_DIR_NAME,
         ChangeAttributes = FILE_NOTIFY_CHANGE_ATTRIBUTES,
-        ChangeSize = FILE_NOTIFY_CHANGE_SIZE,
-        ChangeLastWrite = FILE_NOTIFY_CHANGE_LAST_WRITE,
+        ChangeSize       = FILE_NOTIFY_CHANGE_SIZE,
+        ChangeLastWrite  = FILE_NOTIFY_CHANGE_LAST_WRITE,
         ChangeLastAccess = FILE_NOTIFY_CHANGE_LAST_ACCESS,
-        ChangeCreation = FILE_NOTIFY_CHANGE_CREATION,
-        ChangeSecurity = FILE_NOTIFY_CHANGE_SECURITY
+        ChangeCreation   = FILE_NOTIFY_CHANGE_CREATION,
+        ChangeSecurity   = FILE_NOTIFY_CHANGE_SECURITY
     };
+
     IG_ENUM_FLAGS(EFileWatchFilterFlags);
 
     enum class EFileWatchAction
     {
-        Added = FILE_ACTION_ADDED,                     /* 파일이 디렉터리에 추가됨 */
-        Removed = FILE_ACTION_REMOVED,                 /* 파일이 디렉터리에서 삭제됨 */
-        Modified = FILE_ACTION_MODIFIED,               /* 파일이 수정 됨 */
+        Added          = FILE_ACTION_ADDED,            /* 파일이 디렉터리에 추가됨 */
+        Removed        = FILE_ACTION_REMOVED,          /* 파일이 디렉터리에서 삭제됨 */
+        Modified       = FILE_ACTION_MODIFIED,         /* 파일이 수정 됨 */
         RenamedOldName = FILE_ACTION_RENAMED_OLD_NAME, /* 이름이 변경된 파일의 변경 전 이름 */
         RenamedNewName = FILE_ACTION_RENAMED_NEW_NAME  /* 이름이 변경된 파일의 변경 후 이름 */
     };
@@ -82,20 +87,20 @@ namespace ig
     {
     public:
         EFileWatchAction Action;
-        fs::path Path{};
-        uint64_t CreationTime{};
-        uint64_t LastModificationTime{};
-        uint64_t LastChangeTime{};
-        uint64_t LastAccessTime{};
-        uint64_t FileSize{};
+        fs::path         Path{};
+        uint64_t         CreationTime{};
+        uint64_t         LastModificationTime{};
+        uint64_t         LastChangeTime{};
+        uint64_t         LastAccessTime{};
+        uint64_t         FileSize{};
     };
 
     class CoFileWatcher final
     {
     public:
-        CoFileWatcher(const String directoryPathStr,
+        CoFileWatcher(const String                directoryPathStr,
                       const EFileWatchFilterFlags filters,
-                      const bool bWatchRecursively = true);
+                      const bool                  bWatchRecursively = true);
         ~CoFileWatcher();
 
         std::vector<FileChangeInfo> RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory = true);
@@ -107,14 +112,14 @@ namespace ig
 
     private:
         fs::path directoryPath;
-        HANDLE directory{ INVALID_HANDLE_VALUE };
+        HANDLE   directory{INVALID_HANDLE_VALUE};
 
-        bool bStopWatching{ false };
+        bool bStopWatching{false};
         bool bWatchRecursively = true;
         EFileWatchFilterFlags filters = EFileWatchFilterFlags::ChangeFileName | EFileWatchFilterFlags::ChangeLastWrite;
         std::vector<FileChangeInfo> buffer{};
 
-        bool bEnsureCatchChanges = false;
+        bool bEnsureCatchChanges     = false;
         bool bIgnoreDirectoryChanges = true;
 
         details::FileWatchTask task;

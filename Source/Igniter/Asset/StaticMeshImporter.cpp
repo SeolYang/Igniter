@@ -17,31 +17,33 @@ namespace ig
     {
     }
 
-    static bool CheckAssimpSceneLoadingSucceed(const String resPathStr, const Assimp::Importer& importer, const aiScene* scene)
+    static bool CheckAssimpSceneLoadingSucceed(const String   resPathStr, const Assimp::Importer& importer,
+                                               const aiScene* scene)
     {
         if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr)
         {
-            IG_LOG(StaticMeshImporter, Error, "Load model file from \"{}\" failed: \"{}\"", resPathStr.ToStringView(), importer.GetErrorString());
+            IG_LOG(StaticMeshImporter, Error, "Load model file from \"{}\" failed: \"{}\"", resPathStr.ToStringView(),
+                   importer.GetErrorString());
             return false;
         }
 
         return true;
     }
 
-    static void ProcessStaticMeshData(const aiMesh& mesh, std::vector<StaticMeshVertex>& vertices,
+    static void ProcessStaticMeshData(const aiMesh&          mesh, std::vector<StaticMeshVertex>& vertices,
                                       std::vector<uint32_t>& indices,
-                                      const uint32_t vertexIdxOffset = 0)
+                                      const uint32_t         vertexIdxOffset = 0)
     {
         for (size_t vertexIdx = 0; vertexIdx < mesh.mNumVertices; ++vertexIdx)
         {
             const aiVector3D& position = mesh.mVertices[vertexIdx];
-            const aiVector3D& normal = mesh.mNormals[vertexIdx];
+            const aiVector3D& normal   = mesh.mNormals[vertexIdx];
             const aiVector3D& uvCoords = mesh.mTextureCoords[0][vertexIdx];
 
             vertices.emplace_back(
-                Vector3{ position.x, position.y, position.z },
-                Vector3{ normal.x, normal.y, normal.z },
-                Vector2{ uvCoords.x, uvCoords.y });
+                Vector3{position.x, position.y, position.z},
+                Vector3{normal.x, normal.y, normal.z},
+                Vector2{uvCoords.x, uvCoords.y});
         }
 
         for (size_t faceIdx = 0; faceIdx < mesh.mNumFaces; ++faceIdx)
@@ -55,10 +57,10 @@ namespace ig
     }
 
     static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr,
-                                                                                 const std::string_view meshName,
-                                                                                 const Guid materialGuid,
-                                                                                 const std::vector<StaticMeshVertex>& vertices,
-                                                                                 const std::vector<uint32_t>& indices)
+        const std::string_view                                                                meshName,
+        const Guid                                                                            materialGuid,
+        const std::vector<StaticMeshVertex>&                                                  vertices,
+        const std::vector<uint32_t>&                                                          indices)
     {
         IG_CHECK(!vertices.empty());
         IG_CHECK(!indices.empty());
@@ -67,15 +69,17 @@ namespace ig
         const std::string_view resPathStrView = resPathStr.ToStringView();
 
         std::vector<uint32_t> remap(indices.size());
-        const size_t remappedVertexCount = meshopt_generateVertexRemap(remap.data(),
-                                                                       indices.data(), indices.size(),
-                                                                       vertices.data(), indices.size(), sizeof(StaticMeshVertex));
+        const size_t          remappedVertexCount = meshopt_generateVertexRemap(remap.data(),
+            indices.data(), indices.size(),
+            vertices.data(), indices.size(),
+            sizeof(StaticMeshVertex));
 
-        std::vector<uint32_t> remappedIndices(indices.size());
+        std::vector<uint32_t>         remappedIndices(indices.size());
         std::vector<StaticMeshVertex> remappedVertices(remappedVertexCount);
 
         meshopt_remapIndexBuffer(remappedIndices.data(), indices.data(), indices.size(), remap.data());
-        meshopt_remapVertexBuffer(remappedVertices.data(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex), remap.data());
+        meshopt_remapVertexBuffer(remappedVertices.data(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex),
+                                  remap.data());
         IG_LOG(StaticMeshImporter, Info, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
 
         constexpr float CacheHitRatioThreshold = 1.02f;
@@ -123,17 +127,17 @@ namespace ig
         meshopt_encodeIndexVersion(1);
 
         std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(),
-                                             sizeof(StaticMeshVertex)));
+                                                                             sizeof(StaticMeshVertex)));
         std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(remappedIndices.size(),
-                                            remappedVertices.size()));
+                                                                           remappedVertices.size()));
 
         encodedVertices.resize(meshopt_encodeVertexBuffer(encodedVertices.data(), encodedVertices.size(),
-                               remappedVertices.data(), remappedVertices.size(),
-                               sizeof(StaticMeshVertex)));
+                                                          remappedVertices.data(), remappedVertices.size(),
+                                                          sizeof(StaticMeshVertex)));
         encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(),
-                              remappedIndices.data(), remappedIndices.size()));
+                                                        remappedIndices.data(), remappedIndices.size()));
 
-        const AssetInfo assetInfo{ MakeVirtualPathPreferred(meshName), EAssetType::StaticMesh };
+        const AssetInfo assetInfo{MakeVirtualPathPreferred(meshName), EAssetType::StaticMesh};
 
         const StaticMeshLoadDesc newLoadConfig{
             .NumVertices = static_cast<uint32_t>(remappedVertices.size()),
@@ -153,8 +157,10 @@ namespace ig
         }
 
         const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.GetGuid());
-        if (!SaveBlobsToFile<2>(assetPath, { std::span<const uint8_t>{ encodedVertices },
-                                             std::span<const uint8_t>{ encodedIndices } }))
+        if (!SaveBlobsToFile<2>(assetPath, {
+                                    std::span<const uint8_t>{encodedVertices},
+                                    std::span<const uint8_t>{encodedIndices}
+                                }))
         {
             return MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FailedSaveAssetToFile>();
         }
@@ -166,10 +172,10 @@ namespace ig
     }
 
     std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::Import(const String resPathStr,
-                                                                                              const StaticMesh::ImportDesc& desc)
+        const StaticMesh::ImportDesc&                                                                      desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
-        const fs::path resPath{ resPathStr.ToStringView() };
+        const fs::path                                                 resPath{resPathStr.ToStringView()};
         if (!fs::exists(resPath))
         {
             results.emplace_back(MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FileDoesNotExists>());
@@ -187,7 +193,7 @@ namespace ig
         importFlags |= desc.bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
 
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(resPathStr.ToStandard(), importFlags);
+        const aiScene*   scene = importer.ReadFile(resPathStr.ToStandard(), importFlags);
         {
             if (!CheckAssimpSceneLoadingSucceed(resPathStr, importer, scene))
             {
@@ -201,9 +207,10 @@ namespace ig
             {
                 for (uint32_t materialIdx = 0; materialIdx < scene->mNumMaterials; ++materialIdx)
                 {
-                    const aiMaterial& material = *scene->mMaterials[materialIdx];
-                    materialGuidTable[materialIdx] = assetManager.Import(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
-                                                                         MaterialCreateDesc{ .DiffuseVirtualPath = Texture::EngineDefault });
+                    const aiMaterial& material     = *scene->mMaterials[materialIdx];
+                    materialGuidTable[materialIdx] = assetManager.Import(
+                        MakeVirtualPathPreferred(String(material.GetName().C_Str())),
+                        MaterialCreateDesc{.DiffuseVirtualPath = Texture::EngineDefault});
                 }
             }
 
@@ -213,9 +220,9 @@ namespace ig
             std::vector<xg::Guid> importedStaticMeshGuid(scene->mNumMeshes);
             for (size_t meshIdx = 0; meshIdx < scene->mNumMeshes; ++meshIdx)
             {
-                const aiMesh& mesh = *scene->mMeshes[meshIdx];
+                const aiMesh&                 mesh = *scene->mMeshes[meshIdx];
                 std::vector<StaticMeshVertex> vertices;
-                std::vector<uint32_t> indices;
+                std::vector<uint32_t>         indices;
 
                 vertices.reserve(mesh.mNumVertices);
                 indices.reserve(mesh.mNumFaces * NumIndicesPerFace);
@@ -234,16 +241,17 @@ namespace ig
                     continue;
                 }
 
-                const Guid materialGuid = desc.bImportMaterials ? materialGuidTable[mesh.mMaterialIndex] :
-                    Guid{ DefaultMaterialGuid };
+                const Guid materialGuid = desc.bImportMaterials ?
+                                              materialGuidTable[mesh.mMaterialIndex] :
+                                              Guid{DefaultMaterialGuid};
                 const std::string meshName = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
                 results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, materialGuid, vertices, indices));
             }
         }
         importer.FreeScene();
 
-        const ResourceInfo resInfo{ .Type = EAssetType::StaticMesh };
-        json resMetadata{};
+        const ResourceInfo resInfo{.Type = EAssetType::StaticMesh};
+        json               resMetadata{};
         resMetadata << resInfo << desc;
         const fs::path resMetaPath = MakeResourceMetadataPath(resPath);
         if (!SaveJsonToFile(resMetaPath, resMetadata))
@@ -254,5 +262,4 @@ namespace ig
         IG_CHECK(results.size() > 0);
         return results;
     }
-
 } // namespace ig

@@ -8,12 +8,15 @@
 
 namespace ig
 {
-    TempConstantBufferAllocator::TempConstantBufferAllocator(const FrameManager& frameManager, RenderDevice& renderDevice, HandleManager& handleManager, GpuViewManager& gpuViewManager, const uint32_t reservedSizeInBytesPerFrame)
-        : frameManager(frameManager),
-          renderDevice(renderDevice),
-          handleManager(handleManager),
-          gpuViewManager(gpuViewManager),
-          reservedSizeInBytesPerFrame(reservedSizeInBytesPerFrame)
+    TempConstantBufferAllocator::TempConstantBufferAllocator(const FrameManager& frameManager,
+                                                             RenderDevice& renderDevice, HandleManager& handleManager,
+                                                             GpuViewManager& gpuViewManager,
+                                                             const uint32_t reservedSizeInBytesPerFrame)
+        : frameManager(frameManager)
+        , renderDevice(renderDevice)
+        , handleManager(handleManager)
+        , gpuViewManager(gpuViewManager)
+        , reservedSizeInBytesPerFrame(reservedSizeInBytesPerFrame)
     {
         IG_CHECK(reservedSizeInBytesPerFrame % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
 
@@ -37,10 +40,12 @@ namespace ig
         const size_t currentLocalFrameIdx = frameManager.GetLocalFrameIndex();
         IG_CHECK(currentLocalFrameIdx < NumFramesInFlight);
         const uint64_t allocSizeInBytes = desc.GetSizeAsBytes();
-        const uint64_t offset = allocatedSizeInBytes[currentLocalFrameIdx].fetch_add(allocSizeInBytes);
+        const uint64_t offset           = allocatedSizeInBytes[currentLocalFrameIdx].fetch_add(allocSizeInBytes);
         IG_CHECK(offset <= reservedSizeInBytesPerFrame);
-        mappedBuffers[currentLocalFrameIdx].emplace_back(buffers[currentLocalFrameIdx].MapHandle(handleManager, offset));
-        allocatedViews[currentLocalFrameIdx].emplace_back(gpuViewManager.RequestConstantBufferView(buffers[currentLocalFrameIdx], offset, allocSizeInBytes));
+        mappedBuffers[currentLocalFrameIdx].
+                emplace_back(buffers[currentLocalFrameIdx].MapHandle(handleManager, offset));
+        allocatedViews[currentLocalFrameIdx].emplace_back(
+            gpuViewManager.RequestConstantBufferView(buffers[currentLocalFrameIdx], offset, allocSizeInBytes));
 
         return TempConstantBuffer{
             .Mapping = mappedBuffers[currentLocalFrameIdx].back().MakeRef(),
@@ -68,5 +73,4 @@ namespace ig
 
         cmdCtx.FlushBarriers();
     }
-
 } // namespace ig

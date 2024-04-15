@@ -18,9 +18,9 @@ namespace ig
     {
         const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 
-        auto& mutex = mutexes[localFrameIdx];
-        auto& queue = pendingRequesterQueues[localFrameIdx];
-        ReadWriteLock lock{ mutex };
+        auto&         mutex = mutexes[localFrameIdx];
+        auto&         queue = pendingRequesterQueues[localFrameIdx];
+        ReadWriteLock lock{mutex};
         queue.push(std::move(requester));
     }
 
@@ -35,7 +35,7 @@ namespace ig
         auto& mutex = mutexes[localFrameIdx];
         auto& queue = pendingRequesterQueues[localFrameIdx];
 
-        ReadWriteLock lock{ mutex };
+        ReadWriteLock lock{mutex};
         while (!queue.empty())
         {
             queue.front()();

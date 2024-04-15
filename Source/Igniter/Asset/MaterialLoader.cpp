@@ -11,8 +11,8 @@ namespace ig
 
     Result<Material, EMaterialLoadStatus> MaterialLoader::Load(const Material::Desc& desc)
     {
-        const AssetInfo& assetInfo{ desc.Info };
-        const Material::LoadDesc& loadDesc{ desc.LoadDescriptor };
+        const AssetInfo&          assetInfo{desc.Info};
+        const Material::LoadDesc& loadDesc{desc.LoadDescriptor};
 
         if (!assetInfo.IsValid())
         {
@@ -24,13 +24,13 @@ namespace ig
             return MakeFail<Material, EMaterialLoadStatus::AssetTypeMismatch>();
         }
 
-        CachedAsset<Texture> diffuse{ assetManager.LoadTexture(loadDesc.DiffuseTexGuid) };
+        CachedAsset<Texture> diffuse{assetManager.LoadTexture(loadDesc.DiffuseTexGuid)};
         if (!diffuse)
         {
             return MakeFail<Material, EMaterialLoadStatus::FailedLoadDiffuse>();
         }
 
-        return MakeSuccess<Material, EMaterialLoadStatus>(Material{ desc, std::move(diffuse) });
+        return MakeSuccess<Material, EMaterialLoadStatus>(Material{desc, std::move(diffuse)});
     }
 
     Result<Material, details::EMakeDefaultMatStatus> MaterialLoader::MakeDefault(const AssetInfo& assetInfo)
@@ -40,10 +40,12 @@ namespace ig
             return MakeFail<Material, details::EMakeDefaultMatStatus::InvalidAssetInfo>();
         }
 
-        Material::Desc snapshot{ .Info = assetInfo,
-                                 .LoadDescriptor = { .DiffuseTexGuid = Guid{ DefaultTextureGuid } } };
-        CachedAsset<Texture> defaultEngineTex{ assetManager.LoadTexture(Material::EngineDefault) };
+        Material::Desc snapshot{
+            .Info = assetInfo,
+            .LoadDescriptor = {.DiffuseTexGuid = Guid{DefaultTextureGuid}}
+        };
+        CachedAsset<Texture> defaultEngineTex{assetManager.LoadTexture(Material::EngineDefault)};
         IG_CHECK(defaultEngineTex);
-        return MakeSuccess<Material, details::EMakeDefaultMatStatus>(Material{ snapshot, std::move(defaultEngineTex) });
+        return MakeSuccess<Material, details::EMakeDefaultMatStatus>(Material{snapshot, std::move(defaultEngineTex)});
     }
 } // namespace ig

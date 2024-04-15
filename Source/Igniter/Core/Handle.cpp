@@ -6,9 +6,10 @@ namespace ig
 {
     namespace details
     {
-        HandleImpl::HandleImpl(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType)
-            : owner(&handleManager),
-              handle(handleManager.Allocate(typeHashVal, sizeOfType, alignOfType))
+        HandleImpl::HandleImpl(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType,
+                               const size_t   alignOfType)
+            : owner(&handleManager)
+            , handle(handleManager.Allocate(typeHashVal, sizeOfType, alignOfType))
         {
             IG_CHECK(owner != nullptr);
             IG_CHECK(handle != InvalidHandle);
@@ -17,8 +18,8 @@ namespace ig
         }
 
         HandleImpl::HandleImpl(HandleImpl&& other) noexcept
-            : owner(std::exchange(other.owner, nullptr)),
-              handle(std::exchange(other.handle, InvalidHandle))
+            : owner(std::exchange(other.owner, nullptr))
+            , handle(std::exchange(other.handle, InvalidHandle))
         {
         }
 
@@ -61,7 +62,7 @@ namespace ig
 
         HandleImpl& HandleImpl::operator=(HandleImpl&& other) noexcept
         {
-            owner = std::exchange(other.owner, nullptr);
+            owner  = std::exchange(other.owner, nullptr);
             handle = std::exchange(other.handle, InvalidHandle);
             return *this;
         }
@@ -72,4 +73,4 @@ namespace ig
             owner->MaskAsPendingDeallocation(typeHashVal, handle);
         }
     } // namespace details
-} // namespace ig
+}     // namespace ig

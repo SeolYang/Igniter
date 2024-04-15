@@ -19,25 +19,26 @@ namespace ig
         Success,
         InvalidAssetInfo,
         AssetTypeMismatch,
-        FailedLoadDiffuse,         /* #sy_todo 추후 엔진 기본 텍스처가 추가되면 대체 */
+        FailedLoadDiffuse, /* #sy_todo 추후 엔진 기본 텍스처가 추가되면 대체 */
     };
 
     class AssetManager;
+
     class MaterialLoader final
     {
         friend class AssetManager;
 
     public:
         MaterialLoader(AssetManager& assetManager);
-        MaterialLoader(const MaterialLoader&) = delete;
+        MaterialLoader(const MaterialLoader&)     = delete;
         MaterialLoader(MaterialLoader&&) noexcept = delete;
-        ~MaterialLoader() = default;
+        ~MaterialLoader()                         = default;
 
-        MaterialLoader& operator=(const MaterialLoader&) = delete;
+        MaterialLoader& operator=(const MaterialLoader&)     = delete;
         MaterialLoader& operator=(MaterialLoader&&) noexcept = delete;
 
     private:
-        Result<Material, EMaterialLoadStatus> Load(const Material::Desc& desc);
+        Result<Material, EMaterialLoadStatus>            Load(const Material::Desc& desc);
         Result<Material, details::EMakeDefaultMatStatus> MakeDefault(const AssetInfo& assetInfo);
 
     private:

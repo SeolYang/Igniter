@@ -8,34 +8,36 @@
 namespace ig
 {
     class RenderDevice;
+
     class RenderContext final
     {
     public:
-        RenderContext(DeferredDeallocator& deferredDeallocator, RenderDevice& renderDevice, HandleManager& handleManager);
+        RenderContext(DeferredDeallocator& deferredDeallocator, RenderDevice& renderDevice,
+                      HandleManager&       handleManager);
         ~RenderContext() = default;
 
-        RenderContext(const RenderContext&) = delete;
+        RenderContext(const RenderContext&)     = delete;
         RenderContext(RenderContext&&) noexcept = delete;
 
-        RenderContext& operator=(const RenderContext&) = delete;
+        RenderContext& operator=(const RenderContext&)     = delete;
         RenderContext& operator=(RenderContext&&) noexcept = delete;
 
-        CommandQueue& GetMainGfxQueue() { return mainGfxQueue; }
+        CommandQueue&       GetMainGfxQueue() { return mainGfxQueue; }
         CommandContextPool& GetMainGfxCommandContextPool() { return mainGfxCmdCtxPool; }
-        CommandQueue& GetAsyncComputeQueue() { return asyncComputeQueue; }
-        CommandQueue& GetAsyncCopyQueue() { return asyncComputeQueue; }
-        GpuViewManager& GetGpuViewManager() { return gpuViewManager; }
-        GpuUploader& GetGpuUploader() { return gpuUploader; }
+        CommandQueue&       GetAsyncComputeQueue() { return asyncComputeQueue; }
+        CommandQueue&       GetAsyncCopyQueue() { return asyncComputeQueue; }
+        GpuViewManager&     GetGpuViewManager() { return gpuViewManager; }
+        GpuUploader&        GetGpuUploader() { return gpuUploader; }
 
         void FlushQueues();
 
     private:
-        CommandQueue mainGfxQueue;
+        CommandQueue       mainGfxQueue;
         CommandContextPool mainGfxCmdCtxPool;
-        CommandQueue asyncComputeQueue;
-        CommandQueue asyncCopyQueue;
+        CommandQueue       asyncComputeQueue;
+        CommandQueue       asyncCopyQueue;
 
         GpuViewManager gpuViewManager;
-        GpuUploader gpuUploader;
+        GpuUploader    gpuUploader;
     };
 }

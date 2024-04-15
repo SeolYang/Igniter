@@ -3,7 +3,9 @@
 
 namespace ig
 {
-    ImGuiCanvas::~ImGuiCanvas() {}
+    ImGuiCanvas::~ImGuiCanvas()
+    {
+    }
 
     void ImGuiCanvas::Render()
     {

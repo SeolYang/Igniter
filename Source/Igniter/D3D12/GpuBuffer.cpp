@@ -3,18 +3,18 @@
 
 namespace ig
 {
-    GpuBuffer::GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
+    GpuBuffer::GpuBuffer(const GpuBufferDesc&   newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
                          ComPtr<ID3D12Resource> newResource)
-        : desc(newDesc),
-          allocation(std::move(newAllocation)),
-          resource(std::move(newResource))
+        : desc(newDesc)
+        , allocation(std::move(newAllocation))
+        , resource(std::move(newResource))
     {
     }
 
     GpuBuffer::GpuBuffer(GpuBuffer&& other) noexcept
-        : desc(other.desc),
-          allocation(std::move(other.allocation)),
-          resource(std::move(other.resource))
+        : desc(other.desc)
+        , allocation(std::move(other.allocation))
+        , resource(std::move(other.resource))
     {
     }
 
@@ -28,9 +28,9 @@ namespace ig
 
     GpuBuffer& GpuBuffer::operator=(GpuBuffer&& other) noexcept
     {
-        desc = other.desc;
+        desc       = other.desc;
         allocation = std::move(other.allocation);
-        resource = std::move(other.resource);
+        resource   = std::move(other.resource);
         return *this;
     }
 
@@ -63,7 +63,10 @@ namespace ig
 
         return {
             mappedPtr, [this](uint8_t* ptr)
-            { if (ptr != nullptr) Unmap(); }
+            {
+                if (ptr != nullptr)
+                    Unmap();
+            }
         };
     }
 
@@ -74,7 +77,7 @@ namespace ig
         {
             return Handle<MappedGpuBuffer, GpuBuffer*>{
                 handleManager, this,
-                MappedGpuBuffer{ mappedPtr }
+                MappedGpuBuffer{mappedPtr}
             };
         }
 
@@ -82,10 +85,10 @@ namespace ig
         return {};
     }
 
-    void GpuBuffer::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer)
+    void GpuBuffer::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash,
+                               MappedGpuBuffer*    mappedGPUBuffer)
     {
         IG_VERIFY(mappedGPUBuffer != nullptr);
         handle.Deallocate(evaluatedTypeHash);
     }
-
 } // namespace ig

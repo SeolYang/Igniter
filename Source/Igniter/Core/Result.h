@@ -4,7 +4,8 @@
 namespace ig
 {
     template <typename T>
-    concept ResultStatus = requires {
+    concept ResultStatus = requires
+    {
         {
             T::Success
         };
@@ -33,14 +34,17 @@ namespace ig
     {
     public:
         Result(const Result&) = delete;
+
         Result(Result&& other) noexcept
-            : dummy{},
-              status(other.status)
+            : dummy{}
+            , status(other.status)
         {
-            IG_CHECK(other.status != E::Success && other.bOwnershipTransferred || other.status == E::Success && !other.bOwnershipTransferred);
+            IG_CHECK(
+                other.status != E::Success && other.bOwnershipTransferred || other.status == E::Success && !other.
+                bOwnershipTransferred);
             if (!other.bOwnershipTransferred)
             {
-                ::new (&value) T(std::move(other.value));
+                ::new(&value) T(std::move(other.value));
             }
             bOwnershipTransferred = std::exchange(other.bOwnershipTransferred, true);
         }
@@ -57,7 +61,7 @@ namespace ig
             }
         }
 
-        Result& operator=(const Result&) = delete;
+        Result& operator=(const Result&)     = delete;
         Result& operator=(Result&&) noexcept = delete;
 
         [[nodiscard]] T Take()
@@ -80,7 +84,7 @@ namespace ig
 
         [[nodiscard]] bool HasOwnership() const noexcept { return IsSuccess() && !bOwnershipTransferred; }
         [[nodiscard]] bool IsSuccess() const noexcept { return status == E::Success; }
-        [[nodiscard]] E GetStatus() const noexcept { return status; }
+        [[nodiscard]] E    GetStatus() const noexcept { return status; }
 
     private:
         template <typename Ty, ResultStatus En, typename... Args>
@@ -91,18 +95,18 @@ namespace ig
         friend Result<T, decltype(Status)> MakeFail();
 
         Result(const E newStatus)
-            : dummy{},
-              status(newStatus)
+            : dummy{}
+            , status(newStatus)
         {
         }
 
         template <typename... Args>
         Result(Args&&... args)
-            : dummy{},
-              status(E::Success),
-              bOwnershipTransferred(false)
+            : dummy{}
+            , status(E::Success)
+            , bOwnershipTransferred(false)
         {
-            ::new (&value) T(std::forward<Args>(args)...);
+            ::new(&value) T(std::forward<Args>(args)...);
         }
 
     private:
@@ -110,25 +114,28 @@ namespace ig
         {
             struct NonTrivialDummy
             {
-                constexpr NonTrivialDummy() noexcept {}
+                constexpr NonTrivialDummy() noexcept
+                {
+                }
             } dummy;
+
             std::decay_t<T> value;
         };
 
         const E status;
-        bool bOwnershipTransferred = true;
+        bool    bOwnershipTransferred = true;
     };
 
     template <typename T, ResultStatus E, typename... Args>
     Result<T, E> MakeSuccess(Args&&... args)
     {
-        return Result<T, E>{ std::forward<Args>(args)... };
+        return Result<T, E>{std::forward<Args>(args)...};
     }
 
     template <typename T, auto Status>
         requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
     Result<T, decltype(Status)> MakeFail()
     {
-        return Result<T, decltype(Status)>{ Status };
+        return Result<T, decltype(Status)>{Status};
     }
 } // namespace ig

@@ -4,6 +4,7 @@
 namespace ig
 {
     class EntityList;
+
     class EntityInspector final : public ImGuiLayer
     {
     public:

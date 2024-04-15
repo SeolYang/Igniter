@@ -9,7 +9,7 @@ namespace ig
     class TextureImportPanel final : public ImGuiLayer
     {
     public:
-        TextureImportPanel() = default;
+        TextureImportPanel()  = default;
         ~TextureImportPanel() = default;
 
         void Render() override;
@@ -19,12 +19,12 @@ namespace ig
         void SelectFileToImport();
 
     private:
-        String path{};
-        TextureImportDesc config;
+        String                path{};
+        TextureImportDesc     config;
         EOpenFileDialogStatus status{};
 
-        int selectedCompModeIdx = 0;
-        int selectedFilterIdx = 0;
+        int selectedCompModeIdx  = 0;
+        int selectedFilterIdx    = 0;
         int selectedAddressModeU = 0;
         int selectedAddressModeV = 0;
         int selectedAddressModeW = 0;

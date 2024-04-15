@@ -48,24 +48,29 @@ namespace ig
         Matrix LocalToWorld{};
     };
 
-    Renderer::Renderer(const FrameManager& frameManager, Window& window, RenderDevice& device, HandleManager& handleManager, RenderContext& renderContext) :
-        frameManager(frameManager),
-        renderDevice(device),
-        handleManager(handleManager),
-        renderContext(renderContext),
-        tempConstantBufferAllocator(frameManager, renderDevice, handleManager, renderContext.GetGpuViewManager()),
-        mainViewport(window.GetViewport()),
-        swapchain(window, renderContext.GetGpuViewManager(), renderContext.GetMainGfxQueue(), NumFramesInFlight)
+    Renderer::Renderer(const FrameManager& frameManager, Window&         window, RenderDevice& device,
+                       HandleManager&      handleManager, RenderContext& renderContext) :
+        frameManager(frameManager)
+        , renderDevice(device)
+        , handleManager(handleManager)
+        , renderContext(renderContext)
+        , tempConstantBufferAllocator(frameManager, renderDevice, handleManager, renderContext.GetGpuViewManager())
+        , mainViewport(window.GetViewport())
+        , swapchain(window, renderContext.GetGpuViewManager(), renderContext.GetMainGfxQueue(), NumFramesInFlight)
     {
 #pragma region test
         bindlessRootSignature = std::make_unique<RootSignature>(device.CreateBindlessRootSignature().value());
 
-        const ShaderCompileDesc vsDesc{ .SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
-                                        .Type = EShaderType::Vertex,
-                                        .OptimizationLevel = EShaderOptimizationLevel::None };
+        const ShaderCompileDesc vsDesc{
+            .SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
+            .Type = EShaderType::Vertex,
+            .OptimizationLevel = EShaderOptimizationLevel::None
+        };
 
-        const ShaderCompileDesc psDesc{ .SourcePath = String("Assets/Shader/BasicPixelShader.hlsl"),
-                                        .Type = EShaderType::Pixel };
+        const ShaderCompileDesc psDesc{
+            .SourcePath = String("Assets/Shader/BasicPixelShader.hlsl"),
+            .Type = EShaderType::Pixel
+        };
 
         vs = std::make_unique<ShaderBlob>(vsDesc);
         ps = std::make_unique<ShaderBlob>(psDesc);
@@ -75,39 +80,41 @@ namespace ig
         psoDesc.SetPixelShader(*ps);
         psoDesc.SetRootSignature(*bindlessRootSignature);
         psoDesc.NumRenderTargets = 1;
-        psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-        psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-        pso = std::make_unique<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
+        psoDesc.RTVFormats[0]    = DXGI_FORMAT_R8G8B8A8_UNORM;
+        psoDesc.DSVFormat        = DXGI_FORMAT_D32_FLOAT;
+        pso                      = std::make_unique<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
 
-        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
-        GpuTextureDesc depthStencilDesc;
+        GpuViewManager& gpuViewManager{renderContext.GetGpuViewManager()};
+        GpuTextureDesc  depthStencilDesc;
         depthStencilDesc.DebugName = String("DepthStencilBufferTex");
-        depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
+        depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width),
+                                        static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
         depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
-        dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{ .MipSlice = 0 });
+        dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{.MipSlice = 0});
 
-        CommandContextPool& mainGfxCmdCtxPool{ renderContext.GetMainGfxCommandContextPool() };
-        auto initialCmdCtx = mainGfxCmdCtxPool.Request();
+        CommandContextPool& mainGfxCmdCtxPool{renderContext.GetMainGfxCommandContextPool()};
+        auto                initialCmdCtx = mainGfxCmdCtxPool.Request();
         initialCmdCtx->Begin();
         {
             initialCmdCtx->AddPendingTextureBarrier(*depthStencilBuffer,
                                                     D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                                    D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
+                                                    D3D12_BARRIER_LAYOUT_UNDEFINED,
+                                                    D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
             initialCmdCtx->FlushBarriers();
         }
         initialCmdCtx->End();
         auto initialCmdCtxRef = MakeRefArray(*initialCmdCtx);
 
-        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
+        CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         mainGfxQueue.ExecuteContexts(initialCmdCtxRef);
 #pragma endregion
     }
 
     Renderer::~Renderer()
     {
-        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
-        GpuSync mainGfxQueueSync = mainGfxQueue.MakeSync();
+        CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
+        GpuSync       mainGfxQueueSync = mainGfxQueue.MakeSync();
         mainGfxQueueSync.WaitOnCpu();
     }
 
@@ -128,7 +135,7 @@ namespace ig
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
-        auto cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
+        auto           cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
         IG_CHECK(cameraView.size_hint() == 1);
         for (auto [entity, camera, transformData] : cameraView.each())
         {
@@ -140,17 +147,17 @@ namespace ig
         }
         perFrameConstantBuffer.Write(perFrameBuffer);
 
-        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
-        CommandContextPool& mainGfxCmdCtxPool{ renderContext.GetMainGfxCommandContextPool() };
-        GpuViewManager& gpuViewManager{ renderContext.GetGpuViewManager() };
-        auto renderCmdCtx = mainGfxCmdCtxPool.Request();
+        CommandQueue&       mainGfxQueue{renderContext.GetMainGfxQueue()};
+        CommandContextPool& mainGfxCmdCtxPool{renderContext.GetMainGfxCommandContextPool()};
+        GpuViewManager&     gpuViewManager{renderContext.GetGpuViewManager()};
+        auto                renderCmdCtx = mainGfxCmdCtxPool.Request();
         renderCmdCtx->Begin(pso.get());
         {
             auto bindlessDescriptorHeaps = gpuViewManager.GetBindlessDescriptorHeaps();
             renderCmdCtx->SetDescriptorHeaps(bindlessDescriptorHeaps);
             renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
-            GpuTexture& backBuffer = swapchain.GetBackBuffer();
+            GpuTexture&    backBuffer    = swapchain.GetBackBuffer();
             const GpuView& backBufferRTV = swapchain.GetRenderTargetView();
             renderCmdCtx->AddPendingTextureBarrier(backBuffer,
                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
@@ -172,18 +179,21 @@ namespace ig
                 {
                     StaticMesh& staticMesh = *staticMeshComponent.Mesh;
 
-                    GpuBuffer& indexBuffer = *staticMesh.GetIndexBuffer();
-                    GpuView& vertexBufferSrv = *staticMesh.GetVertexBufferSrv();
+                    GpuBuffer& indexBuffer     = *staticMesh.GetIndexBuffer();
+                    GpuView&   vertexBufferSrv = *staticMesh.GetVertexBufferSrv();
 
                     renderCmdCtx->SetIndexBuffer(indexBuffer);
                     {
-                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
-                        const auto perObjectBuffer = PerObjectBuffer{ .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation()) };
+                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<
+                            PerObjectBuffer>();
+                        const auto perObjectBuffer = PerObjectBuffer{
+                            .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation())
+                        };
                         perObjectConstantBuffer.Write(perObjectBuffer);
 
                         /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
-                        Material& material{ *staticMesh.GetMaterial() };
-                        Texture& diffuseTex{ *material.GetDiffuse() };
+                        Material& material{*staticMesh.GetMaterial()};
+                        Texture&  diffuseTex{*material.GetDiffuse()};
 
                         const BasicRenderResources params{
                             .VertexBufferIdx = vertexBufferSrv.Index,
@@ -196,7 +206,7 @@ namespace ig
                         renderCmdCtx->SetRoot32BitConstants(0, params, 0);
                     }
 
-                    const StaticMesh::Desc& snapshot = staticMesh.GetSnapshot();
+                    const StaticMesh::Desc&     snapshot = staticMesh.GetSnapshot();
                     const StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
                     renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                 }
@@ -204,14 +214,14 @@ namespace ig
         }
         renderCmdCtx->End();
 
-        Ref<CommandContext> renderCmdCtxs[] = { *renderCmdCtx };
+        Ref<CommandContext> renderCmdCtxs[] = {*renderCmdCtx};
         mainGfxQueue.ExecuteContexts(renderCmdCtxs);
     }
 
     void Renderer::EndFrame()
     {
         ZoneScoped;
-        CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
+        CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()] = mainGfxQueue.MakeSync();
         swapchain.Present();
     }

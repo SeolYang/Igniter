@@ -13,31 +13,31 @@
 namespace ig
 {
     CommandContext::CommandContext(CommandContext&& other) noexcept
-        : cmdAllocator(std::move(other.cmdAllocator)),
-          cmdList(std::move(other.cmdList)),
-          cmdListTargetQueueType(other.cmdListTargetQueueType),
-          pendingGlobalBarriers(std::move(other.pendingGlobalBarriers)),
-          pendingTextureBarriers(std::move(other.pendingTextureBarriers)),
-          pendingBufferBarriers(std::move(other.pendingBufferBarriers))
+        : cmdAllocator(std::move(other.cmdAllocator))
+        , cmdList(std::move(other.cmdList))
+        , cmdListTargetQueueType(other.cmdListTargetQueueType)
+        , pendingGlobalBarriers(std::move(other.pendingGlobalBarriers))
+        , pendingTextureBarriers(std::move(other.pendingTextureBarriers))
+        , pendingBufferBarriers(std::move(other.pendingBufferBarriers))
     {
     }
 
     CommandContext::CommandContext(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList,
-                                   const EQueueType targetQueueType)
-        : cmdAllocator(std::move(newCmdAllocator)),
-          cmdList(std::move(newCmdList)),
-          cmdListTargetQueueType(targetQueueType)
+                                   const EQueueType               targetQueueType)
+        : cmdAllocator(std::move(newCmdAllocator))
+        , cmdList(std::move(newCmdList))
+        , cmdListTargetQueueType(targetQueueType)
     {
     }
 
     CommandContext& CommandContext::operator=(CommandContext&& other) noexcept
     {
-        cmdAllocator = std::move(other.cmdAllocator);
-        cmdList = std::move(other.cmdList);
+        cmdAllocator           = std::move(other.cmdAllocator);
+        cmdList                = std::move(other.cmdList);
         cmdListTargetQueueType = other.cmdListTargetQueueType;
-        pendingGlobalBarriers = std::move(other.pendingGlobalBarriers);
+        pendingGlobalBarriers  = std::move(other.pendingGlobalBarriers);
         pendingTextureBarriers = std::move(other.pendingTextureBarriers);
-        pendingBufferBarriers = std::move(other.pendingBufferBarriers);
+        pendingBufferBarriers  = std::move(other.pendingBufferBarriers);
         return *this;
     }
 
@@ -69,39 +69,55 @@ namespace ig
         IG_CHECK(targetTexture);
         IG_CHECK(syncBefore != syncAfter || accessBefore != accessAfter || layoutBefore != layoutAfter);
 
-        pendingTextureBarriers.emplace_back(D3D12_TEXTURE_BARRIER{ .SyncBefore = syncBefore,
-                                                                   .SyncAfter = syncAfter,
-                                                                   .AccessBefore = accessBefore,
-                                                                   .AccessAfter = accessAfter,
-                                                                   .LayoutBefore = layoutBefore,
-                                                                   .LayoutAfter = layoutAfter,
-                                                                   .pResource = &targetTexture.GetNative(),
-                                                                   .Subresources = subresourceRange,
-                                                                   .Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE });
+        pendingTextureBarriers.emplace_back(D3D12_TEXTURE_BARRIER{
+            .SyncBefore = syncBefore,
+            .SyncAfter = syncAfter,
+            .AccessBefore = accessBefore,
+            .AccessAfter = accessAfter,
+            .LayoutBefore = layoutBefore,
+            .LayoutAfter = layoutAfter,
+            .pResource = &targetTexture.GetNative(),
+            .Subresources = subresourceRange,
+            .Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE
+        });
     }
 
-    void CommandContext::AddPendingBufferBarrier(GpuBuffer& targetBuffer, const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter, const size_t offset, const size_t sizeAsBytes)
+    void CommandContext::AddPendingBufferBarrier(GpuBuffer& targetBuffer, const D3D12_BARRIER_SYNC syncBefore,
+                                                 const D3D12_BARRIER_SYNC syncAfter, D3D12_BARRIER_ACCESS accessBefore,
+                                                 const D3D12_BARRIER_ACCESS accessAfter, const size_t offset,
+                                                 const size_t sizeAsBytes)
     {
         IG_CHECK(IsValid());
         IG_CHECK(targetBuffer);
         IG_CHECK(syncBefore != syncAfter || accessBefore != accessAfter);
 
-        pendingBufferBarriers.emplace_back(D3D12_BUFFER_BARRIER{ .SyncBefore = syncBefore,
-                                                                 .SyncAfter = syncAfter,
-                                                                 .AccessBefore = accessBefore,
-                                                                 .AccessAfter = accessAfter,
-                                                                 .pResource = &targetBuffer.GetNative(),
-                                                                 .Offset = offset,
-                                                                 .Size = sizeAsBytes });
+        pendingBufferBarriers.emplace_back(D3D12_BUFFER_BARRIER{
+            .SyncBefore = syncBefore,
+            .SyncAfter = syncAfter,
+            .AccessBefore = accessBefore,
+            .AccessAfter = accessAfter,
+            .pResource = &targetBuffer.GetNative(),
+            .Offset = offset,
+            .Size = sizeAsBytes
+        });
     }
 
     void CommandContext::FlushBarriers()
     {
         IG_CHECK(IsValid());
         const D3D12_BARRIER_GROUP barrierGroups[3] = {
-            { .Type = D3D12_BARRIER_TYPE_GLOBAL, .NumBarriers = static_cast<uint32_t>(pendingGlobalBarriers.size()), .pGlobalBarriers = pendingGlobalBarriers.data() },
-            { .Type = D3D12_BARRIER_TYPE_TEXTURE, .NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()), .pTextureBarriers = pendingTextureBarriers.data() },
-            { .Type = D3D12_BARRIER_TYPE_BUFFER, .NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()), .pBufferBarriers = pendingBufferBarriers.data() }
+            {
+                .Type = D3D12_BARRIER_TYPE_GLOBAL, .NumBarriers = static_cast<uint32_t>(pendingGlobalBarriers.size()),
+                .pGlobalBarriers = pendingGlobalBarriers.data()
+            },
+            {
+                .Type = D3D12_BARRIER_TYPE_TEXTURE, .NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()),
+                .pTextureBarriers = pendingTextureBarriers.data()
+            },
+            {
+                .Type = D3D12_BARRIER_TYPE_BUFFER, .NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()),
+                .pBufferBarriers = pendingBufferBarriers.data()
+            }
         };
 
         cmdList->Barrier(3, barrierGroups);
@@ -110,12 +126,13 @@ namespace ig
         pendingBufferBarriers.clear();
     }
 
-    void CommandContext::ClearRenderTarget(const GpuView& rtv, float r /*= 0.f*/, float g /*= 0.f*/, float b /*= 0.f*/, float a /*= 1.f*/)
+    void CommandContext::ClearRenderTarget(const GpuView& rtv, float r /*= 0.f*/, float g /*= 0.f*/, float b /*= 0.f*/,
+                                           float          a /*= 1.f*/)
     {
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
-        const float rgba[4] = { r, g, b, a };
+        const float rgba[4] = {r, g, b, a};
         cmdList->ClearRenderTargetView(rtv.CPUHandle, rgba, 0, nullptr);
     }
 
@@ -150,7 +167,8 @@ namespace ig
         cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, nullptr);
     }
 
-    void CommandContext::CopyBuffer(GpuBuffer& src, const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes)
+    void CommandContext::CopyBuffer(GpuBuffer& src, const size_t srcOffsetInBytes, const size_t numBytes,
+                                    GpuBuffer& dst, const size_t dstOffsetInBytes)
     {
         IG_CHECK(IsValid());
         IG_CHECK(src);
@@ -168,7 +186,9 @@ namespace ig
         CopyBuffer(src, 0, srcDesc.GetSizeAsBytes(), dst, 0);
     }
 
-    void CommandContext::CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+    void CommandContext::CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst,
+                                           const uint32_t subresourceIdx,
+                                           const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
     {
         IG_CHECK(src);
         IG_CHECK(dst);
@@ -188,30 +208,34 @@ namespace ig
         IG_CHECK(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
         switch (cmdListTargetQueueType)
         {
-            case EQueueType::Direct:
-                cmdList->SetGraphicsRootSignature(&rootSignature.GetNative());
-                break;
+        case EQueueType::Direct:
+            cmdList->SetGraphicsRootSignature(&rootSignature.GetNative());
+            break;
 
-            case EQueueType::AsyncCompute:
-                cmdList->SetComputeRootSignature(&rootSignature.GetNative());
-                break;
+        case EQueueType::AsyncCompute:
+            cmdList->SetComputeRootSignature(&rootSignature.GetNative());
+            break;
         }
     }
 
-    void CommandContext::SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps)
+    void CommandContext::SetDescriptorHeaps(
+        const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps)
     {
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
         std::vector<ID3D12DescriptorHeap*> descriptorHeaps(targetDescriptorHeaps.size());
         std::transform(targetDescriptorHeaps.begin(), targetDescriptorHeaps.end(), descriptorHeaps.begin(),
                        [](DescriptorHeap& descriptorHeap)
-                       { IG_CHECK(descriptorHeap); return &descriptorHeap.GetNative(); });
+                       {
+                           IG_CHECK(descriptorHeap);
+                           return &descriptorHeap.GetNative();
+                       });
         cmdList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()), descriptorHeaps.data());
     }
 
     void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
     {
-        std::reference_wrapper<DescriptorHeap> descriptorHeaps[] = { std::ref(descriptorHeap) };
+        std::reference_wrapper<DescriptorHeap> descriptorHeaps[] = {std::ref(descriptorHeap)};
         SetDescriptorHeaps(descriptorHeaps);
     }
 
@@ -233,17 +257,18 @@ namespace ig
         cmdList->IASetIndexBuffer(&ibView.value());
     }
 
-    void CommandContext::SetRenderTarget(const GpuView& rtv, std::optional<std::reference_wrapper<GpuView>> dsv /*= std::nullopt*/)
+    void CommandContext::SetRenderTarget(const GpuView&                                 rtv,
+                                         std::optional<std::reference_wrapper<GpuView>> dsv /*= std::nullopt*/)
     {
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
         IG_CHECK(!dsv ||
-                 (dsv->get() && (dsv->get().Type == EGpuViewType::DepthStencilView)));
+            (dsv->get() && (dsv->get().Type == EGpuViewType::DepthStencilView)));
 
         const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = rtv.CPUHandle;
         const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle =
-            dsv ? dsv->get().CPUHandle : D3D12_CPU_DESCRIPTOR_HANDLE{};
+                dsv ? dsv->get().CPUHandle : D3D12_CPU_DESCRIPTOR_HANDLE{};
 
         cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, dsv ? &dsvCpuHandle : nullptr);
     }
@@ -254,10 +279,11 @@ namespace ig
         cmdList->IASetPrimitiveTopology(primitiveTopology);
     }
 
-    void CommandContext::SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth /*= 0.f*/, const float maxDepth /*= 1.f*/)
+    void CommandContext::SetViewport(const float topLeftX, const float topLeftY, const float width, const float height,
+                                     const float minDepth /*= 0.f*/, const float maxDepth /*= 1.f*/)
     {
         IG_CHECK(IsValid());
-        const D3D12_VIEWPORT viewport{ topLeftX, topLeftY, width, height, minDepth, maxDepth };
+        const D3D12_VIEWPORT viewport{topLeftX, topLeftY, width, height, minDepth, maxDepth};
         cmdList->RSSetViewports(1, &viewport);
     }
 
@@ -269,13 +295,14 @@ namespace ig
     void CommandContext::SetScissorRect(const long left, const long top, const long right, const long bottom)
     {
         IG_CHECK(IsValid());
-        const D3D12_RECT rect{ left, top, right, bottom };
+        const D3D12_RECT rect{left, top, right, bottom};
         cmdList->RSSetScissorRects(1, &rect);
     }
 
     void CommandContext::SetScissorRect(const Viewport& viewport)
     {
-        SetScissorRect(static_cast<long>(viewport.x), static_cast<long>(viewport.y), static_cast<long>(viewport.width), static_cast<long>(viewport.height));
+        SetScissorRect(static_cast<long>(viewport.x), static_cast<long>(viewport.y), static_cast<long>(viewport.width),
+                       static_cast<long>(viewport.height));
     }
 
     void CommandContext::DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset, const uint32_t vertexOffset)
@@ -284,7 +311,8 @@ namespace ig
         cmdList->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
     }
 
-    void CommandContext::SetRoot32BitConstants(const uint32_t registerSlot, const uint32_t num32BitValuesToSet, const void* srcData, const uint32_t destOffsetIn32BitValues)
+    void CommandContext::SetRoot32BitConstants(const uint32_t registerSlot, const uint32_t num32BitValuesToSet,
+                                               const void*    srcData, const uint32_t      destOffsetIn32BitValues)
     {
         constexpr uint32_t NumMaximumRootConstants = 64;
         IG_VERIFY(num32BitValuesToSet < NumMaximumRootConstants);
@@ -294,15 +322,17 @@ namespace ig
         {
             switch (cmdListTargetQueueType)
             {
-                case EQueueType::Direct:
-                    cmdList->SetGraphicsRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData, destOffsetIn32BitValues);
-                    break;
-                case EQueueType::AsyncCompute:
-                    cmdList->SetComputeRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData, destOffsetIn32BitValues);
-                    break;
-                default:
-                    IG_CHECK_NO_ENTRY();
-                    break;
+            case EQueueType::Direct:
+                cmdList->SetGraphicsRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData,
+                                                       destOffsetIn32BitValues);
+                break;
+            case EQueueType::AsyncCompute:
+                cmdList->SetComputeRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData,
+                                                      destOffsetIn32BitValues);
+                break;
+            default:
+                IG_CHECK_NO_ENTRY();
+                break;
             }
         }
         else
@@ -310,5 +340,4 @@ namespace ig
             IG_CHECK_NO_ENTRY();
         }
     }
-
 } // namespace ig
