@@ -136,6 +136,8 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 #include <spdlog/spdlog.h>
 #pragma warning(pop)
 
+#include <xxhash.h>
+
 #include <Core/Assert.h>
 #include <Core/Types.h>
 #include <Core/Serializable.h>

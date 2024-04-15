@@ -4,11 +4,6 @@
 
 namespace ig
 {
-    constexpr uint64_t String::EvalHash(const std::string_view strView) noexcept
-    {
-        return EvalCRC64(strView);
-    }
-
     String::HashStringMap& String::GetHashStringMap()
     {
         static HashStringMap hashStringMap{};
@@ -61,7 +56,7 @@ namespace ig
 
     bool String::operator==(const std::string_view rhs) const noexcept
     {
-        return this->hashOfString == String::EvalHash(rhs);
+        return this->hashOfString == XXH64(rhs.data(), rhs.length(), 0);
     }
 
     bool String::operator==(const std::wstring_view rhs) const
@@ -80,7 +75,7 @@ namespace ig
             }
             else
             {
-                hashOfString = String::EvalHash(strView);
+                hashOfString = XXH64(strView.data(), strView.length(), 0);
                 IG_CHECK(hashOfString != InvalidHashVal);
 
                 HashStringMap& hashStringMap{GetHashStringMap()};

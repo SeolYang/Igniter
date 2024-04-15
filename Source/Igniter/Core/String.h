@@ -82,8 +82,6 @@ namespace ig
         static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
     private:
-        [[nodiscard]] static constexpr uint64_t EvalHash(const std::string_view strView) noexcept;
-
         using HashStringMap = StableUnorderedMap<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
         [[nodiscard]] static SharedMutex&   GetHashStringMapMutex();
