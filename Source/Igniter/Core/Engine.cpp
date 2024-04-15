@@ -30,49 +30,43 @@ namespace ig
     Igniter::Igniter()
     {
         CoInitializeUnique();
-        const bool bIsFirstEngineCreation = instance == nullptr;
-        IG_CHECK(bIsFirstEngineCreation);
-        if (bIsFirstEngineCreation)
-        {
-            instance = this;
-            IG_LOG(Engine, Info, "Igniter Engine Version {}", version::Version);
-            IG_LOG(Engine, Info, "Igniting Engine Runtime!");
-            //////////////////////// L0 ////////////////////////
-            frameManager = std::make_unique<FrameManager>();
-            timer        = std::make_unique<Timer>();
-            /* #sy_test 임시 윈도우 설명자 */
-            window = std::make_unique<Window>(WindowDescription{
-                .Width = 1920, .Height = 1080, .Title = String(settings::GameName)
-            });
-            renderDevice  = std::make_unique<RenderDevice>();
-            handleManager = std::make_unique<HandleManager>();
-            ////////////////////////////////////////////////////
+        IG_LOG(Engine, Info, "Igniter Engine Version {}", version::Version);
+        IG_LOG(Engine, Info, "Igniting Engine Runtime!");
+        //////////////////////// L0 ////////////////////////
+        frameManager = std::make_unique<FrameManager>();
+        timer        = std::make_unique<Timer>();
+        /* #sy_test 임시 윈도우 설명자 */
+        window = std::make_unique<Window>(WindowDescription{
+            .Width = 1920, .Height = 1080, .Title = String(settings::GameName)
+        });
+        renderDevice  = std::make_unique<RenderDevice>();
+        handleManager = std::make_unique<HandleManager>();
+        ////////////////////////////////////////////////////
 
-            //////////////////////// L1 ////////////////////////
-            inputManager        = std::make_unique<InputManager>(*handleManager);
-            deferredDeallocator = std::make_unique<DeferredDeallocator>(*frameManager);
-            ////////////////////////////////////////////////////
+        //////////////////////// L1 ////////////////////////
+        inputManager        = std::make_unique<InputManager>(*handleManager);
+        deferredDeallocator = std::make_unique<DeferredDeallocator>(*frameManager);
+        ////////////////////////////////////////////////////
 
-            //////////////////////// L2 ////////////////////////
-            renderContext = std::make_unique<RenderContext>(*deferredDeallocator, *renderDevice, *handleManager);
-            ////////////////////////////////////////////////////
+        //////////////////////// L2 ////////////////////////
+        renderContext = std::make_unique<RenderContext>(*deferredDeallocator, *renderDevice, *handleManager);
+        ////////////////////////////////////////////////////
 
-            //////////////////////// L3 ////////////////////////
-            assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *renderContext);
-            /* #sy_test Temporary */
-            ////////////////////////////////////////////////////
+        //////////////////////// L3 ////////////////////////
+        assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *renderContext);
+        /* #sy_test Temporary */
+        ////////////////////////////////////////////////////
 
-            //////////////////////// L4 ////////////////////////
-            renderer = std::make_unique<Renderer>(*frameManager, *window, *renderDevice, *handleManager,
-                                                  *renderContext);
-            imguiRenderer = std::make_unique<ImGuiRenderer>(*frameManager, *window, *renderDevice);
-            ////////////////////////////////////////////////////
+        //////////////////////// L4 ////////////////////////
+        renderer = std::make_unique<Renderer>(*frameManager, *window, *renderDevice, *handleManager,
+                                              *renderContext);
+        imguiRenderer = std::make_unique<ImGuiRenderer>(*frameManager, *window, *renderDevice);
+        ////////////////////////////////////////////////////
 
-            //////////////////////// APP ///////////////////////
-            imguiCanvas  = std::make_unique<ImGuiCanvas>();
-            gameInstance = std::make_unique<GameInstance>();
-            ////////////////////////////////////////////////////
-        }
+        //////////////////////// APP ///////////////////////
+        imguiCanvas  = std::make_unique<ImGuiCanvas>();
+        gameInstance = std::make_unique<GameInstance>();
+        ////////////////////////////////////////////////////
     }
 
     Igniter::~Igniter()
@@ -121,7 +115,7 @@ namespace ig
         }
     }
 
-    int Igniter::Execute()
+    int Igniter::ExecuteImpl()
     {
         IG_LOG(Engine, Info, "Igniting Main Loop!");
         while (!bShouldExit)
@@ -165,10 +159,39 @@ namespace ig
         return 0;
     }
 
-    void Igniter::Exit()
+    int Igniter::Execute()
+    {
+        IG_CHECK(instance != nullptr);
+        return instance->ExecuteImpl();
+    }
+
+    void Igniter::Stop()
     {
         IG_CHECK(instance != nullptr);
         instance->bShouldExit = true;
+    }
+
+    void Igniter::Ignite()
+    {
+        if (instance != nullptr)
+        {
+            IG_CHECK_NO_ENTRY();
+            return;
+        }
+
+        instance = new Igniter();
+    }
+
+    void Igniter::Extinguish()
+    {
+        if (instance == nullptr)
+        {
+            IG_CHECK_NO_ENTRY();
+            return;
+        }
+
+        delete instance;
+        instance = nullptr;
     }
 
     FrameManager& Igniter::GetFrameManager()
@@ -247,7 +270,6 @@ namespace ig
     {
         if (Igniter::instance == nullptr)
         {
-            IG_CHECK_NO_ENTRY();
             return std::nullopt;
         }
 

@@ -45,7 +45,7 @@ namespace fe
 
                 if (ImGui::MenuItem("Exit (Alt+F4)"))
                 {
-                    ig::Igniter::Exit();
+                    ig::Igniter::Stop();
                 }
 
                 ImGui::EndMenu();

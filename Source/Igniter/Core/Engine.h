@@ -22,8 +22,12 @@ namespace ig
     class Igniter final
     {
     public:
-        Igniter();
         ~Igniter();
+
+        Igniter(const Igniter&)                = delete;
+        Igniter(Igniter&&) noexcept            = delete;
+        Igniter& operator=(const Igniter&)     = delete;
+        Igniter& operator=(Igniter&&) noexcept = delete;
 
         [[nodiscard]] static FrameManager&            GetFrameManager();
         [[nodiscard]] static Timer&                   GetTimer();
@@ -40,13 +44,19 @@ namespace ig
         [[nodiscard]] static OptionalRef<ImGuiCanvas> TryGetImGuiCanvas();
         [[nodiscard]] static GameInstance&            GetGameInstance();
 
-        bool IsValid() const { return this == instance; }
+        [[nodiscard]] bool IsValid() const { return this == instance; }
 
         bool static IsInitialized() { return instance != nullptr; }
 
-        [[nodiscard]] static void Exit();
+        static void Ignite();
+        static void Extinguish();
+        static void Stop();
+        static int Execute();
 
-        int Execute();
+    private:
+        Igniter();
+
+        int ExecuteImpl();
 
     private:
         static Igniter* instance;
