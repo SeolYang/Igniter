@@ -74,9 +74,9 @@ namespace ig
      * #sy_ref https://stackoverflow.com/questions/56292104/hashing-types-at-compile-time-in-c17-c2a
      */
     template <typename T>
-    constexpr uint64_t EvalHashOfType() noexcept
+    consteval uint64_t EvalHashOfType() noexcept
     {
-        return EvalCRC64(__FUNCSIG__);
+        return EvalCRC64(std::string_view{__FUNCSIG__ + 44, sizeof(__FUNCSIG__) - 45 - 16});
     }
 
     template <typename T>
