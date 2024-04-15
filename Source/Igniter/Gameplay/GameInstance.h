@@ -23,9 +23,9 @@ namespace ig
 
         void SetGameMode(std::unique_ptr<GameMode> newGameMode);
 
-        OptionalRef<GameMode> GetGameMode()
+        Option<Ref<GameMode>> GetGameMode()
         {
-            return gameMode != nullptr ? MakeOptionalRef(*gameMode) : std::nullopt;
+            return gameMode != nullptr ? Some(*gameMode) : std::nullopt;
         }
 
     private:

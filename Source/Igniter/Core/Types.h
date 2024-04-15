@@ -20,22 +20,57 @@ namespace ig
     using UniqueLock     = std::unique_lock<Mutex>;
 
     template <typename T>
-    using OptionalRef = std::optional<std::reference_wrapper<T>>;
+    using Ref = std::reference_wrapper<T>;
 
     template <typename T>
-    OptionalRef<T> MakeOptionalRef(T& ref)
+    using CRef = Ref<const T>;
+
+    template <typename T>
+    using Option = std::optional<T>;
+
+    template <typename T>
+    Option<T> Some(T&& val)
     {
-        return std::make_optional(std::ref(ref));
+        return std::make_optional(std::forward<T>(val));
     }
 
     template <typename T>
-    using Ptr = std::unique_ptr<T>;
+    Option<T> None()
+    {
+        return std::nullopt;
+    }
+
+    template <typename T>
+    Option<Ref<T>> Some(T& reference)
+    {
+        return std::make_optional(std::ref(reference));
+    }
+
+    template <typename T>
+    Option<Ref<T>> Some(const T& reference)
+    {
+        return std::make_optional(std::cref(reference));
+    }
+
+    template <typename T, typename Dx = std::default_delete<T>>
+    using Ptr = std::unique_ptr<T, Dx>;
+
+    template <typename T, typename... Args>
+        requires !std::is_array_v<T>
+    Ptr<T> MakePtr(Args&&... args)
+    {
+        return std::make_unique<T>(std::forward<Args>(args)...);
+    }
+
+    template <typename T>
+    requires std::is_array_v<T>
+    Ptr<T> MakePtr(const size_t size)
+    {
+        return std::make_unique<T>(size);
+    }
 
     template <typename T>
     using SharedPtr = std::shared_ptr<T>;
-
-    template <typename T>
-    using Ref = std::reference_wrapper<T>;
 
     template <typename Key, typename T>
     using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;

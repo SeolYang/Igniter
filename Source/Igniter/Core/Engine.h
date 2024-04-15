@@ -41,7 +41,6 @@ namespace ig
         [[nodiscard]] static Renderer&                GetRenderer();
         [[nodiscard]] static ImGuiRenderer&           GetImGuiRenderer();
         [[nodiscard]] static ImGuiCanvas&             GetImGuiCanvas();
-        [[nodiscard]] static OptionalRef<ImGuiCanvas> TryGetImGuiCanvas();
         [[nodiscard]] static GameInstance&            GetGameInstance();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
