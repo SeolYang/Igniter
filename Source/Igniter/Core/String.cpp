@@ -1,6 +1,6 @@
 #include <Igniter.h>
 #include <Core/String.h>
-#include <Core/ContainerUtils.h>
+#include <Core/Regex.h>
 
 namespace ig
 {
@@ -16,11 +16,6 @@ namespace ig
         return hashStringMapMutex;
     }
 
-    String::String(const String& other)
-        : hashOfString(other.hashOfString)
-    {
-    }
-
     String::String(const std::string_view strView)
     {
         SetString(strView);
@@ -29,12 +24,6 @@ namespace ig
     String::String(const std::wstring_view strView)
     {
         SetString(Narrower(strView));
-    }
-
-    String& String::operator=(const String& rhs)
-    {
-        hashOfString = rhs.hashOfString;
-        return *this;
     }
 
     String& String::operator=(const std::string_view rhs)
@@ -47,11 +36,6 @@ namespace ig
     {
         SetString(Narrower(rhs));
         return *this;
-    }
-
-    bool String::operator==(const String& rhs) const noexcept
-    {
-        return hashOfString == rhs.hashOfString;
     }
 
     bool String::operator==(const std::string_view rhs) const noexcept
@@ -166,5 +150,27 @@ namespace ig
         cachedStrs.emplace_back(0, std::string_view{""});
 
         return cachedStrs;
+    }
+
+    String CamelCaseToTitleCase(const String& str)
+    {
+        if (!str.IsValid())
+        {
+            return String{};
+        }
+
+        static const std::regex LetterSpacingRegex{"([a-z])([A-Z])", std::regex_constants::optimize};
+        static const std::regex NumberSpacingRegex{"([a-zA-Z])([0-9])", std::regex_constants::optimize};
+        static const String ReplacePattern{"$1 $2"};
+
+        String spacedStr = RegexReplace(str, LetterSpacingRegex, ReplacePattern);
+        spacedStr = RegexReplace(spacedStr, NumberSpacingRegex, ReplacePattern);
+        std::string  value{spacedStr.ToStandard()};
+        std::transform(value.begin(), value.begin() + 1, value.begin(), [](const char character)
+        {
+            return (char)std::toupper((int)character);
+        });
+
+        return String{value};
     }
 } // namespace ig

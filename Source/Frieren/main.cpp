@@ -179,7 +179,7 @@ int main()
             registry.emplace<MainCameraTag>(cameraEntity);
         }
         /********************************************/
-        
+
         /* #sy_test ImGui integration tests */
         ImGuiCanvas& canvas    = Igniter::GetImGuiCanvas();
         auto&        mainLayer = canvas.AddLayer<MainLayer>(canvas);

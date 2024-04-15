@@ -45,13 +45,15 @@ namespace ig
     class String final
     {
     public:
-        String() = default;
-        String(const String& other);
+        String() noexcept              = default;
+        String(const String&) noexcept = default;
+        String(String&&) noexcept      = default;
         String(const std::string_view strView);
         String(const std::wstring_view strView);
-        ~String() = default;
+        ~String() noexcept = default;
 
-        String& operator=(const String& rhs);
+        String& operator=(const String&) noexcept = default;
+        String& operator=(String&&) noexcept      = default;
         String& operator=(const std::string_view rhs);
         String& operator=(const std::wstring_view rhs);
 
@@ -59,7 +61,7 @@ namespace ig
         [[nodiscard]] operator std::string_view() const { return ToStringView(); }
         [[nodiscard]] operator std::wstring() const { return ToWideString(); }
 
-        [[nodiscard]] bool operator==(const String& rhs) const noexcept;
+        [[nodiscard]] bool operator==(const String& rhs) const noexcept = default;
         [[nodiscard]] bool operator==(const std::string_view rhs) const noexcept;
         [[nodiscard]] bool operator==(const std::wstring_view rhs) const;
 
@@ -99,10 +101,12 @@ namespace ig
     {
         return std::wstring_view{wstr, count};
     }
+
+    String CamelCaseToTitleCase(const String& str);
 } // namespace ig
 
 template <>
-class std::hash<ig::String>
+struct std::hash<ig::String>
 {
 public:
     [[nodiscard]] size_t operator()(const ig::String& str) const noexcept { return str.GetHash(); }
