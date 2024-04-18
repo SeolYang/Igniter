@@ -82,28 +82,28 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf_v<T>, guid);
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf<T>, guid);
                 return false;
             }
 
             bool                   bSuceeded = false;
             const typename T::Desc desc{assetMonitor->GetDesc<T>(guid)};
-            if constexpr (AssetTypeOf_v<T> == EAssetType::Texture)
+            if constexpr (AssetTypeOf<T> == EAssetType::Texture)
             {
                 bSuceeded = ReloadImpl<Texture>(guid, desc, *textureLoader);
             }
-            else if constexpr (AssetTypeOf_v<T> == EAssetType::StaticMesh)
+            else if constexpr (AssetTypeOf<T> == EAssetType::StaticMesh)
             {
                 bSuceeded = ReloadImpl<StaticMesh>(guid, desc, *staticMeshLoader);
             }
-            else if constexpr (AssetTypeOf_v<T> == EAssetType::Material)
+            else if constexpr (AssetTypeOf<T> == EAssetType::Material)
             {
                 bSuceeded = ReloadImpl<Material>(guid, desc, *materialLoader);
             }
             else
             {
                 IG_CHECK_NO_ENTRY();
-                IG_LOG(AssetManager, Error, "Reload Unsupported Asset Type {}.", AssetTypeOf_v<T>);
+                IG_LOG(AssetManager, Error, "Reload Unsupported Asset Type {}.", AssetTypeOf<T>);
             }
 
             if (bSuceeded)
@@ -155,7 +155,7 @@ namespace ig
         template <Asset T>
         details::AssetCache<T>& GetCache()
         {
-            return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetTypeOf_v<T>));
+            return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetTypeOf<T>));
         }
 
         details::TypelessAssetCache& GetTypelessCache(const EAssetType assetType);
@@ -167,7 +167,7 @@ namespace ig
         template <Asset T, ResultStatus ImportStatus>
         std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)
         {
-            constexpr auto AssetType{AssetTypeOf_v<T>};
+            constexpr auto AssetType{AssetTypeOf<T>};
             if (!result.HasOwnership())
             {
                 IG_LOG(AssetManager, Error, "{}: Failed({}) to import \"{}\".",
@@ -242,7 +242,7 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf_v<T>, guid);
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf<T>, guid);
                 return CachedAsset<T>{};
             }
 
@@ -256,17 +256,17 @@ namespace ig
                 if (!result.HasOwnership())
                 {
                     IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).",
-                           AssetTypeOf_v<T>, result.GetStatus(),
+                           AssetTypeOf<T>, result.GetStatus(),
                            desc.Info.GetVirtualPath(), guid);
                     return CachedAsset<T>{};
                 }
 
                 assetCache.Cache(guid, result.Take());
-                IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.", AssetTypeOf_v<T>, desc.Info.GetVirtualPath(),
+                IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.", AssetTypeOf<T>, desc.Info.GetVirtualPath(),
                        guid);
             }
 
-            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf_v<T>, guid);
+            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf<T>, guid);
             bIsDirty = true;
             return assetCache.Load(guid);
         }
@@ -293,7 +293,7 @@ namespace ig
             auto result{loader.Load(desc)};
             if (!result.HasOwnership())
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" failed to reload.", AssetTypeOf_v<T>, guid);
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" failed to reload.", AssetTypeOf<T>, guid);
                 return false;
             }
 
@@ -320,7 +320,7 @@ namespace ig
             if (!assetResult.HasOwnership())
             {
                 IG_LOG(AssetManager, Error, "{}: Failed({}) to create engine default asset {}.",
-                       AssetTypeOf_v<T>, assetResult.GetStatus(), requiredVirtualPath);
+                       AssetTypeOf<T>, assetResult.GetStatus(), requiredVirtualPath);
                 return;
             }
 
@@ -328,7 +328,7 @@ namespace ig
             const typename T::Desc& desc{asset.GetSnapshot()};
             const AssetInfo&        assetInfo{desc.Info};
             IG_CHECK(assetInfo.IsValid());
-            IG_CHECK(assetInfo.GetType() == AssetTypeOf_v<T>);
+            IG_CHECK(assetInfo.GetType() == AssetTypeOf<T>);
             IG_CHECK(assetInfo.GetScope() == EAssetScope::Engine);
 
             /* #sy_note GUID를 고정으로 할지 말지.. 일단 Virtual Path는 고정적이고, Import 되고난 이후엔 Virtual Path로 접근 가능하니 유동적으로 */

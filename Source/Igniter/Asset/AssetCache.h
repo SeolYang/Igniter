@@ -136,7 +136,7 @@ namespace ig::details
         }
 
     public:
-        constexpr static EAssetType AssetType = AssetTypeOf_v<T>;
+        constexpr static EAssetType AssetType = AssetTypeOf<T>;
 
     private:
         HandleManager& handleManager;

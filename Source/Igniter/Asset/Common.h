@@ -107,10 +107,10 @@ namespace ig
     };
 
     template <typename T>
-    inline constexpr EAssetType AssetTypeOf_v = EAssetType::Unknown;
+    inline constexpr EAssetType AssetTypeOf = EAssetType::Unknown;
 
     template <typename T>
-        requires(AssetTypeOf_v<T> != EAssetType::Unknown)
+        requires(AssetTypeOf<T> != EAssetType::Unknown)
     struct AssetDesc
     {
         AssetInfo   Info;
@@ -119,21 +119,21 @@ namespace ig
 
     template <typename T>
     concept Asset = requires(T asset)
-    {
-        typename T::ImportDesc;
-        typename T::LoadDesc;
-        typename T::Desc;
-        {
-            asset.GetSnapshot()
-        } -> std::same_as<const typename T::Desc&>;
-    } && std::is_move_constructible_v<T> && std::is_move_assignable_v<T> && std::is_same_v<
-        typename T::Desc, AssetDesc<T>> && AssetTypeOf_v<T> != EAssetType::Unknown;
+            {
+                typename T::ImportDesc;
+                typename T::LoadDesc;
+                typename T::Desc;
+                {
+                    asset.GetSnapshot()
+                } -> std::same_as<const typename T::Desc&>;
+            } && std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
+            std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf<T> != EAssetType::Unknown;
 
     template <typename T>
-    inline constexpr bool IsAsset_v = false;
+    inline constexpr bool IsAsset = false;
 
     template <Asset T>
-    inline constexpr bool IsAsset_v<T> = true;
+    inline constexpr bool IsAsset<T> = true;
 
     namespace details
     {

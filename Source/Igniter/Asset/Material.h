@@ -9,7 +9,7 @@ namespace ig
 {
     class Material;
     template <>
-    constexpr inline EAssetType AssetTypeOf_v<Material> = EAssetType::Material;
+    constexpr inline EAssetType AssetTypeOf<Material> = EAssetType::Material;
 
     struct MaterialCreateDesc final
     {

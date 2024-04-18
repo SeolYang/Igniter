@@ -10,7 +10,7 @@ namespace ig
 {
     class StaticMesh;
     template <>
-    constexpr inline EAssetType AssetTypeOf_v<StaticMesh> = EAssetType::StaticMesh;
+    constexpr inline EAssetType AssetTypeOf<StaticMesh> = EAssetType::StaticMesh;
 
     struct StaticMeshImportDesc
     {

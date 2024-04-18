@@ -101,7 +101,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h" />
     <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
-    <ClInclude Include="..\Source\Igniter\Reflection\Type.h" />
+    <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
     <ClInclude Include="..\Source\Igniter\Render\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Render\GpuUploader.h" />
@@ -255,6 +255,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -262,6 +263,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -269,6 +271,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>true</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -277,6 +280,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -343,6 +347,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -377,6 +382,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -411,6 +417,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -446,6 +453,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

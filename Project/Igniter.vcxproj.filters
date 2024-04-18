@@ -381,7 +381,7 @@
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Reflection\Type.h">
+    <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h">
       <Filter>Source\Reflection</Filter>
     </ClInclude>
   </ItemGroup>

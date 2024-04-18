@@ -136,8 +136,8 @@ namespace ig::details
         [[nodiscard]] T::LoadDesc GetLoadDesc(const String virtualPath) const
         {
             ReadOnlyLock lock{mutex};
-            IG_CHECK(ContainsUnsafe(AssetTypeOf_v<T>, virtualPath));
-            return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath));
+            IG_CHECK(ContainsUnsafe(AssetTypeOf<T>, virtualPath));
+            return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf<T>, virtualPath));
         }
 
         template <Asset T>
@@ -151,8 +151,8 @@ namespace ig::details
         [[nodiscard]] void UpdateLoadDesc(const String virtualPath, const typename T::LoadDesc& loadDesc)
         {
             ReadWriteLock rwLock{mutex};
-            IG_CHECK(ContainsUnsafe(AssetTypeOf_v<T>, virtualPath));
-            UpdateLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath), loadDesc);
+            IG_CHECK(ContainsUnsafe(AssetTypeOf<T>, virtualPath));
+            UpdateLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf<T>, virtualPath), loadDesc);
         }
 
         template <Asset T>
@@ -166,8 +166,8 @@ namespace ig::details
         [[nodiscard]] T::Desc GetDesc(const String virtualPath) const
         {
             ReadOnlyLock lock{mutex};
-            IG_CHECK(ContainsUnsafe(AssetTypeOf_v<T>, virtualPath));
-            return GetDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf_v<T>, virtualPath));
+            IG_CHECK(ContainsUnsafe(AssetTypeOf<T>, virtualPath));
+            return GetDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf<T>, virtualPath));
         }
 
         template <Asset T>
@@ -206,13 +206,13 @@ namespace ig::details
         template <Asset T>
         AssetDescMap<T>& GetDescMap()
         {
-            return static_cast<AssetDescMap<T>&>(GetDescMap(AssetTypeOf_v<T>));
+            return static_cast<AssetDescMap<T>&>(GetDescMap(AssetTypeOf<T>));
         }
 
         template <Asset T>
         const AssetDescMap<T>& GetDescMap() const
         {
-            return static_cast<const AssetDescMap<T>&>(GetDescMap(AssetTypeOf_v<T>));
+            return static_cast<const AssetDescMap<T>&>(GetDescMap(AssetTypeOf<T>));
         }
 
         TypelessAssetDescMap&       GetDescMap(const EAssetType assetType);
