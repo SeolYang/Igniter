@@ -20,8 +20,8 @@ namespace ig
     struct MaterialLoadDesc final
     {
     public:
-        json&       Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
+        Json&       Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
 
     public:
         Guid DiffuseTexGuid{DefaultTextureGuid};

@@ -72,6 +72,8 @@ namespace ig
     template <typename T>
     using SharedPtr = std::shared_ptr<T>;
 
+    using Path = std::filesystem::path;
+
     template <typename Key, typename T>
     using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;
 
@@ -87,7 +89,7 @@ namespace ig
     using Entity   = entt::entity;
     using Registry = entt::registry;
 
-    using json = nlohmann::json;
+    using Json = nlohmann::json;
     using Guid = xg::Guid;
 
     constexpr uint64_t InvalidIndex    = 0xffffffffffffffffUi64;

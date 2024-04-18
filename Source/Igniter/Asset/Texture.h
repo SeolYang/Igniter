@@ -29,8 +29,8 @@ namespace ig
     struct TextureImportDesc
     {
     public:
-        json&       Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
+        Json&       Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
 
     public:
         ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
@@ -45,8 +45,8 @@ namespace ig
     struct TextureLoadDesc
     {
     public:
-        json&       Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
+        Json&       Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
 
         [[nodiscard]] bool IsArray() const { return Dimension != ETextureDimension::Tex3D && DepthOrArrayLength > 1; }
 

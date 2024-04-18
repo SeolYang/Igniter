@@ -3,24 +3,24 @@
 
 namespace ig
 {
-    inline json LoadJsonFromFile(const fs::path& path)
+    inline Json LoadJsonFromFile(const Path& path)
     {
         if (!fs::exists(path))
         {
-            return json{};
+            return Json{};
         }
 
         std::ifstream fileStream{path.c_str()};
         if (!fileStream.is_open())
         {
-            return json{};
+            return Json{};
         }
 
-        json newJson{json::parse(fileStream, nullptr, false)};
-        return newJson.is_discarded() ? json{} : newJson;
+        Json newJson{Json::parse(fileStream, nullptr, false)};
+        return newJson.is_discarded() ? Json{} : newJson;
     }
 
-    inline bool SaveJsonToFile(const fs::path& path, const json& jsonData)
+    inline bool SaveJsonToFile(const Path& path, const Json& jsonData)
     {
         std::ofstream fileStream{path.c_str()};
         if (!fileStream.is_open())
@@ -33,7 +33,7 @@ namespace ig
         return true;
     }
 
-    inline std::vector<uint8_t> LoadBlobFromFile(const fs::path& path)
+    inline std::vector<uint8_t> LoadBlobFromFile(const Path& path)
     {
         std::vector<uint8_t> blob;
         if (!fs::exists(path))
@@ -54,7 +54,7 @@ namespace ig
         return blob;
     }
 
-    inline bool SaveBlobToFile(const fs::path& path, const std::span<const uint8_t> blob)
+    inline bool SaveBlobToFile(const Path& path, const std::span<const uint8_t> blob)
     {
         IG_CHECK(blob.size_bytes() > 0);
 
@@ -70,7 +70,7 @@ namespace ig
     }
 
     template <size_t N>
-    inline bool SaveBlobsToFile(const fs::path& path, const std::array<std::span<const uint8_t>, N> blobs)
+    inline bool SaveBlobsToFile(const Path& path, const std::array<std::span<const uint8_t>, N> blobs)
     {
         IG_CHECK(blobs.size() > 0);
         std::ofstream fileStream{path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc};

@@ -87,7 +87,7 @@ namespace ig
     {
     public:
         EFileWatchAction Action;
-        fs::path         Path{};
+        Path         Path{};
         uint64_t         CreationTime{};
         uint64_t         LastModificationTime{};
         uint64_t         LastChangeTime{};
@@ -111,7 +111,7 @@ namespace ig
         static details::FileWatchTask Watch(CoFileWatcher* watcher);
 
     private:
-        fs::path directoryPath;
+        Path directoryPath;
         HANDLE   directory{INVALID_HANDLE_VALUE};
 
         bool bStopWatching{false};

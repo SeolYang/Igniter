@@ -15,8 +15,8 @@ namespace ig
     struct StaticMeshImportDesc
     {
     public:
-        json&       Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
+        Json&       Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
 
     public:
         bool bMakeLeftHanded        = true;
@@ -35,8 +35,8 @@ namespace ig
     struct StaticMeshLoadDesc
     {
     public:
-        json&       Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
+        Json&       Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
 
     public:
         uint32_t NumVertices{0};

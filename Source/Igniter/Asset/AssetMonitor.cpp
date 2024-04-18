@@ -24,10 +24,10 @@ namespace ig::details
 
     void AssetMonitor::InitAssetDescTables()
     {
-        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Texture, std::make_unique<AssetDescMap<Texture>>()));
+        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Texture, MakePtr<AssetDescMap<Texture>>()));
         guidDescTables.emplace_back(
-            std::make_pair(EAssetCategory::StaticMesh, std::make_unique<AssetDescMap<StaticMesh>>()));
-        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Material, std::make_unique<AssetDescMap<Material>>()));
+            std::make_pair(EAssetCategory::StaticMesh, MakePtr<AssetDescMap<StaticMesh>>()));
+        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Material, MakePtr<AssetDescMap<Material>>()));
     }
 
     void AssetMonitor::InitVirtualPathGuidTables()
@@ -38,7 +38,7 @@ namespace ig::details
 
             if (assetType != EAssetCategory::Unknown)
             {
-                const fs::path typeDirPath{GetAssetDirectoryPath(assetType)};
+                const Path typeDirPath{GetAssetDirectoryPath(assetType)};
                 if (!fs::exists(typeDirPath))
                 {
                     fs::create_directories(typeDirPath);
@@ -77,7 +77,7 @@ namespace ig::details
                         continue;
                     }
 
-                    fs::path metadataPath{entry.path()};
+                    Path metadataPath{entry.path()};
                     metadataPath.replace_extension(details::MetadataExt);
                     if (!fs::exists(metadataPath))
                     {
@@ -87,7 +87,7 @@ namespace ig::details
                         continue;
                     }
 
-                    json      serializedMetadata{LoadJsonFromFile(metadataPath)};
+                    Json      serializedMetadata{LoadJsonFromFile(metadataPath)};
                     AssetInfo assetInfo{};
                     serializedMetadata >> assetInfo;
 
@@ -331,8 +331,8 @@ namespace ig::details
             const String expiredVirtualPath{expiredAssetInfo.GetVirtualPath()};
 
             IG_CHECK(expiredAssetInfoPair.first == expiredGuid);
-            const fs::path metadataPath{MakeAssetMetadataPath(expiredAssetInfo.GetCategory(), expiredGuid)};
-            const fs::path assetPath{MakeAssetPath(expiredAssetInfo.GetCategory(), expiredGuid)};
+            const Path metadataPath{MakeAssetMetadataPath(expiredAssetInfo.GetCategory(), expiredGuid)};
+            const Path assetPath{MakeAssetPath(expiredAssetInfo.GetCategory(), expiredGuid)};
             if (fs::exists(metadataPath))
             {
                 IG_ENSURE(fs::remove(metadataPath));
@@ -357,8 +357,8 @@ namespace ig::details
         for (const auto& assetTypeDescTablePair : guidDescTables)
         {
             TypelessAssetDescMap& descMap{*assetTypeDescTablePair.second};
-            std::vector<json>     serializedDescs{descMap.GetSerializedDescs()};
-            for (const json& serializedDesc : serializedDescs)
+            std::vector<Json>     serializedDescs{descMap.GetSerializedDescs()};
+            for (const Json& serializedDesc : serializedDescs)
             {
                 AssetInfo assetInfo{};
                 serializedDesc >> assetInfo;
@@ -369,7 +369,7 @@ namespace ig::details
                     const Guid   guid{assetInfo.GetGuid()};
                     const String virtualPath{assetInfo.GetVirtualPath()};
 
-                    const fs::path metadataPath{MakeAssetMetadataPath(assetInfo.GetCategory(), guid)};
+                    const Path metadataPath{MakeAssetMetadataPath(assetInfo.GetCategory(), guid)};
                     IG_ENSURE(SaveJsonToFile(metadataPath, serializedDesc));
                     IG_LOG(AssetMonitor, Debug, "{} Asset metadata Saved: {} ({})",
                            assetInfo.GetCategory(),
@@ -381,7 +381,7 @@ namespace ig::details
 
     void AssetMonitor::CleanupOrphanFiles()
     {
-        std::vector<fs::path> orphanFiles{};
+        std::vector<Path> orphanFiles{};
         for (const auto assetType : magic_enum::enum_values<EAssetCategory>())
         {
             if (assetType == EAssetCategory::Unknown)
@@ -392,7 +392,7 @@ namespace ig::details
             fs::directory_iterator directoryItr{GetAssetDirectoryPath(assetType)};
             while (directoryItr != fs::end(directoryItr))
             {
-                fs::path path{directoryItr->path()};
+                Path path{directoryItr->path()};
                 if (!fs::is_regular_file(path))
                 {
                     ++directoryItr;
@@ -419,7 +419,7 @@ namespace ig::details
             }
         }
 
-        for (const fs::path& orphanFilePath : orphanFiles)
+        for (const Path& orphanFilePath : orphanFiles)
         {
             IG_LOG(AssetMonitor, Info, "Removing unreferenced(orphan) file: {}...", orphanFilePath.string());
             fs::remove(orphanFilePath);

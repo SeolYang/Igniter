@@ -9,12 +9,12 @@ namespace ig
     }
 
     template <typename Component>
-    void SerializeComponent(Registry&, const Entity, json&)
+    void SerializeComponent(Registry&, const Entity, Json&)
     {
     }
 
     template <typename Component>
-    void DeserializeComponent(Registry&, const Entity, const json&)
+    void DeserializeComponent(Registry&, const Entity, const Json&)
     {
     }
 
@@ -22,8 +22,8 @@ namespace ig
     {
     public:
         using ComponentEvent      = std::function<void(Registry&, const Entity)>;
-        using SerializeCallback   = std::function<void(Registry&, const Entity, json&)>;
-        using DeserializeCallback = std::function<void(Registry&, const Entity, const json&)>;
+        using SerializeCallback   = std::function<void(Registry&, const Entity, Json&)>;
+        using DeserializeCallback = std::function<void(Registry&, const Entity, const Json&)>;
 
         struct ComponentInfo final
         {

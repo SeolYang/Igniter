@@ -6,7 +6,7 @@
 
 namespace ig
 {
-    json& StaticMeshImportDesc::Serialize(json& archive) const
+    Json& StaticMeshImportDesc::Serialize(Json& archive) const
     {
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bMakeLeftHanded);
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateNormals);
@@ -21,7 +21,7 @@ namespace ig
         return archive;
     }
 
-    const json& StaticMeshImportDesc::Deserialize(const json& archive)
+    const Json& StaticMeshImportDesc::Deserialize(const Json& archive)
     {
         *this = {};
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bMakeLeftHanded, bMakeLeftHanded);
@@ -37,7 +37,7 @@ namespace ig
         return archive;
     }
 
-    json& StaticMeshLoadDesc::Serialize(json& archive) const
+    Json& StaticMeshLoadDesc::Serialize(Json& archive) const
     {
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices);
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices);
@@ -47,7 +47,7 @@ namespace ig
         return archive;
     }
 
-    const json& StaticMeshLoadDesc::Deserialize(const json& archive)
+    const Json& StaticMeshLoadDesc::Deserialize(const Json& archive)
     {
         *this = {};
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices, NumVertices);

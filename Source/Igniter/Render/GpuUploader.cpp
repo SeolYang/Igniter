@@ -17,7 +17,7 @@ namespace ig
         for (size_t idx = 0; idx < RequestCapacity; ++idx)
         {
             uploadRequests[idx].Reset();
-            uploadRequests[idx].CmdCtx = std::make_unique<CommandContext>(
+            uploadRequests[idx].CmdCtx = MakePtr<CommandContext>(
                 renderDevice.CreateCommandContext(std::format("Gpu Uploader CmdCtx{}", idx), EQueueType::Copy).value());
         }
     }
@@ -213,7 +213,7 @@ namespace ig
             GpuBufferDesc     bufferDesc{};
             bufferDesc.AsUploadBuffer(static_cast<uint32_t>(alignedNewSize));
             bufferDesc.DebugName = UploadBufferName;
-            buffer               = std::make_unique<GpuBuffer>(renderDevice.CreateBuffer(bufferDesc).value());
+            buffer               = MakePtr<GpuBuffer>(renderDevice.CreateBuffer(bufferDesc).value());
 
             bufferCapacity        = alignedNewSize;
             bufferHead            = 0;

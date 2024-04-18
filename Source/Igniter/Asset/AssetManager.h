@@ -204,10 +204,10 @@ namespace ig
 
                 assetMonitor->Remove(oldAssetInfo.GetGuid(), false);
 
-                const fs::path oldAssetPath{MakeAssetPath(AssetType, oldAssetInfo.GetGuid())};
-                const fs::path oldAssetMetadataPath{MakeAssetMetadataPath(AssetType, oldAssetInfo.GetGuid())};
-                const fs::path currentAssetPath{MakeAssetPath(AssetType, assetInfo.GetGuid())};
-                const fs::path currentAssetMetadataPath{MakeAssetMetadataPath(AssetType, assetInfo.GetGuid())};
+                const Path oldAssetPath{MakeAssetPath(AssetType, oldAssetInfo.GetGuid())};
+                const Path oldAssetMetadataPath{MakeAssetMetadataPath(AssetType, oldAssetInfo.GetGuid())};
+                const Path currentAssetPath{MakeAssetPath(AssetType, assetInfo.GetGuid())};
+                const Path currentAssetMetadataPath{MakeAssetMetadataPath(AssetType, assetInfo.GetGuid())};
                 IG_CHECK(fs::exists(oldAssetPath));
                 IG_CHECK(fs::exists(oldAssetMetadataPath));
                 IG_CHECK(fs::exists(currentAssetPath));

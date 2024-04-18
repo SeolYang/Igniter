@@ -6,7 +6,7 @@
 
 namespace ig
 {
-    json& TextureImportDesc::Serialize(json& archive) const
+    Json& TextureImportDesc::Serialize(Json& archive) const
     {
         IG_SERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, CompressionMode);
         IG_SERIALIZE_JSON_SIMPLE(TextureImportDesc, archive, bGenerateMips);
@@ -17,7 +17,7 @@ namespace ig
         return archive;
     }
 
-    const json& TextureImportDesc::Deserialize(const json& archive)
+    const Json& TextureImportDesc::Deserialize(const Json& archive)
     {
         *this = {};
         IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, CompressionMode, ETextureCompressionMode::None);
@@ -29,7 +29,7 @@ namespace ig
         return archive;
     }
 
-    json& TextureLoadDesc::Serialize(json& archive) const
+    Json& TextureLoadDesc::Serialize(Json& archive) const
     {
         IG_SERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Format);
         IG_SERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Dimension);
@@ -45,7 +45,7 @@ namespace ig
         return archive;
     }
 
-    const json& TextureLoadDesc::Deserialize(const json& archive)
+    const Json& TextureLoadDesc::Deserialize(const Json& archive)
     {
         *this = {};
         IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Format, DXGI_FORMAT_UNKNOWN);

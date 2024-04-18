@@ -71,9 +71,9 @@ namespace ig
         [[nodiscard]] std::string_view   ToStringView() const;
         [[nodiscard]] const char*        ToCString() const;
         [[nodiscard]] std::wstring       ToWideString() const;
-        [[nodiscard]] fs::path           ToPath() const;
+        [[nodiscard]] Path           ToPath() const;
 
-        [[nodiscard]] static String FromPath(const fs::path& path);
+        [[nodiscard]] static String FromPath(const Path& path);
 
         [[nodiscard]] uint64_t GetHash() const noexcept { return hashOfString; }
         [[nodiscard]] bool     IsValid() const noexcept { return hashOfString != InvalidHashVal; }

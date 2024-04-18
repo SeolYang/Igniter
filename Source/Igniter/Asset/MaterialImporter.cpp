@@ -41,17 +41,17 @@ namespace ig
             .DiffuseTexGuid = diffuseTexGuid
         };
 
-        json serializedMeta{};
+        Json serializedMeta{};
         serializedMeta << assetInfo << loadDesc;
 
-        const fs::path metadataPath{MakeAssetMetadataPath(EAssetCategory::Material, assetInfo.GetGuid())};
+        const Path metadataPath{MakeAssetMetadataPath(EAssetCategory::Material, assetInfo.GetGuid())};
         IG_CHECK(!metadataPath.empty());
         if (!SaveJsonToFile(metadataPath, serializedMeta))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveMetadata>();
         }
 
-        const fs::path assetPath{MakeAssetPath(EAssetCategory::Material, assetInfo.GetGuid())};
+        const Path assetPath{MakeAssetPath(EAssetCategory::Material, assetInfo.GetGuid())};
         if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, std::array<uint8_t, 1>{0}))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveAsset>();

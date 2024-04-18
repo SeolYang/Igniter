@@ -112,12 +112,12 @@ namespace ig
         return Wider(ToStringView());
     }
 
-    fs::path String::ToPath() const
+    Path String::ToPath() const
     {
-        return fs::path{ToStringView()};
+        return Path{ToStringView()};
     }
 
-    String String::FromPath(const fs::path& path)
+    String String::FromPath(const Path& path)
     {
         return String{path.c_str()};
     }

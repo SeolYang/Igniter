@@ -7,7 +7,7 @@ IG_DEFINE_LOG_CATEGORY(JsonDeserializer);
 namespace ig::details
 {
     template <typename VarType>
-    void Serialize(json&                  archive, const VarType& var, const std::string_view containerKey,
+    void Serialize(Json&                  archive, const VarType& var, const std::string_view containerKey,
                    const std::string_view varKey)
     {
         if (!archive.contains(containerKey))
@@ -20,14 +20,14 @@ namespace ig::details
     }
 
     template <typename VarType, typename F>
-    void Deserialize(const json&            archive, VarType& var, const std::string_view containerKey,
+    void Deserialize(const Json&            archive, VarType& var, const std::string_view containerKey,
                      const std::string_view varKey, F         callback, VarType           fallback)
     {
         IG_CHECK(!archive.is_discarded());
         if (!archive.contains(containerKey) || !archive[containerKey].contains(varKey))
         {
             var = fallback;
-            IG_LOG(JsonDeserializer, Warning, "{}::{} does not exists in json archive.", containerKey, varKey);
+            IG_LOG(JsonDeserializer, Warning, "{}::{} does not exists in Json archive.", containerKey, varKey);
             return;
         }
 
@@ -40,21 +40,21 @@ namespace ig::details
     }
 
     template <typename T>
-    concept ConvertibleJsonInternalArray = std::is_same<T, json::array_t>::value;
+    concept ConvertibleJsonInternalArray = std::is_same<T, Json::array_t>::value;
 
     template <typename T>
     concept ConvertibleJsonInternalUnsigned = !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v
-            <T, json::number_unsigned_t>;
+            <T, Json::number_unsigned_t>;
 
     template <typename T>
-    concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, json::number_float_t>
+    concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, Json::number_float_t>
             ;
 
     template <typename T>
-    concept ConvertibleJsonInternalBoolean = std::is_same_v<T, json::boolean_t>;
+    concept ConvertibleJsonInternalBoolean = std::is_same_v<T, Json::boolean_t>;
 
     template <typename T>
-    concept ConvertibleJsonInternalString = std::is_convertible_v<T, json::string_t>;
+    concept ConvertibleJsonInternalString = std::is_convertible_v<T, Json::string_t>;
 
     template <typename T>
     struct JsonInternal;
@@ -62,31 +62,31 @@ namespace ig::details
     template <ConvertibleJsonInternalArray T>
     struct JsonInternal<T>
     {
-        using Type = json::array_t;
+        using Type = Json::array_t;
     };
 
     template <ConvertibleJsonInternalUnsigned T>
     struct JsonInternal<T>
     {
-        using Type = json::number_unsigned_t;
+        using Type = Json::number_unsigned_t;
     };
 
     template <ConvertibleJsonInternalFloat T>
     struct JsonInternal<T>
     {
-        using Type = json::number_float_t;
+        using Type = Json::number_float_t;
     };
 
     template <ConvertibleJsonInternalString T>
     struct JsonInternal<T>
     {
-        using Type = json::string_t;
+        using Type = Json::string_t;
     };
 
     template <ConvertibleJsonInternalBoolean T>
     struct JsonInternal<T>
     {
-        using Type = json::boolean_t;
+        using Type = Json::boolean_t;
     };
 
     template <typename T>
@@ -124,7 +124,7 @@ namespace ig::details
 #define IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                                  \
     ig::details::Deserialize<std::decay_t<decltype(VAR)>>(                                                          \
         JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
-        [](const ig::json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
+        [](const ig::Json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
             IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
             using JsoInternal = ig::details::JsonInternal_t<std::decay_t<decltype(var)>>;                           \
             const JsoInternal* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const JsoInternal*>(); \
@@ -141,7 +141,7 @@ namespace ig::details
 #define IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
     ig::details::Deserialize<ig::Guid>(                                                                             \
         JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
-        [](const ig::json& archive, ig::Guid& var) {                                                          \
+        [](const ig::Json& archive, ig::Guid& var) {                                                          \
             IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
             const std::string* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const std::string*>(); \
             const bool bTypeMismatch = valuePtr == nullptr;                                                         \
@@ -157,7 +157,7 @@ namespace ig::details
 #define IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
     ig::details::Deserialize<std::decay_t<decltype(VAR)>>(                                                          \
         JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
-        [](const ig::json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
+        [](const ig::Json& archive, std::decay_t<decltype(VAR)>& var) {                                       \
             IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
             const std::string* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const std::string*>(); \
             const bool bTypeMismatch = valuePtr == nullptr;                                                         \

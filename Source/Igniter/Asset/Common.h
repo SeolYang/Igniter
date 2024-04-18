@@ -39,8 +39,8 @@ namespace ig
     struct ResourceInfo
     {
     public:
-        json&       Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
+        Json&       Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
 
     public:
         EAssetCategory Category = EAssetCategory::Unknown;
@@ -68,8 +68,8 @@ namespace ig
         AssetInfo& operator=(const AssetInfo&)     = default;
         AssetInfo& operator=(AssetInfo&&) noexcept = default;
 
-        json&       Serialize(json& archive) const;
-        const json& Deserialize(const json& archive);
+        Json&       Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
 
         [[nodiscard]] bool IsValid() const;
 
@@ -102,8 +102,8 @@ namespace ig
         Guid                guid{};
         String              virtualPath{};
         std::vector<String> virtualPathHierarchy{};
-        EAssetCategory      category  = EAssetCategory::Unknown;
-        EAssetScope         scope = EAssetScope::Managed;
+        EAssetCategory      category = EAssetCategory::Unknown;
+        EAssetScope         scope    = EAssetScope::Managed;
     };
 
     template <typename T>
@@ -145,21 +145,21 @@ namespace ig
     using CachedAsset = UniqueRefHandle<T, details::AssetCache<T>*>;
 
     /* Refer to {ResourcePath}.metadata */
-    fs::path MakeResourceMetadataPath(fs::path resPath);
+    Path MakeResourceMetadataPath(Path resPath);
 
-    fs::path GetAssetDirectoryPath(const EAssetCategory type);
+    Path GetAssetDirectoryPath(const EAssetCategory type);
 
     /* Refer to ./Asset/{AssetType}/{GUID} */
-    fs::path MakeAssetPath(const EAssetCategory type, const Guid& guid);
+    Path MakeAssetPath(const EAssetCategory type, const Guid& guid);
 
     /* Refer to ./Assets/{AssetType}/{GUID}.metadata */
-    fs::path MakeAssetMetadataPath(const EAssetCategory type, const Guid& guid);
+    Path MakeAssetMetadataPath(const EAssetCategory type, const Guid& guid);
 
-    bool HasImportedBefore(const fs::path& resPath);
+    bool HasImportedBefore(const Path& resPath);
 
-    bool IsMetadataPath(const fs::path& resPath);
+    bool IsMetadataPath(const Path& resPath);
 
-    Guid ConvertMetadataPathToGuid(fs::path path);
+    Guid ConvertMetadataPathToGuid(Path path);
 
     bool IsValidVirtualPath(const String virtualPath);
 

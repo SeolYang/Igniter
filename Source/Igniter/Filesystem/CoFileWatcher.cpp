@@ -97,7 +97,7 @@ namespace ig
                             continue;
                         }
 
-                        const fs::path notifiedPath = watcher->directoryPath / fileNameBuffer;
+                        const Path notifiedPath = watcher->directoryPath / fileNameBuffer;
                         if (!fs::is_directory(notifiedPath) || !watcher->bIgnoreDirectoryChanges)
                         {
                             watcher->buffer.emplace_back(FileChangeInfo{

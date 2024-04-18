@@ -33,39 +33,39 @@ namespace ig
         IG_LOG(Engine, Info, "Igniter Engine Version {}", version::Version);
         IG_LOG(Engine, Info, "Igniting Engine Runtime!");
         //////////////////////// L0 ////////////////////////
-        frameManager = std::make_unique<FrameManager>();
-        timer        = std::make_unique<Timer>();
+        frameManager = MakePtr<FrameManager>();
+        timer        = MakePtr<Timer>();
         /* #sy_test 임시 윈도우 설명자 */
-        window = std::make_unique<Window>(WindowDescription{
+        window = MakePtr<Window>(WindowDescription{
             .Width = 1920, .Height = 1080, .Title = String(settings::GameName)
         });
-        renderDevice  = std::make_unique<RenderDevice>();
-        handleManager = std::make_unique<HandleManager>();
+        renderDevice  = MakePtr<RenderDevice>();
+        handleManager = MakePtr<HandleManager>();
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        inputManager        = std::make_unique<InputManager>(*handleManager);
-        deferredDeallocator = std::make_unique<DeferredDeallocator>(*frameManager);
+        inputManager        = MakePtr<InputManager>(*handleManager);
+        deferredDeallocator = MakePtr<DeferredDeallocator>(*frameManager);
         ////////////////////////////////////////////////////
 
         //////////////////////// L2 ////////////////////////
-        renderContext = std::make_unique<RenderContext>(*deferredDeallocator, *renderDevice, *handleManager);
+        renderContext = MakePtr<RenderContext>(*deferredDeallocator, *renderDevice, *handleManager);
         ////////////////////////////////////////////////////
 
         //////////////////////// L3 ////////////////////////
-        assetManager = std::make_unique<AssetManager>(*handleManager, *renderDevice, *renderContext);
+        assetManager = MakePtr<AssetManager>(*handleManager, *renderDevice, *renderContext);
         /* #sy_test Temporary */
         ////////////////////////////////////////////////////
 
         //////////////////////// L4 ////////////////////////
-        renderer = std::make_unique<Renderer>(*frameManager, *window, *renderDevice, *handleManager,
+        renderer = MakePtr<Renderer>(*frameManager, *window, *renderDevice, *handleManager,
                                               *renderContext);
-        imguiRenderer = std::make_unique<ImGuiRenderer>(*frameManager, *window, *renderDevice);
+        imguiRenderer = MakePtr<ImGuiRenderer>(*frameManager, *window, *renderDevice);
         ////////////////////////////////////////////////////
 
         //////////////////////// APP ///////////////////////
-        imguiCanvas  = std::make_unique<ImGuiCanvas>();
-        gameInstance = std::make_unique<GameInstance>();
+        imguiCanvas  = MakePtr<ImGuiCanvas>();
+        gameInstance = MakePtr<GameInstance>();
         ////////////////////////////////////////////////////
     }
 

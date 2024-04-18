@@ -17,7 +17,7 @@ namespace ig
 {
     ImGuiRenderer::ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderDevice& device)
         : frameManager(frameManager)
-        , descriptorHeap(std::make_unique<DescriptorHeap>(
+        , descriptorHeap(MakePtr<DescriptorHeap>(
             device.CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 3).value()))
         , mainSrv(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView))
     {
@@ -41,7 +41,7 @@ namespace ig
         for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
             commandContexts.emplace_back(
-                std::make_unique<CommandContext>(
+                MakePtr<CommandContext>(
                     device.CreateCommandContext("ImGui Cmd Ctx", EQueueType::Direct).value()));
             reservedSharedResourceViews.emplace_back(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView));
         }

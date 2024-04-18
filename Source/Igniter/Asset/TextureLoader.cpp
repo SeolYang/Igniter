@@ -51,7 +51,7 @@ namespace ig
         }
 
         /* Load asset from file */
-        const fs::path assetPath = MakeAssetPath(EAssetCategory::Texture, assetInfo.GetGuid());
+        const Path assetPath = MakeAssetPath(EAssetCategory::Texture, assetInfo.GetGuid());
         if (!fs::exists(assetPath))
         {
             return MakeFail<Texture, ETextureLoaderStatus::FileDoesNotExists>();

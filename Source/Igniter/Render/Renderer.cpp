@@ -59,7 +59,7 @@ namespace ig
         , swapchain(window, renderContext.GetGpuViewManager(), renderContext.GetMainGfxQueue(), NumFramesInFlight)
     {
 #pragma region test
-        bindlessRootSignature = std::make_unique<RootSignature>(device.CreateBindlessRootSignature().value());
+        bindlessRootSignature = MakePtr<RootSignature>(device.CreateBindlessRootSignature().value());
 
         const ShaderCompileDesc vsDesc{
             .SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
@@ -72,8 +72,8 @@ namespace ig
             .Type = EShaderType::Pixel
         };
 
-        vs = std::make_unique<ShaderBlob>(vsDesc);
-        ps = std::make_unique<ShaderBlob>(psDesc);
+        vs = MakePtr<ShaderBlob>(vsDesc);
+        ps = MakePtr<ShaderBlob>(psDesc);
 
         GraphicsPipelineStateDesc psoDesc;
         psoDesc.SetVertexShader(*vs);
@@ -82,14 +82,14 @@ namespace ig
         psoDesc.NumRenderTargets = 1;
         psoDesc.RTVFormats[0]    = DXGI_FORMAT_R8G8B8A8_UNORM;
         psoDesc.DSVFormat        = DXGI_FORMAT_D32_FLOAT;
-        pso                      = std::make_unique<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
+        pso                      = MakePtr<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
 
         GpuViewManager& gpuViewManager{renderContext.GetGpuViewManager()};
         GpuTextureDesc  depthStencilDesc;
         depthStencilDesc.DebugName = String("DepthStencilBufferTex");
         depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width),
                                         static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
-        depthStencilBuffer = std::make_unique<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
+        depthStencilBuffer = MakePtr<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
         dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{.MipSlice = 0});
 
         CommandContextPool& mainGfxCmdCtxPool{renderContext.GetMainGfxCommandContextPool()};

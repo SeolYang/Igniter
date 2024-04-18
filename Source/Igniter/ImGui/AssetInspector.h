@@ -41,9 +41,9 @@ namespace ig
         bool                                bDirty{true};
         chrono::system_clock::time_point    lastUpdated{chrono::system_clock::now()};
 
-        EAssetCategory       mainTableAssetFilter{EAssetCategory::Unknown};
-        int                  mainTableSelectedIdx{-1};
-        bool                 bIsMainSelectionDirty = false;
+        EAssetCategory mainTableAssetFilter{EAssetCategory::Unknown};
+        int            mainTableSelectedIdx{-1};
+        bool           bIsMainSelectionDirty = false;
 
         CachedAsset<Texture> previewTextures[NumFramesInFlight];
         bool                 bIsPreviewSrvUpdated[NumFramesInFlight]{false,};

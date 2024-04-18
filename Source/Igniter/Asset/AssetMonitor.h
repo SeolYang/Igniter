@@ -10,10 +10,10 @@ namespace ig::details
     public:
         virtual ~TypelessAssetDescMap() = default;
 
-        virtual void                   Insert(const json& serializedMetadata) = 0;
+        virtual void                   Insert(const Json& serializedMetadata) = 0;
         virtual void                   Erase(const Guid guid) = 0;
         virtual bool                   Contains(const Guid guid) const = 0;
-        virtual std::vector<json>      GetSerializedDescs() const = 0;
+        virtual std::vector<Json>      GetSerializedDescs() const = 0;
         virtual std::vector<AssetInfo> GetAssetInfos() const = 0;
         virtual AssetInfo              GetAssetInfo(const Guid guid) const = 0;
         virtual void                   Update(const AssetInfo& assetInfo) = 0;
@@ -33,7 +33,7 @@ namespace ig::details
             container[guid] = newDesc;
         }
 
-        void Insert(const json& serializedMetadata) override
+        void Insert(const Json& serializedMetadata) override
         {
             typename T::Desc newDesc{};
             serializedMetadata >> newDesc.Info >> newDesc.LoadDescriptor;
@@ -60,13 +60,13 @@ namespace ig::details
             return container.contains(guid);
         }
 
-        std::vector<json> GetSerializedDescs() const override
+        std::vector<Json> GetSerializedDescs() const override
         {
-            std::vector<json> result;
+            std::vector<Json> result;
             result.reserve(container.size());
             for (auto guidDescPair : container)
             {
-                json serialized{};
+                Json serialized{};
                 serialized << guidDescPair.second.Info << guidDescPair.second.LoadDescriptor;
                 result.emplace_back(serialized);
             }

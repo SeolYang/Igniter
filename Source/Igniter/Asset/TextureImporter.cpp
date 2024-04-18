@@ -9,7 +9,7 @@ IG_DEFINE_LOG_CATEGORY(TextureImporter);
 
 namespace ig
 {
-    static bool IsDDSExtnsion(const fs::path& extension)
+    static bool IsDDSExtnsion(const Path& extension)
     {
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -21,7 +21,7 @@ namespace ig
         return ext == ".dds";
     }
 
-    static bool IsWICExtension(const fs::path& extension)
+    static bool IsWICExtension(const Path& extension)
     {
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -34,7 +34,7 @@ namespace ig
                 (ext == ".tiff");
     }
 
-    static bool IsHDRExtnsion(const fs::path& extension)
+    static bool IsHDRExtnsion(const Path& extension)
     {
         std::string ext = extension.string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -94,13 +94,13 @@ namespace ig
     {
         CoInitializeUnique();
 
-        const fs::path resPath{resPathStr.ToStringView()};
+        const Path resPath{resPathStr.ToStringView()};
         if (!fs::exists(resPath))
         {
             return MakeFail<Texture::Desc, ETextureImportStatus::FileDoesNotExists>();
         }
 
-        const fs::path        resExtension = resPath.extension();
+        const Path        resExtension = resPath.extension();
         DirectX::ScratchImage targetTex{};
         DirectX::TexMetadata  texMetadata{};
 
@@ -252,10 +252,10 @@ namespace ig
 
         /* Configure Texture Resource Metadata */
         const ResourceInfo resInfo{.Category = EAssetCategory::Texture};
-        json               resMetadata{};
+        Json               resMetadata{};
         resMetadata << resInfo << importDesc;
 
-        const fs::path resMetadataPath{MakeResourceMetadataPath(resPath)};
+        const Path resMetadataPath{MakeResourceMetadataPath(resPath)};
         if (SaveJsonToFile(resMetadataPath, resMetadata))
         {
             IG_LOG(TextureImporter, Warning, "Failed to create resource metadata {}.", resMetadataPath.string());
@@ -283,10 +283,10 @@ namespace ig
             .AddressModeW = importDesc.AddressModeW
         };
 
-        json assetMetadata{};
+        Json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;
 
-        const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetCategory::Texture, assetInfo.GetGuid());
+        const Path assetMetadataPath = MakeAssetMetadataPath(EAssetCategory::Texture, assetInfo.GetGuid());
         IG_CHECK(!assetMetadataPath.empty());
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
@@ -294,7 +294,7 @@ namespace ig
         }
 
         /* Save data to asset file */
-        const fs::path assetPath = MakeAssetPath(EAssetCategory::Texture, assetInfo.GetGuid());
+        const Path assetPath = MakeAssetPath(EAssetCategory::Texture, assetInfo.GetGuid());
         IG_CHECK(!assetPath.empty());
         if (fs::exists(assetPath))
         {

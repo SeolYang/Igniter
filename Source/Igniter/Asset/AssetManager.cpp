@@ -10,13 +10,13 @@
 namespace ig
 {
     AssetManager::AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext)
-        : assetMonitor(std::make_unique<details::AssetMonitor>())
-        , textureImporter(std::make_unique<TextureImporter>())
-        , textureLoader(std::make_unique<TextureLoader>(handleManager, renderDevice, renderContext))
-        , staticMeshImporter(std::make_unique<StaticMeshImporter>(*this))
-        , staticMeshLoader(std::make_unique<StaticMeshLoader>(handleManager, renderDevice, renderContext, *this))
-        , materialImporter(std::make_unique<MaterialImporter>(*this))
-        , materialLoader(std::make_unique<MaterialLoader>(*this))
+        : assetMonitor(MakePtr<details::AssetMonitor>())
+        , textureImporter(MakePtr<TextureImporter>())
+        , textureLoader(MakePtr<TextureLoader>(handleManager, renderDevice, renderContext))
+        , staticMeshImporter(MakePtr<StaticMeshImporter>(*this))
+        , staticMeshLoader(MakePtr<StaticMeshLoader>(handleManager, renderDevice, renderContext, *this))
+        , materialImporter(MakePtr<MaterialImporter>(*this))
+        , materialLoader(MakePtr<MaterialLoader>(*this))
     {
         InitAssetCaches(handleManager);
         InitEngineInternalAssets();
@@ -29,9 +29,9 @@ namespace ig
 
     void AssetManager::InitAssetCaches(HandleManager& handleManager)
     {
-        assetCaches.emplace_back(std::make_unique<details::AssetCache<Texture>>(handleManager));
-        assetCaches.emplace_back(std::make_unique<details::AssetCache<StaticMesh>>(handleManager));
-        assetCaches.emplace_back(std::make_unique<details::AssetCache<Material>>(handleManager));
+        assetCaches.emplace_back(MakePtr<details::AssetCache<Texture>>(handleManager));
+        assetCaches.emplace_back(MakePtr<details::AssetCache<StaticMesh>>(handleManager));
+        assetCaches.emplace_back(MakePtr<details::AssetCache<Material>>(handleManager));
     }
 
     void AssetManager::InitEngineInternalAssets()

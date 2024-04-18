@@ -16,7 +16,7 @@ namespace ig
             requires std::derived_from<T, ImGuiLayer>
         T& AddLayer(Args&&... args)
         {
-            layers.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+            layers.emplace_back(MakePtr<T>(std::forward<Args>(args)...));
             bDirty = true;
             return reinterpret_cast<T&>(*layers.back());
         }

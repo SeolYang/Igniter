@@ -147,16 +147,16 @@ namespace ig
             .MaterialGuid = materialGuid
         };
 
-        json assetMetadata{};
+        Json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;
 
-        const fs::path newMetaPath = MakeAssetMetadataPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
+        const Path newMetaPath = MakeAssetMetadataPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
         if (!SaveJsonToFile(newMetaPath, assetMetadata))
         {
             return MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FailedSaveMetadataToFile>();
         }
 
-        const fs::path assetPath = MakeAssetPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
+        const Path assetPath = MakeAssetPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
         if (!SaveBlobsToFile<2>(assetPath, {
                                     std::span<const uint8_t>{encodedVertices},
                                     std::span<const uint8_t>{encodedIndices}
@@ -175,7 +175,7 @@ namespace ig
         const StaticMesh::ImportDesc&                                                                      desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
-        const fs::path                                                 resPath{resPathStr.ToStringView()};
+        const Path                                                 resPath{resPathStr.ToStringView()};
         if (!fs::exists(resPath))
         {
             results.emplace_back(MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FileDoesNotExists>());
@@ -251,9 +251,9 @@ namespace ig
         importer.FreeScene();
 
         const ResourceInfo resInfo{.Category = EAssetCategory::StaticMesh};
-        json               resMetadata{};
+        Json               resMetadata{};
         resMetadata << resInfo << desc;
-        const fs::path resMetaPath = MakeResourceMetadataPath(resPath);
+        const Path resMetaPath = MakeResourceMetadataPath(resPath);
         if (!SaveJsonToFile(resMetaPath, resMetadata))
         {
             IG_LOG(StaticMeshImporter, Warning, "Failed to save resource metadata to {}.", resMetaPath.string());

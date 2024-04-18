@@ -14,20 +14,20 @@ namespace ig
                                                           handleManager(handleManager)
                                                           , deferredDeallocator(deferredDeallocator)
                                                           , device(device)
-                                                          , cbvSrvUavHeap(std::make_unique<DescriptorHeap>(
+                                                          , cbvSrvUavHeap(MakePtr<DescriptorHeap>(
                                                               device.CreateDescriptorHeap(
                                                                   "Bindless CBV-SRV-UAV Heap",
                                                                   EDescriptorHeapType::CBV_SRV_UAV,
                                                                   NumCbvSrvUavDescriptors).value()))
-                                                          , samplerHeap(std::make_unique<DescriptorHeap>(
+                                                          , samplerHeap(MakePtr<DescriptorHeap>(
                                                               device.CreateDescriptorHeap(
                                                                   "Bindless Sampler Heap", EDescriptorHeapType::Sampler,
                                                                   NumSamplerDescriptors).value()))
-                                                          , rtvHeap(std::make_unique<DescriptorHeap>(
+                                                          , rtvHeap(MakePtr<DescriptorHeap>(
                                                               device.CreateDescriptorHeap(
                                                                   "Bindless RTV Heap", EDescriptorHeapType::RTV,
                                                                   NumRtvDescriptors).value()))
-                                                          , dsvHeap(std::make_unique<DescriptorHeap>(
+                                                          , dsvHeap(MakePtr<DescriptorHeap>(
                                                               device.CreateDescriptorHeap(
                                                                   "Bindless DSV Heap", EDescriptorHeapType::DSV,
                                                                   NumDsvDescriptors).value()))

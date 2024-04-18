@@ -6,13 +6,13 @@
 
 namespace ig
 {
-    json& ResourceInfo::Serialize(json& archive) const
+    Json& ResourceInfo::Serialize(Json& archive) const
     {
         IG_SERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Category);
         return archive;
     }
 
-    const json& ResourceInfo::Deserialize(const json& archive)
+    const Json& ResourceInfo::Deserialize(const Json& archive)
     {
         IG_DESERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Category, EAssetCategory::Unknown);
         return archive;
@@ -43,7 +43,7 @@ namespace ig
         constexpr inline std::string_view Scope{"Scope"};
     } // namespace key
 
-    json& AssetInfo::Serialize(json& archive) const
+    Json& AssetInfo::Serialize(Json& archive) const
     {
         IG_SERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime);
         IG_SERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid);
@@ -53,7 +53,7 @@ namespace ig
         return archive;
     }
 
-    const json& AssetInfo::Deserialize(const json& archive)
+    const Json& AssetInfo::Deserialize(const Json& archive)
     {
         *this = {};
         IG_DESERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime, 0);
@@ -82,42 +82,42 @@ namespace ig
         virtualPathHierarchy = virtualPath.Split(details::VirtualPathSeparator);
     }
 
-    fs::path MakeResourceMetadataPath(fs::path resPath)
+    Path MakeResourceMetadataPath(Path resPath)
     {
         resPath += details::MetadataExt;
         return resPath;
     }
 
-    fs::path GetAssetDirectoryPath(const EAssetCategory type)
+    Path GetAssetDirectoryPath(const EAssetCategory type)
     {
         IG_CHECK(type != EAssetCategory::Unknown);
         switch (type)
         {
         case EAssetCategory::Texture:
-            return fs::path{details::TextureAssetRootPath};
+            return Path{details::TextureAssetRootPath};
         case EAssetCategory::StaticMesh:
-            return fs::path{details::StaticMeshAssetRootPath};
+            return Path{details::StaticMeshAssetRootPath};
         case EAssetCategory::SkeletalMesh:
-            return fs::path{details::SkeletalMeshAssetRootPath};
+            return Path{details::SkeletalMeshAssetRootPath};
         case EAssetCategory::Audio:
-            return fs::path{details::AudioAssetRootPath};
+            return Path{details::AudioAssetRootPath};
         case EAssetCategory::Material:
-            return fs::path{details::MaterialAssetRootPath};
+            return Path{details::MaterialAssetRootPath};
             [[unlikely]] default:
             IG_CHECK_NO_ENTRY();
-            return fs::path{};
+            return Path{};
         }
     }
 
-    fs::path MakeAssetPath(const EAssetCategory type, const xg::Guid& guid)
+    Path MakeAssetPath(const EAssetCategory type, const xg::Guid& guid)
     {
         IG_CHECK(guid.isValid() && type != EAssetCategory::Unknown);
-        return fs::path{GetAssetDirectoryPath(type)} / guid.str();
+        return Path{GetAssetDirectoryPath(type)} / guid.str();
     }
 
-    fs::path MakeAssetMetadataPath(const EAssetCategory type, const xg::Guid& guid)
+    Path MakeAssetMetadataPath(const EAssetCategory type, const xg::Guid& guid)
     {
-        fs::path newAssetPath{MakeAssetPath(type, guid)};
+        Path newAssetPath{MakeAssetPath(type, guid)};
         if (!newAssetPath.empty())
         {
             newAssetPath.replace_extension(details::MetadataExt);
@@ -126,12 +126,12 @@ namespace ig
         return newAssetPath;
     }
 
-    bool HasImportedBefore(const fs::path& resPath)
+    bool HasImportedBefore(const Path& resPath)
     {
         return fs::exists(MakeResourceMetadataPath(resPath));
     }
 
-    bool IsMetadataPath(const fs::path& resPath)
+    bool IsMetadataPath(const Path& resPath)
     {
         std::string extension = resPath.extension().string();
         std::transform(extension.begin(), extension.end(), extension.begin(),
@@ -143,7 +143,7 @@ namespace ig
         return extension == details::MetadataExt;
     }
 
-    xg::Guid ConvertMetadataPathToGuid(fs::path path)
+    xg::Guid ConvertMetadataPathToGuid(Path path)
     {
         if (!IsMetadataPath(path))
         {

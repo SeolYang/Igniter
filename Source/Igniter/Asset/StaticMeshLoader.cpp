@@ -50,7 +50,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidArguments>();
         }
 
-        const fs::path assetPath = MakeAssetPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
+        const Path assetPath = MakeAssetPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
         if (!fs::exists(assetPath))
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FileDoesNotExists>();
