@@ -251,7 +251,7 @@ namespace ig
         }
 
         /* Configure Texture Resource Metadata */
-        const ResourceInfo resInfo{.Type = EAssetType::Texture};
+        const ResourceInfo resInfo{.Category = EAssetCategory::Texture};
         json               resMetadata{};
         resMetadata << resInfo << importDesc;
 
@@ -265,7 +265,7 @@ namespace ig
         texMetadata = targetTex.GetMetadata();
 
         const AssetInfo assetInfo{
-            MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetType::Texture
+            MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetCategory::Texture
         };
         const TextureLoadDesc newLoadConfig{
             .Format = texMetadata.format,
@@ -286,7 +286,7 @@ namespace ig
         json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;
 
-        const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetType::Texture, assetInfo.GetGuid());
+        const fs::path assetMetadataPath = MakeAssetMetadataPath(EAssetCategory::Texture, assetInfo.GetGuid());
         IG_CHECK(!assetMetadataPath.empty());
         if (!SaveJsonToFile(assetMetadataPath, assetMetadata))
         {
@@ -294,7 +294,7 @@ namespace ig
         }
 
         /* Save data to asset file */
-        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.GetGuid());
+        const fs::path assetPath = MakeAssetPath(EAssetCategory::Texture, assetInfo.GetGuid());
         IG_CHECK(!assetPath.empty());
         if (fs::exists(assetPath))
         {
@@ -311,7 +311,7 @@ namespace ig
             return MakeFail<Texture::Desc, ETextureImportStatus::FailedSaveAssetToFile>();
         }
 
-        IG_CHECK(assetInfo.IsValid() && assetInfo.GetType() == EAssetType::Texture);
+        IG_CHECK(assetInfo.IsValid() && assetInfo.GetCategory() == EAssetCategory::Texture);
         return MakeSuccess<Texture::Desc, ETextureImportStatus>(assetInfo, newLoadConfig);
     }
 } // namespace ig

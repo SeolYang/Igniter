@@ -40,7 +40,7 @@ namespace ig
         AssetInfo defaultTexInfo{
             AssetInfo::MakeEngineInternal(Guid{DefaultTextureGuid},
                                           Texture::EngineDefault,
-                                          EAssetType::Texture)
+                                          EAssetCategory::Texture)
         };
         RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(),
                                              textureLoader->MakeDefault(defaultTexInfo));
@@ -48,7 +48,7 @@ namespace ig
         AssetInfo defaultWhiteTexInfo{
             AssetInfo::MakeEngineInternal(Guid{DefaultWhiteTextureGuid},
                                           Texture::EngineDefaultWhite,
-                                          EAssetType::Texture)
+                                          EAssetCategory::Texture)
         };
         RegisterEngineInternalAsset<Texture>(defaultWhiteTexInfo.GetVirtualPath(),
                                              textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{1.f, 1.f, 1.f}));
@@ -56,7 +56,7 @@ namespace ig
         AssetInfo defaultBlackTexInfo{
             AssetInfo::MakeEngineInternal(Guid{DefaultBlackTextureGuid},
                                           Texture::EngineDefaultBlack,
-                                          EAssetType::Texture)
+                                          EAssetCategory::Texture)
         };
         RegisterEngineInternalAsset<Texture>(defaultBlackTexInfo.GetVirtualPath(),
                                              textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{0.f, 0.f, 0.f}));
@@ -64,13 +64,13 @@ namespace ig
         AssetInfo defaultMatInfo{
             AssetInfo::MakeEngineInternal(Guid{DefaultMaterialGuid},
                                           Material::EngineDefault,
-                                          EAssetType::Material)
+                                          EAssetCategory::Material)
         };
         RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(),
                                               materialLoader->MakeDefault(defaultMatInfo));
     }
 
-    details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetType assetType)
+    details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetCategory assetType)
     {
         IG_CHECK(assetCaches.size() > 0);
 
@@ -120,13 +120,13 @@ namespace ig
             return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
         }
 
-        if (!assetMonitor->Contains(EAssetType::Texture, virtualPath))
+        if (!assetMonitor->Contains(EAssetCategory::Texture, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
             return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
         }
 
-        return LoadTexture(assetMonitor->GetGuid(EAssetType::Texture, virtualPath));
+        return LoadTexture(assetMonitor->GetGuid(EAssetCategory::Texture, virtualPath));
     }
 
     std::vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc)
@@ -161,13 +161,13 @@ namespace ig
             return CachedAsset<StaticMesh>{};
         }
 
-        if (!assetMonitor->Contains(EAssetType::StaticMesh, virtualPath))
+        if (!assetMonitor->Contains(EAssetCategory::StaticMesh, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
             return CachedAsset<StaticMesh>{};
         }
 
-        return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetType::StaticMesh, virtualPath), *staticMeshLoader);
+        return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader);
     }
 
     Guid AssetManager::Import(const String virtualPath, const MaterialCreateDesc& createDesc)
@@ -179,7 +179,7 @@ namespace ig
         }
 
         Result<Material::Desc, EMaterialCreateStatus> result{
-            materialImporter->Import(AssetInfo{virtualPath, EAssetType::Material},
+            materialImporter->Import(AssetInfo{virtualPath, EAssetCategory::Material},
                                      createDesc)
         };
         std::optional<Guid> guidOpt{ImportImpl<Material>(virtualPath, result)};
@@ -211,13 +211,13 @@ namespace ig
             return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
         }
 
-        if (!assetMonitor->Contains(EAssetType::Material, virtualPath))
+        if (!assetMonitor->Contains(EAssetCategory::Material, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
             return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
         }
 
-        return LoadMaterial(assetMonitor->GetGuid(EAssetType::Material, virtualPath));
+        return LoadMaterial(assetMonitor->GetGuid(EAssetCategory::Material, virtualPath));
     }
 
     void AssetManager::Delete(const Guid& guid)
@@ -230,12 +230,12 @@ namespace ig
             return;
         }
 
-        DeleteImpl(assetMonitor->GetAssetInfo(guid).GetType(), guid);
+        DeleteImpl(assetMonitor->GetAssetInfo(guid).GetCategory(), guid);
     }
 
-    void AssetManager::Delete(const EAssetType assetType, const String virtualPath)
+    void AssetManager::Delete(const EAssetCategory assetType, const String virtualPath)
     {
-        if (assetType == EAssetType::Unknown)
+        if (assetType == EAssetCategory::Unknown)
         {
             IG_LOG(AssetManager, Error, "Failed to delete asset. The asset type is unknown.");
             return;
@@ -251,12 +251,12 @@ namespace ig
         DeleteImpl(assetType, assetMonitor->GetGuid(assetType, virtualPath));
     }
 
-    void AssetManager::DeleteImpl(const EAssetType assetType, const Guid& guid)
+    void AssetManager::DeleteImpl(const EAssetCategory assetType, const Guid& guid)
     {
         UniqueLock assetLock{GetAssetMutex(guid)};
-        IG_CHECK(assetType != EAssetType::Unknown);
+        IG_CHECK(assetType != EAssetCategory::Unknown);
         IG_CHECK(
-            guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).GetType() == assetType);
+            guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).GetCategory() == assetType);
 
         details::TypelessAssetCache& assetCache = GetTypelessCache(assetType);
         if (assetCache.IsCached(guid))

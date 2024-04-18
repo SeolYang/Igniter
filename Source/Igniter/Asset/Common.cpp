@@ -8,26 +8,26 @@ namespace ig
 {
     json& ResourceInfo::Serialize(json& archive) const
     {
-        IG_SERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Type);
+        IG_SERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Category);
         return archive;
     }
 
     const json& ResourceInfo::Deserialize(const json& archive)
     {
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Type, EAssetType::Unknown);
+        IG_DESERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Category, EAssetCategory::Unknown);
         return archive;
     }
 
-    AssetInfo::AssetInfo(const String virtualPath, const EAssetType type)
-        : AssetInfo(xg::newGuid(), virtualPath, type, EAssetScope::Managed)
+    AssetInfo::AssetInfo(const String virtualPath, const EAssetCategory category)
+        : AssetInfo(xg::newGuid(), virtualPath, category, EAssetScope::Managed)
     {
     }
 
-    AssetInfo::AssetInfo(const Guid& guid, const String virtualPath, const EAssetType type, const EAssetScope scope)
+    AssetInfo::AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope)
         : creationTime(Timer::Now())
         , guid(guid)
         , virtualPath(virtualPath)
-        , type(type)
+        , category(category)
         , scope(scope)
     {
         ConstructVirtualPathHierarchy();
@@ -39,7 +39,7 @@ namespace ig
         constexpr inline std::string_view CreationTime{"CreationTime"};
         constexpr inline std::string_view Guid{"Guid"};
         constexpr inline std::string_view VirtualPath{"VirtualPath"};
-        constexpr inline std::string_view Type{"Type"};
+        constexpr inline std::string_view Category{"Category"};
         constexpr inline std::string_view Scope{"Scope"};
     } // namespace key
 
@@ -48,7 +48,7 @@ namespace ig
         IG_SERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime);
         IG_SERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid);
         IG_SERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath);
-        IG_SERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type);
+        IG_SERIALIZE_ENUM_JSON(archive, category, key::AssetInfo, key::Category);
         IG_SERIALIZE_ENUM_JSON(archive, scope, key::AssetInfo, key::Scope);
         return archive;
     }
@@ -59,7 +59,7 @@ namespace ig
         IG_DESERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime, 0);
         IG_DESERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid, xg::Guid{});
         IG_DESERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath, String{});
-        IG_DESERIALIZE_ENUM_JSON(archive, type, key::AssetInfo, key::Type, EAssetType::Unknown);
+        IG_DESERIALIZE_ENUM_JSON(archive, category, key::AssetInfo, key::Category, EAssetCategory::Unknown);
         IG_DESERIALIZE_ENUM_JSON(archive, scope, key::AssetInfo, key::Scope, EAssetScope::Managed);
         ConstructVirtualPathHierarchy();
         return archive;
@@ -67,7 +67,7 @@ namespace ig
 
     bool AssetInfo::IsValid() const
     {
-        return guid.isValid() && IsValidVirtualPath(virtualPath) && type != EAssetType::Unknown;
+        return guid.isValid() && IsValidVirtualPath(virtualPath) && category != EAssetCategory::Unknown;
     }
 
     void AssetInfo::SetVirtualPath(const String newVirtualPath)
@@ -88,20 +88,20 @@ namespace ig
         return resPath;
     }
 
-    fs::path GetAssetDirectoryPath(const EAssetType type)
+    fs::path GetAssetDirectoryPath(const EAssetCategory type)
     {
-        IG_CHECK(type != EAssetType::Unknown);
+        IG_CHECK(type != EAssetCategory::Unknown);
         switch (type)
         {
-        case EAssetType::Texture:
+        case EAssetCategory::Texture:
             return fs::path{details::TextureAssetRootPath};
-        case EAssetType::StaticMesh:
+        case EAssetCategory::StaticMesh:
             return fs::path{details::StaticMeshAssetRootPath};
-        case EAssetType::SkeletalMesh:
+        case EAssetCategory::SkeletalMesh:
             return fs::path{details::SkeletalMeshAssetRootPath};
-        case EAssetType::Audio:
+        case EAssetCategory::Audio:
             return fs::path{details::AudioAssetRootPath};
-        case EAssetType::Material:
+        case EAssetCategory::Material:
             return fs::path{details::MaterialAssetRootPath};
             [[unlikely]] default:
             IG_CHECK_NO_ENTRY();
@@ -109,13 +109,13 @@ namespace ig
         }
     }
 
-    fs::path MakeAssetPath(const EAssetType type, const xg::Guid& guid)
+    fs::path MakeAssetPath(const EAssetCategory type, const xg::Guid& guid)
     {
-        IG_CHECK(guid.isValid() && type != EAssetType::Unknown);
+        IG_CHECK(guid.isValid() && type != EAssetCategory::Unknown);
         return fs::path{GetAssetDirectoryPath(type)} / guid.str();
     }
 
-    fs::path MakeAssetMetadataPath(const EAssetType type, const xg::Guid& guid)
+    fs::path MakeAssetMetadataPath(const EAssetCategory type, const xg::Guid& guid)
     {
         fs::path newAssetPath{MakeAssetPath(type, guid)};
         if (!newAssetPath.empty())

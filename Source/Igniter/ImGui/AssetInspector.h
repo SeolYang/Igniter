@@ -18,7 +18,7 @@ namespace ig
         void RenderFilterMenu();
         void RenderMainFrame();
         void RenderAssetStats();
-        void RenderAssetTable(const EAssetType assetTypeFilter, int& selectedIdx,
+        void RenderAssetTable(const EAssetCategory assetTypeFilter, int& selectedIdx,
                               bool*            bSelectionDirtyFlagPtr = nullptr);
         void RenderInspector();
         void RenderEdit(const AssetInfo& assetInfo);
@@ -28,7 +28,7 @@ namespace ig
         void RenderTexturePreview(const AssetInfo& assetInfo);
         void RenderAssetInfo(const AssetInfo& assetInfo);
         void RenderSelector(const char* label, const Guid guid);
-        int  RenderSelectorPopup(const EAssetType selectAssetType);
+        int  RenderSelectorPopup(const EAssetCategory selectAssetType);
 
     private:
         RecursiveMutex                      mutex{};
@@ -36,7 +36,7 @@ namespace ig
         bool                                bDirty{true};
         chrono::system_clock::time_point    lastUpdated{chrono::system_clock::now()};
 
-        EAssetType           mainTableAssetFilter{EAssetType::Unknown};
+        EAssetCategory           mainTableAssetFilter{EAssetCategory::Unknown};
         int                  mainTableSelectedIdx{-1};
         bool                 bIsMainSelectionDirty = false;
         CachedAsset<Texture> previewTextures[NumFramesInFlight];

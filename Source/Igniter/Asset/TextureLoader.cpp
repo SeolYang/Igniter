@@ -33,7 +33,7 @@ namespace ig
             return MakeFail<Texture, ETextureLoaderStatus::InvalidAssetInfo>();
         }
 
-        if (assetInfo.GetType() != EAssetType::Texture)
+        if (assetInfo.GetCategory() != EAssetCategory::Texture)
         {
             return MakeFail<Texture, ETextureLoaderStatus::AssetTypeMismatch>();
         }
@@ -51,7 +51,7 @@ namespace ig
         }
 
         /* Load asset from file */
-        const fs::path assetPath = MakeAssetPath(EAssetType::Texture, assetInfo.GetGuid());
+        const fs::path assetPath = MakeAssetPath(EAssetCategory::Texture, assetInfo.GetGuid());
         if (!fs::exists(assetPath))
         {
             return MakeFail<Texture, ETextureLoaderStatus::FileDoesNotExists>();

@@ -137,7 +137,7 @@ namespace ig
         encodedIndices.resize(meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(),
                                                         remappedIndices.data(), remappedIndices.size()));
 
-        const AssetInfo assetInfo{MakeVirtualPathPreferred(meshName), EAssetType::StaticMesh};
+        const AssetInfo assetInfo{MakeVirtualPathPreferred(meshName), EAssetCategory::StaticMesh};
 
         const StaticMeshLoadDesc newLoadConfig{
             .NumVertices = static_cast<uint32_t>(remappedVertices.size()),
@@ -150,13 +150,13 @@ namespace ig
         json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;
 
-        const fs::path newMetaPath = MakeAssetMetadataPath(EAssetType::StaticMesh, assetInfo.GetGuid());
+        const fs::path newMetaPath = MakeAssetMetadataPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
         if (!SaveJsonToFile(newMetaPath, assetMetadata))
         {
             return MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FailedSaveMetadataToFile>();
         }
 
-        const fs::path assetPath = MakeAssetPath(EAssetType::StaticMesh, assetInfo.GetGuid());
+        const fs::path assetPath = MakeAssetPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
         if (!SaveBlobsToFile<2>(assetPath, {
                                     std::span<const uint8_t>{encodedVertices},
                                     std::span<const uint8_t>{encodedIndices}
@@ -250,7 +250,7 @@ namespace ig
         }
         importer.FreeScene();
 
-        const ResourceInfo resInfo{.Type = EAssetType::StaticMesh};
+        const ResourceInfo resInfo{.Category = EAssetCategory::StaticMesh};
         json               resMetadata{};
         resMetadata << resInfo << desc;
         const fs::path resMetaPath = MakeResourceMetadataPath(resPath);

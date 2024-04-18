@@ -82,28 +82,28 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf<T>, guid);
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
                 return false;
             }
 
             bool                   bSuceeded = false;
             const typename T::Desc desc{assetMonitor->GetDesc<T>(guid)};
-            if constexpr (AssetTypeOf<T> == EAssetType::Texture)
+            if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
                 bSuceeded = ReloadImpl<Texture>(guid, desc, *textureLoader);
             }
-            else if constexpr (AssetTypeOf<T> == EAssetType::StaticMesh)
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::StaticMesh)
             {
                 bSuceeded = ReloadImpl<StaticMesh>(guid, desc, *staticMeshLoader);
             }
-            else if constexpr (AssetTypeOf<T> == EAssetType::Material)
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
             {
                 bSuceeded = ReloadImpl<Material>(guid, desc, *materialLoader);
             }
             else
             {
                 IG_CHECK_NO_ENTRY();
-                IG_LOG(AssetManager, Error, "Reload Unsupported Asset Type {}.", AssetTypeOf<T>);
+                IG_LOG(AssetManager, Error, "Reload Unsupported Asset Type {}.", AssetCategoryOf<T>);
             }
 
             if (bSuceeded)
@@ -115,7 +115,7 @@ namespace ig
         }
 
         void Delete(const Guid& guid);
-        void Delete(const EAssetType assetType, const String virtualPath);
+        void Delete(const EAssetCategory assetType, const String virtualPath);
 
         void SaveAllChanges();
 
@@ -155,10 +155,10 @@ namespace ig
         template <Asset T>
         details::AssetCache<T>& GetCache()
         {
-            return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetTypeOf<T>));
+            return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetCategoryOf<T>));
         }
 
-        details::TypelessAssetCache& GetTypelessCache(const EAssetType assetType);
+        details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType);
 
         void InitAssetCaches(HandleManager& handleManager);
 
@@ -167,7 +167,7 @@ namespace ig
         template <Asset T, ResultStatus ImportStatus>
         std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)
         {
-            constexpr auto AssetType{AssetTypeOf<T>};
+            constexpr auto AssetType{AssetCategoryOf<T>};
             if (!result.HasOwnership())
             {
                 IG_LOG(AssetManager, Error, "{}: Failed({}) to import \"{}\".",
@@ -181,7 +181,7 @@ namespace ig
             const T::Desc desc{result.Take()};
             AssetInfo     assetInfo{desc.Info};
             IG_CHECK(assetInfo.IsValid());
-            IG_CHECK(assetInfo.GetType() == AssetType);
+            IG_CHECK(assetInfo.GetCategory() == AssetType);
 
             const String virtualPath{assetInfo.GetVirtualPath()};
             IG_CHECK(IsValidVirtualPath(virtualPath));
@@ -242,7 +242,7 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetTypeOf<T>, guid);
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
                 return CachedAsset<T>{};
             }
 
@@ -256,17 +256,17 @@ namespace ig
                 if (!result.HasOwnership())
                 {
                     IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).",
-                           AssetTypeOf<T>, result.GetStatus(),
+                           AssetCategoryOf<T>, result.GetStatus(),
                            desc.Info.GetVirtualPath(), guid);
                     return CachedAsset<T>{};
                 }
 
                 assetCache.Cache(guid, result.Take());
-                IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.", AssetTypeOf<T>, desc.Info.GetVirtualPath(),
+                IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.", AssetCategoryOf<T>, desc.Info.GetVirtualPath(),
                        guid);
             }
 
-            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetTypeOf<T>, guid);
+            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetCategoryOf<T>, guid);
             bIsDirty = true;
             return assetCache.Load(guid);
         }
@@ -293,7 +293,7 @@ namespace ig
             auto result{loader.Load(desc)};
             if (!result.HasOwnership())
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" failed to reload.", AssetTypeOf<T>, guid);
+                IG_LOG(AssetManager, Error, "{} asset \"{}\" failed to reload.", AssetCategoryOf<T>, guid);
                 return false;
             }
 
@@ -310,7 +310,7 @@ namespace ig
             return true;
         }
 
-        void DeleteImpl(const EAssetType assetType, const Guid& guid);
+        void DeleteImpl(const EAssetCategory assetType, const Guid& guid);
 
         [[nodiscard]] AssetMutex& GetAssetMutex(const Guid& guid);
 
@@ -320,7 +320,7 @@ namespace ig
             if (!assetResult.HasOwnership())
             {
                 IG_LOG(AssetManager, Error, "{}: Failed({}) to create engine default asset {}.",
-                       AssetTypeOf<T>, assetResult.GetStatus(), requiredVirtualPath);
+                       AssetCategoryOf<T>, assetResult.GetStatus(), requiredVirtualPath);
                 return;
             }
 
@@ -328,7 +328,7 @@ namespace ig
             const typename T::Desc& desc{asset.GetSnapshot()};
             const AssetInfo&        assetInfo{desc.Info};
             IG_CHECK(assetInfo.IsValid());
-            IG_CHECK(assetInfo.GetType() == AssetTypeOf<T>);
+            IG_CHECK(assetInfo.GetCategory() == AssetCategoryOf<T>);
             IG_CHECK(assetInfo.GetScope() == EAssetScope::Engine);
 
             /* #sy_note GUID를 고정으로 할지 말지.. 일단 Virtual Path는 고정적이고, Import 되고난 이후엔 Virtual Path로 접근 가능하니 유동적으로 */

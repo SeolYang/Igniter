@@ -18,7 +18,7 @@ namespace ig::details
     public:
         virtual ~TypelessAssetCache() = default;
 
-        virtual EAssetType                          GetAssetType() const = 0;
+        virtual EAssetCategory                      GetAssetType() const = 0;
         virtual void                                Invalidate(const Guid& guid) = 0;
         virtual [[nodiscard]] bool                  IsCached(const Guid& guid) const = 0;
         virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
@@ -37,12 +37,12 @@ namespace ig::details
 
         AssetCache(const AssetCache&)     = delete;
         AssetCache(AssetCache&&) noexcept = delete;
-        ~AssetCache()                     = default;
+        ~AssetCache() override            = default;
 
         AssetCache& operator=(const AssetCache&)     = delete;
         AssetCache& operator=(AssetCache&&) noexcept = delete;
 
-        EAssetType GetAssetType() const override { return AssetType; }
+        EAssetCategory GetAssetType() const override { return AssetType; }
 
         void Cache(const Guid& guid, T&& asset)
         {
@@ -67,7 +67,7 @@ namespace ig::details
             return LoadUnsafe(guid);
         }
 
-        [[nodiscard]] bool IsCached(const Guid& guid) const
+        [[nodiscard]] bool IsCached(const Guid& guid) const override
         {
             ReadOnlyLock lock{mutex};
             return IsCachedUnsafe(guid);
@@ -136,7 +136,7 @@ namespace ig::details
         }
 
     public:
-        constexpr static EAssetType AssetType = AssetTypeOf<T>;
+        constexpr static EAssetCategory AssetType = AssetCategoryOf<T>;
 
     private:
         HandleManager& handleManager;

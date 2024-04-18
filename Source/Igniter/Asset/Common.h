@@ -25,7 +25,7 @@ namespace ig
     inline constexpr GuidBytes DefaultBlackTextureGuid{GuidBytesFrom("d923e9f9-1651-4393-9636-1a231c7a2b6d")};
     inline constexpr GuidBytes DefaultMaterialGuid{GuidBytesFrom("ca932248-e2d7-4b4f-9d28-2140f1bf30e3")};
 
-    enum class EAssetType
+    enum class EAssetCategory
     {
         Unknown,
         Texture,
@@ -43,7 +43,7 @@ namespace ig
         const json& Deserialize(const json& archive);
 
     public:
-        EAssetType Type = EAssetType::Unknown;
+        EAssetCategory Category = EAssetCategory::Unknown;
     };
 
     enum class EAssetScope
@@ -62,7 +62,7 @@ namespace ig
         AssetInfo()                     = default;
         AssetInfo(const AssetInfo&)     = default;
         AssetInfo(AssetInfo&&) noexcept = default;
-        AssetInfo(const String virtualPath, const EAssetType type);
+        AssetInfo(const String virtualPath, const EAssetCategory category);
         ~AssetInfo() = default;
 
         AssetInfo& operator=(const AssetInfo&)     = default;
@@ -75,7 +75,7 @@ namespace ig
 
         const Guid&                GetGuid() const { return guid; }
         String                     GetVirtualPath() const { return virtualPath; }
-        EAssetType                 GetType() const { return type; }
+        EAssetCategory             GetCategory() const { return category; }
         EAssetScope                GetScope() const { return scope; }
         const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
@@ -87,10 +87,10 @@ namespace ig
         }
 
     private:
-        AssetInfo(const Guid& guid, const String virtualPath, const EAssetType type, const EAssetScope scope);
+        AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope);
         void ConstructVirtualPathHierarchy();
 
-        static AssetInfo MakeEngineInternal(const Guid& guid, const String virtualPath, const EAssetType type)
+        static AssetInfo MakeEngineInternal(const Guid& guid, const String virtualPath, const EAssetCategory type)
         {
             return AssetInfo{guid, virtualPath, type, EAssetScope::Engine};
         }
@@ -102,15 +102,15 @@ namespace ig
         Guid                guid{};
         String              virtualPath{};
         std::vector<String> virtualPathHierarchy{};
-        EAssetType          type  = EAssetType::Unknown;
+        EAssetCategory      category  = EAssetCategory::Unknown;
         EAssetScope         scope = EAssetScope::Managed;
     };
 
     template <typename T>
-    inline constexpr EAssetType AssetTypeOf = EAssetType::Unknown;
+    inline constexpr EAssetCategory AssetCategoryOf = EAssetCategory::Unknown;
 
     template <typename T>
-        requires(AssetTypeOf<T> != EAssetType::Unknown)
+        requires(AssetCategoryOf<T> != EAssetCategory::Unknown)
     struct AssetDesc
     {
         AssetInfo   Info;
@@ -127,7 +127,7 @@ namespace ig
                     asset.GetSnapshot()
                 } -> std::same_as<const typename T::Desc&>;
             } && std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
-            std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetTypeOf<T> != EAssetType::Unknown;
+            std::is_same_v<typename T::Desc, AssetDesc<T>> && AssetCategoryOf<T> != EAssetCategory::Unknown;
 
     template <typename T>
     inline constexpr bool IsAsset = false;
@@ -147,13 +147,13 @@ namespace ig
     /* Refer to {ResourcePath}.metadata */
     fs::path MakeResourceMetadataPath(fs::path resPath);
 
-    fs::path GetAssetDirectoryPath(const EAssetType type);
+    fs::path GetAssetDirectoryPath(const EAssetCategory type);
 
     /* Refer to ./Asset/{AssetType}/{GUID} */
-    fs::path MakeAssetPath(const EAssetType type, const Guid& guid);
+    fs::path MakeAssetPath(const EAssetCategory type, const Guid& guid);
 
     /* Refer to ./Assets/{AssetType}/{GUID}.metadata */
-    fs::path MakeAssetMetadataPath(const EAssetType type, const Guid& guid);
+    fs::path MakeAssetMetadataPath(const EAssetCategory type, const Guid& guid);
 
     bool HasImportedBefore(const fs::path& resPath);
 
@@ -178,6 +178,6 @@ public:
     template <typename FrameContext>
     auto format(const ig::AssetInfo& info, FrameContext& ctx) const
     {
-        return std::format_to(ctx.out(), "{}:{}({})", info.GetType(), info.GetVirtualPath(), info.GetGuid());
+        return std::format_to(ctx.out(), "{}:{}({})", info.GetCategory(), info.GetVirtualPath(), info.GetGuid());
     }
 };

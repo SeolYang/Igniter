@@ -19,7 +19,7 @@ namespace ig
             return MakeFail<Material, EMaterialLoadStatus::InvalidAssetInfo>();
         }
 
-        if (assetInfo.GetType() != EAssetType::Material)
+        if (assetInfo.GetCategory() != EAssetCategory::Material)
         {
             return MakeFail<Material, EMaterialLoadStatus::AssetTypeMismatch>();
         }

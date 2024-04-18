@@ -22,7 +22,7 @@ namespace ig
             return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetInfo>();
         }
 
-        if (assetInfo.GetType() != EAssetType::Material)
+        if (assetInfo.GetCategory() != EAssetCategory::Material)
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetType>();
         }
@@ -44,14 +44,14 @@ namespace ig
         json serializedMeta{};
         serializedMeta << assetInfo << loadDesc;
 
-        const fs::path metadataPath{MakeAssetMetadataPath(EAssetType::Material, assetInfo.GetGuid())};
+        const fs::path metadataPath{MakeAssetMetadataPath(EAssetCategory::Material, assetInfo.GetGuid())};
         IG_CHECK(!metadataPath.empty());
         if (!SaveJsonToFile(metadataPath, serializedMeta))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveMetadata>();
         }
 
-        const fs::path assetPath{MakeAssetPath(EAssetType::Material, assetInfo.GetGuid())};
+        const fs::path assetPath{MakeAssetPath(EAssetCategory::Material, assetInfo.GetGuid())};
         if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, std::array<uint8_t, 1>{0}))
         {
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveAsset>();

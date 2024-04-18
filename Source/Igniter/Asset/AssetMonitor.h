@@ -119,11 +119,11 @@ namespace ig::details
         ~AssetMonitor();
 
         [[nodiscard]] bool Contains(const Guid& guid) const;
-        [[nodiscard]] bool Contains(const EAssetType assetType, const String virtualPath) const;
+        [[nodiscard]] bool Contains(const EAssetCategory assetType, const String virtualPath) const;
 
-        [[nodiscard]] Guid      GetGuid(const EAssetType assetType, const String virtualPath) const;
+        [[nodiscard]] Guid      GetGuid(const EAssetCategory assetType, const String virtualPath) const;
         [[nodiscard]] AssetInfo GetAssetInfo(const Guid& guid) const;
-        [[nodiscard]] AssetInfo GetAssetInfo(const EAssetType assetType, const String virtualPath) const;
+        [[nodiscard]] AssetInfo GetAssetInfo(const EAssetCategory assetType, const String virtualPath) const;
 
         template <Asset T>
         [[nodiscard]] T::LoadDesc GetLoadDesc(const Guid& guid) const
@@ -136,8 +136,8 @@ namespace ig::details
         [[nodiscard]] T::LoadDesc GetLoadDesc(const String virtualPath) const
         {
             ReadOnlyLock lock{mutex};
-            IG_CHECK(ContainsUnsafe(AssetTypeOf<T>, virtualPath));
-            return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf<T>, virtualPath));
+            IG_CHECK(ContainsUnsafe(AssetCategoryOf<T>, virtualPath));
+            return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath));
         }
 
         template <Asset T>
@@ -151,8 +151,8 @@ namespace ig::details
         [[nodiscard]] void UpdateLoadDesc(const String virtualPath, const typename T::LoadDesc& loadDesc)
         {
             ReadWriteLock rwLock{mutex};
-            IG_CHECK(ContainsUnsafe(AssetTypeOf<T>, virtualPath));
-            UpdateLoadDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf<T>, virtualPath), loadDesc);
+            IG_CHECK(ContainsUnsafe(AssetCategoryOf<T>, virtualPath));
+            UpdateLoadDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath), loadDesc);
         }
 
         template <Asset T>
@@ -166,8 +166,8 @@ namespace ig::details
         [[nodiscard]] T::Desc GetDesc(const String virtualPath) const
         {
             ReadOnlyLock lock{mutex};
-            IG_CHECK(ContainsUnsafe(AssetTypeOf<T>, virtualPath));
-            return GetDescUnsafe<T>(GetGuidUnsafe(AssetTypeOf<T>, virtualPath));
+            IG_CHECK(ContainsUnsafe(AssetCategoryOf<T>, virtualPath));
+            return GetDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath));
         }
 
         template <Asset T>
@@ -181,7 +181,7 @@ namespace ig::details
             const String virtualPath{newInfo.GetVirtualPath()};
             IG_CHECK(IsValidVirtualPath(virtualPath));
 
-            VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetType());
+            VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetCategory());
             IG_CHECK(!virtualPathGuidTable.contains(virtualPath));
 
             AssetDescMap<T>& assetDescTable{GetDescMap<T>()};
@@ -200,28 +200,28 @@ namespace ig::details
         void InitVirtualPathGuidTables();
         void ParseAssetDirectory();
 
-        VirtualPathGuidTable&       GetVirtualPathGuidTable(const EAssetType assetType);
-        const VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetType assetType) const;
+        VirtualPathGuidTable&       GetVirtualPathGuidTable(const EAssetCategory assetType);
+        const VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetCategory assetType) const;
 
         template <Asset T>
         AssetDescMap<T>& GetDescMap()
         {
-            return static_cast<AssetDescMap<T>&>(GetDescMap(AssetTypeOf<T>));
+            return static_cast<AssetDescMap<T>&>(GetDescMap(AssetCategoryOf<T>));
         }
 
         template <Asset T>
         const AssetDescMap<T>& GetDescMap() const
         {
-            return static_cast<const AssetDescMap<T>&>(GetDescMap(AssetTypeOf<T>));
+            return static_cast<const AssetDescMap<T>&>(GetDescMap(AssetCategoryOf<T>));
         }
 
-        TypelessAssetDescMap&       GetDescMap(const EAssetType assetType);
-        const TypelessAssetDescMap& GetDescMap(const EAssetType assetType) const;
+        TypelessAssetDescMap&       GetDescMap(const EAssetCategory assetType);
+        const TypelessAssetDescMap& GetDescMap(const EAssetCategory assetType) const;
 
         [[nodiscard]] bool ContainsUnsafe(const Guid& guid) const;
-        [[nodiscard]] bool ContainsUnsafe(const EAssetType assetType, const String virtualPath) const;
+        [[nodiscard]] bool ContainsUnsafe(const EAssetCategory assetType, const String virtualPath) const;
 
-        [[nodiscard]] Guid      GetGuidUnsafe(const EAssetType assetType, const String virtualPath) const;
+        [[nodiscard]] Guid      GetGuidUnsafe(const EAssetCategory assetType, const String virtualPath) const;
         [[nodiscard]] AssetInfo GetAssetInfoUnsafe(const Guid& guid) const;
 
         template <Asset T>
@@ -254,8 +254,8 @@ namespace ig::details
 
     private:
         mutable SharedMutex                                           mutex;
-        std::vector<std::pair<EAssetType, VirtualPathGuidTable>>      virtualPathGuidTables;
-        std::vector<std::pair<EAssetType, Ptr<TypelessAssetDescMap>>> guidDescTables;
+        std::vector<std::pair<EAssetCategory, VirtualPathGuidTable>>      virtualPathGuidTables;
+        std::vector<std::pair<EAssetCategory, Ptr<TypelessAssetDescMap>>> guidDescTables;
         UnorderedMap<Guid, AssetInfo>                                 expiredAssetInfos;
     };
 } // namespace ig::details
