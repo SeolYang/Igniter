@@ -150,7 +150,7 @@ namespace ig
         }
     }
 
-    void AssetInspector::RenderAssetTable(const EAssetCategory assetTypeFilter, int& selectedIdx,
+    void AssetInspector::RenderAssetTable(const EAssetCategory assetCategoryFilter, int& selectedIdx,
                                           bool*                bSelectionDirtyFlagPtr)
     {
         constexpr ImGuiTableFlags TableFlags =
@@ -228,7 +228,7 @@ namespace ig
             {
                 const AssetManager::Snapshot& snapshot{snapshots[idx]};
                 const EAssetCategory          assetCategory{snapshot.Info.GetCategory()};
-                if (assetTypeFilter == EAssetCategory::Unknown || assetTypeFilter == assetCategory)
+                if (assetCategoryFilter == EAssetCategory::Unknown || assetCategoryFilter == assetCategory)
                 {
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();

@@ -5,11 +5,16 @@
 
 namespace ig
 {
-    class AssetInspector : public ImGuiLayer
+    class AssetInspector final : public ImGuiLayer
     {
     public:
         AssetInspector();
-        ~AssetInspector() = default;
+        AssetInspector(const AssetInspector&)     = delete;
+        AssetInspector(AssetInspector&&) noexcept = delete;
+        ~AssetInspector() override                = default;
+
+        AssetInspector& operator=(const AssetInspector&)     = delete;
+        AssetInspector& operator=(AssetInspector&&) noexcept = delete;
 
         void Render() override;
 
@@ -18,8 +23,8 @@ namespace ig
         void RenderFilterMenu();
         void RenderMainFrame();
         void RenderAssetStats();
-        void RenderAssetTable(const EAssetCategory assetTypeFilter, int& selectedIdx,
-                              bool*            bSelectionDirtyFlagPtr = nullptr);
+        void RenderAssetTable(const EAssetCategory assetCategoryFilter, int& selectedIdx,
+                              bool*                bSelectionDirtyFlagPtr = nullptr);
         void RenderInspector();
         void RenderEdit(const AssetInfo& assetInfo);
         void RenderMaterialEdit(const AssetInfo& assetInfo);
@@ -36,9 +41,10 @@ namespace ig
         bool                                bDirty{true};
         chrono::system_clock::time_point    lastUpdated{chrono::system_clock::now()};
 
-        EAssetCategory           mainTableAssetFilter{EAssetCategory::Unknown};
+        EAssetCategory       mainTableAssetFilter{EAssetCategory::Unknown};
         int                  mainTableSelectedIdx{-1};
         bool                 bIsMainSelectionDirty = false;
+
         CachedAsset<Texture> previewTextures[NumFramesInFlight];
         bool                 bIsPreviewSrvUpdated[NumFramesInFlight]{false,};
 
