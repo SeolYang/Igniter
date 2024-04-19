@@ -1,5 +1,5 @@
 #include <Frieren.h>
-#include <TestGameMode.h>
+#include <Game/Mode/TestGameMode.h>
 
 namespace fe
 {

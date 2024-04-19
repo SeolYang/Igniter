@@ -1,6 +1,6 @@
 #include <Frieren.h>
-#include <CameraPossessSystem.h>
-#include <FpsCameraControllSystem.h>
+#include <Game/System/CameraPossessSystem.h>
+#include <Game/System/FpsCameraControllSystem.h>
 #include <Core/Window.h>
 #include <Core/Log.h>
 #include <Core/Engine.h>

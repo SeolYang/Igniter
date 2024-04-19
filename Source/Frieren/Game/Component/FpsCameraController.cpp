@@ -1,5 +1,5 @@
 #include <Frieren.h>
-#include <FpsCameraController.h>
+#include <Game/Component/FpsCameraController.h>
 
 namespace fe
 {

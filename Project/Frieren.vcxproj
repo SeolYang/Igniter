@@ -19,9 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Frieren\CameraPossessSystem.cpp" />
-    <ClCompile Include="..\Source\Frieren\FpsCameraController.cpp" />
-    <ClCompile Include="..\Source\Frieren\FpsCameraControllSystem.cpp" />
     <ClCompile Include="..\Source\Frieren\Frieren.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Frieren.h</PrecompiledHeaderFile>
@@ -32,6 +29,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Frieren.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Game\Component\FpsCameraController.cpp" />
+    <ClCompile Include="..\Source\Frieren\Game\Mode\TestGameMode.cpp" />
+    <ClCompile Include="..\Source\Frieren\Game\System\CameraPossessSystem.cpp" />
+    <ClCompile Include="..\Source\Frieren\Game\System\FpsCameraControllSystem.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\AssetInspector.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\AssetWatchPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp" />
@@ -42,13 +43,13 @@
     <ClCompile Include="..\Source\Frieren\ImGui\StatisticsPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\TextureImportPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\main.cpp" />
-    <ClCompile Include="..\Source\Frieren\TestGameMode.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\Frieren\CameraPossessSystem.h" />
-    <ClInclude Include="..\Source\Frieren\FpsCameraController.h" />
-    <ClInclude Include="..\Source\Frieren\FpsCameraControllSystem.h" />
     <ClInclude Include="..\Source\Frieren\Frieren.h" />
+    <ClInclude Include="..\Source\Frieren\Game\Component\FpsCameraController.h" />
+    <ClInclude Include="..\Source\Frieren\Game\Mode\TestGameMode.h" />
+    <ClInclude Include="..\Source\Frieren\Game\System\CameraPossessSystem.h" />
+    <ClInclude Include="..\Source\Frieren\Game\System\FpsCameraControllSystem.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\AssetInspector.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\AssetWatchPanel.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h" />
@@ -58,7 +59,6 @@
     <ClInclude Include="..\Source\Frieren\ImGui\StaticMeshImportPanel.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\StatisticsPanel.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\TextureImportPanel.h" />
-    <ClInclude Include="..\Source\Frieren\TestGameMode.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

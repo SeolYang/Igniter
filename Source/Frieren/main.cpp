@@ -15,8 +15,8 @@
 #include <ImGui/ImGuiLayer.h>
 #include <Core/String.h>
 #include <ImGui/MainLayer.h>
-#include <FpsCameraController.h>
-#include <TestGameMode.h>
+#include <Game/Component/FpsCameraController.h>
+#include <Game/Mode/TestGameMode.h>
 
 int main()
 {
