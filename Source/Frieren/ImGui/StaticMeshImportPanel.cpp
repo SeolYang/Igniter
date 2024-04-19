@@ -1,9 +1,9 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Core/Engine.h>
 #include <Asset/AssetManager.h>
 #include <ImGui/StaticMeshImportPanel.h>
 
-namespace ig
+namespace fe
 {
     void StaticMeshImportPanel::Render()
     {

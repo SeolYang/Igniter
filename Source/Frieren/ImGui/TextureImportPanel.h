@@ -1,16 +1,21 @@
 #pragma once
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Filesystem/FileDialog.h>
 #include <Asset/Texture.h>
 #include <ImGui/ImGuiLayer.h>
 
-namespace ig
+namespace fe
 {
     class TextureImportPanel final : public ImGuiLayer
     {
     public:
-        TextureImportPanel()  = default;
-        ~TextureImportPanel() = default;
+        TextureImportPanel()                          = default;
+        TextureImportPanel(const TextureImportPanel&) = delete;
+        TextureImportPanel(TextureImportPanel&&)      = delete;
+        ~TextureImportPanel() override                = default;
+
+        TextureImportPanel& operator=(const TextureImportPanel&)     = delete;
+        TextureImportPanel& operator=(TextureImportPanel&&) noexcept = delete;
 
         void Render() override;
         void OnVisible() override;

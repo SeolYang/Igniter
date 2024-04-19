@@ -1,4 +1,4 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Core/Engine.h>
 #include <Core/MemUtils.h>
 #include <Core/Timer.h>
@@ -7,14 +7,14 @@
 #include <Render/TempConstantBufferAllocator.h>
 #include <ImGui/StatisticsPanel.h>
 
-namespace ig
+namespace fe
 {
     void StatisticsPanel::Render()
     {
         if (bEnablePolling && pollingStep >= pollingInterval)
         {
-            Renderer& renderer = Igniter::GetRenderer();
             {
+                Renderer& renderer = Igniter::GetRenderer();
                 TempConstantBufferAllocator& tempConstantBufferAllocator = renderer.GetTempConstantBufferAllocator();
                 const auto [tempCBufferAllocLocalFrame0, tempCBufferAllocLocalFrame1] = tempConstantBufferAllocator.
                         GetUsedSizeInBytes();
@@ -29,14 +29,14 @@ namespace ig
                     tempConstantBufferSizePerFrameMB);
             }
 
-            const HandleManager& handleManager = Igniter::GetHandleManager();
             {
-                const auto statistics             = handleManager.GetStatistics();
-                handleManagerNumMemoryPools       = statistics.NumMemoryPools;
-                handleManagerAllocatedChunkSizeMB = BytesToMegaBytes(statistics.AllocatedChunksSizeInBytes);
-                handleManagerUsedSizeMB           = BytesToMegaBytes(statistics.UsedSizeInBytes);
-                handleManagerNumAllocatedChunks   = statistics.NumAllocatedChunks;
-                handleManagerNumAllocatedHandles  = statistics.NumAllocatedHandles;
+                const HandleManager& handleManager = Igniter::GetHandleManager();
+                const auto           statistics    = handleManager.GetStatistics();
+                handleManagerNumMemoryPools        = statistics.NumMemoryPools;
+                handleManagerAllocatedChunkSizeMB  = BytesToMegaBytes(statistics.AllocatedChunksSizeInBytes);
+                handleManagerUsedSizeMB            = BytesToMegaBytes(statistics.UsedSizeInBytes);
+                handleManagerNumAllocatedChunks    = statistics.NumAllocatedChunks;
+                handleManagerNumAllocatedHandles   = statistics.NumAllocatedHandles;
             }
 
             pollingStep = 0;

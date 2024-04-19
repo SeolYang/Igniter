@@ -87,18 +87,10 @@
     <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\AssetInspector.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\CachedStringDebugger.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\EntityInsepctor.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\EntityList.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\AssetWatchPanel.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\StatisticsPanel.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\TextureImportPanel.h" />
     <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
@@ -171,16 +163,9 @@
     <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\AssetInspector.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\CachedStringDebugger.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\EntityInspector.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\EntityList.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\AssetWatchPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\StaticMeshImportPanel.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\StatisticsPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\Igniter.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Igniter.h</PrecompiledHeaderFile>
@@ -191,7 +176,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Igniter.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\TextureImportPanel.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp" />

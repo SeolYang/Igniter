@@ -32,8 +32,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Frieren.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\AssetInspector.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\AssetWatchPanel.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\EntityInspector.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\EntityList.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\MainLayer.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\StaticMeshImportPanel.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\StatisticsPanel.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\TextureImportPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\main.cpp" />
-    <ClCompile Include="..\Source\Frieren\MainLayer.cpp" />
     <ClCompile Include="..\Source\Frieren\TestGameMode.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -41,7 +49,15 @@
     <ClInclude Include="..\Source\Frieren\FpsCameraController.h" />
     <ClInclude Include="..\Source\Frieren\FpsCameraControllSystem.h" />
     <ClInclude Include="..\Source\Frieren\Frieren.h" />
-    <ClInclude Include="..\Source\Frieren\MainLayer.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\AssetInspector.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\AssetWatchPanel.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\EntityInsepctor.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\EntityList.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\MainLayer.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\StaticMeshImportPanel.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\StatisticsPanel.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\TextureImportPanel.h" />
     <ClInclude Include="..\Source\Frieren\TestGameMode.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

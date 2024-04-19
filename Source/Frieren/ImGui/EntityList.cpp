@@ -1,4 +1,4 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Component/NameComponent.h>
 #include <Core/Engine.h>
 #include <Core/Log.h>
@@ -6,7 +6,7 @@
 #include <Gameplay/GameInstance.h>
 #include <ImGui/EntityList.h>
 
-namespace ig
+namespace fe
 {
     void EntityList::Render()
     {

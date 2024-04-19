@@ -1,9 +1,9 @@
 #pragma once
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Asset/AssetManager.h>
 #include <ImGui/ImGuiLayer.h>
 
-namespace ig
+namespace fe
 {
     class AssetInspector final : public ImGuiLayer
     {

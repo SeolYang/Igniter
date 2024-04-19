@@ -1,8 +1,8 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Core/String.h>
 #include <ImGUi/CachedStringDebugger.h>
 
-namespace ig
+namespace fe
 {
     void CachedStringDebugger::Render()
     {

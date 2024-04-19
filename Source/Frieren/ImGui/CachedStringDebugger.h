@@ -1,14 +1,20 @@
 #pragma once
+#include <Frieren.h>
 #include <Core/HashUtils.h>
 #include <ImGui/ImGuiLayer.h>
 
-namespace ig
+namespace fe
 {
     class CachedStringDebugger final : public ImGuiLayer
     {
     public:
-        CachedStringDebugger()  = default;
-        ~CachedStringDebugger() = default;
+        CachedStringDebugger()                                = default;
+        CachedStringDebugger(const CachedStringDebugger&)     = delete;
+        CachedStringDebugger(CachedStringDebugger&&) noexcept = delete;
+        ~CachedStringDebugger() override                      = default;
+
+        CachedStringDebugger& operator=(const CachedStringDebugger&) = delete;
+        CachedStringDebugger& operator=(CachedStringDebugger&&)      = delete;
 
         void Render() override;
 

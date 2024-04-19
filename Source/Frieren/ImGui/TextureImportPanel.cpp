@@ -1,10 +1,10 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Core/Engine.h>
 #include <Asset/AssetManager.h>
 #include <ImGui/ImGuiExtensions.h>
 #include <ImGui/TextureImportPanel.h>
 
-namespace ig
+namespace fe
 {
     void TextureImportPanel::Render()
     {

@@ -1,21 +1,22 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Core/Engine.h>
 #include <Gameplay/GameInstance.h>
 #include <Component/NameComponent.h>
 #include <ImGui/EntityInsepctor.h>
 #include <ImGui/EntityList.h>
 
-namespace ig
+namespace fe
 {
-    EntityInspector::EntityInspector(const EntityList& entityList) : entityList(entityList)
+    EntityInspector::EntityInspector(const EntityList& entityList) : entityList(&entityList)
     {
     }
 
     void EntityInspector::Render()
     {
+        IG_CHECK(entityList != nullptr);
         if (ImGui::Begin("Inspector", &bIsVisible))
         {
-            const Entity selectedEntity = entityList.GetSelectedEntity();
+            const Entity selectedEntity = entityList->GetSelectedEntity();
             if (selectedEntity != entt::null)
             {
                 GameInstance& gameInstance             = Igniter::GetGameInstance();

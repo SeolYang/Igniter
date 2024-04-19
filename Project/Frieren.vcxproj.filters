@@ -36,11 +36,35 @@
     <ClCompile Include="..\Source\Frieren\FpsCameraController.cpp">
       <Filter>Source\Component</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\MainLayer.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Frieren\Frieren.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\EntityInspector.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\EntityList.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\StaticMeshImportPanel.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\StatisticsPanel.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\TextureImportPanel.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\AssetInspector.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\AssetWatchPanel.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\ImGui\MainLayer.cpp">
+      <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -56,11 +80,35 @@
     <ClInclude Include="..\Source\Frieren\FpsCameraController.h">
       <Filter>Source\Component</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\MainLayer.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Frieren\Frieren.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\EntityInsepctor.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\EntityList.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\StaticMeshImportPanel.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\StatisticsPanel.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\TextureImportPanel.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\AssetInspector.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\AssetWatchPanel.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\ImGui\MainLayer.h">
+      <Filter>Source\ImGui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

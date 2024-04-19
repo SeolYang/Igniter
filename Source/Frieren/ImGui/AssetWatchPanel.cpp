@@ -1,8 +1,8 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Core/Result.h>
 #include <ImGui/AssetWatchPanel.h>
 
-namespace ig
+namespace fe
 {
     AssetWatchPanel::AssetWatchPanel() : watcher{
                                            "Assets"_fs,

@@ -1,4 +1,4 @@
-#include <Igniter.h>
+#include <Frieren.h>
 #include <Core/Engine.h>
 #include <Core/Timer.h>
 #include <Core/FrameManager.h>
@@ -12,7 +12,7 @@
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/AssetInspector.h>
 
-namespace ig
+namespace fe
 {
     AssetInspector::AssetInspector()
     {

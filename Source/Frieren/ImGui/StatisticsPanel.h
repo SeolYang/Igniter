@@ -1,12 +1,19 @@
 #pragma once
+#include <Frieren.h>
 #include <ImGui/ImGuiLayer.h>
 
-namespace ig
+namespace fe
 {
     class StatisticsPanel final : public ImGuiLayer
     {
     public:
-        StatisticsPanel() = default;
+        StatisticsPanel()                           = default;
+        StatisticsPanel(const StatisticsPanel&)     = delete;
+        StatisticsPanel(StatisticsPanel&&) noexcept = delete;
+        ~StatisticsPanel() override                 = default;
+
+        StatisticsPanel& operator=(const StatisticsPanel&) = delete;
+        StatisticsPanel& operator=(StatisticsPanel&&)      = delete;
 
         void Render() override;
 

@@ -1,5 +1,5 @@
 #include <Frieren.h>
-#include <MainLayer.h>
+#include <ImGui/MainLayer.h>
 #include <Core/Engine.h>
 #include <Asset/AssetManager.h>
 #include <ImGui/ImGuiCanvas.h>
@@ -15,19 +15,14 @@
 namespace fe
 {
     MainLayer::MainLayer(ig::ImGuiCanvas& canvas)
-        : canvas(canvas),
-          statisticsPanel(canvas.AddLayer<ig::StatisticsPanel>()),
-          cachedStringDebugger(canvas.AddLayer<ig::CachedStringDebugger>()),
-          entityList(canvas.AddLayer<ig::EntityList>()),
-          entityInspector(canvas.AddLayer<ig::EntityInspector>(entityList)),
-          assetWatchPanel(canvas.AddLayer<ig::AssetWatchPanel>()),
-          textureImportPanel(canvas.AddLayer<ig::TextureImportPanel>()),
-          staticMeshImportPanel(canvas.AddLayer<ig::StaticMeshImportPanel>()),
-          assetSnapshotPanel(canvas.AddLayer<ig::AssetInspector>())
-    {
-    }
-
-    MainLayer::~MainLayer()
+        : statisticsPanel(&canvas.AddLayer<StatisticsPanel>()),
+          cachedStringDebugger(&canvas.AddLayer<CachedStringDebugger>()),
+          entityList(&canvas.AddLayer<EntityList>()),
+          entityInspector(&canvas.AddLayer<EntityInspector>(*entityList)),
+          assetWatchPanel(&canvas.AddLayer<AssetWatchPanel>()),
+          textureImportPanel(&canvas.AddLayer<TextureImportPanel>()),
+          staticMeshImportPanel(&canvas.AddLayer<StaticMeshImportPanel>()),
+          assetSnapshotPanel(&canvas.AddLayer<AssetInspector>())
     {
     }
 
@@ -55,17 +50,17 @@ namespace fe
             {
                 if (ImGui::MenuItem("Asset Inspector"))
                 {
-                    assetSnapshotPanel.SetVisibility(true);
+                    assetSnapshotPanel->SetVisibility(true);
                 }
 
                 if (ImGui::MenuItem("Import Texture"))
                 {
-                    textureImportPanel.SetVisibility(true);
+                    textureImportPanel->SetVisibility(true);
                 }
 
                 if (ImGui::MenuItem("Import Static Mesh"))
                 {
-                    staticMeshImportPanel.SetVisibility(true);
+                    staticMeshImportPanel->SetVisibility(true);
                 }
 
                 ImGui::EndMenu();
@@ -75,23 +70,23 @@ namespace fe
             {
                 if (ImGui::MenuItem("Statistics Panel"))
                 {
-                    statisticsPanel.SetVisibility(true);
+                    statisticsPanel->SetVisibility(true);
                 }
 
                 if (ImGui::MenuItem("Debug Cached String"))
                 {
-                    cachedStringDebugger.SetVisibility(true);
+                    cachedStringDebugger->SetVisibility(true);
                 }
 
                 if (ImGui::MenuItem("Entity Inspector"))
                 {
-                    entityInspector.SetVisibility(true);
-                    entityList.SetVisibility(true);
+                    entityInspector->SetVisibility(true);
+                    entityList->SetVisibility(true);
                 }
 
                 if (ImGui::MenuItem("Asset Watch Panel"))
                 {
-                    assetWatchPanel.SetVisibility(true);
+                    assetWatchPanel->SetVisibility(true);
                 }
 
                 ImGui::EndMenu();
