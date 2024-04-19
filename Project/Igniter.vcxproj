@@ -50,7 +50,6 @@
     <ClInclude Include="..\Source\Igniter\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Igniter\Core\HashUtils.h" />
     <ClInclude Include="..\Source\Igniter\Core\Engine.h" />
-    <ClInclude Include="..\Source\Igniter\Core\InputManager.h" />
     <ClInclude Include="..\Source\Igniter\Core\Json.h" />
     <ClInclude Include="..\Source\Igniter\Core\Log.h" />
     <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h" />
@@ -91,6 +90,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
+    <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
     <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
@@ -136,7 +136,6 @@
     <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Engine.cpp" />
-    <ClCompile Include="..\Source\Igniter\Core\InputManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Log.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\MemoryPool.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Regex.cpp" />
@@ -176,6 +175,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Igniter.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Input\InputManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp" />

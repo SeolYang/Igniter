@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/InputManager.h>
+#include <Input/InputManager.h>
 
 namespace ig
 {

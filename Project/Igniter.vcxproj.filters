@@ -67,6 +67,9 @@
     <Filter Include="Source\Reflection">
       <UniqueIdentifier>{8edf5e6f-4457-4477-86ce-754888e18fa6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Input">
+      <UniqueIdentifier>{f4062502-3595-4cf1-b1ac-c406357a3049}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
@@ -136,9 +139,6 @@
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\HashUtils.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\InputManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Json.h">
@@ -351,6 +351,9 @@
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h">
       <Filter>Source\Reflection</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Input\InputManager.h">
+      <Filter>Source\Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -372,9 +375,6 @@
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\InputManager.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\Log.cpp">
@@ -529,6 +529,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp">
       <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Input\InputManager.cpp">
+      <Filter>Source\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

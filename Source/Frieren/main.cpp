@@ -8,12 +8,12 @@
 #include <Component/TransformComponent.h>
 #include <Core/Handle.h>
 #include <Core/Engine.h>
-#include <Core/InputManager.h>
 #include <Core/Window.h>
+#include <Core/String.h>
 #include <Gameplay/GameInstance.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/ImGuiLayer.h>
-#include <Core/String.h>
+#include <Input/InputManager.h>
 #include <ImGui/MainLayer.h>
 #include <Game/Component/FpsCameraController.h>
 #include <Game/Mode/TestGameMode.h>

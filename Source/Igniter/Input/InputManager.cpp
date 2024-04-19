@@ -1,5 +1,5 @@
 #include <Igniter.h>
-#include <Core/InputManager.h>
+#include <Input/InputManager.h>
 #include <Core/Log.h>
 
 IG_DEFINE_LOG_CATEGORY(InputManager);
