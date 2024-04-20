@@ -8,7 +8,7 @@
  * 'Wider Character String'. In such cases, you must use 'Wider' functions to convert UTF-8 encoded string to wider character string.
  */
 #include <Igniter.h>
-#include <Core/HashUtils.h>
+#include <Core/Hash.h>
 
 namespace ig
 {

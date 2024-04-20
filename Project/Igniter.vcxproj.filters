@@ -138,7 +138,7 @@
     <ClInclude Include="..\Source\Igniter\Core\HandleManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\HashUtils.h">
+    <ClInclude Include="..\Source\Igniter\Core\Hash.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Json.h">
@@ -353,6 +353,12 @@
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Input\InputManager.h">
       <Filter>Source\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Handle_New.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\HandleRegistry_New.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

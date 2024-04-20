@@ -48,7 +48,9 @@
     <ClInclude Include="..\Source\Igniter\Core\GuidBytes.h" />
     <ClInclude Include="..\Source\Igniter\Core\Handle.h" />
     <ClInclude Include="..\Source\Igniter\Core\HandleManager.h" />
-    <ClInclude Include="..\Source\Igniter\Core\HashUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\HandleRegistry_New.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Handle_New.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Hash.h" />
     <ClInclude Include="..\Source\Igniter\Core\Engine.h" />
     <ClInclude Include="..\Source\Igniter\Core\Json.h" />
     <ClInclude Include="..\Source\Igniter\Core\Log.h" />

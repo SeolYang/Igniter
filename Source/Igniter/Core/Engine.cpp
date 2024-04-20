@@ -6,11 +6,11 @@
 #include <Core/FrameManager.h>
 #include <Core/Timer.h>
 #include <Core/HandleManager.h>
-#include <Core/InputManager.h>
 #include <Core/Window.h>
 #include <Core/DeferredDeallocator.h>
 #include <Core/EmbededSettings.h>
 #include <Core/ComInitializer.h>
+#include <Input/InputManager.h>
 #include <D3D12/RenderDevice.h>
 #include <Render/RenderContext.h>
 #include <Render/GpuUploader.h>

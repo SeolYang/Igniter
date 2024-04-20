@@ -1,6 +1,6 @@
 #pragma once
 #include <Frieren.h>
-#include <Core/HashUtils.h>
+#include <Core/Hash.h>
 #include <ImGui/ImGuiLayer.h>
 
 namespace fe

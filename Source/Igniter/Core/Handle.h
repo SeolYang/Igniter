@@ -1,7 +1,7 @@
 #pragma once
 #include <Igniter.h>
 #include <Core/Engine.h>
-#include <Core/HashUtils.h>
+#include <Core/Hash.h>
 #include <Core/DeferredDeallocator.h>
 
 namespace ig

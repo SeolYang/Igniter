@@ -1,8 +1,8 @@
 #include <Igniter.h>
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
-#include <Core/InputManager.h>
 #include <Core/Log.h>
+#include <Input/InputManager.h>
 #include <ImGUi/ImGuiCanvas.h>
 
 IG_DEFINE_LOG_CATEGORY(Window);
