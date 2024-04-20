@@ -150,7 +150,7 @@
     <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\MemUtils.h">
+    <ClInclude Include="..\Source\Igniter\Core\Memory.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Result.h">
