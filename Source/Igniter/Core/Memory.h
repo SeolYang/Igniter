@@ -1,6 +1,6 @@
 #pragma once
 #include <Igniter.h>
-#include <Math/Utils.h>
+#include <Core/Math.h>
 
 namespace ig
 {
@@ -33,6 +33,21 @@ namespace ig
         IG_CHECK(alignment > 0 && IsPowOf2(alignment));
         const size_t mask = alignment - 1;
         return (T)((size_t)value & ~mask);
+    }
+
+    template <size_t OffsetInBits, size_t SizeInBits, typename Ty = uint64_t>
+    constexpr Ty MaskBits(const uint64_t value)
+    {
+        static_assert(SizeInBits <= sizeof(Ty) * 8);
+        static_assert(SizeInBits + OffsetInBits <= sizeof(uint64_t) * 8);
+        return (value >> OffsetInBits) & ((1Ui64 << SizeInBits) - 1);
+    }
+
+    template <size_t OffsetInBits, size_t SizeInBits>
+    constexpr uint64_t SetBits(const uint64_t dest, const uint64_t src)
+    {
+        static_assert(SizeInBits + OffsetInBits <= sizeof(uint64_t) * 8);
+        return dest | ((((1Ui64 << SizeInBits) - 1) & src) << OffsetInBits);
     }
 
     inline constexpr double BytesToKiloBytes(const size_t bytes)

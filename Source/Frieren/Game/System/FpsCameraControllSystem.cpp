@@ -1,12 +1,12 @@
 #include <Frieren.h>
-#include <FpsCameraControllSystem.h>
+#include <Game/System/FpsCameraControllSystem.h>
 #include <Component/TransformComponent.h>
 #include <Component/CameraComponent.h>
-#include <Core/InputManager.h>
+#include <Input/InputManager.h>
 #include <Core/Log.h>
 #include <Core/Engine.h>
 #include <Core/Timer.h>
-#include <FpsCameraController.h>
+#include <Game/Component/FpsCameraController.h>
 
 namespace fe
 {

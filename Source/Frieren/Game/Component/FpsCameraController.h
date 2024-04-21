@@ -1,6 +1,6 @@
 #pragma once
 #include <Gameplay/ComponentRegistry.h>
-#include <Math/Utils.h>
+#include <Core/Math.h>
 
 namespace fe
 {

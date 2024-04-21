@@ -34,7 +34,7 @@ namespace ig
                 ReadWriteLock lock{mutex};
                 logger = new spdlog::logger(Category::CategoryName.data(), {consoleSink, fileSink});
                 logger->set_level(spdlog::level::trace);
-                categoryMap[HashOfType<Category>] = logger;
+                categoryMap[TypeHash<Category>] = logger;
             }
 
             const std::string formattedMessage =
@@ -80,7 +80,7 @@ namespace ig
         spdlog::logger* QueryCategory()
         {
             ReadOnlyLock lock{mutex};
-            return categoryMap.contains(HashOfType<C>) ? categoryMap.find(HashOfType<C>)->second : nullptr;
+            return categoryMap.contains(TypeHash<C>) ? categoryMap.find(TypeHash<C>)->second : nullptr;
         }
 
     private:

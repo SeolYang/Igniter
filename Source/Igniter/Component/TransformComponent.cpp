@@ -1,6 +1,6 @@
 #include <Igniter.h>
 #include <Component/TransformComponent.h>
-#include <Math/Utils.h>
+#include <Core/Math.h>
 #include <ImGui/ImGuiExtensions.h>
 
 namespace ig

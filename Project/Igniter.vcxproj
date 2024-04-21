@@ -40,6 +40,7 @@
     <ClInclude Include="..\Source\Igniter\Core\Assert.h" />
     <ClInclude Include="..\Source\Igniter\Core\ComInitializer.h" />
     <ClInclude Include="..\Source\Igniter\Core\ContainerUtils.h" />
+    <ClInclude Include="..\Source\Igniter\Core\DebugTools.h" />
     <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h" />
     <ClInclude Include="..\Source\Igniter\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Igniter\Core\Event.h" />
@@ -54,6 +55,7 @@
     <ClInclude Include="..\Source\Igniter\Core\Engine.h" />
     <ClInclude Include="..\Source\Igniter\Core\Json.h" />
     <ClInclude Include="..\Source\Igniter\Core\Log.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Math.h" />
     <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h" />
     <ClInclude Include="..\Source\Igniter\Core\Memory.h" />
     <ClInclude Include="..\Source\Igniter\Core\Regex.h" />
@@ -93,7 +95,6 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
     <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
-    <ClInclude Include="..\Source\Igniter\Math\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="..\Source\Igniter\Component\StaticMeshComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Component\TransformComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\ComInitializer.cpp" />
+    <ClCompile Include="..\Source\Igniter\Core\DebugTools.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />

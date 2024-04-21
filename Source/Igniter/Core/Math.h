@@ -11,6 +11,23 @@ namespace ig
     }
 
     template <typename T>
+        requires std::is_arithmetic_v<T>
+    consteval T Pow(const T base, const size_t exp)
+    {
+        if (exp == 0)
+        {
+            return T{1};
+        }
+
+        T result = base;
+        for ([[maybe_unused]] const auto _ : views::iota(0Ui64, exp - 1))
+        {
+            result *= base;
+        }
+        return result;
+    }
+
+    template <typename T>
         requires std::integral<T>
     T Random(const T min, const T max = std::numeric_limits<T>::max())
     {

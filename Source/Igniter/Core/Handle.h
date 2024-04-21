@@ -113,7 +113,7 @@ namespace ig
         details::HandleImpl GetHandle() { return handle; }
 
     public:
-        static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
+        static constexpr uint64_t EvaluatedTypeHashVal = TypeHash<T>;
 
     protected:
         details::HandleImpl handle{};
@@ -419,7 +419,7 @@ namespace ig
         [[nodiscard]] size_t GetHash() const { return handle.GetHash(); }
 
     public:
-        static constexpr uint64_t EvaluatedTypeHashVal = HashOfType<T>;
+        static constexpr uint64_t EvaluatedTypeHashVal = TypeHash<T>;
 
     private:
         details::HandleImpl             handle{};

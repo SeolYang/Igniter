@@ -40,9 +40,6 @@
     <Filter Include="Source\ImGui">
       <UniqueIdentifier>{8a58a63d-d3f6-4e1b-a871-a8ba1824da64}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Math">
-      <UniqueIdentifier>{3e0a91db-4807-4302-b29c-858e6f83b600}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Component">
       <UniqueIdentifier>{a2feb8ca-1174-4678-b886-dc43aece1d9f}</UniqueIdentifier>
     </Filter>
@@ -240,9 +237,6 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Math\Utils.h">
-      <Filter>Source\Math</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Render\Utils.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
@@ -358,6 +352,12 @@
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\HandleRegistry_New.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\DebugTools.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Math.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -538,6 +538,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Input\InputManager.cpp">
       <Filter>Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Core\DebugTools.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
