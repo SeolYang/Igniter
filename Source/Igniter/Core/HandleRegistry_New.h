@@ -18,6 +18,13 @@ namespace ig::details
 
         return 4Ui64 * 1024Ui64 * 1024Ui64; /* 4 MB for greater 512 bytes alloc. */
     }
+
+    template <typename Ty>
+    consteval size_t GetOptimalChunkSize()
+    {
+        constexpr size_t optimalNumSlotsPerChunk = 4096Ui64;
+        return AlignUp(sizeof(Ty) * optimalNumSlotsPerChunk, 16Ui64 * 1024Ui64);
+    }
 }
 
 namespace ig
@@ -248,7 +255,7 @@ namespace ig
         {
             IG_CHECK(IsSlotInRange(slot));
             const size_t chunkIdx = slot / NumSlotsPerChunk;
-              IG_CHECK(chunkIdx < chunks.size());
+            IG_CHECK(chunkIdx < chunks.size());
             const size_t slotIdxInChunk = slot % NumSlotsPerChunk;
             IG_CHECK(slotIdxInChunk < NumSlotsPerChunk);
             return reinterpret_cast<const Ty*>(chunks[chunkIdx] + (slotIdxInChunk * SizeOfElement));
@@ -274,7 +281,7 @@ namespace ig
         }
 
     private:
-        constexpr static size_t ChunkSizeInBytes = details::GetHeuristicOptimalChunkSize<Ty>();
+        constexpr static size_t ChunkSizeInBytes = details::GetOptimalChunkSize<Ty>();
 
         /*
          * LSB 0~21     <22 bits>  : Slot Bit

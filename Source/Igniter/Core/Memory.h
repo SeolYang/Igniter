@@ -20,7 +20,7 @@ namespace ig
     }
 
     template <typename T>
-    T AlignUp(T value, const size_t alignment)
+    constexpr T AlignUp(T value, const size_t alignment)
     {
         IG_CHECK(alignment > 0 && IsPowOf2(alignment));
         const size_t mask = alignment - 1;
