@@ -238,9 +238,9 @@ namespace ig
         {
             IG_CHECK(IsSlotInRange(slot));
             const size_t chunkIdx = slot / NumSlotsPerChunk;
-            IG_CHECK(chunkIdx < currentChunkCapactiy);
+            IG_CHECK(chunkIdx < chunks.size());
             const size_t slotIdxInChunk = slot % NumSlotsPerChunk;
-            IG_CHECK(slotIdxInChunk < SlotCapacityPerChunk);
+            IG_CHECK(slotIdxInChunk < NumSlotsPerChunk);
             return reinterpret_cast<Ty*>(chunks[chunkIdx] + (slotIdxInChunk * SizeOfElement));
         }
 
@@ -248,9 +248,9 @@ namespace ig
         {
             IG_CHECK(IsSlotInRange(slot));
             const size_t chunkIdx = slot / NumSlotsPerChunk;
-            IG_CHECK(chunkIdx < currentChunkCapactiy);
+              IG_CHECK(chunkIdx < chunks.size());
             const size_t slotIdxInChunk = slot % NumSlotsPerChunk;
-            IG_CHECK(slotIdxInChunk < SlotCapacityPerChunk);
+            IG_CHECK(slotIdxInChunk < NumSlotsPerChunk);
             return reinterpret_cast<const Ty*>(chunks[chunkIdx] + (slotIdxInChunk * SizeOfElement));
         }
 
