@@ -294,9 +294,18 @@ namespace ig
             {
                 Action* actionPtr = actionRegistry.Lookup(actionHandle);
                 IG_CHECK(actionPtr != nullptr);
-                if (actionPtr->State == EInputState::Pressed)
+                switch (actionPtr->State)
                 {
+                case EInputState::Pressed:
                     actionPtr->State = EInputState::OnPressing;
+                    break;
+
+                case EInputState::Released:
+                    actionPtr->State = EInputState::None;
+                    break;
+
+                default:
+                    break;
                 }
             }
 
@@ -389,8 +398,7 @@ namespace ig
         {
             Action* actionPtr = actionRegistry.Lookup(action);
             IG_CHECK(actionPtr != nullptr);
-            // #todo 왜 Released가 아닌 None 으로 해둔거지? 나중에 알아볼것
-            actionPtr->State = EInputState::None;
+            actionPtr->State = EInputState::Released;
         }
 
         return false;
