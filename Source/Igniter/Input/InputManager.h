@@ -116,7 +116,7 @@ namespace ig
         std::array<UnorderedSet<Handle_New<Action>>, NumScopedInputs> actionSets;
         std::array<UnorderedSet<Handle_New<Axis>>, NumScopedInputs> axisSets;
 
-        std::vector<EInput> processedInputs;
+        UnorderedSet<EInput> processedInputs;
 
         std::vector<uint8_t> rawInputBuffer;
     };

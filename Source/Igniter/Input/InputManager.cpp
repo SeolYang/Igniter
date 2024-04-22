@@ -316,7 +316,7 @@ namespace ig
         const EInput input = WParamToInput(wParam, bIsMouse);
         if (HandlePressAction(input) || HandleAxis(input, 1.f))
         {
-            processedInputs.emplace_back(input);
+            processedInputs.insert(input);
         }
     }
 
@@ -351,12 +351,12 @@ namespace ig
             const auto deltaY = rawInput->data.mouse.lLastY;
             if (HandleAxis(EInput::MouseDeltaX, static_cast<float>(deltaX), true))
             {
-                processedInputs.emplace_back(EInput::MouseDeltaX);
+                processedInputs.insert(EInput::MouseDeltaX);
             }
 
             if (HandleAxis(EInput::MouseDeltaY, static_cast<float>(deltaY), true))
             {
-                processedInputs.emplace_back(EInput::MouseDeltaY);
+                processedInputs.insert(EInput::MouseDeltaY);
             }
         }
     }
