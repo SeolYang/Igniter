@@ -5,6 +5,10 @@
 #include <Core/Result.h>
 #include <Core/Handle_New.h>
 
+#ifdef IG_TRACK_LEAKED_HANDLE
+#include <Core/DebugTools.h>
+#endif
+
 namespace ig::details
 {
     template <typename Ty>
@@ -52,12 +56,16 @@ namespace ig
         {
             if (freeSlots.size() != slotCapacity)
             {
-                IG_CHECK_NO_ENTRY();
                 for (const auto slot : views::iota(0Ui32, slotCapacity))
                 {
                     if (!IsMarkedAsFreeSlot(slot))
                     {
-                        /* @TODO Dump Callstack (+debug) information */
+#ifdef IG_TRACK_LEAKED_HANDLE
+                        PrintToDebugger("*** Found Leaked Handle!!! ***\n");
+                        PrintToDebugger(CallStack::Dump(lastCallStackTable[slot]));
+                        PrintToDebugger("\n");
+                        IG_CHECK_NO_ENTRY();
+#endif
                         Ty* slotElementPtr = CalcAddressOfSlot(slot);
                         slotElementPtr->~Ty();
                     }
@@ -98,8 +106,13 @@ namespace ig
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersionTable[newSlot]);
-            newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(
-                newHandle.Value, ReduceHashTo16Bits(TypeHash<Ty>));
+            newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(newHandle.Value,
+                                                                              ReduceHashTo16Bits(TypeHash<Ty>));
+
+#ifdef IG_TRACK_LEAKED_HANDLE
+            lastCallStackTable[newSlot] = CallStack::Capture();
+#endif
+
             return newHandle;
         }
 
@@ -211,6 +224,7 @@ namespace ig
             slotCapacity                   = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
             freeSlots.reserve(slotCapacity);
             slotVersionTable.resize(slotCapacity);
+
             for (const SlotType newSlot : views::iota(oldSlotCapacity, slotCapacity) | views::reverse)
             {
                 freeSlots.emplace_back(newSlot);
@@ -304,5 +318,9 @@ namespace ig
         uint32_t                 slotCapacity = 0;
         std::vector<SlotType>    freeSlots;
         std::vector<VersionType> slotVersionTable;
+
+#ifdef IG_TRACK_LEAKED_HANDLE
+        std::array<DWORD, MaxNumSlots> lastCallStackTable;
+#endif
     };
 }

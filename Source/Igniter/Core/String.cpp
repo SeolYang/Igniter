@@ -49,6 +49,7 @@ namespace ig
         return *this == narrower;
     }
 
+    /* #todo string이 rvalue로 넘어올 때, 아예 copy 없이 hash 맵 안에 넣을 수 있도록 수정 할 것 */
     void String::SetString(const std::string_view strView)
     {
         if (utf8::is_valid(strView))
