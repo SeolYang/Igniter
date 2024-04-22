@@ -351,13 +351,16 @@
     <ClInclude Include="..\Source\Igniter\Core\Handle_New.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\HandleRegistry_New.h">
+    <ClInclude Include="..\Source\Igniter\Core\HandleRegistry.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\DebugTools.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Math.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Input\InputManager_New.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -540,6 +543,9 @@
       <Filter>Source\Input</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\DebugTools.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Input\InputManager_New.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>

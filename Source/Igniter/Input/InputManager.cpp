@@ -57,6 +57,9 @@ namespace ig
 
             case VK_CONTROL:
                 return EInput::Control;
+
+            default:
+                break;
             }
         }
 

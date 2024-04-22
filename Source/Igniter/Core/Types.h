@@ -131,6 +131,13 @@ namespace ig
     }
 
     template <typename T>
+     requires std::is_enum_v<T>
+    constexpr auto ToUnderlying(const T enumerator)
+    {
+        return static_cast<std::underlying_type_t<std::decay_t<T>>>(enumerator);
+    }
+
+    template <typename T>
     consteval auto GetTypeName() noexcept
     {
         constexpr std::string_view funcSignature = __FUNCSIG__;

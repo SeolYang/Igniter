@@ -4,7 +4,6 @@
 #include <Core/Memory.h>
 #include <Core/Result.h>
 #include <Core/Handle_New.h>
-
 #ifdef IG_TRACK_LEAKED_HANDLE
 #include <Core/DebugTools.h>
 #endif
@@ -26,15 +25,6 @@ namespace ig::details
 
 namespace ig
 {
-    enum class EHandleLookupStatus
-    {
-        Success,
-        HasInvalidValue,
-        OutOfSlotRange,
-        AccessFreeSlot,
-        VersionMismatch
-    };
-
     template <typename Ty>
         requires (sizeof(Ty) >= sizeof(uint32_t))
     class HandleRegistry final
@@ -148,58 +138,58 @@ namespace ig
             freeSlots.push_back(slot);
         }
 
-        Result<Ty*, EHandleLookupStatus> Lookup(const Handle_New<Ty> handle)
+        Ty* Lookup(const Handle_New<Ty> handle)
         {
             if (handle.Value == Handle_New<Ty>::InvalidValue)
             {
-                return MakeFail<Ty*, EHandleLookupStatus::HasInvalidValue>();
+                return nullptr;
             }
 
             const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);
             if (!IsSlotInRange(slot))
             {
-                return MakeFail<Ty*, EHandleLookupStatus::OutOfSlotRange>();
+                return nullptr;
             }
 
             if (IsMarkedAsFreeSlot(slot))
             {
-                return MakeFail<Ty*, EHandleLookupStatus::AccessFreeSlot>();
+                return nullptr;
             }
 
             const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
             if (version != slotVersionTable[slot])
             {
-                return MakeFail<Ty*, EHandleLookupStatus::VersionMismatch>();
+                return nullptr;
             }
 
-            return MakeSuccess<Ty*, EHandleLookupStatus>(CalcAddressOfSlot(slot));
+            return CalcAddressOfSlot(slot);
         }
 
-        Result<const Ty*, EHandleLookupStatus> Lookup(const Handle_New<Ty> handle) const
+        const Ty* Lookup(const Handle_New<Ty> handle) const
         {
             if (handle.Value == Handle_New<Ty>::InvalidValue)
             {
-                return MakeFail<const Ty*, EHandleLookupStatus::HasInvalidValue>();
+                return nullptr;
             }
 
-            const SlotType slot = MaskBits<0, SlotSizeInBits>(handle.Value);
+            const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);
             if (!IsSlotInRange(slot))
             {
-                return MakeFail<const Ty*, EHandleLookupStatus::OutOfSlotRange>();
+                return nullptr;
             }
 
             if (IsMarkedAsFreeSlot(slot))
             {
-                return MakeFail<const Ty*, EHandleLookupStatus::AccessFreeSlot>();
+                return nullptr;
             }
 
-            const VersionType version = MaskBits<VersionOffset, VersionSizeInBits>(handle.Value);
+            const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
             if (version != slotVersionTable[slot])
             {
-                return MakeFail<const Ty*, EHandleLookupStatus::VersionMismatch>();
+                return nullptr;
             }
 
-            return MakeSuccess<const Ty*, EHandleLookupStatus>(CalcAddressOfSlot(slot));
+            return CalcAddressOfSlot(slot);
         }
 
     private:
@@ -230,6 +220,10 @@ namespace ig
                 freeSlots.emplace_back(newSlot);
                 MarkAsFreeSlot(newSlot);
             }
+
+#ifdef IG_TRACK_LEAKED_HANDLE
+            lastCallStackTable.resize(slotCapacity);
+#endif
 
             return true;
         }
@@ -320,7 +314,7 @@ namespace ig
         std::vector<VersionType> slotVersionTable;
 
 #ifdef IG_TRACK_LEAKED_HANDLE
-        std::array<DWORD, MaxNumSlots> lastCallStackTable;
+        std::vector<DWORD> lastCallStackTable;
 #endif
     };
 }

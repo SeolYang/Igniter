@@ -49,7 +49,7 @@
     <ClInclude Include="..\Source\Igniter\Core\GuidBytes.h" />
     <ClInclude Include="..\Source\Igniter\Core\Handle.h" />
     <ClInclude Include="..\Source\Igniter\Core\HandleManager.h" />
-    <ClInclude Include="..\Source\Igniter\Core\HandleRegistry_New.h" />
+    <ClInclude Include="..\Source\Igniter\Core\HandleRegistry.h" />
     <ClInclude Include="..\Source\Igniter\Core\Handle_New.h" />
     <ClInclude Include="..\Source\Igniter\Core\Hash.h" />
     <ClInclude Include="..\Source\Igniter\Core\Engine.h" />
@@ -96,6 +96,7 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
     <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
+    <ClInclude Include="..\Source\Igniter\Input\InputManager_New.h" />
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
     <ClInclude Include="..\Source\Igniter\Render\Utils.h" />
@@ -180,6 +181,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Igniter.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Input\InputManager.cpp" />
+    <ClCompile Include="..\Source\Igniter\Input\InputManager_New.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp" />
@@ -360,7 +362,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IG_TRACK_LEAKED_HANDLE;_CRTDBG_MAP_ALLOC;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
