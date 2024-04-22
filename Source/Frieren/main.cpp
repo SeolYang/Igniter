@@ -1,4 +1,8 @@
 #include <Frieren.h>
+#include <Core/Handle.h>
+#include <Core/Engine.h>
+#include <Core/Window.h>
+#include <Core/String.h>
 #include <Asset/StaticMesh.h>
 #include <Asset/AssetManager.h>
 #include <Component/CameraArchetype.h>
@@ -6,15 +10,11 @@
 #include <Component/NameComponent.h>
 #include <Component/StaticMeshComponent.h>
 #include <Component/TransformComponent.h>
-#include <Core/Handle.h>
-#include <Core/Engine.h>
-#include <Core/Window.h>
-#include <Core/String.h>
-#include <Gameplay/GameInstance.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/ImGuiLayer.h>
-#include <Input/InputManager.h>
 #include <ImGui/MainLayer.h>
+#include <Input/InputManager.h>
+#include <Gameplay/GameInstance.h>
 #include <Game/Component/FpsCameraController.h>
 #include <Game/Mode/TestGameMode.h>
 
@@ -29,10 +29,6 @@ int main()
         InputManager&                  inputManager = Igniter::GetInputManager();
         GameInstance&                  gameInstance = Igniter::GetGameInstance();
         [[maybe_unused]] AssetManager& assetManager = Igniter::GetAssetManager();
-
-        /* #sy_test Asset System & Mechanism Test */
-
-        /******************************/
 
         /* #sy_test Input Manager Test */
         inputManager.BindAction("MoveLeft"_fs, EInput::A);
