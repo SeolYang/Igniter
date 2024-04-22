@@ -76,7 +76,7 @@ namespace ig
     template <typename T>
     consteval uint64_t EvalTypeHash() noexcept
     {
-        return EvalCRC64(std::string_view{__FUNCSIG__ + 44, sizeof(__FUNCSIG__) - 45 - 16});
+        return EvalCRC64(GetTypeName<T>());
     }
 
     template <typename T>

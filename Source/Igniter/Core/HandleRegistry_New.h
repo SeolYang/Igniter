@@ -18,13 +18,6 @@ namespace ig::details
 
         return 4Ui64 * 1024Ui64 * 1024Ui64; /* 4 MB for greater 512 bytes alloc. */
     }
-
-    template <typename Ty>
-    consteval size_t GetOptimalChunkSize()
-    {
-        constexpr size_t optimalNumSlotsPerChunk = 4096Ui64;
-        return AlignUp(sizeof(Ty) * optimalNumSlotsPerChunk, 16Ui64 * 1024Ui64);
-    }
 }
 
 namespace ig
@@ -217,9 +210,10 @@ namespace ig
             const uint32_t oldSlotCapacity = slotCapacity;
             slotCapacity                   = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
             freeSlots.reserve(slotCapacity);
+            slotVersionTable.resize(slotCapacity);
             for (const SlotType newSlot : views::iota(oldSlotCapacity, slotCapacity) | views::reverse)
             {
-                freeSlots.push_back(newSlot);
+                freeSlots.emplace_back(newSlot);
                 MarkAsFreeSlot(newSlot);
             }
 
@@ -281,7 +275,7 @@ namespace ig
         }
 
     private:
-        constexpr static size_t ChunkSizeInBytes = details::GetOptimalChunkSize<Ty>();
+        constexpr static size_t ChunkSizeInBytes = details::GetHeuristicOptimalChunkSize<Ty>();
 
         /*
          * LSB 0~21     <22 bits>  : Slot Bit
@@ -307,8 +301,8 @@ namespace ig
         constexpr static size_t InitialNumChunks = 4;
         std::vector<uint8_t*>   chunks{};
 
-        uint32_t                             slotCapacity = 0;
-        std::vector<SlotType>                freeSlots;
-        std::array<VersionType, MaxNumSlots> slotVersionTable;
+        uint32_t                 slotCapacity = 0;
+        std::vector<SlotType>    freeSlots;
+        std::vector<VersionType> slotVersionTable;
     };
 }

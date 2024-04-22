@@ -129,6 +129,14 @@ namespace ig
     {
         return magic_enum::enum_name(enumerator).data();
     }
+
+    template <typename T>
+    consteval auto GetTypeName() noexcept
+    {
+        constexpr std::string_view funcSignature = __FUNCSIG__;
+        constexpr auto offset = funcSignature.find_first_not_of(' ', funcSignature.find_first_of('<') + 1);
+        return  funcSignature.substr(offset, funcSignature.find_last_of('>') - offset);
+    }
 } // namespace ig
 
 #define IG_NUMERIC_MIN_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::min()
