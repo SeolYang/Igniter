@@ -1,28 +1,29 @@
 #include <Igniter.h>
-#include <Input/InputManager.h>
 #include <Core/Log.h>
+#include <Input/InputManager.h>
 
 IG_DEFINE_LOG_CATEGORY(InputManager);
 
 namespace ig
 {
-    static EInput WParamToInput(const WPARAM wParam, const bool bIsMouseKey)
+    namespace
     {
-        if (bIsMouseKey)
+        EInput WParamToInput(const WPARAM wParam, const bool bIsMouseKey)
         {
-            /* #sy_ref https://learn.microsoft.com/ko-kr/windows/win32/learnwin32/mouse-clicks#additional-flags */
-            if (ContainsFlags(wParam, MK_LBUTTON))
+            if (bIsMouseKey)
             {
-                return EInput::MouseLB;
+                /* #sy_ref https://learn.microsoft.com/ko-kr/windows/win32/learnwin32/mouse-clicks#additional-flags */
+                if (ContainsFlags(wParam, MK_LBUTTON))
+                {
+                    return EInput::MouseLB;
+                }
+
+                if (ContainsFlags(wParam, MK_RBUTTON))
+                {
+                    return EInput::MouseRB;
+                }
             }
 
-            if (ContainsFlags(wParam, MK_RBUTTON))
-            {
-                return EInput::MouseRB;
-            }
-        }
-        else
-        {
             switch (wParam)
             {
             /** Characters */
@@ -61,13 +62,12 @@ namespace ig
             default:
                 break;
             }
-        }
 
-        return EInput::None;
+            return EInput::None;
+        }
     }
 
-    InputManager::InputManager(HandleManager& handleManager)
-        : handleManager(handleManager)
+    InputManager::InputManager()
     {
         RAWINPUTDEVICE mouseRID{};
         mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
@@ -93,77 +93,167 @@ namespace ig
         {
             IG_LOG(InputManager, Error, "Failed to unregister raw input mouse. {:#X}", GetLastError());
         }
-    }
 
-    void InputManager::BindAction(const String nameOfAction, const EInput input)
-    {
-        IG_CHECK(nameOfAction.IsValid());
-        IG_CHECK(input != EInput::None);
-        IG_CHECK(!inputActionNameMap[input].contains(nameOfAction));
-        inputActionNameMap[input].insert(nameOfAction);
-        if (!actionMap.contains(nameOfAction))
+        for (const auto& [_, mappedAction] : nameActionTable)
         {
-            actionMap[nameOfAction] = Handle<Action>{handleManager};
+            actionRegistry.Destroy(mappedAction.ActionHandle);
+        }
+
+        for (const auto& [_, mappedAxis] : nameAxisTable)
+        {
+            axisRegistry.Destroy(mappedAxis.AxisHandle);
         }
     }
 
-    void InputManager::BindAxis(const String nameOfAxis, const EInput input, const float scale)
+    void InputManager::MapAction(const String name, const EInput input)
     {
-        IG_CHECK(nameOfAxis.IsValid());
-        IG_CHECK(input != EInput::None);
-        if (!axisMap.contains(nameOfAxis))
+        if (!name.IsValid() || name.IsEmpty())
         {
-            inputAxisNameScaleMap[input][nameOfAxis] = scale;
-            axisMap[nameOfAxis]                      = Handle<Axis>{handleManager};
-        }
-    }
-
-    RefHandle<const Action> InputManager::QueryAction(const String nameOfAction) const
-    {
-        auto actionMapItr = actionMap.find(nameOfAction);
-        return actionMapItr != actionMap.cend() ? actionMapItr->second.MakeRef() : RefHandle<const Action>{};
-    }
-
-    RefHandle<const Axis> InputManager::QueryAxis(const String nameOfAxis) const
-    {
-        auto axisMapItr = axisMap.find(nameOfAxis);
-        return axisMapItr != axisMap.cend() ? axisMapItr->second.MakeRef() : RefHandle<const Axis>{};
-    }
-
-    float InputManager::QueryScaleOfAxis(const String nameOfAxis, const EInput input) const
-    {
-        auto itr = inputAxisNameScaleMap.find(input);
-        if (itr != inputAxisNameScaleMap.cend())
-        {
-            const ScaleMap& scaleMap    = itr->second;
-            auto            scaleMapItr = scaleMap.find(nameOfAxis);
-            if (scaleMapItr != scaleMap.cend())
-            {
-                return scaleMapItr->second;
-            }
+            IG_LOG(InputManager, Error, "The Name string has invalid or empty value.");
+            return;
         }
 
-        return 0.f;
-    }
-
-    void InputManager::SetScaleOfAxis(const String nameOfAxis, const EInput input, const float scale)
-    {
-        auto itr = inputAxisNameScaleMap.find(input);
-        if (itr != inputAxisNameScaleMap.end())
+        if (input == EInput::None)
         {
-            ScaleMap& scaleMap    = itr->second;
-            auto      scaleMapItr = scaleMap.find(nameOfAxis);
-            if (scaleMapItr != scaleMap.end())
-            {
-                scaleMapItr->second = scale;
-            }
+            IG_LOG(InputManager, Error, "Action {} cannot mapped with 'None'.", name);
+            return;
         }
+
+        if (nameActionTable.contains(name))
+        {
+            IG_LOG(InputManager, Error, "The Map action ignored due to duplication of {} mapping.");
+            return;
+        }
+
+        const Handle_New<Action> newHandle = actionRegistry.Create();
+        nameActionTable[name]              = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
+        IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
+        actionSets[ToUnderlying(input)].insert(newHandle);
+        IG_LOG(InputManager, Info, "Action {} mapped to '{}'", name, input);
     }
 
-    void InputManager::HandleEvent(const UINT message, const WPARAM wParam, const LPARAM lParam)
+    void InputManager::UnmapAction(const String name)
     {
-        constexpr WPARAM MouseLBWParam = 1;
-        constexpr WPARAM MouseRBWParam = 2;
+        if (!nameActionTable.contains(name))
+        {
+            IG_LOG(InputManager, Error, "Action {} does not exists.", name);
+            return;
+        }
+
+        const auto [handle, mappedInput] = nameActionTable[name];
+        IG_CHECK(actionSets[ToUnderlying(mappedInput)].contains(handle));
+        actionSets[ToUnderlying(mappedInput)].erase(handle);
+        actionRegistry.Destroy(handle);
+        IG_LOG(InputManager, Info, "Action {} unmapped from '{}'.", name, mappedInput);
+    }
+
+    void InputManager::MapAxis(const String name, const EInput input, const float scale)
+    {
+        if (!name.IsValid() || name.IsEmpty())
+        {
+            IG_LOG(InputManager, Error, "The Name string has invalid or empty value.");
+            return;
+        }
+
+        if (input == EInput::None)
+        {
+            IG_LOG(InputManager, Error, "Axis {} cannot mapped with 'None'.", name);
+            return;
+        }
+
+        if (nameActionTable.contains(name))
+        {
+            IG_LOG(InputManager, Error, "The Map axis ignored due to duplication of {} mapping.");
+            return;
+        }
+
+        const Handle_New<Axis> newHandle = axisRegistry.Create(scale);
+        nameAxisTable[name]              = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
+        IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
+        axisSets[ToUnderlying(input)].insert(newHandle);
+        IG_LOG(InputManager, Info, "Axis {} mapped to '{}'", name, input);
+    }
+
+    void InputManager::UnmapAxis(const String name)
+    {
+        if (!nameAxisTable.contains(name))
+        {
+            IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
+            return;
+        }
+
+        const auto [handle, mappedInput] = nameAxisTable[name];
+        IG_CHECK(axisSets[ToUnderlying(mappedInput)].contains(handle));
+        axisSets[ToUnderlying(mappedInput)].erase(handle);
+        axisRegistry.Destroy(handle);
+        IG_LOG(InputManager, Info, "Axis {} unmapped from '{}'.", name, mappedInput);
+    }
+
+    void InputManager::SetScale(const String name, const float newScale)
+    {
+        if (!nameAxisTable.contains(name))
+        {
+            IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
+            return;
+        }
+
+        Axis* axisPtr = axisRegistry.Lookup(nameAxisTable[name].AxisHandle);
+        IG_CHECK(axisPtr != nullptr);
+        axisPtr->Scale = newScale;
+    }
+
+    Handle_New<Action> InputManager::QueryAction(const String name) const
+    {
+        const auto mappingItr = nameActionTable.find(name);
+        if (mappingItr != nameActionTable.cend())
+        {
+            return mappingItr->second.ActionHandle;
+        }
+
+        IG_LOG(InputManager, Error, "Action {} does not exists.", name);
+        return Handle_New<Action>{};
+    }
+
+    Handle_New<Axis> InputManager::QueryAxis(const String name) const
+    {
+        const auto mappingItr = nameAxisTable.find(name);
+        if (mappingItr != nameAxisTable.cend())
+        {
+            return mappingItr->second.AxisHandle;
+        }
+
+        IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
+        return Handle_New<Axis>{};
+    }
+
+    Action InputManager::GetAction(const Handle_New<Action> action) const
+    {
+        const Action* actionPtr = actionRegistry.Lookup(action);
+        if (actionPtr == nullptr)
+        {
+            IG_LOG(InputManager, Error, "The action handle is not valid.");
+            return Action{};
+        }
+
+        return *actionPtr;
+    }
+
+    Axis InputManager::GetAxis(const Handle_New<Axis> axis) const
+    {
+        const Axis* axisPtr = axisRegistry.Lookup(axis);
+        if (axisPtr == nullptr)
+        {
+            IG_LOG(InputManager, Error, "The action handle is not valid.");
+            return Axis{};
+        }
+
+        return *axisPtr;
+    }
+
+    void InputManager::HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam)
+    {
+        constexpr WPARAM mouseLBWParam = 1;
+        constexpr WPARAM mouseRBWParam = 2;
 
         switch (message)
         {
@@ -177,10 +267,10 @@ namespace ig
             break;
 
         case WM_LBUTTONUP:
-            HandleKeyUp(MouseLBWParam, true);
+            HandleKeyUp(mouseLBWParam, true);
             break;
         case WM_RBUTTONUP:
-            HandleKeyUp(MouseRBWParam, true);
+            HandleKeyUp(mouseRBWParam, true);
             break;
 
         case WM_KEYUP:
@@ -188,83 +278,56 @@ namespace ig
             break;
 
         case WM_INPUT:
-            HandleRawInputDevices(wParam, lParam);
+            HandleRawInput(lParam);
+            break;
+
+        default:
             break;
         }
     }
 
     void InputManager::PostUpdate()
     {
-        ZoneScoped;
-        if (!scopedInputs.empty())
+        for (const EInput input : processedInputs)
         {
-            for (const auto& input : scopedInputs)
+            for (const Handle_New<Action> actionHandle : actionSets[ToUnderlying(input)])
             {
-                for (const auto& actionName : inputActionNameMap[input])
+                Action* actionPtr = actionRegistry.Lookup(actionHandle);
+                IG_CHECK(actionPtr != nullptr);
+                if (actionPtr->State == EInputState::Pressed)
                 {
-                    const auto actionItr = actionMap.find(actionName);
-                    if (actionItr != actionMap.end())
-                    {
-                        auto& action = actionItr->second;
-                        IG_CHECK(action);
-                        if (action->State == EInputState::Pressed)
-                        {
-                            action->State = EInputState::OnPressing;
-                        }
-                    }
-                    else
-                    {
-                        IG_CHECK_NO_ENTRY();
-                    }
-                }
-
-                const auto axisNameScaleMapItr = inputAxisNameScaleMap.find(input);
-                if (axisNameScaleMapItr != inputAxisNameScaleMap.end())
-                {
-                    for (auto& axisNameScale : axisNameScaleMapItr->second)
-                    {
-                        const auto axisItr = axisMap.find(axisNameScale.first);
-                        if (axisItr != axisMap.end())
-                        {
-                            auto& axis = axisItr->second;
-                            IG_CHECK(axis);
-                            axis->Value = 0.f;
-                        }
-                    }
+                    actionPtr->State = EInputState::OnPressing;
                 }
             }
 
-            scopedInputs.clear();
+            for (const Handle_New<Axis> axisHandle : axisSets[ToUnderlying(input)])
+            {
+                Axis* axisPtr = axisRegistry.Lookup(axisHandle);
+                IG_CHECK(axisPtr != nullptr);
+                axisPtr->Value = 0.f;
+            }
         }
+
+        processedInputs.clear();
     }
 
-    void InputManager::Clear()
+    void InputManager::HandleKeyDown(const WPARAM wParam, const bool bIsMouse)
     {
-        inputActionNameMap.clear();
-        inputAxisNameScaleMap.clear();
-        actionMap.clear();
-        axisMap.clear();
-        scopedInputs.clear();
-    }
-
-    void InputManager::HandleKeyDown(const WPARAM wParam, const bool bIsMouseKey)
-    {
-        const EInput input           = WParamToInput(wParam, bIsMouseKey);
-        const bool   bKeyDownHandled = HandlePressAction(input) || HandleAxis(input, 1.f);
-        if (bKeyDownHandled)
+        const EInput input = WParamToInput(wParam, bIsMouse);
+        if (HandlePressAction(input) || HandleAxis(input, 1.f))
         {
-            scopedInputs.insert(input);
+            processedInputs.emplace_back(input);
         }
     }
 
-    void InputManager::HandleKeyUp(const WPARAM wParam, const bool bIsMouseKey)
+    void InputManager::HandleKeyUp(const WPARAM wParam, const bool bIsMouse)
     {
-        const EInput input = WParamToInput(wParam, bIsMouseKey);
+        const EInput input = WParamToInput(wParam, bIsMouse);
         HandleReleaseAction(input);
         HandleAxis(input, 0.f);
     }
 
-    void InputManager::HandleRawInputDevices(const WPARAM, const LPARAM lParam)
+    void InputManager::HandleRawInput(const LPARAM lParam)
     {
         UINT pcbSize{};
         GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &pcbSize, sizeof(RAWINPUTHEADER));
@@ -288,73 +351,70 @@ namespace ig
             const auto deltaY = rawInput->data.mouse.lLastY;
             if (HandleAxis(EInput::MouseDeltaX, static_cast<float>(deltaX), true))
             {
-                scopedInputs.insert(EInput::MouseDeltaX);
+                processedInputs.emplace_back(EInput::MouseDeltaX);
             }
 
             if (HandleAxis(EInput::MouseDeltaY, static_cast<float>(deltaY), true))
             {
-                scopedInputs.insert(EInput::MouseDeltaY);
+                processedInputs.emplace_back(EInput::MouseDeltaY);
             }
         }
     }
 
     bool InputManager::HandlePressAction(const EInput input)
     {
-        bool bPressActionHandled = false;
-        auto inputActionNameItr  = inputActionNameMap.find(input);
-        if (inputActionNameItr != inputActionNameMap.end())
+        bool bAnyPress = false;
+        for (const Handle_New<Action> action : actionSets[ToUnderlying(input)])
         {
-            for (const String& actionName : inputActionNameItr->second)
+            Action* actionPtr = actionRegistry.Lookup(action);
+            IG_CHECK(actionPtr != nullptr);
+            switch (actionPtr->State)
             {
-                RefHandle<Action> action = actionMap[actionName].MakeRef();
-                switch (action->State)
-                {
-                case EInputState::None:
-                case EInputState::Released:
-                    action->State = EInputState::Pressed;
-                    bPressActionHandled = true;
-                }
+            case EInputState::None:
+            case EInputState::Released:
+                actionPtr->State = EInputState::Pressed;
+                bAnyPress = true;
+                break;
+            default:
+                break;
             }
         }
 
-        return bPressActionHandled;
+        return bAnyPress;
     }
 
-    void InputManager::HandleReleaseAction(const EInput input)
+    bool InputManager::HandleReleaseAction(const EInput input)
     {
-        auto inputActionNameItr = inputActionNameMap.find(input);
-        if (inputActionNameItr != inputActionNameMap.end())
+        for (const Handle_New<Action> action : actionSets[ToUnderlying(input)])
         {
-            for (const String& actionName : inputActionNameItr->second)
-            {
-                RefHandle<Action> action = actionMap[actionName].MakeRef();
-                action->State            = EInputState::None;
-            }
+            Action* actionPtr = actionRegistry.Lookup(action);
+            IG_CHECK(actionPtr != nullptr);
+            // #todo 왜 Released가 아닌 None 으로 해둔거지? 나중에 알아볼것
+            actionPtr->State = EInputState::None;
         }
+
+        return false;
     }
 
     bool InputManager::HandleAxis(const EInput input, const float value, const bool bIsDifferential)
     {
-        bool bAxisHandled             = false;
-        auto inputAxisNameScaleMapItr = inputAxisNameScaleMap.find(input);
-        if (inputAxisNameScaleMapItr != inputAxisNameScaleMap.end())
+        bool bAnyAxisHandled = false;
+        for (const Handle_New<Axis> axis : axisSets[ToUnderlying(input)])
         {
-            for (const auto& [axisName, axisScale] : inputAxisNameScaleMapItr->second)
+            Axis* axisPtr = axisRegistry.Lookup(axis);
+            IG_CHECK(axisPtr != nullptr);
+            if (bIsDifferential)
             {
-                RefHandle<Axis> axis = axisMap[axisName].MakeRef();
-                if (bIsDifferential)
-                {
-                    axis->Value += value * axisScale;
-                }
-                else
-                {
-                    axis->Value = value * axisScale;
-                }
-
-                bAxisHandled = true;
+                axisPtr->Value += value;
             }
+            else
+            {
+                axisPtr->Value = value;
+            }
+
+            bAnyAxisHandled = true;
         }
 
-        return bAxisHandled;
+        return bAnyAxisHandled;
     }
-} // namespace ig
+}

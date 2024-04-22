@@ -1,11 +1,11 @@
 #pragma once
 #include <Igniter.h>
 #include <Core/String.h>
-#include <Core/Handle.h>
+#include <Core/HandleRegistry.h>
 
 namespace ig
 {
-    enum class EInput
+    enum class EInput : uint16_t
     {
         None,
 
@@ -36,37 +36,42 @@ namespace ig
     struct Action final
     {
     public:
-        bool IsAnyPressing() const { return State == ig::EInputState::Pressed || State == EInputState::OnPressing; }
+        [[nodiscard]] bool IsAnyPressing() const noexcept
+        {
+            return State == ig::EInputState::Pressed || State == EInputState::OnPressing;
+        }
 
     public:
         EInputState State = EInputState::None;
-
-    private:
-        float pad = 0.f;
     };
 
     struct Axis final
     {
     public:
+        [[nodiscard]] float GetScaledValue() const noexcept { return Value * Scale; }
+
+    public:
+        float Scale = 1.f;
         float Value = 0.0f;
-
-    private:
-        float pad = 0.f;
     };
-
-    class HandleManager;
 
     class InputManager final
     {
-        using NameSet           = UnorderedSet<String>;
-        using InputNameMap      = UnorderedMap<EInput, NameSet>;
-        using ScaleMap          = UnorderedMap<String, float>;
-        using InputNameScaleMap = UnorderedMap<EInput, ScaleMap>;
-        template <typename T>
-        using EventMap = UnorderedMap<String, Handle<T>>;
+    private:
+        struct ActionMapping
+        {
+            Handle_New<Action> ActionHandle{};
+            EInput             MappedInput{EInput::None};
+        };
+
+        struct AxisMapping
+        {
+            Handle_New<Axis> AxisHandle{};
+            EInput           MappedInput{EInput::None};
+        };
 
     public:
-        InputManager(HandleManager& handleManager);
+        InputManager();
         InputManager(const InputManager&)     = delete;
         InputManager(InputManager&&) noexcept = delete;
         ~InputManager();
@@ -74,42 +79,45 @@ namespace ig
         InputManager& operator=(const InputManager&)     = delete;
         InputManager& operator=(InputManager&&) noexcept = delete;
 
-        void BindAction(String nameOfAction, EInput input);
-        void BindAxis(String nameOfAxis, EInput input, const float scale = 1.f);
+        void MapAction(const String name, const EInput input);
+        void UnmapAction(const String name);
 
-        // #sy_todo UnbindAction/Axis
+        void MapAxis(const String name, const EInput input, const float scale = 1.f);
+        void UnmapAxis(const String name);
+        void SetScale(const String name, const float newScale);
 
-        RefHandle<const Action> QueryAction(String nameOfAction) const;
-        RefHandle<const Axis>   QueryAxis(String nameOfAxis) const;
-        float                   QueryScaleOfAxis(String nameOfAxis, EInput input) const;
+        [[nodiscard]] Handle_New<Action> QueryAction(const String name) const;
+        [[nodiscard]] Handle_New<Axis>   QueryAxis(const String name) const;
 
-        void SetScaleOfAxis(String nameOfAxis, EInput input, float scale);
+        [[nodiscard]] Action GetAction(const Handle_New<Action> action) const;
+        [[nodiscard]] Axis   GetAxis(const Handle_New<Axis> axis) const;
 
-        void HandleEvent(UINT message, WPARAM wParam, LPARAM lParam);
+        void HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
         void PostUpdate();
 
-        void Clear();
+    private:
+        void HandleKeyDown(const WPARAM wParam, const bool bIsMouse);
+        void HandleKeyUp(const WPARAM wParam, const bool bIsMouse);
+        void HandleRawInput(const LPARAM lParam);
+
+        bool HandlePressAction(const EInput input);
+        bool HandleReleaseAction(const EInput input);
+
+        bool HandleAxis(const EInput input, const float value, const bool bIsDifferential = false);
 
     private:
-        void HandleKeyDown(WPARAM wParam, const bool bIsMouseKey);
-        void HandleKeyUp(WPARAM wParam, const bool bIsMouseKey);
-        void HandleRawInputDevices(const WPARAM wParam, const LPARAM lParam);
+        HandleRegistry<Action> actionRegistry;
+        HandleRegistry<Axis>   axisRegistry;
 
-        bool HandlePressAction(EInput input);
-        void HandleReleaseAction(EInput input);
-        bool HandleAxis(EInput input, float value, const bool bIsDifferential = false);
+        UnorderedMap<String, ActionMapping> nameActionTable{};
+        UnorderedMap<String, AxisMapping>   nameAxisTable{};
 
-    private:
-        HandleManager& handleManager;
+        constexpr static size_t NumScopedInputs = magic_enum::enum_count<EInput>();
+        std::array<UnorderedSet<Handle_New<Action>>, NumScopedInputs> actionSets;
+        std::array<UnorderedSet<Handle_New<Axis>>, NumScopedInputs> axisSets;
 
-        InputNameMap      inputActionNameMap{};
-        InputNameScaleMap inputAxisNameScaleMap{};
-
-        EventMap<Action> actionMap{};
-        EventMap<Axis>   axisMap{};
-
-        UnorderedSet<EInput> scopedInputs{};
+        std::vector<EInput> processedInputs;
 
         std::vector<uint8_t> rawInputBuffer;
     };
-} // namespace ig
+}

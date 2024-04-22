@@ -22,16 +22,16 @@ namespace fe
 
         bool bIgnoreInput = false;
 
-        ig::RefHandle<const ig::Action> moveLeftAction;
-        ig::RefHandle<const ig::Action> moveRightAction;
-        ig::RefHandle<const ig::Action> moveForwardAction;
-        ig::RefHandle<const ig::Action> moveBackwardAction;
-        ig::RefHandle<const ig::Action> moveUpAction;
-        ig::RefHandle<const ig::Action> moveDownAction;
+        Handle_New<Action> moveLeftActionHandle;
+        Handle_New<Action> moveRightActionHandle;
+        Handle_New<Action> moveForwardActionHandle;
+        Handle_New<Action> moveBackwardActionHandle;
+        Handle_New<Action> moveUpActionHandle;
+        Handle_New<Action> moveDownActionHandle;
 
-        ig::RefHandle<const ig::Axis> turnYawAxis;
-        ig::RefHandle<const ig::Axis> turnPitchAxis;
+        Handle_New<Axis> turnYawAxisHandle;
+        Handle_New<Axis> turnPitchAxisHandle;
 
-        ig::RefHandle<const ig::Action> sprintAction;
+        Handle_New<Action> sprintActionHandle;
     };
 } // namespace fe

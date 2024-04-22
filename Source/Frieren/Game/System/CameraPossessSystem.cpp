@@ -10,27 +10,23 @@ IG_DEFINE_LOG_CATEGORY(CameraPossessSystem);
 
 namespace fe
 {
-
     CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
-        : window(ig::Igniter::GetWindow()),
-          fpsCamControllSystem(fpsCamControllSystem)
+        : window(ig::Igniter::GetWindow())
+        , fpsCamControllSystem(fpsCamControllSystem)
     {
-        const auto& inputManager = ig::Igniter::GetInputManager();
-        togglePossessToCamera = inputManager.QueryAction(ig::String("TogglePossessCamera"));
-        IG_CHECK(togglePossessToCamera);
+        const auto& inputManager    = ig::Igniter::GetInputManager();
+        togglePossessToCameraHandle = inputManager.QueryAction(ig::String("TogglePossessCamera"));
 
         Configure();
     }
 
     void CameraPossessSystem::Update()
     {
-        if (togglePossessToCamera)
+        const Action togglePossessToCamera = Igniter::GetInputManager().GetAction(togglePossessToCameraHandle);
+        if (togglePossessToCamera.State == ig::EInputState::Pressed)
         {
-            if (togglePossessToCamera->State == ig::EInputState::Pressed)
-            {
-                bEnabled = !bEnabled;
-                Configure();
-            }
+            bEnabled = !bEnabled;
+            Configure();
         }
     }
 

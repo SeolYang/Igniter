@@ -31,18 +31,18 @@ int main()
         [[maybe_unused]] AssetManager& assetManager = Igniter::GetAssetManager();
 
         /* #sy_test Input Manager Test */
-        inputManager.BindAction("MoveLeft"_fs, EInput::A);
-        inputManager.BindAction("MoveRight"_fs, EInput::D);
-        inputManager.BindAction("MoveForward"_fs, EInput::W);
-        inputManager.BindAction("MoveBackward"_fs, EInput::S);
-        inputManager.BindAction("MoveUp"_fs, EInput::MouseRB);
-        inputManager.BindAction("MoveDown"_fs, EInput::MouseLB);
-        inputManager.BindAction("Sprint"_fs, EInput::Shift);
+        inputManager.MapAction("MoveLeft"_fs, EInput::A);
+        inputManager.MapAction("MoveRight"_fs, EInput::D);
+        inputManager.MapAction("MoveForward"_fs, EInput::W);
+        inputManager.MapAction("MoveBackward"_fs, EInput::S);
+        inputManager.MapAction("MoveUp"_fs, EInput::MouseRB);
+        inputManager.MapAction("MoveDown"_fs, EInput::MouseLB);
+        inputManager.MapAction("Sprint"_fs, EInput::Shift);
 
-        inputManager.BindAxis("TurnYaw"_fs, EInput::MouseDeltaX, 1.f);
-        inputManager.BindAxis("TurnAxis"_fs, EInput::MouseDeltaY, 1.f);
+        inputManager.MapAxis("TurnYaw"_fs, EInput::MouseDeltaX, 1.f);
+        inputManager.MapAxis("TurnAxis"_fs, EInput::MouseDeltaY, 1.f);
 
-        inputManager.BindAction(String("TogglePossessCamera"), EInput::Space);
+        inputManager.MapAction(String("TogglePossessCamera"), EInput::Space);
         /********************************/
 
         /* #sy_test ECS based Game flow & logic tests */

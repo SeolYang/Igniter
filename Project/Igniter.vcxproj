@@ -94,9 +94,8 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
-    <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
-    <ClInclude Include="..\Source\Igniter\Input\InputManager_New.h" />
+    <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
     <ClInclude Include="..\Source\Igniter\Render\Utils.h" />
@@ -181,7 +180,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Igniter.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Input\InputManager.cpp" />
-    <ClCompile Include="..\Source\Igniter\Input\InputManager_New.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp" />

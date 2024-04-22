@@ -2,6 +2,7 @@
 #include <Core/Window.h>
 #include <Core/EmbededSettings.h>
 #include <Core/Log.h>
+#include <Core/Engine.h>
 #include <Input/InputManager.h>
 #include <ImGUi/ImGuiCanvas.h>
 

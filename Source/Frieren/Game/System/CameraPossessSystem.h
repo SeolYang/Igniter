@@ -9,6 +9,7 @@ namespace ig
 namespace fe
 {
     class FpsCameraControllSystem;
+
     class CameraPossessSystem
     {
     public:
@@ -20,8 +21,8 @@ namespace fe
         void Configure();
 
     private:
-        ig::Window& window;
-        ig::RefHandle<const ig::Action> togglePossessToCamera;
+        ig::Window&              window;
+        Handle_New<Action>       togglePossessToCameraHandle;
         FpsCameraControllSystem& fpsCamControllSystem;
 
         bool bEnabled = false;

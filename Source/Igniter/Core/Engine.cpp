@@ -41,10 +41,10 @@ namespace ig
         });
         renderDevice  = MakePtr<RenderDevice>();
         handleManager = MakePtr<HandleManager>();
+        inputManager  = MakePtr<InputManager>();
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        inputManager        = MakePtr<InputManager>(*handleManager);
         deferredDeallocator = MakePtr<DeferredDeallocator>(*frameManager);
         ////////////////////////////////////////////////////
 
@@ -59,7 +59,7 @@ namespace ig
 
         //////////////////////// L4 ////////////////////////
         renderer = MakePtr<Renderer>(*frameManager, *window, *renderDevice, *handleManager,
-                                              *renderContext);
+                                     *renderContext);
         imguiRenderer = MakePtr<ImGuiRenderer>(*frameManager, *window, *renderDevice);
         ////////////////////////////////////////////////////
 
@@ -97,10 +97,10 @@ namespace ig
 
         //////////////////////// L1 ////////////////////////
         deferredDeallocator.reset();
-        inputManager.reset();
         ////////////////////////////////////////////////////
 
         //////////////////////// L0 ////////////////////////
+        inputManager.reset();
         handleManager.reset();
         renderDevice.reset();
         window.reset();
