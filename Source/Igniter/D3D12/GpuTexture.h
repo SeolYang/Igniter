@@ -42,12 +42,11 @@ namespace ig
         }
 
     private:
-        GpuTexture(const GpuTextureDesc&  newDesc, ComPtr<D3D12MA::Allocation> newAllocation,
-                   ComPtr<ID3D12Resource> newResource);
+        GpuTexture(const GpuTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource);
 
     private:
-        GpuTextureDesc              desc;
+        GpuTextureDesc desc;
         ComPtr<D3D12MA::Allocation> allocation;
-        ComPtr<ID3D12Resource>      resource;
+        ComPtr<ID3D12Resource> resource;
     };
-} // namespace ig
+}    // namespace ig

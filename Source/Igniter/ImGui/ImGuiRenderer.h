@@ -29,10 +29,10 @@ namespace ig
     private:
         const FrameManager& frameManager;
 
-        Ptr<DescriptorHeap>  descriptorHeap;
-        GpuView              mainSrv;
+        Ptr<DescriptorHeap> descriptorHeap;
+        GpuView mainSrv;
         std::vector<GpuView> reservedSharedResourceViews;
 
         std::vector<Ptr<CommandContext>> commandContexts;
     };
-} // namespace ig
+}    // namespace ig

@@ -21,18 +21,17 @@ namespace ig
 
     public:
         MaterialImporter(AssetManager& assetManager);
-        MaterialImporter(const MaterialImporter&)     = delete;
+        MaterialImporter(const MaterialImporter&) = delete;
         MaterialImporter(MaterialImporter&&) noexcept = delete;
-        ~MaterialImporter()                           = default;
+        ~MaterialImporter() = default;
 
-        MaterialImporter& operator=(const MaterialImporter&)     = delete;
+        MaterialImporter& operator=(const MaterialImporter&) = delete;
         MaterialImporter& operator=(MaterialImporter&&) noexcept = delete;
 
     private:
-        Result<Material::Desc, EMaterialCreateStatus>
-        Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc);
+        Result<Material::Desc, EMaterialCreateStatus> Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc);
 
     private:
         AssetManager& assetManager;
     };
-}
+}    // namespace ig

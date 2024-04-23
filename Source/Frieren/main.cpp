@@ -25,9 +25,9 @@ int main()
     int result = 0;
     Igniter::Ignite();
     {
-        Window&                        window       = Igniter::GetWindow();
-        InputManager&                  inputManager = Igniter::GetInputManager();
-        GameInstance&                  gameInstance = Igniter::GetGameInstance();
+        Window& window = Igniter::GetWindow();
+        InputManager& inputManager = Igniter::GetInputManager();
+        GameInstance& gameInstance = Igniter::GetGameInstance();
         [[maybe_unused]] AssetManager& assetManager = Igniter::GetAssetManager();
 
         /* #sy_test Input Manager Test */
@@ -49,8 +49,7 @@ int main()
         Registry& registry = gameInstance.GetRegistry();
         gameInstance.SetGameMode(std::make_unique<TestGameMode>());
 
-        Guid homuraMeshGuids[] =
-        {
+        Guid homuraMeshGuids[] = {
             Guid{"0c5a8c40-a6d9-4b6a-bcc9-616b3cef8450"},
             Guid{"5e6a8a5a-4358-47a9-93e6-0e7ed165dbc0"},
             Guid{"ad4921ad-3654-4ce4-a626-6568ce399dba"},
@@ -63,12 +62,8 @@ int main()
         std::vector<std::future<CachedAsset<StaticMesh>>> homuraMeshFutures{};
         for (Guid guid : homuraMeshGuids)
         {
-            homuraMeshFutures.emplace_back(std::async(std::launch::async,
-                                                      [&assetManager](const Guid guid)
-                                                      {
-                                                          return assetManager.LoadStaticMesh(guid);
-                                                      },
-                                                      guid));
+            homuraMeshFutures.emplace_back(std::async(
+                std::launch::async, [&assetManager](const Guid guid) { return assetManager.LoadStaticMesh(guid); }, guid));
         }
 
         for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : homuraMeshFutures)
@@ -77,38 +72,30 @@ int main()
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
-                auto&      staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
+                auto& staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
                 staticMeshComponent.Mesh = std::move(staticMesh);
 
                 registry.emplace<TransformComponent>(newEntity);
-                registry.emplace<NameComponent>(
-                    newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
             }
         }
 
         std::future<CachedAsset<StaticMesh>> homuraAxeMeshFutures{
-            std::async(std::launch::async,
-                       [&assetManager]()
-                       {
-                           return assetManager.LoadStaticMesh(Guid{"b77399f0-98ec-47cb-ad80-e7287d5833c2"});
-                       })
-        };
+            std::async(std::launch::async, [&assetManager]() { return assetManager.LoadStaticMesh(Guid{"b77399f0-98ec-47cb-ad80-e7287d5833c2"}); })};
         {
             CachedAsset<StaticMesh> staticMesh{homuraAxeMeshFutures.get()};
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
-                auto&      staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
+                auto& staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
                 staticMeshComponent.Mesh = std::move(staticMesh);
 
                 registry.emplace<TransformComponent>(newEntity);
-                registry.emplace<NameComponent>(
-                    newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
             }
         }
 
-        Guid littleTokyoMeshGuids[] =
-        {
+        Guid littleTokyoMeshGuids[] = {
             Guid{"b7cdf76b-12ca-4476-8c83-bcb0ca77bd5a"},
             Guid{"573ad7dc-62af-46b0-8388-690bf473abe3"},
             Guid{"52b2cb76-d1fe-4e5f-97b8-0138391bbea4"},
@@ -137,12 +124,7 @@ int main()
         for (Guid guid : littleTokyoMeshGuids)
         {
             littleTokyoMeshFutures.emplace_back(std::async(
-                std::launch::async,
-                [&assetManager](const Guid guid)
-                {
-                    return assetManager.LoadStaticMesh(guid);
-                },
-                guid));
+                std::launch::async, [&assetManager](const Guid guid) { return assetManager.LoadStaticMesh(guid); }, guid));
         }
 
         for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : littleTokyoMeshFutures)
@@ -151,12 +133,11 @@ int main()
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
-                auto&      staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
+                auto& staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
                 staticMeshComponent.Mesh = std::move(staticMesh);
 
                 registry.emplace<TransformComponent>(newEntity);
-                registry.emplace<NameComponent>(
-                    newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
             }
         }
 
@@ -166,10 +147,10 @@ int main()
             registry.emplace<NameComponent>(cameraEntity, "Camera"_fs);
 
             TransformComponent& cameraTransform = registry.get<TransformComponent>(cameraEntity);
-            cameraTransform.Position            = Vector3{0.f, 0.f, -30.f};
+            cameraTransform.Position = Vector3{0.f, 0.f, -30.f};
 
             CameraComponent& cameraComponent = registry.get<CameraComponent>(cameraEntity);
-            cameraComponent.CameraViewport   = window.GetViewport();
+            cameraComponent.CameraViewport = window.GetViewport();
 
             registry.emplace<FpsCameraController>(cameraEntity);
             registry.emplace<MainCameraTag>(cameraEntity);
@@ -177,8 +158,8 @@ int main()
         /********************************************/
 
         /* #sy_test ImGui integration tests */
-        ImGuiCanvas& canvas    = Igniter::GetImGuiCanvas();
-        auto&        mainLayer = canvas.AddLayer<MainLayer>(canvas);
+        ImGuiCanvas& canvas = Igniter::GetImGuiCanvas();
+        auto& mainLayer = canvas.AddLayer<MainLayer>(canvas);
         mainLayer.SetVisibility(true);
         /************************************/
 
@@ -196,14 +177,11 @@ struct MemoryLeakDetector
 {
     MemoryLeakDetector()
     {
-        _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-        _CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_DEBUG );
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+        _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
     }
 
-    ~MemoryLeakDetector()
-    {
-        _CrtDumpMemoryLeaks();
-    }
+    ~MemoryLeakDetector() { _CrtDumpMemoryLeaks(); }
 };
 
 #pragma warning(push)

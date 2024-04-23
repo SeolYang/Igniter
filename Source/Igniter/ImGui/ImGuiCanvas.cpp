@@ -3,19 +3,13 @@
 
 namespace ig
 {
-    ImGuiCanvas::~ImGuiCanvas()
-    {
-    }
+    ImGuiCanvas::~ImGuiCanvas() {}
 
     void ImGuiCanvas::Render()
     {
         if (bDirty)
         {
-            std::sort(layers.begin(), layers.end(),
-                      [](const auto& lhs, const auto& rhs)
-                      {
-                          return lhs->GetPriority() < rhs->GetPriority();
-                      });
+            std::sort(layers.begin(), layers.end(), [](const auto& lhs, const auto& rhs) { return lhs->GetPriority() < rhs->GetPriority(); });
 
             bDirty = false;
         }
@@ -28,4 +22,4 @@ namespace ig
             }
         }
     }
-} // namespace ig
+}    // namespace ig

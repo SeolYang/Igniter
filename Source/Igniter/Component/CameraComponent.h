@@ -17,8 +17,8 @@ namespace ig
 
     public:
         Viewport CameraViewport{};
-        float    NearZ = 0.1f;
-        float    FarZ  = 1000.f;
+        float NearZ = 0.1f;
+        float FarZ = 1000.f;
         /* Degrees Field Of View */
         float Fov = 45.f;
 
@@ -32,4 +32,4 @@ namespace ig
     IG_DECLARE_COMPONENT(CameraComponent);
 
     IG_DECLARE_COMPONENT(MainCameraTag);
-} // namespace ig
+}    // namespace ig

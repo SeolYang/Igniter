@@ -45,15 +45,15 @@ namespace ig
     class String final
     {
     public:
-        String() noexcept              = default;
+        String() noexcept = default;
         String(const String&) noexcept = default;
-        String(String&&) noexcept      = default;
+        String(String&&) noexcept = default;
         String(const std::string_view strView);
         String(const std::wstring_view strView);
         ~String() noexcept = default;
 
         String& operator=(const String&) noexcept = default;
-        String& operator=(String&&) noexcept      = default;
+        String& operator=(String&&) noexcept = default;
         String& operator=(const std::string_view rhs);
         String& operator=(const std::wstring_view rhs);
 
@@ -68,16 +68,16 @@ namespace ig
         void SetString(const std::string_view strView);
 
         [[nodiscard]] const std::string& ToStandard() const;
-        [[nodiscard]] std::string_view   ToStringView() const;
-        [[nodiscard]] const char*        ToCString() const;
-        [[nodiscard]] std::wstring       ToWideString() const;
-        [[nodiscard]] Path           ToPath() const;
+        [[nodiscard]] std::string_view ToStringView() const;
+        [[nodiscard]] const char* ToCString() const;
+        [[nodiscard]] std::wstring ToWideString() const;
+        [[nodiscard]] Path ToPath() const;
 
         [[nodiscard]] static String FromPath(const Path& path);
 
         [[nodiscard]] uint64_t GetHash() const noexcept { return hashOfString; }
-        [[nodiscard]] bool     IsValid() const noexcept { return hashOfString != InvalidHashVal; }
-        [[nodiscard]] bool     IsEmpty() const noexcept { return hashOfString == 0; }
+        [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
+        [[nodiscard]] bool IsEmpty() const noexcept { return hashOfString == 0; }
 
         [[nodiscard]] std::vector<String> Split(const String delimiter) const;
 
@@ -86,7 +86,7 @@ namespace ig
     private:
         using HashStringMap = StableUnorderedMap<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
-        [[nodiscard]] static SharedMutex&   GetHashStringMapMutex();
+        [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
 
     private:
         uint64_t hashOfString{0};
@@ -103,7 +103,7 @@ namespace ig
     }
 
     String CamelCaseToTitleCase(const String& str);
-} // namespace ig
+}    // namespace ig
 
 template <>
 struct std::hash<ig::String>
@@ -116,10 +116,7 @@ template <>
 struct std::formatter<ig::String>
 {
 public:
-    constexpr auto parse(std::format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
+    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FrameContext>
     auto format(const ig::String& str, FrameContext& ctx) const

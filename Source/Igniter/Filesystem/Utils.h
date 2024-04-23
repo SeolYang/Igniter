@@ -50,7 +50,7 @@ namespace ig
         const size_t sizeOfBlob = fs::file_size(path);
         IG_CHECK(sizeOfBlob > 0);
         blob.resize(sizeOfBlob);
-        blobStream.read((char*)blob.data(), blob.size());
+        blobStream.read((char*) blob.data(), blob.size());
         return blob;
     }
 
@@ -88,4 +88,4 @@ namespace ig
         fileStream.close();
         return true;
     }
-} // namespace ig
+}    // namespace ig

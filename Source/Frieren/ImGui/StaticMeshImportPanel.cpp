@@ -58,12 +58,11 @@ namespace fe
             DialogFilter{.Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs},
         };
 
-        Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(
-            nullptr, "Model resource to import"_fs, Filters);
+        Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(nullptr, "Model resource to import"_fs, Filters);
         status = result.GetStatus();
         if (result.HasOwnership())
         {
             path = result.Take();
         }
     }
-} // namespace ig
+}    // namespace fe

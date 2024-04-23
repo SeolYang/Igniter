@@ -4,16 +4,14 @@
 namespace ig
 {
     template <typename Archive, typename Data>
-    concept Serializable = requires(Archive& archive, const Data& data)
-    {
+    concept Serializable = requires(Archive& archive, const Data& data) {
         {
             data.Serialize(archive)
         } -> std::convertible_to<Archive&>;
     };
 
     template <typename Archive, typename Data>
-    concept Deserializable = requires(const Archive& archive, Data& data)
-    {
+    concept Deserializable = requires(const Archive& archive, Data& data) {
         {
             data.Deserialize(archive)
         } -> std::convertible_to<const Archive&>;
@@ -32,4 +30,4 @@ namespace ig
     {
         return data.Deserialize(archive);
     }
-} // namespace ig
+}    // namespace ig

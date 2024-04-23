@@ -28,9 +28,9 @@ namespace ig
     }
 
     template <typename T, typename... Params>
-        requires (std::is_same_v<T, Params> && ...)
+        requires(std::is_same_v<T, Params> && ...)
     auto MakeRefArray(T& reference, [[maybe_unused]] Params&... params)
     {
         return std::array<Ref<T>, sizeof...(Params) + 1>{std::ref(reference), std::ref(params)...};
     }
-} // namespace ig
+}    // namespace ig

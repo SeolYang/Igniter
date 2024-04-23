@@ -4,11 +4,7 @@
 
 namespace fe
 {
-    AssetWatchPanel::AssetWatchPanel() : watcher{
-                                           "Assets"_fs,
-                                           ig::EFileWatchFilterFlags::ChangeLastWrite |
-                                           ig::EFileWatchFilterFlags::ChangeFileName
-                                       }
+    AssetWatchPanel::AssetWatchPanel() : watcher{"Assets"_fs, ig::EFileWatchFilterFlags::ChangeLastWrite | ig::EFileWatchFilterFlags::ChangeFileName}
     {
         infoBuffer.reserve(64);
     }
@@ -24,13 +20,8 @@ namespace fe
 
             ImGui::SameLine();
 
-            constexpr ImGuiTableFlags TableFlags =
-                    ImGuiTableFlags_Reorderable |
-                    ImGuiTableFlags_RowBg |
-                    ImGuiTableFlags_BordersOuter |
-                    ImGuiTableFlags_BordersV |
-                    ImGuiTableFlags_NoBordersInBody |
-                    ImGuiTableFlags_ScrollY;
+            constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter |
+                                                   ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY;
 
             if (ImGui::BeginTable("Latest Changes", 6, TableFlags))
             {
@@ -68,4 +59,4 @@ namespace fe
             infoBuffer.emplace_back(newChangeInfo);
         }
     }
-} // namespace ig
+}    // namespace fe

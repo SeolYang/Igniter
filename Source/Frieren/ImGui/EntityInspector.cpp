@@ -7,9 +7,7 @@
 
 namespace fe
 {
-    EntityInspector::EntityInspector(const EntityList& entityList) : entityList(&entityList)
-    {
-    }
+    EntityInspector::EntityInspector(const EntityList& entityList) : entityList(&entityList) {}
 
     void EntityInspector::Render()
     {
@@ -19,9 +17,9 @@ namespace fe
             const Entity selectedEntity = entityList->GetSelectedEntity();
             if (selectedEntity != entt::null)
             {
-                GameInstance& gameInstance             = Igniter::GetGameInstance();
-                Registry&     registry                 = gameInstance.GetRegistry();
-                bool          bHasDisplayableComponent = false;
+                GameInstance& gameInstance = Igniter::GetGameInstance();
+                Registry& registry = gameInstance.GetRegistry();
+                bool bHasDisplayableComponent = false;
 
                 const auto componentInfos = ComponentRegistry::GetComponentInfos();
                 for (const auto& componentInfoPair : componentInfos)
@@ -31,8 +29,7 @@ namespace fe
                     entt::sparse_set* sparseSet = registry.storage(componentID);
                     if (sparseSet != nullptr && sparseSet->contains(selectedEntity))
                     {
-                        if (ImGui::CollapsingHeader(componentInfo.Name.data(),
-                                                    ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
+                        if (ImGui::CollapsingHeader(componentInfo.Name.data(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
                         {
                             componentInfo.OnImGui(registry, selectedEntity);
                         }
@@ -53,4 +50,4 @@ namespace fe
             ImGui::End();
         }
     }
-} // namespace ig
+}    // namespace fe

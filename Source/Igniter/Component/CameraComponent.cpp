@@ -20,4 +20,4 @@ namespace ig
         ImGui::InputFloat("Width", &camera.CameraViewport.width);
         ImGui::InputFloat("Height", &camera.CameraViewport.height);
     }
-} // namespace ig
+}    // namespace ig

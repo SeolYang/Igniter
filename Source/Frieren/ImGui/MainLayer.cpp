@@ -15,14 +15,14 @@
 namespace fe
 {
     MainLayer::MainLayer(ig::ImGuiCanvas& canvas)
-        : statisticsPanel(&canvas.AddLayer<StatisticsPanel>()),
-          cachedStringDebugger(&canvas.AddLayer<CachedStringDebugger>()),
-          entityList(&canvas.AddLayer<EntityList>()),
-          entityInspector(&canvas.AddLayer<EntityInspector>(*entityList)),
-          assetWatchPanel(&canvas.AddLayer<AssetWatchPanel>()),
-          textureImportPanel(&canvas.AddLayer<TextureImportPanel>()),
-          staticMeshImportPanel(&canvas.AddLayer<StaticMeshImportPanel>()),
-          assetSnapshotPanel(&canvas.AddLayer<AssetInspector>())
+        : statisticsPanel(&canvas.AddLayer<StatisticsPanel>())
+        , cachedStringDebugger(&canvas.AddLayer<CachedStringDebugger>())
+        , entityList(&canvas.AddLayer<EntityList>())
+        , entityInspector(&canvas.AddLayer<EntityInspector>(*entityList))
+        , assetWatchPanel(&canvas.AddLayer<AssetWatchPanel>())
+        , textureImportPanel(&canvas.AddLayer<TextureImportPanel>())
+        , staticMeshImportPanel(&canvas.AddLayer<StaticMeshImportPanel>())
+        , assetSnapshotPanel(&canvas.AddLayer<AssetInspector>())
     {
     }
 
@@ -95,4 +95,4 @@ namespace fe
             ImGui::EndMainMenuBar();
         }
     }
-} // namespace fe
+}    // namespace fe

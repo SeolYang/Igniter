@@ -17,32 +17,31 @@ namespace ig
         CommandQueue(CommandQueue&& other) noexcept;
         ~CommandQueue();
 
-        CommandQueue& operator=(const CommandQueue&)     = delete;
+        CommandQueue& operator=(const CommandQueue&) = delete;
         CommandQueue& operator=(CommandQueue&&) noexcept = delete;
 
         bool IsValid() const { return native; }
         operator bool() const { return IsValid(); }
 
-        auto&      GetNative() { return *native.Get(); }
+        auto& GetNative() { return *native.Get(); }
         EQueueType GetType() const { return type; }
 
-        void    ExecuteContexts(const std::span<Ref<CommandContext>> cmdCtxs);
+        void ExecuteContexts(const std::span<Ref<CommandContext>> cmdCtxs);
         GpuSync MakeSync();
-        void    SyncWith(GpuSync& sync);
+        void SyncWith(GpuSync& sync);
 
     private:
-        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType,
-                     ComPtr<ID3D12Fence>        newFence);
+        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, ComPtr<ID3D12Fence> newFence);
 
     private:
         static constexpr size_t RecommendedMinNumCommandContexts = 16;
 
     private:
         ComPtr<ID3D12CommandQueue> native;
-        const EQueueType           type;
+        const EQueueType type;
 
-        Mutex                mutex;
-        ComPtr<ID3D12Fence>  fence;
+        Mutex mutex;
+        ComPtr<ID3D12Fence> fence;
         std::atomic_uint64_t syncCounter{1};
     };
-} // namespace ig
+}    // namespace ig

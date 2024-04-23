@@ -7,12 +7,12 @@ namespace fe
     class EntityList final : public ImGuiLayer
     {
     public:
-        EntityList()                      = default;
-        EntityList(const EntityList&)     = delete;
+        EntityList() = default;
+        EntityList(const EntityList&) = delete;
         EntityList(EntityList&&) noexcept = delete;
-        ~EntityList() override            = default;
+        ~EntityList() override = default;
 
-        EntityList& operator=(const EntityList&)     = delete;
+        EntityList& operator=(const EntityList&) = delete;
         EntityList& operator=(EntityList&&) noexcept = delete;
 
         void Render() override;
@@ -22,4 +22,4 @@ namespace fe
     private:
         Entity selectedEntity = entt::null;
     };
-} // namespace ig
+}    // namespace fe

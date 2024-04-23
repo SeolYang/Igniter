@@ -6,7 +6,7 @@ namespace ig
 {
     class DeferredDeallocator;
     void RequestDeferredDeallocation(DeferredDeallocator& deferredDeallocator, std::function<void()>&& requester);
-} // namespace ig
+}    // namespace ig
 
 namespace ig
 {
@@ -19,17 +19,16 @@ namespace ig
         CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device, const EQueueType queueType);
         ~CommandContextPool();
 
-        std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> Request(
-            const std::string_view debugName = "");
+        std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> Request(const std::string_view debugName = "");
 
     private:
         void Return(CommandContext* cmdContext);
 
     private:
         DeferredDeallocator& deferredDeallocator;
-        const size_t         reservedNumCmdCtxs;
+        const size_t reservedNumCmdCtxs;
 
-        SharedMutex                 mutex;
+        SharedMutex mutex;
         std::queue<CommandContext*> pool;
     };
-} // namespace ig
+}    // namespace ig

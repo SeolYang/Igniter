@@ -9,34 +9,20 @@
 
 namespace ig
 {
-    GpuViewManager::GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator,
-                                   RenderDevice&  device) :
-                                                          handleManager(handleManager)
-                                                          , deferredDeallocator(deferredDeallocator)
-                                                          , device(device)
-                                                          , cbvSrvUavHeap(MakePtr<DescriptorHeap>(
-                                                              device.CreateDescriptorHeap(
-                                                                  "Bindless CBV-SRV-UAV Heap",
-                                                                  EDescriptorHeapType::CBV_SRV_UAV,
-                                                                  NumCbvSrvUavDescriptors).value()))
-                                                          , samplerHeap(MakePtr<DescriptorHeap>(
-                                                              device.CreateDescriptorHeap(
-                                                                  "Bindless Sampler Heap", EDescriptorHeapType::Sampler,
-                                                                  NumSamplerDescriptors).value()))
-                                                          , rtvHeap(MakePtr<DescriptorHeap>(
-                                                              device.CreateDescriptorHeap(
-                                                                  "Bindless RTV Heap", EDescriptorHeapType::RTV,
-                                                                  NumRtvDescriptors).value()))
-                                                          , dsvHeap(MakePtr<DescriptorHeap>(
-                                                              device.CreateDescriptorHeap(
-                                                                  "Bindless DSV Heap", EDescriptorHeapType::DSV,
-                                                                  NumDsvDescriptors).value()))
+    GpuViewManager::GpuViewManager(HandleManager& handleManager, DeferredDeallocator& deferredDeallocator, RenderDevice& device)
+        : handleManager(handleManager)
+        , deferredDeallocator(deferredDeallocator)
+        , device(device)
+        , cbvSrvUavHeap(MakePtr<DescriptorHeap>(
+              device.CreateDescriptorHeap("Bindless CBV-SRV-UAV Heap", EDescriptorHeapType::CBV_SRV_UAV, NumCbvSrvUavDescriptors).value()))
+        , samplerHeap(MakePtr<DescriptorHeap>(
+              device.CreateDescriptorHeap("Bindless Sampler Heap", EDescriptorHeapType::Sampler, NumSamplerDescriptors).value()))
+        , rtvHeap(MakePtr<DescriptorHeap>(device.CreateDescriptorHeap("Bindless RTV Heap", EDescriptorHeapType::RTV, NumRtvDescriptors).value()))
+        , dsvHeap(MakePtr<DescriptorHeap>(device.CreateDescriptorHeap("Bindless DSV Heap", EDescriptorHeapType::DSV, NumDsvDescriptors).value()))
     {
     }
 
-    GpuViewManager::~GpuViewManager()
-    {
-    }
+    GpuViewManager::~GpuViewManager() {}
 
     std::array<std::reference_wrapper<DescriptorHeap>, 2> GpuViewManager::GetBindlessDescriptorHeaps()
     {
@@ -107,8 +93,7 @@ namespace ig
     }
 
     Handle<GpuView, GpuViewManager*> GpuViewManager::RequestShaderResourceView(
-        GpuTexture&       gpuTexture, const GpuTextureSrvDesc& srvDesc,
-        const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         std::optional<GpuView> newSRV = Allocate(EGpuViewType::ShaderResourceView);
         if (newSRV)
@@ -124,8 +109,7 @@ namespace ig
     }
 
     Handle<GpuView, GpuViewManager*> GpuViewManager::RequestUnorderedAccessView(
-        GpuTexture&       gpuTexture, const GpuTextureUavDesc& uavDesc,
-        const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         std::optional<GpuView> newUAV = Allocate(EGpuViewType::UnorderedAccessView);
         if (newUAV)
@@ -141,8 +125,7 @@ namespace ig
     }
 
     Handle<GpuView, GpuViewManager*> GpuViewManager::RequestRenderTargetView(
-        GpuTexture&       gpuTexture, const GpuTextureRtvDesc& rtvDesc,
-        const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         std::optional<GpuView> newRTV = Allocate(EGpuViewType::RenderTargetView);
         if (newRTV)
@@ -158,8 +141,7 @@ namespace ig
     }
 
     Handle<GpuView, GpuViewManager*> GpuViewManager::RequestDepthStencilView(
-        GpuTexture&       gpuTexture, const GpuTextureDsvDesc& dsvDesc,
-        const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         std::optional<GpuView> newDSV = Allocate(EGpuViewType::DepthStencilView);
         if (newDSV)
@@ -176,11 +158,11 @@ namespace ig
 
     RefHandle<GpuView> GpuViewManager::RequestSampler(const D3D12_SAMPLER_DESC& desc)
     {
-        RecursiveLock  lock{mutex};
+        RecursiveLock lock{mutex};
         const uint64_t samplerDescHashVal = HashState(&desc);
 
         RefHandle<GpuView> refHandle{};
-        const auto         itr = cachedSamplerView.find(samplerDescHashVal);
+        const auto itr = cachedSamplerView.find(samplerDescHashVal);
         if (itr != cachedSamplerView.end())
         {
             refHandle = itr->second.MakeRef();
@@ -199,7 +181,7 @@ namespace ig
                 device.CreateSampler(desc, *samplerView);
 
                 Handle<GpuView, GpuViewManager*> handle{MakeHandle(*samplerView)};
-                refHandle                             = handle.MakeRef();
+                refHandle = handle.MakeRef();
                 cachedSamplerView[samplerDescHashVal] = std::move(handle);
             }
         }
@@ -219,18 +201,18 @@ namespace ig
         IG_CHECK(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
         switch (type)
         {
-        case EGpuViewType::ConstantBufferView:
-            return cbvSrvUavHeap->Allocate(type);
-        case EGpuViewType::ShaderResourceView:
-            return cbvSrvUavHeap->Allocate(type);
-        case EGpuViewType::UnorderedAccessView:
-            return cbvSrvUavHeap->Allocate(type);
-        case EGpuViewType::Sampler:
-            return samplerHeap->Allocate(type);
-        case EGpuViewType::RenderTargetView:
-            return rtvHeap->Allocate(type);
-        case EGpuViewType::DepthStencilView:
-            return dsvHeap->Allocate(type);
+            case EGpuViewType::ConstantBufferView:
+                return cbvSrvUavHeap->Allocate(type);
+            case EGpuViewType::ShaderResourceView:
+                return cbvSrvUavHeap->Allocate(type);
+            case EGpuViewType::UnorderedAccessView:
+                return cbvSrvUavHeap->Allocate(type);
+            case EGpuViewType::Sampler:
+                return samplerHeap->Allocate(type);
+            case EGpuViewType::RenderTargetView:
+                return rtvHeap->Allocate(type);
+            case EGpuViewType::DepthStencilView:
+                return dsvHeap->Allocate(type);
         }
 
         IG_CHECK_NO_ENTRY();
@@ -244,18 +226,18 @@ namespace ig
         IG_CHECK(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
         switch (gpuView.Type)
         {
-        case EGpuViewType::ConstantBufferView:
-            return cbvSrvUavHeap->Deallocate(gpuView);
-        case EGpuViewType::ShaderResourceView:
-            return cbvSrvUavHeap->Deallocate(gpuView);
-        case EGpuViewType::UnorderedAccessView:
-            return cbvSrvUavHeap->Deallocate(gpuView);
-        case EGpuViewType::Sampler:
-            return samplerHeap->Deallocate(gpuView);
-        case EGpuViewType::RenderTargetView:
-            return rtvHeap->Deallocate(gpuView);
-        case EGpuViewType::DepthStencilView:
-            return dsvHeap->Deallocate(gpuView);
+            case EGpuViewType::ConstantBufferView:
+                return cbvSrvUavHeap->Deallocate(gpuView);
+            case EGpuViewType::ShaderResourceView:
+                return cbvSrvUavHeap->Deallocate(gpuView);
+            case EGpuViewType::UnorderedAccessView:
+                return cbvSrvUavHeap->Deallocate(gpuView);
+            case EGpuViewType::Sampler:
+                return samplerHeap->Deallocate(gpuView);
+            case EGpuViewType::RenderTargetView:
+                return rtvHeap->Deallocate(gpuView);
+            case EGpuViewType::DepthStencilView:
+                return dsvHeap->Deallocate(gpuView);
         }
 
         IG_CHECK_NO_ENTRY();
@@ -284,4 +266,4 @@ namespace ig
             }
         }
     }
-} // namespace ig
+}    // namespace ig

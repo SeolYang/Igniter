@@ -28,4 +28,4 @@ namespace ig
     private:
         ComPtr<ID3D12RootSignature> rootSignature;
     };
-} // namespace ig
+}    // namespace ig

@@ -4,10 +4,7 @@
 
 namespace ig
 {
-    DeferredDeallocator::DeferredDeallocator(const FrameManager& frameManager)
-        : frameManager(frameManager)
-    {
-    }
+    DeferredDeallocator::DeferredDeallocator(const FrameManager& frameManager) : frameManager(frameManager) {}
 
     DeferredDeallocator::~DeferredDeallocator()
     {
@@ -18,8 +15,8 @@ namespace ig
     {
         const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
 
-        auto&         mutex = mutexes[localFrameIdx];
-        auto&         queue = pendingRequesterQueues[localFrameIdx];
+        auto& mutex = mutexes[localFrameIdx];
+        auto& queue = pendingRequesterQueues[localFrameIdx];
         ReadWriteLock lock{mutex};
         queue.push(std::move(requester));
     }
@@ -55,4 +52,4 @@ namespace ig
     {
         deferredDeallocator.RequestDeallocation(std::move(requester));
     }
-} // namespace ig
+}    // namespace ig

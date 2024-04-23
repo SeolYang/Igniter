@@ -8,7 +8,7 @@ namespace ig
     {
         IG_CHECK(size >= sizeof(void*));
         IG_CHECK(alignment > 0 && IsPowOf2(alignment));
-        const size_t mask         = alignment - 1;
+        const size_t mask = alignment - 1;
         const size_t misalignment = size & mask;
         return (alignment - misalignment);
     }
@@ -24,7 +24,7 @@ namespace ig
     {
         IG_CHECK(alignment > 0 && IsPowOf2(alignment));
         const size_t mask = alignment - 1;
-        return (T)((size_t)(value + mask) & ~mask);
+        return (T) ((size_t) (value + mask) & ~mask);
     }
 
     template <typename T>
@@ -32,7 +32,7 @@ namespace ig
     {
         IG_CHECK(alignment > 0 && IsPowOf2(alignment));
         const size_t mask = alignment - 1;
-        return (T)((size_t)value & ~mask);
+        return (T) ((size_t) value & ~mask);
     }
 
     template <size_t OffsetInBits, size_t SizeInBits, typename Ty = uint64_t>
@@ -64,4 +64,4 @@ namespace ig
     {
         return bytes / (1024.0 * 1024.0 * 1024.0);
     }
-} // namespace ig
+}    // namespace ig

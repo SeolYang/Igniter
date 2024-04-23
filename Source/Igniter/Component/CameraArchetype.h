@@ -15,4 +15,4 @@ namespace ig
             return newEntity;
         }
     };
-} // namespace ig
+}    // namespace ig

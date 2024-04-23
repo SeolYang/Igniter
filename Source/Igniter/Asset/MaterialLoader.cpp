@@ -4,14 +4,11 @@
 
 namespace ig
 {
-    MaterialLoader::MaterialLoader(AssetManager& assetManager)
-        : assetManager(assetManager)
-    {
-    }
+    MaterialLoader::MaterialLoader(AssetManager& assetManager) : assetManager(assetManager) {}
 
     Result<Material, EMaterialLoadStatus> MaterialLoader::Load(const Material::Desc& desc)
     {
-        const AssetInfo&          assetInfo{desc.Info};
+        const AssetInfo& assetInfo{desc.Info};
         const Material::LoadDesc& loadDesc{desc.LoadDescriptor};
 
         if (!assetInfo.IsValid())
@@ -40,12 +37,9 @@ namespace ig
             return MakeFail<Material, details::EMakeDefaultMatStatus::InvalidAssetInfo>();
         }
 
-        Material::Desc snapshot{
-            .Info = assetInfo,
-            .LoadDescriptor = {.DiffuseTexGuid = Guid{DefaultTextureGuid}}
-        };
+        Material::Desc snapshot{.Info = assetInfo, .LoadDescriptor = {.DiffuseTexGuid = Guid{DefaultTextureGuid}}};
         CachedAsset<Texture> defaultEngineTex{assetManager.LoadTexture(Material::EngineDefault)};
         IG_CHECK(defaultEngineTex);
         return MakeSuccess<Material, details::EMakeDefaultMatStatus>(Material{snapshot, std::move(defaultEngineTex)});
     }
-} // namespace ig
+}    // namespace ig

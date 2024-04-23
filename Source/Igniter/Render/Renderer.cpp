@@ -48,9 +48,9 @@ namespace ig
         Matrix LocalToWorld{};
     };
 
-    Renderer::Renderer(const FrameManager& frameManager, Window&         window, RenderDevice& device,
-                       HandleManager&      handleManager, RenderContext& renderContext) :
-        frameManager(frameManager)
+    Renderer::Renderer(
+        const FrameManager& frameManager, Window& window, RenderDevice& device, HandleManager& handleManager, RenderContext& renderContext)
+        : frameManager(frameManager)
         , renderDevice(device)
         , handleManager(handleManager)
         , renderContext(renderContext)
@@ -61,16 +61,11 @@ namespace ig
 #pragma region test
         bindlessRootSignature = MakePtr<RootSignature>(device.CreateBindlessRootSignature().value());
 
-        const ShaderCompileDesc vsDesc{
-            .SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
+        const ShaderCompileDesc vsDesc{.SourcePath = String("Assets/Shader/BasicVertexShader.hlsl"),
             .Type = EShaderType::Vertex,
-            .OptimizationLevel = EShaderOptimizationLevel::None
-        };
+            .OptimizationLevel = EShaderOptimizationLevel::None};
 
-        const ShaderCompileDesc psDesc{
-            .SourcePath = String("Assets/Shader/BasicPixelShader.hlsl"),
-            .Type = EShaderType::Pixel
-        };
+        const ShaderCompileDesc psDesc{.SourcePath = String("Assets/Shader/BasicPixelShader.hlsl"), .Type = EShaderType::Pixel};
 
         vs = MakePtr<ShaderBlob>(vsDesc);
         ps = MakePtr<ShaderBlob>(psDesc);
@@ -80,27 +75,24 @@ namespace ig
         psoDesc.SetPixelShader(*ps);
         psoDesc.SetRootSignature(*bindlessRootSignature);
         psoDesc.NumRenderTargets = 1;
-        psoDesc.RTVFormats[0]    = DXGI_FORMAT_R8G8B8A8_UNORM;
-        psoDesc.DSVFormat        = DXGI_FORMAT_D32_FLOAT;
-        pso                      = MakePtr<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
+        psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+        pso = MakePtr<PipelineState>(device.CreateGraphicsPipelineState(psoDesc).value());
 
         GpuViewManager& gpuViewManager{renderContext.GetGpuViewManager()};
-        GpuTextureDesc  depthStencilDesc;
+        GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = String("DepthStencilBufferTex");
-        depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width),
-                                        static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
+        depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
         depthStencilBuffer = MakePtr<GpuTexture>(device.CreateTexture(depthStencilDesc).value());
         dsv = gpuViewManager.RequestDepthStencilView(*depthStencilBuffer, D3D12_TEX2D_DSV{.MipSlice = 0});
 
         CommandContextPool& mainGfxCmdCtxPool{renderContext.GetMainGfxCommandContextPool()};
-        auto                initialCmdCtx = mainGfxCmdCtxPool.Request();
+        auto initialCmdCtx = mainGfxCmdCtxPool.Request();
         initialCmdCtx->Begin();
         {
-            initialCmdCtx->AddPendingTextureBarrier(*depthStencilBuffer,
-                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                                    D3D12_BARRIER_LAYOUT_UNDEFINED,
-                                                    D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
+            initialCmdCtx->AddPendingTextureBarrier(*depthStencilBuffer, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_UNDEFINED,
+                D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
             initialCmdCtx->FlushBarriers();
         }
         initialCmdCtx->End();
@@ -114,7 +106,7 @@ namespace ig
     Renderer::~Renderer()
     {
         CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        GpuSync       mainGfxQueueSync = mainGfxQueue.MakeSync();
+        GpuSync mainGfxQueueSync = mainGfxQueue.MakeSync();
         mainGfxQueueSync.WaitOnCpu();
     }
 
@@ -135,7 +127,7 @@ namespace ig
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
-        auto           cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
+        auto cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
         IG_CHECK(cameraView.size_hint() == 1);
         for (auto [entity, camera, transformData] : cameraView.each())
         {
@@ -147,22 +139,20 @@ namespace ig
         }
         perFrameConstantBuffer.Write(perFrameBuffer);
 
-        CommandQueue&       mainGfxQueue{renderContext.GetMainGfxQueue()};
+        CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         CommandContextPool& mainGfxCmdCtxPool{renderContext.GetMainGfxCommandContextPool()};
-        GpuViewManager&     gpuViewManager{renderContext.GetGpuViewManager()};
-        auto                renderCmdCtx = mainGfxCmdCtxPool.Request();
+        GpuViewManager& gpuViewManager{renderContext.GetGpuViewManager()};
+        auto renderCmdCtx = mainGfxCmdCtxPool.Request();
         renderCmdCtx->Begin(pso.get());
         {
             auto bindlessDescriptorHeaps = gpuViewManager.GetBindlessDescriptorHeaps();
             renderCmdCtx->SetDescriptorHeaps(bindlessDescriptorHeaps);
             renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
-            GpuTexture&    backBuffer    = swapchain.GetBackBuffer();
+            GpuTexture& backBuffer = swapchain.GetBackBuffer();
             const GpuView& backBufferRTV = swapchain.GetRenderTargetView();
-            renderCmdCtx->AddPendingTextureBarrier(backBuffer,
-                                                   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-                                                   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-                                                   D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            renderCmdCtx->AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
             renderCmdCtx->FlushBarriers();
 
             renderCmdCtx->ClearRenderTarget(backBufferRTV);
@@ -179,34 +169,29 @@ namespace ig
                 {
                     StaticMesh& staticMesh = *staticMeshComponent.Mesh;
 
-                    GpuBuffer& indexBuffer     = *staticMesh.GetIndexBuffer();
-                    GpuView&   vertexBufferSrv = *staticMesh.GetVertexBufferSrv();
+                    GpuBuffer& indexBuffer = *staticMesh.GetIndexBuffer();
+                    GpuView& vertexBufferSrv = *staticMesh.GetVertexBufferSrv();
 
                     renderCmdCtx->SetIndexBuffer(indexBuffer);
                     {
-                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<
-                            PerObjectBuffer>();
-                        const auto perObjectBuffer = PerObjectBuffer{
-                            .LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation())
-                        };
+                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
+                        const auto perObjectBuffer = PerObjectBuffer{.LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation())};
                         perObjectConstantBuffer.Write(perObjectBuffer);
 
                         /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
                         Material& material{*staticMesh.GetMaterial()};
-                        Texture&  diffuseTex{*material.GetDiffuse()};
+                        Texture& diffuseTex{*material.GetDiffuse()};
 
-                        const BasicRenderResources params{
-                            .VertexBufferIdx = vertexBufferSrv.Index,
+                        const BasicRenderResources params{.VertexBufferIdx = vertexBufferSrv.Index,
                             .PerFrameBufferIdx = perFrameConstantBuffer.View->Index,
                             .PerObjectBufferIdx = perObjectConstantBuffer.View->Index,
                             .DiffuseTexIdx = diffuseTex.GetShaderResourceView()->Index,
-                            .DiffuseTexSamplerIdx = diffuseTex.GetSampler()->Index
-                        };
+                            .DiffuseTexSamplerIdx = diffuseTex.GetSampler()->Index};
 
                         renderCmdCtx->SetRoot32BitConstants(0, params, 0);
                     }
 
-                    const StaticMesh::Desc&     snapshot = staticMesh.GetSnapshot();
+                    const StaticMesh::Desc& snapshot = staticMesh.GetSnapshot();
                     const StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
                     renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                 }
@@ -225,4 +210,4 @@ namespace ig
         mainGfxFrameSyncs[frameManager.GetLocalFrameIndex()] = mainGfxQueue.MakeSync();
         swapchain.Present();
     }
-} // namespace ig
+}    // namespace ig

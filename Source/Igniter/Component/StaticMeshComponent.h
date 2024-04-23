@@ -18,4 +18,4 @@ namespace ig
     };
 
     IG_DECLARE_COMPONENT(StaticMeshComponent)
-} // namespace ig
+}    // namespace ig

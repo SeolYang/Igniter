@@ -20,7 +20,7 @@ namespace ig
     struct MaterialLoadDesc final
     {
     public:
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
     public:
@@ -33,21 +33,21 @@ namespace ig
     {
     public:
         using ImportDesc = void;
-        using LoadDesc   = MaterialLoadDesc;
-        using Desc       = AssetDesc<Material>;
+        using LoadDesc = MaterialLoadDesc;
+        using Desc = AssetDesc<Material>;
 
         friend class AssetManager;
 
     public:
         Material(const Desc& snapshot, CachedAsset<Texture> diffuse);
-        Material(const Material&)     = delete;
+        Material(const Material&) = delete;
         Material(Material&&) noexcept = default;
         ~Material();
 
-        Material& operator=(const Material&)     = delete;
+        Material& operator=(const Material&) = delete;
         Material& operator=(Material&&) noexcept = default;
 
-        const Desc&        GetSnapshot() const { return snapshot; }
+        const Desc& GetSnapshot() const { return snapshot; }
         RefHandle<Texture> GetDiffuse() { return diffuse.MakeRef(); }
 
     public:
@@ -55,7 +55,7 @@ namespace ig
         static constexpr std::string_view EngineDefault{"Engine\\Default"};
 
     private:
-        Desc                 snapshot{};
+        Desc snapshot{};
         CachedAsset<Texture> diffuse{};
     };
-} // namespace ig
+}    // namespace ig

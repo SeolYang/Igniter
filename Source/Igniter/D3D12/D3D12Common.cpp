@@ -18,12 +18,12 @@ namespace ig
     {
         switch (type)
         {
-        case EQueueType::Direct:
-            return D3D12_COMMAND_LIST_TYPE_DIRECT;
-        case EQueueType::AsyncCompute:
-            return D3D12_COMMAND_LIST_TYPE_COMPUTE;
-        case EQueueType::Copy:
-            return D3D12_COMMAND_LIST_TYPE_COPY;
+            case EQueueType::Direct:
+                return D3D12_COMMAND_LIST_TYPE_DIRECT;
+            case EQueueType::AsyncCompute:
+                return D3D12_COMMAND_LIST_TYPE_COMPUTE;
+            case EQueueType::Copy:
+                return D3D12_COMMAND_LIST_TYPE_COPY;
         }
 
         return D3D12_COMMAND_LIST_TYPE_NONE;
@@ -33,16 +33,15 @@ namespace ig
     {
         switch (descriptorHeapType)
         {
-        case EDescriptorHeapType::CBV_SRV_UAV:
-            return gpuViewType == EGpuViewType::ShaderResourceView ||
-                    gpuViewType == EGpuViewType::ConstantBufferView ||
-                    gpuViewType == EGpuViewType::UnorderedAccessView;
-        case EDescriptorHeapType::Sampler:
-            return gpuViewType == EGpuViewType::Sampler;
-        case EDescriptorHeapType::RTV:
-            return gpuViewType == EGpuViewType::RenderTargetView;
-        case EDescriptorHeapType::DSV:
-            return gpuViewType == EGpuViewType::DepthStencilView;
+            case EDescriptorHeapType::CBV_SRV_UAV:
+                return gpuViewType == EGpuViewType::ShaderResourceView || gpuViewType == EGpuViewType::ConstantBufferView ||
+                       gpuViewType == EGpuViewType::UnorderedAccessView;
+            case EDescriptorHeapType::Sampler:
+                return gpuViewType == EGpuViewType::Sampler;
+            case EDescriptorHeapType::RTV:
+                return gpuViewType == EGpuViewType::RenderTargetView;
+            case EDescriptorHeapType::DSV:
+                return gpuViewType == EGpuViewType::DepthStencilView;
         }
 
         return false;
@@ -55,4 +54,4 @@ namespace ig
             object->SetName(Wider(name).c_str());
         }
     }
-} // namespace ig
+}    // namespace ig

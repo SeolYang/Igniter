@@ -11,12 +11,9 @@ namespace ig
 {
     constexpr size_t NumExtraCommandContextsPerFrame = 4;
 
-    CommandContextPool::CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device,
-                                           const EQueueType     queueType)
+    CommandContextPool::CommandContextPool(DeferredDeallocator& deferredDeallocator, RenderDevice& device, const EQueueType queueType)
         : deferredDeallocator(deferredDeallocator)
-        , reservedNumCmdCtxs(
-            std::thread::hardware_concurrency() * NumFramesInFlight + (NumExtraCommandContextsPerFrame *
-                NumFramesInFlight))
+        , reservedNumCmdCtxs(std::thread::hardware_concurrency() * NumFramesInFlight + (NumExtraCommandContextsPerFrame * NumFramesInFlight))
     {
         IG_CHECK(reservedNumCmdCtxs > 0);
         for (size_t idx = 0; idx < reservedNumCmdCtxs; ++idx)
@@ -36,21 +33,17 @@ namespace ig
         }
     }
 
-    std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> CommandContextPool::Request(
-        const std::string_view debugName)
+    std::unique_ptr<CommandContext, std::function<void(CommandContext*)>> CommandContextPool::Request(const std::string_view debugName)
     {
         const auto deleter = [this](CommandContext* ptr)
         {
             if (ptr != nullptr)
             {
-                RequestDeferredDeallocation(deferredDeallocator, [ptr, this]()
-                {
-                    this->Return(ptr);
-                });
+                RequestDeferredDeallocation(deferredDeallocator, [ptr, this]() { this->Return(ptr); });
             }
         };
 
-        ReadWriteLock   lock{mutex};
+        ReadWriteLock lock{mutex};
         CommandContext* cmdCtxPtr = nullptr;
         if (pool.empty())
         {
@@ -77,4 +70,4 @@ namespace ig
         IG_CHECK(pool.size() < reservedNumCmdCtxs);
         pool.push(cmdContext);
     }
-} // namespace ig
+}    // namespace ig

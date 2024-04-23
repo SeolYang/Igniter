@@ -8,7 +8,7 @@ namespace ig
     HandleManager::Statistics HandleManager::GetStatistics() const
     {
         ReadOnlyLock lock{mutex};
-        Statistics   newStatistics{};
+        Statistics newStatistics{};
         for (const auto& memPoolPair : memPools)
         {
             ++newStatistics.NumMemoryPools;
@@ -21,21 +21,15 @@ namespace ig
         return newStatistics;
     }
 
-    uint64_t HandleManager::Allocate(const uint64_t typeHashVal, const size_t sizeOfElement,
-                                     const size_t   alignOfElement)
+    uint64_t HandleManager::Allocate(const uint64_t typeHashVal, const size_t sizeOfElement, const size_t alignOfElement)
     {
         IG_CHECK(typeHashVal != InvalidHashVal);
 
         ReadWriteLock lock{mutex};
         if (!memPools.contains(typeHashVal))
         {
-            memPools.insert({
-                typeHashVal,
-                MemoryPool{
-                    sizeOfElement, alignOfElement, static_cast<uint16_t>(SizeOfChunkBytes / sizeOfElement),
-                    NumInitialChunkPerPool, static_cast<uint16_t>(typeHashVal)
-                }
-            });
+            memPools.insert({typeHashVal, MemoryPool{sizeOfElement, alignOfElement, static_cast<uint16_t>(SizeOfChunkBytes / sizeOfElement),
+                                              NumInitialChunkPerPool, static_cast<uint16_t>(typeHashVal)}});
         }
         IG_CHECK(memPools.contains(typeHashVal));
 
@@ -51,8 +45,8 @@ namespace ig
         IG_CHECK(handle != details::HandleImpl::InvalidHandle);
 
         ReadWriteLock lock{mutex};
-        const bool    bMemPoolExists         = memPools.contains(typeHashVal);
-        const bool    bDeallocationSetExists = pendingDeallocationSets.contains(typeHashVal);
+        const bool bMemPoolExists = memPools.contains(typeHashVal);
+        const bool bDeallocationSetExists = pendingDeallocationSets.contains(typeHashVal);
         if (bMemPoolExists && bDeallocationSetExists)
         {
             pendingDeallocationSets.at(typeHashVal).erase(handle);
@@ -147,8 +141,6 @@ namespace ig
     {
         IG_CHECK(handle != details::HandleImpl::InvalidHandle);
         IG_CHECK(typeHashVal != InvalidHashVal);
-        return pendingDeallocationSets.contains(typeHashVal) ?
-                   pendingDeallocationSets.at(typeHashVal).contains(handle) :
-                   false;
+        return pendingDeallocationSets.contains(typeHashVal) ? pendingDeallocationSets.at(typeHashVal).contains(handle) : false;
     }
-} // namespace ig
+}    // namespace ig

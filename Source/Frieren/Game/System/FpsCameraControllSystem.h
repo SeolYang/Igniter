@@ -4,7 +4,7 @@
 namespace ig
 {
     class Timer;
-} // namespace ig
+}    // namespace ig
 
 namespace fe
 {
@@ -34,4 +34,4 @@ namespace fe
 
         Handle_New<Action> sprintActionHandle;
     };
-} // namespace fe
+}    // namespace fe

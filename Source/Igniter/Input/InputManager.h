@@ -36,10 +36,7 @@ namespace ig
     struct Action final
     {
     public:
-        [[nodiscard]] bool IsAnyPressing() const noexcept
-        {
-            return State == ig::EInputState::Pressed || State == EInputState::OnPressing;
-        }
+        [[nodiscard]] bool IsAnyPressing() const noexcept { return State == ig::EInputState::Pressed || State == EInputState::OnPressing; }
 
     public:
         EInputState State = EInputState::None;
@@ -61,22 +58,22 @@ namespace ig
         struct ActionMapping
         {
             Handle_New<Action> ActionHandle{};
-            EInput             MappedInput{EInput::None};
+            EInput MappedInput{EInput::None};
         };
 
         struct AxisMapping
         {
             Handle_New<Axis> AxisHandle{};
-            EInput           MappedInput{EInput::None};
+            EInput MappedInput{EInput::None};
         };
 
     public:
         InputManager();
-        InputManager(const InputManager&)     = delete;
+        InputManager(const InputManager&) = delete;
         InputManager(InputManager&&) noexcept = delete;
         ~InputManager();
 
-        InputManager& operator=(const InputManager&)     = delete;
+        InputManager& operator=(const InputManager&) = delete;
         InputManager& operator=(InputManager&&) noexcept = delete;
 
         void MapAction(const String name, const EInput input);
@@ -87,10 +84,10 @@ namespace ig
         void SetScale(const String name, const float newScale);
 
         [[nodiscard]] Handle_New<Action> QueryAction(const String name) const;
-        [[nodiscard]] Handle_New<Axis>   QueryAxis(const String name) const;
+        [[nodiscard]] Handle_New<Axis> QueryAxis(const String name) const;
 
         [[nodiscard]] Action GetAction(const Handle_New<Action> action) const;
-        [[nodiscard]] Axis   GetAxis(const Handle_New<Axis> axis) const;
+        [[nodiscard]] Axis GetAxis(const Handle_New<Axis> axis) const;
 
         void HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
         void PostUpdate();
@@ -107,17 +104,17 @@ namespace ig
 
     private:
         HandleRegistry<Action> actionRegistry;
-        HandleRegistry<Axis>   axisRegistry;
+        HandleRegistry<Axis> axisRegistry;
 
         UnorderedMap<String, ActionMapping> nameActionTable{};
-        UnorderedMap<String, AxisMapping>   nameAxisTable{};
+        UnorderedMap<String, AxisMapping> nameAxisTable{};
 
         constexpr static size_t NumScopedInputs = magic_enum::enum_count<EInput>();
-        std::array<UnorderedSet<Handle_New<Action>>, NumScopedInputs> actionSets;
-        std::array<UnorderedSet<Handle_New<Axis>>, NumScopedInputs> axisSets;
+        eastl::array<UnorderedSet<Handle_New<Action>>, NumScopedInputs> actionSets;
+        eastl::array<UnorderedSet<Handle_New<Axis>>, NumScopedInputs> axisSets;
 
         UnorderedSet<EInput> processedInputs;
 
-        std::vector<uint8_t> rawInputBuffer;
+        eastl::vector<uint8_t> rawInputBuffer;
     };
-}
+}    // namespace ig

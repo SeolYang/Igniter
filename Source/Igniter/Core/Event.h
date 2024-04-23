@@ -8,16 +8,16 @@ namespace ig
         requires(std::is_object_v<Identifier>) && (std::is_object_v<Params> && ...)
     class [[nodiscard]] Event final
     {
-        using DelegateType   = std::function<void(Params...)>;
+        using DelegateType = std::function<void(Params...)>;
         using SubscriberType = std::pair<Identifier, DelegateType>;
 
     public:
-        Event()                 = default;
-        Event(const Event&)     = default;
+        Event() = default;
+        Event(const Event&) = default;
         Event(Event&&) noexcept = default;
-        ~Event()                = default;
+        ~Event() = default;
 
-        Event& operator=(const Event&)     = default;
+        Event& operator=(const Event&) = default;
         Event& operator=(Event&&) noexcept = default;
 
         template <typename I, typename D>
@@ -27,20 +27,11 @@ namespace ig
             subscribeTable.insert_or_assign(std::forward<I>(id), std::forward<D>(delegate));
         }
 
-        void Unsubscribe(const Identifier& id)
-        {
-            subscribeTable.erase(id);
-        }
+        void Unsubscribe(const Identifier& id) { subscribeTable.erase(id); }
 
-        [[nodiscard]] bool HasAnySubscriber() const
-        {
-            return !subscribeTable.empty();
-        }
+        [[nodiscard]] bool HasAnySubscriber() const { return !subscribeTable.empty(); }
 
-        [[nodiscard]] bool HasSubscriber(const Identifier& id) const
-        {
-            return subscribeTable.contains(id);
-        }
+        [[nodiscard]] bool HasSubscriber(const Identifier& id) const { return subscribeTable.contains(id); }
 
         void Notify(const Params&... args)
         {
@@ -50,12 +41,9 @@ namespace ig
             }
         }
 
-        void Clear()
-        {
-            subscribeTable.clear();
-        }
+        void Clear() { subscribeTable.clear(); }
 
     private:
         UnorderedMap<Identifier, DelegateType> subscribeTable{};
     };
-} // namespace ig
+}    // namespace ig

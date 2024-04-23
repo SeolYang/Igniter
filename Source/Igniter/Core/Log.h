@@ -18,11 +18,11 @@ namespace ig
     class Logger final
     {
     public:
-        Logger(const Logger&)     = delete;
+        Logger(const Logger&) = delete;
         Logger(Logger&&) noexcept = delete;
         ~Logger();
 
-        Logger& operator=(const Logger&)     = delete;
+        Logger& operator=(const Logger&) = delete;
         Logger& operator=(Logger&&) noexcept = delete;
 
         template <typename Category, ELogVerbosity Verbosity, typename... Args>
@@ -37,33 +37,32 @@ namespace ig
                 categoryMap[TypeHash<Category>] = logger;
             }
 
-            const std::string formattedMessage =
-                    std::vformat(logMessage, std::make_format_args(std::forward<Args>(args)...));
+            const std::string formattedMessage = std::vformat(logMessage, std::make_format_args(std::forward<Args>(args)...));
 
             switch (Verbosity)
             {
-            case ELogVerbosity::Info:
-                logger->info(formattedMessage);
-                break;
-            case ELogVerbosity::Trace:
-                logger->trace(formattedMessage);
-                break;
+                case ELogVerbosity::Info:
+                    logger->info(formattedMessage);
+                    break;
+                case ELogVerbosity::Trace:
+                    logger->trace(formattedMessage);
+                    break;
 
-            case ELogVerbosity::Warning:
-                logger->warn(formattedMessage);
-                break;
+                case ELogVerbosity::Warning:
+                    logger->warn(formattedMessage);
+                    break;
 
-            case ELogVerbosity::Error:
-                logger->error(formattedMessage);
-                break;
+                case ELogVerbosity::Error:
+                    logger->error(formattedMessage);
+                    break;
 
-            case ELogVerbosity::Fatal:
-                logger->critical(formattedMessage);
-                break;
+                case ELogVerbosity::Fatal:
+                    logger->critical(formattedMessage);
+                    break;
 
-            case ELogVerbosity::Debug:
-                logger->debug(formattedMessage);
-                break;
+                case ELogVerbosity::Debug:
+                    logger->debug(formattedMessage);
+                    break;
             }
         }
 
@@ -84,15 +83,15 @@ namespace ig
         }
 
     private:
-        mutable SharedMutex                                  mutex;
+        mutable SharedMutex mutex;
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
-        std::shared_ptr<spdlog::sinks::basic_file_sink_mt>   fileSink;
-        UnorderedMap<uint64_t, spdlog::logger*>              categoryMap;
+        std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
+        UnorderedMap<uint64_t, spdlog::logger*> categoryMap;
 
     private:
         static constexpr std::string_view FileName = "Log";
     };
-} // namespace ig
+}    // namespace ig
 
 /* #sy_log 카테고리의 고유성을 보장하기 위해, 네임스페이스의 밖에 정의되어야 함. */
 #define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)                                \
@@ -106,13 +105,14 @@ namespace ig
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...)                                                                \
-        ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__); \
-        if constexpr (ig::ELogVerbosity::LOG_VERBOSITY == ig::ELogVerbosity::Fatal)                                                             \
-        {                                                                                                                    \
-            IG_CHECK_NO_ENTRY();                                                                                             \
-        }
+    ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__); \
+    if constexpr (ig::ELogVerbosity::LOG_VERBOSITY == ig::ELogVerbosity::Fatal)                                          \
+    {                                                                                                                    \
+        IG_CHECK_NO_ENTRY();                                                                                             \
+    }
 #else
-    #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...) ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__)
+#define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...) \
+    ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__)
 #endif
 
 IG_DEFINE_LOG_CATEGORY(LogTemp);

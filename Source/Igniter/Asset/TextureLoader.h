@@ -47,21 +47,21 @@ namespace ig
 
     public:
         TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext);
-        TextureLoader(const TextureLoader&)     = delete;
+        TextureLoader(const TextureLoader&) = delete;
         TextureLoader(TextureLoader&&) noexcept = delete;
-        ~TextureLoader()                        = default;
+        ~TextureLoader() = default;
 
-        TextureLoader& operator=(const TextureLoader&)     = delete;
+        TextureLoader& operator=(const TextureLoader&) = delete;
         TextureLoader& operator=(TextureLoader&&) noexcept = delete;
 
     private:
-        Result<Texture, ETextureLoaderStatus>           Load(const Texture::Desc& desc);
+        Result<Texture, ETextureLoaderStatus> Load(const Texture::Desc& desc);
         Result<Texture, details::EMakeDefaultTexStatus> MakeDefault(const AssetInfo& assetInfo);
         Result<Texture, details::EMakeDefaultTexStatus> MakeMonochrome(const AssetInfo& assetInfo, const Color& color);
 
     private:
         HandleManager& handleManager;
-        RenderDevice&  renderDevice;
+        RenderDevice& renderDevice;
         RenderContext& renderContext;
     };
-} // namespace ig
+}    // namespace ig

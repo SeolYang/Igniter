@@ -10,7 +10,7 @@ namespace ig
         {
             /* #sy_improvement atomically? */
             static uint64_t LayerCounter = 0;
-            id                           = LayerCounter++;
+            id = LayerCounter++;
         }
 
         virtual ~ImGuiLayer() = default;
@@ -32,11 +32,9 @@ namespace ig
         uint64_t GetID() const { return id; }
 
         uint64_t GetPriority() const { return priority; }
-        void     SetPriority(const uint64_t newPriority) { priority = newPriority; }
+        void SetPriority(const uint64_t newPriority) { priority = newPriority; }
 
-        virtual void OnVisible()
-        {
-        }
+        virtual void OnVisible() {}
 
     protected:
         bool bIsVisible = false;
@@ -46,4 +44,4 @@ namespace ig
         /* lower value = high priority */
         uint64_t priority = 0;
     };
-} // namespace ig
+}    // namespace ig

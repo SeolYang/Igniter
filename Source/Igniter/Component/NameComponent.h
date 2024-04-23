@@ -11,4 +11,4 @@ namespace ig
     };
 
     IG_DECLARE_COMPONENT(NameComponent);
-} // namespace ig
+}    // namespace ig

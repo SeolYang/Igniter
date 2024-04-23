@@ -14,4 +14,4 @@ namespace ig
         const static thread_local size_t tuid = uid.fetch_add(1);
         return tuid;
     }
-} // namespace ig
+}    // namespace ig

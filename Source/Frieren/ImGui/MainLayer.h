@@ -33,13 +33,13 @@ namespace fe
         void Render() override;
 
     private:
-        StatisticsPanel*       statisticsPanel{nullptr};
-        CachedStringDebugger*  cachedStringDebugger{nullptr};
-        EntityList*            entityList{nullptr};
-        EntityInspector*       entityInspector{nullptr};
-        AssetWatchPanel*       assetWatchPanel{nullptr};
-        TextureImportPanel*    textureImportPanel{nullptr};
+        StatisticsPanel* statisticsPanel{nullptr};
+        CachedStringDebugger* cachedStringDebugger{nullptr};
+        EntityList* entityList{nullptr};
+        EntityInspector* entityInspector{nullptr};
+        AssetWatchPanel* assetWatchPanel{nullptr};
+        TextureImportPanel* textureImportPanel{nullptr};
         StaticMeshImportPanel* staticMeshImportPanel{nullptr};
-        AssetInspector*        assetSnapshotPanel{nullptr};
+        AssetInspector* assetSnapshotPanel{nullptr};
     };
-} // namespace fe
+}    // namespace fe

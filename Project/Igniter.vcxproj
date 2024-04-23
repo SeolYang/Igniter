@@ -336,6 +336,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
       <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -371,6 +372,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
       <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -406,6 +408,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
       <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -442,6 +445,7 @@ xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
       <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

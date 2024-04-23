@@ -64,7 +64,7 @@ namespace ig
                 IG_CHECK(hashOfString != InvalidHashVal);
 
                 HashStringMap& hashStringMap{GetHashStringMap()};
-                ReadWriteLock  lock{GetHashStringMapMutex()};
+                ReadWriteLock lock{GetHashStringMapMutex()};
                 if (!hashStringMap.contains(hashOfString))
                 {
                     hashStringMap[hashOfString] = strView;
@@ -92,7 +92,7 @@ namespace ig
             return Empty;
         }
 
-        ReadOnlyLock         lock{GetHashStringMapMutex()};
+        ReadOnlyLock lock{GetHashStringMapMutex()};
         const HashStringMap& hashStringMap{GetHashStringMap()};
         IG_CHECK(hashStringMap.contains(hashOfString));
         return hashStringMap.at(hashOfString);
@@ -125,21 +125,18 @@ namespace ig
 
     std::vector<String> String::Split(const String delimiter) const
     {
-        auto splitStrViews{
-            ToStringView() |
-            views::split(delimiter.ToStringView()) |
-            views::transform([](auto&& element)
-            {
-                return String{std::string_view{&*element.begin(), static_cast<size_t>(ranges::distance(element))}};
-            })
-        };
+        auto splitStrViews{ToStringView() | views::split(delimiter.ToStringView()) |
+                           views::transform(
+                               [](auto&& element) {
+                                   return String{std::string_view{&*element.begin(), static_cast<size_t>(ranges::distance(element))}};
+                               })};
 
         return std::vector<String>{splitStrViews.begin(), splitStrViews.end()};
     }
 
     std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()
     {
-        ReadOnlyLock   lock{GetHashStringMapMutex()};
+        ReadOnlyLock lock{GetHashStringMapMutex()};
         HashStringMap& hashStringMap{GetHashStringMap()};
 
         std::vector<std::pair<uint64_t, std::string_view>> cachedStrs;
@@ -166,12 +163,9 @@ namespace ig
 
         String spacedStr = RegexReplace(str, LetterSpacingRegex, ReplacePattern);
         spacedStr = RegexReplace(spacedStr, NumberSpacingRegex, ReplacePattern);
-        std::string  value{spacedStr.ToStandard()};
-        std::transform(value.begin(), value.begin() + 1, value.begin(), [](const char character)
-        {
-            return (char)std::toupper((int)character);
-        });
+        std::string value{spacedStr.ToStandard()};
+        std::transform(value.begin(), value.begin() + 1, value.begin(), [](const char character) { return (char) std::toupper((int) character); });
 
         return String{value};
     }
-} // namespace ig
+}    // namespace ig

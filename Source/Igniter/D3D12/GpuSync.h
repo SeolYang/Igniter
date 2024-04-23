@@ -10,10 +10,10 @@ namespace ig
         friend class CommandQueue;
 
     public:
-        GpuSync()                   = default;
-        GpuSync(const GpuSync&)     = default;
+        GpuSync() = default;
+        GpuSync(const GpuSync&) = default;
         GpuSync(GpuSync&&) noexcept = default;
-        ~GpuSync()                  = default;
+        ~GpuSync() = default;
 
         GpuSync& operator=(const GpuSync& rhs) = default;
         GpuSync& operator=(GpuSync&&) noexcept = default;
@@ -30,7 +30,7 @@ namespace ig
 
         [[nodiscard]] size_t GetSyncPoint() const noexcept { return syncPoint; }
         [[nodiscard]] size_t GetCompletedSyncPoint() const;
-        [[nodiscard]] bool   IsExpired() const { return GetSyncPoint() <= GetCompletedSyncPoint(); }
+        [[nodiscard]] bool IsExpired() const { return GetSyncPoint() <= GetCompletedSyncPoint(); }
 
         void WaitOnCpu();
 
@@ -44,7 +44,7 @@ namespace ig
         }
 
     private:
-        ID3D12Fence* fence     = nullptr;
-        size_t       syncPoint = 0;
+        ID3D12Fence* fence = nullptr;
+        size_t syncPoint = 0;
     };
-} // namespace ig
+}    // namespace ig

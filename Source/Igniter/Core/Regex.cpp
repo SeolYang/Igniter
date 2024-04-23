@@ -3,8 +3,8 @@
 
 namespace ig
 {
-    bool RegexMatch(const String                                str, const std::regex& regex,
-                    const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
+    bool RegexMatch(
+        const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
         if (!str.IsValid())
         {
@@ -14,9 +14,8 @@ namespace ig
         return std::regex_match(str.ToCString(), regex, flags);
     }
 
-    std::vector<String> RegexMatchN(const String                                str, const std::regex& regex,
-                                    const std::regex_constants::match_flag_type flags
-                                    /*= std::regex_constants::match_default*/)
+    std::vector<String> RegexMatchN(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags
+        /*= std::regex_constants::match_default*/)
     {
         std::vector<String> result{};
         if (str.IsValid())
@@ -53,7 +52,7 @@ namespace ig
     }
 
     String RegexReplace(const String str, const std::regex& regex, const String replacePattern,
-                        const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
+        const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
         if (!str.IsValid())
         {
@@ -62,4 +61,4 @@ namespace ig
 
         return String{std::regex_replace(str.ToStandard(), regex, replacePattern.ToStandard(), flags)};
     }
-} // namespace ig
+}    // namespace ig

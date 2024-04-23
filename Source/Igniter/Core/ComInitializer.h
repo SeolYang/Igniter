@@ -4,4 +4,4 @@
 namespace ig
 {
     HRESULT CoInitializeUnique();
-} // namespace ig
+}    // namespace ig

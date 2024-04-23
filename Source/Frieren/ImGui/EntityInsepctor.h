@@ -21,4 +21,4 @@ namespace fe
     private:
         const EntityList* entityList;
     };
-} // namespace ig
+}    // namespace fe

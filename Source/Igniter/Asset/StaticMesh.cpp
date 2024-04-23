@@ -52,19 +52,14 @@ namespace ig
         *this = {};
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices, NumVertices);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices, NumIndices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes,
-                                   CompressedVerticesSizeInBytes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes,
-                                   CompressedIndicesSizeInBytes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes, CompressedVerticesSizeInBytes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes, CompressedIndicesSizeInBytes);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, MaterialGuid, MaterialGuid);
         return archive;
     }
 
-    StaticMesh::StaticMesh(const Desc&                      snapshot,
-                           DeferredHandle<GpuBuffer>        vertexBuffer,
-                           Handle<GpuView, GpuViewManager*> vertexBufferSrv,
-                           DeferredHandle<GpuBuffer>        indexBuffer,
-                           CachedAsset<Material>            material)
+    StaticMesh::StaticMesh(const Desc& snapshot, DeferredHandle<GpuBuffer> vertexBuffer, Handle<GpuView, GpuViewManager*> vertexBufferSrv,
+        DeferredHandle<GpuBuffer> indexBuffer, CachedAsset<Material> material)
         : snapshot(snapshot)
         , vertexBuffer(std::move(vertexBuffer))
         , vertexBufferSrv(std::move(vertexBufferSrv))
@@ -77,7 +72,5 @@ namespace ig
         IG_CHECK(this->material);
     }
 
-    StaticMesh::~StaticMesh()
-    {
-    }
-} // namespace ig
+    StaticMesh::~StaticMesh() {}
+}    // namespace ig

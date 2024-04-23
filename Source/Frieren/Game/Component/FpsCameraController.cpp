@@ -20,8 +20,9 @@ namespace ig
 
         ImGui::Text("Read-only");
         ImGui::InputFloat3("Latest Impulse", &controller.LatestImpulse.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
-        ImGui::InputFloat("Elapsed Time After Latest Impulse", &controller.ElapsedTimeAfterLatestImpulse, 0.f, 0.f, "%.3f seconds", ImGuiInputTextFlags_ReadOnly);
+        ImGui::InputFloat(
+            "Elapsed Time After Latest Impulse", &controller.ElapsedTimeAfterLatestImpulse, 0.f, 0.f, "%.3f seconds", ImGuiInputTextFlags_ReadOnly);
         ImGui::InputFloat("Current Yaw", &controller.CurrentYaw, 0.f, 0.f, "%.3f deg", ImGuiInputTextFlags_ReadOnly);
         ImGui::InputFloat("Current Pitch", &controller.CurrentPitch, 0.f, 0.f, "%.3f deg", ImGuiInputTextFlags_ReadOnly);
     }
-} // namespace ig
+}    // namespace ig

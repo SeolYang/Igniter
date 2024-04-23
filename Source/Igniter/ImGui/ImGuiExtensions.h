@@ -32,19 +32,17 @@ namespace ig::ImGuiX
 
     template <typename E, typename... Excludes>
         requires std::is_enum_v<E> && (std::is_same_v<E, Excludes> && ...)
-    std::optional<E> EnumMenuItems(std::optional<E>                   lastSelection = std::nullopt,
-                                   [[maybe_unused]] const Excludes... excludes)
+    std::optional<E> EnumMenuItems(std::optional<E> lastSelection = std::nullopt, [[maybe_unused]] const Excludes... excludes)
     {
         constexpr auto& EnumNames = magic_enum::enum_names<E>();
-        constexpr auto& EnumVals  = magic_enum::enum_values<E>();
+        constexpr auto& EnumVals = magic_enum::enum_values<E>();
         static_assert(EnumNames.size() == EnumVals.size());
         std::optional<E> selection = std::nullopt;
         for (size_t idx = 0; idx < EnumVals.size(); ++idx)
         {
             if (((EnumVals[idx] != excludes) && ...))
             {
-                if (ImGui::MenuItem(EnumNames[idx].data(), nullptr,
-                                    lastSelection ? (*lastSelection == EnumVals[idx]) : false))
+                if (ImGui::MenuItem(EnumNames[idx].data(), nullptr, lastSelection ? (*lastSelection == EnumVals[idx]) : false))
                 {
                     selection = EnumVals[idx];
                     break;
@@ -56,9 +54,9 @@ namespace ig::ImGuiX
     }
 
     ImVec2 GetFramePadding();
-    bool   EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format);
-    bool   EditTransform(const std::string_view label, struct TransformComponent& transform);
-    void   SeparatorText(const std::string_view text);
-    bool   EditColor3(const std::string_view label, Color& color);
-    bool   EditColor4(const std::string_view label, Color& color);
-} // namespace ig
+    bool EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format);
+    bool EditTransform(const std::string_view label, struct TransformComponent& transform);
+    void SeparatorText(const std::string_view text);
+    bool EditColor3(const std::string_view label, Color& color);
+    bool EditColor4(const std::string_view label, Color& color);
+}    // namespace ig::ImGuiX

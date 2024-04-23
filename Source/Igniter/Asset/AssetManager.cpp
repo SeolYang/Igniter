@@ -37,37 +37,21 @@ namespace ig
     void AssetManager::InitEngineInternalAssets()
     {
         /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
-        AssetInfo defaultTexInfo{
-            AssetInfo::MakeEngineInternal(Guid{DefaultTextureGuid},
-                                          Texture::EngineDefault,
-                                          EAssetCategory::Texture)
-        };
-        RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(),
-                                             textureLoader->MakeDefault(defaultTexInfo));
+        AssetInfo defaultTexInfo{AssetInfo::MakeEngineInternal(Guid{DefaultTextureGuid}, Texture::EngineDefault, EAssetCategory::Texture)};
+        RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
 
         AssetInfo defaultWhiteTexInfo{
-            AssetInfo::MakeEngineInternal(Guid{DefaultWhiteTextureGuid},
-                                          Texture::EngineDefaultWhite,
-                                          EAssetCategory::Texture)
-        };
-        RegisterEngineInternalAsset<Texture>(defaultWhiteTexInfo.GetVirtualPath(),
-                                             textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{1.f, 1.f, 1.f}));
+            AssetInfo::MakeEngineInternal(Guid{DefaultWhiteTextureGuid}, Texture::EngineDefaultWhite, EAssetCategory::Texture)};
+        RegisterEngineInternalAsset<Texture>(
+            defaultWhiteTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{1.f, 1.f, 1.f}));
 
         AssetInfo defaultBlackTexInfo{
-            AssetInfo::MakeEngineInternal(Guid{DefaultBlackTextureGuid},
-                                          Texture::EngineDefaultBlack,
-                                          EAssetCategory::Texture)
-        };
-        RegisterEngineInternalAsset<Texture>(defaultBlackTexInfo.GetVirtualPath(),
-                                             textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{0.f, 0.f, 0.f}));
+            AssetInfo::MakeEngineInternal(Guid{DefaultBlackTextureGuid}, Texture::EngineDefaultBlack, EAssetCategory::Texture)};
+        RegisterEngineInternalAsset<Texture>(
+            defaultBlackTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{0.f, 0.f, 0.f}));
 
-        AssetInfo defaultMatInfo{
-            AssetInfo::MakeEngineInternal(Guid{DefaultMaterialGuid},
-                                          Material::EngineDefault,
-                                          EAssetCategory::Material)
-        };
-        RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(),
-                                              materialLoader->MakeDefault(defaultMatInfo));
+        AssetInfo defaultMatInfo{AssetInfo::MakeEngineInternal(Guid{DefaultMaterialGuid}, Material::EngineDefault, EAssetCategory::Material)};
+        RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetCategory assetType)
@@ -91,7 +75,7 @@ namespace ig
     Guid AssetManager::Import(const String resPath, const TextureImportDesc& config)
     {
         Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
-        const std::optional<Guid>                   guidOpt{ImportImpl<Texture>(resPath, result)};
+        const std::optional<Guid> guidOpt{ImportImpl<Texture>(resPath, result)};
         if (!guidOpt)
         {
             return Guid{};
@@ -131,8 +115,7 @@ namespace ig
 
     std::vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc)
     {
-        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(
-            resPath, desc);
+        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(resPath, desc);
         std::vector<Guid> output;
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
@@ -178,10 +161,7 @@ namespace ig
             return Guid{};
         }
 
-        Result<Material::Desc, EMaterialCreateStatus> result{
-            materialImporter->Import(AssetInfo{virtualPath, EAssetCategory::Material},
-                                     createDesc)
-        };
+        Result<Material::Desc, EMaterialCreateStatus> result{materialImporter->Import(AssetInfo{virtualPath, EAssetCategory::Material}, createDesc)};
         std::optional<Guid> guidOpt{ImportImpl<Material>(virtualPath, result)};
         if (!guidOpt)
         {
@@ -224,9 +204,7 @@ namespace ig
     {
         if (!assetMonitor->Contains(guid))
         {
-            IG_LOG(AssetManager, Error,
-                   "Failed to delete asset. The asset guid (\"{}\") is invisible to asset manager or invalid.",
-                   guid.str());
+            IG_LOG(AssetManager, Error, "Failed to delete asset. The asset guid (\"{}\") is invisible to asset manager or invalid.", guid.str());
             return;
         }
 
@@ -243,8 +221,7 @@ namespace ig
 
         if (!assetMonitor->Contains(assetType, virtualPath))
         {
-            IG_LOG(AssetManager, Error,
-                   "Failed to delete asset. The virtual path is invisible to asset manager or invalid.");
+            IG_LOG(AssetManager, Error, "Failed to delete asset. The virtual path is invisible to asset manager or invalid.");
             return;
         }
 
@@ -255,8 +232,7 @@ namespace ig
     {
         UniqueLock assetLock{GetAssetMutex(guid)};
         IG_CHECK(assetType != EAssetCategory::Unknown);
-        IG_CHECK(
-            guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).GetCategory() == assetType);
+        IG_CHECK(guid.isValid() && assetMonitor->Contains(guid) && assetMonitor->GetAssetInfo(guid).GetCategory() == assetType);
 
         details::TypelessAssetCache& assetCache = GetTypelessCache(assetType);
         if (assetCache.IsCached(guid))
@@ -299,7 +275,7 @@ namespace ig
     std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots() const
     {
         UnorderedMap<Guid, Snapshot> intermediateSnapshots{};
-        std::vector<AssetInfo>       assetInfoSnapshots{assetMonitor->TakeSnapshots()};
+        std::vector<AssetInfo> assetInfoSnapshots{assetMonitor->TakeSnapshots()};
         for (const AssetInfo& assetInfoSnapshot : assetInfoSnapshots)
         {
             if (assetInfoSnapshot.IsValid())
@@ -337,4 +313,4 @@ namespace ig
             bIsDirty = false;
         }
     }
-} // namespace ig
+}    // namespace ig

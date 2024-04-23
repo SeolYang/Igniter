@@ -5,7 +5,7 @@
 namespace ig
 {
     class Window;
-} // namespace ig
+}    // namespace ig
 
 namespace ig
 {
@@ -19,18 +19,15 @@ namespace ig
     class Swapchain final
     {
     public:
-        Swapchain(const Window& window, GpuViewManager&           gpuViewManager, CommandQueue& directCmdQueue,
-                  const uint8_t desiredNumBackBuffers, const bool bEnableVSync = true);
+        Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& directCmdQueue, const uint8_t desiredNumBackBuffers,
+            const bool bEnableVSync = true);
         ~Swapchain();
 
-        bool              IsTearingSupport() const { return bTearingEnabled; }
-        GpuTexture&       GetBackBuffer();
+        bool IsTearingSupport() const { return bTearingEnabled; }
+        GpuTexture& GetBackBuffer();
         const GpuTexture& GetBackBuffer() const;
 
-        const GpuView& GetRenderTargetView() const
-        {
-            return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()];
-        }
+        const GpuView& GetRenderTargetView() const { return *renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
 
         // #sy_todo Impl Resize Swapchain!
         // void Resize(const uint32_t width, const uint32_t height);
@@ -47,10 +44,10 @@ namespace ig
         ComPtr<IDXGISwapChain4> swapchain;
 
         const uint8_t numBackBuffers;
-        const bool    bVSyncEnabled;
-        bool          bTearingEnabled = false;
+        const bool bVSyncEnabled;
+        bool bTearingEnabled = false;
 
-        std::vector<GpuTexture>                       backBuffers;
+        std::vector<GpuTexture> backBuffers;
         std::vector<Handle<GpuView, GpuViewManager*>> renderTargetViews;
     };
-} // namespace ig
+}    // namespace ig

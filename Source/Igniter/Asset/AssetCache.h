@@ -11,16 +11,16 @@ namespace ig::details
     public:
         struct Snapshot
         {
-            const Guid     Guid{};
+            const Guid Guid{};
             const uint32_t RefCount{};
         };
 
     public:
         virtual ~TypelessAssetCache() = default;
 
-        virtual EAssetCategory                      GetAssetType() const = 0;
-        virtual void                                Invalidate(const Guid& guid) = 0;
-        virtual [[nodiscard]] bool                  IsCached(const Guid& guid) const = 0;
+        virtual EAssetCategory GetAssetType() const = 0;
+        virtual void Invalidate(const Guid& guid) = 0;
+        virtual [[nodiscard]] bool IsCached(const Guid& guid) const = 0;
         virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
     };
 
@@ -30,16 +30,13 @@ namespace ig::details
         friend class UniqueRefHandle<T, class AssetCache<T>*>;
 
     public:
-        AssetCache(HandleManager& handleManager)
-            : handleManager(handleManager)
-        {
-        }
+        AssetCache(HandleManager& handleManager) : handleManager(handleManager) {}
 
-        AssetCache(const AssetCache&)     = delete;
+        AssetCache(const AssetCache&) = delete;
         AssetCache(AssetCache&&) noexcept = delete;
-        ~AssetCache() override            = default;
+        ~AssetCache() override = default;
 
-        AssetCache& operator=(const AssetCache&)     = delete;
+        AssetCache& operator=(const AssetCache&) = delete;
         AssetCache& operator=(AssetCache&&) noexcept = delete;
 
         EAssetCategory GetAssetType() const override { return AssetType; }
@@ -51,7 +48,7 @@ namespace ig::details
             ReadWriteLock rwLock{mutex};
             IG_CHECK(!cachedAssets.contains(guid));
             IG_CHECK(!refCounterTable.contains(guid));
-            cachedAssets[guid]    = Handle<T>{handleManager, std::move(asset)};
+            cachedAssets[guid] = Handle<T>{handleManager, std::move(asset)};
             refCounterTable[guid] = 0;
         }
 
@@ -75,14 +72,12 @@ namespace ig::details
 
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const override
         {
-            ReadOnlyLock          lock{mutex};
+            ReadOnlyLock lock{mutex};
             std::vector<Snapshot> refCounterSnapshots{};
             refCounterSnapshots.reserve(refCounterTable.size());
             for (const auto& guidRefCounter : refCounterTable)
             {
-                refCounterSnapshots.emplace_back(Snapshot{
-                    .Guid = guidRefCounter.first, .RefCount = guidRefCounter.second
-                });
+                refCounterSnapshots.emplace_back(Snapshot{.Guid = guidRefCounter.first, .RefCount = guidRefCounter.second});
             }
 
             return refCounterSnapshots;
@@ -119,7 +114,7 @@ namespace ig::details
         {
             IG_CHECK(asset != nullptr);
             const AssetDesc<T> snapshot{asset->GetSnapshot()};
-            const AssetInfo&   assetInfo{snapshot.Info};
+            const AssetInfo& assetInfo{snapshot.Info};
             IG_CHECK(assetInfo.IsValid());
 
             const Guid& guid{assetInfo.GetGuid()};
@@ -141,8 +136,8 @@ namespace ig::details
     private:
         HandleManager& handleManager;
 
-        mutable SharedMutex           mutex;
+        mutable SharedMutex mutex;
         UnorderedMap<Guid, Handle<T>> cachedAssets{};
-        UnorderedMap<Guid, uint32_t>  refCounterTable{};
+        UnorderedMap<Guid, uint32_t> refCounterTable{};
     };
-} // namespace ig::details
+}    // namespace ig::details

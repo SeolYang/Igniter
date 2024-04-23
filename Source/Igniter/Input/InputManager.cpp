@@ -26,54 +26,54 @@ namespace ig
 
             switch (wParam)
             {
-            /** Characters */
-            case 'W':
-            case 'w':
-                return EInput::W;
+                /** Characters */
+                case 'W':
+                case 'w':
+                    return EInput::W;
 
-            case 'S':
-            case 's':
-                return EInput::S;
+                case 'S':
+                case 's':
+                    return EInput::S;
 
-            case 'A':
-            case 'a':
-                return EInput::A;
+                case 'A':
+                case 'a':
+                    return EInput::A;
 
-            case 'D':
-            case 'd':
-                return EInput::D;
+                case 'D':
+                case 'd':
+                    return EInput::D;
 
-            /** Virtual Keys */
-            case VK_SPACE:
-                return EInput::Space;
+                /** Virtual Keys */
+                case VK_SPACE:
+                    return EInput::Space;
 
-            case VK_LBUTTON:
-                return EInput::MouseLB;
+                case VK_LBUTTON:
+                    return EInput::MouseLB;
 
-            case VK_RBUTTON:
-                return EInput::MouseRB;
+                case VK_RBUTTON:
+                    return EInput::MouseRB;
 
-            case VK_SHIFT:
-                return EInput::Shift;
+                case VK_SHIFT:
+                    return EInput::Shift;
 
-            case VK_CONTROL:
-                return EInput::Control;
+                case VK_CONTROL:
+                    return EInput::Control;
 
-            default:
-                break;
+                default:
+                    break;
             }
 
             return EInput::None;
         }
-    }
+    }    // namespace
 
     InputManager::InputManager()
     {
         RAWINPUTDEVICE mouseRID{};
         mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-        mouseRID.usUsage     = 0x02; /* HID_USAGE_GENERIC_MOUSE */
-        mouseRID.dwFlags     = 0;
-        mouseRID.hwndTarget  = nullptr;
+        mouseRID.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
+        mouseRID.dwFlags = 0;
+        mouseRID.hwndTarget = nullptr;
 
         if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
         {
@@ -85,9 +85,9 @@ namespace ig
     {
         RAWINPUTDEVICE mouseRID{};
         mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-        mouseRID.usUsage     = 0x02; /* HID_USAGE_GENERIC_MOUSE */
-        mouseRID.dwFlags     = RIDEV_REMOVE;
-        mouseRID.hwndTarget  = nullptr;
+        mouseRID.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
+        mouseRID.dwFlags = RIDEV_REMOVE;
+        mouseRID.hwndTarget = nullptr;
 
         if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
         {
@@ -126,7 +126,7 @@ namespace ig
         }
 
         const Handle_New<Action> newHandle = actionRegistry.Create();
-        nameActionTable[name]              = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
+        nameActionTable[name] = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
         IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
         actionSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManager, Info, "Action {} mapped to '{}'", name, input);
@@ -168,7 +168,7 @@ namespace ig
         }
 
         const Handle_New<Axis> newHandle = axisRegistry.Create(scale);
-        nameAxisTable[name]              = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
+        nameAxisTable[name] = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
         IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
         axisSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManager, Info, "Axis {} mapped to '{}'", name, input);
@@ -257,32 +257,32 @@ namespace ig
 
         switch (message)
         {
-        case WM_LBUTTONDOWN:
-        case WM_RBUTTONDOWN:
-            HandleKeyDown(wParam, true);
-            break;
+            case WM_LBUTTONDOWN:
+            case WM_RBUTTONDOWN:
+                HandleKeyDown(wParam, true);
+                break;
 
-        case WM_KEYDOWN:
-            HandleKeyDown(wParam, false);
-            break;
+            case WM_KEYDOWN:
+                HandleKeyDown(wParam, false);
+                break;
 
-        case WM_LBUTTONUP:
-            HandleKeyUp(mouseLBWParam, true);
-            break;
-        case WM_RBUTTONUP:
-            HandleKeyUp(mouseRBWParam, true);
-            break;
+            case WM_LBUTTONUP:
+                HandleKeyUp(mouseLBWParam, true);
+                break;
+            case WM_RBUTTONUP:
+                HandleKeyUp(mouseRBWParam, true);
+                break;
 
-        case WM_KEYUP:
-            HandleKeyUp(wParam, false);
-            break;
+            case WM_KEYUP:
+                HandleKeyUp(wParam, false);
+                break;
 
-        case WM_INPUT:
-            HandleRawInput(lParam);
-            break;
+            case WM_INPUT:
+                HandleRawInput(lParam);
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -296,16 +296,16 @@ namespace ig
                 IG_CHECK(actionPtr != nullptr);
                 switch (actionPtr->State)
                 {
-                case EInputState::Pressed:
-                    actionPtr->State = EInputState::OnPressing;
-                    break;
+                    case EInputState::Pressed:
+                        actionPtr->State = EInputState::OnPressing;
+                        break;
 
-                case EInputState::Released:
-                    actionPtr->State = EInputState::None;
-                    break;
+                    case EInputState::Released:
+                        actionPtr->State = EInputState::None;
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
                 }
             }
 
@@ -345,8 +345,7 @@ namespace ig
             rawInputBuffer.resize(pcbSize);
         }
 
-        if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize,
-                            sizeof(RAWINPUTHEADER)) != pcbSize)
+        if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize, sizeof(RAWINPUTHEADER)) != pcbSize)
         {
             IG_LOG(InputManager, Fatal, "GetRawInputData does not return correct size!");
             return;
@@ -379,13 +378,13 @@ namespace ig
             IG_CHECK(actionPtr != nullptr);
             switch (actionPtr->State)
             {
-            case EInputState::None:
-            case EInputState::Released:
-                actionPtr->State = EInputState::Pressed;
-                bAnyPress = true;
-                break;
-            default:
-                break;
+                case EInputState::None:
+                case EInputState::Released:
+                    actionPtr->State = EInputState::Pressed;
+                    bAnyPress = true;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -425,4 +424,4 @@ namespace ig
 
         return bAnyAxisHandled;
     }
-}
+}    // namespace ig

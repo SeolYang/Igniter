@@ -31,10 +31,10 @@ namespace ig
             HandleImpl& operator=(const HandleImpl& other) = default;
             HandleImpl& operator=(HandleImpl&& other) noexcept;
 
-            uint8_t*       GetAddressOf(const uint64_t typeHashValue);
+            uint8_t* GetAddressOf(const uint64_t typeHashValue);
             const uint8_t* GetAddressOf(const uint64_t typeHashValue) const;
 
-            uint8_t*       GetAliveAddressOf(const uint64_t typeHashValue);
+            uint8_t* GetAliveAddressOf(const uint64_t typeHashValue);
             const uint8_t* GetAliveAddressOf(const uint64_t typeHashValue) const;
 
             bool IsValid() const { return owner != nullptr && handle != InvalidHandle; }
@@ -47,17 +47,16 @@ namespace ig
 
         private:
             HandleImpl() = default;
-            HandleImpl(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType,
-                       const size_t   alignOfType);
+            HandleImpl(HandleManager& handleManager, const uint64_t typeHashVal, const size_t sizeOfType, const size_t alignOfType);
 
         public:
             static constexpr uint64_t InvalidHandle = 0xffffffffffffffffUi64;
 
         private:
             HandleManager* owner{nullptr};
-            uint64_t       handle{InvalidHandle};
+            uint64_t handle{InvalidHandle};
         };
-    } // namespace details
+    }    // namespace details
 
     template <typename T>
     class RefHandle
@@ -65,15 +64,13 @@ namespace ig
     public:
         RefHandle() = default;
 
-        explicit RefHandle(const details::HandleImpl& newHandle) : handle(newHandle)
-        {
-        }
+        explicit RefHandle(const details::HandleImpl& newHandle) : handle(newHandle) {}
 
-        RefHandle(const RefHandle& other)     = default;
+        RefHandle(const RefHandle& other) = default;
         RefHandle(RefHandle&& other) noexcept = default;
-        virtual ~RefHandle()                  = default;
+        virtual ~RefHandle() = default;
 
-        RefHandle& operator=(const RefHandle& other)     = default;
+        RefHandle& operator=(const RefHandle& other) = default;
         RefHandle& operator=(RefHandle&& other) noexcept = default;
 
         [[nodiscard]] T& operator*()
@@ -149,9 +146,8 @@ namespace ig
 
         template <typename Fn>
             requires(std::is_same_v<std::decay_t<Fn>, Finalizer>)
-        explicit UniqueRefHandle(const details::HandleImpl newHandle, Fn&& finalizer) : finalizer(
-                std::forward<Fn>(finalizer))
-            , RefHandle<T>(newHandle)
+        explicit UniqueRefHandle(const details::HandleImpl newHandle, Fn&& finalizer)
+            : finalizer(std::forward<Fn>(finalizer)), RefHandle<T>(newHandle)
         {
         }
 
@@ -169,10 +165,7 @@ namespace ig
             }
         }
 
-        ~UniqueRefHandle()
-        {
-            Finalize();
-        }
+        ~UniqueRefHandle() { Finalize(); }
 
         UniqueRefHandle& operator=(const UniqueRefHandle&) = delete;
 
@@ -192,15 +185,9 @@ namespace ig
             return *this;
         }
 
-        [[nodiscard]] RefHandle<const T> MakeRef() const
-        {
-            return RefHandle<const T>{RefHandle<T>::handle};
-        }
+        [[nodiscard]] RefHandle<const T> MakeRef() const { return RefHandle<const T>{RefHandle<T>::handle}; }
 
-        [[nodiscard]] RefHandle<T> MakeRef()
-        {
-            return RefHandle<T>{RefHandle<T>::handle};
-        }
+        [[nodiscard]] RefHandle<T> MakeRef() { return RefHandle<T>{RefHandle<T>::handle}; }
 
     private:
         void Finalize()
@@ -276,12 +263,10 @@ namespace ig
     class Handle final
     {
     public:
-        Handle()              = default;
+        Handle() = default;
         Handle(const Handle&) = delete;
 
-        Handle(Handle&& other) noexcept
-            : handle(std::move(other.handle))
-            , destroyer(std::move(other.destroyer))
+        Handle(Handle&& other) noexcept : handle(std::move(other.handle)), destroyer(std::move(other.destroyer))
         {
             if constexpr (std::is_pointer_v<Destroyer>)
             {
@@ -290,16 +275,14 @@ namespace ig
         }
 
         template <typename Dx>
-        Handle(Dx&& destroyer)
-            : destroyer(std::forward<Dx>(destroyer))
+        Handle(Dx&& destroyer) : destroyer(std::forward<Dx>(destroyer))
         {
         }
 
         template <typename... Args, typename Dx>
             requires(std::is_same_v<std::decay_t<Dx>, Destroyer>)
         Handle(HandleManager& handleManager, Dx&& destroyer, Args&&... args)
-            : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
-            , destroyer(std::forward<Dx>(destroyer))
+            : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T)), destroyer(std::forward<Dx>(destroyer))
         {
             if constexpr (std::is_pointer_v<Destroyer>)
             {
@@ -308,23 +291,19 @@ namespace ig
 
             T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
-            new(instancePtr) T(std::forward<Args>(args)...);
+            new (instancePtr) T(std::forward<Args>(args)...);
         }
 
         template <typename... Args>
             requires(!std::is_pointer_v<Destroyer> && std::is_constructible_v<Destroyer>)
-        Handle(HandleManager& handleManager, Args&&... args)
-            : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
+        Handle(HandleManager& handleManager, Args&&... args) : handle(handleManager, EvaluatedTypeHashVal, sizeof(T), alignof(T))
         {
             T* instancePtr = reinterpret_cast<T*>(handle.GetAliveAddressOf(EvaluatedTypeHashVal));
             IG_CHECK(instancePtr != nullptr);
-            new(instancePtr) T(std::forward<Args>(args)...);
+            new (instancePtr) T(std::forward<Args>(args)...);
         }
 
-        ~Handle()
-        {
-            Destroy();
-        }
+        ~Handle() { Destroy(); }
 
         Handle& operator=(const Handle&) = delete;
 
@@ -394,15 +373,9 @@ namespace ig
             }
         }
 
-        [[nodiscard]] RefHandle<const T> MakeRef() const
-        {
-            return RefHandle<const T>{handle};
-        }
+        [[nodiscard]] RefHandle<const T> MakeRef() const { return RefHandle<const T>{handle}; }
 
-        [[nodiscard]] RefHandle<T> MakeRef()
-        {
-            return RefHandle<T>{handle};
-        }
+        [[nodiscard]] RefHandle<T> MakeRef() { return RefHandle<T>{handle}; }
 
         template <typename Finalizer>
         [[nodiscard]] UniqueRefHandle<const T, Finalizer> MakeUniqueRef(Finalizer&& finalizer) const
@@ -422,13 +395,13 @@ namespace ig
         static constexpr uint64_t EvaluatedTypeHashVal = TypeHash<T>;
 
     private:
-        details::HandleImpl             handle{};
+        details::HandleImpl handle{};
         [[no_unique_address]] Destroyer destroyer{};
     };
 
     template <typename T>
     using DeferredHandle = Handle<T, DeferredDestroyer<T>>;
-} // namespace ig
+}    // namespace ig
 
 namespace std
 {
@@ -445,4 +418,4 @@ namespace std
     public:
         size_t operator()(const ig::RefHandle<T>& handle) const { return handle.GetHash(); }
     };
-} // namespace std
+}    // namespace std

@@ -9,12 +9,12 @@ namespace fe
     class StaticMeshImportPanel final : public ImGuiLayer
     {
     public:
-        StaticMeshImportPanel()                                 = default;
-        StaticMeshImportPanel(const StaticMeshImportPanel&)     = delete;
+        StaticMeshImportPanel() = default;
+        StaticMeshImportPanel(const StaticMeshImportPanel&) = delete;
         StaticMeshImportPanel(StaticMeshImportPanel&&) noexcept = delete;
-        ~StaticMeshImportPanel() override                       = default;
+        ~StaticMeshImportPanel() override = default;
 
-        StaticMeshImportPanel& operator=(const StaticMeshImportPanel&)     = delete;
+        StaticMeshImportPanel& operator=(const StaticMeshImportPanel&) = delete;
         StaticMeshImportPanel& operator=(StaticMeshImportPanel&&) noexcept = delete;
 
         void Render() override;
@@ -24,8 +24,8 @@ namespace fe
         void SelectFileToImport();
 
     private:
-        String                path{};
-        StaticMeshImportDesc  config;
+        String path{};
+        StaticMeshImportDesc config;
         EOpenFileDialogStatus status{};
     };
-} // namespace ig
+}    // namespace fe

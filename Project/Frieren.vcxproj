@@ -159,6 +159,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Frieren.h</PrecompiledHeaderFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -180,6 +181,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Frieren.h</PrecompiledHeaderFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -201,6 +203,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Frieren.h</PrecompiledHeaderFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -225,6 +228,7 @@
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Frieren.h</PrecompiledHeaderFile>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

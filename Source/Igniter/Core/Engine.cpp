@@ -34,14 +34,12 @@ namespace ig
         IG_LOG(Engine, Info, "Igniting Engine Runtime!");
         //////////////////////// L0 ////////////////////////
         frameManager = MakePtr<FrameManager>();
-        timer        = MakePtr<Timer>();
+        timer = MakePtr<Timer>();
         /* #sy_test 임시 윈도우 설명자 */
-        window = MakePtr<Window>(WindowDescription{
-            .Width = 1920, .Height = 1080, .Title = String(settings::GameName)
-        });
-        renderDevice  = MakePtr<RenderDevice>();
+        window = MakePtr<Window>(WindowDescription{.Width = 1920, .Height = 1080, .Title = String(settings::GameName)});
+        renderDevice = MakePtr<RenderDevice>();
         handleManager = MakePtr<HandleManager>();
-        inputManager  = MakePtr<InputManager>();
+        inputManager = MakePtr<InputManager>();
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
@@ -58,13 +56,12 @@ namespace ig
         ////////////////////////////////////////////////////
 
         //////////////////////// L4 ////////////////////////
-        renderer = MakePtr<Renderer>(*frameManager, *window, *renderDevice, *handleManager,
-                                     *renderContext);
+        renderer = MakePtr<Renderer>(*frameManager, *window, *renderDevice, *handleManager, *renderContext);
         imguiRenderer = MakePtr<ImGuiRenderer>(*frameManager, *window, *renderDevice);
         ////////////////////////////////////////////////////
 
         //////////////////////// APP ///////////////////////
-        imguiCanvas  = MakePtr<ImGuiCanvas>();
+        imguiCanvas = MakePtr<ImGuiCanvas>();
         gameInstance = MakePtr<GameInstance>();
         ////////////////////////////////////////////////////
     }
@@ -271,4 +268,4 @@ namespace ig
         IG_CHECK(instance != nullptr);
         return *(instance->gameInstance);
     }
-} // namespace ig
+}    // namespace ig

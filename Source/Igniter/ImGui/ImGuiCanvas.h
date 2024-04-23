@@ -68,7 +68,7 @@ namespace ig
 
     private:
         std::vector<std::unique_ptr<ImGuiLayer>> layers;
-        bool                                     bIgnoreInput = false;
-        bool                                     bDirty       = false;
+        bool bIgnoreInput = false;
+        bool bDirty = false;
     };
-} // namespace ig
+}    // namespace ig

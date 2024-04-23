@@ -13,4 +13,4 @@ namespace ig
         TransformComponent& transform = registry.get<TransformComponent>(entity);
         ImGuiX::EditTransform("Transform", transform);
     }
-} // namespace ig
+}    // namespace ig

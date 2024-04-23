@@ -8,4 +8,4 @@ namespace fe
         fpsCameraControllSystem.Update(registry);
         cameraPossessSystem.Update();
     }
-} // namespace fe
+}    // namespace fe

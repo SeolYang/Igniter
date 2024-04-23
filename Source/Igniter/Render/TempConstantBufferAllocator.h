@@ -32,20 +32,19 @@ namespace ig
 
     public:
         RefHandle<MappedGpuBuffer> Mapping = {};
-        RefHandle<GpuView>         View    = {};
+        RefHandle<GpuView> View = {};
     };
 
     class TempConstantBufferAllocator final
     {
     public:
-        TempConstantBufferAllocator(const FrameManager& frameManager, RenderDevice&    renderDevice,
-                                    HandleManager&      handleManager, GpuViewManager& gpuViewManager,
-                                    const uint32_t      reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
-        TempConstantBufferAllocator(const TempConstantBufferAllocator&)     = delete;
+        TempConstantBufferAllocator(const FrameManager& frameManager, RenderDevice& renderDevice, HandleManager& handleManager,
+            GpuViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
+        TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
         ~TempConstantBufferAllocator();
 
-        TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&)     = delete;
+        TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
         TempConstantBuffer Allocate(const GpuBufferDesc& desc);
@@ -63,10 +62,7 @@ namespace ig
 
         void InitBufferStateTransition(CommandContext& cmdCtx);
 
-        std::pair<uint64_t, uint64_t> GetUsedSizeInBytes() const
-        {
-            return {allocatedSizeInBytes[0].load(), allocatedSizeInBytes[1].load()};
-        }
+        std::pair<uint64_t, uint64_t> GetUsedSizeInBytes() const { return {allocatedSizeInBytes[0].load(), allocatedSizeInBytes[1].load()}; }
 
         uint32_t GetReservedSizeInBytesPerFrame() const { return reservedSizeInBytesPerFrame; }
 
@@ -76,15 +72,15 @@ namespace ig
 
     private:
         const FrameManager& frameManager;
-        RenderDevice&       renderDevice;
-        HandleManager&      handleManager;
-        GpuViewManager&     gpuViewManager;
+        RenderDevice& renderDevice;
+        HandleManager& handleManager;
+        GpuViewManager& gpuViewManager;
 
         const uint32_t reservedSizeInBytesPerFrame;
 
-        std::vector<GpuBuffer>                                                          buffers;
-        std::array<std::atomic_uint64_t, NumFramesInFlight>                             allocatedSizeInBytes;
+        std::vector<GpuBuffer> buffers;
+        std::array<std::atomic_uint64_t, NumFramesInFlight> allocatedSizeInBytes;
         std::array<std::vector<Handle<MappedGpuBuffer, GpuBuffer*>>, NumFramesInFlight> mappedBuffers;
-        std::array<std::vector<Handle<GpuView, GpuViewManager*>>, NumFramesInFlight>    allocatedViews;
+        std::array<std::vector<Handle<GpuView, GpuViewManager*>>, NumFramesInFlight> allocatedViews;
     };
-} // namespace ig
+}    // namespace ig

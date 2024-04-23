@@ -21,25 +21,22 @@ namespace ig::details
 
         return 4Ui64 * 1024Ui64 * 1024Ui64; /* 4 MB for greater 512 bytes alloc. */
     }
-}
+}    // namespace ig::details
 
 namespace ig
 {
     template <typename Ty>
-        requires (sizeof(Ty) >= sizeof(uint32_t))
+        requires(sizeof(Ty) >= sizeof(uint32_t))
     class HandleRegistry final
     {
     private:
-        using SlotType    = uint32_t;
+        using SlotType = uint32_t;
         using VersionType = uint32_t;
 
     public:
-        HandleRegistry()
-        {
-            GrowChunks();
-        }
+        HandleRegistry() { GrowChunks(); }
 
-        HandleRegistry(const HandleRegistry&)     = delete;
+        HandleRegistry(const HandleRegistry&) = delete;
         HandleRegistry(HandleRegistry&&) noexcept = delete;
 
         ~HandleRegistry()
@@ -71,7 +68,7 @@ namespace ig
             }
         }
 
-        HandleRegistry& operator=(const HandleRegistry&)     = delete;
+        HandleRegistry& operator=(const HandleRegistry&) = delete;
         HandleRegistry& operator=(HandleRegistry&&) noexcept = delete;
 
         [[nodiscard]] size_t GetCapacity() const { return slotCapacity; }
@@ -92,12 +89,11 @@ namespace ig
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
 
             Ty* const slotElementPtr = CalcAddressOfSlot(newSlot);
-            ::new(slotElementPtr) Ty(std::forward<Args>(args)...);
+            ::new (slotElementPtr) Ty(std::forward<Args>(args)...);
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersionTable[newSlot]);
-            newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(newHandle.Value,
-                                                                              ReduceHashTo16Bits(TypeHash<Ty>));
+            newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(newHandle.Value, ReduceHashTo16Bits(TypeHash<Ty>));
 
 #ifdef IG_TRACK_LEAKED_HANDLE
             lastCallStackTable[newSlot] = CallStack::Capture();
@@ -205,13 +201,11 @@ namespace ig
             chunks.reserve(newChunkCapacity);
             for ([[maybe_unused]] const auto _ : views::iota(0Ui64, numNewChunks))
             {
-                chunks.emplace_back(
-                    static_cast<uint8_t*>(_aligned_malloc(ChunkSizeInBytes,
-                                                          std::hardware_destructive_interference_size)));
+                chunks.emplace_back(static_cast<uint8_t*>(_aligned_malloc(ChunkSizeInBytes, std::hardware_destructive_interference_size)));
             }
 
             const uint32_t oldSlotCapacity = slotCapacity;
-            slotCapacity                   = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
+            slotCapacity = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
             freeSlots.reserve(slotCapacity);
             slotVersionTable.resize(slotCapacity);
 
@@ -228,10 +222,7 @@ namespace ig
             return true;
         }
 
-        [[nodiscard]] bool IsSlotInRange(const uint32_t slot) const
-        {
-            return slot < slotCapacity;
-        }
+        [[nodiscard]] bool IsSlotInRange(const uint32_t slot) const { return slot < slotCapacity; }
 
         [[nodiscard]] size_t GetNewChunkCapacity() const
         {
@@ -266,7 +257,7 @@ namespace ig
         void MarkAsFreeSlot(const uint32_t slot)
         {
             IG_CHECK(IsSlotInRange(slot));
-            using MagicNumberType              = std::decay_t<decltype(FreeSlotMagicNumber)>;
+            using MagicNumberType = std::decay_t<decltype(FreeSlotMagicNumber)>;
             auto* const freeSlotMagicNumberPtr = reinterpret_cast<MagicNumberType*>(CalcAddressOfSlot(slot));
             IG_CHECK(freeSlotMagicNumberPtr != nullptr);
             *freeSlotMagicNumberPtr = FreeSlotMagicNumber;
@@ -275,9 +266,8 @@ namespace ig
         [[nodiscard]] bool IsMarkedAsFreeSlot(const uint32_t slot) const
         {
             IG_CHECK(IsSlotInRange(slot));
-            using MagicNumberType                    = std::decay_t<decltype(FreeSlotMagicNumber)>;
-            const auto* const freeSlotMagicNumberPtr = reinterpret_cast<const MagicNumberType*>(
-                CalcAddressOfSlot(slot));
+            using MagicNumberType = std::decay_t<decltype(FreeSlotMagicNumber)>;
+            const auto* const freeSlotMagicNumberPtr = reinterpret_cast<const MagicNumberType*>(CalcAddressOfSlot(slot));
             IG_CHECK(freeSlotMagicNumberPtr != nullptr);
             return *freeSlotMagicNumberPtr == FreeSlotMagicNumber;
         }
@@ -290,31 +280,31 @@ namespace ig
          * LSB 22~47    <26 bits>  : Version Bits
          * LSB 48~64    <16 bits>  : Type Validation Bits
          */
-        constexpr static size_t SlotSizeInBits     = 22;
-        constexpr static size_t VersionOffset      = SlotSizeInBits;
-        constexpr static size_t VersionSizeInBits  = 26;
+        constexpr static size_t SlotSizeInBits = 22;
+        constexpr static size_t VersionOffset = SlotSizeInBits;
+        constexpr static size_t VersionSizeInBits = 26;
         constexpr static size_t TypeHashBitsOffset = VersionOffset + VersionSizeInBits;
         constexpr static size_t TypeHashSizeInBits = 16;
         static_assert(TypeHashBitsOffset + TypeHashSizeInBits == 64);
 
-        constexpr static size_t      SizeOfElement    = sizeof(Ty);
-        constexpr static size_t      MaxNumSlots      = Pow(2, SlotSizeInBits);
-        constexpr static VersionType MaxVersion       = Pow(2, VersionSizeInBits);
-        constexpr static size_t      NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
+        constexpr static size_t SizeOfElement = sizeof(Ty);
+        constexpr static size_t MaxNumSlots = Pow(2, SlotSizeInBits);
+        constexpr static VersionType MaxVersion = Pow(2, VersionSizeInBits);
+        constexpr static size_t NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
         static_assert(NumSlotsPerChunk <= MaxNumSlots);
         constexpr static size_t MaxNumChunks = MaxNumSlots / NumSlotsPerChunk;
 
         constexpr static uint32_t FreeSlotMagicNumber = 0xF3EE6102;
 
         constexpr static size_t InitialNumChunks = 4;
-        std::vector<uint8_t*>   chunks{};
+        eastl::vector<uint8_t*> chunks{};
 
-        uint32_t                 slotCapacity = 0;
-        std::vector<SlotType>    freeSlots;
-        std::vector<VersionType> slotVersionTable;
+        uint32_t slotCapacity = 0;
+        eastl::vector<SlotType> freeSlots;
+        eastl::vector<VersionType> slotVersionTable;
 
 #ifdef IG_TRACK_LEAKED_HANDLE
-        std::vector<DWORD> lastCallStackTable;
+        eastl::vector<DWORD> lastCallStackTable;
 #endif
     };
-}
+}    // namespace ig

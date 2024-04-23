@@ -9,4 +9,4 @@ namespace ig
         Vector3 Normal;
         Vector2 UVCoords;
     };
-} // namespace ig
+}    // namespace ig

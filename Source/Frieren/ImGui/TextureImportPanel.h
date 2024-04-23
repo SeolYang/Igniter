@@ -9,12 +9,12 @@ namespace fe
     class TextureImportPanel final : public ImGuiLayer
     {
     public:
-        TextureImportPanel()                          = default;
+        TextureImportPanel() = default;
         TextureImportPanel(const TextureImportPanel&) = delete;
-        TextureImportPanel(TextureImportPanel&&)      = delete;
-        ~TextureImportPanel() override                = default;
+        TextureImportPanel(TextureImportPanel&&) = delete;
+        ~TextureImportPanel() override = default;
 
-        TextureImportPanel& operator=(const TextureImportPanel&)     = delete;
+        TextureImportPanel& operator=(const TextureImportPanel&) = delete;
         TextureImportPanel& operator=(TextureImportPanel&&) noexcept = delete;
 
         void Render() override;
@@ -24,14 +24,14 @@ namespace fe
         void SelectFileToImport();
 
     private:
-        String                path{};
-        TextureImportDesc     config;
+        String path{};
+        TextureImportDesc config;
         EOpenFileDialogStatus status{};
 
-        int selectedCompModeIdx  = 0;
-        int selectedFilterIdx    = 0;
+        int selectedCompModeIdx = 0;
+        int selectedFilterIdx = 0;
         int selectedAddressModeU = 0;
         int selectedAddressModeV = 0;
         int selectedAddressModeW = 0;
     };
-} // namespace ig
+}    // namespace fe

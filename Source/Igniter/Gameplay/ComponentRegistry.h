@@ -21,27 +21,25 @@ namespace ig
     class ComponentRegistry final
     {
     public:
-        using ComponentEvent      = std::function<void(Registry&, const Entity)>;
-        using SerializeCallback   = std::function<void(Registry&, const Entity, Json&)>;
+        using ComponentEvent = std::function<void(Registry&, const Entity)>;
+        using SerializeCallback = std::function<void(Registry&, const Entity, Json&)>;
         using DeserializeCallback = std::function<void(Registry&, const Entity, const Json&)>;
 
         struct ComponentInfo final
         {
-            std::string_view    Name;
-            ComponentEvent      OnImGui{};
-            SerializeCallback   Serialize{};
+            std::string_view Name;
+            ComponentEvent OnImGui{};
+            SerializeCallback Serialize{};
             DeserializeCallback Deserialize{};
         };
 
         template <typename Component>
         static void Register(const std::string_view nameOfComponent)
         {
-            Register(entt::type_hash<Component>::value(), ComponentInfo{
-                         .Name = nameOfComponent,
-                         .OnImGui = OnImGui<Component>,
-                         .Serialize = SerializeComponent<Component>,
-                         .Deserialize = DeserializeComponent<Component>
-                     });
+            Register(entt::type_hash<Component>::value(), ComponentInfo{.Name = nameOfComponent,
+                                                              .OnImGui = OnImGui<Component>,
+                                                              .Serialize = SerializeComponent<Component>,
+                                                              .Deserialize = DeserializeComponent<Component>});
         }
 
         static std::span<const std::pair<entt::id_type, ComponentInfo>> GetComponentInfos();
@@ -50,18 +48,21 @@ namespace ig
         static void Register(const entt::id_type componentTypeID, const ComponentInfo componentInfo);
         static std::vector<std::pair<entt::id_type, ComponentRegistry::ComponentInfo>>& GetComponentInfosInternal();
     };
-} // namespace ig
+}    // namespace ig
 
-#define IG_DECLARE_COMPONENT(COMPONENT_TYPE)                                                                     \
-    namespace details::component                                                                                 \
-    {                                                                                                            \
-        struct COMPONENT_TYPE##REGISTRATION                                                                      \
-        {                                                                                                        \
-            COMPONENT_TYPE##REGISTRATION() { ig::ComponentRegistry::Register<COMPONENT_TYPE>(#COMPONENT_TYPE); } \
-                                                                                                                 \
-        private:                                                                                                 \
-            static COMPONENT_TYPE##REGISTRATION _##COMPONENT_TYPE##REGISTRATION;                                 \
-        };                                                                                                       \
+#define IG_DECLARE_COMPONENT(COMPONENT_TYPE)                                      \
+    namespace details::component                                                  \
+    {                                                                             \
+        struct COMPONENT_TYPE##REGISTRATION                                       \
+        {                                                                         \
+            COMPONENT_TYPE##REGISTRATION()                                        \
+            {                                                                     \
+                ig::ComponentRegistry::Register<COMPONENT_TYPE>(#COMPONENT_TYPE); \
+            }                                                                     \
+                                                                                  \
+        private:                                                                  \
+            static COMPONENT_TYPE##REGISTRATION _##COMPONENT_TYPE##REGISTRATION;  \
+        };                                                                        \
     }
 
 #define IG_DEFINE_COMPONENT(COMPONENT_TYPE) \

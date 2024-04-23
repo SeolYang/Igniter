@@ -14,37 +14,24 @@ namespace ig
     {
         windowTitle = description.Title.ToWideString();
         IG_CHECK(description.Width > 0 && description.Height > 0);
-        windowClass = {
-            sizeof(WNDCLASSEX),
-            CS_OWNDC,
-            WindowProc,
-            0L,
-            0L,
-            GetModuleHandle(NULL),
-            NULL,
-            LoadCursor(NULL, IDC_ARROW),
-            NULL,
-            NULL,
-            windowTitle.c_str(),
-            NULL
-        };
+        windowClass = {sizeof(WNDCLASSEX), CS_OWNDC, WindowProc, 0L, 0L, GetModuleHandle(NULL), NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL,
+            windowTitle.c_str(), NULL};
 
         IG_VERIFY(SUCCEEDED(RegisterClassEx(&windowClass)));
-        const auto screenWidth  = GetSystemMetrics(SM_CXSCREEN);
+        const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
         const auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-        constexpr auto windowStyle   = WS_POPUP;
+        constexpr auto windowStyle = WS_POPUP;
         constexpr auto exWindowStyle = 0;
 
         RECT rect{0, static_cast<LONG>(description.Height), static_cast<LONG>(description.Width), 0};
         IG_VERIFY(AdjustWindowRectEx(&rect, windowStyle, false, exWindowStyle) != FALSE);
 
-        windowHandle = CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle,
-                                      (screenWidth - description.Width) / 2, (screenHeight - description.Height) / 2,
-                                      rect.right - rect.left, rect.top - rect.bottom, NULL, NULL,
-                                      windowClass.hInstance, NULL);
+        windowHandle =
+            CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle, (screenWidth - description.Width) / 2,
+                (screenHeight - description.Height) / 2, rect.right - rect.left, rect.top - rect.bottom, NULL, NULL, windowClass.hInstance, NULL);
 
-        viewport.width  = static_cast<float>(rect.right - rect.left);
+        viewport.width = static_cast<float>(rect.right - rect.left);
         viewport.height = static_cast<float>(rect.top - rect.bottom);
 
         ShowWindow(windowHandle, SW_SHOWDEFAULT);
@@ -73,9 +60,9 @@ namespace ig
         ClientToScreen(windowHandle, &leftTop);
         ClientToScreen(windowHandle, &rightBottom);
 
-        clientRect.left   = leftTop.x;
-        clientRect.top    = leftTop.y;
-        clientRect.right  = rightBottom.x;
+        clientRect.left = leftTop.x;
+        clientRect.top = leftTop.y;
+        clientRect.right = rightBottom.x;
         clientRect.bottom = rightBottom.y;
         if (::ClipCursor(&clientRect) == FALSE)
         {
@@ -114,12 +101,12 @@ namespace ig
 
             switch (uMsg)
             {
-            case WM_DESTROY:
-                PostQuitMessage(0);
-                return 0;
+                case WM_DESTROY:
+                    PostQuitMessage(0);
+                    return 0;
 
-            default:
-                break;
+                default:
+                    break;
             }
 
             Igniter::GetInputManager().HandleEvent(uMsg, wParam, lParam);
@@ -127,4 +114,4 @@ namespace ig
 
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
     }
-} // namespace ig
+}    // namespace ig

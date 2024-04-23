@@ -15,18 +15,18 @@ namespace ig
     struct StaticMeshImportDesc
     {
     public:
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
     public:
-        bool bMakeLeftHanded        = true;
-        bool bFlipUVs               = true;
-        bool bFlipWindingOrder      = true;
-        bool bGenerateNormals       = false;
-        bool bSplitLargeMeshes      = false;
-        bool bPreTransformVertices  = false;
-        bool bImproveCacheLocality  = false;
-        bool bGenerateUVCoords      = false;
+        bool bMakeLeftHanded = true;
+        bool bFlipUVs = true;
+        bool bFlipWindingOrder = true;
+        bool bGenerateNormals = false;
+        bool bSplitLargeMeshes = false;
+        bool bPreTransformVertices = false;
+        bool bImproveCacheLocality = false;
+        bool bGenerateUVCoords = false;
         bool bGenerateBoundingBoxes = false;
 
         bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
@@ -35,15 +35,15 @@ namespace ig
     struct StaticMeshLoadDesc
     {
     public:
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
     public:
         uint32_t NumVertices{0};
         uint32_t NumIndices{0};
-        size_t   CompressedVerticesSizeInBytes{0};
-        size_t   CompressedIndicesSizeInBytes{0};
-        Guid     MaterialGuid{DefaultMaterialGuid};
+        size_t CompressedVerticesSizeInBytes{0};
+        size_t CompressedIndicesSizeInBytes{0};
+        Guid MaterialGuid{DefaultMaterialGuid};
         /* #sy_todo Add AABB Info */
     };
 
@@ -55,32 +55,30 @@ namespace ig
     {
     public:
         using ImportDesc = StaticMeshImportDesc;
-        using LoadDesc   = StaticMeshLoadDesc;
-        using Desc       = AssetDesc<StaticMesh>;
+        using LoadDesc = StaticMeshLoadDesc;
+        using Desc = AssetDesc<StaticMesh>;
 
     public:
-        StaticMesh(const Desc&                      snapshot, DeferredHandle<GpuBuffer> vertexBuffer,
-                   Handle<GpuView, GpuViewManager*> vertexBufferSrv,
-                   DeferredHandle<GpuBuffer>        indexBuffer,
-                   CachedAsset<Material>            material);
-        StaticMesh(const StaticMesh&)     = delete;
+        StaticMesh(const Desc& snapshot, DeferredHandle<GpuBuffer> vertexBuffer, Handle<GpuView, GpuViewManager*> vertexBufferSrv,
+            DeferredHandle<GpuBuffer> indexBuffer, CachedAsset<Material> material);
+        StaticMesh(const StaticMesh&) = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();
 
-        StaticMesh& operator=(const StaticMesh&)     = delete;
+        StaticMesh& operator=(const StaticMesh&) = delete;
         StaticMesh& operator=(StaticMesh&&) noexcept = default;
 
-        const Desc&          GetSnapshot() const { return snapshot; }
+        const Desc& GetSnapshot() const { return snapshot; }
         RefHandle<GpuBuffer> GetVertexBuffer() { return vertexBuffer.MakeRef(); }
-        RefHandle<GpuView>   GetVertexBufferSrv() { return vertexBufferSrv.MakeRef(); }
+        RefHandle<GpuView> GetVertexBufferSrv() { return vertexBufferSrv.MakeRef(); }
         RefHandle<GpuBuffer> GetIndexBuffer() { return indexBuffer.MakeRef(); }
-        RefHandle<Material>  GetMaterial() { return material.MakeRef(); }
+        RefHandle<Material> GetMaterial() { return material.MakeRef(); }
 
     private:
-        Desc                             snapshot{};
-        DeferredHandle<GpuBuffer>        vertexBuffer{};
+        Desc snapshot{};
+        DeferredHandle<GpuBuffer> vertexBuffer{};
         Handle<GpuView, GpuViewManager*> vertexBufferSrv{};
-        DeferredHandle<GpuBuffer>        indexBuffer{};
-        CachedAsset<Material>            material{};
+        DeferredHandle<GpuBuffer> indexBuffer{};
+        CachedAsset<Material> material{};
     };
-} // namespace ig
+}    // namespace ig

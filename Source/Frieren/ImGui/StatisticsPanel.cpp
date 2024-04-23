@@ -16,27 +16,23 @@ namespace fe
             {
                 Renderer& renderer = Igniter::GetRenderer();
                 TempConstantBufferAllocator& tempConstantBufferAllocator = renderer.GetTempConstantBufferAllocator();
-                const auto [tempCBufferAllocLocalFrame0, tempCBufferAllocLocalFrame1] = tempConstantBufferAllocator.
-                        GetUsedSizeInBytes();
+                const auto [tempCBufferAllocLocalFrame0, tempCBufferAllocLocalFrame1] = tempConstantBufferAllocator.GetUsedSizeInBytes();
                 tempConstantBufferUsedSizeMB[0] = BytesToMegaBytes(tempCBufferAllocLocalFrame0);
                 tempConstantBufferUsedSizeMB[1] = BytesToMegaBytes(tempCBufferAllocLocalFrame1);
 
-                tempConstantBufferSizePerFrameMB = BytesToMegaBytes(
-                    tempConstantBufferAllocator.GetReservedSizeInBytesPerFrame());
-                tempConstantBufferOccupancy[0] = static_cast<float>(tempConstantBufferUsedSizeMB[0] /
-                    tempConstantBufferSizePerFrameMB);
-                tempConstantBufferOccupancy[1] = static_cast<float>(tempConstantBufferUsedSizeMB[1] /
-                    tempConstantBufferSizePerFrameMB);
+                tempConstantBufferSizePerFrameMB = BytesToMegaBytes(tempConstantBufferAllocator.GetReservedSizeInBytesPerFrame());
+                tempConstantBufferOccupancy[0] = static_cast<float>(tempConstantBufferUsedSizeMB[0] / tempConstantBufferSizePerFrameMB);
+                tempConstantBufferOccupancy[1] = static_cast<float>(tempConstantBufferUsedSizeMB[1] / tempConstantBufferSizePerFrameMB);
             }
 
             {
                 const HandleManager& handleManager = Igniter::GetHandleManager();
-                const auto           statistics    = handleManager.GetStatistics();
-                handleManagerNumMemoryPools        = statistics.NumMemoryPools;
-                handleManagerAllocatedChunkSizeMB  = BytesToMegaBytes(statistics.AllocatedChunksSizeInBytes);
-                handleManagerUsedSizeMB            = BytesToMegaBytes(statistics.UsedSizeInBytes);
-                handleManagerNumAllocatedChunks    = statistics.NumAllocatedChunks;
-                handleManagerNumAllocatedHandles   = statistics.NumAllocatedHandles;
+                const auto statistics = handleManager.GetStatistics();
+                handleManagerNumMemoryPools = statistics.NumMemoryPools;
+                handleManagerAllocatedChunkSizeMB = BytesToMegaBytes(statistics.AllocatedChunksSizeInBytes);
+                handleManagerUsedSizeMB = BytesToMegaBytes(statistics.UsedSizeInBytes);
+                handleManagerNumAllocatedChunks = statistics.NumAllocatedChunks;
+                handleManagerNumAllocatedHandles = statistics.NumAllocatedHandles;
             }
 
             pollingStep = 0;
@@ -47,7 +43,7 @@ namespace fe
             if (ImGui::RadioButton("##EnablePollingStatistics", bEnablePolling))
             {
                 bEnablePolling = !bEnablePolling;
-                pollingStep    = 0;
+                pollingStep = 0;
             }
 
             ImGui::SameLine();
@@ -65,11 +61,9 @@ namespace fe
             if (ImGui::TreeNodeEx("Temp Constant Buffer Occupancy", ImGuiTreeNodeFlags_Framed))
             {
                 constexpr std::string_view FormatTemplate = "Local Frame#%d Used: %lf MB/%.01lf MB";
-                ImGui::Text(FormatTemplate.data(), 0, tempConstantBufferUsedSizeMB[0],
-                            tempConstantBufferSizePerFrameMB);
+                ImGui::Text(FormatTemplate.data(), 0, tempConstantBufferUsedSizeMB[0], tempConstantBufferSizePerFrameMB);
                 ImGui::ProgressBar(tempConstantBufferOccupancy[0], ImVec2(0, 0));
-                ImGui::Text(FormatTemplate.data(), 1, tempConstantBufferUsedSizeMB[1],
-                            tempConstantBufferSizePerFrameMB);
+                ImGui::Text(FormatTemplate.data(), 1, tempConstantBufferUsedSizeMB[1], tempConstantBufferSizePerFrameMB);
                 ImGui::ProgressBar(tempConstantBufferOccupancy[1], ImVec2(0, 0));
                 ImGui::TreePop();
             }
@@ -89,4 +83,4 @@ namespace fe
 
         ++pollingStep;
     }
-} // namespace ig
+}    // namespace fe

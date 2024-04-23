@@ -6,10 +6,7 @@ template <typename Enumeration>
 struct std::formatter<Enumeration>
 {
 public:
-    constexpr auto parse(std::format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
+    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FrameContext>
     auto format(const Enumeration& enumerator, FrameContext& ctx) const
@@ -22,10 +19,7 @@ template <>
 struct std::formatter<ig::Guid>
 {
 public:
-    constexpr auto parse(std::format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
+    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FrameContext>
     auto format(const ig::Guid& guid, FrameContext& ctx) const

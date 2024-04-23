@@ -9,17 +9,17 @@ namespace fe
     {
     public:
         AssetWatchPanel();
-        AssetWatchPanel(const AssetWatchPanel&)     = delete;
+        AssetWatchPanel(const AssetWatchPanel&) = delete;
         AssetWatchPanel(AssetWatchPanel&&) noexcept = delete;
-        ~AssetWatchPanel() override                 = default;
+        ~AssetWatchPanel() override = default;
 
-        AssetWatchPanel& operator=(const AssetWatchPanel&)     = delete;
+        AssetWatchPanel& operator=(const AssetWatchPanel&) = delete;
         AssetWatchPanel& operator=(AssetWatchPanel&&) noexcept = delete;
 
         void Render() override;
 
     private:
-        CoFileWatcher               watcher;
+        CoFileWatcher watcher;
         std::vector<FileChangeInfo> infoBuffer;
     };
-} // namespace ig
+}    // namespace fe

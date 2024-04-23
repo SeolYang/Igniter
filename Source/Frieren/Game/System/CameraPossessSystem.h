@@ -4,7 +4,7 @@
 namespace ig
 {
     class Window;
-} // namespace ig
+}    // namespace ig
 
 namespace fe
 {
@@ -21,10 +21,10 @@ namespace fe
         void Configure();
 
     private:
-        ig::Window&              window;
-        Handle_New<Action>       togglePossessToCameraHandle;
+        ig::Window& window;
+        Handle_New<Action> togglePossessToCameraHandle;
         FpsCameraControllSystem& fpsCamControllSystem;
 
         bool bEnabled = false;
     };
-} // namespace fe
+}    // namespace fe

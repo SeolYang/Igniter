@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable : 4530)
 #include <array>
 #include <bitset>
 #include <functional>
@@ -55,7 +56,7 @@
 #pragma warning(pop)
 
 #ifndef WIN32_MEAN_AND_LEAN
-    #define WIN32_MEAN_AND_LEAN
+#define WIN32_MEAN_AND_LEAN
 #endif
 #include <Windows.h>
 #include <strsafe.h>
@@ -138,6 +139,9 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 
 #include <xxhash.h>
 
+#include <EASTL/vector.h>
+#include <EASTL/array.h>
+
 #include <Core/Assert.h>
 #include <Core/Types.h>
 #include <Core/Serializable.h>
@@ -151,7 +155,7 @@ namespace ig /* Constants */
 #ifdef _M_X64
 #define ENABLE_SSE_CRC32 1
 #else
-    #define ENABLE_SSE_CRC32 0
+#define ENABLE_SSE_CRC32 0
 #endif
 
 #if ENABLE_SSE_CRC32

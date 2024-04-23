@@ -24,24 +24,24 @@ namespace ig
     public:
         ~Igniter();
 
-        Igniter(const Igniter&)                = delete;
-        Igniter(Igniter&&) noexcept            = delete;
-        Igniter& operator=(const Igniter&)     = delete;
+        Igniter(const Igniter&) = delete;
+        Igniter(Igniter&&) noexcept = delete;
+        Igniter& operator=(const Igniter&) = delete;
         Igniter& operator=(Igniter&&) noexcept = delete;
 
-        [[nodiscard]] static FrameManager&            GetFrameManager();
-        [[nodiscard]] static Timer&                   GetTimer();
-        [[nodiscard]] static Window&                  GetWindow();
-        [[nodiscard]] static RenderDevice&            GetRenderDevice();
-        [[nodiscard]] static HandleManager&           GetHandleManager();
-        [[nodiscard]] static InputManager&            GetInputManager();
-        [[nodiscard]] static DeferredDeallocator&     GetDeferredDeallocator();
-        [[nodiscard]] static RenderContext&           GetRenderContext();
-        [[nodiscard]] static AssetManager&            GetAssetManager();
-        [[nodiscard]] static Renderer&                GetRenderer();
-        [[nodiscard]] static ImGuiRenderer&           GetImGuiRenderer();
-        [[nodiscard]] static ImGuiCanvas&             GetImGuiCanvas();
-        [[nodiscard]] static GameInstance&            GetGameInstance();
+        [[nodiscard]] static FrameManager& GetFrameManager();
+        [[nodiscard]] static Timer& GetTimer();
+        [[nodiscard]] static Window& GetWindow();
+        [[nodiscard]] static RenderDevice& GetRenderDevice();
+        [[nodiscard]] static HandleManager& GetHandleManager();
+        [[nodiscard]] static InputManager& GetInputManager();
+        [[nodiscard]] static DeferredDeallocator& GetDeferredDeallocator();
+        [[nodiscard]] static RenderContext& GetRenderContext();
+        [[nodiscard]] static AssetManager& GetAssetManager();
+        [[nodiscard]] static Renderer& GetRenderer();
+        [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
+        [[nodiscard]] static ImGuiCanvas& GetImGuiCanvas();
+        [[nodiscard]] static GameInstance& GetGameInstance();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
 
@@ -59,19 +59,19 @@ namespace ig
 
     private:
         static Igniter* instance;
-        bool            bShouldExit = false;
+        bool bShouldExit = false;
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////
-        Ptr<FrameManager>  frameManager;
-        Ptr<Timer>         timer;
-        Ptr<Window>        window;
-        Ptr<RenderDevice>  renderDevice;
+        Ptr<FrameManager> frameManager;
+        Ptr<Timer> timer;
+        Ptr<Window> window;
+        Ptr<RenderDevice> renderDevice;
         Ptr<HandleManager> handleManager;
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        Ptr<InputManager>        inputManager;
+        Ptr<InputManager> inputManager;
         Ptr<DeferredDeallocator> deferredDeallocator;
         ////////////////////////////////////////////////////
 
@@ -84,13 +84,13 @@ namespace ig
         ////////////////////////////////////////////////////
 
         //////////////////////// L4 ////////////////////////
-        Ptr<Renderer>      renderer;
+        Ptr<Renderer> renderer;
         Ptr<ImGuiRenderer> imguiRenderer;
         ////////////////////////////////////////////////////
 
         //////////////////////// APP ///////////////////////
-        Ptr<ImGuiCanvas>  imguiCanvas;
+        Ptr<ImGuiCanvas> imguiCanvas;
         Ptr<GameInstance> gameInstance;
         ////////////////////////////////////////////////////
     };
-} // namespace ig
+}    // namespace ig

@@ -4,9 +4,7 @@
 
 namespace ig
 {
-    GameInstance::GameInstance()
-    {
-    }
+    GameInstance::GameInstance() {}
 
     GameInstance::~GameInstance()
     {
@@ -26,4 +24,4 @@ namespace ig
     {
         gameMode = std::move(newGameMode);
     }
-} // namespace ig
+}    // namespace ig

@@ -47,20 +47,20 @@ namespace ig::details
 
         return HexDigitToByte(frontHexChar) << 4 | HexDigitToByte(rearHexChar);
     }
-}
+}    // namespace ig::details
 
 namespace ig
 {
     inline constexpr size_t GuidBytesLength = 16;
-    using GuidBytes                         = std::array<uint8_t, GuidBytesLength>;
+    using GuidBytes = std::array<uint8_t, GuidBytesLength>;
 
     constexpr static std::array<uint8_t, GuidBytesLength> GuidBytesFrom(const std::string_view strView)
     {
         std::array<uint8_t, GuidBytesLength> bytes{};
-        char                                 frontHexChar         = '\0';
-        char                                 rearHexChar          = '\0';
-        bool                                 bLookingForFrontChar = true;
-        uint16_t                             nextByte             = 0;
+        char frontHexChar = '\0';
+        char rearHexChar = '\0';
+        bool bLookingForFrontChar = true;
+        uint16_t nextByte = 0;
 
         for (const char& ch : strView)
         {
@@ -77,13 +77,13 @@ namespace ig
 
             if (bLookingForFrontChar)
             {
-                frontHexChar         = ch;
+                frontHexChar = ch;
                 bLookingForFrontChar = false;
             }
             else
             {
-                rearHexChar          = ch;
-                bytes[nextByte]      = details::TwoHexDigitToByte(frontHexChar, rearHexChar);
+                rearHexChar = ch;
+                bytes[nextByte] = details::TwoHexDigitToByte(frontHexChar, rearHexChar);
                 bLookingForFrontChar = true;
                 ++nextByte;
             }
@@ -96,4 +96,4 @@ namespace ig
 
         return bytes;
     }
-} // namespace ig
+}    // namespace ig

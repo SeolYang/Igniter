@@ -10,21 +10,20 @@
 
 namespace fe
 {
-    FpsCameraControllSystem::FpsCameraControllSystem()
-        : timer(ig::Igniter::GetTimer())
+    FpsCameraControllSystem::FpsCameraControllSystem() : timer(ig::Igniter::GetTimer())
     {
-        auto& inputManager       = ig::Igniter::GetInputManager();
-        moveLeftActionHandle     = inputManager.QueryAction(ig::String("MoveLeft"));
-        moveRightActionHandle    = inputManager.QueryAction(ig::String("MoveRight"));
-        moveForwardActionHandle  = inputManager.QueryAction(ig::String("MoveForward"));
+        auto& inputManager = ig::Igniter::GetInputManager();
+        moveLeftActionHandle = inputManager.QueryAction(ig::String("MoveLeft"));
+        moveRightActionHandle = inputManager.QueryAction(ig::String("MoveRight"));
+        moveForwardActionHandle = inputManager.QueryAction(ig::String("MoveForward"));
         moveBackwardActionHandle = inputManager.QueryAction(ig::String("MoveBackward"));
 
-        moveUpActionHandle   = inputManager.QueryAction(ig::String("MoveUp"));
+        moveUpActionHandle = inputManager.QueryAction(ig::String("MoveUp"));
         moveDownActionHandle = inputManager.QueryAction(ig::String("MoveDown"));
 
         sprintActionHandle = inputManager.QueryAction(ig::String("Sprint"));
 
-        turnYawAxisHandle   = inputManager.QueryAxis(ig::String("TurnYaw"));
+        turnYawAxisHandle = inputManager.QueryAxis(ig::String("TurnYaw"));
         turnPitchAxisHandle = inputManager.QueryAxis(ig::String("TurnAxis"));
     }
 
@@ -33,27 +32,27 @@ namespace fe
         const auto fpsCamView = registry.view<ig::TransformComponent, FpsCameraController, ig::CameraComponent>();
         for (const ig::Entity entity : fpsCamView)
         {
-            auto& transform  = fpsCamView.get<ig::TransformComponent>(entity);
+            auto& transform = fpsCamView.get<ig::TransformComponent>(entity);
             auto& controller = fpsCamView.get<FpsCameraController>(entity);
 
             if (!bIgnoreInput)
             {
-                const auto&  inputManager       = Igniter::GetInputManager();
-                const Action moveLeftAction     = inputManager.GetAction(moveLeftActionHandle);
-                const Action moveRightAction    = inputManager.GetAction(moveRightActionHandle);
-                const Action moveForwardAction  = inputManager.GetAction(moveForwardActionHandle);
+                const auto& inputManager = Igniter::GetInputManager();
+                const Action moveLeftAction = inputManager.GetAction(moveLeftActionHandle);
+                const Action moveRightAction = inputManager.GetAction(moveRightActionHandle);
+                const Action moveForwardAction = inputManager.GetAction(moveForwardActionHandle);
                 const Action moveBackwardAction = inputManager.GetAction(moveBackwardActionHandle);
-                const Action moveUpAction       = inputManager.GetAction(moveUpActionHandle);
-                const Action moveDownAction     = inputManager.GetAction(moveDownActionHandle);
+                const Action moveUpAction = inputManager.GetAction(moveUpActionHandle);
+                const Action moveDownAction = inputManager.GetAction(moveDownActionHandle);
 
-                const Axis turnYawAxis   = inputManager.GetAxis(turnYawAxisHandle);
+                const Axis turnYawAxis = inputManager.GetAxis(turnYawAxisHandle);
                 const Axis turnPitchAxis = inputManager.GetAxis(turnPitchAxisHandle);
 
                 const Action sprintAction = inputManager.GetAction(sprintActionHandle);
 
                 /* Handle Movements */
-                const bool  bShouldSprint = sprintAction.IsAnyPressing();
-                const float sprintFactor  = bShouldSprint ? controller.SprintFactor : 1.f;
+                const bool bShouldSprint = sprintAction.IsAnyPressing();
+                const float sprintFactor = bShouldSprint ? controller.SprintFactor : 1.f;
                 ig::Vector3 direction{};
                 if (moveLeftAction.IsAnyPressing())
                 {
@@ -87,24 +86,21 @@ namespace fe
 
                 if (direction != ig::Vector3::Zero)
                 {
-                    const ig::Vector3 impulse = controller.MovementPower *
-                            sprintFactor *
-                            direction *
-                            timer.GetDeltaTime();
+                    const ig::Vector3 impulse = controller.MovementPower * sprintFactor * direction * timer.GetDeltaTime();
 
-                    controller.LatestImpulse                 = impulse;
+                    controller.LatestImpulse = impulse;
                     controller.ElapsedTimeAfterLatestImpulse = 0.f;
                 }
 
                 /* Handle Rotations */
-                const float yawAxisValue   = turnYawAxis.Value;
+                const float yawAxisValue = turnYawAxis.Value;
                 const float pitchAxisValue = turnPitchAxis.Value;
                 if (yawAxisValue != 0.f || pitchAxisValue != 0.f)
                 {
                     controller.CurrentYaw += yawAxisValue * controller.MouseYawSentisitivity;
                     controller.CurrentPitch += pitchAxisValue * controller.MousePitchSentisitivity;
-                    controller.CurrentPitch = std::clamp(controller.CurrentPitch, FpsCameraController::MinPitchDegrees,
-                                                         FpsCameraController::MaxPitchDegrees);
+                    controller.CurrentPitch =
+                        std::clamp(controller.CurrentPitch, FpsCameraController::MinPitchDegrees, FpsCameraController::MaxPitchDegrees);
                 }
             }
 
@@ -113,4 +109,4 @@ namespace fe
             transform.Rotation = controller.GetCurrentRotation();
         }
     }
-} // namespace fe
+}    // namespace fe

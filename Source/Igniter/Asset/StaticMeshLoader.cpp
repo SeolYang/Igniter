@@ -16,20 +16,15 @@ IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);
 
 namespace ig
 {
-    StaticMeshLoader::StaticMeshLoader(HandleManager& handleManager,
-                                       RenderDevice&  renderDevice,
-                                       RenderContext& renderContext,
-                                       AssetManager&  assetManager) :
-                                                                    handleManager(handleManager)
-                                                                    , renderDevice(renderDevice)
-                                                                    , renderContext(renderContext)
-                                                                    , assetManager(assetManager)
+    StaticMeshLoader::StaticMeshLoader(
+        HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext, AssetManager& assetManager)
+        : handleManager(handleManager), renderDevice(renderDevice), renderContext(renderContext), assetManager(assetManager)
     {
     }
 
     Result<StaticMesh, EStaticMeshLoadStatus> StaticMeshLoader::Load(const StaticMesh::Desc& desc)
     {
-        const AssetInfo&          assetInfo{desc.Info};
+        const AssetInfo& assetInfo{desc.Info};
         const StaticMeshLoadDesc& loadDesc{desc.LoadDescriptor};
 
         if (!assetInfo.IsValid())
@@ -42,9 +37,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::AssetTypeMismatch>();
         }
 
-        if (loadDesc.NumVertices == 0 ||
-            loadDesc.NumIndices == 0 ||
-            loadDesc.CompressedVerticesSizeInBytes == 0 ||
+        if (loadDesc.NumVertices == 0 || loadDesc.NumIndices == 0 || loadDesc.CompressedVerticesSizeInBytes == 0 ||
             loadDesc.CompressedIndicesSizeInBytes == 0)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidArguments>();
@@ -70,8 +63,7 @@ namespace ig
 
         GpuBufferDesc vertexBufferDesc{};
         vertexBufferDesc.AsStructuredBuffer<StaticMeshVertex>(loadDesc.NumVertices);
-        vertexBufferDesc.DebugName = String(std::format("{}({})_Vertices", assetInfo.GetVirtualPath(),
-                                                        assetInfo.GetGuid()));
+        vertexBufferDesc.DebugName = String(std::format("{}({})_Vertices", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
         if (vertexBufferDesc.GetSizeAsBytes() < loadDesc.CompressedVerticesSizeInBytes)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedVerticesSize>();
@@ -79,8 +71,7 @@ namespace ig
 
         GpuBufferDesc indexBufferDesc{};
         indexBufferDesc.AsIndexBuffer<uint32_t>(loadDesc.NumIndices);
-        indexBufferDesc.DebugName = String(std::format("{}({})_Indices", assetInfo.GetVirtualPath(),
-                                                       assetInfo.GetGuid()));
+        indexBufferDesc.DebugName = String(std::format("{}({})_Indices", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
         if (indexBufferDesc.GetSizeAsBytes() < loadDesc.CompressedIndicesSizeInBytes)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedIndicesSize>();
@@ -93,7 +84,7 @@ namespace ig
         }
 
         GpuViewManager& gpuViewManager{renderContext.GetGpuViewManager()};
-        auto            vertexBufferSrv = gpuViewManager.RequestShaderResourceView(*vertexBuffer);
+        auto vertexBufferSrv = gpuViewManager.RequestShaderResourceView(*vertexBuffer);
         if (!vertexBufferSrv)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBufferSrv>();
@@ -105,16 +96,13 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateIndexBuffer>();
         }
 
-        GpuUploader&  gpuUploader{renderContext.GetGpuUploader()};
-        bool          bVertexBufferDecodeSucceed = false;
-        UploadContext verticesUploadCtx          = gpuUploader.Reserve(vertexBufferDesc.GetSizeAsBytes());
+        GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
+        bool bVertexBufferDecodeSucceed = false;
+        UploadContext verticesUploadCtx = gpuUploader.Reserve(vertexBufferDesc.GetSizeAsBytes());
         {
             const size_t compressedVerticesOffset = 0;
-            const int    decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(),
-                                                                   loadDesc.NumVertices,
-                                                                   sizeof(StaticMeshVertex),
-                                                                   blob.data() + compressedVerticesOffset,
-                                                                   loadDesc.CompressedVerticesSizeInBytes);
+            const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(), loadDesc.NumVertices,
+                sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, loadDesc.CompressedVerticesSizeInBytes);
             if (decodeResult == 0)
             {
                 verticesUploadCtx.CopyBuffer(0, vertexBufferDesc.GetSizeAsBytes(), *vertexBuffer);
@@ -124,14 +112,12 @@ namespace ig
         std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
         IG_CHECK(verticesUploadSync);
 
-        bool          bIndexBufferDecodeSucceed = false;
-        UploadContext indicesUploadCtx          = gpuUploader.Reserve(indexBufferDesc.GetSizeAsBytes());
+        bool bIndexBufferDecodeSucceed = false;
+        UploadContext indicesUploadCtx = gpuUploader.Reserve(indexBufferDesc.GetSizeAsBytes());
         {
             const size_t compressedIndicesOffset = loadDesc.CompressedVerticesSizeInBytes;
-            const int    decodeResult            = meshopt_decodeIndexBuffer<uint32_t>(
-                reinterpret_cast<uint32_t*>(indicesUploadCtx.GetOffsettedCpuAddress()),
-                loadDesc.NumIndices,
-                blob.data() + compressedIndicesOffset, loadDesc.CompressedIndicesSizeInBytes);
+            const int decodeResult = meshopt_decodeIndexBuffer<uint32_t>(reinterpret_cast<uint32_t*>(indicesUploadCtx.GetOffsettedCpuAddress()),
+                loadDesc.NumIndices, blob.data() + compressedIndicesOffset, loadDesc.CompressedIndicesSizeInBytes);
 
             if (decodeResult == 0)
             {
@@ -158,12 +144,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedDecodeIndexBuffer>();
         }
 
-        return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(StaticMesh{
-            desc,
-            {handleManager, std::move(*vertexBuffer)},
-            std::move(vertexBufferSrv),
-            {handleManager, std::move(*indexBuffer)},
-            std::move(material)
-        });
+        return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(StaticMesh{desc, {handleManager, std::move(*vertexBuffer)}, std::move(vertexBufferSrv),
+            {handleManager, std::move(*indexBuffer)}, std::move(material)});
     }
-} // namespace ig
+}    // namespace ig

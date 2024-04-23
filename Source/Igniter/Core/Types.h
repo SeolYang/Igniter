@@ -11,13 +11,13 @@ namespace ig
     using namespace DirectX::SimpleMath;
     using namespace std::chrono_literals;
 
-    using SharedMutex    = std::shared_mutex;
-    using ReadOnlyLock   = std::shared_lock<SharedMutex>;
-    using ReadWriteLock  = std::unique_lock<SharedMutex>;
+    using SharedMutex = std::shared_mutex;
+    using ReadOnlyLock = std::shared_lock<SharedMutex>;
+    using ReadWriteLock = std::unique_lock<SharedMutex>;
     using RecursiveMutex = std::recursive_mutex;
-    using RecursiveLock  = std::unique_lock<RecursiveMutex>;
-    using Mutex          = std::mutex;
-    using UniqueLock     = std::unique_lock<Mutex>;
+    using RecursiveLock = std::unique_lock<RecursiveMutex>;
+    using Mutex = std::mutex;
+    using UniqueLock = std::unique_lock<Mutex>;
 
     template <typename T>
     using Ref = std::reference_wrapper<T>;
@@ -57,13 +57,13 @@ namespace ig
 
     template <typename T, typename... Args>
         requires !std::is_array_v<T>
-    Ptr<T> MakePtr(Args&&... args)
+                 Ptr<T> MakePtr(Args && ... args)
     {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
 
     template <typename T>
-    requires std::is_array_v<T>
+        requires std::is_array_v<T>
     Ptr<T> MakePtr(const size_t size)
     {
         return std::make_unique<T>(size);
@@ -86,13 +86,13 @@ namespace ig
     template <typename Key>
     using UnorderedSet = ankerl::unordered_dense::set<Key>;
 
-    using Entity   = entt::entity;
+    using Entity = entt::entity;
     using Registry = entt::registry;
 
     using Json = nlohmann::json;
     using Guid = xg::Guid;
 
-    constexpr uint64_t InvalidIndex    = 0xffffffffffffffffUi64;
+    constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
     constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
 
     template <typename T>
@@ -131,7 +131,7 @@ namespace ig
     }
 
     template <typename T>
-     requires std::is_enum_v<T>
+        requires std::is_enum_v<T>
     constexpr auto ToUnderlying(const T enumerator)
     {
         return static_cast<std::underlying_type_t<std::decay_t<T>>>(enumerator);
@@ -142,23 +142,21 @@ namespace ig
     {
         constexpr std::string_view funcSignature = __FUNCSIG__;
         constexpr auto offset = funcSignature.find_first_not_of(' ', funcSignature.find_first_of('<') + 1);
-        return  funcSignature.substr(offset, funcSignature.find_last_of('>') - offset);
+        return funcSignature.substr(offset, funcSignature.find_last_of('>') - offset);
     }
-} // namespace ig
+}    // namespace ig
 
 #define IG_NUMERIC_MIN_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::min()
 #define IG_NUMERIC_MAX_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::max()
 
-#define IG_ENUM_FLAGS(ENUM_TYPE)                                                            \
-    inline constexpr ENUM_TYPE operator|(const ENUM_TYPE lhs, const ENUM_TYPE rhs)          \
-    {                                                                                       \
-        static_assert(std::is_enum_v<ENUM_TYPE>);                                           \
-        return static_cast<ENUM_TYPE>(static_cast<std::underlying_type_t<ENUM_TYPE>>(lhs) | \
-                                      static_cast<std::underlying_type_t<ENUM_TYPE>>(rhs)); \
-    }                                                                                       \
-    inline constexpr ENUM_TYPE operator&(const ENUM_TYPE lhs, const ENUM_TYPE rhs)          \
-    {                                                                                       \
-        static_assert(std::is_enum_v<ENUM_TYPE>);                                           \
-        return static_cast<ENUM_TYPE>(static_cast<std::underlying_type_t<ENUM_TYPE>>(lhs) & \
-                                      static_cast<std::underlying_type_t<ENUM_TYPE>>(rhs)); \
+#define IG_ENUM_FLAGS(ENUM_TYPE)                                                                                                                  \
+    inline constexpr ENUM_TYPE operator|(const ENUM_TYPE lhs, const ENUM_TYPE rhs)                                                                \
+    {                                                                                                                                             \
+        static_assert(std::is_enum_v<ENUM_TYPE>);                                                                                                 \
+        return static_cast<ENUM_TYPE>(static_cast<std::underlying_type_t<ENUM_TYPE>>(lhs) | static_cast<std::underlying_type_t<ENUM_TYPE>>(rhs)); \
+    }                                                                                                                                             \
+    inline constexpr ENUM_TYPE operator&(const ENUM_TYPE lhs, const ENUM_TYPE rhs)                                                                \
+    {                                                                                                                                             \
+        static_assert(std::is_enum_v<ENUM_TYPE>);                                                                                                 \
+        return static_cast<ENUM_TYPE>(static_cast<std::underlying_type_t<ENUM_TYPE>>(lhs) & static_cast<std::underlying_type_t<ENUM_TYPE>>(rhs)); \
     }

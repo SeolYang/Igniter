@@ -9,13 +9,9 @@ IG_DEFINE_LOG_CATEGORY(MaterialImporter);
 
 namespace ig
 {
-    MaterialImporter::MaterialImporter(AssetManager& assetManager)
-        : assetManager(assetManager)
-    {
-    }
+    MaterialImporter::MaterialImporter(AssetManager& assetManager) : assetManager(assetManager) {}
 
-    Result<Material::Desc, EMaterialCreateStatus> MaterialImporter::Import(
-        const AssetInfo& assetInfo, const MaterialCreateDesc& desc)
+    Result<Material::Desc, EMaterialCreateStatus> MaterialImporter::Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc)
     {
         if (!assetInfo.IsValid())
         {
@@ -28,18 +24,16 @@ namespace ig
         }
 
         CachedAsset<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
-        Guid                 diffuseTexGuid{DefaultTextureGuid};
+        Guid diffuseTexGuid{DefaultTextureGuid};
         if (diffuse)
         {
             const Texture::Desc& diffuseDescSnapshot{diffuse->GetSnapshot()};
-            const AssetInfo&     diffuseInfo{diffuseDescSnapshot.Info};
+            const AssetInfo& diffuseInfo{diffuseDescSnapshot.Info};
             diffuseTexGuid = diffuseInfo.GetGuid();
         }
         IG_CHECK(diffuseTexGuid.isValid());
 
-        const Material::LoadDesc loadDesc{
-            .DiffuseTexGuid = diffuseTexGuid
-        };
+        const Material::LoadDesc loadDesc{.DiffuseTexGuid = diffuseTexGuid};
 
         Json serializedMeta{};
         serializedMeta << assetInfo << loadDesc;
@@ -57,9 +51,6 @@ namespace ig
             return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveAsset>();
         }
 
-        return MakeSuccess<Material::Desc, EMaterialCreateStatus>(Material::Desc{
-            .Info = assetInfo,
-            .LoadDescriptor = loadDesc
-        });
+        return MakeSuccess<Material::Desc, EMaterialCreateStatus>(Material::Desc{.Info = assetInfo, .LoadDescriptor = loadDesc});
     }
-} // namespace ig
+}    // namespace ig
