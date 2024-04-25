@@ -81,13 +81,13 @@ namespace ig
 
     Handle<GpuView> RenderContext::CreateConstantBufferView(const Handle<GpuBuffer> buffer)
     {
-        GpuBuffer* const bufferPtr = Lookup(buffer);
+        ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
+        GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestConstantBufferView(*bufferPtr);
         if (!newView)
         {
@@ -100,13 +100,13 @@ namespace ig
 
     Handle<GpuView> RenderContext::CreateConstantBufferView(const Handle<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
     {
-        GpuBuffer* const bufferPtr = Lookup(buffer);
+        ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
+        GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestConstantBufferView(*bufferPtr, offset, sizeInBytes);
         if (!newView)
         {
@@ -119,13 +119,13 @@ namespace ig
 
     Handle<GpuView> RenderContext::CreateShaderResourceView(const Handle<GpuBuffer> buffer)
     {
-        GpuBuffer* const bufferPtr = Lookup(buffer);
+        ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
+        GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestShaderResourceView(*bufferPtr);
         if (!newView)
         {
@@ -138,13 +138,13 @@ namespace ig
 
     Handle<GpuView> RenderContext::CreateUnorderedAccessView(const Handle<GpuBuffer> buffer)
     {
-        GpuBuffer* const bufferPtr = Lookup(buffer);
+        ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
+        GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*bufferPtr);
         if (!newView)
         {
@@ -158,13 +158,13 @@ namespace ig
     Handle<GpuView> RenderContext::CreateShaderResourceView(
         Handle<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        GpuTexture* const texturePtr = Lookup(texture);
+        ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
+        GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestShaderResourceView(*texturePtr, srvDesc, desireViewFormat);
         if (!newView)
         {
@@ -178,13 +178,13 @@ namespace ig
     Handle<GpuView> RenderContext::CreateUnorderedAccessView(
         Handle<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        GpuTexture* const texturePtr = Lookup(texture);
+        ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
+        GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*texturePtr, uavDesc, desireViewFormat);
         if (!newView)
         {
@@ -198,13 +198,13 @@ namespace ig
     Handle<GpuView> RenderContext::CreateRenderTargetView(
         Handle<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        GpuTexture* const texturePtr = Lookup(texture);
+        ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
+        GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestRenderTargetView(*texturePtr, rtvDesc, desireViewFormat);
         if (!newView)
         {
@@ -218,13 +218,13 @@ namespace ig
     Handle<GpuView> RenderContext::CreateDepthStencilView(
         Handle<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        GpuTexture* const texturePtr = Lookup(texture);
+        ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
+        GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestDepthStencilView(*texturePtr, dsvDesc, desireViewFormat);
         if (!newView)
         {

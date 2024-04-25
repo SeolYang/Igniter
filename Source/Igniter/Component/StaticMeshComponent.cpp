@@ -29,5 +29,4 @@ namespace ig
         AssetManager& assetManager = Igniter::GetAssetManager();
         assetManager.Unload(Mesh);
     }
-
 }    // namespace ig
