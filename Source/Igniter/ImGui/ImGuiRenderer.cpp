@@ -4,10 +4,10 @@
 #include <Core/ContainerUtils.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/DescriptorHeap.h>
-#include <D3D12/Swapchain.h>
 #include <D3D12/CommandQueue.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/GpuView.h>
+#include <Render/Swapchain.h>
 #include <Render/Renderer.h>
 #include <Render/RenderContext.h>
 #include <ImGui/ImGuiRenderer.h>
@@ -15,9 +15,11 @@
 
 namespace ig
 {
-    ImGuiRenderer::ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderDevice& device)
+    ImGuiRenderer::ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext)
         : frameManager(frameManager)
-        , descriptorHeap(MakePtr<DescriptorHeap>(device.CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 3).value()))
+        , renderContext(renderContext)
+        , descriptorHeap(MakePtr<DescriptorHeap>(
+              renderContext.GetRenderDevice().CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 3).value()))
         , mainSrv(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView))
     {
         IMGUI_CHECKVERSION();
@@ -30,16 +32,17 @@ namespace ig
         // ImGui::StyleColorsDark();
         SetupDefaultTheme();
 
+        RenderDevice& renderDevice = renderContext.GetRenderDevice();
         ImGui_ImplWin32_Init(window.GetNative());
-        ImGui_ImplDX12_Init(
-            &device.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM, &descriptorHeap->GetNative(), mainSrv.CPUHandle, mainSrv.GPUHandle);
+        ImGui_ImplDX12_Init(&renderDevice.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM, &descriptorHeap->GetNative(), mainSrv.CPUHandle,
+            mainSrv.GPUHandle);
 
         commandContexts.reserve(NumFramesInFlight);
         reservedSharedResourceViews.reserve(NumFramesInFlight);
         for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
-            commandContexts.emplace_back(MakePtr<CommandContext>(device.CreateCommandContext("ImGui Cmd Ctx", EQueueType::Direct).value()));
-            reservedSharedResourceViews.emplace_back(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView));
+            commandContexts.emplace_back(renderDevice.CreateCommandContext("ImGui Cmd Ctx", EQueueType::Graphics).value());
+            reservedSharedResourceViews.emplace_back(descriptorHeap->Allocate(EGpuViewType::ShaderResourceView).value());
         }
     }
 
@@ -69,24 +72,22 @@ namespace ig
         canvas.Render();
         ImGui::Render();
 
-        CommandContext& cmdCtx = *commandContexts[frameManager.GetLocalFrameIndex()];
+        CommandContext& cmdCtx = commandContexts[frameManager.GetLocalFrameIndex()];
         cmdCtx.Begin();
         Swapchain& swapchain = renderer.GetSwapchain();
-        GpuTexture& backBuffer = swapchain.GetBackBuffer();
-
-        const GpuView& backBufferRTV = swapchain.GetRenderTargetView();
-        cmdCtx.SetRenderTarget(backBufferRTV);
+        GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
+        const GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
+        cmdCtx.SetRenderTarget(*backBufferRtvPtr);
         cmdCtx.SetDescriptorHeap(*descriptorHeap);
 
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx.GetNative());
 
-        cmdCtx.AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+        cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_RENDER_TARGET,
             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
 
         cmdCtx.FlushBarriers();
         cmdCtx.End();
 
-        RenderContext& renderContext{Igniter::GetRenderContext()};
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
         auto cmdCtxRefs{MakeRefArray(cmdCtx)};
         mainGfxQueue.ExecuteContexts(cmdCtxRefs);

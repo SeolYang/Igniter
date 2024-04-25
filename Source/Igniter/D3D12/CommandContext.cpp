@@ -1,4 +1,5 @@
 #include <Igniter.h>
+#include <Core/ContainerUtils.h>
 #include <D3D12/CommandContext.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GPUTextureDesc.h>
@@ -112,7 +113,7 @@ namespace ig
     void CommandContext::ClearRenderTarget(const GpuView& rtv, float r /*= 0.f*/, float g /*= 0.f*/, float b /*= 0.f*/, float a /*= 1.f*/)
     {
         IG_CHECK(IsValid());
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
         const float rgba[4] = {r, g, b, a};
         cmdList->ClearRenderTargetView(rtv.CPUHandle, rgba, 0, nullptr);
@@ -121,7 +122,7 @@ namespace ig
     void CommandContext::ClearDepthStencil(const GpuView& dsv, float depth /*= 1.f*/, uint8_t stencil /*= 0*/)
     {
         IG_CHECK(IsValid());
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
         const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
@@ -131,7 +132,7 @@ namespace ig
     void CommandContext::ClearDepth(const GpuView& dsv, float depth /*= 1.f*/)
     {
         IG_CHECK(IsValid());
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
         const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
@@ -141,7 +142,7 @@ namespace ig
     void CommandContext::ClearStencil(const GpuView& dsv, uint8_t stencil /*= 0*/)
     {
         IG_CHECK(IsValid());
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
         const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
@@ -185,14 +186,14 @@ namespace ig
     {
         IG_CHECK(IsValid());
         IG_CHECK(rootSignature);
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics || cmdListTargetQueueType == EQueueType::Compute);
         switch (cmdListTargetQueueType)
         {
-            case EQueueType::Direct:
+            case EQueueType::Graphics:
                 cmdList->SetGraphicsRootSignature(&rootSignature.GetNative());
                 break;
 
-            case EQueueType::AsyncCompute:
+            case EQueueType::Compute:
                 cmdList->SetComputeRootSignature(&rootSignature.GetNative());
                 break;
         }
@@ -201,7 +202,7 @@ namespace ig
     void CommandContext::SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps)
     {
         IG_CHECK(IsValid());
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Direct || cmdListTargetQueueType == EQueueType::AsyncCompute);
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics || cmdListTargetQueueType == EQueueType::Compute);
         std::vector<ID3D12DescriptorHeap*> descriptorHeaps(targetDescriptorHeaps.size());
         std::transform(targetDescriptorHeaps.begin(), targetDescriptorHeaps.end(), descriptorHeaps.begin(),
             [](DescriptorHeap& descriptorHeap)
@@ -210,6 +211,16 @@ namespace ig
                 return &descriptorHeap.GetNative();
             });
         cmdList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()), descriptorHeaps.data());
+    }
+
+    void CommandContext::SetDescriptorHeaps(const std::span<DescriptorHeap*> descriptorHeaps)
+    {
+        IG_CHECK(IsValid());
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics || cmdListTargetQueueType == EQueueType::Compute);
+        auto toNative = views::all(descriptorHeaps) | views::filter([](DescriptorHeap* ptr) { return ptr != nullptr; }) |
+                        views::transform([](DescriptorHeap* ptr) { return &ptr->GetNative(); });
+        auto nativePtrs = ToVector(toNative);
+        cmdList->SetDescriptorHeaps(static_cast<uint32_t>(nativePtrs.size()), nativePtrs.data());
     }
 
     void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
@@ -239,7 +250,7 @@ namespace ig
     void CommandContext::SetRenderTarget(const GpuView& rtv, std::optional<std::reference_wrapper<GpuView>> dsv /*= std::nullopt*/)
     {
         IG_CHECK(IsValid());
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Direct);
+        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
         IG_CHECK(!dsv || (dsv->get() && (dsv->get().Type == EGpuViewType::DepthStencilView)));
 
@@ -298,10 +309,10 @@ namespace ig
         {
             switch (cmdListTargetQueueType)
             {
-                case EQueueType::Direct:
+                case EQueueType::Graphics:
                     cmdList->SetGraphicsRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData, destOffsetIn32BitValues);
                     break;
-                case EQueueType::AsyncCompute:
+                case EQueueType::Compute:
                     cmdList->SetComputeRoot32BitConstants(registerSlot, num32BitValuesToSet, srcData, destOffsetIn32BitValues);
                     break;
                 default:

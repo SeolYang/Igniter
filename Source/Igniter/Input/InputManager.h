@@ -57,13 +57,13 @@ namespace ig
     private:
         struct ActionMapping
         {
-            Handle_New<Action> ActionHandle{};
+            Handle<Action> ActionHandle{};
             EInput MappedInput{EInput::None};
         };
 
         struct AxisMapping
         {
-            Handle_New<Axis> AxisHandle{};
+            Handle<Axis> AxisHandle{};
             EInput MappedInput{EInput::None};
         };
 
@@ -83,11 +83,11 @@ namespace ig
         void UnmapAxis(const String name);
         void SetScale(const String name, const float newScale);
 
-        [[nodiscard]] Handle_New<Action> QueryAction(const String name) const;
-        [[nodiscard]] Handle_New<Axis> QueryAxis(const String name) const;
+        [[nodiscard]] Handle<Action> QueryAction(const String name) const;
+        [[nodiscard]] Handle<Axis> QueryAxis(const String name) const;
 
-        [[nodiscard]] Action GetAction(const Handle_New<Action> action) const;
-        [[nodiscard]] Axis GetAxis(const Handle_New<Axis> axis) const;
+        [[nodiscard]] Action GetAction(const Handle<Action> action) const;
+        [[nodiscard]] Axis GetAxis(const Handle<Axis> axis) const;
 
         void HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
         void PostUpdate();
@@ -110,8 +110,8 @@ namespace ig
         UnorderedMap<String, AxisMapping> nameAxisTable{};
 
         constexpr static size_t NumScopedInputs = magic_enum::enum_count<EInput>();
-        eastl::array<UnorderedSet<Handle_New<Action>>, NumScopedInputs> actionSets;
-        eastl::array<UnorderedSet<Handle_New<Axis>>, NumScopedInputs> axisSets;
+        eastl::array<UnorderedSet<Handle<Action>>, NumScopedInputs> actionSets;
+        eastl::array<UnorderedSet<Handle<Axis>>, NumScopedInputs> axisSets;
 
         UnorderedSet<EInput> processedInputs;
 

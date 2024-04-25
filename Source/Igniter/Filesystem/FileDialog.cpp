@@ -22,7 +22,7 @@ namespace ig
         Microsoft::WRL::ComPtr<IFileDialogEvents> fileDialogEvents;
         Microsoft::WRL::ComPtr<IShellItem> shellItem;
 
-        // #sy_log Save 다이얼로그엔 CLSID_FileSaveDialog
+        // #sy_note Save 다이얼로그엔 CLSID_FileSaveDialog
         HRESULT result = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
         if (FAILED(result))
         {

@@ -9,12 +9,13 @@
 namespace ig
 {
     class StaticMesh;
-    class Texture;
-
     struct StaticMeshComponent
     {
     public:
-        CachedAsset<StaticMesh> Mesh{};
+        ~StaticMeshComponent();
+
+    public:
+        Handle<StaticMesh> Mesh{};
     };
 
     IG_DECLARE_COMPONENT(StaticMeshComponent)

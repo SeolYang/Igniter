@@ -2,7 +2,6 @@
 #include <Core/Engine.h>
 #include <Core/Memory.h>
 #include <Core/Timer.h>
-#include <Core/HandleManager.h>
 #include <Render/Renderer.h>
 #include <Render/TempConstantBufferAllocator.h>
 #include <ImGui/StatisticsPanel.h>
@@ -15,7 +14,7 @@ namespace fe
         {
             {
                 Renderer& renderer = Igniter::GetRenderer();
-                TempConstantBufferAllocator& tempConstantBufferAllocator = renderer.GetTempConstantBufferAllocator();
+                const TempConstantBufferAllocator& tempConstantBufferAllocator = renderer.GetTempConstantBufferAllocator();
                 const auto [tempCBufferAllocLocalFrame0, tempCBufferAllocLocalFrame1] = tempConstantBufferAllocator.GetUsedSizeInBytes();
                 tempConstantBufferUsedSizeMB[0] = BytesToMegaBytes(tempCBufferAllocLocalFrame0);
                 tempConstantBufferUsedSizeMB[1] = BytesToMegaBytes(tempCBufferAllocLocalFrame1);
@@ -26,13 +25,7 @@ namespace fe
             }
 
             {
-                const HandleManager& handleManager = Igniter::GetHandleManager();
-                const auto statistics = handleManager.GetStatistics();
-                handleManagerNumMemoryPools = statistics.NumMemoryPools;
-                handleManagerAllocatedChunkSizeMB = BytesToMegaBytes(statistics.AllocatedChunksSizeInBytes);
-                handleManagerUsedSizeMB = BytesToMegaBytes(statistics.UsedSizeInBytes);
-                handleManagerNumAllocatedChunks = statistics.NumAllocatedChunks;
-                handleManagerNumAllocatedHandles = statistics.NumAllocatedHandles;
+                /* #sy_todo Asset Manager나 RenderContext가 소유중인 HandleRegistry의 메모리 사용량을 추적 */
             }
 
             pollingStep = 0;
@@ -67,17 +60,6 @@ namespace fe
                 ImGui::ProgressBar(tempConstantBufferOccupancy[1], ImVec2(0, 0));
                 ImGui::TreePop();
             }
-
-            if (ImGui::TreeNodeEx("Handle Manager", ImGuiTreeNodeFlags_Framed))
-            {
-                ImGui::Text("#Managed Types: %d", handleManagerNumMemoryPools);
-                ImGui::Text("#Chunks: %d", handleManagerNumAllocatedChunks);
-                ImGui::Text("#Handles: %d", handleManagerNumAllocatedHandles);
-                ImGui::Text("Allocated Chunk Size: %lf MB", handleManagerAllocatedChunkSizeMB);
-                ImGui::Text("Used Size: %lf MB", handleManagerUsedSizeMB);
-                ImGui::TreePop();
-            }
-
             ImGui::End();
         }
 

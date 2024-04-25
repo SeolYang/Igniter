@@ -117,9 +117,6 @@
     <ClInclude Include="..\Source\Igniter\Core\ContainerUtils.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\EmbededSettings.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -129,12 +126,6 @@
     <ClInclude Include="..\Source\Igniter\Core\FrameManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\Handle.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\HandleManager.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Hash.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
@@ -142,9 +133,6 @@
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Log.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\Memory.h">
@@ -172,9 +160,6 @@
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\D3D12\CommandContext.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\D3D12\CommandContextPool.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\D3D12\CommandQueue.h">
@@ -216,9 +201,6 @@
     <ClInclude Include="..\Source\Igniter\D3D12\ShaderBlob.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\D3D12\Swapchain.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h">
       <Filter>Source\Filesystem</Filter>
     </ClInclude>
@@ -243,13 +225,7 @@
     <ClInclude Include="..\Source\Igniter\Render\GpuUploader.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Render\Renderer.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Render\Vertex.h">
@@ -339,13 +315,10 @@
     <ClInclude Include="..\Source\Igniter\Core\GuidBytes.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\RenderContext.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h">
       <Filter>Source\Reflection</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\Handle_New.h">
+    <ClInclude Include="..\Source\Igniter\Core\Handle.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\HandleRegistry.h">
@@ -359,6 +332,21 @@
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Input\InputManager.h">
       <Filter>Source\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\RenderContext.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\CommandContextPool.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\Swapchain.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -374,19 +362,7 @@
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp">
       <Filter>Source\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\Handle.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\Log.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Core\MemoryPool.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\String.cpp">
@@ -399,9 +375,6 @@
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\D3D12\CommandContext.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\D3D12\CommandContextPool.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\D3D12\CommandQueue.cpp">
@@ -440,9 +413,6 @@
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp">
       <Filter>Source\Gameplay</Filter>
     </ClCompile>
@@ -455,13 +425,7 @@
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Render\Renderer.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\Engine.cpp">
@@ -533,14 +497,26 @@
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiExtensions.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\DebugTools.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Input\InputManager.cpp">
       <Filter>Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\CommandContextPool.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\Swapchain.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

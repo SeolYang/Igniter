@@ -1,7 +1,6 @@
 #include <Igniter.h>
 #include <D3D12/GpuTexture.h>
 #include <D3D12/GpuBuffer.h>
-#include <Render/GpuViewManager.h>
 #include <Asset/TextureImporter.h>
 #include <Asset/StaticMeshImporter.h>
 #include <Asset/MaterialImporter.h>
@@ -9,49 +8,23 @@
 
 namespace ig
 {
-    AssetManager::AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext)
+    AssetManager::AssetManager(RenderContext& renderContext)
         : assetMonitor(MakePtr<details::AssetMonitor>())
         , textureImporter(MakePtr<TextureImporter>())
-        , textureLoader(MakePtr<TextureLoader>(handleManager, renderDevice, renderContext))
+        , textureLoader(MakePtr<TextureLoader>(renderContext))
         , staticMeshImporter(MakePtr<StaticMeshImporter>(*this))
-        , staticMeshLoader(MakePtr<StaticMeshLoader>(handleManager, renderDevice, renderContext, *this))
+        , staticMeshLoader(MakePtr<StaticMeshLoader>(renderContext, *this))
         , materialImporter(MakePtr<MaterialImporter>(*this))
         , materialLoader(MakePtr<MaterialLoader>(*this))
     {
-        InitAssetCaches(handleManager);
-        InitEngineInternalAssets();
+        assetCaches.emplace_back(MakePtr<details::AssetCache<Texture>>());
+        assetCaches.emplace_back(MakePtr<details::AssetCache<StaticMesh>>());
+        assetCaches.emplace_back(MakePtr<details::AssetCache<Material>>());
     }
 
     AssetManager::~AssetManager()
     {
         SaveAllChanges();
-    }
-
-    void AssetManager::InitAssetCaches(HandleManager& handleManager)
-    {
-        assetCaches.emplace_back(MakePtr<details::AssetCache<Texture>>(handleManager));
-        assetCaches.emplace_back(MakePtr<details::AssetCache<StaticMesh>>(handleManager));
-        assetCaches.emplace_back(MakePtr<details::AssetCache<Material>>(handleManager));
-    }
-
-    void AssetManager::InitEngineInternalAssets()
-    {
-        /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
-        AssetInfo defaultTexInfo{AssetInfo::MakeEngineInternal(Guid{DefaultTextureGuid}, Texture::EngineDefault, EAssetCategory::Texture)};
-        RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
-
-        AssetInfo defaultWhiteTexInfo{
-            AssetInfo::MakeEngineInternal(Guid{DefaultWhiteTextureGuid}, Texture::EngineDefaultWhite, EAssetCategory::Texture)};
-        RegisterEngineInternalAsset<Texture>(
-            defaultWhiteTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{1.f, 1.f, 1.f}));
-
-        AssetInfo defaultBlackTexInfo{
-            AssetInfo::MakeEngineInternal(Guid{DefaultBlackTextureGuid}, Texture::EngineDefaultBlack, EAssetCategory::Texture)};
-        RegisterEngineInternalAsset<Texture>(
-            defaultBlackTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{0.f, 0.f, 0.f}));
-
-        AssetInfo defaultMatInfo{AssetInfo::MakeEngineInternal(Guid{DefaultMaterialGuid}, Material::EngineDefault, EAssetCategory::Material)};
-        RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetCategory assetType)
@@ -72,6 +45,50 @@ namespace ig
         return *cachePtr;
     }
 
+    const details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetCategory assetType) const
+    {
+        IG_CHECK(assetCaches.size() > 0);
+
+        details::TypelessAssetCache* cachePtr = nullptr;
+        for (const Ptr<details::TypelessAssetCache>& cache : assetCaches)
+        {
+            if (cache->GetAssetType() == assetType)
+            {
+                cachePtr = cache.get();
+                break;
+            }
+        }
+
+        IG_CHECK(cachePtr != nullptr);
+        return *cachePtr;
+    }
+
+    void AssetManager::RegisterEngineDefault()
+    {
+        /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
+        AssetInfo defaultTexInfo{Guid{DefaultTextureGuid}, Texture::EngineDefault, EAssetCategory::Texture, EAssetScope::Engine};
+        RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
+
+        AssetInfo defaultWhiteTexInfo{Guid{DefaultWhiteTextureGuid}, Texture::EngineDefaultWhite, EAssetCategory::Texture, EAssetScope::Engine};
+        RegisterEngineInternalAsset<Texture>(
+            defaultWhiteTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{1.f, 1.f, 1.f}));
+
+        AssetInfo defaultBlackTexInfo{Guid{DefaultBlackTextureGuid}, Texture::EngineDefaultBlack, EAssetCategory::Texture, EAssetScope::Engine};
+        RegisterEngineInternalAsset<Texture>(
+            defaultBlackTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{0.f, 0.f, 0.f}));
+
+        AssetInfo defaultMatInfo{Guid{DefaultMaterialGuid}, Material::EngineDefault, EAssetCategory::Material, EAssetScope::Engine};
+        RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
+    }
+
+    void AssetManager::UnRegisterEngineDefault()
+    {
+        Delete(Guid{DefaultTextureGuid});
+        Delete(Guid{DefaultWhiteTextureGuid});
+        Delete(Guid{DefaultBlackTextureGuid});
+        Delete(Guid{DefaultMaterialGuid});
+    }
+
     Guid AssetManager::Import(const String resPath, const TextureImportDesc& config)
     {
         Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
@@ -85,9 +102,9 @@ namespace ig
         return *guidOpt;
     }
 
-    CachedAsset<Texture> AssetManager::LoadTexture(const Guid& guid)
+    Handle<Texture> AssetManager::LoadTexture(const Guid& guid)
     {
-        CachedAsset<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader)};
+        Handle<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader)};
         if (!cachedTex)
         {
             return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
@@ -96,7 +113,7 @@ namespace ig
         return cachedTex;
     }
 
-    CachedAsset<Texture> AssetManager::LoadTexture(const String virtualPath)
+    Handle<Texture> AssetManager::LoadTexture(const String virtualPath)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -131,23 +148,23 @@ namespace ig
         return output;
     }
 
-    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid)
+    Handle<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid)
     {
         return LoadImpl<StaticMesh>(guid, *staticMeshLoader);
     }
 
-    CachedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
+    Handle<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Load Static Mesh: Invalid Virtual Path {}", virtualPath);
-            return CachedAsset<StaticMesh>{};
+            return Handle<StaticMesh>{};
         }
 
         if (!assetMonitor->Contains(EAssetCategory::StaticMesh, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
-            return CachedAsset<StaticMesh>{};
+            return Handle<StaticMesh>{};
         }
 
         return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader);
@@ -172,9 +189,9 @@ namespace ig
         return *guidOpt;
     }
 
-    CachedAsset<Material> AssetManager::LoadMaterial(const Guid& guid)
+    Handle<Material> AssetManager::LoadMaterial(const Guid& guid)
     {
-        CachedAsset<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader)};
+        Handle<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader)};
         if (!cachedMat)
         {
             return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
@@ -183,7 +200,7 @@ namespace ig
         return cachedMat;
     }
 
-    CachedAsset<Material> AssetManager::LoadMaterial(const String virtualPath)
+    Handle<Material> AssetManager::LoadMaterial(const String virtualPath)
     {
         if (!IsValidVirtualPath(virtualPath))
         {

@@ -1,7 +1,9 @@
 #include <Igniter.h>
 #include <Core/Json.h>
+#include <Core/Engine.h>
 #include <D3D12/GpuBuffer.h>
-#include <Render/GpuViewManager.h>
+#include <Render/RenderContext.h>
+#include <Asset/AssetManager.h>
 #include <Asset/StaticMesh.h>
 
 namespace ig
@@ -58,19 +60,30 @@ namespace ig
         return archive;
     }
 
-    StaticMesh::StaticMesh(const Desc& snapshot, DeferredHandle<GpuBuffer> vertexBuffer, Handle<GpuView, GpuViewManager*> vertexBufferSrv,
-        DeferredHandle<GpuBuffer> indexBuffer, CachedAsset<Material> material)
-        : snapshot(snapshot)
-        , vertexBuffer(std::move(vertexBuffer))
-        , vertexBufferSrv(std::move(vertexBufferSrv))
-        , indexBuffer(std::move(indexBuffer))
-        , material(std::move(material))
+    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const Handle<GpuBuffer> vertexBuffer,
+        const Handle<GpuView> vertexBufferSrv, const Handle<GpuBuffer> indexBuffer, const Handle<Material> material)
+        : renderContext(&renderContext)
+        , assetManager(&assetManager)
+        , snapshot(snapshot)
+        , vertexBuffer(vertexBuffer)
+        , vertexBufferSrv(vertexBufferSrv)
+        , indexBuffer(indexBuffer)
+        , material(material)
     {
-        IG_CHECK(this->vertexBuffer);
-        IG_CHECK(this->vertexBufferSrv);
-        IG_CHECK(this->indexBuffer);
-        IG_CHECK(this->material);
     }
 
-    StaticMesh::~StaticMesh() {}
+    StaticMesh::~StaticMesh()
+    {
+        if (assetManager != nullptr)
+        {
+            assetManager->Unload(material);
+        }
+
+        if (renderContext != nullptr)
+        {
+            renderContext->DestroyBuffer(vertexBuffer);
+            renderContext->DestroyBuffer(indexBuffer);
+            renderContext->DestroyGpuView(vertexBufferSrv);
+        }
+    }
 }    // namespace ig

@@ -1,38 +1,17 @@
 #include <Igniter.h>
 #include <Core/Window.h>
-#include <D3D12/Swapchain.h>
 #include <D3D12/CommandQueue.h>
-#include <D3D12/GPUTexture.h>
-#include <Render/GPUViewManager.h>
+#include <D3D12/GpuTexture.h>
+#include <Render/RenderContext.h>
+#include <Render/Swapchain.h>
 
 namespace ig
 {
-    Swapchain::Swapchain(const Window& window, GpuViewManager& gpuViewManager, CommandQueue& mainGfxQueue, const uint8_t desiredNumBackBuffers,
-        const bool bEnableVSync)
-        : numBackBuffers(desiredNumBackBuffers + 2), bVSyncEnabled(bEnableVSync)
+    Swapchain::Swapchain(const Window& window, RenderContext& renderContext, const uint8_t desiredNumBackBuffers, const bool bEnableVSync /*= true*/)
+        : renderContext(renderContext), numBackBuffers(desiredNumBackBuffers + 2), bVSyncEnabled(bEnableVSync)
     {
-        InitSwapchain(window, mainGfxQueue);
-        InitRenderTargetViews(gpuViewManager);
-    }
+        CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
 
-    Swapchain::~Swapchain()
-    {
-        renderTargetViews.clear();
-        backBuffers.clear();
-    }
-
-    GpuTexture& Swapchain::GetBackBuffer()
-    {
-        return backBuffers[swapchain->GetCurrentBackBufferIndex()];
-    }
-
-    const GpuTexture& Swapchain::GetBackBuffer() const
-    {
-        return backBuffers[swapchain->GetCurrentBackBufferIndex()];
-    }
-
-    void Swapchain::InitSwapchain(const Window& window, CommandQueue& mainGfxQueue)
-    {
         ComPtr<IDXGIFactory5> factory;
 
         uint32_t factoryFlags = 0;
@@ -45,7 +24,6 @@ namespace ig
         DXGI_SWAP_CHAIN_DESC1 desc = {};
         desc.Width = 0;
         desc.Height = 0;
-
         /*
          * #sy_todo Support hdr
          * #sy_ref https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32
@@ -68,6 +46,30 @@ namespace ig
         // Disable Alt+Enter full-screen toggle.
         IG_VERIFY_SUCCEEDED(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
         IG_VERIFY_SUCCEEDED(swapchain1.As(&swapchain));
+
+        renderTargetViews.reserve(numBackBuffers);
+        backBuffers.reserve(numBackBuffers);
+        for (uint32_t idx = 0; idx < numBackBuffers; ++idx)
+        {
+            ComPtr<ID3D12Resource1> resource;
+            IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
+            SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
+            backBuffers.emplace_back(renderContext.CreateTexture(GpuTexture{resource}));
+            renderTargetViews.emplace_back(renderContext.CreateRenderTargetView(backBuffers[idx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0}));
+        }
+    }
+
+    Swapchain::~Swapchain()
+    {
+        for (const Handle<GpuView> rtv : renderTargetViews)
+        {
+            renderContext.DestroyGpuView(rtv);
+        }
+
+        for (const Handle<GpuTexture> backBuffer : backBuffers)
+        {
+            renderContext.DestroyTexture(backBuffer);
+        }
     }
 
     void Swapchain::CheckTearingSupport(ComPtr<IDXGIFactory5> factory)
@@ -80,20 +82,6 @@ namespace ig
         else
         {
             bTearingEnabled = allowTearing == TRUE;
-        }
-    }
-
-    void Swapchain::InitRenderTargetViews(GpuViewManager& gpuViewManager)
-    {
-        renderTargetViews.reserve(numBackBuffers);
-        backBuffers.reserve(numBackBuffers);
-        for (uint32_t idx = 0; idx < numBackBuffers; ++idx)
-        {
-            ComPtr<ID3D12Resource1> resource;
-            IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
-            SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
-            backBuffers.emplace_back(resource);
-            renderTargetViews.emplace_back(gpuViewManager.RequestRenderTargetView(backBuffers[idx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0}));
         }
     }
 

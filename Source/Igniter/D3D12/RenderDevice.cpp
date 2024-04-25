@@ -233,7 +233,7 @@ namespace ig
         return true;
     }
 
-    std::optional<CommandQueue> RenderDevice::CreateCommandQueue(const std::string_view debugName, const EQueueType queueType)
+    Option<CommandQueue> RenderDevice::CreateCommandQueue(const std::string_view debugName, const EQueueType queueType)
     {
         IG_CHECK(device);
 
@@ -265,7 +265,7 @@ namespace ig
         return CommandQueue{std::move(newCmdQueue), queueType, std::move(newFence)};
     }
 
-    std::optional<CommandContext> RenderDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
+    Option<CommandContext> RenderDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
     {
         IG_CHECK(device);
 
@@ -293,7 +293,7 @@ namespace ig
         return CommandContext{std::move(newCmdAllocator), std::move(newCmdList), targetQueueType};
     }
 
-    std::optional<RootSignature> RenderDevice::CreateBindlessRootSignature()
+    Option<RootSignature> RenderDevice::CreateBindlessRootSignature()
     {
         IG_CHECK(device);
         constexpr uint8_t NumReservedConstants = 16;
@@ -331,7 +331,7 @@ namespace ig
         return RootSignature{std::move(newRootSignature)};
     }
 
-    std::optional<PipelineState> RenderDevice::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
+    Option<PipelineState> RenderDevice::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
     {
         IG_CHECK(device);
 
@@ -348,7 +348,7 @@ namespace ig
         return PipelineState{std::move(newPipelineState), true};
     }
 
-    std::optional<PipelineState> RenderDevice::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
+    Option<PipelineState> RenderDevice::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
     {
         IG_CHECK(device);
 
@@ -364,7 +364,7 @@ namespace ig
         return PipelineState{std::move(newPipelineState), false};
     }
 
-    std::optional<DescriptorHeap> RenderDevice::CreateDescriptorHeap(
+    Option<DescriptorHeap> RenderDevice::CreateDescriptorHeap(
         const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
     {
         IG_CHECK(device);
@@ -409,7 +409,7 @@ namespace ig
         device->CreateSampler(&samplerDesc, gpuView.CPUHandle);
     }
 
-    std::optional<GpuBuffer> RenderDevice::CreateBuffer(const GpuBufferDesc& bufferDesc)
+    Option<GpuBuffer> RenderDevice::CreateBuffer(const GpuBufferDesc& bufferDesc)
     {
         IG_CHECK(device);
         IG_CHECK(allocator);
@@ -431,13 +431,13 @@ namespace ig
         return GpuBuffer{bufferDesc, std::move(allocation), std::move(resource)};
     }
 
-    std::optional<GpuTexture> RenderDevice::CreateTexture(const GpuTextureDesc& textureDesc)
+    Option<GpuTexture> RenderDevice::CreateTexture(const GpuTextureDesc& textureDesc)
     {
         IG_CHECK(device);
         IG_CHECK(allocator);
 
         const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.GetAllocationDesc();
-        std::optional<D3D12_CLEAR_VALUE> clearValue{};
+        Option<D3D12_CLEAR_VALUE> clearValue{};
         if (textureDesc.IsRenderTargetCompatible())
         {
             clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .Color = {0.f, 0.f, 0.f, 1.f}};
@@ -502,7 +502,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(buffer);
         const GpuBufferDesc& desc = buffer.GetDesc();
-        std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
+        Option<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
         if (cbvDesc)
         {
             device->CreateConstantBufferView(&cbvDesc.value(), gpuView.CPUHandle);
@@ -536,7 +536,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(buffer);
         const GpuBufferDesc& desc = buffer.GetDesc();
-        std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
+        Option<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
         if (srvDesc)
         {
             device->CreateShaderResourceView(&buffer.GetNative(), &srvDesc.value(), gpuView.CPUHandle);
@@ -553,7 +553,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(buffer);
         const GpuBufferDesc& desc = buffer.GetDesc();
-        std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
+        Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
 
         if (uavDesc)
         {
@@ -572,7 +572,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvDesc, desireViewFormat);
+        Option<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvDesc, desireViewFormat);
 
         if (nativeDesc)
         {
@@ -591,7 +591,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavDesc, desireViewFormat);
+        Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavDesc, desireViewFormat);
 
         if (nativeDesc)
         {
@@ -610,7 +610,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        std::optional<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvDesc, desireViewFormat);
+        Option<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvDesc, desireViewFormat);
         if (nativeDesc)
         {
             device->CreateRenderTargetView(&texture.GetNative(), &nativeDesc.value(), gpuView.CPUHandle);
@@ -628,7 +628,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvDesc, desireViewFormat);
+        Option<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvDesc, desireViewFormat);
 
         if (nativeDesc)
         {

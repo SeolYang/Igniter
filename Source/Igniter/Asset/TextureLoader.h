@@ -36,17 +36,15 @@ namespace ig
         FailedCreateSamplerView,
     };
 
-    class HandleManager;
-    class RenderDevice;
-    class RenderContext;
+    
     class AssetManager;
-
+    class RenderContext;
     class TextureLoader final
     {
         friend class AssetManager;
 
     public:
-        TextureLoader(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext);
+        TextureLoader(RenderContext& renderContext);
         TextureLoader(const TextureLoader&) = delete;
         TextureLoader(TextureLoader&&) noexcept = delete;
         ~TextureLoader() = default;
@@ -60,8 +58,6 @@ namespace ig
         Result<Texture, details::EMakeDefaultTexStatus> MakeMonochrome(const AssetInfo& assetInfo, const Color& color);
 
     private:
-        HandleManager& handleManager;
-        RenderDevice& renderDevice;
         RenderContext& renderContext;
     };
 }    // namespace ig

@@ -31,17 +31,17 @@ namespace ig
         [[nodiscard]] auto& GetNative() { return *device.Get(); }
         uint32_t GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
-        std::optional<CommandQueue> CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
-        std::optional<CommandContext> CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType);
+        Option<CommandQueue> CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
+        Option<CommandContext> CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType);
 
-        std::optional<RootSignature> CreateBindlessRootSignature();
-        std::optional<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
-        std::optional<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
+        Option<RootSignature> CreateBindlessRootSignature();
+        Option<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
+        Option<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
 
-        std::optional<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
-        std::optional<GpuTexture> CreateTexture(const GpuTextureDesc& textureDesc);
+        Option<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
+        Option<GpuTexture> CreateTexture(const GpuTextureDesc& textureDesc);
 
-        std::optional<DescriptorHeap> CreateDescriptorHeap(
+        Option<DescriptorHeap> CreateDescriptorHeap(
             const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
         void CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView);

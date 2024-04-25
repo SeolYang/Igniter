@@ -1,6 +1,7 @@
 #include <Igniter.h>
 #include <Core/Json.h>
-#include <Asset/AssetCache.h>
+#include <Core/Engine.h>
+#include <Asset/AssetManager.h>
 #include <Asset/Texture.h>
 #include <Asset/Material.h>
 
@@ -19,7 +20,16 @@ namespace ig
         return archive;
     }
 
-    Material::Material(const Desc& snapshot, CachedAsset<Texture> diffuse) : snapshot(snapshot), diffuse(std::move(diffuse)) {}
+    Material::Material(AssetManager& assetManager, const Desc& snapshot, const Handle<Texture> diffuse)
+        : assetManager(&assetManager), snapshot(snapshot), diffuse(diffuse)
+    {
+    }
 
-    Material::~Material() {}
+    Material::~Material()
+    {
+        if (assetManager != nullptr)
+        {
+            assetManager->Unload(diffuse);
+        }
+    }
 }    // namespace ig

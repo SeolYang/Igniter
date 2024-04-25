@@ -60,22 +60,4 @@ namespace ig
                     Unmap();
             }};
     }
-
-    Handle<MappedGpuBuffer, GpuBuffer*> GpuBuffer::MapHandle(HandleManager& handleManager, const uint64_t offset)
-    {
-        uint8_t* mappedPtr = Map(offset);
-        if (mappedPtr != nullptr)
-        {
-            return Handle<MappedGpuBuffer, GpuBuffer*>{handleManager, this, MappedGpuBuffer{mappedPtr}};
-        }
-
-        IG_CHECK_NO_ENTRY();
-        return {};
-    }
-
-    void GpuBuffer::operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer)
-    {
-        IG_VERIFY(mappedGPUBuffer != nullptr);
-        handle.Deallocate(evaluatedTypeHash);
-    }
 }    // namespace ig

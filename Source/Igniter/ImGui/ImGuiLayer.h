@@ -8,7 +8,6 @@ namespace ig
     public:
         ImGuiLayer()
         {
-            /* #sy_improvement atomically? */
             static uint64_t LayerCounter = 0;
             id = LayerCounter++;
         }

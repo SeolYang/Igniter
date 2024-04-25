@@ -27,6 +27,7 @@ namespace ig
         D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
         D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
 
+        /* #sy_todo optional 대신 그냥 invalid gpu view 반환 하도록 변경 하기 */
         std::optional<GpuView> Allocate(const EGpuViewType desiredType);
         void Deallocate(const GpuView& gpuView);
 

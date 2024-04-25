@@ -95,7 +95,7 @@ namespace ig
 
     // Reserve Upload -> setup data & fill up copy cmd ctx -> Submit Upload -> Submit to Async Copy Queue
     class CommandQueue;
-    class RenderContext;
+    ;
 
     class GpuUploader final
     {

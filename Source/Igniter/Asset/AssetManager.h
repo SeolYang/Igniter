@@ -30,7 +30,6 @@ namespace ig
     class StaticMeshLoader;
     class MaterialImporter;
     class MaterialLoader;
-
     class AssetManager final
     {
     private:
@@ -52,7 +51,7 @@ namespace ig
         };
 
     public:
-        AssetManager(HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext);
+        AssetManager(RenderContext& renderContext);
         AssetManager(const AssetManager&) = delete;
         AssetManager(AssetManager&&) noexcept = delete;
         ~AssetManager();
@@ -60,17 +59,26 @@ namespace ig
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
+        void RegisterEngineDefault();
+        void UnRegisterEngineDefault();
+
+        /* 
+        * #sy_note 에셋 매니저를 사용한 리소스의 로드/언로드
+        * 에셋 매니저가 제공하는 로드 함수를 통해 특정 에셋을 로드하면
+        * 에셋의 레퍼런스 카운트가 증가함. 즉 반드시 1번의 로드에 최소 1번의 언로드를 매칭 시켜주어야 함.
+        */
+
         Guid Import(const String resPath, const TextureImportDesc& desc);
-        [[nodiscard]] CachedAsset<Texture> LoadTexture(const Guid& guid);
-        [[nodiscard]] CachedAsset<Texture> LoadTexture(const String virtualPath);
+        [[nodiscard]] Handle<Texture> LoadTexture(const Guid& guid);
+        [[nodiscard]] Handle<Texture> LoadTexture(const String virtualPath);
 
         std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc);
-        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const Guid& guid);
-        [[nodiscard]] CachedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
+        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const Guid& guid);
+        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const String virtualPath);
 
         Guid Import(const String virtualPath, const MaterialCreateDesc& createDesc);
-        [[nodiscard]] CachedAsset<Material> LoadMaterial(const Guid& guid);
-        [[nodiscard]] CachedAsset<Material> LoadMaterial(const String virtualPath);
+        [[nodiscard]] Handle<Material> LoadMaterial(const Guid& guid);
+        [[nodiscard]] Handle<Material> LoadMaterial(const String virtualPath);
 
         template <Asset T>
         bool Reload(const Guid& guid)
@@ -112,6 +120,32 @@ namespace ig
         void Delete(const Guid& guid);
         void Delete(const EAssetCategory assetType, const String virtualPath);
 
+        template <Asset T>
+        T* Lookup(const Handle<T> handle)
+        {
+            return GetCache<T>().Lookup(handle);
+        }
+
+        template <Asset T>
+        const T* Lookup(const Handle<T> handle) const
+        {
+            return GetCache<T>().Lookup(handle);
+        }
+
+        template <Asset T>
+        void Unload(const Handle<T> handle)
+        {
+            /* #sy_todo_priority not thread safe...*/
+            details::AssetCache<T>& cache = GetCache<T>();
+            T* ptr = cache.Lookup(handle);
+            if (ptr != nullptr)
+            {
+                const T::Desc& desc = ptr->GetSnapshot();
+                AssetLock assetLock{GetAssetMutex(desc.Info.GetGuid())};
+                cache.Unload(desc.Info);
+            }
+        }
+
         void SaveAllChanges();
 
         [[nodiscard]] std::optional<AssetInfo> GetAssetInfo(const Guid& guid) const;
@@ -152,12 +186,15 @@ namespace ig
         {
             return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetCategoryOf<T>));
         }
+        template <Asset T>
+        const details::AssetCache<T>& GetCache() const
+        {
+            return static_cast<const details::AssetCache<T>&>(GetTypelessCache(AssetCategoryOf<T>));
+        }
 
         details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType);
+        const details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType) const;
 
-        void InitAssetCaches(HandleManager& handleManager);
-
-        void InitEngineInternalAssets();
 
         template <Asset T, ResultStatus ImportStatus>
         std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)
@@ -223,12 +260,12 @@ namespace ig
         }
 
         template <Asset T, typename AssetLoader>
-        [[nodiscard]] CachedAsset<T> LoadImpl(const Guid& guid, AssetLoader& loader)
+        [[nodiscard]] Handle<T> LoadImpl(const Guid& guid, AssetLoader& loader)
         {
             if (!assetMonitor->Contains(guid))
             {
                 IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
-                return CachedAsset<T>{};
+                return Handle<T>{};
             }
 
             AssetLock assetLock{GetAssetMutex(guid)};
@@ -242,7 +279,7 @@ namespace ig
                 {
                     IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
                         desc.Info.GetVirtualPath(), guid);
-                    return CachedAsset<T>{};
+                    return Handle<T>{};
                 }
 
                 assetCache.Cache(guid, result.Take());
@@ -280,10 +317,12 @@ namespace ig
                 return false;
             }
 
-            CachedAsset<T> cachedAsset{assetCache.Load(guid)};
+            Handle<T> cachedAsset{assetCache.Load(guid)};
             if (cachedAsset)
             {
-                *cachedAsset = result.Take();
+                T* cachedAssetPtr = assetCache.Lookup(cachedAsset);
+                IG_CHECK(cachedAssetPtr != nullptr);
+                *cachedAssetPtr = result.Take();
             }
             else
             {

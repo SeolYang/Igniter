@@ -1,16 +1,13 @@
 #pragma once
 #include <D3D12/Common.h>
 #include <D3D12/GpuBufferDesc.h>
-#include <Core/Handle.h>
 
 namespace ig
 {
     class RenderDevice;
-
     class GpuBuffer final
     {
         friend class RenderDevice;
-        friend class Handle<MappedGpuBuffer, GpuBuffer*>;
 
     public:
         GpuBuffer(ComPtr<ID3D12Resource> bufferResource);
@@ -42,7 +39,6 @@ namespace ig
         void Unmap();
 
         GPUResourceMapGuard MapGuard(const uint64_t offset = 0);
-        Handle<MappedGpuBuffer, GpuBuffer*> MapHandle(HandleManager& handleManager, const uint64_t offset = 0);
 
         std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
         {
@@ -72,8 +68,6 @@ namespace ig
 
     private:
         GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource);
-
-        void operator()(details::HandleImpl handle, const uint64_t evaluatedTypeHash, MappedGpuBuffer* mappedGPUBuffer);
 
     private:
         GpuBufferDesc desc;

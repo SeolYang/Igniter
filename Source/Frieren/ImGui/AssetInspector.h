@@ -44,7 +44,7 @@ namespace fe
         int mainTableSelectedIdx{-1};
         bool bIsMainSelectionDirty = false;
 
-        CachedAsset<Texture> previewTextures[NumFramesInFlight];
+        Handle<Texture> previewTextures[NumFramesInFlight];
         bool bIsPreviewSrvUpdated[NumFramesInFlight]{
             false,
         };

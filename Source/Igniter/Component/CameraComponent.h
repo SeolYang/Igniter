@@ -22,7 +22,7 @@ namespace ig
         /* Degrees Field Of View */
         float Fov = 45.f;
 
-        /* #sy_improvement Support Orthographic? */
+        /* #sy_improvements Support Orthographic? */
     };
 
     struct MainCameraTag

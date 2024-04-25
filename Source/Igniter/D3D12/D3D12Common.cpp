@@ -18,9 +18,9 @@ namespace ig
     {
         switch (type)
         {
-            case EQueueType::Direct:
+            case EQueueType::Graphics:
                 return D3D12_COMMAND_LIST_TYPE_DIRECT;
-            case EQueueType::AsyncCompute:
+            case EQueueType::Compute:
                 return D3D12_COMMAND_LIST_TYPE_COMPUTE;
             case EQueueType::Copy:
                 return D3D12_COMMAND_LIST_TYPE_COPY;

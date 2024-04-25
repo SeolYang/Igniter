@@ -3,7 +3,7 @@
 #include <Core/Hash.h>
 #include <Core/Memory.h>
 #include <Core/Result.h>
-#include <Core/Handle_New.h>
+#include <Core/Handle.h>
 #ifdef IG_TRACK_LEAKED_HANDLE
 #include <Core/DebugTools.h>
 #endif
@@ -75,15 +75,15 @@ namespace ig
         [[nodiscard]] size_t GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
 
         template <typename... Args>
-        Handle_New<Ty> Create(Args&&... args)
+        Handle<Ty> Create(Args&&... args)
         {
             if (freeSlots.empty() && !GrowChunks())
             {
-                return Handle_New<Ty>{};
+                return Handle<Ty>{};
             }
             IG_CHECK(!freeSlots.empty());
 
-            Handle_New<Ty> newHandle{0};
+            Handle<Ty> newHandle{0};
             const SlotType newSlot = freeSlots.back();
             freeSlots.pop_back();
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
@@ -92,7 +92,7 @@ namespace ig
             ::new (slotElementPtr) Ty(std::forward<Args>(args)...);
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
-            newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersionTable[newSlot]);
+            newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
             newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(newHandle.Value, ReduceHashTo16Bits(TypeHash<Ty>));
 
 #ifdef IG_TRACK_LEAKED_HANDLE
@@ -102,9 +102,9 @@ namespace ig
             return newHandle;
         }
 
-        void Destroy(const Handle_New<Ty> handle)
+        void Destroy(const Handle<Ty> handle)
         {
-            if (handle.Value == Handle_New<Ty>::InvalidValue)
+            if (handle.Value == Handle<Ty>::InvalidValue)
             {
                 return;
             }
@@ -121,11 +121,17 @@ namespace ig
                 return;
             }
 
+            const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
+            if (version != slotVersions[slot])
+            {
+                return;
+            }
+
             /*
              * 만약 2^{VersionBits} 만큼 할당-해제가 발생해 버전 값에 오버플로우가 일어나는 것은, 실제로 맨 처음 할당 되었던 핸들 객체가
              * 더 이상 존재하지 않아서 충돌이 일어나기 힘든 조건이라고 가정.
              */
-            slotVersionTable[slot] = (slotVersionTable[slot] + 1) % MaxVersion;
+            slotVersions[slot] = (slotVersions[slot] + 1) % MaxVersion;
 
             Ty* slotElementPtr = CalcAddressOfSlot(slot);
             slotElementPtr->~Ty();
@@ -134,9 +140,9 @@ namespace ig
             freeSlots.push_back(slot);
         }
 
-        Ty* Lookup(const Handle_New<Ty> handle)
+        Ty* Lookup(const Handle<Ty> handle)
         {
-            if (handle.Value == Handle_New<Ty>::InvalidValue)
+            if (handle.Value == Handle<Ty>::InvalidValue)
             {
                 return nullptr;
             }
@@ -153,7 +159,7 @@ namespace ig
             }
 
             const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
-            if (version != slotVersionTable[slot])
+            if (version != slotVersions[slot])
             {
                 return nullptr;
             }
@@ -161,9 +167,9 @@ namespace ig
             return CalcAddressOfSlot(slot);
         }
 
-        const Ty* Lookup(const Handle_New<Ty> handle) const
+        const Ty* Lookup(const Handle<Ty> handle) const
         {
-            if (handle.Value == Handle_New<Ty>::InvalidValue)
+            if (handle.Value == Handle<Ty>::InvalidValue)
             {
                 return nullptr;
             }
@@ -180,7 +186,7 @@ namespace ig
             }
 
             const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
-            if (version != slotVersionTable[slot])
+            if (version != slotVersions[slot])
             {
                 return nullptr;
             }
@@ -207,7 +213,7 @@ namespace ig
             const uint32_t oldSlotCapacity = slotCapacity;
             slotCapacity = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
             freeSlots.reserve(slotCapacity);
-            slotVersionTable.resize(slotCapacity);
+            slotVersions.resize(slotCapacity);
 
             for (const SlotType newSlot : views::iota(oldSlotCapacity, slotCapacity) | views::reverse)
             {
@@ -301,7 +307,7 @@ namespace ig
 
         uint32_t slotCapacity = 0;
         eastl::vector<SlotType> freeSlots;
-        eastl::vector<VersionType> slotVersionTable;
+        eastl::vector<VersionType> slotVersions;
 
 #ifdef IG_TRACK_LEAKED_HANDLE
         eastl::vector<DWORD> lastCallStackTable;

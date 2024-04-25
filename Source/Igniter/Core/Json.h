@@ -104,7 +104,7 @@ namespace ig::details
 #define IG_SERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
 
 /*
- * #sy_log Deserialize 하고 싶은 Json Archive 내부에 원하는 값이 없을 수도 있다. 그에 대해선 아래와 같이 대응 하기로 결정.
+ * #sy_note Deserialize 하고 싶은 Json Archive 내부에 원하는 값이 없을 수도 있다. 그에 대해선 아래와 같이 대응 하기로 결정.
  * 1. 값 설정 Callback 은 Json 내부에 원하는 값이 있는 경우에만 호출 된다.
  *  1.1. 단 이 경우, '키'는 유효하지만 원하는 타입으로 가져올 수 없는 경우엔 Callback 함수는 false 를 반환해야 한다.
  *  1.2. 만약 값을 가져오는데 완전히 성공하면 true 를 반환해야 한다.

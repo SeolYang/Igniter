@@ -23,11 +23,13 @@ namespace ig
             return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetType>();
         }
 
-        CachedAsset<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
+        const Handle<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
         Guid diffuseTexGuid{DefaultTextureGuid};
         if (diffuse)
         {
-            const Texture::Desc& diffuseDescSnapshot{diffuse->GetSnapshot()};
+            const Texture* diffusePtr = assetManager.Lookup(diffuse);
+            IG_CHECK(diffusePtr != nullptr);
+            const Texture::Desc& diffuseDescSnapshot{diffusePtr->GetSnapshot()};
             const AssetInfo& diffuseInfo{diffuseDescSnapshot.Info};
             diffuseTexGuid = diffuseInfo.GetGuid();
         }

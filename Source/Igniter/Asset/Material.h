@@ -28,7 +28,6 @@ namespace ig
     };
 
     class AssetManager;
-
     class Material final
     {
     public:
@@ -39,7 +38,7 @@ namespace ig
         friend class AssetManager;
 
     public:
-        Material(const Desc& snapshot, CachedAsset<Texture> diffuse);
+        Material(AssetManager& assetManager, const Desc& snapshot, const Handle<Texture> diffuse);
         Material(const Material&) = delete;
         Material(Material&&) noexcept = default;
         ~Material();
@@ -48,14 +47,15 @@ namespace ig
         Material& operator=(Material&&) noexcept = default;
 
         const Desc& GetSnapshot() const { return snapshot; }
-        RefHandle<Texture> GetDiffuse() { return diffuse.MakeRef(); }
+        Handle<Texture> GetDiffuse() const { return diffuse; }
 
     public:
         /* #sy_wip Common 헤더로 이동 */
         static constexpr std::string_view EngineDefault{"Engine\\Default"};
 
     private:
+        AssetManager* assetManager{nullptr};
         Desc snapshot{};
-        CachedAsset<Texture> diffuse{};
+        Handle<Texture> diffuse{};
     };
 }    // namespace ig

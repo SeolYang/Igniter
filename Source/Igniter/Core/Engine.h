@@ -6,19 +6,14 @@ namespace ig
     class FrameManager;
     class Timer;
     class Window;
-    class RenderDevice;
     class RenderContext;
     class GpuUploader;
-    class HandleManager;
     class InputManager;
-    class GpuViewManager;
-    class DeferredDeallocator;
     class AssetManager;
     class Renderer;
     class ImGuiCanvas;
     class ImGuiRenderer;
     class GameInstance;
-
     class Igniter final
     {
     public:
@@ -32,10 +27,7 @@ namespace ig
         [[nodiscard]] static FrameManager& GetFrameManager();
         [[nodiscard]] static Timer& GetTimer();
         [[nodiscard]] static Window& GetWindow();
-        [[nodiscard]] static RenderDevice& GetRenderDevice();
-        [[nodiscard]] static HandleManager& GetHandleManager();
         [[nodiscard]] static InputManager& GetInputManager();
-        [[nodiscard]] static DeferredDeallocator& GetDeferredDeallocator();
         [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static Renderer& GetRenderer();
@@ -45,7 +37,7 @@ namespace ig
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
 
-        bool static IsInitialized() { return instance != nullptr; }
+        bool static IsInitialized() { return instance != nullptr && instance->bInitialized; }
 
         static void Ignite();
         static void Extinguish();
@@ -59,6 +51,7 @@ namespace ig
 
     private:
         static Igniter* instance;
+        bool bInitialized = false;
         bool bShouldExit = false;
 
         /* L# stands for Dependency Level */
@@ -66,24 +59,15 @@ namespace ig
         Ptr<FrameManager> frameManager;
         Ptr<Timer> timer;
         Ptr<Window> window;
-        Ptr<RenderDevice> renderDevice;
-        Ptr<HandleManager> handleManager;
+        Ptr<InputManager> inputManager;
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        Ptr<InputManager> inputManager;
-        Ptr<DeferredDeallocator> deferredDeallocator;
-        ////////////////////////////////////////////////////
-
-        //////////////////////// L2 ////////////////////////
         Ptr<RenderContext> renderContext;
         ////////////////////////////////////////////////////
 
-        //////////////////////// L3 ////////////////////////
+        //////////////////////// L2 ////////////////////////
         Ptr<AssetManager> assetManager;
-        ////////////////////////////////////////////////////
-
-        //////////////////////// L4 ////////////////////////
         Ptr<Renderer> renderer;
         Ptr<ImGuiRenderer> imguiRenderer;
         ////////////////////////////////////////////////////

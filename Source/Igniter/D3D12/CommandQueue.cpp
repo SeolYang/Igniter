@@ -26,6 +26,14 @@ namespace ig
         native->ExecuteCommandLists(static_cast<uint32_t>(cmdLists.size()), reinterpret_cast<ID3D12CommandList**>(cmdLists.data()));
     }
 
+    void CommandQueue::ExecuteContexts(const std::span<CommandContext*> cmdCtxs)
+    {
+        IG_CHECK(IsValid());
+        auto toNative = views::all(cmdCtxs) | views::filter([](CommandContext* cmdCtx) { return cmdCtx != nullptr; }) | views::transform([](CommandContext* cmdCtx){ return &cmdCtx->GetNative();});
+        std::vector<CommandContext::NativeType*> natives = ToVector(toNative);
+        native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
+    }
+
     GpuSync CommandQueue::MakeSync()
     {
         IG_CHECK(fence);

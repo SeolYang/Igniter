@@ -1,7 +1,8 @@
 #include <Igniter.h>
 #include <Core/Json.h>
-#include <D3D12/GpuTexture.h>
-#include <Render/GpuViewManager.h>
+#include <Core/Engine.h>
+#include <D3D12/GpuTexture.h> /* #sy_todo necessary? */
+#include <Render/RenderContext.h>
 #include <Asset/Texture.h>
 
 namespace ig
@@ -62,16 +63,23 @@ namespace ig
         return archive;
     }
 
-    Texture::Texture(
-        const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, const RefHandle<GpuView>& sampler)
-        : snapshot(snapshot), gpuTexture(std::move(gpuTexture)), srv(std::move(srv)), sampler(sampler)
+    Texture::Texture(RenderContext& renderContext, const Desc& snapshot, const Handle<GpuTexture> gpuTexture, const Handle<GpuView> srv, const Handle<GpuView> sampler)
+        : renderContext(&renderContext), snapshot(snapshot), gpuTexture(gpuTexture), srv(srv), sampler(sampler)
     {
-        IG_CHECK(this->gpuTexture);
-        IG_CHECK(this->srv);
-        IG_CHECK(this->sampler);
+        IG_CHECK(gpuTexture);
+        IG_CHECK(srv);
+        IG_CHECK(sampler);
     }
 
-    Texture::~Texture() {}
+    Texture::~Texture() 
+    {
+        if (renderContext != nullptr)
+        {
+            renderContext->DestroyTexture(gpuTexture);
+            renderContext->DestroyGpuView(srv);
+            renderContext->DestroyGpuView(sampler);
+        }
+    }
 }    // namespace ig
 
 namespace ig::details

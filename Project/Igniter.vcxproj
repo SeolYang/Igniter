@@ -41,22 +41,18 @@
     <ClInclude Include="..\Source\Igniter\Core\ComInitializer.h" />
     <ClInclude Include="..\Source\Igniter\Core\ContainerUtils.h" />
     <ClInclude Include="..\Source\Igniter\Core\DebugTools.h" />
-    <ClInclude Include="..\Source\Igniter\Core\DeferredDeallocator.h" />
     <ClInclude Include="..\Source\Igniter\Core\EmbededSettings.h" />
     <ClInclude Include="..\Source\Igniter\Core\Event.h" />
     <ClInclude Include="..\Source\Igniter\Core\Format.h" />
     <ClInclude Include="..\Source\Igniter\Core\FrameManager.h" />
     <ClInclude Include="..\Source\Igniter\Core\GuidBytes.h" />
-    <ClInclude Include="..\Source\Igniter\Core\Handle.h" />
-    <ClInclude Include="..\Source\Igniter\Core\HandleManager.h" />
     <ClInclude Include="..\Source\Igniter\Core\HandleRegistry.h" />
-    <ClInclude Include="..\Source\Igniter\Core\Handle_New.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Handle.h" />
     <ClInclude Include="..\Source\Igniter\Core\Hash.h" />
     <ClInclude Include="..\Source\Igniter\Core\Engine.h" />
     <ClInclude Include="..\Source\Igniter\Core\Json.h" />
     <ClInclude Include="..\Source\Igniter\Core\Log.h" />
     <ClInclude Include="..\Source\Igniter\Core\Math.h" />
-    <ClInclude Include="..\Source\Igniter\Core\MemoryPool.h" />
     <ClInclude Include="..\Source\Igniter\Core\Memory.h" />
     <ClInclude Include="..\Source\Igniter\Core\Regex.h" />
     <ClInclude Include="..\Source\Igniter\Core\Result.h" />
@@ -68,7 +64,6 @@
     <ClInclude Include="..\Source\Igniter\Core\Version.h" />
     <ClInclude Include="..\Source\Igniter\Core\Window.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\CommandContext.h" />
-    <ClInclude Include="..\Source\Igniter\D3D12\CommandContextPool.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\CommandQueue.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\Common.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\DescriptorHeap.h" />
@@ -83,7 +78,6 @@
     <ClInclude Include="..\Source\Igniter\D3D12\RenderDevice.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\RootSignature.h" />
     <ClInclude Include="..\Source\Igniter\D3D12\ShaderBlob.h" />
-    <ClInclude Include="..\Source\Igniter\D3D12\Swapchain.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\CoFileWatcher.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h" />
@@ -97,12 +91,14 @@
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
     <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
     <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
+    <ClInclude Include="..\Source\Igniter\Render\CommandContextPool.h" />
+    <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
+    <ClInclude Include="..\Source\Igniter\Render\Swapchain.h" />
+    <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h" />
     <ClInclude Include="..\Source\Igniter\Render\Utils.h" />
     <ClInclude Include="..\Source\Igniter\Render\GpuUploader.h" />
-    <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h" />
     <ClInclude Include="..\Source\Igniter\Render\Renderer.h" />
-    <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h" />
     <ClInclude Include="..\Source\Igniter\Render\Vertex.h" />
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
     <ClInclude Include="..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
@@ -136,18 +132,13 @@
     <ClCompile Include="..\Source\Igniter\Component\TransformComponent.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\ComInitializer.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\DebugTools.cpp" />
-    <ClCompile Include="..\Source\Igniter\Core\DeferredDeallocator.cpp" />
-    <ClCompile Include="..\Source\Igniter\Core\Handle.cpp" />
-    <ClCompile Include="..\Source\Igniter\Core\HandleManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Engine.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Log.cpp" />
-    <ClCompile Include="..\Source\Igniter\Core\MemoryPool.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Regex.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\String.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\ThreadUIDGenerator.cpp" />
     <ClCompile Include="..\Source\Igniter\Core\Window.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\CommandContext.cpp" />
-    <ClCompile Include="..\Source\Igniter\D3D12\CommandContextPool.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\CommandQueue.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\D3D12Common.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\DescriptorHeap.cpp" />
@@ -161,7 +152,6 @@
     <ClCompile Include="..\Source\Igniter\D3D12\RenderDevice.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\RootSignature.cpp" />
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
-    <ClCompile Include="..\Source\Igniter\D3D12\Swapchain.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\CoFileWatcher.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp" />
@@ -180,10 +170,12 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Igniter.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Input\InputManager.cpp" />
+    <ClCompile Include="..\Source\Igniter\Render\CommandContextPool.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuUploader.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\GpuViewManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\RenderContext.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\Renderer.cpp" />
+    <ClCompile Include="..\Source\Igniter\Render\Swapchain.cpp" />
     <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>

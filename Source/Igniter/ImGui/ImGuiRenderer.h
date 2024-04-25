@@ -4,7 +4,7 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class RenderContext;
     class DescriptorHeap;
     class CommandContext;
     class GpuView;
@@ -12,11 +12,10 @@ namespace ig
     class Window;
     class Renderer;
     class ImGuiCanvas;
-
     class ImGuiRenderer final
     {
     public:
-        ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderDevice& device);
+        ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext);
         ~ImGuiRenderer();
 
         void Render(ImGuiCanvas& canvas, Renderer& renderer);
@@ -28,11 +27,12 @@ namespace ig
 
     private:
         const FrameManager& frameManager;
+        RenderContext& renderContext;
 
         Ptr<DescriptorHeap> descriptorHeap;
         GpuView mainSrv;
         std::vector<GpuView> reservedSharedResourceViews;
 
-        std::vector<Ptr<CommandContext>> commandContexts;
+        std::vector<CommandContext> commandContexts;
     };
 }    // namespace ig

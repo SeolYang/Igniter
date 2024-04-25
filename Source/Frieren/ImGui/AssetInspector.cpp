@@ -7,7 +7,7 @@
 #include <D3D12/GpuTexture.h>
 #include <D3D12/GpuView.h>
 #include <D3D12/RenderDevice.h>
-#include <Render/GpuViewManager.h>
+#include <Render/RenderContext.h>
 #include <ImGui/ImGuiExtensions.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/AssetInspector.h>
@@ -286,11 +286,15 @@ namespace fe
             previewTextures[localFrameIdx] = assetManager.LoadTexture(assetInfo.GetGuid());
             if (previewTextures[localFrameIdx])
             {
-                GpuTexture& gpuTexture{*previewTextures[localFrameIdx]->GetGpuTexture()};
-                const GpuTextureDesc& gpuTexDesc{gpuTexture.GetDesc()};
-                RenderDevice& renderDevice{Igniter::GetRenderDevice()};
+                Texture* previewTexturePtr = assetManager.Lookup(previewTextures[localFrameIdx]);
+                IG_CHECK(previewTexturePtr != nullptr);
+                const Handle<GpuTexture> gpuTexture = previewTexturePtr->GetGpuTexture();
+                GpuTexture* gpuTexturePtr = Igniter::GetRenderContext().Lookup(gpuTexture);
+                const GpuTextureDesc& gpuTexDesc{gpuTexturePtr->GetDesc()};
+                RenderDevice& renderDevice{Igniter::GetRenderContext().GetRenderDevice()};
+                /* #sy_todo RenderContext 차원에서 Update...Descriptor 메서드 지원 */
                 renderDevice.UpdateShaderResourceView(
-                    reservedSrv, gpuTexture, GpuTextureSrvDesc{D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1}}, gpuTexDesc.Format);
+                    reservedSrv, *gpuTexturePtr, GpuTextureSrvDesc{D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1}}, gpuTexDesc.Format);
                 bIsPreviewSrvUpdated[localFrameIdx] = true;
             }
         }

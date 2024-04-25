@@ -86,12 +86,6 @@ namespace ig
     private:
         AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope);
         void ConstructVirtualPathHierarchy();
-
-        static AssetInfo MakeEngineInternal(const Guid& guid, const String virtualPath, const EAssetCategory type)
-        {
-            return AssetInfo{guid, virtualPath, type, EAssetScope::Engine};
-        }
-
         void SetGuid(const Guid& newGuid) { this->guid = newGuid; }
 
     private:
@@ -131,15 +125,6 @@ namespace ig
 
     template <Asset T>
     inline constexpr bool IsAsset<T> = true;
-
-    namespace details
-    {
-        template <Asset T>
-        class AssetCache;
-    }
-
-    template <Asset T>
-    using CachedAsset = UniqueRefHandle<T, details::AssetCache<T>*>;
 
     /* Refer to {ResourcePath}.metadata */
     Path MakeResourceMetadataPath(Path resPath);

@@ -65,11 +65,9 @@ namespace ig
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     };
 
-    class RenderDevice;
     class GpuTexture;
     class GpuView;
-    class GpuViewManager;
-
+    class RenderContext;
     class Texture final
     {
     public:
@@ -78,7 +76,7 @@ namespace ig
         using Desc = AssetDesc<Texture>;
 
     public:
-        Texture(const Desc& snapshot, DeferredHandle<GpuTexture> gpuTexture, Handle<GpuView, GpuViewManager*> srv, const RefHandle<GpuView>& sampler);
+        Texture(RenderContext& renderContext, const Desc& snapshot, const Handle<GpuTexture> gpuTexture, const Handle<GpuView> srv, const Handle<GpuView> sampler);
         Texture(const Texture&) = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();
@@ -87,9 +85,9 @@ namespace ig
         Texture& operator=(Texture&&) noexcept = default;
 
         const Desc& GetSnapshot() const { return snapshot; }
-        RefHandle<GpuTexture> GetGpuTexture() { return gpuTexture.MakeRef(); }
-        RefHandle<GpuView> GetShaderResourceView() { return srv.MakeRef(); }
-        RefHandle<GpuView> GetSampler() { return sampler; }
+        Handle<GpuTexture> GetGpuTexture() const { return gpuTexture; }
+        Handle<GpuView> GetShaderResourceView() const { return srv; }
+        Handle<GpuView> GetSampler() const { return sampler; }
 
     public:
         /* #sy_wip Common으로 이동 */
@@ -98,10 +96,11 @@ namespace ig
         static constexpr std::string_view EngineDefaultBlack = "Engine\\Black";
 
     private:
+        RenderContext* renderContext{nullptr};
         Desc snapshot{};
-        DeferredHandle<GpuTexture> gpuTexture{};
-        Handle<GpuView, GpuViewManager*> srv{};
-        RefHandle<GpuView> sampler{};
+        Handle<GpuTexture> gpuTexture{};
+        Handle<GpuView> srv{};
+        Handle<GpuView> sampler{};
     };
 }    // namespace ig
 

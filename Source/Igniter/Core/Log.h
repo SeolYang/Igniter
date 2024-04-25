@@ -93,7 +93,7 @@ namespace ig
     };
 }    // namespace ig
 
-/* #sy_log 카테고리의 고유성을 보장하기 위해, 네임스페이스의 밖에 정의되어야 함. */
+/* #sy_note 카테고리의 고유성을 보장하기 위해, 네임스페이스의 밖에 정의되어야 함. */
 #define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)                                \
     namespace ig::categories                                                     \
     {                                                                            \

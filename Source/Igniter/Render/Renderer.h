@@ -1,15 +1,13 @@
 #pragma once
-#include <D3D12/CommandQueue.h>
-#include <D3D12/Swapchain.h>
 #include <Core/Handle.h>
+#include <D3D12/CommandQueue.h>
+#include <Render/Swapchain.h>
 #include <Render/TempConstantBufferAllocator.h>
 
 namespace ig
 {
     class RenderDevice;
     class CommandContext;
-    class Fence;
-
 #pragma region test
     // #sy_test
     class GpuBuffer;
@@ -18,8 +16,6 @@ namespace ig
     class RootSignature;
     class PipelineState;
     class GpuView;
-    class GpuViewManager;
-    class RenderContext;
 #pragma endregion
 }    // namespace ig
 
@@ -27,11 +23,11 @@ namespace ig
 {
     class Window;
     class DeferredDeallocator;
-
+    class RenderContext;
     class Renderer final
     {
     public:
-        Renderer(const FrameManager& frameManager, Window& window, RenderDevice& device, HandleManager& handleManager, RenderContext& renderContext);
+        Renderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext);
         Renderer(const Renderer&) = delete;
         Renderer(Renderer&&) noexcept = delete;
         ~Renderer();
@@ -40,22 +36,19 @@ namespace ig
         Renderer& operator=(Renderer&&) noexcept = delete;
 
         Swapchain& GetSwapchain() { return swapchain; }
-        TempConstantBufferAllocator& GetTempConstantBufferAllocator() { return tempConstantBufferAllocator; }
+        const TempConstantBufferAllocator& GetTempConstantBufferAllocator() const { return tempConstantBufferAllocator; }
 
-        void BeginFrame();
-        void Render(Registry& registry);
-        void EndFrame();
+        void BeginFrame(const uint8_t localFrameIdx);
+        void Render(const uint8_t localFrameIdx, Registry& registry);
+        void EndFrame(const uint8_t localFrameIdx);
 
     private:
         const FrameManager& frameManager;
-        RenderDevice& renderDevice;
-        HandleManager& handleManager;
         RenderContext& renderContext;
 
         TempConstantBufferAllocator tempConstantBufferAllocator;
 
         Viewport mainViewport{};
-
         Swapchain swapchain;
         GpuSync mainGfxFrameSyncs[NumFramesInFlight];
 
@@ -65,8 +58,8 @@ namespace ig
         std::unique_ptr<ShaderBlob> ps;
         std::unique_ptr<RootSignature> bindlessRootSignature;
         std::unique_ptr<PipelineState> pso;
-        std::unique_ptr<GpuTexture> depthStencilBuffer;
-        Handle<GpuView, GpuViewManager*> dsv;
+        eastl::array<Handle<GpuTexture>, NumFramesInFlight> depthStencils;
+        eastl::array<Handle<GpuView>, NumFramesInFlight> dsvs;
 #pragma endregion
     };
 }    // namespace ig

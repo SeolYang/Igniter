@@ -18,6 +18,8 @@ namespace ig
     using RecursiveLock = std::unique_lock<RecursiveMutex>;
     using Mutex = std::mutex;
     using UniqueLock = std::unique_lock<Mutex>;
+    template <typename... Mutexes>
+    using ScopedLock = std::scoped_lock<Mutexes...>;
 
     template <typename T>
     using Ref = std::reference_wrapper<T>;

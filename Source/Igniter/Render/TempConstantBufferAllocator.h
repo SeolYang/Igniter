@@ -1,45 +1,42 @@
 #pragma once
-#include <D3D12/Common.h>
-#include <D3D12/GpuBuffer.h>
+#include <Igniter.h>
 #include <Core/Handle.h>
-#include <Core/FrameManager.h>
+#include <D3D12/GpuBufferDesc.h>
 
 namespace ig
 {
-    class RenderDevice;
-    class GpuBuffer;
-    struct MappedGpuBuffer;
-    class GpuBufferDesc;
     class GpuView;
-    class GpuViewManager;
-    class CommandContext;
-
-    struct TempConstantBuffer final
+    struct TempConstantBuffer2 final
     {
     public:
+        TempConstantBuffer2(const Handle<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) {}
+        ~TempConstantBuffer2() = default;
+
         template <typename T>
         void Write(const T& data)
         {
-            if (Mapping && Mapping->MappedPtr != nullptr)
+            if (mappedPtr != nullptr)
             {
-                std::memcpy(Mapping->MappedPtr, &data, sizeof(T));
-            }
-            else
-            {
-                IG_CHECK_NO_ENTRY();
+                std::memcpy(mappedPtr, &data, sizeof(T));
             }
         }
 
-    public:
-        RefHandle<MappedGpuBuffer> Mapping = {};
-        RefHandle<GpuView> View = {};
+        [[nodiscard]] Handle<GpuView> GetConstantBufferView() const { return cbv; }
+
+    private:
+        uint8_t* mappedPtr{nullptr};
+        Handle<GpuView> cbv{};
     };
 
+    class FrameManager;
+    class GpuBuffer;
+    class RenderContext;
+    class CommandContext;
     class TempConstantBufferAllocator final
     {
     public:
-        TempConstantBufferAllocator(const FrameManager& frameManager, RenderDevice& renderDevice, HandleManager& handleManager,
-            GpuViewManager& gpuViewManager, const uint32_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
+        TempConstantBufferAllocator(const FrameManager& frameManager, RenderContext& renderContext,
+            const size_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
         TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
         ~TempConstantBufferAllocator();
@@ -47,10 +44,10 @@ namespace ig
         TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
-        TempConstantBuffer Allocate(const GpuBufferDesc& desc);
+        TempConstantBuffer2 Allocate(const GpuBufferDesc& desc);
 
         template <typename T>
-        TempConstantBuffer Allocate()
+        TempConstantBuffer2 Allocate()
         {
             GpuBufferDesc constantBufferDesc{};
             constantBufferDesc.AsConstantBuffer<T>();
@@ -58,29 +55,27 @@ namespace ig
         }
 
         // 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다. 프레임 시작시 반드시 호출해야함.
-        void DeallocateCurrentFrame();
+        void BeginFrame(const uint8_t localFrameIdx);
 
         void InitBufferStateTransition(CommandContext& cmdCtx);
 
-        std::pair<uint64_t, uint64_t> GetUsedSizeInBytes() const { return {allocatedSizeInBytes[0].load(), allocatedSizeInBytes[1].load()}; }
+        std::pair<size_t, size_t> GetUsedSizeInBytes() const;
 
-        uint32_t GetReservedSizeInBytesPerFrame() const { return reservedSizeInBytesPerFrame; }
+        size_t GetReservedSizeInBytesPerFrame() const { return reservedSizeInBytesPerFrame; }
 
     public:
-        // 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값 == 4 MB)
-        static constexpr uint32_t DefaultReservedBufferSizeInBytes = 4194304;
+        // 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값: 4 MB)
+        static constexpr size_t DefaultReservedBufferSizeInBytes = 4194304;
 
     private:
         const FrameManager& frameManager;
-        RenderDevice& renderDevice;
-        HandleManager& handleManager;
-        GpuViewManager& gpuViewManager;
+        RenderContext& renderContext;
 
-        const uint32_t reservedSizeInBytesPerFrame;
+        size_t reservedSizeInBytesPerFrame;
 
-        std::vector<GpuBuffer> buffers;
-        std::array<std::atomic_uint64_t, NumFramesInFlight> allocatedSizeInBytes;
-        std::array<std::vector<Handle<MappedGpuBuffer, GpuBuffer*>>, NumFramesInFlight> mappedBuffers;
-        std::array<std::vector<Handle<GpuView, GpuViewManager*>>, NumFramesInFlight> allocatedViews;
+        mutable eastl::array<Mutex, NumFramesInFlight> mutexes;
+        eastl::array<Handle<GpuBuffer>, NumFramesInFlight> buffers;
+        eastl::array<size_t, NumFramesInFlight> allocatedSizeInBytes{0};
+        eastl::array<eastl::vector<Handle<GpuView>>, NumFramesInFlight> allocatedViews;
     };
 }    // namespace ig

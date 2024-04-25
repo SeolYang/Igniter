@@ -15,8 +15,8 @@ namespace ig
 
     enum class EQueueType
     {
-        Direct,
-        AsyncCompute,
+        Graphics,
+        Compute,
         Copy
     };
 

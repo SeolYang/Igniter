@@ -25,11 +25,5 @@ namespace fe
         double tempConstantBufferUsedSizeMB[2]{};
         double tempConstantBufferSizePerFrameMB{};
         float tempConstantBufferOccupancy[2]{};
-
-        uint64_t handleManagerNumMemoryPools{};
-        double handleManagerAllocatedChunkSizeMB{};
-        double handleManagerUsedSizeMB{};
-        uint64_t handleManagerNumAllocatedChunks{};
-        uint64_t handleManagerNumAllocatedHandles{};
     };
 }    // namespace fe

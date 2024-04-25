@@ -1,12 +1,12 @@
 #include <Igniter.h>
 #include <Core/Log.h>
 #include <Core/Timer.h>
+#include <Core/Handle.h>
 #include <Filesystem/Utils.h>
 #include <D3D12/RenderDevice.h>
 #include <D3D12/GpuBuffer.h>
 #include <D3D12/GpuBufferDesc.h>
 #include <Render/Vertex.h>
-#include <Render/GpuViewManager.h>
 #include <Render/GpuUploader.h>
 #include <Render/RenderContext.h>
 #include <Asset/AssetManager.h>
@@ -16,9 +16,8 @@ IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);
 
 namespace ig
 {
-    StaticMeshLoader::StaticMeshLoader(
-        HandleManager& handleManager, RenderDevice& renderDevice, RenderContext& renderContext, AssetManager& assetManager)
-        : handleManager(handleManager), renderDevice(renderDevice), renderContext(renderContext), assetManager(assetManager)
+    StaticMeshLoader::StaticMeshLoader(RenderContext& renderContext, AssetManager& assetManager)
+        : renderContext(renderContext), assetManager(assetManager)
     {
     }
 
@@ -77,20 +76,19 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedIndicesSize>();
         }
 
-        std::optional<GpuBuffer> vertexBuffer = renderDevice.CreateBuffer(vertexBufferDesc);
+        const Handle<GpuBuffer> vertexBuffer = renderContext.CreateBuffer(vertexBufferDesc);
         if (!vertexBuffer)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBuffer>();
         }
 
-        GpuViewManager& gpuViewManager{renderContext.GetGpuViewManager()};
-        auto vertexBufferSrv = gpuViewManager.RequestShaderResourceView(*vertexBuffer);
+        const Handle<GpuView> vertexBufferSrv = renderContext.CreateShaderResourceView(vertexBuffer);
         if (!vertexBufferSrv)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBufferSrv>();
         }
 
-        std::optional<GpuBuffer> indexBuffer = renderDevice.CreateBuffer(indexBufferDesc);
+        const Handle<GpuBuffer> indexBuffer = renderContext.CreateBuffer(indexBufferDesc);
         if (!indexBuffer)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateIndexBuffer>();
@@ -105,7 +103,9 @@ namespace ig
                 sizeof(StaticMeshVertex), blob.data() + compressedVerticesOffset, loadDesc.CompressedVerticesSizeInBytes);
             if (decodeResult == 0)
             {
-                verticesUploadCtx.CopyBuffer(0, vertexBufferDesc.GetSizeAsBytes(), *vertexBuffer);
+                GpuBuffer* vertexBufferPtr = renderContext.Lookup(vertexBuffer);
+                IG_CHECK(vertexBufferPtr != nullptr);
+                verticesUploadCtx.CopyBuffer(0, vertexBufferDesc.GetSizeAsBytes(), *vertexBufferPtr);
                 bVertexBufferDecodeSucceed = true;
             }
         }
@@ -121,14 +121,16 @@ namespace ig
 
             if (decodeResult == 0)
             {
-                indicesUploadCtx.CopyBuffer(0, indexBufferDesc.GetSizeAsBytes(), *indexBuffer);
+                GpuBuffer* indexBufferPtr = renderContext.Lookup(indexBuffer);
+                IG_CHECK(indexBufferPtr != nullptr);
+                indicesUploadCtx.CopyBuffer(0, indexBufferDesc.GetSizeAsBytes(), *indexBufferPtr);
                 bIndexBufferDecodeSucceed = true;
             }
         }
         std::optional<GpuSync> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
         IG_CHECK(indicesUploadSync);
 
-        CachedAsset<Material> material{assetManager.LoadMaterial(loadDesc.MaterialGuid)};
+        Handle<Material> material{assetManager.LoadMaterial(loadDesc.MaterialGuid)};
         IG_CHECK(material);
 
         verticesUploadSync->WaitOnCpu();
@@ -144,7 +146,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedDecodeIndexBuffer>();
         }
 
-        return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(StaticMesh{desc, {handleManager, std::move(*vertexBuffer)}, std::move(vertexBufferSrv),
-            {handleManager, std::move(*indexBuffer)}, std::move(material)});
+        return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(
+            StaticMesh{renderContext, assetManager, desc, vertexBuffer, vertexBufferSrv, indexBuffer, material});
     }
 }    // namespace ig

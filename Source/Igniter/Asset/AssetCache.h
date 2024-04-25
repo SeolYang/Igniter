@@ -2,6 +2,7 @@
 #include <Igniter.h>
 #include <Core/String.h>
 #include <Core/Handle.h>
+#include <Core/HandleRegistry.h>
 #include <Asset/Common.h>
 
 namespace ig::details
@@ -27,11 +28,8 @@ namespace ig::details
     template <Asset T>
     class AssetCache final : public TypelessAssetCache
     {
-        friend class UniqueRefHandle<T, class AssetCache<T>*>;
-
     public:
-        AssetCache(HandleManager& handleManager) : handleManager(handleManager) {}
-
+        AssetCache()  = default;
         AssetCache(const AssetCache&) = delete;
         AssetCache(AssetCache&&) noexcept = delete;
         ~AssetCache() override = default;
@@ -48,7 +46,7 @@ namespace ig::details
             ReadWriteLock rwLock{mutex};
             IG_CHECK(!cachedAssets.contains(guid));
             IG_CHECK(!refCounterTable.contains(guid));
-            cachedAssets[guid] = Handle<T>{handleManager, std::move(asset)};
+            cachedAssets[guid] = registry.Create(std::move(asset));
             refCounterTable[guid] = 0;
         }
 
@@ -58,7 +56,7 @@ namespace ig::details
             InvalidateUnsafe(guid);
         }
 
-        [[nodiscard]] CachedAsset<T> Load(const Guid& guid)
+        [[nodiscard]] Handle<T> Load(const Guid& guid)
         {
             ReadWriteLock rwLock{mutex};
             return LoadUnsafe(guid);
@@ -69,6 +67,34 @@ namespace ig::details
             ReadOnlyLock lock{mutex};
             return IsCachedUnsafe(guid);
         }
+
+        [[nodiscard]] T* Lookup(const Handle<T> handle)
+        {
+            ReadOnlyLock lock{mutex};
+            return registry.Lookup(handle);
+        }
+
+        [[nodiscard]] const T* Lookup(const Handle<T> handle) const
+        {
+            ReadOnlyLock lock{mutex};
+            return registry.Lookup(handle);
+        }
+
+        void Unload(const AssetInfo& assetInfo)
+        {
+            const Guid& guid = assetInfo.GetGuid();
+            ReadWriteLock rwLock{mutex};
+            IG_CHECK(cachedAssets.contains(guid));
+            IG_CHECK(refCounterTable.contains(guid));
+            IG_CHECK(refCounterTable[guid] > 0);
+            const uint32_t refCount{--refCounterTable[guid]};
+            if (refCount == 0 && assetInfo.GetScope() == EAssetScope::Managed)
+            {
+                InvalidateUnsafe(guid);
+            }
+        }
+
+        // #sy_todo Unload with Handle?
 
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const override
         {
@@ -90,14 +116,14 @@ namespace ig::details
             return cachedAssets.contains(guid) && refCounterTable.contains(guid);
         }
 
-        [[nodiscard]] CachedAsset<T> LoadUnsafe(const Guid& guid)
+        [[nodiscard]] Handle<T> LoadUnsafe(const Guid& guid)
         {
             IG_CHECK(guid.isValid());
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
 
             ++refCounterTable[guid];
-            return cachedAssets[guid].MakeUniqueRef(this);
+            return cachedAssets[guid];
         }
 
         void InvalidateUnsafe(const Guid& guid)
@@ -106,37 +132,17 @@ namespace ig::details
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
 
+            registry.Destroy(cachedAssets[guid]);
             cachedAssets.erase(guid);
             refCounterTable.erase(guid);
-        }
-
-        void operator()(T* asset)
-        {
-            IG_CHECK(asset != nullptr);
-            const AssetDesc<T> snapshot{asset->GetSnapshot()};
-            const AssetInfo& assetInfo{snapshot.Info};
-            IG_CHECK(assetInfo.IsValid());
-
-            const Guid& guid{assetInfo.GetGuid()};
-
-            ReadWriteLock rwLock{mutex};
-            IG_CHECK(cachedAssets.contains(guid));
-            IG_CHECK(refCounterTable.contains(guid));
-            IG_CHECK(refCounterTable[guid] > 0);
-            const uint32_t refCount{--refCounterTable[guid]};
-            if (refCount == 0 && assetInfo.GetScope() == EAssetScope::Managed)
-            {
-                InvalidateUnsafe(guid);
-            }
         }
 
     public:
         constexpr static EAssetCategory AssetType = AssetCategoryOf<T>;
 
     private:
-        HandleManager& handleManager;
-
         mutable SharedMutex mutex;
+        HandleRegistry<T> registry;
         UnorderedMap<Guid, Handle<T>> cachedAssets{};
         UnorderedMap<Guid, uint32_t> refCounterTable{};
     };

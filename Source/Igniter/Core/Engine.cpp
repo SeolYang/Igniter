@@ -5,16 +5,13 @@
 #include <Core/Version.h>
 #include <Core/FrameManager.h>
 #include <Core/Timer.h>
-#include <Core/HandleManager.h>
 #include <Core/Window.h>
-#include <Core/DeferredDeallocator.h>
 #include <Core/EmbededSettings.h>
 #include <Core/ComInitializer.h>
 #include <Input/InputManager.h>
 #include <D3D12/RenderDevice.h>
 #include <Render/RenderContext.h>
 #include <Render/GpuUploader.h>
-#include <Render/GPUViewManager.h>
 #include <Render/Renderer.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
@@ -29,6 +26,7 @@ namespace ig
 
     Igniter::Igniter()
     {
+        instance = this;
         CoInitializeUnique();
         IG_LOG(Engine, Info, "Igniter Engine Version {}", version::Version);
         IG_LOG(Engine, Info, "Igniting Engine Runtime!");
@@ -37,33 +35,26 @@ namespace ig
         timer = MakePtr<Timer>();
         /* #sy_test 임시 윈도우 설명자 */
         window = MakePtr<Window>(WindowDescription{.Width = 1920, .Height = 1080, .Title = String(settings::GameName)});
-        renderDevice = MakePtr<RenderDevice>();
-        handleManager = MakePtr<HandleManager>();
         inputManager = MakePtr<InputManager>();
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
-        deferredDeallocator = MakePtr<DeferredDeallocator>(*frameManager);
+        renderContext = MakePtr<RenderContext>(*frameManager);
         ////////////////////////////////////////////////////
 
         //////////////////////// L2 ////////////////////////
-        renderContext = MakePtr<RenderContext>(*deferredDeallocator, *renderDevice, *handleManager);
-        ////////////////////////////////////////////////////
-
-        //////////////////////// L3 ////////////////////////
-        assetManager = MakePtr<AssetManager>(*handleManager, *renderDevice, *renderContext);
-        /* #sy_test Temporary */
-        ////////////////////////////////////////////////////
-
-        //////////////////////// L4 ////////////////////////
-        renderer = MakePtr<Renderer>(*frameManager, *window, *renderDevice, *handleManager, *renderContext);
-        imguiRenderer = MakePtr<ImGuiRenderer>(*frameManager, *window, *renderDevice);
+        assetManager = MakePtr<AssetManager>(*renderContext);
+        assetManager->RegisterEngineDefault();
+        renderer = MakePtr<Renderer>(*frameManager, *window, *renderContext);
+        imguiRenderer = MakePtr<ImGuiRenderer>(*frameManager, *window, *renderContext);
         ////////////////////////////////////////////////////
 
         //////////////////////// APP ///////////////////////
         imguiCanvas = MakePtr<ImGuiCanvas>();
         gameInstance = MakePtr<GameInstance>();
         ////////////////////////////////////////////////////
+
+        bInitialized = true;
     }
 
     Igniter::~Igniter()
@@ -74,32 +65,19 @@ namespace ig
         imguiCanvas.reset();
         ////////////////////////////////////////////////////
 
-        /* #sy_note 각 계층에서 여전히 지연 해제하는 경우, 상위 계층을 해제하기 전에 중간에 수동으로 처리 해주어야 함. */
-        deferredDeallocator->FlushAllFrames();
-
-        //////////////////////// L4 ////////////////////////
+        //////////////////////// L2 ////////////////////////
         imguiRenderer.reset();
         renderer.reset();
-        ////////////////////////////////////////////////////
-
-        //////////////////////// L3 ////////////////////////
+        assetManager->UnRegisterEngineDefault();
         assetManager.reset();
         ////////////////////////////////////////////////////
 
-        deferredDeallocator->FlushAllFrames();
-
-        //////////////////////// L2 ////////////////////////
-        renderContext.reset();
-        ////////////////////////////////////////////////////
-
         //////////////////////// L1 ////////////////////////
-        deferredDeallocator.reset();
+        renderContext.reset();
         ////////////////////////////////////////////////////
 
         //////////////////////// L0 ////////////////////////
         inputManager.reset();
-        handleManager.reset();
-        renderDevice.reset();
         window.reset();
         timer.reset();
         frameManager.reset();
@@ -133,18 +111,19 @@ namespace ig
                 DispatchMessage(&msg);
             }
 
-            deferredDeallocator->FlushCurrentFrame();
             assetManager->Update();
 
             gameInstance->Update();
             inputManager->PostUpdate();
 
-            renderer->BeginFrame();
+            const uint8_t localFrameIdx = frameManager->GetLocalFrameIndex();
+            renderer->BeginFrame(localFrameIdx);
+            renderContext->BeginFrame(localFrameIdx);
             {
-                renderer->Render(gameInstance->GetRegistry());
+                renderer->Render(localFrameIdx, gameInstance->GetRegistry());
                 imguiRenderer->Render(*imguiCanvas, *renderer);
             }
-            renderer->EndFrame();
+            renderer->EndFrame(localFrameIdx);
 
             timer->End();
             frameManager->NextFrame();
@@ -170,13 +149,15 @@ namespace ig
 
     void Igniter::Ignite()
     {
+        /* 좀 더 나은 방식 찾아보기 */
         if (instance != nullptr)
         {
             IG_CHECK_NO_ENTRY();
             return;
         }
 
-        instance = new Igniter();
+        [[maybe_unused]] Igniter* newInstance = new Igniter();
+        IG_CHECK(newInstance == instance);
     }
 
     void Igniter::Extinguish()
@@ -203,22 +184,10 @@ namespace ig
         return *instance->timer;
     }
 
-    HandleManager& Igniter::GetHandleManager()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->handleManager;
-    }
-
     Window& Igniter::GetWindow()
     {
         IG_CHECK(instance != nullptr);
         return *instance->window;
-    }
-
-    RenderDevice& Igniter::GetRenderDevice()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->renderDevice;
     }
 
     RenderContext& Igniter::GetRenderContext()
@@ -231,12 +200,6 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->inputManager;
-    }
-
-    DeferredDeallocator& Igniter::GetDeferredDeallocator()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->deferredDeallocator;
     }
 
     Renderer& Igniter::GetRenderer()

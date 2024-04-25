@@ -125,7 +125,7 @@ namespace ig
             return;
         }
 
-        const Handle_New<Action> newHandle = actionRegistry.Create();
+        const Handle<Action> newHandle = actionRegistry.Create();
         nameActionTable[name] = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
         IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
         actionSets[ToUnderlying(input)].insert(newHandle);
@@ -167,7 +167,7 @@ namespace ig
             return;
         }
 
-        const Handle_New<Axis> newHandle = axisRegistry.Create(scale);
+        const Handle<Axis> newHandle = axisRegistry.Create(scale);
         nameAxisTable[name] = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
         IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
         axisSets[ToUnderlying(input)].insert(newHandle);
@@ -202,7 +202,7 @@ namespace ig
         axisPtr->Scale = newScale;
     }
 
-    Handle_New<Action> InputManager::QueryAction(const String name) const
+    Handle<Action> InputManager::QueryAction(const String name) const
     {
         const auto mappingItr = nameActionTable.find(name);
         if (mappingItr != nameActionTable.cend())
@@ -211,10 +211,10 @@ namespace ig
         }
 
         IG_LOG(InputManager, Error, "Action {} does not exists.", name);
-        return Handle_New<Action>{};
+        return Handle<Action>{};
     }
 
-    Handle_New<Axis> InputManager::QueryAxis(const String name) const
+    Handle<Axis> InputManager::QueryAxis(const String name) const
     {
         const auto mappingItr = nameAxisTable.find(name);
         if (mappingItr != nameAxisTable.cend())
@@ -223,10 +223,10 @@ namespace ig
         }
 
         IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
-        return Handle_New<Axis>{};
+        return Handle<Axis>{};
     }
 
-    Action InputManager::GetAction(const Handle_New<Action> action) const
+    Action InputManager::GetAction(const Handle<Action> action) const
     {
         const Action* actionPtr = actionRegistry.Lookup(action);
         if (actionPtr == nullptr)
@@ -238,7 +238,7 @@ namespace ig
         return *actionPtr;
     }
 
-    Axis InputManager::GetAxis(const Handle_New<Axis> axis) const
+    Axis InputManager::GetAxis(const Handle<Axis> axis) const
     {
         const Axis* axisPtr = axisRegistry.Lookup(axis);
         if (axisPtr == nullptr)
@@ -290,7 +290,7 @@ namespace ig
     {
         for (const EInput input : processedInputs)
         {
-            for (const Handle_New<Action> actionHandle : actionSets[ToUnderlying(input)])
+            for (const Handle<Action> actionHandle : actionSets[ToUnderlying(input)])
             {
                 Action* actionPtr = actionRegistry.Lookup(actionHandle);
                 IG_CHECK(actionPtr != nullptr);
@@ -309,7 +309,7 @@ namespace ig
                 }
             }
 
-            for (const Handle_New<Axis> axisHandle : axisSets[ToUnderlying(input)])
+            for (const Handle<Axis> axisHandle : axisSets[ToUnderlying(input)])
             {
                 Axis* axisPtr = axisRegistry.Lookup(axisHandle);
                 IG_CHECK(axisPtr != nullptr);
@@ -372,7 +372,7 @@ namespace ig
     bool InputManager::HandlePressAction(const EInput input)
     {
         bool bAnyPress = false;
-        for (const Handle_New<Action> action : actionSets[ToUnderlying(input)])
+        for (const Handle<Action> action : actionSets[ToUnderlying(input)])
         {
             Action* actionPtr = actionRegistry.Lookup(action);
             IG_CHECK(actionPtr != nullptr);
@@ -393,7 +393,7 @@ namespace ig
 
     bool InputManager::HandleReleaseAction(const EInput input)
     {
-        for (const Handle_New<Action> action : actionSets[ToUnderlying(input)])
+        for (const Handle<Action> action : actionSets[ToUnderlying(input)])
         {
             Action* actionPtr = actionRegistry.Lookup(action);
             IG_CHECK(actionPtr != nullptr);
@@ -406,7 +406,7 @@ namespace ig
     bool InputManager::HandleAxis(const EInput input, const float value, const bool bIsDifferential)
     {
         bool bAnyAxisHandled = false;
-        for (const Handle_New<Axis> axis : axisSets[ToUnderlying(input)])
+        for (const Handle<Axis> axis : axisSets[ToUnderlying(input)])
         {
             Axis* axisPtr = axisRegistry.Lookup(axis);
             IG_CHECK(axisPtr != nullptr);

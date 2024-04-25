@@ -59,31 +59,32 @@ int main()
             Guid{"f9ed3d69-d906-4b03-9def-16b6b37211e7"},
         };
 
-        std::vector<std::future<CachedAsset<StaticMesh>>> homuraMeshFutures{};
+        std::vector<std::future<Handle<StaticMesh>>> homuraMeshFutures{};
         for (Guid guid : homuraMeshGuids)
         {
             homuraMeshFutures.emplace_back(std::async(
                 std::launch::async, [&assetManager](const Guid guid) { return assetManager.LoadStaticMesh(guid); }, guid));
         }
 
-        for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : homuraMeshFutures)
+        for (std::future<Handle<StaticMesh>>& staticMeshFuture : homuraMeshFutures)
         {
-            CachedAsset<StaticMesh> staticMesh{staticMeshFuture.get()};
+            Handle<StaticMesh> staticMesh{staticMeshFuture.get()};
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
                 auto& staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
-                staticMeshComponent.Mesh = std::move(staticMesh);
+                staticMeshComponent.Mesh = staticMesh;
 
                 registry.emplace<TransformComponent>(newEntity);
-                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+
+                registry.emplace<NameComponent>(newEntity, assetManager.Lookup(staticMeshComponent.Mesh)->GetSnapshot().Info.GetVirtualPath());
             }
         }
 
-        std::future<CachedAsset<StaticMesh>> homuraAxeMeshFutures{
+        std::future<Handle<StaticMesh>> homuraAxeMeshFutures{
             std::async(std::launch::async, [&assetManager]() { return assetManager.LoadStaticMesh(Guid{"b77399f0-98ec-47cb-ad80-e7287d5833c2"}); })};
         {
-            CachedAsset<StaticMesh> staticMesh{homuraAxeMeshFutures.get()};
+            Handle<StaticMesh> staticMesh{homuraAxeMeshFutures.get()};
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
@@ -91,7 +92,7 @@ int main()
                 staticMeshComponent.Mesh = std::move(staticMesh);
 
                 registry.emplace<TransformComponent>(newEntity);
-                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+                registry.emplace<NameComponent>(newEntity, assetManager.Lookup(staticMeshComponent.Mesh)->GetSnapshot().Info.GetVirtualPath());
             }
         }
 
@@ -120,24 +121,24 @@ int main()
             Guid{"f8dad50c-7331-42a4-be15-72923762a76a"},
         };
 
-        std::vector<std::future<CachedAsset<StaticMesh>>> littleTokyoMeshFutures{};
+        std::vector<std::future<Handle<StaticMesh>>> littleTokyoMeshFutures{};
         for (Guid guid : littleTokyoMeshGuids)
         {
             littleTokyoMeshFutures.emplace_back(std::async(
                 std::launch::async, [&assetManager](const Guid guid) { return assetManager.LoadStaticMesh(guid); }, guid));
         }
 
-        for (std::future<CachedAsset<StaticMesh>>& staticMeshFuture : littleTokyoMeshFutures)
+        for (std::future<Handle<StaticMesh>>& staticMeshFuture : littleTokyoMeshFutures)
         {
-            CachedAsset<StaticMesh> staticMesh{staticMeshFuture.get()};
+            Handle<StaticMesh> staticMesh{staticMeshFuture.get()};
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
                 auto& staticMeshComponent{registry.emplace<StaticMeshComponent>(newEntity)};
-                staticMeshComponent.Mesh = std::move(staticMesh);
+                staticMeshComponent.Mesh = staticMesh;
 
                 registry.emplace<TransformComponent>(newEntity);
-                registry.emplace<NameComponent>(newEntity, staticMeshComponent.Mesh->GetSnapshot().Info.GetVirtualPath());
+                registry.emplace<NameComponent>(newEntity, assetManager.Lookup(staticMeshComponent.Mesh)->GetSnapshot().Info.GetVirtualPath());
             }
         }
 
