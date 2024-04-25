@@ -24,7 +24,17 @@ namespace ig
 
     AssetManager::~AssetManager()
     {
-        /* #sy_todo_priority 아직 캐싱되어 있는 에셋에 대한 정보 출력 */
+        /* #sy_improvements 에셋도 Load시 가장 최근 callstack 정보를 저장하도록 만드는 것도 나쁘지 않을 것 같음! */
+        /* 아니면, 핸들의 핸들? */
+        for (const auto& snapshot : TakeSnapshots())
+        {
+            if (snapshot.IsCached())
+            {
+                IG_LOG(AssetManager, Warning, "Asset {} still cached(alived) with ref count: {}. Please Checks Load-Unload call pair.", snapshot.Info,
+                    snapshot.RefCount);
+            }
+        }
+
         SaveAllChanges();
     }
 
