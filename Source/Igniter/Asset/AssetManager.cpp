@@ -24,6 +24,7 @@ namespace ig
 
     AssetManager::~AssetManager()
     {
+        /* #sy_todo_priority 아직 캐싱되어 있는 에셋에 대한 정보 출력 */
         SaveAllChanges();
     }
 

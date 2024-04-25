@@ -11,7 +11,7 @@ namespace fe
         AssetInspector();
         AssetInspector(const AssetInspector&) = delete;
         AssetInspector(AssetInspector&&) noexcept = delete;
-        ~AssetInspector() override = default;
+        ~AssetInspector() override;
 
         AssetInspector& operator=(const AssetInspector&) = delete;
         AssetInspector& operator=(AssetInspector&&) noexcept = delete;
@@ -45,9 +45,7 @@ namespace fe
         bool bIsMainSelectionDirty = false;
 
         Handle<Texture> previewTextures[NumFramesInFlight];
-        bool bIsPreviewSrvUpdated[NumFramesInFlight]{
-            false,
-        };
+        bool bIsPreviewSrvUpdated[NumFramesInFlight]{false};
 
         int selectorTableSelectedIdx{-1};
         bool bOpenSelectorPopup = false;

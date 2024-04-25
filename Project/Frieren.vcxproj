@@ -5,6 +5,10 @@
       <Configuration>Asan</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="CheckHandleLeaks|x64">
+      <Configuration>CheckHandleLeaks</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="CheckMemLeaks|x64">
       <Configuration>CheckMemLeaks</Configuration>
       <Platform>x64</Platform>
@@ -21,7 +25,9 @@
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\Frieren.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Frieren.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Frieren.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">Frieren.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Create</PrecompiledHeader>
@@ -76,6 +82,13 @@
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -106,6 +119,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -117,6 +133,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">
     <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -136,6 +156,9 @@
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="Vcpkg">
     <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'" Label="Vcpkg">
@@ -169,11 +192,33 @@
       <AdditionalOptions>/WHOLEARCHIVE:Igniter.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>IG_TRACK_LEAKED_HANDLE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Frieren;$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Frieren.h</PrecompiledHeaderFile>
+      <ExceptionHandling>false</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Igniter.lib;dxguid.lib;d3d11.lib;d3d12.lib;dxcompiler.lib;dxgi.lib;WinPixEventRuntime.lib;DirectXTexD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\;$(SolutionDir)..\Thirdparty\DirectXTex\libs;$(SolutionDir)..\Thirdparty\DirectXCompiler\lib;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\lib</AdditionalLibraryDirectories>
+      <AdditionalOptions>/WHOLEARCHIVE:Igniter.lib %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>IG_TRACK_LEAKED_HANDLE;_CRTDBG_MAP_ALLOC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>

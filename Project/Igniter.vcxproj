@@ -5,6 +5,10 @@
       <Configuration>Asan</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="CheckHandleLeaks|x64">
+      <Configuration>CheckHandleLeaks</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="CheckMemLeaks|x64">
       <Configuration>CheckMemLeaks</Configuration>
       <Platform>x64</Platform>
@@ -161,7 +165,9 @@
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="..\Source\Igniter\Igniter.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Igniter.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Igniter.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">Igniter.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Create</PrecompiledHeader>
@@ -179,16 +185,19 @@
     <ClCompile Include="..\Source\Igniter\Render\TempConstantBufferAllocator.cpp" />
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TurnOffAllWarnings</WarningLevel>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -197,20 +206,24 @@
   <ItemGroup>
     <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -230,6 +243,14 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -270,6 +291,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -281,6 +305,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">
     <OutDir>$(SolutionDir)..\Binaries\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -304,6 +332,9 @@
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckMemLeaks|x64'" Label="Vcpkg">
     <VcpkgInstalledDir>$(SolutionDir)..\Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
   </PropertyGroup>
@@ -318,6 +349,42 @@
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)..\Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>IG_TRACK_LEAKED_HANDLE;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Source\Igniter;$(SolutionDir)..\Thirdparty\AgilitySDK\include;$(SolutionDir)..\Thirdparty\SimpleMath;$(SolutionDir)..\Thirdparty\D3D12MemAlloc;$(SolutionDir)..\Thirdparty\DirectXTex\include;$(SolutionDir)..\Thirdparty\DirectXCompiler\include;$(SolutionDir)..\Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

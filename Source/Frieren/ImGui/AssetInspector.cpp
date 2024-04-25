@@ -42,6 +42,18 @@ namespace fe
         snapshots = assetManager.TakeSnapshots();
     }
 
+    AssetInspector::~AssetInspector()
+    {
+        for (const Handle<Texture> previewTexture : previewTextures)
+        {
+            if (previewTexture)
+            {
+                AssetManager& assetManager = Igniter::GetAssetManager();
+                assetManager.Unload(previewTexture);
+            }
+        }
+    }
+
     void AssetInspector::Render()
     {
         if (ImGui::Begin("Asset Inspector", &bIsVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar))
@@ -283,7 +295,13 @@ namespace fe
         if (!bIsPreviewSrvUpdated[localFrameIdx])
         {
             AssetManager& assetManager{Igniter::GetAssetManager()};
+            if (previewTextures[localFrameIdx])
+            {
+                assetManager.Unload(previewTextures[localFrameIdx]);
+            }
+
             previewTextures[localFrameIdx] = assetManager.LoadTexture(assetInfo.GetGuid());
+
             if (previewTextures[localFrameIdx])
             {
                 Texture* previewTexturePtr = assetManager.Lookup(previewTextures[localFrameIdx]);

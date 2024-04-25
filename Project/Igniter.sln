@@ -13,6 +13,7 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Asan|x64 = Asan|x64
+		CheckHandleLeaks|x64 = CheckHandleLeaks|x64
 		CheckMemLeaks|x64 = CheckMemLeaks|x64
 		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
@@ -20,6 +21,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{229BECC5-709F-4D93-B959-7C23283DDEF8}.Asan|x64.ActiveCfg = Asan|x64
 		{229BECC5-709F-4D93-B959-7C23283DDEF8}.Asan|x64.Build.0 = Asan|x64
+		{229BECC5-709F-4D93-B959-7C23283DDEF8}.CheckHandleLeaks|x64.ActiveCfg = CheckHandleLeaks|x64
+		{229BECC5-709F-4D93-B959-7C23283DDEF8}.CheckHandleLeaks|x64.Build.0 = CheckHandleLeaks|x64
 		{229BECC5-709F-4D93-B959-7C23283DDEF8}.CheckMemLeaks|x64.ActiveCfg = CheckMemLeaks|x64
 		{229BECC5-709F-4D93-B959-7C23283DDEF8}.CheckMemLeaks|x64.Build.0 = CheckMemLeaks|x64
 		{229BECC5-709F-4D93-B959-7C23283DDEF8}.Debug|x64.ActiveCfg = Debug|x64
@@ -28,6 +31,8 @@ Global
 		{229BECC5-709F-4D93-B959-7C23283DDEF8}.Release|x64.Build.0 = Release|x64
 		{3225FAFA-796D-4C15-8B47-A26A6724C6FA}.Asan|x64.ActiveCfg = Asan|x64
 		{3225FAFA-796D-4C15-8B47-A26A6724C6FA}.Asan|x64.Build.0 = Asan|x64
+		{3225FAFA-796D-4C15-8B47-A26A6724C6FA}.CheckHandleLeaks|x64.ActiveCfg = CheckHandleLeaks|x64
+		{3225FAFA-796D-4C15-8B47-A26A6724C6FA}.CheckHandleLeaks|x64.Build.0 = CheckHandleLeaks|x64
 		{3225FAFA-796D-4C15-8B47-A26A6724C6FA}.CheckMemLeaks|x64.ActiveCfg = CheckMemLeaks|x64
 		{3225FAFA-796D-4C15-8B47-A26A6724C6FA}.CheckMemLeaks|x64.Build.0 = CheckMemLeaks|x64
 		{3225FAFA-796D-4C15-8B47-A26A6724C6FA}.Debug|x64.ActiveCfg = Debug|x64
