@@ -28,40 +28,32 @@ namespace ig
         template <typename Category, ELogVerbosity Verbosity, typename... Args>
         void Log(const std::string_view logMessage, Args&&... args)
         {
-            spdlog::logger* logger = QueryCategory<Category>();
-            if (logger == nullptr)
-            {
-                ReadWriteLock lock{mutex};
-                logger = new spdlog::logger(Category::CategoryName.data(), {consoleSink, fileSink});
-                logger->set_level(spdlog::level::trace);
-                categoryMap[TypeHash<Category>] = logger;
-            }
-
+            spdlog::logger& logger = QueryCategory<Category>();
             const std::string formattedMessage = std::vformat(logMessage, std::make_format_args(std::forward<Args>(args)...));
 
             switch (Verbosity)
             {
                 case ELogVerbosity::Info:
-                    logger->info(formattedMessage);
+                    logger.info(formattedMessage);
                     break;
                 case ELogVerbosity::Trace:
-                    logger->trace(formattedMessage);
+                    logger.trace(formattedMessage);
                     break;
 
                 case ELogVerbosity::Warning:
-                    logger->warn(formattedMessage);
+                    logger.warn(formattedMessage);
                     break;
 
                 case ELogVerbosity::Error:
-                    logger->error(formattedMessage);
+                    logger.error(formattedMessage);
                     break;
 
                 case ELogVerbosity::Fatal:
-                    logger->critical(formattedMessage);
+                    logger.critical(formattedMessage);
                     break;
 
                 case ELogVerbosity::Debug:
-                    logger->debug(formattedMessage);
+                    logger.debug(formattedMessage);
                     break;
             }
         }
@@ -76,16 +68,24 @@ namespace ig
         Logger();
 
         template <typename C>
-        spdlog::logger* QueryCategory()
+        spdlog::logger& QueryCategory()
         {
-            ReadOnlyLock lock{mutex};
-            return categoryMap.contains(TypeHash<C>) ? categoryMap.find(TypeHash<C>)->second : nullptr;
+            UniqueLock lock{categoryMapMutex};
+            auto itr = categoryMap.find(TypeHash<C>);
+            if (itr == categoryMap.end())
+            {
+                spdlog::logger* newLogger = new spdlog::logger(C::CategoryName.data(), {consoleSink, fileSink});
+                newLogger->set_level(spdlog::level::trace);
+                itr = categoryMap.insert(itr, std::make_pair(TypeHash<C>, newLogger));
+            }
+
+            return *itr->second;
         }
 
     private:
-        mutable SharedMutex mutex;
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
         std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
+        Mutex categoryMapMutex;
         UnorderedMap<uint64_t, spdlog::logger*> categoryMap;
 
     private:

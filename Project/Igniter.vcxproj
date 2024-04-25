@@ -94,7 +94,6 @@
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
     <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
-    <ClInclude Include="..\Source\Igniter\Reflection\Reflection.h" />
     <ClInclude Include="..\Source\Igniter\Render\CommandContextPool.h" />
     <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
