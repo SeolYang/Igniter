@@ -529,4 +529,7 @@
       <Filter>Thirdparty\DirectXTex</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
+  </ItemGroup>
 </Project>

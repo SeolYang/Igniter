@@ -232,6 +232,9 @@
     <None Include="..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl" />
     <None Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
