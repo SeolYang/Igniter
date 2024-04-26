@@ -233,7 +233,9 @@
     <None Include="..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="..\test.natvis" />
     <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
+    <Natvis Include="..\Thirdparty\nlohmann_json\nlohmann_json.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

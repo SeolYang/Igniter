@@ -531,5 +531,7 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
+    <Natvis Include="..\Thirdparty\nlohmann_json\nlohmann_json.natvis" />
+    <Natvis Include="..\test.natvis" />
   </ItemGroup>
 </Project>

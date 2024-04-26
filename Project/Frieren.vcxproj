@@ -66,6 +66,9 @@
     <ClInclude Include="..\Source\Frieren\ImGui\StatisticsPanel.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\TextureImportPanel.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\test.natvis" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

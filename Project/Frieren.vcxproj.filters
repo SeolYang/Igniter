@@ -111,4 +111,7 @@
       <Filter>Source\Game\Mode</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\test.natvis" />
+  </ItemGroup>
 </Project>
