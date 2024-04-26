@@ -104,7 +104,7 @@ namespace ig
 
         void Destroy(const Handle<Ty> handle)
         {
-            if (handle.Value == Handle<Ty>::InvalidValue)
+            if (handle.IsNull())
             {
                 return;
             }
@@ -142,7 +142,7 @@ namespace ig
 
         Ty* Lookup(const Handle<Ty> handle)
         {
-            if (handle.Value == Handle<Ty>::InvalidValue)
+            if (handle.IsNull())
             {
                 return nullptr;
             }
@@ -169,7 +169,7 @@ namespace ig
 
         const Ty* Lookup(const Handle<Ty> handle) const
         {
-            if (handle.Value == Handle<Ty>::InvalidValue)
+            if (handle.IsNull())
             {
                 return nullptr;
             }

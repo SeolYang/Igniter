@@ -10,25 +10,25 @@ namespace ig
         Handle() noexcept = default;
         Handle(const uint64_t newValue) : Value(newValue) {}
         Handle(const Handle&) noexcept = default;
-        Handle(Handle&& other) noexcept 
-            : Value(std::exchange(other.Value, InvalidValue))
-        {
-        }
+        Handle(Handle&& other) noexcept : Value(std::exchange(other.Value, NullValue)) {}
         ~Handle() = default;
 
         Handle& operator=(const Handle&) noexcept = default;
-        Handle& operator=(Handle&& other) noexcept 
+        Handle& operator=(Handle&& other) noexcept
         {
-            Value = std::exchange(other.Value, InvalidValue);
+            Value = std::exchange(other.Value, NullValue);
             return *this;
         }
 
         [[nodiscard]] bool operator==(const Handle rhs) const noexcept { return Value == rhs.Value; }
-        [[nodiscard]] operator bool() const noexcept { return Value != InvalidValue; }
+        [[nodiscard]] operator bool() const noexcept { return Value != NullValue; }
+        [[nodiscard]] bool IsNull() const noexcept { return Value == NullValue; }
+
+    private:
+        constexpr static uint64_t NullValue{std::numeric_limits<uint64_t>::max()};
 
     public:
-        constexpr static uint64_t InvalidValue{std::numeric_limits<uint64_t>::max()};
-        uint64_t Value{InvalidValue};
+        uint64_t Value{NullValue};
     };
 }    // namespace ig
 
