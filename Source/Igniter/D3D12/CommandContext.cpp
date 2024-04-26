@@ -199,20 +199,6 @@ namespace ig
         }
     }
 
-    void CommandContext::SetDescriptorHeaps(const std::span<std::reference_wrapper<DescriptorHeap>> targetDescriptorHeaps)
-    {
-        IG_CHECK(IsValid());
-        IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics || cmdListTargetQueueType == EQueueType::Compute);
-        std::vector<ID3D12DescriptorHeap*> descriptorHeaps(targetDescriptorHeaps.size());
-        std::transform(targetDescriptorHeaps.begin(), targetDescriptorHeaps.end(), descriptorHeaps.begin(),
-            [](DescriptorHeap& descriptorHeap)
-            {
-                IG_CHECK(descriptorHeap);
-                return &descriptorHeap.GetNative();
-            });
-        cmdList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()), descriptorHeaps.data());
-    }
-
     void CommandContext::SetDescriptorHeaps(const std::span<DescriptorHeap*> descriptorHeaps)
     {
         IG_CHECK(IsValid());
@@ -225,7 +211,7 @@ namespace ig
 
     void CommandContext::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
     {
-        std::reference_wrapper<DescriptorHeap> descriptorHeaps[] = {std::ref(descriptorHeap)};
+        DescriptorHeap* descriptorHeaps[] = {&descriptorHeap};
         SetDescriptorHeaps(descriptorHeaps);
     }
 
