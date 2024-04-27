@@ -43,10 +43,15 @@ namespace fe
                 continue;
             }
 
-            entt::meta_prop nameProperty = type.prop(ig::meta::NameProperty);
+            entt::meta_prop nameProperty = type.prop(ig::meta::TitleCaseNameProperty);
             if (!nameProperty)
             {
-                continue;
+                // fallback
+                nameProperty = type.prop(ig::meta::NameProperty);
+                if (!nameProperty)
+                {
+                    continue;
+                }
             }
 
             const String* name = nameProperty.value().try_cast<String>();
@@ -56,6 +61,7 @@ namespace fe
             }
 
             bHasDisplayableComponent = true;
+
             if (!ImGui::CollapsingHeader(name->ToCString(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
             {
                 continue;

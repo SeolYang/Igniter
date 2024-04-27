@@ -81,6 +81,8 @@ namespace ig
 
         [[nodiscard]] std::vector<String> Split(const String delimiter) const;
 
+        [[nodiscard]] String ToTitleCase() const;
+
         static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
     private:
@@ -101,8 +103,6 @@ namespace ig
     {
         return std::wstring_view{wstr, count};
     }
-
-    String CamelCaseToTitleCase(const String& str);
 }    // namespace ig
 
 template <>

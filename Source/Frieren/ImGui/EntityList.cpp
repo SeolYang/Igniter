@@ -53,7 +53,7 @@ namespace fe
                         }
 
                         bool bIsOpened = ImGui::TreeNodeEx(entityName.c_str(), nodeFlags);
-                        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                        if ((ImGui::IsItemClicked() || ImGui::IsItemFocused()) && !ImGui::IsItemToggledOpen())
                         {
                             selectedEntity = entity;
                             bIsItemClicked = true;

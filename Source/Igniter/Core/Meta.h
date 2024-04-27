@@ -6,6 +6,8 @@
 namespace ig::meta
 {
     constexpr inline entt::hashed_string NameProperty = "Name"_hs;
+    constexpr inline entt::hashed_string TitleCaseNameProperty = "TitleCaseName"_hs;
+    constexpr inline entt::hashed_string DescriptionProperty = "Description"_hs;
     constexpr inline entt::hashed_string ComponentProperty = "Component"_hs;
     constexpr inline entt::hashed_string AddComponentFunc = "AddComponent"_hs;
     constexpr inline entt::hashed_string RemoveComponentFunc = "RemoveComponent"_hs;
@@ -52,16 +54,17 @@ namespace ig
         };                              \
     }
 
-#define IG_DEFINE_TYPE_META(T)                                \
-    namespace details::meta                                   \
-    {                                                         \
-        T##_DefineMeta::T##_DefineMeta()                      \
-        {                                                     \
-            entt::meta<T>().type(TypeHash<T>);                \
-            entt::meta<T>().prop(ig::meta::NameProperty, #T); \
-            DefineMeta<T>();                                  \
-        }                                                     \
-        T##_DefineMeta T##_DefineMeta::_reg;                  \
+#define IG_DEFINE_TYPE_META(T)                                                            \
+    namespace details::meta                                                               \
+    {                                                                                     \
+        T##_DefineMeta::T##_DefineMeta()                                                  \
+        {                                                                                 \
+            entt::meta<T>().type(TypeHash<T>);                                            \
+            entt::meta<T>().prop(ig::meta::NameProperty, #T);                             \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase()); \
+            DefineMeta<T>();                                                              \
+        }                                                                                 \
+        T##_DefineMeta T##_DefineMeta::_reg;                                              \
     }
 
 #define IG_DEFINE_TYPE_META_AS_COMPONENT(T)                                                        \
@@ -71,6 +74,7 @@ namespace ig
         {                                                                                          \
             entt::meta<T>().type(TypeHash<T>);                                                     \
             entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                                 \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase());          \
             entt::meta<T>().prop(ig::meta::ComponentProperty);                                     \
             entt::meta<T>().template func<&ig::AddComponent<T>>(ig::meta::AddComponentFunc);       \
             entt::meta<T>().template func<&ig::RemoveComponent<T>>(ig::meta::RemoveComponentFunc); \

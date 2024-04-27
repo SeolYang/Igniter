@@ -134,6 +134,24 @@ namespace ig
         return std::vector<String>{splitStrViews.begin(), splitStrViews.end()};
     }
 
+    String String::ToTitleCase() const 
+    {
+        if (!IsValid())
+        {
+            return String{};
+        }
+
+        static const std::regex LetterSpacingRegex{"([a-z])([A-Z])", std::regex_constants::optimize};
+        static const std::regex NumberSpacingRegex{"([a-zA-Z])([0-9])", std::regex_constants::optimize};
+        static const String ReplacePattern{"$1 $2"};
+
+        String spacedStr = RegexReplace(*this, LetterSpacingRegex, ReplacePattern);
+        spacedStr = RegexReplace(spacedStr, NumberSpacingRegex, ReplacePattern);
+        std::string value{spacedStr.ToStandard()};
+        std::transform(value.begin(), value.begin() + 1, value.begin(), [](const char character) { return (char) std::toupper((int) character); });
+        return String{value};
+    }
+
     std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()
     {
         ReadOnlyLock lock{GetHashStringMapMutex()};
@@ -148,24 +166,5 @@ namespace ig
         cachedStrs.emplace_back(0, std::string_view{""});
 
         return cachedStrs;
-    }
-
-    String CamelCaseToTitleCase(const String& str)
-    {
-        if (!str.IsValid())
-        {
-            return String{};
-        }
-
-        static const std::regex LetterSpacingRegex{"([a-z])([A-Z])", std::regex_constants::optimize};
-        static const std::regex NumberSpacingRegex{"([a-zA-Z])([0-9])", std::regex_constants::optimize};
-        static const String ReplacePattern{"$1 $2"};
-
-        String spacedStr = RegexReplace(str, LetterSpacingRegex, ReplacePattern);
-        spacedStr = RegexReplace(spacedStr, NumberSpacingRegex, ReplacePattern);
-        std::string value{spacedStr.ToStandard()};
-        std::transform(value.begin(), value.begin() + 1, value.begin(), [](const char character) { return (char) std::toupper((int) character); });
-
-        return String{value};
     }
 }    // namespace ig
