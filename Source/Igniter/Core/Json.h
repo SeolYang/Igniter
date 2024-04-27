@@ -42,7 +42,12 @@ namespace ig::details
     concept ConvertibleJsonInternalArray = std::is_same<T, Json::array_t>::value;
 
     template <typename T>
-    concept ConvertibleJsonInternalUnsigned = !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
+    concept ConvertibleJsonInternalSigned =
+        !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_signed_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
+
+    template <typename T>
+    concept ConvertibleJsonInternalUnsigned =
+        !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
 
     template <typename T>
     concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, Json::number_float_t>;
@@ -60,6 +65,12 @@ namespace ig::details
     struct JsonInternal<T>
     {
         using Type = Json::array_t;
+    };
+
+    template <ConvertibleJsonInternalSigned T>
+    struct JsonInternal<T>
+    {
+        using Type = Json::number_integer_t;
     };
 
     template <ConvertibleJsonInternalUnsigned T>

@@ -62,11 +62,11 @@ namespace ig
         void RegisterEngineDefault();
         void UnRegisterEngineDefault();
 
-        /* 
-        * #sy_note 에셋 매니저를 사용한 리소스의 로드/언로드
-        * 에셋 매니저가 제공하는 로드 함수를 통해 특정 에셋을 로드하면
-        * 에셋의 레퍼런스 카운트가 증가함. 즉 반드시 1번의 로드에 최소 1번의 언로드를 매칭 시켜주어야 함.
-        */
+        /*
+         * #sy_note 에셋 매니저를 사용한 리소스의 로드/언로드
+         * 에셋 매니저가 제공하는 로드 함수를 통해 특정 에셋을 로드하면
+         * 에셋의 레퍼런스 카운트가 증가함. 즉 반드시 1번의 로드에 최소 1번의 언로드를 매칭 시켜주어야 함.
+         */
 
         Guid Import(const String resPath, const TextureImportDesc& desc);
         [[nodiscard]] Handle<Texture> LoadTexture(const Guid& guid);
@@ -79,6 +79,40 @@ namespace ig
         Guid Import(const String virtualPath, const MaterialCreateDesc& createDesc);
         [[nodiscard]] Handle<Material> LoadMaterial(const Guid& guid);
         [[nodiscard]] Handle<Material> LoadMaterial(const String virtualPath);
+
+        template <Asset T>
+        [[nodiscard]] Handle<T> Load(const Guid& guid)
+        {
+            if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
+            {
+                return LoadTexture(guid);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::StaticMesh)
+            {
+                return LoadStaticMesh(guid);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
+            {
+                return LoadMaterial(guid);
+            }
+        }
+
+        template <Asset T>
+        [[nodiscard]] Handle<T> Load(const String virtualPath)
+        {
+            if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
+            {
+                return LoadTexture(virtualPath);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::StaticMesh)
+            {
+                return LoadStaticMesh(virtualPath);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
+            {
+                return LoadMaterial(virtualPath);
+            }
+        }
 
         template <Asset T>
         bool Reload(const Guid& guid)
@@ -194,7 +228,6 @@ namespace ig
 
         details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType);
         const details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType) const;
-
 
         template <Asset T, ResultStatus ImportStatus>
         std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)

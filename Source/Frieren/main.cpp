@@ -63,7 +63,7 @@ int main()
         for (Guid guid : homuraMeshGuids)
         {
             homuraMeshFutures.emplace_back(std::async(
-                std::launch::async, [&assetManager](const Guid guid) { return assetManager.LoadStaticMesh(guid); }, guid));
+                std::launch::async, [&assetManager](const Guid guid) { return assetManager.Load<StaticMesh>(guid); }, guid));
         }
 
         for (std::future<Handle<StaticMesh>>& staticMeshFuture : homuraMeshFutures)
