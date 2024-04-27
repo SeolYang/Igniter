@@ -110,6 +110,7 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 #pragma warning(push)
 #pragma warning(disable : 26827)
 #include <entt/entt.hpp>
+using namespace entt::literals;
 #pragma warning(pop)
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -144,7 +145,7 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 
 #include <Core/Assert.h>
 #include <Core/Types.h>
-#include <Core/Serializable.h>
+#include <Core/Serialization.h>
 #include <Core/Format.h>
 
 namespace ig /* Constants */

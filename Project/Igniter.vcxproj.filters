@@ -138,7 +138,7 @@
     <ClInclude Include="..\Source\Igniter\Core\Result.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Core\Serializable.h">
+    <ClInclude Include="..\Source\Igniter\Core\Serialization.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\Core\String.h">
@@ -246,9 +246,6 @@
     <ClInclude Include="..\Source\Igniter\Component\CameraArchetype.h">
       <Filter>Source\Component\Archetype</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h">
-      <Filter>Source\Gameplay</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\D3D12\GpuSync.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
@@ -342,6 +339,9 @@
     <ClInclude Include="..\Source\Igniter\Render\Swapchain.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Core\Meta.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -424,9 +424,6 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Core\Engine.cpp">
       <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp">
-      <Filter>Source\Gameplay</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Component\NameComponent.cpp">
       <Filter>Source\Component</Filter>

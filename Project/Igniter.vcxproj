@@ -58,9 +58,10 @@
     <ClInclude Include="..\Source\Igniter\Core\Log.h" />
     <ClInclude Include="..\Source\Igniter\Core\Math.h" />
     <ClInclude Include="..\Source\Igniter\Core\Memory.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Meta.h" />
     <ClInclude Include="..\Source\Igniter\Core\Regex.h" />
     <ClInclude Include="..\Source\Igniter\Core\Result.h" />
-    <ClInclude Include="..\Source\Igniter\Core\Serializable.h" />
+    <ClInclude Include="..\Source\Igniter\Core\Serialization.h" />
     <ClInclude Include="..\Source\Igniter\Core\String.h" />
     <ClInclude Include="..\Source\Igniter\Core\ThreadUIDGenerator.h" />
     <ClInclude Include="..\Source\Igniter\Core\Timer.h" />
@@ -85,7 +86,6 @@
     <ClInclude Include="..\Source\Igniter\Filesystem\CoFileWatcher.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h" />
-    <ClInclude Include="..\Source\Igniter\Gameplay\ComponentRegistry.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
@@ -157,7 +157,6 @@
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\CoFileWatcher.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp" />
-    <ClCompile Include="..\Source\Igniter\Gameplay\ComponentRegistry.cpp" />
     <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiExtensions.cpp" />

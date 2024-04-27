@@ -71,12 +71,12 @@ namespace ig
         spdlog::logger& QueryCategory()
         {
             UniqueLock lock{categoryMapMutex};
-            auto itr = categoryMap.find(TypeHash<C>);
+            auto itr = categoryMap.find(TypeHash64<C>);
             if (itr == categoryMap.end())
             {
                 spdlog::logger* newLogger = new spdlog::logger(C::CategoryName.data(), {consoleSink, fileSink});
                 newLogger->set_level(spdlog::level::trace);
-                itr = categoryMap.insert(itr, std::make_pair(TypeHash<C>, newLogger));
+                itr = categoryMap.insert(itr, std::make_pair(TypeHash64<C>, newLogger));
             }
 
             return *itr->second;

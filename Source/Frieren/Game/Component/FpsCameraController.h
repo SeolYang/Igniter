@@ -1,6 +1,6 @@
 #pragma once
-#include <Gameplay/ComponentRegistry.h>
 #include <Core/Math.h>
+#include <Core/Meta.h>
 
 namespace fe
 {
@@ -16,6 +16,10 @@ namespace fe
         {
             return ig::Quaternion::CreateFromYawPitchRoll(ig::Deg2Rad(CurrentYaw), ig::Deg2Rad(CurrentPitch), 0.f);
         }
+
+        Json& Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
+        static void OnInspector(Registry* registry, const Entity entity);
 
     public:
         float MovementPower = 25.f;
@@ -33,5 +37,5 @@ namespace fe
         constexpr static float MaxPitchDegrees = 45.f;
     };
 
-    IG_DECLARE_COMPONENT(FpsCameraController);
+    IG_DECLARE_TYPE_META(FpsCameraController);
 }    // namespace fe

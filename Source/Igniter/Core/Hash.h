@@ -74,13 +74,10 @@ namespace ig
      * #sy_ref https://stackoverflow.com/questions/56292104/hashing-types-at-compile-time-in-c17-c2a
      */
     template <typename T>
-    consteval uint64_t EvalTypeHash() noexcept
-    {
-        return EvalCRC64(GetTypeName<T>());
-    }
+    constexpr uint64_t TypeHash64 = EvalCRC64(GetTypeName<T>());
 
     template <typename T>
-    constexpr uint64_t TypeHash = EvalTypeHash<std::decay_t<T>>();
+    constexpr uint32_t TypeHash = entt::type_hash<T>::value();
 
     /* #sy_ref https://stackoverflow.com/questions/3058139/hash-32bit-int-to-16bit-int */
     static constexpr uint16_t ReduceHashTo16Bits(const uint64_t hash)

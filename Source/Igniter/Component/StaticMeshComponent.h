@@ -1,10 +1,6 @@
 #pragma once
 #include <Core/Handle.h>
-#include <Asset/Common.h>
-#include <Asset/StaticMesh.h>
-#include <Asset/Material.h>
-#include <Asset/AssetCache.h>
-#include <Gameplay/ComponentRegistry.h>
+#include <Core/Meta.h>
 
 namespace ig
 {
@@ -14,9 +10,19 @@ namespace ig
     public:
         ~StaticMeshComponent();
 
+        Json& Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
+        static void OnInspector(Registry* registry, const Entity entity);
+
     public:
         Handle<StaticMesh> Mesh{};
+
+    private:
+        constexpr static std::string_view ContainerKey{"StaticMeshComponent"};
+        constexpr static std::string_view MeshGuidKey{"StaticMeshGuid"};
+
     };
 
-    IG_DECLARE_COMPONENT(StaticMeshComponent)
+    // #sy_todo_priority new meta features!!
+    IG_DECLARE_TYPE_META(StaticMeshComponent);
 }    // namespace ig

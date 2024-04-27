@@ -169,7 +169,7 @@ namespace ig
         template <Asset T>
         void Unload(const Handle<T> handle)
         {
-            /* #sy_todo_priority not thread safe...*/
+            /* #sy_todo not thread safe... make it safe! */
             details::AssetCache<T>& cache = GetCache<T>();
             T* ptr = cache.Lookup(handle);
             if (ptr != nullptr)

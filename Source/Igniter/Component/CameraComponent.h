@@ -1,6 +1,6 @@
 #pragma once
-#include <Gameplay/ComponentRegistry.h>
 #include <Core/Math.h>
+#include <Core/Meta.h>
 
 namespace ig
 {
@@ -14,6 +14,10 @@ namespace ig
             const float fovRads = Deg2Rad(Fov);
             return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
         }
+
+        Json& Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
+        static void OnInspector(Registry* registry, const Entity entity);
 
     public:
         Viewport CameraViewport{};
@@ -29,7 +33,6 @@ namespace ig
     {
     };
 
-    IG_DECLARE_COMPONENT(CameraComponent);
-
-    IG_DECLARE_COMPONENT(MainCameraTag);
+    IG_DECLARE_TYPE_META(CameraComponent);
+    IG_DECLARE_TYPE_META(MainCameraTag);
 }    // namespace ig

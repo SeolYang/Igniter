@@ -93,7 +93,7 @@ namespace ig
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
-            newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(newHandle.Value, ReduceHashTo16Bits(TypeHash<Ty>));
+            newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(newHandle.Value, ReduceHashTo16Bits(TypeHash64<Ty>));
 
 #ifdef IG_TRACK_LEAKED_HANDLE
             lastCallStackTable[newSlot] = CallStack::Capture();
