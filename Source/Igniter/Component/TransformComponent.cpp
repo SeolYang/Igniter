@@ -1,6 +1,7 @@
 #include <Igniter.h>
 #include <Core/Math.h>
 #include <Core/Json.h>
+#include <Core/Serialization.h>
 #include <ImGui/ImGuiExtensions.h>
 #include <Component/TransformComponent.h>
 
@@ -10,8 +11,7 @@ namespace ig
     void DefineMeta<TransformComponent>()
     {
         IG_SET_META_ON_INSPECTOR_FUNC(TransformComponent, TransformComponent::OnInspector);
-        IG_SET_META_SERIALIZE_JSON(TransformComponent);
-        IG_SET_META_DESERIALIZE_JSON(TransformComponent);
+        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(TransformComponent);
     }
 
     Json& TransformComponent::Serialize(Json& archive) const 

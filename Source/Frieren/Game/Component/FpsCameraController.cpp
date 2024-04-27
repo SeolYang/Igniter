@@ -1,5 +1,6 @@
 #include <Frieren.h>
 #include <Core/Json.h>
+#include <Core/Serialization.h>
 #include <Game/Component/FpsCameraController.h>
 
 namespace fe
@@ -8,8 +9,7 @@ namespace fe
     void DefineMeta<FpsCameraController>()
     {
         IG_SET_META_ON_INSPECTOR_FUNC(FpsCameraController, FpsCameraController::OnInspector);
-        IG_SET_META_SERIALIZE_JSON(FpsCameraController);
-        IG_SET_META_DESERIALIZE_JSON(FpsCameraController);
+        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(FpsCameraController);
     }
 
     Json& FpsCameraController::Serialize(Json& archive) const
@@ -22,7 +22,7 @@ namespace fe
         return archive;
     }
 
-    const Json& FpsCameraController::Deserialize(const Json& archive) 
+    const Json& FpsCameraController::Deserialize(const Json& archive)
     {
         IG_DESERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPower, 25.f);
         IG_DESERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPowerAttenuationTime, 0.65f);

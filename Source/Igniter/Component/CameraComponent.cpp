@@ -9,8 +9,7 @@ namespace ig
     void DefineMeta<CameraComponent>()
     {
         IG_SET_META_ON_INSPECTOR_FUNC(CameraComponent, CameraComponent::OnInspector);
-        IG_SET_META_SERIALIZE_JSON(CameraComponent);
-        IG_SET_META_DESERIALIZE_JSON(CameraComponent);
+        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(CameraComponent);
     }
 
     Json& CameraComponent::Serialize(Json& archive) const

@@ -1,5 +1,6 @@
 #include <Igniter.h>
 #include <Core/Json.h>
+#include <Core/Serialization.h>
 #include <Component/NameComponent.h>
 
 namespace ig
@@ -8,8 +9,7 @@ namespace ig
     void DefineMeta<NameComponent>()
     {
         IG_SET_META_ON_INSPECTOR_FUNC(NameComponent, NameComponent::OnInspector);
-        IG_SET_META_SERIALIZE_JSON(NameComponent);
-        IG_SET_META_DESERIALIZE_JSON(NameComponent);
+        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(NameComponent);
     }
 
     Json& NameComponent::Serialize(Json& archive) const

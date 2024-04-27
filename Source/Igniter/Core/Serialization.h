@@ -1,17 +1,20 @@
 #pragma once
 #include <Igniter.h>
 
+namespace ig::meta
+{
+    constexpr inline entt::hashed_string SerializeComponentJsonFunc = "SerializeComponentJson"_hs;
+    constexpr inline entt::hashed_string DeserializeComponentJsonFunc = "DeserializeComponentJson"_hs;
+}    // namespace ig::meta
+
 namespace ig
 {
     template <typename Archive, typename Ty>
-    concept Serializable = requires(Archive& archive, const Ty& data) {
+    concept Serializable = requires(Archive& archive, Ty& data, const Ty& constData) {
         {
-            data.Serialize(archive)
+            constData.Serialize(archive)
         } -> std::same_as<Archive&>;
-    };
 
-    template <typename Archive, typename Ty>
-    concept Deserializable = requires(const Archive& archive, Ty& data) {
         {
             data.Deserialize(archive)
         } -> std::same_as<const Archive&>;
@@ -25,7 +28,7 @@ namespace ig
     }
 
     template <typename Archive, typename Ty>
-        requires Deserializable<Archive, Ty>
+        requires Serializable<Archive, Ty>
     const Archive& Deserialize(const Archive& archive, Ty& data)
     {
         return data.Deserialize(archive);
@@ -39,43 +42,38 @@ namespace ig
     }
 
     template <typename Archive, typename Ty>
-        requires Deserializable<Archive, Ty>
+        requires Serializable<Archive, Ty>
     const Archive& operator>>(const Archive& archive, Ty& data)
     {
         return data.Deserialize(archive);
     }
 
-    // 정적으로 타입을 알 수 없는 경우 사용 할 것!
     template <typename Archive, typename Ty>
         requires Serializable<Archive, Ty>
-    void SerializeTypeless(Archive* archive, const void* dataPtr)
+    void SerializeComponent(Ref<Archive> archiveRef, Ref<const Registry> registryRef, const Entity entity)
     {
-        if (archive == nullptr || dataPtr == nullptr)
+        const Registry& registry = registryRef.get();
+        if (registry.all_of<Ty>(entity))
         {
-            return;
+            const Ty& component = registry.get<Ty>(entity);
+            component.Serialize(archiveRef.get());
         }
-
-        reinterpret_cast<const Ty*>(dataPtr)->Serialize(*archive);
     }
 
     template <typename Archive, typename Ty>
-        requires Deserializable<Archive, Ty>
-    void DeserializeTypeless(const Archive* archive, void* dataPtr)
+        requires Serializable<Archive, Ty>
+    void DeserializeComponent(Ref<const Archive> archiveRef, Ref<Registry> registryRef, const Entity entity)
     {
-        if (archive == nullptr || dataPtr == nullptr)
+        Registry& registry = registryRef.get();
+        if (registry.all_of<Ty>(entity))
         {
-            return;
+            Ty& component = registry.get<Ty>(entity);
+            component.Deserialize(archiveRef.get());
         }
-
-        reinterpret_cast<Ty*>(dataPtr)->Deserialize(*archive);
     }
-
-    constexpr inline entt::hashed_string SerializeJsonFunc = "SerializeJson"_hs;
-    constexpr inline entt::hashed_string DeserializeJsonFunc = "DeserializeJson"_hs;
 }    // namespace ig
 
-#define IG_SET_META_SERIALIZE_JSON(T) entt::meta<T>().template func<&ig::SerializeTypeless<ig::Json, T>>(ig::SerializeJsonFunc)
-#define IG_SET_META_DESERIALIZE_JSON(T) entt::meta<T>().template func<&ig::DeserializeTypeless<ig::Json, T>>(ig::DeserializeJsonFunc)
-
-// #sy_note 지원 타입 더 늘리기 위해서는 Serialize 할 타입에 대해 특정 Archive에 대한 함수를 오버로딩 해주고. DefineMeta 에서 자유(독립) 함수를
-// 등록 해주면
+// #sy_note 'T'가 Trivial Type 이면
+#define IG_SET_META_JSON_SERIALIZABLE_COMPONENT(T)                                                             \
+    entt::meta<T>().template func<&ig::SerializeComponent<ig::Json, T>>(ig::meta::SerializeComponentJsonFunc); \
+    entt::meta<T>().template func<&ig::DeserializeComponent<ig::Json, T>>(ig::meta::DeserializeComponentJsonFunc);

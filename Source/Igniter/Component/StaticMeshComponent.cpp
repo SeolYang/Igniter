@@ -10,8 +10,7 @@ namespace ig
     void DefineMeta<StaticMeshComponent>()
     {
         IG_SET_META_ON_INSPECTOR_FUNC(StaticMeshComponent, StaticMeshComponent::OnInspector);
-        IG_SET_META_SERIALIZE_JSON(StaticMeshComponent);
-        IG_SET_META_DESERIALIZE_JSON(StaticMeshComponent);
+        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(StaticMeshComponent);
     }
 
     StaticMeshComponent::~StaticMeshComponent()

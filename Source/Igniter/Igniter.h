@@ -145,7 +145,6 @@ using namespace entt::literals;
 
 #include <Core/Assert.h>
 #include <Core/Types.h>
-#include <Core/Serialization.h>
 #include <Core/Format.h>
 
 namespace ig /* Constants */

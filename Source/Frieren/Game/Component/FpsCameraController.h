@@ -7,6 +7,8 @@ namespace fe
     struct FpsCameraController
     {
     public:
+        ~FpsCameraController() = default;
+
         ig::Vector3 GetCurrentVelocity() const
         {
             return ig::Lerp(LatestImpulse, ig::Vector3::Zero, ig::SmoothStep(0.f, MovementPowerAttenuationTime, ElapsedTimeAfterLatestImpulse));
