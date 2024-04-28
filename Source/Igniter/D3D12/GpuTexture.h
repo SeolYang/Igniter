@@ -5,7 +5,6 @@
 namespace ig
 {
     class RenderDevice;
-
     class GpuTexture final
     {
         friend class RenderDevice;

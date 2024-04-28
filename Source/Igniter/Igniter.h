@@ -142,6 +142,7 @@ using namespace entt::literals;
 
 #include <EASTL/vector.h>
 #include <EASTL/array.h>
+#include <EASTL/list.h>
 
 #include <Core/Assert.h>
 #include <Core/Types.h>

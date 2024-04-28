@@ -29,6 +29,19 @@ namespace fe
 
     void FpsCameraControllSystem::Update(ig::Registry& registry)
     {
+        const auto& inputManager = Igniter::GetInputManager();
+        const Action moveLeftAction = inputManager.GetAction(moveLeftActionHandle);
+        const Action moveRightAction = inputManager.GetAction(moveRightActionHandle);
+        const Action moveForwardAction = inputManager.GetAction(moveForwardActionHandle);
+        const Action moveBackwardAction = inputManager.GetAction(moveBackwardActionHandle);
+        const Action moveUpAction = inputManager.GetAction(moveUpActionHandle);
+        const Action moveDownAction = inputManager.GetAction(moveDownActionHandle);
+
+        const Axis turnYawAxis = inputManager.GetAxis(turnYawAxisHandle);
+        const Axis turnPitchAxis = inputManager.GetAxis(turnPitchAxisHandle);
+
+        const Action sprintAction = inputManager.GetAction(sprintActionHandle);
+
         const auto fpsCamView = registry.view<ig::TransformComponent, FpsCameraController, ig::CameraComponent>();
         for (const ig::Entity entity : fpsCamView)
         {
@@ -37,19 +50,6 @@ namespace fe
 
             if (!bIgnoreInput)
             {
-                const auto& inputManager = Igniter::GetInputManager();
-                const Action moveLeftAction = inputManager.GetAction(moveLeftActionHandle);
-                const Action moveRightAction = inputManager.GetAction(moveRightActionHandle);
-                const Action moveForwardAction = inputManager.GetAction(moveForwardActionHandle);
-                const Action moveBackwardAction = inputManager.GetAction(moveBackwardActionHandle);
-                const Action moveUpAction = inputManager.GetAction(moveUpActionHandle);
-                const Action moveDownAction = inputManager.GetAction(moveDownActionHandle);
-
-                const Axis turnYawAxis = inputManager.GetAxis(turnYawAxisHandle);
-                const Axis turnPitchAxis = inputManager.GetAxis(turnPitchAxisHandle);
-
-                const Action sprintAction = inputManager.GetAction(sprintActionHandle);
-
                 /* Handle Movements */
                 const bool bShouldSprint = sprintAction.IsAnyPressing();
                 const float sprintFactor = bShouldSprint ? controller.SprintFactor : 1.f;

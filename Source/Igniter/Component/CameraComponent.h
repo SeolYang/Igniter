@@ -26,13 +26,9 @@ namespace ig
         /* Degrees Field Of View */
         float Fov = 45.f;
 
+        bool bIsMainCamera = false;
         /* #sy_improvements Support Orthographic? */
     };
 
-    struct MainCameraTag
-    {
-    };
-
     IG_DECLARE_TYPE_META(CameraComponent);
-    IG_DECLARE_TYPE_META(MainCameraTag);
 }    // namespace ig

@@ -135,7 +135,7 @@ namespace ig
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
-        auto cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
+        auto cameraView = registry.view<CameraComponent, TransformComponent>();
         IG_CHECK(cameraView.size_hint() == 1);
         for (auto [entity, camera, transformData] : cameraView.each())
         {

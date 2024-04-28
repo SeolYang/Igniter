@@ -154,7 +154,6 @@ int main()
             cameraComponent.CameraViewport = window.GetViewport();
 
             registry.emplace<FpsCameraController>(cameraEntity);
-            registry.emplace<MainCameraTag>(cameraEntity);
         }
         /********************************************/
 

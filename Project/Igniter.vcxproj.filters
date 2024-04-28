@@ -345,6 +345,9 @@
     <ClInclude Include="..\Source\Igniter\Render\RenderCommon.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Render\Scene.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -510,6 +513,9 @@
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Render\Swapchain.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Render\Scene.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>

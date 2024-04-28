@@ -22,10 +22,14 @@ namespace ig
         IG_SERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.minDepth);
         IG_SERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.maxDepth);
 
-        /* Miscs */
+        /* Perspective */
         IG_SERIALIZE_JSON_SIMPLE(CameraComponent, archive, NearZ);
         IG_SERIALIZE_JSON_SIMPLE(CameraComponent, archive, FarZ);
         IG_SERIALIZE_JSON_SIMPLE(CameraComponent, archive, Fov);
+
+        /* Miscs */
+        IG_SERIALIZE_JSON_SIMPLE(CameraComponent, archive, bIsMainCamera);
+
         return archive;
     }
 
@@ -39,10 +43,14 @@ namespace ig
         IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.minDepth, 0.f);
         IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.maxDepth, 1.f);
 
-        /* Miscs */
+        /* Perspective */
         IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, NearZ, 0.1f);
         IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, FarZ, 1000.f);
         IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, Fov, 45.f);
+
+        /* Miscs */
+        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, bIsMainCamera, false);
+
         return archive;
     }
 
@@ -59,12 +67,8 @@ namespace ig
         ImGui::InputFloat("Y", &camera.CameraViewport.y);
         ImGui::InputFloat("Width", &camera.CameraViewport.width);
         ImGui::InputFloat("Height", &camera.CameraViewport.height);
+
+        ImGui::Checkbox("Is Main Camera", &camera.bIsMainCamera);
     }
     IG_DEFINE_TYPE_META_AS_COMPONENT(CameraComponent);
-
-    template <>
-    void DefineMeta<MainCameraTag>()
-    {
-    }
-    IG_DEFINE_TYPE_META_AS_COMPONENT(MainCameraTag);
 }    // namespace ig
