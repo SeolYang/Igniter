@@ -345,8 +345,8 @@
     <ClInclude Include="..\Source\Igniter\Render\RenderCommon.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Render\Scene.h">
-      <Filter>Source\Render</Filter>
+    <ClInclude Include="..\Source\Igniter\Gameplay\Scene.h">
+      <Filter>Source\Gameplay</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -515,8 +515,8 @@
     <ClCompile Include="..\Source\Igniter\Render\Swapchain.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Render\Scene.cpp">
-      <Filter>Source\Render</Filter>
+    <ClCompile Include="..\Source\Igniter\Gameplay\Scene.cpp">
+      <Filter>Source\Gameplay</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

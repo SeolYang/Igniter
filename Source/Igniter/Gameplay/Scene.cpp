@@ -1,7 +1,7 @@
 #include <Igniter.h>
 #include <Component/CameraComponent.h>
 #include <Render/RenderContext.h>
-#include <Render/Scene.h>
+#include <Gameplay/Scene.h>
 
 namespace ig
 {

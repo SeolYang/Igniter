@@ -61,13 +61,13 @@ namespace ig
         uint32_t height = 0;
     };
 
-    class Scene
+    class Scene final
     {
     public:
         Scene(RenderContext& renderContext);
         Scene(const Scene&) = delete;
         Scene(Scene&&) noexcept = default;
-        virtual ~Scene() = default;
+        ~Scene() = default;
 
         Scene& operator=(const Scene&) = delete;
         Scene& operator=(Scene&&) noexcept = default;
