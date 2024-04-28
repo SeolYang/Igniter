@@ -73,7 +73,6 @@ namespace ig
     }
 }    // namespace ig
 
-// #sy_note 'T'가 Trivial Type 이면
 #define IG_SET_META_JSON_SERIALIZABLE_COMPONENT(T)                                                             \
     entt::meta<T>().template func<&ig::SerializeComponent<ig::Json, T>>(ig::meta::SerializeComponentJsonFunc); \
     entt::meta<T>().template func<&ig::DeserializeComponent<ig::Json, T>>(ig::meta::DeserializeComponentJsonFunc);

@@ -31,7 +31,7 @@ namespace ig
 
         Ptr<DescriptorHeap> descriptorHeap;
         GpuView mainSrv;
-        std::vector<GpuView> reservedSharedResourceViews;
+        std::vector<GpuView> reservedSharedResourceViews; // 이부분 개선하고 싶음
 
         std::vector<CommandContext> commandContexts;
     };

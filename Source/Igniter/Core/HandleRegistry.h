@@ -25,7 +25,7 @@ namespace ig::details
 
 namespace ig
 {
-    template <typename Ty>
+    template <typename Ty, typename Tag = DefaultHandleTag>
         requires(sizeof(Ty) >= sizeof(uint32_t))
     class HandleRegistry final
     {
@@ -75,7 +75,7 @@ namespace ig
         [[nodiscard]] size_t GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
 
         template <typename... Args>
-        Handle<Ty> Create(Args&&... args)
+        Handle<Ty, DefaultHandleTag> Create(Args&&... args)
         {
             if (freeSlots.empty() && !GrowChunks())
             {
@@ -83,7 +83,7 @@ namespace ig
             }
             IG_CHECK(!freeSlots.empty());
 
-            Handle<Ty> newHandle{0};
+            Handle<Ty, DefaultHandleTag> newHandle{0};
             const SlotType newSlot = freeSlots.back();
             freeSlots.pop_back();
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
@@ -102,7 +102,7 @@ namespace ig
             return newHandle;
         }
 
-        void Destroy(const Handle<Ty> handle)
+        void Destroy(const Handle<Ty, DefaultHandleTag> handle)
         {
             if (handle.IsNull())
             {
@@ -140,7 +140,7 @@ namespace ig
             freeSlots.push_back(slot);
         }
 
-        Ty* Lookup(const Handle<Ty> handle)
+        Ty* Lookup(const Handle<Ty, DefaultHandleTag> handle)
         {
             if (handle.IsNull())
             {
@@ -167,7 +167,7 @@ namespace ig
             return CalcAddressOfSlot(slot);
         }
 
-        const Ty* Lookup(const Handle<Ty> handle) const
+        const Ty* Lookup(const Handle<Ty, DefaultHandleTag> handle) const
         {
             if (handle.IsNull())
             {
@@ -306,8 +306,8 @@ namespace ig
         eastl::vector<uint8_t*> chunks{};
 
         uint32_t slotCapacity = 0;
-        eastl::vector<SlotType> freeSlots;
-        eastl::vector<VersionType> slotVersions;
+        eastl::vector<SlotType> freeSlots{};
+        eastl::vector<VersionType> slotVersions{};
 
 #ifdef IG_TRACK_LEAKED_HANDLE
         eastl::vector<DWORD> lastCallStackTable;

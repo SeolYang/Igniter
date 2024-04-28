@@ -3,7 +3,8 @@
 
 namespace ig
 {
-    template <typename Ty>
+    class DefaultHandleTag;
+    template <typename Ty, typename Tag = DefaultHandleTag>
     struct Handle final
     {
     public:
