@@ -210,8 +210,8 @@ namespace ig
         }
         renderCmdCtx->End();
 
-        Ref<CommandContext> renderCmdCtxs[] = {*renderCmdCtx};
-        mainGfxQueue.ExecuteContexts(renderCmdCtxs);
+        CommandContext* renderCmdCtxPtrs[] = {renderCmdCtx.get()};
+        mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
     }
 
     void Renderer::EndFrame(const uint8_t localFrameIdx)

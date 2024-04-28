@@ -19,9 +19,7 @@ namespace ig
     ImGuiRenderer::ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext)
         : frameManager(frameManager)
         , renderContext(renderContext)
-        , descriptorHeap(MakePtr<DescriptorHeap>(
-              renderContext.GetRenderDevice().CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 3).value()))
-        , mainSrv(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView))
+        , mainSrv(renderContext.CreateGpuView(EGpuViewType::ShaderResourceView))
         , gpuViewManager(MakePtr<GpuViewManager>(renderContext.GetRenderDevice()))
     {
         IMGUI_CHECKVERSION();
@@ -34,17 +32,16 @@ namespace ig
         // ImGui::StyleColorsDark();
         SetupDefaultTheme();
 
+        GpuView* mainSrvPtr = renderContext.Lookup(mainSrv);
         RenderDevice& renderDevice = renderContext.GetRenderDevice();
         ImGui_ImplWin32_Init(window.GetNative());
-        ImGui_ImplDX12_Init(&renderDevice.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM, &descriptorHeap->GetNative(), mainSrv.CPUHandle,
-            mainSrv.GPUHandle);
+        ImGui_ImplDX12_Init(&renderDevice.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM, &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), mainSrvPtr->CPUHandle,
+            mainSrvPtr->GPUHandle);
 
         commandContexts.reserve(NumFramesInFlight);
-        reservedSharedResourceViews.reserve(NumFramesInFlight);
         for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
             commandContexts.emplace_back(renderDevice.CreateCommandContext("ImGui Cmd Ctx", EQueueType::Graphics).value());
-            reservedSharedResourceViews.emplace_back(descriptorHeap->Allocate(EGpuViewType::ShaderResourceView).value());
         }
     }
 
@@ -56,12 +53,7 @@ namespace ig
 
         commandContexts.clear();
 
-        descriptorHeap->Deallocate(mainSrv);
-        for (auto& reservedView : reservedSharedResourceViews)
-        {
-            descriptorHeap->Deallocate(reservedView);
-        }
-        descriptorHeap.reset();
+        renderContext.DestroyGpuView(mainSrv);
     }
 
     void ImGuiRenderer::Render(ImGuiCanvas& canvas, Renderer& renderer)
@@ -80,7 +72,7 @@ namespace ig
         GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
         const GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
         cmdCtx.SetRenderTarget(*backBufferRtvPtr);
-        cmdCtx.SetDescriptorHeap(*descriptorHeap);
+        cmdCtx.SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
 
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx.GetNative());
 
@@ -91,13 +83,8 @@ namespace ig
         cmdCtx.End();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        auto cmdCtxRefs{MakeRefArray(cmdCtx)};
-        mainGfxQueue.ExecuteContexts(cmdCtxRefs);
-    }
-
-    GpuView ImGuiRenderer::GetReservedShaderResourceView() const
-    {
-        return reservedSharedResourceViews[frameManager.GetLocalFrameIndex()];
+        CommandContext* cmdCtxPtrs[]{&cmdCtx};
+        mainGfxQueue.ExecuteContexts(cmdCtxPtrs);
     }
 
     void ImGuiRenderer::SetupDefaultTheme()

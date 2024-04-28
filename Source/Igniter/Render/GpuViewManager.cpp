@@ -6,16 +6,17 @@
 
 namespace ig
 {
-    GpuViewManager::GpuViewManager(RenderDevice& renderDevice)
+    GpuViewManager::GpuViewManager(RenderDevice& renderDevice, const uint32_t numCbvSrvUavDescriptors, const uint32_t numSamplerDescriptors,
+        const uint32_t numRtvDescriptors, const uint32_t numDsvDescriptors)
         : renderDevice(renderDevice)
         , cbvSrvUavHeap(MakePtr<DescriptorHeap>(
-              renderDevice.CreateDescriptorHeap("Bindless CBV-SRV-UAV Heap", EDescriptorHeapType::CBV_SRV_UAV, NumCbvSrvUavDescriptors).value()))
+              renderDevice.CreateDescriptorHeap("GpuViewManagerCbvSrvUavHeap", EDescriptorHeapType::CBV_SRV_UAV, numCbvSrvUavDescriptors).value()))
         , samplerHeap(MakePtr<DescriptorHeap>(
-              renderDevice.CreateDescriptorHeap("Bindless Sampler Heap", EDescriptorHeapType::Sampler, NumSamplerDescriptors).value()))
+              renderDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value()))
         , rtvHeap(
-              MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("Bindless RTV Heap", EDescriptorHeapType::RTV, NumRtvDescriptors).value()))
+              MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("GpuViewManagerRtvHeap", EDescriptorHeapType::RTV, numRtvDescriptors).value()))
         , dsvHeap(
-              MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("Bindless DSV Heap", EDescriptorHeapType::DSV, NumDsvDescriptors).value()))
+              MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value()))
     {
     }
 

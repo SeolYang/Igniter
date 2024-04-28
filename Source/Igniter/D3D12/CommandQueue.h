@@ -26,7 +26,6 @@ namespace ig
         auto& GetNative() { return *native.Get(); }
         EQueueType GetType() const { return type; }
 
-        void ExecuteContexts(const std::span<Ref<CommandContext>> cmdCtxs);
         void ExecuteContexts(const std::span<CommandContext*> cmdCtxs);
         GpuSync MakeSync();
         void SyncWith(GpuSync& sync);

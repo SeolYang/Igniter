@@ -55,6 +55,9 @@ namespace ig
         CommandContextPool& GetMainGfxCommandContextPool() { return mainGfxCmdCtxPool; }
         CommandContextPool& GetAsyncComputeCommandContextPool() { return mainGfxCmdCtxPool; }
         GpuUploader& GetGpuUploader() { return gpuUploader; }
+
+        auto& GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
+
         auto GetBindlessDescriptorHeaps()
         {
             return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()};
@@ -80,6 +83,9 @@ namespace ig
         RenderResource<GpuView> CreateDepthStencilView(
             RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         RenderResource<GpuView> CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
+
+        /* Create a non-initialized Gpu View */
+        RenderResource<GpuView> CreateGpuView(const EGpuViewType type);
 
         void DestroyBuffer(const RenderResource<GpuBuffer> buffer);
         void DestroyTexture(const RenderResource<GpuTexture> texture);

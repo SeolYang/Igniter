@@ -278,8 +278,7 @@ namespace fe
 
     void AssetInspector::RenderTexturePreview(const AssetInfo& assetInfo)
     {
-        ImGuiRenderer& imguiRenderer{Igniter::GetImGuiRenderer()};
-        GpuView reservedSrv{imguiRenderer.GetReservedShaderResourceView()};
+        RenderContext& renderContext{Igniter::GetRenderContext()};
         if (bIsMainSelectionDirty)
         {
             for (bool& previewSrvUpdateFlag : bIsPreviewSrvUpdated)
@@ -291,35 +290,36 @@ namespace fe
         }
 
         const FrameManager& frameManager{Igniter::GetFrameManager()};
+        AssetManager& assetManager{Igniter::GetAssetManager()};
         const uint8_t localFrameIdx{frameManager.GetLocalFrameIndex()};
         if (!bIsPreviewSrvUpdated[localFrameIdx])
         {
-            AssetManager& assetManager{Igniter::GetAssetManager()};
             if (previewTextures[localFrameIdx])
             {
                 assetManager.Unload(previewTextures[localFrameIdx]);
+                previewTextures[localFrameIdx] = {};
             }
 
             previewTextures[localFrameIdx] = assetManager.LoadTexture(assetInfo.GetGuid());
 
             if (previewTextures[localFrameIdx])
             {
-                Texture* previewTexturePtr = assetManager.Lookup(previewTextures[localFrameIdx]);
-                IG_CHECK(previewTexturePtr != nullptr);
-                const RenderResource<GpuTexture> gpuTexture = previewTexturePtr->GetGpuTexture();
-                GpuTexture* gpuTexturePtr = Igniter::GetRenderContext().Lookup(gpuTexture);
-                const GpuTextureDesc& gpuTexDesc{gpuTexturePtr->GetDesc()};
-                RenderDevice& renderDevice{Igniter::GetRenderContext().GetRenderDevice()};
-                /* #sy_todo RenderContext 차원에서 Update...Descriptor 메서드 지원 */
-                renderDevice.UpdateShaderResourceView(
-                    reservedSrv, *gpuTexturePtr, GpuTextureSrvDesc{D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1}}, gpuTexDesc.Format);
                 bIsPreviewSrvUpdated[localFrameIdx] = true;
             }
         }
 
         if (bIsPreviewSrvUpdated[localFrameIdx])
         {
-            ImGui::Image(reinterpret_cast<ImTextureID>(reservedSrv.GPUHandle.ptr), ImVec2{256, 256});
+            Texture* previewTexturePtr = assetManager.Lookup(previewTextures[localFrameIdx]);
+            if (previewTexturePtr != nullptr)
+            {
+                const RenderResource<GpuView> srv = previewTexturePtr->GetShaderResourceView();
+                GpuView* srvPtr = renderContext.Lookup(srv);
+                if (srvPtr != nullptr)
+                {
+                    ImGui::Image(reinterpret_cast<ImTextureID>(srvPtr->GPUHandle.ptr), ImVec2{256, 256});
+                }
+            }
         }
     }
 

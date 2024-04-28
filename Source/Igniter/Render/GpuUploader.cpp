@@ -151,9 +151,9 @@ namespace ig
 
         details::UploadRequest& request = context.GetRequest();
         request.CmdCtx->End();
-        std::reference_wrapper<CommandContext> cmdCtxRef[] = {std::ref(*request.CmdCtx)};
 
-        asyncCopyQueue.ExecuteContexts(cmdCtxRef);
+        CommandContext* cmdCtxPtrs[] = {request.CmdCtx.get()};
+        asyncCopyQueue.ExecuteContexts(cmdCtxPtrs);
         request.Sync = asyncCopyQueue.MakeSync();
         IG_CHECK(request.Sync.IsValid());
         context.Reset();

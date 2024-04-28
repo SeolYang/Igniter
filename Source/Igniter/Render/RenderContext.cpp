@@ -248,6 +248,20 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
+    RenderResource<GpuView> RenderContext::CreateGpuView(const EGpuViewType type) 
+    {
+        IG_CHECK(type != EGpuViewType::Unknown);
+        ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
+        const GpuView newView = gpuViewManager.Allocate(type);
+        if (!newView)
+        {
+            return RenderResource<GpuView>{};
+        }
+
+        IG_CHECK(newView.Type != EGpuViewType::Unknown);
+        return gpuViewPackage.Registry.Create(newView);
+    }
+
     void RenderContext::DestroyBuffer(const RenderResource<GpuBuffer> buffer)
     {
         if (buffer)

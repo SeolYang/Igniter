@@ -21,19 +21,14 @@ namespace ig
 
         void Render(ImGuiCanvas& canvas, Renderer& renderer);
 
-        GpuView GetReservedShaderResourceView() const;
-
     private:
         void SetupDefaultTheme();
 
     private:
         const FrameManager& frameManager;
         RenderContext& renderContext;
-
-        Ptr<DescriptorHeap> descriptorHeap;
-        GpuView mainSrv;
-        std::vector<GpuView> reservedSharedResourceViews; // 이부분 개선하고 싶음
         Ptr<GpuViewManager> gpuViewManager;
+        RenderResource<GpuView> mainSrv;
 
         std::vector<CommandContext> commandContexts;
     };

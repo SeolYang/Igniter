@@ -18,14 +18,6 @@ namespace ig
 
     CommandQueue::~CommandQueue() {}
 
-    void CommandQueue::ExecuteContexts(const std::span<Ref<CommandContext>> cmdCtxs)
-    {
-        IG_CHECK(IsValid());
-        auto cmdLists{ToVector(views::all(cmdCtxs) | views::transform([](auto& cmdCtxRef) { return &cmdCtxRef.get().GetNative(); }))};
-        IG_CHECK(!cmdLists.empty());
-        native->ExecuteCommandLists(static_cast<uint32_t>(cmdLists.size()), reinterpret_cast<ID3D12CommandList**>(cmdLists.data()));
-    }
-
     void CommandQueue::ExecuteContexts(const std::span<CommandContext*> cmdCtxs)
     {
         IG_CHECK(IsValid());
