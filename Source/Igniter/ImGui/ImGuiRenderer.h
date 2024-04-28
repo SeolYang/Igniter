@@ -12,6 +12,7 @@ namespace ig
     class Window;
     class Renderer;
     class ImGuiCanvas;
+    class GpuViewManager;
     class ImGuiRenderer final
     {
     public:
@@ -32,6 +33,7 @@ namespace ig
         Ptr<DescriptorHeap> descriptorHeap;
         GpuView mainSrv;
         std::vector<GpuView> reservedSharedResourceViews; // 이부분 개선하고 싶음
+        Ptr<GpuViewManager> gpuViewManager;
 
         std::vector<CommandContext> commandContexts;
     };

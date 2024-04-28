@@ -96,6 +96,7 @@
     <ClInclude Include="..\Source\Igniter\Input\InputManager.h" />
     <ClInclude Include="..\Source\Igniter\Render\CommandContextPool.h" />
     <ClInclude Include="..\Source\Igniter\Render\GpuViewManager.h" />
+    <ClInclude Include="..\Source\Igniter\Render\RenderCommon.h" />
     <ClInclude Include="..\Source\Igniter\Render\RenderContext.h" />
     <ClInclude Include="..\Source\Igniter\Render\Swapchain.h" />
     <ClInclude Include="..\Source\Igniter\Render\TempConstantBufferAllocator.h" />

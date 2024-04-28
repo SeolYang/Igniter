@@ -10,6 +10,7 @@
 #include <Render/Swapchain.h>
 #include <Render/Renderer.h>
 #include <Render/RenderContext.h>
+#include <Render/GpuViewManager.h>
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 
@@ -21,6 +22,7 @@ namespace ig
         , descriptorHeap(MakePtr<DescriptorHeap>(
               renderContext.GetRenderDevice().CreateDescriptorHeap("ImGui Descriptor Heap", EDescriptorHeapType::CBV_SRV_UAV, 3).value()))
         , mainSrv(*descriptorHeap->Allocate(EGpuViewType::ShaderResourceView))
+        , gpuViewManager(MakePtr<GpuViewManager>(renderContext.GetRenderDevice()))
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();

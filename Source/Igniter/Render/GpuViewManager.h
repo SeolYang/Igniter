@@ -53,10 +53,10 @@ namespace ig
         constexpr static uint32_t NumDsvDescriptors = NumRtvDescriptors;
 
         RenderDevice& renderDevice;
-        std::unique_ptr<DescriptorHeap> cbvSrvUavHeap;
-        std::unique_ptr<DescriptorHeap> samplerHeap;
-        std::unique_ptr<DescriptorHeap> rtvHeap;
-        std::unique_ptr<DescriptorHeap> dsvHeap;
+        Ptr<DescriptorHeap> cbvSrvUavHeap;
+        Ptr<DescriptorHeap> samplerHeap;
+        Ptr<DescriptorHeap> rtvHeap;
+        Ptr<DescriptorHeap> dsvHeap;
 
         UnorderedMap<uint64_t, GpuView> cachedSamplerView;
     };

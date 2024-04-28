@@ -34,7 +34,7 @@ namespace ig
         }
     }
 
-    TempConstantBuffer2 TempConstantBufferAllocator::Allocate(const GpuBufferDesc& desc)
+    TempConstantBuffer TempConstantBufferAllocator::Allocate(const GpuBufferDesc& desc)
     {
         const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
         IG_CHECK(localFrameIdx < NumFramesInFlight);
@@ -48,22 +48,22 @@ namespace ig
         GpuBuffer* bufferPtr = renderContext.Lookup(buffers[localFrameIdx]);
         if (bufferPtr == nullptr)
         {
-            return TempConstantBuffer2{{}, nullptr};
+            return TempConstantBuffer{{}, nullptr};
         }
 
         allocatedViews[localFrameIdx].emplace_back(renderContext.CreateConstantBufferView(buffers[localFrameIdx], offset, allocSizeInBytes));
         if (!allocatedViews[localFrameIdx].back())
         {
-            return TempConstantBuffer2{{}, nullptr};
+            return TempConstantBuffer{{}, nullptr};
         }
 
-        return TempConstantBuffer2{allocatedViews[localFrameIdx].back(), bufferPtr->Map(offset)};
+        return TempConstantBuffer{allocatedViews[localFrameIdx].back(), bufferPtr->Map(offset)};
     }
 
     void TempConstantBufferAllocator::BeginFrame(const uint8_t localFrameIdx)
     {
         UniqueLock lock{mutexes[localFrameIdx]};
-        for (const Handle<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
+        for (const RenderResource<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
         {
             renderContext.DestroyGpuView(gpuViewHandle);
         }
@@ -73,7 +73,7 @@ namespace ig
 
     void TempConstantBufferAllocator::InitBufferStateTransition(CommandContext& cmdCtx)
     {
-        for (const Handle<GpuBuffer> buffer : buffers)
+        for (const RenderResource<GpuBuffer> buffer : buffers)
         {
             GpuBuffer* bufferPtr = renderContext.Lookup(buffer);
             IG_CHECK(bufferPtr != nullptr);

@@ -132,7 +132,7 @@ namespace ig
     void Renderer::Render(const uint8_t localFrameIdx, Registry& registry)
     {
         ZoneScoped;
-        TempConstantBuffer2 perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
+        TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
 
         PerFrameBuffer perFrameBuffer{};
         auto cameraView = registry.view<CameraComponent, TransformComponent, MainCameraTag>();
@@ -182,7 +182,7 @@ namespace ig
                     GpuView* vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
                     renderCmdCtx->SetIndexBuffer(*indexBufferPtr);
                     {
-                        TempConstantBuffer2 perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
+                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
                         GpuView* perObjectCBViewPtr = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
                         const auto perObjectBuffer = PerObjectBuffer{.LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation())};
                         perObjectConstantBuffer.Write(perObjectBuffer);

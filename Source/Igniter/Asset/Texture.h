@@ -2,6 +2,7 @@
 #include <Core/Handle.h>
 #include <Core/String.h>
 #include <D3D12/Common.h>
+#include <Render/RenderContext.h>
 #include <Asset/Common.h>
 
 namespace ig
@@ -76,7 +77,7 @@ namespace ig
         using Desc = AssetDesc<Texture>;
 
     public:
-        Texture(RenderContext& renderContext, const Desc& snapshot, const Handle<GpuTexture> gpuTexture, const Handle<GpuView> srv, const Handle<GpuView> sampler);
+        Texture(RenderContext& renderContext, const Desc& snapshot, const RenderResource<GpuTexture> gpuTexture, const RenderResource<GpuView> srv, const RenderResource<GpuView> sampler);
         Texture(const Texture&) = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();
@@ -85,9 +86,9 @@ namespace ig
         Texture& operator=(Texture&&) noexcept = default;
 
         const Desc& GetSnapshot() const { return snapshot; }
-        Handle<GpuTexture> GetGpuTexture() const { return gpuTexture; }
-        Handle<GpuView> GetShaderResourceView() const { return srv; }
-        Handle<GpuView> GetSampler() const { return sampler; }
+        RenderResource<GpuTexture> GetGpuTexture() const { return gpuTexture; }
+        RenderResource<GpuView> GetShaderResourceView() const { return srv; }
+        RenderResource<GpuView> GetSampler() const { return sampler; }
 
     public:
         /* #sy_wip Common으로 이동 */
@@ -98,9 +99,9 @@ namespace ig
     private:
         RenderContext* renderContext{nullptr};
         Desc snapshot{};
-        Handle<GpuTexture> gpuTexture{};
-        Handle<GpuView> srv{};
-        Handle<GpuView> sampler{};
+        RenderResource<GpuTexture> gpuTexture{};
+        RenderResource<GpuView> srv{};
+        RenderResource<GpuView> sampler{};
     };
 }    // namespace ig
 

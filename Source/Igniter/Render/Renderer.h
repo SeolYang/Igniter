@@ -58,8 +58,8 @@ namespace ig
         std::unique_ptr<ShaderBlob> ps;
         std::unique_ptr<RootSignature> bindlessRootSignature;
         std::unique_ptr<PipelineState> pso;
-        eastl::array<Handle<GpuTexture>, NumFramesInFlight> depthStencils;
-        eastl::array<Handle<GpuView>, NumFramesInFlight> dsvs;
+        eastl::array<RenderResource<GpuTexture>, NumFramesInFlight> depthStencils;
+        eastl::array<RenderResource<GpuView>, NumFramesInFlight> dsvs;
 #pragma endregion
     };
 }    // namespace ig

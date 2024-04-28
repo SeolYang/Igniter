@@ -61,12 +61,12 @@ namespace ig
 
     Swapchain::~Swapchain()
     {
-        for (const Handle<GpuView> rtv : renderTargetViews)
+        for (const RenderResource<GpuView> rtv : renderTargetViews)
         {
             renderContext.DestroyGpuView(rtv);
         }
 
-        for (const Handle<GpuTexture> backBuffer : backBuffers)
+        for (const RenderResource<GpuTexture> backBuffer : backBuffers)
         {
             renderContext.DestroyTexture(backBuffer);
         }

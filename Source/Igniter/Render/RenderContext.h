@@ -10,6 +10,7 @@
 #include <D3D12/GpuTextureDesc.h>
 #include <D3D12/PipelineState.h>
 #include <D3D12/PipelineStateDesc.h>
+#include <Render/RenderCommon.h>
 #include <Render/GpuViewManager.h>
 #include <Render/CommandContextPool.h>
 #include <Render/GpuUploader.h>
@@ -32,9 +33,9 @@ namespace ig
         struct ResourceManagePackage
         {
             mutable SharedMutex Mut;
-            HandleRegistry<Ty> Registry;
+            HandleRegistry<Ty, RenderContext> Registry;
             eastl::array<Mutex, NumFramesInFlight> PendingListMut;
-            eastl::array<eastl::vector<Handle<Ty>>, NumFramesInFlight> PendingDestroyList;
+            eastl::array<eastl::vector<RenderResource<Ty>>, NumFramesInFlight> PendingDestroyList;
         };
 
     public:
@@ -59,40 +60,40 @@ namespace ig
             return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()};
         }
 
-        Handle<GpuBuffer> CreateBuffer(const GpuBufferDesc& desc);
-        Handle<GpuTexture> CreateTexture(const GpuTextureDesc& desc);
-        Handle<GpuTexture> CreateTexture(GpuTexture&& gpuTexture);
+        RenderResource<GpuBuffer> CreateBuffer(const GpuBufferDesc& desc);
+        RenderResource<GpuTexture> CreateTexture(const GpuTextureDesc& desc);
+        RenderResource<GpuTexture> CreateTexture(GpuTexture&& gpuTexture);
 
-        Handle<PipelineState> CreatePipelineState(const GraphicsPipelineStateDesc& desc);
-        Handle<PipelineState> CreatePipelineState(const ComputePipelineStateDesc& desc);
+        RenderResource<PipelineState> CreatePipelineState(const GraphicsPipelineStateDesc& desc);
+        RenderResource<PipelineState> CreatePipelineState(const ComputePipelineStateDesc& desc);
 
-        Handle<GpuView> CreateConstantBufferView(const Handle<GpuBuffer> buffer);
-        Handle<GpuView> CreateConstantBufferView(const Handle<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
-        Handle<GpuView> CreateShaderResourceView(const Handle<GpuBuffer> buffer);
-        Handle<GpuView> CreateUnorderedAccessView(const Handle<GpuBuffer> buffer);
-        Handle<GpuView> CreateShaderResourceView(
-            Handle<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        Handle<GpuView> CreateUnorderedAccessView(
-            Handle<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        Handle<GpuView> CreateRenderTargetView(
-            Handle<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        Handle<GpuView> CreateDepthStencilView(
-            Handle<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        Handle<GpuView> CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
+        RenderResource<GpuView> CreateConstantBufferView(const RenderResource<GpuBuffer> buffer);
+        RenderResource<GpuView> CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
+        RenderResource<GpuView> CreateShaderResourceView(const RenderResource<GpuBuffer> buffer);
+        RenderResource<GpuView> CreateUnorderedAccessView(const RenderResource<GpuBuffer> buffer);
+        RenderResource<GpuView> CreateShaderResourceView(
+            RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateUnorderedAccessView(
+            RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateRenderTargetView(
+            RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateDepthStencilView(
+            RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
 
-        void DestroyBuffer(const Handle<GpuBuffer> buffer);
-        void DestroyTexture(const Handle<GpuTexture> texture);
-        void DestroyPipelineState(const Handle<PipelineState> state);
-        void DestroyGpuView(const Handle<GpuView> view);
+        void DestroyBuffer(const RenderResource<GpuBuffer> buffer);
+        void DestroyTexture(const RenderResource<GpuTexture> texture);
+        void DestroyPipelineState(const RenderResource<PipelineState> state);
+        void DestroyGpuView(const RenderResource<GpuView> view);
 
-        GpuBuffer* Lookup(const Handle<GpuBuffer> handle);
-        const GpuBuffer* Lookup(const Handle<GpuBuffer> handle) const;
-        GpuTexture* Lookup(const Handle<GpuTexture> handle);
-        const GpuTexture* Lookup(const Handle<GpuTexture> handle) const;
-        PipelineState* Lookup(const Handle<PipelineState> handle);
-        const PipelineState* Lookup(const Handle<PipelineState> handle) const;
-        GpuView* Lookup(const Handle<GpuView> handle);
-        const GpuView* Lookup(const Handle<GpuView> handle) const;
+        GpuBuffer* Lookup(const RenderResource<GpuBuffer> handle);
+        const GpuBuffer* Lookup(const RenderResource<GpuBuffer> handle) const;
+        GpuTexture* Lookup(const RenderResource<GpuTexture> handle);
+        const GpuTexture* Lookup(const RenderResource<GpuTexture> handle) const;
+        PipelineState* Lookup(const RenderResource<PipelineState> handle);
+        const PipelineState* Lookup(const RenderResource<PipelineState> handle) const;
+        GpuView* Lookup(const RenderResource<GpuView> handle);
+        const GpuView* Lookup(const RenderResource<GpuView> handle) const;
 
         void FlushQueues();
         void BeginFrame(const uint8_t localFrameIdx);

@@ -25,230 +25,230 @@ namespace ig
         }
     }
 
-    Handle<GpuBuffer> RenderContext::CreateBuffer(const GpuBufferDesc& desc)
+    RenderResource<GpuBuffer> RenderContext::CreateBuffer(const GpuBufferDesc& desc)
     {
         Option<GpuBuffer> newBuffer = renderDevice.CreateBuffer(desc);
         if (!newBuffer)
         {
-            return Handle<GpuBuffer>{};
+            return RenderResource<GpuBuffer>{};
         }
 
         ReadWriteLock bufferRegistryLock{bufferPackage.Mut};
         return bufferPackage.Registry.Create(std::move(newBuffer).value());
     }
 
-    Handle<GpuTexture> RenderContext::CreateTexture(const GpuTextureDesc& desc)
+    RenderResource<GpuTexture> RenderContext::CreateTexture(const GpuTextureDesc& desc)
     {
         Option<GpuTexture> newTexture = renderDevice.CreateTexture(desc);
         if (!newTexture)
         {
-            return Handle<GpuTexture>{};
+            return RenderResource<GpuTexture>{};
         }
 
         ReadWriteLock textureRegistryLock{texturePackage.Mut};
         return texturePackage.Registry.Create(std::move(newTexture).value());
     }
 
-    Handle<GpuTexture> RenderContext::CreateTexture(GpuTexture&& gpuTexture)
+    RenderResource<GpuTexture> RenderContext::CreateTexture(GpuTexture&& gpuTexture)
     {
         ReadWriteLock textureRegistryLock{texturePackage.Mut};
         return texturePackage.Registry.Create(std::move(gpuTexture));
     }
 
-    Handle<PipelineState> RenderContext::CreatePipelineState(const GraphicsPipelineStateDesc& desc)
+    RenderResource<PipelineState> RenderContext::CreatePipelineState(const GraphicsPipelineStateDesc& desc)
     {
         Option<PipelineState> newPipelineState = renderDevice.CreateGraphicsPipelineState(desc);
         if (!newPipelineState)
         {
-            return Handle<PipelineState>{};
+            return RenderResource<PipelineState>{};
         }
 
         ReadWriteLock pipelineStateRegistryLock{pipelineStatePackage.Mut};
         return pipelineStatePackage.Registry.Create(std::move(newPipelineState).value());
     }
 
-    Handle<PipelineState> RenderContext::CreatePipelineState(const ComputePipelineStateDesc& desc)
+    RenderResource<PipelineState> RenderContext::CreatePipelineState(const ComputePipelineStateDesc& desc)
     {
         Option<PipelineState> newPipelineState = renderDevice.CreateComputePipelineState(desc);
         if (!newPipelineState)
         {
-            return Handle<PipelineState>{};
+            return RenderResource<PipelineState>{};
         }
 
         ReadWriteLock pipelineStateRegistryLock{pipelineStatePackage.Mut};
         return pipelineStatePackage.Registry.Create(std::move(newPipelineState).value());
     }
 
-    Handle<GpuView> RenderContext::CreateConstantBufferView(const Handle<GpuBuffer> buffer)
+    RenderResource<GpuView> RenderContext::CreateConstantBufferView(const RenderResource<GpuBuffer> buffer)
     {
         ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
         GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestConstantBufferView(*bufferPtr);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ConstantBufferView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateConstantBufferView(const Handle<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
+    RenderResource<GpuView> RenderContext::CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
     {
         ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
         GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestConstantBufferView(*bufferPtr, offset, sizeInBytes);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ConstantBufferView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateShaderResourceView(const Handle<GpuBuffer> buffer)
+    RenderResource<GpuView> RenderContext::CreateShaderResourceView(const RenderResource<GpuBuffer> buffer)
     {
         ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
         GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestShaderResourceView(*bufferPtr);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ShaderResourceView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateUnorderedAccessView(const Handle<GpuBuffer> buffer)
+    RenderResource<GpuView> RenderContext::CreateUnorderedAccessView(const RenderResource<GpuBuffer> buffer)
     {
         ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
         GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*bufferPtr);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::UnorderedAccessView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateShaderResourceView(
-        Handle<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateShaderResourceView(
+        RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestShaderResourceView(*texturePtr, srvDesc, desireViewFormat);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ShaderResourceView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateUnorderedAccessView(
-        Handle<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateUnorderedAccessView(
+        RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*texturePtr, uavDesc, desireViewFormat);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::UnorderedAccessView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateRenderTargetView(
-        Handle<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateRenderTargetView(
+        RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestRenderTargetView(*texturePtr, rtvDesc, desireViewFormat);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::RenderTargetView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateDepthStencilView(
-        Handle<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateDepthStencilView(
+        RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{texturePackage.Mut, gpuViewPackage.Mut};
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestDepthStencilView(*texturePtr, dsvDesc, desireViewFormat);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::DepthStencilView);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateSamplerView(const D3D12_SAMPLER_DESC& desc)
+    RenderResource<GpuView> RenderContext::CreateSamplerView(const D3D12_SAMPLER_DESC& desc)
     {
         ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
         const GpuView newView = gpuViewManager.RequestSampler(desc);
         if (!newView)
         {
-            return Handle<GpuView>{};
+            return RenderResource<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::Sampler);
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    void RenderContext::DestroyBuffer(const Handle<GpuBuffer> buffer)
+    void RenderContext::DestroyBuffer(const RenderResource<GpuBuffer> buffer)
     {
         if (buffer)
         {
@@ -257,7 +257,7 @@ namespace ig
         }
     }
 
-    void RenderContext::DestroyTexture(const Handle<GpuTexture> texture)
+    void RenderContext::DestroyTexture(const RenderResource<GpuTexture> texture)
     {
         if (texture)
         {
@@ -266,7 +266,7 @@ namespace ig
         }
     }
 
-    void RenderContext::DestroyPipelineState(const Handle<PipelineState> state)
+    void RenderContext::DestroyPipelineState(const RenderResource<PipelineState> state)
     {
         if (state)
         {
@@ -275,7 +275,7 @@ namespace ig
         }
     }
 
-    void RenderContext::DestroyGpuView(const Handle<GpuView> view)
+    void RenderContext::DestroyGpuView(const RenderResource<GpuView> view)
     {
         if (view)
         {
@@ -284,49 +284,49 @@ namespace ig
         }
     }
 
-    GpuBuffer* RenderContext::Lookup(const Handle<GpuBuffer> handle)
+    GpuBuffer* RenderContext::Lookup(const RenderResource<GpuBuffer> handle)
     {
         ReadOnlyLock bufferRegistryLock{bufferPackage.Mut};
         return bufferPackage.Registry.Lookup(handle);
     }
 
-    const GpuBuffer* RenderContext::Lookup(const Handle<GpuBuffer> handle) const
+    const GpuBuffer* RenderContext::Lookup(const RenderResource<GpuBuffer> handle) const
     {
         ReadOnlyLock bufferRegistryLock{bufferPackage.Mut};
         return bufferPackage.Registry.Lookup(handle);
     }
 
-    GpuTexture* RenderContext::Lookup(const Handle<GpuTexture> handle)
+    GpuTexture* RenderContext::Lookup(const RenderResource<GpuTexture> handle)
     {
         ReadOnlyLock textureRegistryLock{texturePackage.Mut};
         return texturePackage.Registry.Lookup(handle);
     }
 
-    const GpuTexture* RenderContext::Lookup(const Handle<GpuTexture> handle) const
+    const GpuTexture* RenderContext::Lookup(const RenderResource<GpuTexture> handle) const
     {
         ReadOnlyLock textureRegistryLock{texturePackage.Mut};
         return texturePackage.Registry.Lookup(handle);
     }
 
-    PipelineState* RenderContext::Lookup(const Handle<PipelineState> handle)
+    PipelineState* RenderContext::Lookup(const RenderResource<PipelineState> handle)
     {
         ReadOnlyLock pipelineStateRegistryLock{pipelineStatePackage.Mut};
         return pipelineStatePackage.Registry.Lookup(handle);
     }
 
-    const PipelineState* RenderContext::Lookup(const Handle<PipelineState> handle) const
+    const PipelineState* RenderContext::Lookup(const RenderResource<PipelineState> handle) const
     {
         ReadOnlyLock pipelineStateRegistryLock{pipelineStatePackage.Mut};
         return pipelineStatePackage.Registry.Lookup(handle);
     }
 
-    GpuView* RenderContext::Lookup(const Handle<GpuView> handle)
+    GpuView* RenderContext::Lookup(const RenderResource<GpuView> handle)
     {
         ReadOnlyLock gpuViewRegistryLock{gpuViewPackage.Mut};
         return gpuViewPackage.Registry.Lookup(handle);
     }
 
-    const GpuView* RenderContext::Lookup(const Handle<GpuView> handle) const
+    const GpuView* RenderContext::Lookup(const RenderResource<GpuView> handle) const
     {
         ReadOnlyLock gpuViewRegistryLock{gpuViewPackage.Mut};
         return gpuViewPackage.Registry.Lookup(handle);

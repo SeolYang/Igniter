@@ -1,6 +1,7 @@
 #pragma once
-#include <D3D12/Common.h>
 #include <Core/Handle.h>
+#include <D3D12/Common.h>
+#include <Render/RenderCommon.h>
 
 namespace ig
 {
@@ -21,8 +22,8 @@ namespace ig
         ~Swapchain();
 
         bool IsTearingSupport() const { return bTearingEnabled; }
-        Handle<GpuTexture> GetBackBuffer() const { return backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
-        Handle<GpuView> GetRenderTargetView() const { return renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
+        RenderResource<GpuTexture> GetBackBuffer() const { return backBuffers[swapchain->GetCurrentBackBufferIndex()]; }
+        RenderResource<GpuView> GetRenderTargetView() const { return renderTargetViews[swapchain->GetCurrentBackBufferIndex()]; }
 
         // #sy_todo Impl Resize Swapchain!
         // void Resize(const uint32_t width, const uint32_t height);
@@ -41,7 +42,7 @@ namespace ig
         const uint8_t numBackBuffers;
         const bool bVSyncEnabled;
         bool bTearingEnabled = false;
-        std::vector<Handle<GpuTexture>> backBuffers;
-        std::vector<Handle<GpuView>> renderTargetViews;
+        std::vector<RenderResource<GpuTexture>> backBuffers;
+        std::vector<RenderResource<GpuView>> renderTargetViews;
     };
 }    // namespace ig

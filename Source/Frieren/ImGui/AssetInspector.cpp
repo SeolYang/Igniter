@@ -306,7 +306,7 @@ namespace fe
             {
                 Texture* previewTexturePtr = assetManager.Lookup(previewTextures[localFrameIdx]);
                 IG_CHECK(previewTexturePtr != nullptr);
-                const Handle<GpuTexture> gpuTexture = previewTexturePtr->GetGpuTexture();
+                const RenderResource<GpuTexture> gpuTexture = previewTexturePtr->GetGpuTexture();
                 GpuTexture* gpuTexturePtr = Igniter::GetRenderContext().Lookup(gpuTexture);
                 const GpuTextureDesc& gpuTexDesc{gpuTexturePtr->GetDesc()};
                 RenderDevice& renderDevice{Igniter::GetRenderContext().GetRenderDevice()};

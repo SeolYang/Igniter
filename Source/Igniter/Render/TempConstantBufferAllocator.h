@@ -2,15 +2,16 @@
 #include <Igniter.h>
 #include <Core/Handle.h>
 #include <D3D12/GpuBufferDesc.h>
+#include <Render/RenderCommon.h>
 
 namespace ig
 {
     class GpuView;
-    struct TempConstantBuffer2 final
+    struct TempConstantBuffer final
     {
     public:
-        TempConstantBuffer2(const Handle<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) {}
-        ~TempConstantBuffer2() = default;
+        TempConstantBuffer(const RenderResource<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) {}
+        ~TempConstantBuffer() = default;
 
         template <typename T>
         void Write(const T& data)
@@ -21,11 +22,11 @@ namespace ig
             }
         }
 
-        [[nodiscard]] Handle<GpuView> GetConstantBufferView() const { return cbv; }
+        [[nodiscard]] RenderResource<GpuView> GetConstantBufferView() const { return cbv; }
 
     private:
         uint8_t* mappedPtr{nullptr};
-        Handle<GpuView> cbv{};
+        RenderResource<GpuView> cbv{};
     };
 
     class FrameManager;
@@ -44,10 +45,10 @@ namespace ig
         TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
-        TempConstantBuffer2 Allocate(const GpuBufferDesc& desc);
+        TempConstantBuffer Allocate(const GpuBufferDesc& desc);
 
         template <typename T>
-        TempConstantBuffer2 Allocate()
+        TempConstantBuffer Allocate()
         {
             GpuBufferDesc constantBufferDesc{};
             constantBufferDesc.AsConstantBuffer<T>();
@@ -74,8 +75,8 @@ namespace ig
         size_t reservedSizeInBytesPerFrame;
 
         mutable eastl::array<Mutex, NumFramesInFlight> mutexes;
-        eastl::array<Handle<GpuBuffer>, NumFramesInFlight> buffers;
+        eastl::array<RenderResource<GpuBuffer>, NumFramesInFlight> buffers;
         eastl::array<size_t, NumFramesInFlight> allocatedSizeInBytes{0};
-        eastl::array<eastl::vector<Handle<GpuView>>, NumFramesInFlight> allocatedViews;
+        eastl::array<eastl::vector<RenderResource<GpuView>>, NumFramesInFlight> allocatedViews;
     };
 }    // namespace ig
