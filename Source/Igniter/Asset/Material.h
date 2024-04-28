@@ -38,7 +38,7 @@ namespace ig
         friend class AssetManager;
 
     public:
-        Material(AssetManager& assetManager, const Desc& snapshot, const Handle<Texture> diffuse);
+        Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
         Material(const Material&) = delete;
         Material(Material&&) noexcept = default;
         ~Material();
@@ -47,7 +47,7 @@ namespace ig
         Material& operator=(Material&&) noexcept = default;
 
         const Desc& GetSnapshot() const { return snapshot; }
-        Handle<Texture> GetDiffuse() const { return diffuse; }
+        ManagedAsset<Texture> GetDiffuse() const { return diffuse; }
 
     public:
         /* #sy_wip Common 헤더로 이동 */
@@ -56,6 +56,6 @@ namespace ig
     private:
         AssetManager* assetManager{nullptr};
         Desc snapshot{};
-        Handle<Texture> diffuse{};
+        ManagedAsset<Texture> diffuse{};
     };
 }    // namespace ig

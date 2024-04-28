@@ -21,7 +21,7 @@ namespace ig
             return MakeFail<Material, EMaterialLoadStatus::AssetTypeMismatch>();
         }
 
-        const Handle<Texture> diffuse{assetManager.LoadTexture(loadDesc.DiffuseTexGuid)};
+        const ManagedAsset<Texture> diffuse{assetManager.LoadTexture(loadDesc.DiffuseTexGuid)};
         if (!diffuse)
         {
             return MakeFail<Material, EMaterialLoadStatus::FailedLoadDiffuse>();
@@ -38,7 +38,7 @@ namespace ig
         }
 
         const Material::Desc snapshot{.Info = assetInfo, .LoadDescriptor = {.DiffuseTexGuid = Guid{DefaultTextureGuid}}};
-        const Handle<Texture> defaultEngineTex{assetManager.LoadTexture(Material::EngineDefault)};
+        const ManagedAsset<Texture> defaultEngineTex{assetManager.LoadTexture(Material::EngineDefault)};
         IG_CHECK(defaultEngineTex);
         return MakeSuccess<Material, details::EMakeDefaultMatStatus>(Material{assetManager, snapshot, defaultEngineTex});
     }

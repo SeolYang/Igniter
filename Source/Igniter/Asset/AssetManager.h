@@ -69,19 +69,19 @@ namespace ig
          */
 
         Guid Import(const String resPath, const TextureImportDesc& desc);
-        [[nodiscard]] Handle<Texture> LoadTexture(const Guid& guid);
-        [[nodiscard]] Handle<Texture> LoadTexture(const String virtualPath);
+        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const Guid& guid);
+        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const String virtualPath);
 
         std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc);
-        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const Guid& guid);
-        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const String virtualPath);
+        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const Guid& guid);
+        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
         Guid Import(const String virtualPath, const MaterialCreateDesc& createDesc);
-        [[nodiscard]] Handle<Material> LoadMaterial(const Guid& guid);
-        [[nodiscard]] Handle<Material> LoadMaterial(const String virtualPath);
+        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const Guid& guid);
+        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const String virtualPath);
 
         template <Asset T>
-        [[nodiscard]] Handle<T> Load(const Guid& guid)
+        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid)
         {
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
@@ -98,7 +98,7 @@ namespace ig
         }
 
         template <Asset T>
-        [[nodiscard]] Handle<T> Load(const String virtualPath)
+        [[nodiscard]] ManagedAsset<T> Load(const String virtualPath)
         {
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
@@ -155,19 +155,19 @@ namespace ig
         void Delete(const EAssetCategory assetType, const String virtualPath);
 
         template <Asset T>
-        T* Lookup(const Handle<T> handle)
+        T* Lookup(const ManagedAsset<T> handle)
         {
             return GetCache<T>().Lookup(handle);
         }
 
         template <Asset T>
-        const T* Lookup(const Handle<T> handle) const
+        const T* Lookup(const ManagedAsset<T> handle) const
         {
             return GetCache<T>().Lookup(handle);
         }
 
         template <Asset T>
-        void Unload(const Handle<T> handle)
+        void Unload(const ManagedAsset<T> handle)
         {
             /* #sy_todo not thread safe... make it safe! */
             details::AssetCache<T>& cache = GetCache<T>();
@@ -293,12 +293,12 @@ namespace ig
         }
 
         template <Asset T, typename AssetLoader>
-        [[nodiscard]] Handle<T> LoadImpl(const Guid& guid, AssetLoader& loader)
+        [[nodiscard]] ManagedAsset<T> LoadImpl(const Guid& guid, AssetLoader& loader)
         {
             if (!assetMonitor->Contains(guid))
             {
                 IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
-                return Handle<T>{};
+                return ManagedAsset<T>{};
             }
 
             AssetLock assetLock{GetAssetMutex(guid)};
@@ -312,7 +312,7 @@ namespace ig
                 {
                     IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
                         desc.Info.GetVirtualPath(), guid);
-                    return Handle<T>{};
+                    return ManagedAsset<T>{};
                 }
 
                 assetCache.Cache(guid, result.Take());
@@ -350,7 +350,7 @@ namespace ig
                 return false;
             }
 
-            Handle<T> cachedAsset{assetCache.Load(guid)};
+            ManagedAsset<T> cachedAsset{assetCache.Load(guid)};
             if (cachedAsset)
             {
                 T* cachedAssetPtr = assetCache.Lookup(cachedAsset);

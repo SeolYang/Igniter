@@ -59,16 +59,16 @@ int main()
             Guid{"f9ed3d69-d906-4b03-9def-16b6b37211e7"},
         };
 
-        std::vector<std::future<Handle<StaticMesh>>> homuraMeshFutures{};
+        std::vector<std::future<ManagedAsset<StaticMesh>>> homuraMeshFutures{};
         for (Guid guid : homuraMeshGuids)
         {
             homuraMeshFutures.emplace_back(std::async(
                 std::launch::async, [&assetManager](const Guid guid) { return assetManager.Load<StaticMesh>(guid); }, guid));
         }
 
-        for (std::future<Handle<StaticMesh>>& staticMeshFuture : homuraMeshFutures)
+        for (std::future<ManagedAsset<StaticMesh>>& staticMeshFuture : homuraMeshFutures)
         {
-            Handle<StaticMesh> staticMesh{staticMeshFuture.get()};
+            ManagedAsset<StaticMesh> staticMesh{staticMeshFuture.get()};
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
@@ -81,10 +81,10 @@ int main()
             }
         }
 
-        std::future<Handle<StaticMesh>> homuraAxeMeshFutures{
+        std::future<ManagedAsset<StaticMesh>> homuraAxeMeshFutures{
             std::async(std::launch::async, [&assetManager]() { return assetManager.LoadStaticMesh(Guid{"b77399f0-98ec-47cb-ad80-e7287d5833c2"}); })};
         {
-            Handle<StaticMesh> staticMesh{homuraAxeMeshFutures.get()};
+            ManagedAsset<StaticMesh> staticMesh{homuraAxeMeshFutures.get()};
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};
@@ -121,16 +121,16 @@ int main()
             Guid{"f8dad50c-7331-42a4-be15-72923762a76a"},
         };
 
-        std::vector<std::future<Handle<StaticMesh>>> littleTokyoMeshFutures{};
+        std::vector<std::future<ManagedAsset<StaticMesh>>> littleTokyoMeshFutures{};
         for (Guid guid : littleTokyoMeshGuids)
         {
             littleTokyoMeshFutures.emplace_back(std::async(
                 std::launch::async, [&assetManager](const Guid guid) { return assetManager.LoadStaticMesh(guid); }, guid));
         }
 
-        for (std::future<Handle<StaticMesh>>& staticMeshFuture : littleTokyoMeshFutures)
+        for (std::future<ManagedAsset<StaticMesh>>& staticMeshFuture : littleTokyoMeshFutures)
         {
-            Handle<StaticMesh> staticMesh{staticMeshFuture.get()};
+            ManagedAsset<StaticMesh> staticMesh{staticMeshFuture.get()};
             if (staticMesh)
             {
                 const auto newEntity{registry.create()};

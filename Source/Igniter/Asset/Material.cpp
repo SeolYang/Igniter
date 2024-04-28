@@ -20,7 +20,7 @@ namespace ig
         return archive;
     }
 
-    Material::Material(AssetManager& assetManager, const Desc& snapshot, const Handle<Texture> diffuse)
+    Material::Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse)
         : assetManager(&assetManager), snapshot(snapshot), diffuse(diffuse)
     {
     }

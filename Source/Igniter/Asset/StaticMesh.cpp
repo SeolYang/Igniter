@@ -61,7 +61,7 @@ namespace ig
     }
 
     StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const Handle<GpuBuffer> vertexBuffer,
-        const Handle<GpuView> vertexBufferSrv, const Handle<GpuBuffer> indexBuffer, const Handle<Material> material)
+        const Handle<GpuView> vertexBufferSrv, const Handle<GpuBuffer> indexBuffer, const ManagedAsset<Material> material)
         : renderContext(&renderContext)
         , assetManager(&assetManager)
         , snapshot(snapshot)

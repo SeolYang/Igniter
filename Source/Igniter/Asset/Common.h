@@ -126,6 +126,9 @@ namespace ig
     template <Asset T>
     inline constexpr bool IsAsset<T> = true;
 
+    template <Asset T>
+    using ManagedAsset = Handle<T, class AssetManager>;
+
     /* Refer to {ResourcePath}.metadata */
     Path MakeResourceMetadataPath(Path resPath);
 

@@ -44,7 +44,7 @@ namespace fe
 
     AssetInspector::~AssetInspector()
     {
-        for (const Handle<Texture> previewTexture : previewTextures)
+        for (const ManagedAsset<Texture> previewTexture : previewTextures)
         {
             if (previewTexture)
             {

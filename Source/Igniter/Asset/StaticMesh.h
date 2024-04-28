@@ -61,7 +61,7 @@ namespace ig
 
     public:
         StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const Handle<GpuBuffer> vertexBuffer,
-            const Handle<GpuView> vertexBufferSrv, const Handle<GpuBuffer> indexBuffer, const Handle<Material> material);
+            const Handle<GpuView> vertexBufferSrv, const Handle<GpuBuffer> indexBuffer, const ManagedAsset<Material> material);
         StaticMesh(const StaticMesh&) = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();
@@ -73,7 +73,7 @@ namespace ig
         Handle<GpuBuffer> GetVertexBuffer() const { return vertexBuffer; }
         Handle<GpuView> GetVertexBufferSrv() const { return vertexBufferSrv; }
         Handle<GpuBuffer> GetIndexBuffer() const { return indexBuffer; }
-        Handle<Material> GetMaterial() const { return material; }
+        ManagedAsset<Material> GetMaterial() const { return material; }
 
     private:
         RenderContext* renderContext{nullptr};
@@ -82,6 +82,6 @@ namespace ig
         Handle<GpuBuffer> vertexBuffer{};
         Handle<GpuView> vertexBufferSrv{};
         Handle<GpuBuffer> indexBuffer{};
-        Handle<Material> material{};
+        ManagedAsset<Material> material{};
     };
 }    // namespace ig

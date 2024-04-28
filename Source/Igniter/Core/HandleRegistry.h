@@ -35,10 +35,8 @@ namespace ig
 
     public:
         HandleRegistry() { GrowChunks(); }
-
         HandleRegistry(const HandleRegistry&) = delete;
         HandleRegistry(HandleRegistry&&) noexcept = delete;
-
         ~HandleRegistry()
         {
             if (freeSlots.size() != slotCapacity)
@@ -75,15 +73,15 @@ namespace ig
         [[nodiscard]] size_t GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
 
         template <typename... Args>
-        Handle<Ty, DefaultHandleTag> Create(Args&&... args)
+        Handle<Ty, Tag> Create(Args&&... args)
         {
             if (freeSlots.empty() && !GrowChunks())
             {
-                return Handle<Ty>{};
+                return Handle<Ty, Tag>{};
             }
             IG_CHECK(!freeSlots.empty());
 
-            Handle<Ty, DefaultHandleTag> newHandle{0};
+            Handle<Ty, Tag> newHandle{0};
             const SlotType newSlot = freeSlots.back();
             freeSlots.pop_back();
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
@@ -102,9 +100,14 @@ namespace ig
             return newHandle;
         }
 
-        void Destroy(const Handle<Ty, DefaultHandleTag> handle)
+        void Destroy(const Handle<Ty, Tag> handle)
         {
             if (handle.IsNull())
+            {
+                return;
+            }
+
+            if (ReduceHashTo16Bits(TypeHash64<Ty>) != MaskBits<TypeHashBitsOffset, TypeHashSizeInBits>(handle.Value))
             {
                 return;
             }
@@ -140,9 +143,14 @@ namespace ig
             freeSlots.push_back(slot);
         }
 
-        Ty* Lookup(const Handle<Ty, DefaultHandleTag> handle)
+        Ty* Lookup(const Handle<Ty, Tag> handle)
         {
             if (handle.IsNull())
+            {
+                return nullptr;
+            }
+
+            if (ReduceHashTo16Bits(TypeHash64<Ty>) != MaskBits<TypeHashBitsOffset, TypeHashSizeInBits>(handle.Value))
             {
                 return nullptr;
             }
@@ -167,9 +175,14 @@ namespace ig
             return CalcAddressOfSlot(slot);
         }
 
-        const Ty* Lookup(const Handle<Ty, DefaultHandleTag> handle) const
+        const Ty* Lookup(const Handle<Ty, Tag> handle) const
         {
             if (handle.IsNull())
+            {
+                return nullptr;
+            }
+
+            if (ReduceHashTo16Bits(TypeHash64<Ty>) != MaskBits<TypeHashBitsOffset, TypeHashSizeInBits>(handle.Value))
             {
                 return nullptr;
             }

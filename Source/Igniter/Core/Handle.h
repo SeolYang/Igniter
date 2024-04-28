@@ -33,9 +33,9 @@ namespace ig
     };
 }    // namespace ig
 
-template <typename Ty>
-struct std::hash<ig::Handle<Ty>> final
+template <typename Ty, typename Tag>
+struct std::hash<ig::Handle<Ty, Tag>> final
 {
 public:
-    size_t operator()(const ig::Handle<Ty>& handle) const noexcept { return handle.Value; }
+    size_t operator()(const ig::Handle<Ty, Tag>& handle) const noexcept { return handle.Value; }
 };

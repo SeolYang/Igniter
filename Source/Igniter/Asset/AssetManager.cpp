@@ -113,9 +113,9 @@ namespace ig
         return *guidOpt;
     }
 
-    Handle<Texture> AssetManager::LoadTexture(const Guid& guid)
+    ManagedAsset<Texture> AssetManager::LoadTexture(const Guid& guid)
     {
-        Handle<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader)};
+        ManagedAsset<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader)};
         if (!cachedTex)
         {
             return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
@@ -124,7 +124,7 @@ namespace ig
         return cachedTex;
     }
 
-    Handle<Texture> AssetManager::LoadTexture(const String virtualPath)
+    ManagedAsset<Texture> AssetManager::LoadTexture(const String virtualPath)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -159,23 +159,23 @@ namespace ig
         return output;
     }
 
-    Handle<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid)
+    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid)
     {
         return LoadImpl<StaticMesh>(guid, *staticMeshLoader);
     }
 
-    Handle<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
+    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManager, Error, "Load Static Mesh: Invalid Virtual Path {}", virtualPath);
-            return Handle<StaticMesh>{};
+            return ManagedAsset<StaticMesh>{};
         }
 
         if (!assetMonitor->Contains(EAssetCategory::StaticMesh, virtualPath))
         {
             IG_LOG(AssetManager, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
-            return Handle<StaticMesh>{};
+            return ManagedAsset<StaticMesh>{};
         }
 
         return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader);
@@ -200,9 +200,9 @@ namespace ig
         return *guidOpt;
     }
 
-    Handle<Material> AssetManager::LoadMaterial(const Guid& guid)
+    ManagedAsset<Material> AssetManager::LoadMaterial(const Guid& guid)
     {
-        Handle<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader)};
+        ManagedAsset<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader)};
         if (!cachedMat)
         {
             return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
@@ -211,7 +211,7 @@ namespace ig
         return cachedMat;
     }
 
-    Handle<Material> AssetManager::LoadMaterial(const String virtualPath)
+    ManagedAsset<Material> AssetManager::LoadMaterial(const String virtualPath)
     {
         if (!IsValidVirtualPath(virtualPath))
         {

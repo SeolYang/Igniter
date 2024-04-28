@@ -15,7 +15,7 @@ namespace ig
         static void OnInspector(Registry* registry, const Entity entity);
 
     public:
-        Handle<StaticMesh> Mesh{};
+        ManagedAsset<StaticMesh> Mesh{};
 
     private:
         constexpr static std::string_view ContainerKey{"StaticMeshComponent"};

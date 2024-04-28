@@ -29,7 +29,7 @@ namespace ig::details
     class AssetCache final : public TypelessAssetCache
     {
     public:
-        AssetCache()  = default;
+        AssetCache() = default;
         AssetCache(const AssetCache&) = delete;
         AssetCache(AssetCache&&) noexcept = delete;
         ~AssetCache() override = default;
@@ -56,7 +56,7 @@ namespace ig::details
             InvalidateUnsafe(guid);
         }
 
-        [[nodiscard]] Handle<T> Load(const Guid& guid)
+        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid)
         {
             ReadWriteLock rwLock{mutex};
             return LoadUnsafe(guid);
@@ -68,13 +68,13 @@ namespace ig::details
             return IsCachedUnsafe(guid);
         }
 
-        [[nodiscard]] T* Lookup(const Handle<T> handle)
+        [[nodiscard]] T* Lookup(const ManagedAsset<T> handle)
         {
             ReadOnlyLock lock{mutex};
             return registry.Lookup(handle);
         }
 
-        [[nodiscard]] const T* Lookup(const Handle<T> handle) const
+        [[nodiscard]] const T* Lookup(const ManagedAsset<T> handle) const
         {
             ReadOnlyLock lock{mutex};
             return registry.Lookup(handle);
@@ -116,7 +116,7 @@ namespace ig::details
             return cachedAssets.contains(guid) && refCounterTable.contains(guid);
         }
 
-        [[nodiscard]] Handle<T> LoadUnsafe(const Guid& guid)
+        [[nodiscard]] ManagedAsset<T> LoadUnsafe(const Guid& guid)
         {
             IG_CHECK(guid.isValid());
             IG_CHECK(cachedAssets.contains(guid));
@@ -142,8 +142,8 @@ namespace ig::details
 
     private:
         mutable SharedMutex mutex;
-        HandleRegistry<T> registry;
-        UnorderedMap<Guid, Handle<T>> cachedAssets{};
+        HandleRegistry<T, class AssetManager> registry;
+        UnorderedMap<Guid, ManagedAsset<T>> cachedAssets{};
         UnorderedMap<Guid, uint32_t> refCounterTable{};
     };
 }    // namespace ig::details

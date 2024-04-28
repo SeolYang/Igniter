@@ -23,7 +23,7 @@ namespace ig
             return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetType>();
         }
 
-        const Handle<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
+        const ManagedAsset<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
         Guid diffuseTexGuid{DefaultTextureGuid};
         if (diffuse)
         {
