@@ -25,7 +25,7 @@ namespace ig::details
 
 namespace ig
 {
-    template <typename Ty, typename Tag = DefaultHandleTag>
+    template <typename Ty, typename Dependency>
         requires(sizeof(Ty) >= sizeof(uint32_t))
     class HandleRegistry final
     {
@@ -73,15 +73,15 @@ namespace ig
         [[nodiscard]] size_t GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
 
         template <typename... Args>
-        Handle<Ty, Tag> Create(Args&&... args)
+        Handle<Ty, Dependency> Create(Args&&... args)
         {
             if (freeSlots.empty() && !GrowChunks())
             {
-                return Handle<Ty, Tag>{};
+                return Handle<Ty, Dependency>{};
             }
             IG_CHECK(!freeSlots.empty());
 
-            Handle<Ty, Tag> newHandle{0};
+            Handle<Ty, Dependency> newHandle{0};
             const SlotType newSlot = freeSlots.back();
             freeSlots.pop_back();
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
@@ -100,7 +100,7 @@ namespace ig
             return newHandle;
         }
 
-        void Destroy(const Handle<Ty, Tag> handle)
+        void Destroy(const Handle<Ty, Dependency> handle)
         {
             if (handle.IsNull())
             {
@@ -143,7 +143,7 @@ namespace ig
             freeSlots.push_back(slot);
         }
 
-        Ty* Lookup(const Handle<Ty, Tag> handle)
+        Ty* Lookup(const Handle<Ty, Dependency> handle)
         {
             if (handle.IsNull())
             {
@@ -175,7 +175,7 @@ namespace ig
             return CalcAddressOfSlot(slot);
         }
 
-        const Ty* Lookup(const Handle<Ty, Tag> handle) const
+        const Ty* Lookup(const Handle<Ty, Dependency> handle) const
         {
             if (handle.IsNull())
             {

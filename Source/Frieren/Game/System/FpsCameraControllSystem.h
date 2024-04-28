@@ -22,16 +22,16 @@ namespace fe
 
         bool bIgnoreInput = false;
 
-        Handle<Action> moveLeftActionHandle;
-        Handle<Action> moveRightActionHandle;
-        Handle<Action> moveForwardActionHandle;
-        Handle<Action> moveBackwardActionHandle;
-        Handle<Action> moveUpActionHandle;
-        Handle<Action> moveDownActionHandle;
+        Handle<Action, InputManager> moveLeftActionHandle;
+        Handle<Action, InputManager> moveRightActionHandle;
+        Handle<Action, InputManager> moveForwardActionHandle;
+        Handle<Action, InputManager> moveBackwardActionHandle;
+        Handle<Action, InputManager> moveUpActionHandle;
+        Handle<Action, InputManager> moveDownActionHandle;
 
-        Handle<Axis> turnYawAxisHandle;
-        Handle<Axis> turnPitchAxisHandle;
+        Handle<Axis, InputManager> turnYawAxisHandle;
+        Handle<Axis, InputManager> turnPitchAxisHandle;
 
-        Handle<Action> sprintActionHandle;
+        Handle<Action, InputManager> sprintActionHandle;
     };
 }    // namespace fe
