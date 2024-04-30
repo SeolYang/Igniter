@@ -91,24 +91,20 @@ namespace ig
 
     LRESULT CALLBACK Window::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
     {
+        ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
+
+        switch (uMsg)
+        {
+            case WM_DESTROY:
+                PostQuitMessage(0);
+                return 0;
+
+            default:
+                break;
+        }
+
         if (Igniter::IsInitialized())
         {
-            const bool bIgnoreImGuiInput = Igniter::GetImGuiCanvas().IsIgnoreInputEnabled();
-            if (!bIgnoreImGuiInput && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
-            {
-                return false;
-            }
-
-            switch (uMsg)
-            {
-                case WM_DESTROY:
-                    PostQuitMessage(0);
-                    return 0;
-
-                default:
-                    break;
-            }
-
             Igniter::GetInputManager().HandleEvent(uMsg, wParam, lParam);
         }
 

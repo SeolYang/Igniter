@@ -1,22 +1,21 @@
 #pragma once
 #include <Frieren.h>
 #include <Core/Hash.h>
-#include <ImGui/ImGuiLayer.h>
 
 namespace fe
 {
-    class CachedStringDebugger final : public ImGuiLayer
+    class CachedStringDebugger final
     {
     public:
         CachedStringDebugger() = default;
         CachedStringDebugger(const CachedStringDebugger&) = delete;
         CachedStringDebugger(CachedStringDebugger&&) noexcept = delete;
-        ~CachedStringDebugger() override = default;
+        ~CachedStringDebugger() = default;
 
         CachedStringDebugger& operator=(const CachedStringDebugger&) = delete;
         CachedStringDebugger& operator=(CachedStringDebugger&&) = delete;
 
-        void Render() override;
+        void OnImGui();
 
     private:
         constexpr static size_t MaxInputLength = 32;

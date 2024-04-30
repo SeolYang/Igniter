@@ -31,14 +31,15 @@ namespace fe
 
     void CameraPossessSystem::Configure()
     {
-        auto& imguiCanvas = ig::Igniter::GetImGuiCanvas();
+        ImGuiIO& io = ImGui::GetIO();
         if (bEnabled)
         {
             IG_LOG(CameraPossessSystem, Debug, "Possess to Camera.");
             fpsCamControllSystem.SetIgnoreInput(false);
             window.SetCursorVisibility(false);
             window.ClipCursor();
-            imguiCanvas.SetIgnoreInput(true);
+            io.WantCaptureKeyboard = false;
+            io.WantCaptureMouse = false;
         }
         else
         {
@@ -46,7 +47,8 @@ namespace fe
             fpsCamControllSystem.SetIgnoreInput(true);
             window.SetCursorVisibility(true);
             window.UnclipCursor();
-            imguiCanvas.SetIgnoreInput(false);
+            io.WantCaptureKeyboard = true;
+            io.WantCaptureMouse = true;
         }
     }
 }    // namespace fe

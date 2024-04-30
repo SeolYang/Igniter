@@ -1,7 +1,6 @@
 #include <Igniter.h>
 #include <Core/Json.h>
 #include <Core/Engine.h>
-#include <D3D12/GpuTexture.h> /* #sy_todo necessary? */
 #include <Render/RenderContext.h>
 #include <Asset/Texture.h>
 

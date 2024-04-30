@@ -16,6 +16,7 @@ namespace ig::details
     inline constexpr std::string_view AudioAssetRootPath = "Assets\\Audios";
     inline constexpr std::string_view ScriptAssetRootPath = "Assets\\Scripts";
     inline constexpr std::string_view MaterialAssetRootPath = "Assets\\Materials";
+    inline constexpr std::string_view MapAssetRootPath = "Assets\\Maps";
 }    // namespace ig::details
 
 namespace ig
@@ -33,7 +34,7 @@ namespace ig
         SkeletalMesh,
         Audio,
         Material,
-        // Scene
+        Map,
     };
 
     struct ResourceInfo

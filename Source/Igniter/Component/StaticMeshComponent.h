@@ -23,6 +23,5 @@ namespace ig
 
     };
 
-    // #sy_todo_priority new meta features!!
     IG_DECLARE_TYPE_META(StaticMeshComponent);
 }    // namespace ig

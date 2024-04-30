@@ -54,14 +54,10 @@ namespace fe
         }
     }
 
-    void AssetInspector::Render()
+    void AssetInspector::OnImGui()
     {
-        if (ImGui::Begin("Asset Inspector", &bIsVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar))
-        {
-            RenderMenuBar();
-            RenderMainFrame();
-            ImGui::End();
-        }
+        RenderMenuBar();
+        RenderMainFrame();
     }
 
     void AssetInspector::RenderMenuBar()

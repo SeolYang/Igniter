@@ -1,22 +1,21 @@
 #pragma once
 #include <Frieren.h>
 #include <Asset/AssetManager.h>
-#include <ImGui/ImGuiLayer.h>
 
 namespace fe
 {
-    class AssetInspector final : public ImGuiLayer
+    class AssetInspector final
     {
     public:
         AssetInspector();
         AssetInspector(const AssetInspector&) = delete;
         AssetInspector(AssetInspector&&) noexcept = delete;
-        ~AssetInspector() override;
+        ~AssetInspector();
 
         AssetInspector& operator=(const AssetInspector&) = delete;
         AssetInspector& operator=(AssetInspector&&) noexcept = delete;
 
-        void Render() override;
+        void OnImGui();
 
     private:
         void RenderMenuBar();

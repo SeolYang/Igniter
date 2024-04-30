@@ -35,8 +35,8 @@ namespace ig
         GpuView* mainSrvPtr = renderContext.Lookup(mainSrv);
         RenderDevice& renderDevice = renderContext.GetRenderDevice();
         ImGui_ImplWin32_Init(window.GetNative());
-        ImGui_ImplDX12_Init(&renderDevice.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM, &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), mainSrvPtr->CPUHandle,
-            mainSrvPtr->GPUHandle);
+        ImGui_ImplDX12_Init(&renderDevice.GetNative(), NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM,
+            &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), mainSrvPtr->CPUHandle, mainSrvPtr->GPUHandle);
 
         commandContexts.reserve(NumFramesInFlight);
         for (size_t localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
@@ -56,14 +56,18 @@ namespace ig
         renderContext.DestroyGpuView(mainSrv);
     }
 
-    void ImGuiRenderer::Render(ImGuiCanvas& canvas, Renderer& renderer)
+    void ImGuiRenderer::Render(ImGuiCanvas* canvas, Renderer& renderer)
     {
+        /* #sy_note Backbuffer의 최종 상태가 ImGuiRenderer에 의해 결정 되는게 아니도록 수정해야함.. */
         ZoneScoped;
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        canvas.Render();
+        if (canvas != nullptr)
+        {
+            canvas->OnImGui();
+        }
         ImGui::Render();
 
         CommandContext& cmdCtx = commandContexts[frameManager.GetLocalFrameIndex()];
@@ -76,8 +80,16 @@ namespace ig
 
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx.GetNative());
 
-        cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+        if (canvas != nullptr)
+        {
+            cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+        }
+        else
+        {
+            cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+        }
 
         cmdCtx.FlushBarriers();
         cmdCtx.End();

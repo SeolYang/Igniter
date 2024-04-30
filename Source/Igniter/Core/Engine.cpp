@@ -16,7 +16,7 @@
 #include <ImGui/ImGuiRenderer.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <Asset/AssetManager.h>
-#include <Gameplay/GameInstance.h>
+#include <Application/Application.h>
 
 IG_DEFINE_LOG_CATEGORY(Engine);
 
@@ -24,7 +24,7 @@ namespace ig
 {
     Igniter* Igniter::instance = nullptr;
 
-    Igniter::Igniter()
+    Igniter::Igniter(const IgniterDesc& desc)
     {
         instance = this;
         CoInitializeUnique();
@@ -33,8 +33,7 @@ namespace ig
         //////////////////////// L0 ////////////////////////
         frameManager = MakePtr<FrameManager>();
         timer = MakePtr<Timer>();
-        /* #sy_test 임시 윈도우 설명자 */
-        window = MakePtr<Window>(WindowDescription{.Width = 1920, .Height = 1080, .Title = String(settings::GameName)});
+        window = MakePtr<Window>(WindowDescription{.Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle});
         inputManager = MakePtr<InputManager>();
         ////////////////////////////////////////////////////
 
@@ -49,21 +48,12 @@ namespace ig
         imguiRenderer = MakePtr<ImGuiRenderer>(*frameManager, *window, *renderContext);
         ////////////////////////////////////////////////////
 
-        //////////////////////// APP ///////////////////////
-        imguiCanvas = MakePtr<ImGuiCanvas>();
-        gameInstance = MakePtr<GameInstance>();
-        ////////////////////////////////////////////////////
-
         bInitialized = true;
     }
 
     Igniter::~Igniter()
     {
         IG_LOG(Engine, Info, "Extinguishing Engine Runtime.");
-        //////////////////////// APP ///////////////////////
-        gameInstance.reset();
-        imguiCanvas.reset();
-        ////////////////////////////////////////////////////
 
         //////////////////////// L2 ////////////////////////
         imguiRenderer.reset();
@@ -90,7 +80,7 @@ namespace ig
         }
     }
 
-    int Igniter::ExecuteImpl()
+    int Igniter::Execute(Application& application)
     {
         IG_LOG(Engine, Info, "Igniting Main Loop!");
         while (!bShouldExit)
@@ -111,65 +101,47 @@ namespace ig
                 DispatchMessage(&msg);
             }
 
-            assetManager->Update();
-
-            gameInstance->Update();
-            inputManager->PostUpdate();
-
-            const uint8_t localFrameIdx = frameManager->GetLocalFrameIndex();
-            renderer->BeginFrame(localFrameIdx);
-            renderContext->BeginFrame(localFrameIdx);
             {
-                renderer->Render(localFrameIdx, gameInstance->GetRegistry());
-                imguiRenderer->Render(*imguiCanvas, *renderer);
+                assetManager->Update();
+                application.Update();
             }
-            renderer->EndFrame(localFrameIdx);
+
+            {
+                inputManager->PostUpdate();
+            }
+
+            {
+                const uint8_t localFrameIdx = frameManager->GetLocalFrameIndex();
+                renderer->BeginFrame(localFrameIdx);
+                renderContext->BeginFrame(localFrameIdx);
+                {
+                    application.Render();
+                    imguiRenderer->Render(imguiCanvas, *renderer);
+                }
+                renderer->EndFrame(localFrameIdx);
+            }
 
             timer->End();
             frameManager->NextFrame();
         }
 
         renderContext->FlushQueues();
-
         IG_LOG(Engine, Info, "Extinguishing Engine Main Loop.");
         return 0;
     }
 
-    int Igniter::Execute()
+    void Igniter::SetImGuiCanvas(ImGuiCanvas* canvas)
     {
-        IG_CHECK(instance != nullptr);
-        return instance->ExecuteImpl();
+        if (instance != nullptr)
+        {
+            instance->imguiCanvas = canvas;
+        }
     }
 
     void Igniter::Stop()
     {
         IG_CHECK(instance != nullptr);
         instance->bShouldExit = true;
-    }
-
-    void Igniter::Ignite()
-    {
-        /* 좀 더 나은 방식 찾아보기 */
-        if (instance != nullptr)
-        {
-            IG_CHECK_NO_ENTRY();
-            return;
-        }
-
-        [[maybe_unused]] Igniter* newInstance = new Igniter();
-        IG_CHECK(newInstance == instance);
-    }
-
-    void Igniter::Extinguish()
-    {
-        if (instance == nullptr)
-        {
-            IG_CHECK_NO_ENTRY();
-            return;
-        }
-
-        delete instance;
-        instance = nullptr;
     }
 
     FrameManager& Igniter::GetFrameManager()
@@ -218,17 +190,5 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->assetManager;
-    }
-
-    ImGuiCanvas& Igniter::GetImGuiCanvas()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->imguiCanvas;
-    }
-
-    GameInstance& Igniter::GetGameInstance()
-    {
-        IG_CHECK(instance != nullptr);
-        return *(instance->gameInstance);
     }
 }    // namespace ig

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Frieren\Application\TestApp.cpp" />
     <ClCompile Include="..\Source\Frieren\Frieren.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Create</PrecompiledHeader>
@@ -34,28 +35,27 @@
     <ClCompile Include="..\Source\Frieren\Game\System\CameraPossessSystem.cpp" />
     <ClCompile Include="..\Source\Frieren\Game\System\FpsCameraControllSystem.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\AssetInspector.cpp" />
-    <ClCompile Include="..\Source\Frieren\ImGui\AssetWatchPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\EntityInspector.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\EntityList.cpp" />
-    <ClCompile Include="..\Source\Frieren\ImGui\MainLayer.cpp" />
+    <ClCompile Include="..\Source\Frieren\ImGui\EditorCanvas.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\StaticMeshImportPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\StatisticsPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\ImGui\TextureImportPanel.cpp" />
     <ClCompile Include="..\Source\Frieren\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\Frieren\Application\TestApp.h" />
     <ClInclude Include="..\Source\Frieren\Frieren.h" />
     <ClInclude Include="..\Source\Frieren\Game\Component\FpsCameraController.h" />
     <ClInclude Include="..\Source\Frieren\Game\Mode\TestGameMode.h" />
     <ClInclude Include="..\Source\Frieren\Game\System\CameraPossessSystem.h" />
     <ClInclude Include="..\Source\Frieren\Game\System\FpsCameraControllSystem.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\AssetInspector.h" />
-    <ClInclude Include="..\Source\Frieren\ImGui\AssetWatchPanel.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\CachedStringDebugger.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\EntityInsepctor.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\EntityList.h" />
-    <ClInclude Include="..\Source\Frieren\ImGui\MainLayer.h" />
+    <ClInclude Include="..\Source\Frieren\ImGui\EditorCanvas.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\StaticMeshImportPanel.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\StatisticsPanel.h" />
     <ClInclude Include="..\Source\Frieren\ImGui\TextureImportPanel.h" />

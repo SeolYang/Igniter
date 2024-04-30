@@ -94,15 +94,19 @@ namespace ig
         uint64_t hashOfString{0};
     };
 
-    inline String operator""_fs(const char* str, const size_t count)
+    namespace literals
     {
-        return std::string_view{str, count};
-    }
+        inline String operator""_fs(const char* str, const size_t count)
+        {
+            return std::string_view{str, count};
+        }
 
-    inline String operator""_fs(const wchar_t* wstr, const size_t count)
-    {
-        return std::wstring_view{wstr, count};
-    }
+        inline String operator""_fs(const wchar_t* wstr, const size_t count)
+        {
+            return std::wstring_view{wstr, count};
+        }
+    }    // namespace literals
+    using namespace literals;
 }    // namespace ig
 
 template <>

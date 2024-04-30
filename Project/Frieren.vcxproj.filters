@@ -19,6 +19,9 @@
     <Filter Include="Source\Game\System">
       <UniqueIdentifier>{378f0a90-7de5-4436-af61-afc53b5b67fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Application">
+      <UniqueIdentifier>{1f86ff7d-4bd4-431b-ae53-9a95e2421af6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Frieren\main.cpp">
@@ -45,13 +48,10 @@
     <ClCompile Include="..\Source\Frieren\ImGui\AssetInspector.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\ImGui\AssetWatchPanel.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Frieren\ImGui\CachedStringDebugger.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Frieren\ImGui\MainLayer.cpp">
+    <ClCompile Include="..\Source\Frieren\ImGui\EditorCanvas.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Game\Component\FpsCameraController.cpp">
@@ -65,6 +65,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Game\Mode\TestGameMode.cpp">
       <Filter>Source\Game\Mode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Frieren\Application\TestApp.cpp">
+      <Filter>Source\Application</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,10 +95,7 @@
     <ClInclude Include="..\Source\Frieren\ImGui\AssetInspector.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Frieren\ImGui\AssetWatchPanel.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Frieren\ImGui\MainLayer.h">
+    <ClInclude Include="..\Source\Frieren\ImGui\EditorCanvas.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Game\Component\FpsCameraController.h">
@@ -109,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Frieren\Game\Mode\TestGameMode.h">
       <Filter>Source\Game\Mode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Frieren\Application\TestApp.h">
+      <Filter>Source\Application</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

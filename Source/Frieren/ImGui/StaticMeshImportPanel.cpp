@@ -5,49 +5,41 @@
 
 namespace fe
 {
-    void StaticMeshImportPanel::Render()
+    bool StaticMeshImportPanel::OnImGui()
     {
-        if (ImGui::Begin("Static Mesh Import", &bIsVisible))
+        if (ImGui::Button("Reselect"))
         {
-            if (ImGui::Button("Reselect"))
-            {
-                SelectFileToImport();
-            }
-            if (status != EOpenFileDialogStatus::Success)
-            {
-                ImGui::Text("Failed to select model resource file. (Status: %s)", magic_enum::enum_name(status).data());
-            }
-            else
-            {
-                ImGui::SameLine();
-                ImGui::Text("%s", path.ToStringView().data());
-
-                ImGui::Checkbox("Make Left Handed", &config.bMakeLeftHanded);
-                ImGui::Checkbox("Flip UV Coordinates", &config.bFlipUVs);
-                ImGui::Checkbox("Flip Winding Order", &config.bFlipWindingOrder);
-                ImGui::Checkbox("Generate Normals", &config.bGenerateNormals);
-                ImGui::Checkbox("Split Large Meshes", &config.bSplitLargeMeshes);
-                ImGui::Checkbox("Pre-Transform Vertices", &config.bPreTransformVertices);
-                ImGui::Checkbox("Improve Cache Locality", &config.bImproveCacheLocality);
-                ImGui::Checkbox("Generate UV Coordinates", &config.bGenerateUVCoords);
-                ImGui::Checkbox("Generate Bounding Boxes", &config.bGenerateBoundingBoxes);
-                ImGui::Checkbox("Import Materials", &config.bImportMaterials);
-
-                if (ImGui::Button("Import"))
-                {
-                    AssetManager& assetManager = Igniter::GetAssetManager();
-                    assetManager.Import(path, config);
-                    SetVisibility(false);
-                }
-            }
-
-            ImGui::End();
+            SelectFileToImport();
         }
-    }
+        if (status != EOpenFileDialogStatus::Success)
+        {
+            ImGui::Text("Failed to select model resource file. (Status: %s)", magic_enum::enum_name(status).data());
+        }
+        else
+        {
+            ImGui::SameLine();
+            ImGui::Text("%s", path.ToStringView().data());
 
-    void StaticMeshImportPanel::OnVisible()
-    {
-        SelectFileToImport();
+            ImGui::Checkbox("Make Left Handed", &config.bMakeLeftHanded);
+            ImGui::Checkbox("Flip UV Coordinates", &config.bFlipUVs);
+            ImGui::Checkbox("Flip Winding Order", &config.bFlipWindingOrder);
+            ImGui::Checkbox("Generate Normals", &config.bGenerateNormals);
+            ImGui::Checkbox("Split Large Meshes", &config.bSplitLargeMeshes);
+            ImGui::Checkbox("Pre-Transform Vertices", &config.bPreTransformVertices);
+            ImGui::Checkbox("Improve Cache Locality", &config.bImproveCacheLocality);
+            ImGui::Checkbox("Generate UV Coordinates", &config.bGenerateUVCoords);
+            ImGui::Checkbox("Generate Bounding Boxes", &config.bGenerateBoundingBoxes);
+            ImGui::Checkbox("Import Materials", &config.bImportMaterials);
+
+            if (ImGui::Button("Import"))
+            {
+                AssetManager& assetManager = Igniter::GetAssetManager();
+                assetManager.Import(path, config);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     void StaticMeshImportPanel::SelectFileToImport()

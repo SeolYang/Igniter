@@ -8,7 +8,7 @@
 
 namespace fe
 {
-    void StatisticsPanel::Render()
+    void StatisticsPanel::OnImGui()
     {
         if (bEnablePolling && pollingStep >= pollingInterval)
         {
@@ -31,38 +31,33 @@ namespace fe
             pollingStep = 0;
         }
 
-        if (ImGui::Begin("Statistics Panel", &bIsVisible))
+        if (ImGui::RadioButton("##EnablePollingStatistics", bEnablePolling))
         {
-            if (ImGui::RadioButton("##EnablePollingStatistics", bEnablePolling))
-            {
-                bEnablePolling = !bEnablePolling;
-                pollingStep = 0;
-            }
-
-            ImGui::SameLine();
-
-            ImGui::SliderInt("Interval", &pollingInterval, 10, 180);
-
-            if (ImGui::TreeNodeEx("Engine (Real-time)", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                const Timer& timer = Igniter::GetTimer();
-                ImGui::Text("FPS: %d", timer.GetStableFps());
-                ImGui::Text("Delta Time: %d ms", timer.GetDeltaTimeMillis());
-                ImGui::TreePop();
-            }
-
-            if (ImGui::TreeNodeEx("Temp Constant Buffer Occupancy", ImGuiTreeNodeFlags_Framed))
-            {
-                constexpr std::string_view FormatTemplate = "Local Frame#%d Used: %lf MB/%.01lf MB";
-                ImGui::Text(FormatTemplate.data(), 0, tempConstantBufferUsedSizeMB[0], tempConstantBufferSizePerFrameMB);
-                ImGui::ProgressBar(tempConstantBufferOccupancy[0], ImVec2(0, 0));
-                ImGui::Text(FormatTemplate.data(), 1, tempConstantBufferUsedSizeMB[1], tempConstantBufferSizePerFrameMB);
-                ImGui::ProgressBar(tempConstantBufferOccupancy[1], ImVec2(0, 0));
-                ImGui::TreePop();
-            }
-            ImGui::End();
+            bEnablePolling = !bEnablePolling;
+            pollingStep = 0;
         }
 
+        ImGui::SameLine();
+
+        ImGui::SliderInt("Interval", &pollingInterval, 10, 180);
+
+        if (ImGui::TreeNodeEx("Engine (Real-time)", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            const Timer& timer = Igniter::GetTimer();
+            ImGui::Text("FPS: %d", timer.GetStableFps());
+            ImGui::Text("Delta Time: %d ms", timer.GetDeltaTimeMillis());
+            ImGui::TreePop();
+        }
+
+        if (ImGui::TreeNodeEx("Temp Constant Buffer Occupancy", ImGuiTreeNodeFlags_Framed))
+        {
+            constexpr std::string_view FormatTemplate = "Local Frame#%d Used: %lf MB/%.01lf MB";
+            ImGui::Text(FormatTemplate.data(), 0, tempConstantBufferUsedSizeMB[0], tempConstantBufferSizePerFrameMB);
+            ImGui::ProgressBar(tempConstantBufferOccupancy[0], ImVec2(0, 0));
+            ImGui::Text(FormatTemplate.data(), 1, tempConstantBufferUsedSizeMB[1], tempConstantBufferSizePerFrameMB);
+            ImGui::ProgressBar(tempConstantBufferOccupancy[1], ImVec2(0, 0));
+            ImGui::TreePop();
+        }
         ++pollingStep;
     }
 }    // namespace fe

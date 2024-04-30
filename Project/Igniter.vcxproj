@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\Igniter\Application\Application.h" />
     <ClInclude Include="..\Source\Igniter\Asset\AssetCache.h" />
     <ClInclude Include="..\Source\Igniter\Asset\AssetManager.h" />
     <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h" />
@@ -82,11 +83,9 @@
     <ClInclude Include="..\Source\Igniter\Filesystem\CoFileWatcher.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\FileDialog.h" />
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h" />
-    <ClInclude Include="..\Source\Igniter\Gameplay\GameInstance.h" />
     <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h" />
-    <ClInclude Include="..\Source\Igniter\Gameplay\Scene.h" />
+    <ClInclude Include="..\Source\Igniter\Gameplay\World.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h" />
-    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h" />
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiExtensions.h" />
     <ClInclude Include="..\Source\Igniter\Igniter.h" />
@@ -115,6 +114,7 @@
     <ClInclude Include="..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Igniter\Application\Application.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
@@ -155,9 +155,7 @@
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\CoFileWatcher.cpp" />
     <ClCompile Include="..\Source\Igniter\Filesystem\FileDialog.cpp" />
-    <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp" />
-    <ClCompile Include="..\Source\Igniter\Gameplay\Scene.cpp" />
-    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp" />
+    <ClCompile Include="..\Source\Igniter\Gameplay\World.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="..\Source\Igniter\Igniter.cpp">

@@ -64,6 +64,12 @@
     <Filter Include="Source\Input">
       <UniqueIdentifier>{f4062502-3595-4cf1-b1ac-c406357a3049}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Asset\Map">
+      <UniqueIdentifier>{63956005-c7ab-46d0-8f2c-11b7dd5c5f62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application">
+      <UniqueIdentifier>{86e27114-564a-4f57-83c7-4ce1d301eb54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
@@ -201,16 +207,10 @@
     <ClInclude Include="..\Source\Igniter\Filesystem\Utils.h">
       <Filter>Source\Filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Gameplay\GameInstance.h">
-      <Filter>Source\Gameplay</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Igniter\Gameplay\GameMode.h">
       <Filter>Source\Gameplay</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiCanvas.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Igniter\ImGui\ImGuiLayer.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\Igniter\ImGui\ImGuiRenderer.h">
@@ -345,8 +345,11 @@
     <ClInclude Include="..\Source\Igniter\Render\RenderCommon.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Igniter\Gameplay\Scene.h">
+    <ClInclude Include="..\Source\Igniter\Gameplay\World.h">
       <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Application\Application.h">
+      <Filter>Source\Application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -412,12 +415,6 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\D3D12\ShaderBlob.cpp">
       <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Gameplay\GameInstance.cpp">
-      <Filter>Source\Gameplay</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Igniter\ImGui\ImGuiCanvas.cpp">
-      <Filter>Source\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\ImGui\ImGuiRenderer.cpp">
       <Filter>Source\ImGui</Filter>
@@ -515,8 +512,11 @@
     <ClCompile Include="..\Source\Igniter\Render\Swapchain.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Igniter\Gameplay\Scene.cpp">
+    <ClCompile Include="..\Source\Igniter\Gameplay\World.cpp">
       <Filter>Source\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Application\Application.cpp">
+      <Filter>Source\Application</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

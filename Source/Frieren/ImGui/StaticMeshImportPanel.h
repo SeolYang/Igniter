@@ -2,25 +2,21 @@
 #include <Frieren.h>
 #include <Filesystem/FileDialog.h>
 #include <Asset/StaticMesh.h>
-#include <ImGui/ImGuiLayer.h>
 
 namespace fe
 {
-    class StaticMeshImportPanel final : public ImGuiLayer
+    class StaticMeshImportPanel final
     {
     public:
         StaticMeshImportPanel() = default;
         StaticMeshImportPanel(const StaticMeshImportPanel&) = delete;
         StaticMeshImportPanel(StaticMeshImportPanel&&) noexcept = delete;
-        ~StaticMeshImportPanel() override = default;
+        ~StaticMeshImportPanel() = default;
 
         StaticMeshImportPanel& operator=(const StaticMeshImportPanel&) = delete;
         StaticMeshImportPanel& operator=(StaticMeshImportPanel&&) noexcept = delete;
 
-        void Render() override;
-        void OnVisible() override;
-
-    private:
+        bool OnImGui();
         void SelectFileToImport();
 
     private:

@@ -1,8 +1,8 @@
 #include <Frieren.h>
 #include <Core/Engine.h>
 #include <Core/Meta.h>
-#include <Gameplay/GameInstance.h>
 #include <Component/NameComponent.h>
+#include <Gameplay/World.h>
 #include <ImGui/EntityInsepctor.h>
 #include <ImGui/EntityList.h>
 
@@ -10,24 +10,22 @@ namespace fe
 {
     EntityInspector::EntityInspector(const EntityList& entityList) : entityList(&entityList) {}
 
-    void EntityInspector::Render()
+    void EntityInspector::OnImGui()
     {
         IG_CHECK(entityList != nullptr);
-        if (!ImGui::Begin("Inspector", &bIsVisible))
-        {
-            return;
-        }
-
         const Entity selectedEntity = entityList->GetSelectedEntity();
         if (selectedEntity == entt::null)
         {
             ImGui::Text("Entity not selected.");
-            ImGui::End();
             return;
         }
 
-        GameInstance& gameInstance = Igniter::GetGameInstance();
-        Registry& registry = gameInstance.GetRegistry();
+        if (activeWorld == nullptr)
+        {
+            return;
+        }
+
+        Registry& registry = activeWorld->GetRegistry();
         bool bHasDisplayableComponent = false;
 
         for (const auto& [typeID, type] : entt::resolve())
@@ -79,6 +77,5 @@ namespace fe
         {
             ImGui::Text("Oops! No Displayable Components here!");
         }
-        ImGui::End();
     }
 }    // namespace fe

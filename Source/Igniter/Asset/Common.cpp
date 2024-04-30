@@ -99,6 +99,8 @@ namespace ig
                 return Path{details::AudioAssetRootPath};
             case EAssetCategory::Material:
                 return Path{details::MaterialAssetRootPath};
+            case EAssetCategory::Map:
+                return Path{details::MapAssetRootPath};
             [[unlikely]] default:
                 IG_CHECK_NO_ENTRY();
                 return Path{};

@@ -19,7 +19,7 @@ namespace ig
         ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext);
         ~ImGuiRenderer();
 
-        void Render(ImGuiCanvas& canvas, Renderer& renderer);
+        void Render(ImGuiCanvas* canvas, Renderer& renderer);
 
     private:
         void SetupDefaultTheme();

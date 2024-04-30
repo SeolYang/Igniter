@@ -4,6 +4,7 @@
 namespace ig
 {
     class Timer;
+    class World;
 }    // namespace ig
 
 namespace fe
@@ -13,7 +14,7 @@ namespace fe
     public:
         FpsCameraControllSystem();
 
-        void Update(ig::Registry& registry);
+        void Update(ig::World& world);
 
         void SetIgnoreInput(const bool bEnable) { this->bIgnoreInput = bEnable; }
 

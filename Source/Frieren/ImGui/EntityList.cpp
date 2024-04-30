@@ -3,21 +3,21 @@
 #include <Core/Engine.h>
 #include <Core/Log.h>
 #include <Core/ContainerUtils.h>
-#include <Gameplay/GameInstance.h>
+#include <Gameplay/World.h>
 #include <ImGui/EntityList.h>
 
 namespace fe
 {
-    void EntityList::Render()
+    void EntityList::OnImGui()
     {
-        if (ImGui::Begin("Entity List", &bIsVisible))
+        bool bIsItemClicked = false;
+        if (ImGui::BeginChild("EntityListChild"))
         {
-            bool bIsItemClicked = false;
-            if (ImGui::BeginChild("EntityListChild"))
+            if (ImGui::TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                if (ImGui::TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen))
+                if (activeWorld != nullptr)
                 {
-                    auto& registry = Igniter::GetGameInstance().GetRegistry();
+                    auto& registry = activeWorld->GetRegistry();
                     auto entityView = std::views::all(registry.template storage<Entity>());
                     auto validEntityView = std::views::filter([&registry](const Entity entity) { return registry.valid(entity); });
                     auto entityNameView = std::views::transform(
@@ -65,18 +65,17 @@ namespace fe
                             ImGui::TreePop();
                         }
                     }
-
-                    ImGui::TreePop();
                 }
 
-                ImGui::EndChild();
+                ImGui::TreePop();
             }
 
-            if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseClicked(0) && !bIsItemClicked)
-            {
-                selectedEntity = entt::null;
-            }
-            ImGui::End();
+            ImGui::EndChild();
+        }
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseClicked(0) && !bIsItemClicked)
+        {
+            selectedEntity = entt::null;
         }
     }
 }    // namespace fe

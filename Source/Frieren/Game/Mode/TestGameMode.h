@@ -3,6 +3,11 @@
 #include <Game/System/FpsCameraControllSystem.h>
 #include <Game/System/CameraPossessSystem.h>
 
+namespace ig
+{
+    class World;
+}
+
 namespace fe
 {
     class TestGameMode final : public ig::GameMode
@@ -16,10 +21,12 @@ namespace fe
         TestGameMode& operator=(const TestGameMode&) = delete;
         TestGameMode& operator=(TestGameMode&&) noexcept = delete;
 
-        void Update(ig::Registry& registry) override;
+        void Update(ig::World& world) override;
 
     private:
         FpsCameraControllSystem fpsCameraControllSystem;
         CameraPossessSystem cameraPossessSystem{fpsCameraControllSystem};
     };
+
+    IG_DECLARE_TYPE_META(TestGameMode);
 }    // namespace fe

@@ -1,8 +1,16 @@
 #pragma once
 #include <Igniter.h>
+#include <Core/String.h>
 
 namespace ig
 {
+    struct IgniterDesc
+    {
+        uint32_t WindowWidth, WindowHeight;
+        String WindowTitle;
+    };
+
+    class Application;
     class FrameManager;
     class Timer;
     class Window;
@@ -16,7 +24,10 @@ namespace ig
     class GameInstance;
     class Igniter final
     {
+        friend class Application;
+
     public:
+        Igniter(const IgniterDesc& desc);
         ~Igniter();
 
         Igniter(const Igniter&) = delete;
@@ -32,22 +43,16 @@ namespace ig
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static Renderer& GetRenderer();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
-        [[nodiscard]] static ImGuiCanvas& GetImGuiCanvas();
-        [[nodiscard]] static GameInstance& GetGameInstance();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
-
         bool static IsInitialized() { return instance != nullptr && instance->bInitialized; }
 
-        static void Ignite();
-        static void Extinguish();
+        [[nodiscard]] static void SetImGuiCanvas(ImGuiCanvas* canvas);
+
         static void Stop();
-        static int Execute();
 
     private:
-        Igniter();
-
-        int ExecuteImpl();
+        int Execute(Application& application);
 
     private:
         static Igniter* instance;
@@ -73,8 +78,7 @@ namespace ig
         ////////////////////////////////////////////////////
 
         //////////////////////// APP ///////////////////////
-        Ptr<ImGuiCanvas> imguiCanvas;
-        Ptr<GameInstance> gameInstance;
+        ImGuiCanvas* imguiCanvas = nullptr;
         ////////////////////////////////////////////////////
     };
 }    // namespace ig

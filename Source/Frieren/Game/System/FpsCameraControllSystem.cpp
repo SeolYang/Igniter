@@ -6,6 +6,7 @@
 #include <Core/Log.h>
 #include <Core/Engine.h>
 #include <Core/Timer.h>
+#include <Gameplay/World.h>
 #include <Game/Component/FpsCameraController.h>
 
 namespace fe
@@ -27,8 +28,9 @@ namespace fe
         turnPitchAxisHandle = inputManager.QueryAxis(ig::String("TurnAxis"));
     }
 
-    void FpsCameraControllSystem::Update(ig::Registry& registry)
+    void FpsCameraControllSystem::Update(ig::World& world)
     {
+        Registry& registry = world.GetRegistry();
         const auto& inputManager = Igniter::GetInputManager();
         const Action moveLeftAction = inputManager.GetAction(moveLeftActionHandle);
         const Action moveRightAction = inputManager.GetAction(moveRightActionHandle);
