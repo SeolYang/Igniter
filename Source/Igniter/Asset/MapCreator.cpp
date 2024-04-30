@@ -36,7 +36,7 @@ namespace ig
 
         const Path assetPath{MakeAssetPath(EAssetCategory::Map, assetInfo.GetGuid())};
 
-        if (!fs::exists(assetPath) && !SaveJsonToFile(assetPath, serializedWorld))
+        if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, Json::to_ubjson(serializedWorld)))
         {
             return MakeFail<Map::Desc, EMapCreateStatus::FailedSaveAsset>();
         }

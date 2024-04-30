@@ -23,7 +23,6 @@ namespace ig
             return MakeFail<Map, EMapLoadStatus::FileDoesNotExists>();
         }
 
-        Json serializedWorld = LoadJsonFromFile(assetPath);
-        return MakeSuccess<Map, EMapLoadStatus>(Map{desc, std::move(serializedWorld)});
+        return MakeSuccess<Map, EMapLoadStatus>(Map{desc, Json::from_ubjson(LoadBlobFromFile(assetPath))});
     }
 }    // namespace ig

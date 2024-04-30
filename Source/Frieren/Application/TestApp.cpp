@@ -162,7 +162,7 @@ namespace fe
         //world = MakePtr<World>();
         //world->Deserialize(dumpedWorld);
         AssetManager& assetManager = Igniter::GetAssetManager();
-        world = MakePtr<World>(assetManager, assetManager.Load<Map>(xg::Guid{"231c02e6-1873-4904-926c-e0ced7a61e47"}));
+        world = MakePtr<World>(assetManager, assetManager.Load<Map>(xg::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"}));
     }
 
     TestApp::~TestApp() {}
