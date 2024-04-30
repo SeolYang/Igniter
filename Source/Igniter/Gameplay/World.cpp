@@ -11,32 +11,36 @@ namespace ig
     {
         Json entitesRoot{};
         auto resolvedMeta = entt::resolve();
-        for (const auto entity : *registry.storage<Entity>())
+        for (const auto entity : registry.view<Entity>(entt::exclude<NonSerializable>))
         {
-            Json entityRoot{};
-            for (auto&& [typeID, type] : resolvedMeta)
+            if (!registry.all_of<NonSerializable>(entity))
             {
-                const entt::sparse_set* const storage = registry.storage(typeID);
-                if (storage != nullptr && storage->contains(entity))
+                Json entityRoot{};
+                for (auto&& [typeID, type] : resolvedMeta)
                 {
-                    Json componentRoot{};
-                    const auto nameProperty = type.prop(meta::NameProperty);
-                    IG_CHECK(nameProperty);
-                    componentRoot[ComponentNameHintKey] = nameProperty.value().cast<String>();
-                    auto serializeJson = type.func(meta::SerializeComponentJsonFunc);
-                    if (serializeJson)
+                    const entt::sparse_set* const storage = registry.storage(typeID);
+                    if (storage != nullptr && storage->contains(entity))
                     {
-                        serializeJson.invoke(type, std::ref(componentRoot), std::cref(registry), entity);
-                    }
+                        Json componentRoot{};
+                        const auto nameProperty = type.prop(meta::NameProperty);
+                        IG_CHECK(nameProperty);
+                        componentRoot[ComponentNameHintKey] = nameProperty.value().cast<String>();
+                        auto serializeJson = type.func(meta::SerializeComponentJsonFunc);
+                        if (serializeJson)
+                        {
+                            serializeJson.invoke(type, std::ref(componentRoot), std::cref(registry), entity);
+                        }
 
-                    entityRoot[std::format("{}", typeID)] = componentRoot;
+                        entityRoot[std::format("{}", typeID)] = componentRoot;
+                    }
                 }
+
+                entitesRoot[std::format("{}", entt::to_integral(entity))] = entityRoot;
             }
 
-            entitesRoot[std::format("{}", entt::to_integral(entity))] = entityRoot;
+            archive[EntitiesDataKey] = entitesRoot;
         }
 
-        archive[EntitiesDataKey] = entitesRoot;
         return archive;
     }
 
@@ -54,7 +58,7 @@ namespace ig
             /* #sy_todo key가 number가 아니였을 경우 처리 */
             const auto oldEntity = static_cast<Entity>(std::stoul(rootItr.key()));
             const auto entity = registry.create(oldEntity);
-            IG_CHECK(oldEntity == entity); /* #sy_note 버그는 아니지만, 추후 처리해야함 */
+            IG_CHECK(oldEntity == entity); /* #sy_note 버그는 아니지만, 처리해야함 */
             const Json& entityRoot = rootItr.value();
             for (auto entityItr = entityRoot.cbegin(); entityItr != entityRoot.cend(); ++entityItr)
             {

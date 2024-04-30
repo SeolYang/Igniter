@@ -26,7 +26,6 @@ namespace ig
 
     private:
         constexpr static std::string_view EntitiesDataKey = "Entities";
-        constexpr static std::string_view ComponentIDKey = "CID";
         constexpr static std::string_view ComponentNameHintKey = "NameHint";
 
         Registry registry{};
