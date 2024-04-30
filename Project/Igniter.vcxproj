@@ -24,6 +24,9 @@
     <ClInclude Include="..\Source\Igniter\Asset\AssetManager.h" />
     <ClInclude Include="..\Source\Igniter\Asset\AssetMonitor.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Common.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\Map.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\MapCreator.h" />
+    <ClInclude Include="..\Source\Igniter\Asset\MapLoader.h" />
     <ClInclude Include="..\Source\Igniter\Asset\Material.h" />
     <ClInclude Include="..\Source\Igniter\Asset\MaterialImporter.h" />
     <ClInclude Include="..\Source\Igniter\Asset\MaterialLoader.h" />
@@ -118,6 +121,8 @@
     <ClCompile Include="..\Source\Igniter\Asset\AssetManager.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\AssetMonitor.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Common.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\MapCreator.cpp" />
+    <ClCompile Include="..\Source\Igniter\Asset\MapLoader.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\Material.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\MaterialImporter.cpp" />
     <ClCompile Include="..\Source\Igniter\Asset\MaterialLoader.cpp" />

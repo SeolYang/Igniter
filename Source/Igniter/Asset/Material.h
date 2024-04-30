@@ -31,7 +31,7 @@ namespace ig
     class Material final
     {
     public:
-        using ImportDesc = void;
+        using ImportDesc = MaterialCreateDesc;
         using LoadDesc = MaterialLoadDesc;
         using Desc = AssetDesc<Material>;
 

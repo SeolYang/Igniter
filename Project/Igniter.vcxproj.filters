@@ -351,6 +351,15 @@
     <ClInclude Include="..\Source\Igniter\Application\Application.h">
       <Filter>Source\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\Map.h">
+      <Filter>Source\Asset\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\MapCreator.h">
+      <Filter>Source\Asset\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Igniter\Asset\MapLoader.h">
+      <Filter>Source\Asset\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
@@ -517,6 +526,12 @@
     </ClCompile>
     <ClCompile Include="..\Source\Igniter\Application\Application.cpp">
       <Filter>Source\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\MapCreator.cpp">
+      <Filter>Source\Asset\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Igniter\Asset\MapLoader.cpp">
+      <Filter>Source\Asset\Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

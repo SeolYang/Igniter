@@ -4,6 +4,7 @@
 #include <Asset/TextureImporter.h>
 #include <Asset/StaticMeshImporter.h>
 #include <Asset/MaterialImporter.h>
+#include <Asset/MapCreator.h>
 #include <Asset/AssetManager.h>
 
 namespace ig
@@ -20,6 +21,7 @@ namespace ig
         assetCaches.emplace_back(MakePtr<details::AssetCache<Texture>>());
         assetCaches.emplace_back(MakePtr<details::AssetCache<StaticMesh>>());
         assetCaches.emplace_back(MakePtr<details::AssetCache<Material>>());
+        assetCaches.emplace_back(MakePtr<details::AssetCache<Map>>());
     }
 
     AssetManager::~AssetManager()
@@ -226,6 +228,53 @@ namespace ig
         }
 
         return LoadMaterial(assetMonitor->GetGuid(EAssetCategory::Material, virtualPath));
+    }
+
+    Guid AssetManager::Import(const String virtualPath, const MapCreateDesc& desc)
+    {
+        if (!IsValidVirtualPath(virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Failed to create map: Invalid Virtual Path {}", virtualPath);
+            return Guid{};
+        }
+
+        Result<Map::Desc, EMapCreateStatus> result{mapCreator->Import(AssetInfo{virtualPath, EAssetCategory::Map}, desc)};
+        std::optional<Guid> guidOpt{ImportImpl<Map>(virtualPath, result)};
+        if (!guidOpt)
+        {
+            return Guid{};
+        }
+
+        bIsDirty = true;
+        return *guidOpt;
+    }
+
+    ManagedAsset<Map> AssetManager::LoadMap(const Guid& guid)
+    {
+        ManagedAsset<Map> cachedMap{LoadImpl<Map>(guid, *mapLoader)};
+        if (!cachedMap)
+        {
+            IG_LOG(AssetManager, Error, "Failed to load map {}.", guid);
+        }
+
+        return cachedMap;
+    }
+
+    ManagedAsset<Map> AssetManager::LoadMap(const String virtualPath)
+    {
+        if (!IsValidVirtualPath(virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Load Map: Invalid Virtual Path {}", virtualPath);
+            return {};
+        }
+
+        if (!assetMonitor->Contains(EAssetCategory::Map, virtualPath))
+        {
+            IG_LOG(AssetManager, Error, "Map \"{}\" is invisible to asset manager.", virtualPath);
+            return {};
+        }
+
+        return LoadMap(assetMonitor->GetGuid(EAssetCategory::Map, virtualPath));
     }
 
     void AssetManager::Delete(const Guid& guid)

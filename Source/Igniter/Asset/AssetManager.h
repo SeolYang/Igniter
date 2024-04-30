@@ -11,6 +11,8 @@
 #include <Asset/StaticMeshLoader.h>
 #include <Asset/Material.h>
 #include <Asset/MaterialLoader.h>
+#include <Asset/Map.h>
+#include <Asset/MapLoader.h>
 
 IG_DEFINE_LOG_CATEGORY(AssetManager);
 
@@ -30,6 +32,8 @@ namespace ig
     class StaticMeshLoader;
     class MaterialImporter;
     class MaterialLoader;
+    class MapCreator;
+    class MapLoader;
     class AssetManager final
     {
     private:
@@ -80,6 +84,10 @@ namespace ig
         [[nodiscard]] ManagedAsset<Material> LoadMaterial(const Guid& guid);
         [[nodiscard]] ManagedAsset<Material> LoadMaterial(const String virtualPath);
 
+        Guid Import(const String virtualPath, const MapCreateDesc& desc);
+        [[nodiscard]] ManagedAsset<Map> LoadMap(const Guid& guid);
+        [[nodiscard]] ManagedAsset<Map> LoadMap(const String virtualPath);
+
         template <Asset T>
         [[nodiscard]] ManagedAsset<T> Load(const Guid& guid)
         {
@@ -94,6 +102,10 @@ namespace ig
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
             {
                 return LoadMaterial(guid);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
+            {
+                return LoadMap(guid);
             }
         }
 
@@ -111,6 +123,10 @@ namespace ig
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
             {
                 return LoadMaterial(virtualPath);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
+            {
+                return LoadMap(virtualPath);
             }
         }
 
@@ -136,6 +152,10 @@ namespace ig
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
             {
                 bSuceeded = ReloadImpl<Material>(guid, desc, *materialLoader);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
+            {
+                bSuceeded = ReloadImpl<Map>(guid, desc, *mapLoader);
             }
             else
             {
@@ -415,6 +435,9 @@ namespace ig
 
         Ptr<MaterialImporter> materialImporter;
         Ptr<MaterialLoader> materialLoader;
+
+        Ptr<MapCreator> mapCreator;
+        Ptr<MapLoader> mapLoader;
 
         bool bIsDirty = false;
         ModifiedEvent assetModifiedEvent;

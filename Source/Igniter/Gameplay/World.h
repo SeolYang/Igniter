@@ -1,5 +1,6 @@
 #pragma once
 #include <Igniter.h>
+#include <Core/Handle.h>
 
 namespace ig
 {
@@ -7,13 +8,16 @@ namespace ig
     {
     };
 
-    class World final
+    class Map;
+    class AssetManager;
+    class World
     {
     public:
         World() = default;
+        World(AssetManager& assetManager, const Handle<Map, AssetManager> map);
         World(const World&) = delete;
         World(World&&) noexcept = default;
-        ~World() = default;
+        virtual ~World();
 
         World& operator=(const World&) = delete;
         World& operator=(World&&) noexcept = default;
@@ -28,6 +32,8 @@ namespace ig
         constexpr static std::string_view EntitiesDataKey = "Entities";
         constexpr static std::string_view ComponentNameHintKey = "NameHint";
 
+        AssetManager* assetManager = nullptr;
+        Handle<Map, AssetManager> map{};
         Registry registry{};
     };
 }    // namespace ig

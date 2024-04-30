@@ -4,12 +4,33 @@
 #include <Core/Serialization.h>
 #include <Core/Meta.h>
 #include <Core/String.h>
+#include <Asset/AssetManager.h>
 #include <Gameplay/World.h>
 
 IG_DEFINE_LOG_CATEGORY(World);
 
 namespace ig
 {
+    World::World(AssetManager& assetManager, const Handle<Map, AssetManager> map) : assetManager(&assetManager), map(map)
+    {
+        if (map)
+        {
+            Map* mapPtr = assetManager.Lookup(map);
+            if (mapPtr != nullptr)
+            {
+                Deserialize(mapPtr->GetSerializedWorld());
+            }
+        }
+    }
+
+     World::~World() 
+     {
+         if (assetManager != nullptr && !map.IsNull())
+         {
+            assetManager->Unload(map);
+         }
+     }
+
     Json& World::Serialize(Json& archive) const
     {
         Json entitesRoot{};

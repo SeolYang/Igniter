@@ -2,8 +2,9 @@
 #include <Core/Log.h>
 #include <Filesystem/Utils.h>
 #include <Asset/Texture.h>
-#include <Asset/Material.h>
 #include <Asset/StaticMesh.h>
+#include <Asset/Material.h>
+#include <Asset/Map.h>
 #include <Asset/AssetMonitor.h>
 
 IG_DEFINE_LOG_CATEGORY(AssetMonitor);
@@ -25,6 +26,7 @@ namespace ig::details
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::Texture, MakePtr<AssetDescMap<Texture>>()));
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::StaticMesh, MakePtr<AssetDescMap<StaticMesh>>()));
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::Material, MakePtr<AssetDescMap<Material>>()));
+        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Map, MakePtr<AssetDescMap<Map>>()));
     }
 
     void AssetMonitor::InitVirtualPathGuidTables()

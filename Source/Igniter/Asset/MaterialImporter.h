@@ -14,7 +14,6 @@ namespace ig
     };
 
     class AssetManager;
-
     class MaterialImporter final
     {
         friend class AssetManager;
