@@ -20,6 +20,10 @@ namespace fe
         void Update() override;
         void Render() override;
 
+        void SetGameMode(Ptr<ig::GameMode> newGameMode);
+
+        ig::World* GetActiveWorld() { return world.get(); }
+
     private:
         Ptr<ig::World> world;
         Ptr<ig::GameMode> gameMode;

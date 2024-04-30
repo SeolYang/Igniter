@@ -148,7 +148,7 @@ namespace fe
         /********************************************/
 
         /* #sy_note ImGui 통합 테스트 */
-        editorCanvas = MakePtr<EditorCanvas>();
+        editorCanvas = MakePtr<EditorCanvas>(*this);
         Igniter::SetImGuiCanvas(static_cast<ImGuiCanvas*>(editorCanvas.get()));
         /************************************/
 
@@ -168,5 +168,10 @@ namespace fe
     {
         // #sy_note 더 나은 방식으로 할 수 있을 것 같음 고민해볼 것.
         Igniter::GetRenderer().Render(Igniter::GetFrameManager().GetLocalFrameIndex(), world->GetRegistry());
+    }
+
+    void TestApp::SetGameMode(Ptr<ig::GameMode> newGameMode) 
+    {
+        gameMode = std::move(newGameMode);
     }
 }    // namespace fe

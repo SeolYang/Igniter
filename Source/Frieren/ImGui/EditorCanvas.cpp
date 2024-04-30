@@ -1,6 +1,8 @@
 #include <Frieren.h>
 #include <Core/Engine.h>
 #include <Asset/AssetManager.h>
+#include <Gameplay/GameMode.h>
+#include <Application/TestApp.h>
 #include <ImGui/ImGuiCanvas.h>
 #include <ImGui/StatisticsPanel.h>
 #include <ImGui/CachedStringDebugger.h>
@@ -13,8 +15,9 @@
 
 namespace fe
 {
-    EditorCanvas::EditorCanvas()
-        : statisticsPanel(MakePtr<StatisticsPanel>())
+    EditorCanvas::EditorCanvas(TestApp& testApp)
+        : app(testApp)
+        , statisticsPanel(MakePtr<StatisticsPanel>())
         , cachedStringDebugger(MakePtr<CachedStringDebugger>())
         , entityList(MakePtr<EntityList>())
         , entityInspector(MakePtr<EntityInspector>(*entityList))
@@ -89,11 +92,24 @@ namespace fe
                 if (ImGui::MenuItem("Entity Inspector"))
                 {
                     bEntityInspectorOpend = !bEntityInspectorOpend;
+                    entityInspector->SetActiveWorld(app.GetActiveWorld());
+                    entityList->SetActiveWorld(app.GetActiveWorld());
                 }
 
-                if (ImGui::MenuItem("Entity Outliner"))
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Game Mode"))
+            {
+                for (auto&& [typeID, type] : entt::resolve())
                 {
-                    bEntityListOpend = !bEntityListOpend;
+                    if (type.prop(ig::meta::GameModeProperty))
+                    {
+                        if (ImGui::MenuItem(type.prop(ig::meta::TitleCaseNameProperty).value().cast<ig::String>().ToCString()))
+                        {
+                            app.SetGameMode(std::move(*type.func(ig::meta::CreateGameModeFunc).invoke({}).try_cast<Ptr<GameMode>>()));
+                        }
+                    }
                 }
 
                 ImGui::EndMenu();
@@ -114,7 +130,7 @@ namespace fe
             ImGui::End();
         }
 
-        if (bEntityListOpend && ImGui::Begin("Entity Outliner", &bEntityListOpend))
+        if (bEntityInspectorOpend && ImGui::Begin("Entity Outliner", &bEntityInspectorOpend))
         {
             entityList->OnImGui();
             ImGui::End();

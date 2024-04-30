@@ -31,6 +31,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Frieren.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="..\Source\Frieren\Game\Component\FpsCameraController.cpp" />
+    <ClCompile Include="..\Source\Frieren\Game\Mode\JustSpinningMode.cpp" />
     <ClCompile Include="..\Source\Frieren\Game\Mode\TestGameMode.cpp" />
     <ClCompile Include="..\Source\Frieren\Game\System\CameraPossessSystem.cpp" />
     <ClCompile Include="..\Source\Frieren\Game\System\FpsCameraControllSystem.cpp" />
@@ -48,6 +49,7 @@
     <ClInclude Include="..\Source\Frieren\Application\TestApp.h" />
     <ClInclude Include="..\Source\Frieren\Frieren.h" />
     <ClInclude Include="..\Source\Frieren\Game\Component\FpsCameraController.h" />
+    <ClInclude Include="..\Source\Frieren\Game\Mode\JustSpinningMode.h" />
     <ClInclude Include="..\Source\Frieren\Game\Mode\TestGameMode.h" />
     <ClInclude Include="..\Source\Frieren\Game\System\CameraPossessSystem.h" />
     <ClInclude Include="..\Source\Frieren\Game\System\FpsCameraControllSystem.h" />

@@ -13,15 +13,17 @@ namespace fe
     class TextureImportPanel;
     class StaticMeshImportPanel;
     class AssetInspector;
+    class TestApp;
     class EditorCanvas final : public ig::ImGuiCanvas
     {
     public:
-        EditorCanvas();
+        EditorCanvas(TestApp& testApp);
         ~EditorCanvas() override;
 
         void OnImGui() override;
 
     private:
+        TestApp& app;
         Ptr<StatisticsPanel> statisticsPanel{};
         Ptr<CachedStringDebugger> cachedStringDebugger{};
         Ptr<EntityList> entityList{};
@@ -32,7 +34,6 @@ namespace fe
 
         bool bStatisticsPanelOpend = false;
         bool bCachedStringDebuggerOpend = false;
-        bool bEntityListOpend = false;
         bool bEntityInspectorOpend = false;
         bool bTextureImportPanelOpend = false;
         bool bStaticMeshImportPanelOpend = false;
