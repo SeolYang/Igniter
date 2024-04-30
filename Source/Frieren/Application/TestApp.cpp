@@ -155,6 +155,11 @@ namespace fe
         /* #sy_note Game Mode 타입 메타 정보 테스트 */
         gameMode = std::move(*entt::resolve<TestGameMode>().func(ig::meta::CreateGameModeFunc).invoke({}).try_cast<Ptr<GameMode>>());
         /************************************/
+
+        Json dumpedWorld{};
+        [[maybe_unused]] std::string worldDumpTest = world->Serialize(dumpedWorld).dump();
+        world = MakePtr<World>();
+        world->Deserialize(dumpedWorld);
     }
 
     TestApp::~TestApp() {}

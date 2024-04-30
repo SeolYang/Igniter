@@ -18,25 +18,26 @@ namespace ig
 {
     template <typename T>
         requires std::is_default_constructible_v<T>
-    bool AddComponent(Registry* registry, const Entity entity)
+    bool AddComponent(Ref<Registry> registryRef, const Entity entity)
     {
-        IG_CHECK(registry != nullptr && entity != entt::null);
-        if (registry->all_of<T>(entity))
+        IG_CHECK(entity != entt::null);
+        Registry& registry = registryRef.get();
+        if (registry.all_of<T>(entity))
         {
             return false;
         }
 
         // #sy_note 새롭게 추가한 컴포넌트의 타입을 반환하고 싶지만, Tag Component의 경우 메모리 상에 존재하지 않기 때문에
         // 불가능 하다.
-        registry->emplace<T>(entity);
-        return registry->all_of<T>(entity);
+        registry.emplace<T>(entity);
+        return registry.all_of<T>(entity);
     }
 
     template <typename T>
-    void RemoveComponent(Registry* registry, const Entity entity)
+    bool RemoveComponent(Ref<Registry> registryRef, const Entity entity)
     {
-        IG_CHECK(registry != nullptr && entity != entt::null);
-        registry->remove<T>(entity);
+        IG_CHECK(entity != entt::null);
+        return registryRef.get().remove<T>(entity) > 0;
     }
 }    // namespace ig
 
