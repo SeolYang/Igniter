@@ -1,9 +1,12 @@
 #include <Igniter.h>
 #include <Core/Handle.h>
+#include <Core/Log.h>
 #include <Core/Serialization.h>
 #include <Core/Meta.h>
 #include <Core/String.h>
 #include <Gameplay/World.h>
+
+IG_DEFINE_LOG_CATEGORY(World);
 
 namespace ig
 {
@@ -64,29 +67,33 @@ namespace ig
             {
                 const auto componentID = static_cast<entt::id_type>(std::stoul(entityItr.key()));
                 auto resolvedType = entt::resolve(componentID);
+                const auto nameProperty = resolvedType.prop(meta::NameProperty);
                 if (!resolvedType)
                 {
-                    // #sy_todo add error message
+                    IG_LOG(World, Warning, "Ignored Component {}({}): {} does not registered to meta registry.", nameProperty.value().cast<String>(),
+                        componentID);
                     continue;
                 }
 
                 auto addComponent = resolvedType.func(meta::AddComponentFunc);
                 if (!addComponent)
                 {
-                    // #sy_todo add error message
+                    IG_LOG(World, Warning, "Ignored Type ID: {} add component meta function does not registered to meta registry.",
+                        nameProperty.value().cast<String>());
                     continue;
                 }
 
                 if (!addComponent.invoke(resolvedType, std::ref(registry), entity).cast<bool>())
                 {
-                    // #sy_todo add error message
+                    IG_LOG(World, Warning, "Failed to add component {}({}) to entity", nameProperty.value().cast<String>(), componentID);
                     continue;
                 }
 
                 auto deserializeJson = resolvedType.func(meta::DeserializeComponentJsonFunc);
                 if (!deserializeJson)
                 {
-                    // #sy_todo add err message
+                    IG_LOG(World, Warning, "Ignored component {}({}) deserialization. The deserialize meta function does not registered.",
+                        nameProperty.value().cast<String>(), componentID);
                     continue;
                 }
 
