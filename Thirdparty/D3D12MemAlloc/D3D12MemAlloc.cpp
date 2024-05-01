@@ -20,7 +20,14 @@
 // THE SOFTWARE.
 //
 
-#include "D3D12MemAlloc.h"
+#pragma warning(push)
+#pragma warning(disable : 26827)
+#pragma warning(disable : 26495)
+#pragma warning(disable : 4100)
+#pragma warning(disable : 4189)
+#pragma warning(disable : 4324)
+#pragma warning(disable : 4505)
+#include <D3D12MemAlloc.h>
 
 #include <combaseapi.h>
 #include <mutex>
@@ -10568,3 +10575,4 @@ VirtualBlock::~VirtualBlock()
 #endif // _D3D12MA_VIRTUAL_BLOCK_FUNCTIONS
 #endif // _D3D12MA_PUBLIC_INTERFACE
 } // namespace D3D12MA
+#pragma warning(pop)

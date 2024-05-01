@@ -1,7 +1,7 @@
 #pragma once
-#include <Gameplay/GameMode.h>
-#include <Game/System/FpsCameraControllSystem.h>
-#include <Game/System/CameraPossessSystem.h>
+#include "Igniter/Gameplay/GameMode.h"
+#include "Frieren/Game/System/FpsCameraControllSystem.h"
+#include "Frieren/Game/System/CameraPossessSystem.h"
 
 namespace ig
 {

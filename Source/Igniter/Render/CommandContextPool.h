@@ -1,9 +1,9 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/String.h>
-#include <Core/FrameManager.h>
-#include <D3D12/Common.h>
-#include <D3D12/CommandContext.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/String.h"
+#include "Igniter/Core/FrameManager.h"
+#include "Igniter/D3D12/Common.h"
+#include "Igniter/D3D12/CommandContext.h"
 
 namespace ig
 {

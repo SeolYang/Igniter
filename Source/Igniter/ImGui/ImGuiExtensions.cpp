@@ -1,7 +1,7 @@
-#include <Igniter.h>
+#include "Igniter/Igniter.h"
 #include <imgui_internal.h>
-#include <Component/TransformComponent.h>
-#include <ImGui/ImGuiExtensions.h>
+#include "Igniter/Component/TransformComponent.h"
+#include "Igniter/ImGui/ImGuiExtensions.h"
 
 namespace ig::ImGuiX
 {

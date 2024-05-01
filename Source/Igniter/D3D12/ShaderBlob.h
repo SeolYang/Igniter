@@ -1,6 +1,6 @@
 #pragma once
-#include <D3D12/Common.h>
-#include <Core/String.h>
+#include "Igniter/D3D12/Common.h"
+#include "Igniter/Core/String.h"
 
 namespace ig
 {

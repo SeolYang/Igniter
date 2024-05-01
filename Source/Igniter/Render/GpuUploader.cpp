@@ -1,11 +1,11 @@
-#include <Igniter.h>
-#include <Core/ThreadUIDGenerator.h>
-#include <D3D12/CommandQueue.h>
-#include <D3D12/CommandContext.h>
-#include <D3D12/GpuBuffer.h>
-#include <D3D12/GpuTexture.h>
-#include <D3D12/RenderDevice.h>
-#include <Render/GpuUploader.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/ThreadUIDGenerator.h"
+#include "Igniter/D3D12/CommandQueue.h"
+#include "Igniter/D3D12/CommandContext.h"
+#include "Igniter/D3D12/GpuBuffer.h"
+#include "Igniter/D3D12/GpuTexture.h"
+#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/Render/GpuUploader.h"
 
 namespace ig
 {

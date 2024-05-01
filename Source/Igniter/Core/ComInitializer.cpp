@@ -1,5 +1,5 @@
-#include <Igniter.h>
-#include <Core/ComInitializer.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/ComInitializer.h"
 
 namespace ig
 {

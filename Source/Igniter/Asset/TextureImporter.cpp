@@ -1,10 +1,10 @@
-#include <Igniter.h>
-#include <Core/Log.h>
-#include <Core/Timer.h>
-#include <Core/Serialization.h>
-#include <Core/ComInitializer.h>
-#include <Filesystem/Utils.h>
-#include <Asset/TextureImporter.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Log.h"
+#include "Igniter/Core/Timer.h"
+#include "Igniter/Core/Serialization.h"
+#include "Igniter/Core/ComInitializer.h"
+#include "Igniter/Filesystem/Utils.h"
+#include "Igniter/Asset/TextureImporter.h"
 
 IG_DEFINE_LOG_CATEGORY(TextureImporter);
 

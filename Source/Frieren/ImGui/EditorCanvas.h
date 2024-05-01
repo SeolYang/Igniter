@@ -1,7 +1,7 @@
 #pragma once
-#include <Frieren.h>
-#include <Core/Engine.h>
-#include <ImGui/ImGuiCanvas.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Core/Engine.h"
+#include "Igniter/ImGui/ImGuiCanvas.h"
 
 namespace fe
 {

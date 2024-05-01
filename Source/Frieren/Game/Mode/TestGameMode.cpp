@@ -1,6 +1,6 @@
-#include <Frieren.h>
-#include <Gameplay/World.h>
-#include <Game/Mode/TestGameMode.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Gameplay/World.h"
+#include "Frieren/Game/Mode/TestGameMode.h"
 
 namespace fe
 {

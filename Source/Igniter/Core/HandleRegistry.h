@@ -1,11 +1,11 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/Hash.h>
-#include <Core/Memory.h>
-#include <Core/Result.h>
-#include <Core/Handle.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Hash.h"
+#include "Igniter/Core/Memory.h"
+#include "Igniter/Core/Result.h"
+#include "Igniter/Core/Handle.h"
 #ifdef IG_TRACK_LEAKED_HANDLE
-#include <Core/DebugTools.h>
+#include "Igniter/Core/DebugTools.h"
 #endif
 
 namespace ig::details

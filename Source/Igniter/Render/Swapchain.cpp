@@ -1,9 +1,9 @@
-#include <Igniter.h>
-#include <Core/Window.h>
-#include <D3D12/CommandQueue.h>
-#include <D3D12/GpuTexture.h>
-#include <Render/RenderContext.h>
-#include <Render/Swapchain.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Window.h"
+#include "Igniter/D3D12/CommandQueue.h"
+#include "Igniter/D3D12/GpuTexture.h"
+#include "Igniter/Render/RenderContext.h"
+#include "Igniter/Render/Swapchain.h"
 
 namespace ig
 {

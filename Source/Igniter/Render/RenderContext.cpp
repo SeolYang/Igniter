@@ -1,6 +1,6 @@
-#include <Igniter.h>
-#include <Core/FrameManager.h>
-#include <Render/RenderContext.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/FrameManager.h"
+#include "Igniter/Render/RenderContext.h"
 
 namespace ig
 {

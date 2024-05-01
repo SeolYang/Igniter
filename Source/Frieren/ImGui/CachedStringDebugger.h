@@ -1,6 +1,6 @@
 #pragma once
-#include <Frieren.h>
-#include <Core/Hash.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Core/Hash.h"
 
 namespace fe
 {

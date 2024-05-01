@@ -1,23 +1,19 @@
-#include <Igniter.h>
-#include <Core/Engine.h>
-#include <Application/Application.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Engine.h"
+#include "Igniter/Application/Application.h"
 
 namespace ig
 {
     Application::Application(const AppDesc& desc)
     {
-        const IgniterDesc engineDesc{
-            .WindowWidth = desc.WindowWidth,
-            .WindowHeight = desc.WindowHeight,
-            .WindowTitle = desc.WindowTitle
-        };
+        const IgniterDesc engineDesc{.WindowWidth = desc.WindowWidth, .WindowHeight = desc.WindowHeight, .WindowTitle = desc.WindowTitle};
 
         engine = MakePtr<Igniter>(engineDesc);
     }
 
     Application::~Application() {}
 
-    int Application::Execute() 
+    int Application::Execute()
     {
         return engine->Execute(*this);
     }

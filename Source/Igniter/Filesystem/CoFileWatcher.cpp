@@ -1,6 +1,6 @@
-#include <Igniter.h>
-#include <Filesystem/CoFileWatcher.h>
-#include <Core/Log.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Filesystem/CoFileWatcher.h"
+#include "Igniter/Core/Log.h"
 
 IG_DEFINE_LOG_CATEGORY(CoFileWatcher)
 

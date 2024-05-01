@@ -1,0 +1,464 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Asan|x64">
+      <Configuration>Asan</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="CheckHandleLeaks|x64">
+      <Configuration>CheckHandleLeaks</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h" />
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcerrors.h" />
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h" />
+    <ClInclude Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h" />
+    <ClInclude Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h" />
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3.h" />
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3_win.h" />
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEvents.h" />
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsCommon.h" />
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h" />
+    <ClInclude Include="Application\Application.h" />
+    <ClInclude Include="Asset\AssetCache.h" />
+    <ClInclude Include="Asset\AssetManager.h" />
+    <ClInclude Include="Asset\AssetMonitor.h" />
+    <ClInclude Include="Asset\Common.h" />
+    <ClInclude Include="Asset\Map.h" />
+    <ClInclude Include="Asset\MapCreator.h" />
+    <ClInclude Include="Asset\MapLoader.h" />
+    <ClInclude Include="Asset\Material.h" />
+    <ClInclude Include="Asset\MaterialImporter.h" />
+    <ClInclude Include="Asset\MaterialLoader.h" />
+    <ClInclude Include="Asset\StaticMesh.h" />
+    <ClInclude Include="Asset\StaticMeshImporter.h" />
+    <ClInclude Include="Asset\StaticMeshLoader.h" />
+    <ClInclude Include="Asset\Texture.h" />
+    <ClInclude Include="Asset\TextureImporter.h" />
+    <ClInclude Include="Asset\TextureLoader.h" />
+    <ClInclude Include="Component\CameraArchetype.h" />
+    <ClInclude Include="Component\CameraComponent.h" />
+    <ClInclude Include="Component\NameComponent.h" />
+    <ClInclude Include="Component\StaticMeshComponent.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
+    <ClInclude Include="Core\Assert.h" />
+    <ClInclude Include="Core\ComInitializer.h" />
+    <ClInclude Include="Core\ContainerUtils.h" />
+    <ClInclude Include="Core\DebugTools.h" />
+    <ClInclude Include="Core\EmbededSettings.h" />
+    <ClInclude Include="Core\Engine.h" />
+    <ClInclude Include="Core\Event.h" />
+    <ClInclude Include="Core\Format.h" />
+    <ClInclude Include="Core\FrameManager.h" />
+    <ClInclude Include="Core\GuidBytes.h" />
+    <ClInclude Include="Core\Handle.h" />
+    <ClInclude Include="Core\HandleRegistry.h" />
+    <ClInclude Include="Core\Hash.h" />
+    <ClInclude Include="Core\Json.h" />
+    <ClInclude Include="Core\Log.h" />
+    <ClInclude Include="Core\Math.h" />
+    <ClInclude Include="Core\Memory.h" />
+    <ClInclude Include="Core\Meta.h" />
+    <ClInclude Include="Core\Regex.h" />
+    <ClInclude Include="Core\Result.h" />
+    <ClInclude Include="Core\Serialization.h" />
+    <ClInclude Include="Core\String.h" />
+    <ClInclude Include="Core\ThreadUIDGenerator.h" />
+    <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Core\Types.h" />
+    <ClInclude Include="Core\Version.h" />
+    <ClInclude Include="Core\Window.h" />
+    <ClInclude Include="D3D12\CommandContext.h" />
+    <ClInclude Include="D3D12\CommandQueue.h" />
+    <ClInclude Include="D3D12\Common.h" />
+    <ClInclude Include="D3D12\DescriptorHeap.h" />
+    <ClInclude Include="D3D12\GpuBuffer.h" />
+    <ClInclude Include="D3D12\GpuBufferDesc.h" />
+    <ClInclude Include="D3D12\GpuSync.h" />
+    <ClInclude Include="D3D12\GpuTexture.h" />
+    <ClInclude Include="D3D12\GpuTextureDesc.h" />
+    <ClInclude Include="D3D12\GpuView.h" />
+    <ClInclude Include="D3D12\PipelineState.h" />
+    <ClInclude Include="D3D12\PipelineStateDesc.h" />
+    <ClInclude Include="D3D12\RenderDevice.h" />
+    <ClInclude Include="D3D12\RootSignature.h" />
+    <ClInclude Include="D3D12\ShaderBlob.h" />
+    <ClInclude Include="Filesystem\CoFileWatcher.h" />
+    <ClInclude Include="Filesystem\FileDialog.h" />
+    <ClInclude Include="Filesystem\Utils.h" />
+    <ClInclude Include="Gameplay\GameMode.h" />
+    <ClInclude Include="Gameplay\World.h" />
+    <ClInclude Include="Igniter.h" />
+    <ClInclude Include="ImGui\ImGuiCanvas.h" />
+    <ClInclude Include="ImGui\ImGuiExtensions.h" />
+    <ClInclude Include="ImGui\ImGuiRenderer.h" />
+    <ClInclude Include="Input\InputManager.h" />
+    <ClInclude Include="Render\CommandContextPool.h" />
+    <ClInclude Include="Render\GpuUploader.h" />
+    <ClInclude Include="Render\GpuViewManager.h" />
+    <ClInclude Include="Render\RenderCommon.h" />
+    <ClInclude Include="Render\RenderContext.h" />
+    <ClInclude Include="Render\Renderer.h" />
+    <ClInclude Include="Render\Swapchain.h" />
+    <ClInclude Include="Render\TempConstantBufferAllocator.h" />
+    <ClInclude Include="Render\Utils.h" />
+    <ClInclude Include="Render\Vertex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Application\Application.cpp" />
+    <ClCompile Include="Asset\AssetManager.cpp" />
+    <ClCompile Include="Asset\AssetMonitor.cpp" />
+    <ClCompile Include="Asset\Common.cpp" />
+    <ClCompile Include="Asset\MapCreator.cpp" />
+    <ClCompile Include="Asset\MapLoader.cpp" />
+    <ClCompile Include="Asset\Material.cpp" />
+    <ClCompile Include="Asset\MaterialImporter.cpp" />
+    <ClCompile Include="Asset\MaterialLoader.cpp" />
+    <ClCompile Include="Asset\StaticMesh.cpp" />
+    <ClCompile Include="Asset\StaticMeshImporter.cpp" />
+    <ClCompile Include="Asset\StaticMeshLoader.cpp" />
+    <ClCompile Include="Asset\Texture.cpp" />
+    <ClCompile Include="Asset\TextureImporter.cpp" />
+    <ClCompile Include="Asset\TextureLoader.cpp" />
+    <ClCompile Include="Component\CameraComponent.cpp" />
+    <ClCompile Include="Component\NameComponent.cpp" />
+    <ClCompile Include="Component\StaticMeshComponent.cpp" />
+    <ClCompile Include="Component\TransformComponent.cpp" />
+    <ClCompile Include="Core\ComInitializer.cpp" />
+    <ClCompile Include="Core\DebugTools.cpp" />
+    <ClCompile Include="Core\Engine.cpp" />
+    <ClCompile Include="Core\Log.cpp" />
+    <ClCompile Include="Core\Regex.cpp" />
+    <ClCompile Include="Core\String.cpp" />
+    <ClCompile Include="Core\ThreadUIDGenerator.cpp" />
+    <ClCompile Include="Core\Window.cpp" />
+    <ClCompile Include="D3D12\CommandContext.cpp" />
+    <ClCompile Include="D3D12\CommandQueue.cpp" />
+    <ClCompile Include="D3D12\D3D12Common.cpp" />
+    <ClCompile Include="D3D12\DescriptorHeap.cpp" />
+    <ClCompile Include="D3D12\GpuBuffer.cpp" />
+    <ClCompile Include="D3D12\GpuBufferDesc.cpp" />
+    <ClCompile Include="D3D12\GpuSync.cpp" />
+    <ClCompile Include="D3D12\GpuTexture.cpp" />
+    <ClCompile Include="D3D12\GPUTextureDesc.cpp" />
+    <ClCompile Include="D3D12\PipelineState.cpp" />
+    <ClCompile Include="D3D12\PipelineStateDesc.cpp" />
+    <ClCompile Include="D3D12\RenderDevice.cpp" />
+    <ClCompile Include="D3D12\RootSignature.cpp" />
+    <ClCompile Include="D3D12\ShaderBlob.cpp" />
+    <ClCompile Include="Filesystem\CoFileWatcher.cpp" />
+    <ClCompile Include="Filesystem\FileDialog.cpp" />
+    <ClCompile Include="Gameplay\World.cpp" />
+    <ClCompile Include="Igniter.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
+    <ClCompile Include="ImGui\ImGuiRenderer.cpp" />
+    <ClCompile Include="Input\InputManager.cpp" />
+    <ClCompile Include="Render\CommandContextPool.cpp" />
+    <ClCompile Include="Render\GpuUploader.cpp" />
+    <ClCompile Include="Render\GpuViewManager.cpp" />
+    <ClCompile Include="Render\RenderContext.cpp" />
+    <ClCompile Include="Render\Renderer.cpp" />
+    <ClCompile Include="Render\Swapchain.cpp" />
+    <ClCompile Include="Render\TempConstantBufferAllocator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
+    <Natvis Include="..\Thirdparty\nlohmann_json\nlohmann_json.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl" />
+    <None Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{229becc5-709f-4d93-b959-7c23283ddef8}</ProjectGuid>
+    <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Igniter</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>true</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">
+    <OutDir>$(SolutionDir)Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">
+    <OutDir>$(SolutionDir)Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgApplocalDeps>true</VcpkgApplocalDeps>
+    <VcpkgXUseBuiltInApplocalDeps>true</VcpkgXUseBuiltInApplocalDeps>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgInstalledDir>$(SolutionDir)Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgInstalledDir>$(SolutionDir)Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>IG_TRACK_LEAKED_HANDLE;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;NOMINMAX;WIN32_MEAN_AND_LEAN;_DISABLE_VECTOR_ANNOTATION;_DISABLE_STRING_ANNOTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxgi.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

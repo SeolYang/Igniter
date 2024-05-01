@@ -1,9 +1,9 @@
-#include <Igniter.h>
-#include <Core/Math.h>
-#include <Core/Json.h>
-#include <Core/Serialization.h>
-#include <ImGui/ImGuiExtensions.h>
-#include <Component/TransformComponent.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Math.h"
+#include "Igniter/Core/Json.h"
+#include "Igniter/Core/Serialization.h"
+#include "Igniter/ImGui/ImGuiExtensions.h"
+#include "Igniter/Component/TransformComponent.h"
 
 namespace ig
 {

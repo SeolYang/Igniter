@@ -1,6 +1,6 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/Meta.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Meta.h"
 
 namespace ig
 {

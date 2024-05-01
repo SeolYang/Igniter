@@ -1,6 +1,5 @@
 #pragma once
-#include <Igniter.h>
-#include <Asset/Material.h>
+#include "Igniter/Asset/Material.h"
 
 namespace ig
 {

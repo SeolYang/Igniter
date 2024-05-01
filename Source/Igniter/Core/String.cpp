@@ -1,6 +1,6 @@
-#include <Igniter.h>
-#include <Core/String.h>
-#include <Core/Regex.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/String.h"
+#include "Igniter/Core/Regex.h"
 
 namespace ig
 {

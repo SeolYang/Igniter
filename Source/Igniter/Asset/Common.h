@@ -1,8 +1,8 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/String.h>
-#include <Core/Handle.h>
-#include <Core/GuidBytes.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/String.h"
+#include "Igniter/Core/Handle.h"
+#include "Igniter/Core/GuidBytes.h"
 
 namespace ig::details
 {

@@ -1,6 +1,6 @@
-#include <Igniter.h>
-#include <Core/Log.h>
-#include <D3D12/ShaderBlob.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Log.h"
+#include "Igniter/D3D12/ShaderBlob.h"
 
 IG_DEFINE_LOG_CATEGORY(ShaderBlob);
 

@@ -1,6 +1,6 @@
 #pragma once
-#include <Igniter.h>
-#include <D3D12/GpuView.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/D3D12/GpuView.h"
 
 namespace ig
 {

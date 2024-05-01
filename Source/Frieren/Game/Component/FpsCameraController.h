@@ -1,6 +1,6 @@
 #pragma once
-#include <Core/Math.h>
-#include <Core/Meta.h>
+#include "Igniter/Core/Math.h"
+#include "Igniter/Core/Meta.h"
 
 namespace fe
 {

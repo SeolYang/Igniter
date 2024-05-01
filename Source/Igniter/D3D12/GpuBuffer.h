@@ -1,6 +1,6 @@
 #pragma once
-#include <D3D12/Common.h>
-#include <D3D12/GpuBufferDesc.h>
+#include "Igniter/D3D12/Common.h"
+#include "Igniter/D3D12/GpuBufferDesc.h"
 
 namespace ig
 {

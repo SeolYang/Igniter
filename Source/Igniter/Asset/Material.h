@@ -1,9 +1,8 @@
 #pragma once
-#include <Core/Handle.h>
-#include <Core/Result.h>
-#include <Core/String.h>
-#include <Asset/Common.h>
-#include <Asset/Texture.h>
+#include "Igniter/Core/Handle.h"
+#include "Igniter/Core/Result.h"
+#include "Igniter/Core/String.h"
+#include "Igniter/Asset/Texture.h"
 
 namespace ig
 {

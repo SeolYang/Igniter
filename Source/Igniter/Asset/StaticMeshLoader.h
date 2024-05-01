@@ -1,6 +1,6 @@
 #pragma once
-#include <Igniter.h>
-#include <Asset/StaticMesh.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Asset/StaticMesh.h"
 
 namespace ig
 {

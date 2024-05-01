@@ -1,7 +1,7 @@
 #pragma once
-#include <Igniter.h>
-#include <D3D12/Common.h>
-#include <D3D12/GpuSync.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/D3D12/Common.h"
+#include "Igniter/D3D12/GpuSync.h"
 
 namespace ig
 {

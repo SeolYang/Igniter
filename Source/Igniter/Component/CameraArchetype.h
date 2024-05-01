@@ -1,6 +1,6 @@
 #pragma once
-#include <Component/CameraComponent.h>
-#include <Component/TransformComponent.h>
+#include "Igniter/Component/CameraComponent.h"
+#include "Igniter/Component/TransformComponent.h"
 
 namespace ig
 {

@@ -1,9 +1,9 @@
-#include <Frieren.h>
-#include <Core/Timer.h>
-#include <Core/Engine.h>
-#include <Gameplay/World.h>
-#include <Component/TransformComponent.h>
-#include <Game/Mode/JustSpinningMode.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Core/Timer.h"
+#include "Igniter/Core/Engine.h"
+#include "Igniter/Gameplay/World.h"
+#include "Igniter/Component/TransformComponent.h"
+#include "Frieren/Game/Mode/JustSpinningMode.h"
 
 namespace fe
 {

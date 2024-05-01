@@ -1,7 +1,7 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/Result.h>
-#include <Asset/Texture.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Result.h"
+#include "Igniter/Asset/Texture.h"
 
 struct ID3D11Device;
 

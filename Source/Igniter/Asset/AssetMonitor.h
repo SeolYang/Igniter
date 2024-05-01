@@ -1,7 +1,7 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/Serialization.h>
-#include <Asset/Common.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Serialization.h"
+#include "Igniter/Asset/Common.h"
 
 namespace ig::details
 {

@@ -1,7 +1,7 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/String.h>
-#include <Core/HandleRegistry.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/String.h"
+#include "Igniter/Core/HandleRegistry.h"
 
 namespace ig
 {

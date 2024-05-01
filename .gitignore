@@ -366,7 +366,8 @@ Contents/
 
 # vcpkg
 Thirdparty/VcpkgInstalled
-Project/log.txt
-Project/imgui.ini
-Project/Assets
-Project/Resources
+log.txt
+imgui.ini
+Assets/
+Resources/
+Fonts/

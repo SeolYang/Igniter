@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Version.h>
+#include "Igniter/Core/Version.h"
 
 namespace ig::settings
 {

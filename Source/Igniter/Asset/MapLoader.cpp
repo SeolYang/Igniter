@@ -1,6 +1,6 @@
-#include <Igniter.h>
-#include <Filesystem/Utils.h>
-#include <Asset/MapLoader.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Filesystem/Utils.h"
+#include "Igniter/Asset/MapLoader.h"
 
 namespace ig
 {
@@ -23,6 +23,7 @@ namespace ig
             return MakeFail<Map, EMapLoadStatus::FileDoesNotExists>();
         }
 
+        /* #sy_todo ubjson 으로 저장할지, 아니면 그냥 json으로 저장할지 load desc 에서 설정 할 수 있도록 할 것! */
         return MakeSuccess<Map, EMapLoadStatus>(Map{desc, Json::from_ubjson(LoadBlobFromFile(assetPath))});
     }
 }    // namespace ig

@@ -1,7 +1,7 @@
 #pragma once
-#include <Frieren.h>
-#include <Filesystem/FileDialog.h>
-#include <Asset/StaticMesh.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Filesystem/FileDialog.h"
+#include "Igniter/Asset/StaticMesh.h"
 
 namespace fe
 {

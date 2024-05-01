@@ -1,6 +1,6 @@
-#include <Igniter.h>
-#include <Asset/AssetManager.h>
-#include <Asset/MaterialLoader.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Asset/AssetManager.h"
+#include "Igniter/Asset/MaterialLoader.h"
 
 namespace ig
 {

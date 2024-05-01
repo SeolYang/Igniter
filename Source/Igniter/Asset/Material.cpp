@@ -1,9 +1,9 @@
-#include <Igniter.h>
-#include <Core/Json.h>
-#include <Core/Engine.h>
-#include <Asset/AssetManager.h>
-#include <Asset/Texture.h>
-#include <Asset/Material.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Json.h"
+#include "Igniter/Core/Engine.h"
+#include "Igniter/Asset/AssetManager.h"
+#include "Igniter/Asset/Texture.h"
+#include "Igniter/Asset/Material.h"
 
 namespace ig
 {

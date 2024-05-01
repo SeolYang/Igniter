@@ -1,6 +1,6 @@
 #pragma once
-#include <Frieren.h>
-#include <Asset/AssetManager.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Asset/AssetManager.h"
 
 namespace fe
 {

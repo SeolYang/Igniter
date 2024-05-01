@@ -1,7 +1,7 @@
-#include <Frieren.h>
-#include <Core/Json.h>
-#include <Core/Serialization.h>
-#include <Game/Component/FpsCameraController.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Core/Json.h"
+#include "Igniter/Core/Serialization.h"
+#include "Frieren/Game/Component/FpsCameraController.h"
 
 namespace fe
 {

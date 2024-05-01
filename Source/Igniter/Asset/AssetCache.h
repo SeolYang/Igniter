@@ -1,9 +1,9 @@
 #pragma once
-#include <Igniter.h>
-#include <Core/String.h>
-#include <Core/Handle.h>
-#include <Core/HandleRegistry.h>
-#include <Asset/Common.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/String.h"
+#include "Igniter/Core/Handle.h"
+#include "Igniter/Core/HandleRegistry.h"
+#include "Igniter/Asset/Common.h"
 
 namespace ig::details
 {

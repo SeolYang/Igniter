@@ -1,8 +1,8 @@
-#include <Igniter.h>
+#include "Igniter/Igniter.h"
 #include <DbgHelp.h>
 #include <debugapi.h>
 #pragma comment(lib, "dbghelp.lib")
-#include <Core/DebugTools.h>
+#include "Igniter/Core/DebugTools.h"
 
 namespace ig::details
 {

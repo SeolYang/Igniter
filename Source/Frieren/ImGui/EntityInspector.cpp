@@ -1,10 +1,10 @@
-#include <Frieren.h>
-#include <Core/Engine.h>
-#include <Core/Meta.h>
-#include <Component/NameComponent.h>
-#include <Gameplay/World.h>
-#include <ImGui/EntityInsepctor.h>
-#include <ImGui/EntityList.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Core/Engine.h"
+#include "Igniter/Core/Meta.h"
+#include "Igniter/Component/NameComponent.h"
+#include "Igniter/Gameplay/World.h"
+#include "Frieren/ImGui/EntityInsepctor.h"
+#include "Frieren/ImGui/EntityList.h"
 
 namespace fe
 {

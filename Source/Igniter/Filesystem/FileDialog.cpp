@@ -1,6 +1,6 @@
-#include <Igniter.h>
-#include <Core/ComInitializer.h>
-#include <Filesystem/FileDialog.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/ComInitializer.h"
+#include "Igniter/Filesystem/FileDialog.h"
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "propsys.lib")

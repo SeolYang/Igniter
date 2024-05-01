@@ -1,10 +1,10 @@
-#include <Igniter.h>
-#include <Core/Window.h>
-#include <Core/EmbededSettings.h>
-#include <Core/Log.h>
-#include <Core/Engine.h>
-#include <Input/InputManager.h>
-#include <ImGUi/ImGuiCanvas.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Window.h"
+#include "Igniter/Core/EmbededSettings.h"
+#include "Igniter/Core/Log.h"
+#include "Igniter/Core/Engine.h"
+#include "Igniter/Input/InputManager.h"
+#include "Igniter/ImGui/ImGuiCanvas.h"
 
 IG_DEFINE_LOG_CATEGORY(Window);
 

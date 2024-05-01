@@ -1,10 +1,10 @@
-#include <Frieren.h>
-#include <Core/Engine.h>
-#include <Core/Memory.h>
-#include <Core/Timer.h>
-#include <Render/Renderer.h>
-#include <Render/TempConstantBufferAllocator.h>
-#include <ImGui/StatisticsPanel.h>
+#include "Frieren/Frieren.h"
+#include "Igniter/Core/Engine.h"
+#include "Igniter/Core/Memory.h"
+#include "Igniter/Core/Timer.h"
+#include "Igniter/Render/Renderer.h"
+#include "Igniter/Render/TempConstantBufferAllocator.h"
+#include "Frieren/ImGui/StatisticsPanel.h"
 
 namespace fe
 {

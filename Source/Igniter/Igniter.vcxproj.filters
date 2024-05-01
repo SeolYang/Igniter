@@ -1,0 +1,557 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{687bade5-725c-495a-9ef1-7a3784f06a28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty">
+      <UniqueIdentifier>{649caa31-cf2a-4603-ace2-485c6b0c9660}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\D3D12MemAlloc">
+      <UniqueIdentifier>{d6c45c0b-c442-4eac-90cf-dcc17c5d6e29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{d0dbc9e3-27a4-412c-a6ed-51cd6c470d0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\SimpleMath">
+      <UniqueIdentifier>{0e94695b-79b7-4b7f-8524-6543ee102861}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\DirectXTex">
+      <UniqueIdentifier>{af091ce6-3816-42e2-9da1-b229568acb68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\DirectXCompiler">
+      <UniqueIdentifier>{173fb3a5-9de0-4c9b-9e2b-fec11f93dc3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\WinPixEventRuntime">
+      <UniqueIdentifier>{d1b1f73c-4a4e-41dc-aa8c-5c0d1456bf88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset">
+      <UniqueIdentifier>{3c18d2ba-7e87-4165-9442-349c99f3e97e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\D3D12">
+      <UniqueIdentifier>{058964cd-5d0e-4a04-81a2-a256387061be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Filesystem">
+      <UniqueIdentifier>{aaed342c-7a55-4052-92f8-5abc0cf1e747}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Gameplay">
+      <UniqueIdentifier>{68b2b4dd-9a48-4225-8364-71ddf11c704c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ImGui">
+      <UniqueIdentifier>{8a58a63d-d3f6-4e1b-a871-a8ba1824da64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Component">
+      <UniqueIdentifier>{a2feb8ca-1174-4678-b886-dc43aece1d9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Component\Archetype">
+      <UniqueIdentifier>{af474de2-4b68-4d7c-91d2-b9aac8fc9f75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render">
+      <UniqueIdentifier>{36ef20ca-725c-48ea-81d7-7a5cb33925a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset\Texture">
+      <UniqueIdentifier>{11672438-1ab0-4e75-ad1b-cbf06c5bdaa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset\StaticMesh">
+      <UniqueIdentifier>{c9c91145-aa18-46d0-8feb-d2afaf612d59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset\Material">
+      <UniqueIdentifier>{70e52e7d-fda1-48c9-b44f-c65f31f240f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Core">
+      <UniqueIdentifier>{1bda930a-08a2-46c9-a9ce-cb49bf7105b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Input">
+      <UniqueIdentifier>{f4062502-3595-4cf1-b1ac-c406357a3049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Asset\Map">
+      <UniqueIdentifier>{63956005-c7ab-46d0-8f2c-11b7dd5c5f62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application">
+      <UniqueIdentifier>{86e27114-564a-4f57-83c7-4ce1d301eb54}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application\Application.h">
+      <Filter>Source\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\AssetCache.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\AssetManager.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\AssetMonitor.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\Common.h">
+      <Filter>Source\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\MapLoader.h">
+      <Filter>Source\Asset\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\MapCreator.h">
+      <Filter>Source\Asset\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\Map.h">
+      <Filter>Source\Asset\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\MaterialLoader.h">
+      <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\Material.h">
+      <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\MaterialImporter.h">
+      <Filter>Source\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\StaticMeshLoader.h">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\StaticMesh.h">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\StaticMeshImporter.h">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\TextureLoader.h">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\Texture.h">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\TextureImporter.h">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\CameraComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\NameComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\StaticMeshComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\TransformComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\CameraArchetype.h">
+      <Filter>Source\Component\Archetype</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\String.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ThreadUIDGenerator.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Timer.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Types.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Version.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Window.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Assert.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ComInitializer.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ContainerUtils.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DebugTools.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\EmbededSettings.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Engine.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Event.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Format.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\FrameManager.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GuidBytes.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handle.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\HandleRegistry.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Hash.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Json.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Log.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Math.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Memory.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Meta.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Regex.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Result.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Serialization.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\CommandContext.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\CommandQueue.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\Common.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\DescriptorHeap.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\GpuBuffer.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\GpuBufferDesc.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\GpuSync.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\GpuTexture.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\GpuTextureDesc.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\GpuView.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\PipelineState.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\PipelineStateDesc.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\RenderDevice.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\RootSignature.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\ShaderBlob.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Filesystem\CoFileWatcher.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Filesystem\FileDialog.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Filesystem\Utils.h">
+      <Filter>Source\Filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\GameMode.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\World.h">
+      <Filter>Source\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\ImGuiCanvas.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\ImGuiExtensions.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\ImGuiRenderer.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputManager.h">
+      <Filter>Source\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\CommandContextPool.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GpuUploader.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GpuViewManager.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderCommon.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderContext.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Renderer.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Swapchain.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\TempConstantBufferAllocator.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Utils.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Vertex.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Igniter.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h">
+      <Filter>Thirdparty\D3D12MemAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcerrors.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h">
+      <Filter>Thirdparty\DirectXCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h">
+      <Filter>Thirdparty\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3_win.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEvents.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsCommon.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
+      <Filter>Thirdparty\WinPixEventRuntime</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Application\Application.cpp">
+      <Filter>Source\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\AssetManager.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\AssetMonitor.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\Common.cpp">
+      <Filter>Source\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\MapCreator.cpp">
+      <Filter>Source\Asset\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\MapLoader.cpp">
+      <Filter>Source\Asset\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\MaterialImporter.cpp">
+      <Filter>Source\Asset\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\MaterialLoader.cpp">
+      <Filter>Source\Asset\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\Material.cpp">
+      <Filter>Source\Asset\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\StaticMesh.cpp">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\StaticMeshImporter.cpp">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\StaticMeshLoader.cpp">
+      <Filter>Source\Asset\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\Texture.cpp">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\TextureImporter.cpp">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\TextureLoader.cpp">
+      <Filter>Source\Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\CameraComponent.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\NameComponent.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\StaticMeshComponent.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\TransformComponent.cpp">
+      <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ThreadUIDGenerator.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Window.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ComInitializer.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\DebugTools.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Engine.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Log.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Regex.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\String.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\CommandContext.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\CommandQueue.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\D3D12Common.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\DescriptorHeap.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\GpuBuffer.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\GpuBufferDesc.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\GpuSync.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\GpuTexture.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\GPUTextureDesc.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\PipelineState.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\PipelineStateDesc.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\RenderDevice.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\RootSignature.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\ShaderBlob.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Filesystem\CoFileWatcher.cpp">
+      <Filter>Source\Filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Filesystem\FileDialog.cpp">
+      <Filter>Source\Filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Gameplay\World.cpp">
+      <Filter>Source\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\ImGuiExtensions.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\ImGuiRenderer.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputManager.cpp">
+      <Filter>Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\CommandContextPool.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GpuUploader.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GpuViewManager.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderContext.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Renderer.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Swapchain.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\TempConstantBufferAllocator.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Igniter.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
+      <Filter>Thirdparty\D3D12MemAlloc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
+    <Natvis Include="..\Thirdparty\nlohmann_json\nlohmann_json.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
+      <Filter>Thirdparty\DirectXTex</Filter>
+    </None>
+    <None Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl">
+      <Filter>Thirdparty\SimpleMath</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,5 +1,5 @@
-#include <Igniter.h>
-#include <Core/ThreadUIDGenerator.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/ThreadUIDGenerator.h"
 
 namespace ig
 {

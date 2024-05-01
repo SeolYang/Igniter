@@ -1,7 +1,7 @@
-#include <Igniter.h>
-#include <D3D12/PipelineStateDesc.h>
-#include <D3D12/ShaderBlob.h>
-#include <D3D12/RootSignature.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/D3D12/PipelineStateDesc.h"
+#include "Igniter/D3D12/ShaderBlob.h"
+#include "Igniter/D3D12/RootSignature.h"
 
 namespace ig
 {

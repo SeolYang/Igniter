@@ -1,7 +1,7 @@
-#include <Igniter.h>
-#include <Core/Json.h>
-#include <Core/Serialization.h>
-#include <Component/CameraComponent.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/Json.h"
+#include "Igniter/Core/Serialization.h"
+#include "Igniter/Component/CameraComponent.h"
 
 namespace ig
 {

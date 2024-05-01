@@ -1,5 +1,5 @@
-#include <Igniter.h>
-#include <D3D12/GpuTexture.h>
+#include "Igniter/Igniter.h"
+#include "Igniter/D3D12/GpuTexture.h"
 
 namespace ig
 {

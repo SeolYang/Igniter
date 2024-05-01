@@ -1,5 +1,5 @@
 #pragma once
-#include <Input/InputManager.h>
+#include "Igniter/Input/InputManager.h"
 
 namespace ig
 {

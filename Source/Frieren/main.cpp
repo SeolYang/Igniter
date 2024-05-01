@@ -1,14 +1,15 @@
-#include <Frieren.h>
-#include <Application/TestApp.h>
+#include "Frieren/Frieren.h"
+#include "Frieren/Application/TestApp.h"
 
 int main()
 {
-    fe::TestApp app{ig::AppDesc{.WindowTitle = "Test", .WindowWidth = 1920, .WindowHeight = 1080}};
+    using namespace ig::literals;
+    fe::TestApp app{ig::AppDesc{.WindowTitle = "Test"_fs, .WindowWidth = 1920, .WindowHeight = 1080}};
     return app.Execute();
 }
 
 #ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
+#include <crtdbg.h"
 
 struct MemoryLeakDetector
 {

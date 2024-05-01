@@ -144,9 +144,9 @@ using namespace entt::literals;
 #include <EASTL/array.h>
 #include <EASTL/list.h>
 
-#include <Core/Assert.h>
-#include <Core/Types.h>
-#include <Core/Format.h>
+#include "Igniter/Core/Assert.h"
+#include "Igniter/Core/Types.h"
+#include "Igniter/Core/Format.h"
 
 namespace ig /* Constants */
 {
