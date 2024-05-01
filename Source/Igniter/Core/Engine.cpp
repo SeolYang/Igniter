@@ -86,43 +86,84 @@ namespace ig
         while (!bShouldExit)
         {
             ZoneScoped;
+            /********  Begin Frame  *******/
             timer->Begin();
 
-            MSG msg;
-            ZeroMemory(&msg, sizeof(msg));
-            while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+            /************* Event Handle/Proccess/Dispatch *************/
             {
-                if (msg.message == WM_QUIT)
+                MSG msg;
+                ZeroMemory(&msg, sizeof(msg));
+                while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
                 {
-                    bShouldExit = true;
-                }
+                    if (msg.message == WM_QUIT)
+                    {
+                        bShouldExit = true;
+                    }
 
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
+                    TranslateMessage(&msg);
+                    DispatchMessage(&msg);
+                }
+                assetManager->DispatchEvent();
             }
 
             const float deltaTime = timer->GetDeltaTime();
-
+            /*********** Pre-Update **********/
             {
-                assetManager->DispatchEvent();
+                application.PreUpdate(deltaTime);
+            }
+
+            /************* Update ************/
+            {
                 application.Update(deltaTime);
             }
 
+            /*********** Post-Update **********/
             {
                 inputManager->PostUpdate();
+                application.PostUpdate(deltaTime);
             }
 
+            const uint8_t localFrameIdx = frameManager->GetLocalFrameIndex();
+            /*********** Pre-Render ***********/
             {
-                const uint8_t localFrameIdx = frameManager->GetLocalFrameIndex();
+                localFrameSyncs[localFrameIdx].WaitOnCpu();
+                application.PreRender(localFrameIdx);
+            }
+
+            /************* Render *************/
+            {
+                // #sy_todo 렌더러 인터페이스 및 렌더러 독립 (어플리케이션 단으로 이동/스왑 체인은 RenderContext로 이동)
                 renderer->BeginFrame(localFrameIdx);
                 renderContext->BeginFrame(localFrameIdx);
                 {
                     application.Render(localFrameIdx);
+                    // #sy_note 어플리케이션 렌더러-ImGui 렌더러 간의 큐 동기화는?
+                    // main gfx에서 하나 만들어서 수동으로 동기화?
+                    // swapchain에 가장 마지막으로 접근하는 queue가 어떤 것 인지 알 수 있어야 한다..
+                    // 좀더 정확하게 알기 위해서, D3D12의 명령어 Submisison에 대해 복기하기 <<
+                    // 기억상으론, Cmd Queue에 제출되는 순서대로 명령어들이 Serialize 되고, Submit 간에 일종의 베리어가 생겨서
+                    // 같은 큐 상에서의 서로 다른 Submit 간의 명령어들 실행 순서가 보존된다고 기억함
+                    // 또 스왑 체인 렌더 타겟의 최종 상태 정보도 알아야하는데.. 
+                    // 결국 텍스처 자원에 대한 상태(즉 텍스처 레이아웃)를 추적해야 할지도 모르겠다
+                    // 버퍼는 뭐.. Stateless 니까 상관 없을 것 같다
+                    // 아니면 간단하게, Swapchain은 어떤 렌더러 스코프에서 사용 할 때, 최종적으로 Present 상태(또는 Common)에
+                    // 있도록 룰을 정하는 것도 나쁘진 않을 것 같기도 하다.
+                    // 아니면 애초에 항상 Common 상태를 유지 하던가.
+                    // 결국 최종적으로 Swapchian에 대한 연산을 어떤 큐가 하는지는 알아내야 할 수도 있다.
+                    // 예시. Compute Queue 또는 AsyncCopy 에서 Swapchain에 결과를 쓰는 경우
+                    // 반대로 성능을 조금 포기하고, 단순히 Quad를 통해 Swapchain의 결과를 Main Gfx Queue를 통해 쓰도록 강제도 할 수 있다
+                    // https://microsoft.github.io/DirectX-Specs/d3d/D3D12EnhancedBarriers.html#d3d12_barrier_layout_present
                     imguiRenderer->Render(imguiCanvas, *renderer);
                 }
                 renderer->EndFrame(localFrameIdx);
             }
 
+            /*********** Post-Render ***********/
+            {
+                localFrameSyncs[localFrameIdx] = application.PostRender(localFrameIdx);
+            }
+
+            /***********  End Frame  *************/
             timer->End();
             frameManager->NextFrame();
         }

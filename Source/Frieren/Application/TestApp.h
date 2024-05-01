@@ -19,12 +19,15 @@ namespace fe
 
         void Update(const float deltaTime) override;
         void Render(const FrameIndex localFrameIdx) override;
+        /* #sy_todo Implement Post Render */
+        GpuSync PostRender([[maybe_unused]] const FrameIndex localFrameIdx) override { return GpuSync{};}
 
         void SetGameSystem(Ptr<ig::GameSystem> newGameSystem);
 
         ig::World* GetActiveWorld() { return world.get(); }
 
     private:
+        /* #sy_todo Move Renderer to here!!! */
         Ptr<ig::World> world;
         Ptr<ig::GameSystem> gameSystem;
         Ptr<EditorCanvas> editorCanvas;

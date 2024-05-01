@@ -1,6 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/String.h"
+#include "Igniter/D3D12/GpuSync.h"
 
 namespace ig
 {
@@ -58,6 +59,8 @@ namespace ig
         static Igniter* instance;
         bool bInitialized = false;
         bool bShouldExit = false;
+
+        eastl::array<GpuSync, NumFramesInFlight> localFrameSyncs{};
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////

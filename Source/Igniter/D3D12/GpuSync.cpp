@@ -51,7 +51,6 @@ namespace ig
 
     void GpuSync::WaitOnCpu()
     {
-        IG_CHECK(IsValid());
         if (fence != nullptr && syncPoint > GetCompletedSyncPoint())
         {
             fence->SetEventOnCompletion(syncPoint, nullptr);

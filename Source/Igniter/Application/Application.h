@@ -1,6 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/String.h"
+#include "Igniter/D3D12/GpuSync.h"
 
 namespace ig
 {
@@ -25,15 +26,16 @@ namespace ig
 
         virtual void PreUpdate([[maybe_unused]] const float deltaTime) {}
         virtual void Update(const float deltaTime) = 0;
-        virtual void Render(const FrameIndex localFrameIdx) = 0;
         virtual void PostUpdate([[maybe_unused]] const float deltaTime) {}
+
+        virtual void PreRender([[maybe_unused]] const FrameIndex localFrameIdx){};
+        virtual void Render(const FrameIndex localFrameIdx) = 0;
+        virtual GpuSync PostRender(const FrameIndex localFrameIdx) = 0;
 
     protected:
         Application(const AppDesc& desc);
 
     private:
         Ptr<Igniter> engine;
-
     };
-
 }    // namespace ig
