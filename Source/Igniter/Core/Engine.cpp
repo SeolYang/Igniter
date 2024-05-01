@@ -104,7 +104,7 @@ namespace ig
             const float deltaTime = timer->GetDeltaTime();
 
             {
-                assetManager->Update();
+                assetManager->DispatchEvent();
                 application.Update(deltaTime);
             }
 

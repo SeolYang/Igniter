@@ -232,7 +232,7 @@ namespace ig
 
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 
-        void Update();
+        void DispatchEvent();
 
     private:
         template <Asset T>

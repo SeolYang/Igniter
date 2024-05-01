@@ -381,7 +381,7 @@ namespace ig
         return snapshots;
     }
 
-    void AssetManager::Update()
+    void AssetManager::DispatchEvent()
     {
         if (bIsDirty)
         {
