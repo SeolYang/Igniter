@@ -1,7 +1,7 @@
 #include "Frieren/Frieren.h"
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Asset/AssetManager.h"
-#include "Igniter/Gameplay/GameMode.h"
+#include "Igniter/Gameplay/GameSystem.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Frieren/Application/TestApp.h"
 #include "Frieren/ImGui/StatisticsPanel.h"
@@ -99,15 +99,15 @@ namespace fe
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Game Mode"))
+            if (ImGui::BeginMenu("Game Systems"))
             {
                 for (auto&& [typeID, type] : entt::resolve())
                 {
-                    if (type.prop(ig::meta::GameModeProperty))
+                    if (type.prop(ig::meta::GameSystemProperty))
                     {
                         if (ImGui::MenuItem(type.prop(ig::meta::TitleCaseNameProperty).value().cast<ig::String>().ToCString()))
                         {
-                            app.SetGameMode(std::move(*type.func(ig::meta::CreateGameModeFunc).invoke({}).try_cast<Ptr<GameMode>>()));
+                            app.SetGameSystem(std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<Ptr<GameSystem>>()));
                         }
                     }
                 }

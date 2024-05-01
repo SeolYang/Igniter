@@ -10,9 +10,6 @@
     <Filter Include="Source\Game">
       <UniqueIdentifier>{90d310ba-3bcc-4b92-8ee0-215f8f3fa0d3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Game\Mode">
-      <UniqueIdentifier>{b00d8250-6c9b-4721-8805-b851b2eb84f7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Game\Component">
       <UniqueIdentifier>{b05d40d6-151b-4bf9-bef4-ad79a12c7b76}</UniqueIdentifier>
     </Filter>
@@ -60,16 +57,16 @@
     <ClCompile Include="Game\Component\FpsCameraController.cpp">
       <Filter>Source\Game\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Mode\JustSpinningMode.cpp">
-      <Filter>Source\Game\Mode</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Mode\TestGameMode.cpp">
-      <Filter>Source\Game\Mode</Filter>
-    </ClCompile>
     <ClCompile Include="Game\System\CameraPossessSystem.cpp">
       <Filter>Source\Game\System</Filter>
     </ClCompile>
     <ClCompile Include="Game\System\FpsCameraControllSystem.cpp">
+      <Filter>Source\Game\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\System\TestGameSystem.cpp">
+      <Filter>Source\Game\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\System\JustSpinningSystem.cpp">
       <Filter>Source\Game\System</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,16 +104,16 @@
     <ClInclude Include="Game\Component\FpsCameraController.h">
       <Filter>Source\Game\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Mode\JustSpinningMode.h">
-      <Filter>Source\Game\Mode</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Mode\TestGameMode.h">
-      <Filter>Source\Game\Mode</Filter>
-    </ClInclude>
     <ClInclude Include="Game\System\FpsCameraControllSystem.h">
       <Filter>Source\Game\System</Filter>
     </ClInclude>
     <ClInclude Include="Game\System\CameraPossessSystem.h">
+      <Filter>Source\Game\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\System\TestGameSystem.h">
+      <Filter>Source\Game\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\System\JustSpinningSystem.h">
       <Filter>Source\Game\System</Filter>
     </ClInclude>
   </ItemGroup>

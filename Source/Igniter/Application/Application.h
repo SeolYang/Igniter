@@ -23,8 +23,10 @@ namespace ig
 
         int Execute();
 
-        virtual void Update() = 0;
-        virtual void Render() = 0;
+        virtual void PreUpdate([[maybe_unused]] const float deltaTime) {}
+        virtual void Update(const float deltaTime) = 0;
+        virtual void Render(const FrameIndex localFrameIdx) = 0;
+        virtual void PostUpdate([[maybe_unused]] const float deltaTime) {}
 
     protected:
         Application(const AppDesc& desc);

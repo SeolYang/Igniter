@@ -9,7 +9,6 @@ namespace ig
 namespace fe
 {
     class FpsCameraControllSystem;
-
     class CameraPossessSystem
     {
     public:

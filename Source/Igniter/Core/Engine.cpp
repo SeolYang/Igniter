@@ -101,9 +101,11 @@ namespace ig
                 DispatchMessage(&msg);
             }
 
+            const float deltaTime = timer->GetDeltaTime();
+
             {
                 assetManager->Update();
-                application.Update();
+                application.Update(deltaTime);
             }
 
             {
@@ -115,7 +117,7 @@ namespace ig
                 renderer->BeginFrame(localFrameIdx);
                 renderContext->BeginFrame(localFrameIdx);
                 {
-                    application.Render();
+                    application.Render(localFrameIdx);
                     imguiRenderer->Render(imguiCanvas, *renderer);
                 }
                 renderer->EndFrame(localFrameIdx);

@@ -94,6 +94,8 @@ namespace ig
     using Json = nlohmann::json;
     using Guid = xg::Guid;
 
+    using FrameIndex = uint8_t;
+
     constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
     constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
 

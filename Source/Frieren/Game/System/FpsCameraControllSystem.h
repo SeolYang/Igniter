@@ -1,5 +1,6 @@
 #pragma once
 #include "Igniter/Input/InputManager.h"
+#include "Igniter/Gameplay/GameSystem.h"
 
 namespace ig
 {
@@ -9,18 +10,15 @@ namespace ig
 
 namespace fe
 {
-    class FpsCameraControllSystem
+    class FpsCameraControllSystem : public ig::GameSystem
     {
     public:
         FpsCameraControllSystem();
 
-        void Update(ig::World& world);
-
+        void Update(const float deltaTime, ig::World& world) override;
         void SetIgnoreInput(const bool bEnable) { this->bIgnoreInput = bEnable; }
 
     private:
-        const ig::Timer& timer;
-
         bool bIgnoreInput = false;
 
         Handle<Action, InputManager> moveLeftActionHandle;

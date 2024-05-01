@@ -27,10 +27,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Component\FpsCameraController.cpp" />
-    <ClCompile Include="Game\Mode\JustSpinningMode.cpp" />
-    <ClCompile Include="Game\Mode\TestGameMode.cpp" />
     <ClCompile Include="Game\System\CameraPossessSystem.cpp" />
     <ClCompile Include="Game\System\FpsCameraControllSystem.cpp" />
+    <ClCompile Include="Game\System\JustSpinningSystem.cpp" />
+    <ClCompile Include="Game\System\TestGameSystem.cpp" />
     <ClCompile Include="ImGui\AssetInspector.cpp" />
     <ClCompile Include="ImGui\CachedStringDebugger.cpp" />
     <ClCompile Include="ImGui\EditorCanvas.cpp" />
@@ -45,10 +45,10 @@
     <ClInclude Include="Application\TestApp.h" />
     <ClInclude Include="Frieren.h" />
     <ClInclude Include="Game\Component\FpsCameraController.h" />
-    <ClInclude Include="Game\Mode\JustSpinningMode.h" />
-    <ClInclude Include="Game\Mode\TestGameMode.h" />
     <ClInclude Include="Game\System\CameraPossessSystem.h" />
     <ClInclude Include="Game\System\FpsCameraControllSystem.h" />
+    <ClInclude Include="Game\System\JustSpinningSystem.h" />
+    <ClInclude Include="Game\System\TestGameSystem.h" />
     <ClInclude Include="ImGui\AssetInspector.h" />
     <ClInclude Include="ImGui\CachedStringDebugger.h" />
     <ClInclude Include="ImGui\EditorCanvas.h" />

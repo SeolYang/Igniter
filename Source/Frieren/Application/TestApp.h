@@ -4,12 +4,12 @@
 namespace ig
 {
     class World;
-    class GameMode;
+    class GameSystem;
 }    // namespace ig
 
 namespace fe
 {
-    class TestGameMode;
+    class TestGameSystem;
     class EditorCanvas;
     class TestApp : public ig::Application
     {
@@ -17,16 +17,16 @@ namespace fe
         TestApp(const AppDesc& desc);
         ~TestApp() override;
 
-        void Update() override;
-        void Render() override;
+        void Update(const float deltaTime) override;
+        void Render(const FrameIndex localFrameIdx) override;
 
-        void SetGameMode(Ptr<ig::GameMode> newGameMode);
+        void SetGameSystem(Ptr<ig::GameSystem> newGameSystem);
 
         ig::World* GetActiveWorld() { return world.get(); }
 
     private:
         Ptr<ig::World> world;
-        Ptr<ig::GameMode> gameMode;
+        Ptr<ig::GameSystem> gameSystem;
         Ptr<EditorCanvas> editorCanvas;
     };
 }    // namespace fe

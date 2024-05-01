@@ -11,7 +11,7 @@
 
 namespace fe
 {
-    FpsCameraControllSystem::FpsCameraControllSystem() : timer(ig::Igniter::GetTimer())
+    FpsCameraControllSystem::FpsCameraControllSystem()
     {
         auto& inputManager = ig::Igniter::GetInputManager();
         moveLeftActionHandle = inputManager.QueryAction(ig::String("MoveLeft"));
@@ -28,7 +28,7 @@ namespace fe
         turnPitchAxisHandle = inputManager.QueryAxis(ig::String("TurnAxis"));
     }
 
-    void FpsCameraControllSystem::Update(ig::World& world)
+    void FpsCameraControllSystem::Update(const float deltaTime, ig::World& world)
     {
         Registry& registry = world.GetRegistry();
         const auto& inputManager = Igniter::GetInputManager();
@@ -88,7 +88,7 @@ namespace fe
 
                 if (direction != ig::Vector3::Zero)
                 {
-                    const ig::Vector3 impulse = controller.MovementPower * sprintFactor * direction * timer.GetDeltaTime();
+                    const ig::Vector3 impulse = controller.MovementPower * sprintFactor * direction * deltaTime;
 
                     controller.LatestImpulse = impulse;
                     controller.ElapsedTimeAfterLatestImpulse = 0.f;
@@ -106,7 +106,7 @@ namespace fe
                 }
             }
 
-            controller.ElapsedTimeAfterLatestImpulse += timer.GetDeltaTime();
+            controller.ElapsedTimeAfterLatestImpulse += deltaTime;
             transform.Position += controller.GetCurrentVelocity();
             transform.Rotation = controller.GetCurrentRotation();
         }

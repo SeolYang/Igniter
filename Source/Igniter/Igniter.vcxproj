@@ -98,7 +98,7 @@
     <ClInclude Include="Filesystem\CoFileWatcher.h" />
     <ClInclude Include="Filesystem\FileDialog.h" />
     <ClInclude Include="Filesystem\Utils.h" />
-    <ClInclude Include="Gameplay\GameMode.h" />
+    <ClInclude Include="Gameplay\GameSystem.h" />
     <ClInclude Include="Gameplay\World.h" />
     <ClInclude Include="Igniter.h" />
     <ClInclude Include="ImGui\ImGuiCanvas.h" />

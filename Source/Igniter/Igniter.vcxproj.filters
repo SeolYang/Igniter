@@ -273,7 +273,7 @@
     <ClInclude Include="Filesystem\Utils.h">
       <Filter>Source\Filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="Gameplay\GameMode.h">
+    <ClInclude Include="Gameplay\GameSystem.h">
       <Filter>Source\Gameplay</Filter>
     </ClInclude>
     <ClInclude Include="Gameplay\World.h">
