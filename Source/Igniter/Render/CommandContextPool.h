@@ -12,7 +12,7 @@ namespace ig
     class CommandContextPool final
     {
     public:
-        CommandContextPool(const FrameManager& frameManager, RenderDevice& renderDevice, const EQueueType cmdCtxType);
+        CommandContextPool(RenderDevice& renderDevice, const EQueueType cmdCtxType);
         CommandContextPool(const CommandContextPool&) = delete;
         CommandContextPool(CommandContextPool&&) noexcept = delete;
         ~CommandContextPool();
@@ -20,9 +20,8 @@ namespace ig
         CommandContextPool& operator=(const CommandContextPool&) = delete;
         CommandContextPool& operator=(CommandContextPool&&) noexcept = delete;
 
-        auto Request(const String debugName)
+        auto Request(const LocalFrameIndex localFrameIdx, const String debugName)
         {
-            const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
             UniqueLock poolLock{poolMutex};
             CommandContext* cmdCtx = cmdCtxs.back();
             cmdCtxs.pop_back();
@@ -37,7 +36,7 @@ namespace ig
             return Ptr<CommandContext, decltype(deleter)>{cmdCtx, deleter};
         }
 
-        void BeginFrame(const uint8_t localFrameIdx);
+        void PreRender(const LocalFrameIndex localFrameIdx);
 
     private:
         constexpr static size_t NumTargetCommandContextPerThread = 8;

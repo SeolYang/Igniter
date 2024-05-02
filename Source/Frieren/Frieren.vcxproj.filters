@@ -19,6 +19,9 @@
     <Filter Include="Source\Application">
       <UniqueIdentifier>{1f86ff7d-4bd4-431b-ae53-9a95e2421af6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Render">
+      <UniqueIdentifier>{ccad7419-62f6-4763-8acd-d15b50adf1fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\TestApp.cpp">
@@ -69,6 +72,9 @@
     <ClCompile Include="Game\System\JustSpinningSystem.cpp">
       <Filter>Source\Game\System</Filter>
     </ClCompile>
+    <ClCompile Include="Render\RendererPrototype.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\TestApp.h">
@@ -115,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="Game\System\JustSpinningSystem.h">
       <Filter>Source\Game\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RendererPrototype.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

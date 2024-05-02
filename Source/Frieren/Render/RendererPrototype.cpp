@@ -1,44 +1,34 @@
-#include "Igniter/Igniter.h"
+#include "Frieren/Frieren.h"
 #include "Igniter/Core/Window.h"
 #include "Igniter/Core/Log.h"
-#include "Igniter/Core/ContainerUtils.h"
 #include "Igniter/Core/Engine.h"
-#include "Igniter/D3D12/CommandContext.h"
-#include "Igniter/D3D12/DescriptorHeap.h"
-#include "Igniter/D3D12/GPUBuffer.h"
-#include "Igniter/D3D12/GPUBufferDesc.h"
-#include "Igniter/D3D12/GPUTexture.h"
-#include "Igniter/D3D12/GPUTextureDesc.h"
-#include "Igniter/D3D12/GPUView.h"
+#include "Igniter/D3D12/RootSignature.h"
 #include "Igniter/D3D12/PipelineState.h"
 #include "Igniter/D3D12/PipelineStateDesc.h"
-#include "Igniter/D3D12/RenderDevice.h"
-#include "Igniter/D3D12/RootSignature.h"
 #include "Igniter/D3D12/ShaderBlob.h"
-#include "Igniter/Render/Utils.h"
-#include "Igniter/Render/Renderer.h"
 #include "Igniter/Render/RenderContext.h"
-#include "Igniter/Asset/StaticMesh.h"
-#include "Igniter/Asset/Material.h"
+#include "Igniter/Render/Utils.h"
+#include "Igniter/Render/TempConstantBufferAllocator.h"
 #include "Igniter/Asset/AssetManager.h"
+#include "Igniter/Gameplay/World.h"
+#include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Component/CameraComponent.h"
 #include "Igniter/Component/StaticMeshComponent.h"
-#include "Igniter/Component/TransformComponent.h"
+#include "Frieren/Render/RendererPrototype.h"
 
-struct BasicRenderResources
+namespace fe
 {
-    uint32_t VertexBufferIdx;
-    uint32_t PerFrameBufferIdx;
-    uint32_t PerObjectBufferIdx;
-    uint32_t DiffuseTexIdx;
-    uint32_t DiffuseTexSamplerIdx;
-};
+    struct BasicRenderResources
+    {
+        uint32_t VertexBufferIdx;
+        uint32_t PerFrameBufferIdx;
+        uint32_t PerObjectBufferIdx;
+        uint32_t DiffuseTexIdx;
+        uint32_t DiffuseTexSamplerIdx;
+    };
 #pragma endregion
 
-IG_DEFINE_LOG_CATEGORY(Renderer);
-
-namespace ig
-{
+    IG_DEFINE_LOG_CATEGORY(RendererPrototype);
     struct PerFrameBuffer
     {
         Matrix ViewProj{};
@@ -49,12 +39,10 @@ namespace ig
         Matrix LocalToWorld{};
     };
 
-    Renderer::Renderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext)
-        : frameManager(frameManager)
-        , renderContext(renderContext)
-        , tempConstantBufferAllocator(frameManager, renderContext)
+    RendererPrototype::RendererPrototype(Window& window, RenderContext& renderContext)
+        : renderContext(renderContext)
         , mainViewport(window.GetViewport())
-        , swapchain(window, renderContext, NumFramesInFlight)
+        , tempConstantBufferAllocator(MakePtr<TempConstantBufferAllocator>(renderContext))
     {
         RenderDevice& renderDevice = renderContext.GetRenderDevice();
 #pragma region test
@@ -82,7 +70,7 @@ namespace ig
         depthStencilDesc.DebugName = String("DepthStencilBufferTex");
         depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
 
-        auto initialCmdCtx = renderContext.GetMainGfxCommandContextPool().Request("Initial Transition"_fs);
+        auto initialCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(0, "Initial Transition"_fs);
         initialCmdCtx->Begin();
         {
             for (const uint8_t localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
@@ -105,12 +93,8 @@ namespace ig
 #pragma endregion
     }
 
-    Renderer::~Renderer()
+    RendererPrototype::~RendererPrototype()
     {
-        CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        GpuSync mainGfxQueueSync = mainGfxQueue.MakeSync();
-        mainGfxQueueSync.WaitOnCpu();
-
         for (const auto localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
             renderContext.DestroyGpuView(dsvs[localFrameIdx]);
@@ -118,21 +102,15 @@ namespace ig
         }
     }
 
-    void Renderer::BeginFrame(const uint8_t localFrameIdx)
+    void RendererPrototype::PreRender(const LocalFrameIndex localFrameIdx)
     {
-        ZoneScoped;
-        GpuSync& mainGfxLocalFrameSync = mainGfxFrameSyncs[localFrameIdx];
-        if (mainGfxLocalFrameSync)
-        {
-            mainGfxLocalFrameSync.WaitOnCpu();
-        }
-        tempConstantBufferAllocator.BeginFrame(localFrameIdx);
+        tempConstantBufferAllocator->PreRender(localFrameIdx);
     }
 
-    void Renderer::Render(const uint8_t localFrameIdx, Registry& registry)
+    void RendererPrototype::Render(const LocalFrameIndex localFrameIdx, World& world)
     {
-        ZoneScoped;
-        TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator.Allocate<PerFrameBuffer>();
+        Registry& registry = world.GetRegistry();
+        TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
 
         PerFrameBuffer perFrameBuffer{};
         auto cameraView = registry.view<CameraComponent, TransformComponent>();
@@ -148,13 +126,14 @@ namespace ig
         perFrameConstantBuffer.Write(perFrameBuffer);
 
         CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request("MainGfx"_fs);
+        auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
         renderCmdCtx->Begin(pso.get());
         {
             auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
             renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
             renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
+            Swapchain& swapchain = renderContext.GetSwapchain();
             GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
             const GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
             renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
@@ -182,7 +161,7 @@ namespace ig
                     GpuView* vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
                     renderCmdCtx->SetIndexBuffer(*indexBufferPtr);
                     {
-                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>();
+                        TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator->Allocate<PerObjectBuffer>(localFrameIdx);
                         GpuView* perObjectCBViewPtr = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
                         const auto perObjectBuffer = PerObjectBuffer{.LocalToWorld = ConvertToShaderSuitableForm(transform.CreateTransformation())};
                         perObjectConstantBuffer.Write(perObjectBuffer);
@@ -214,11 +193,9 @@ namespace ig
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
     }
 
-    void Renderer::EndFrame(const uint8_t localFrameIdx)
+    GpuSync RendererPrototype::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
-        ZoneScoped;
         CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        mainGfxFrameSyncs[localFrameIdx] = mainGfxQueue.MakeSync();
-        swapchain.Present();
+        return mainGfxQueue.MakeSync();
     }
-}    // namespace ig
+}    // namespace fe

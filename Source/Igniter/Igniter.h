@@ -150,7 +150,7 @@ using namespace entt::literals;
 
 namespace ig /* Constants */
 {
-    inline constexpr FrameIndex NumFramesInFlight = 2;
+    inline constexpr LocalFrameIndex NumFramesInFlight = 2;
 }
 
 #ifdef _M_X64

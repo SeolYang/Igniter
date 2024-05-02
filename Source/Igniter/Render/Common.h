@@ -1,5 +1,4 @@
 #pragma once
-
 namespace ig
 {
     template <typename Ty>

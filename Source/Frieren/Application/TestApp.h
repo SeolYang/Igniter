@@ -9,6 +9,7 @@ namespace ig
 
 namespace fe
 {
+    class RendererPrototype;
     class TestGameSystem;
     class EditorCanvas;
     class TestApp : public ig::Application
@@ -17,17 +18,20 @@ namespace fe
         TestApp(const AppDesc& desc);
         ~TestApp() override;
 
+        void PreUpdate(const float) override {}
         void Update(const float deltaTime) override;
-        void Render(const FrameIndex localFrameIdx) override;
-        /* #sy_todo Implement Post Render */
-        GpuSync PostRender([[maybe_unused]] const FrameIndex localFrameIdx) override { return GpuSync{};}
+        void PostUpdate(const float) override {}
+
+        void PreRender(const LocalFrameIndex localFrameIdx) override;
+        void Render(const LocalFrameIndex localFrameIdx) override;
+        GpuSync PostRender(const LocalFrameIndex localFrameIdx) override;
 
         void SetGameSystem(Ptr<ig::GameSystem> newGameSystem);
 
         ig::World* GetActiveWorld() { return world.get(); }
 
     private:
-        /* #sy_todo Move Renderer to here!!! */
+        Ptr<RendererPrototype> renderer;
         Ptr<ig::World> world;
         Ptr<ig::GameSystem> gameSystem;
         Ptr<EditorCanvas> editorCanvas;

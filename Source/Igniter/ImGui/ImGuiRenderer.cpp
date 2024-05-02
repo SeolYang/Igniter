@@ -16,9 +16,8 @@
 
 namespace ig
 {
-    ImGuiRenderer::ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext)
-        : frameManager(frameManager)
-        , renderContext(renderContext)
+    ImGuiRenderer::ImGuiRenderer(Window& window, RenderContext& renderContext)
+        : renderContext(renderContext)
         , mainSrv(renderContext.CreateGpuView(EGpuViewType::ShaderResourceView))
         , gpuViewManager(MakePtr<GpuViewManager>(renderContext.GetRenderDevice()))
     {
@@ -56,7 +55,7 @@ namespace ig
         renderContext.DestroyGpuView(mainSrv);
     }
 
-    void ImGuiRenderer::Render(ImGuiCanvas* canvas, Renderer& renderer)
+    void ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx, ImGuiCanvas* canvas)
     {
         /* #sy_note Backbuffer의 최종 상태가 ImGuiRenderer에 의해 결정 되는게 아니도록 수정해야함.. */
         ZoneScoped;
@@ -70,9 +69,9 @@ namespace ig
         }
         ImGui::Render();
 
-        CommandContext& cmdCtx = commandContexts[frameManager.GetLocalFrameIndex()];
+        CommandContext& cmdCtx = commandContexts[localFrameIdx];
         cmdCtx.Begin();
-        Swapchain& swapchain = renderer.GetSwapchain();
+        Swapchain& swapchain = renderContext.GetSwapchain();
         GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
         const GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
         cmdCtx.SetRenderTarget(*backBufferRtvPtr);
@@ -87,8 +86,8 @@ namespace ig
         }
         else
         {
-            cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
         }
 
         cmdCtx.FlushBarriers();

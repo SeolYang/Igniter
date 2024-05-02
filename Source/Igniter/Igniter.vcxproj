@@ -108,7 +108,7 @@
     <ClInclude Include="Render\CommandContextPool.h" />
     <ClInclude Include="Render\GpuUploader.h" />
     <ClInclude Include="Render\GpuViewManager.h" />
-    <ClInclude Include="Render\RenderCommon.h" />
+    <ClInclude Include="Render\Common.h" />
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
     <ClInclude Include="Render\Swapchain.h" />
@@ -186,7 +186,6 @@
     <ClCompile Include="Render\GpuUploader.cpp" />
     <ClCompile Include="Render\GpuViewManager.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
-    <ClCompile Include="Render\Renderer.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />
     <ClCompile Include="Render\TempConstantBufferAllocator.cpp" />
   </ItemGroup>

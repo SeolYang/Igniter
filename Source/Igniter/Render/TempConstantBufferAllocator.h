@@ -2,7 +2,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Handle.h"
 #include "Igniter/D3D12/GpuBufferDesc.h"
-#include "Igniter/Render/RenderCommon.h"
+#include "Igniter/Render/Common.h"
 
 namespace ig
 {
@@ -36,7 +36,7 @@ namespace ig
     class TempConstantBufferAllocator final
     {
     public:
-        TempConstantBufferAllocator(const FrameManager& frameManager, RenderContext& renderContext,
+        TempConstantBufferAllocator(RenderContext& renderContext,
             const size_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
         TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
@@ -45,18 +45,18 @@ namespace ig
         TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
-        TempConstantBuffer Allocate(const GpuBufferDesc& desc);
+        TempConstantBuffer Allocate(const LocalFrameIndex localFrameIdx, const GpuBufferDesc& desc);
 
         template <typename T>
-        TempConstantBuffer Allocate()
+        TempConstantBuffer Allocate(const LocalFrameIndex localFrameIdx)
         {
             GpuBufferDesc constantBufferDesc{};
             constantBufferDesc.AsConstantBuffer<T>();
-            return Allocate(constantBufferDesc);
+            return Allocate(localFrameIdx, constantBufferDesc);
         }
 
         // 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다. 프레임 시작시 반드시 호출해야함.
-        void BeginFrame(const uint8_t localFrameIdx);
+        void PreRender(const LocalFrameIndex localFrameIdx);
 
         void InitBufferStateTransition(CommandContext& cmdCtx);
 
@@ -69,7 +69,6 @@ namespace ig
         static constexpr size_t DefaultReservedBufferSizeInBytes = 4194304;
 
     private:
-        const FrameManager& frameManager;
         RenderContext& renderContext;
 
         size_t reservedSizeInBytesPerFrame;

@@ -19,7 +19,6 @@ namespace ig
     class GpuUploader;
     class InputManager;
     class AssetManager;
-    class Renderer;
     class ImGuiCanvas;
     class ImGuiRenderer;
     class GameInstance;
@@ -36,13 +35,11 @@ namespace ig
         Igniter& operator=(const Igniter&) = delete;
         Igniter& operator=(Igniter&&) noexcept = delete;
 
-        [[nodiscard]] static FrameManager& GetFrameManager();
         [[nodiscard]] static Timer& GetTimer();
         [[nodiscard]] static Window& GetWindow();
         [[nodiscard]] static InputManager& GetInputManager();
         [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
-        [[nodiscard]] static Renderer& GetRenderer();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
@@ -64,7 +61,6 @@ namespace ig
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////
-        Ptr<FrameManager> frameManager;
         Ptr<Timer> timer;
         Ptr<Window> window;
         Ptr<InputManager> inputManager;
@@ -76,7 +72,6 @@ namespace ig
 
         //////////////////////// L2 ////////////////////////
         Ptr<AssetManager> assetManager;
-        Ptr<Renderer> renderer;
         Ptr<ImGuiRenderer> imguiRenderer;
         ////////////////////////////////////////////////////
 

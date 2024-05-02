@@ -1,27 +1,31 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/FrameManager.h"
+#include "Igniter/Core/Window.h"
 #include "Igniter/Render/RenderContext.h"
 
 namespace ig
 {
-    RenderContext::RenderContext(const FrameManager& frameManager)
-        : frameManager(frameManager)
-        , mainGfxQueue(*renderDevice.CreateCommandQueue("MainGfx", EQueueType::Graphics))
-        , mainGfxCmdCtxPool(frameManager, renderDevice, EQueueType::Graphics)
+    RenderContext::RenderContext(const Window& window)
+        : mainGfxQueue(*renderDevice.CreateCommandQueue("MainGfx", EQueueType::Graphics))
+        , mainGfxCmdCtxPool(renderDevice, EQueueType::Graphics)
         , asyncComputeQueue(*renderDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute))
-        , asyncComputeCmdCtxPool(frameManager, renderDevice, EQueueType::Compute)
+        , asyncComputeCmdCtxPool(renderDevice, EQueueType::Compute)
         , asyncCopyQueue(*renderDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy))
         , gpuViewManager(renderDevice)
         , gpuUploader(renderDevice, asyncCopyQueue)
+        , swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight))
     {
     }
 
     RenderContext::~RenderContext()
     {
+        FlushQueues();
+
+        swapchain.reset();
         /* Flush pending destroy list! */
-        for (const uint8_t localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
+        for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            BeginFrame(localFrameIdx);
+            PreRender(localFrameIdx);
         }
     }
 
@@ -98,7 +102,8 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    RenderResource<GpuView> RenderContext::CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
+    RenderResource<GpuView> RenderContext::CreateConstantBufferView(
+        const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
     {
         ScopedLock registryLock{bufferPackage.Mut, gpuViewPackage.Mut};
         GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
@@ -248,7 +253,7 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    RenderResource<GpuView> RenderContext::CreateGpuView(const EGpuViewType type) 
+    RenderResource<GpuView> RenderContext::CreateGpuView(const EGpuViewType type)
     {
         IG_CHECK(type != EGpuViewType::Unknown);
         ReadWriteLock gpuViewRegistryLock{gpuViewPackage.Mut};
@@ -266,8 +271,8 @@ namespace ig
     {
         if (buffer)
         {
-            UniqueLock pendingListLock{bufferPackage.PendingListMut[frameManager.GetLocalFrameIndex()]};
-            bufferPackage.PendingDestroyList[frameManager.GetLocalFrameIndex()].emplace_back(buffer);
+            UniqueLock pendingListLock{bufferPackage.PendingListMut[lastLocalFrameIdx]};
+            bufferPackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(buffer);
         }
     }
 
@@ -275,8 +280,8 @@ namespace ig
     {
         if (texture)
         {
-            UniqueLock pendingListLock{texturePackage.PendingListMut[frameManager.GetLocalFrameIndex()]};
-            texturePackage.PendingDestroyList[frameManager.GetLocalFrameIndex()].emplace_back(texture);
+            UniqueLock pendingListLock{texturePackage.PendingListMut[lastLocalFrameIdx]};
+            texturePackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(texture);
         }
     }
 
@@ -284,8 +289,8 @@ namespace ig
     {
         if (state)
         {
-            UniqueLock pendingListLock{pipelineStatePackage.PendingListMut[frameManager.GetLocalFrameIndex()]};
-            pipelineStatePackage.PendingDestroyList[frameManager.GetLocalFrameIndex()].emplace_back(state);
+            UniqueLock pendingListLock{pipelineStatePackage.PendingListMut[lastLocalFrameIdx]};
+            pipelineStatePackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(state);
         }
     }
 
@@ -293,8 +298,8 @@ namespace ig
     {
         if (view)
         {
-            UniqueLock pendingListLock{gpuViewPackage.PendingListMut[frameManager.GetLocalFrameIndex()]};
-            gpuViewPackage.PendingDestroyList[frameManager.GetLocalFrameIndex()].emplace_back(view);
+            UniqueLock pendingListLock{gpuViewPackage.PendingListMut[lastLocalFrameIdx]};
+            gpuViewPackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(view);
         }
     }
 
@@ -353,10 +358,11 @@ namespace ig
         asyncCopyQueue.MakeSync().WaitOnCpu();
     }
 
-    void RenderContext::BeginFrame(const uint8_t localFrameIdx)
+    void RenderContext::PreRender(const LocalFrameIndex localFrameIdx)
     {
-        mainGfxCmdCtxPool.BeginFrame(localFrameIdx);
-        asyncComputeCmdCtxPool.BeginFrame(localFrameIdx);
+        this->lastLocalFrameIdx = localFrameIdx;
+        mainGfxCmdCtxPool.PreRender(localFrameIdx);
+        asyncComputeCmdCtxPool.PreRender(localFrameIdx);
 
         /* Flush Buffer Package [local frame] pending destroy */
         {
@@ -398,5 +404,10 @@ namespace ig
             }
             gpuViewPackage.PendingDestroyList[localFrameIdx].clear();
         }
+    }
+
+    void RenderContext::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) 
+    {
+        swapchain->Present();
     }
 }    // namespace ig

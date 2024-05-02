@@ -4,7 +4,7 @@
 
 namespace ig
 {
-    CommandContextPool::CommandContextPool(const FrameManager& frameManager, RenderDevice& renderDevice, const EQueueType cmdCtxType)
+    CommandContextPool::CommandContextPool(RenderDevice& renderDevice, const EQueueType cmdCtxType)
         : frameManager(frameManager), numReservedCtx(NumTargetCommandContextPerThread * std::thread::hardware_concurrency() * NumFramesInFlight)
     {
         IG_CHECK(numReservedCtx > 0);
@@ -21,7 +21,7 @@ namespace ig
     {
         for (const uint8_t localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            BeginFrame(localFrameIdx);
+            PreRender(localFrameIdx);
         }
 
         IG_CHECK(preservedCmdCtxs.size() == cmdCtxs.size());
@@ -32,7 +32,7 @@ namespace ig
         }
     }
 
-    void CommandContextPool::BeginFrame(const uint8_t localFrameIdx)
+    void CommandContextPool::PreRender(const LocalFrameIndex localFrameIdx)
     {
         ScopedLock lock{poolMutex, pendingListMutex};
         for (CommandContext* cmdCtx : pendingCmdCtxs[localFrameIdx])

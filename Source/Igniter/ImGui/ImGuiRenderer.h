@@ -16,16 +16,15 @@ namespace ig
     class ImGuiRenderer final
     {
     public:
-        ImGuiRenderer(const FrameManager& frameManager, Window& window, RenderContext& renderContext);
+        ImGuiRenderer(Window& window, RenderContext& renderContext);
         ~ImGuiRenderer();
 
-        void Render(ImGuiCanvas* canvas, Renderer& renderer);
+        void Render(const LocalFrameIndex localFrameIdx, ImGuiCanvas* canvas);
 
     private:
         void SetupDefaultTheme();
 
     private:
-        const FrameManager& frameManager;
         RenderContext& renderContext;
         Ptr<GpuViewManager> gpuViewManager;
         RenderResource<GpuView> mainSrv;

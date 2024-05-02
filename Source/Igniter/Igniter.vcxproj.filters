@@ -300,7 +300,7 @@
     <ClInclude Include="Render\GpuViewManager.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderCommon.h">
+    <ClInclude Include="Render\Common.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\RenderContext.h">
@@ -513,9 +513,6 @@
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderContext.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Renderer.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Render\Swapchain.cpp">

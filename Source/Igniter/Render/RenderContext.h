@@ -10,13 +10,15 @@
 #include "Igniter/D3D12/GpuTextureDesc.h"
 #include "Igniter/D3D12/PipelineState.h"
 #include "Igniter/D3D12/PipelineStateDesc.h"
-#include "Igniter/Render/RenderCommon.h"
+#include "Igniter/Render/Common.h"
 #include "Igniter/Render/GpuViewManager.h"
 #include "Igniter/Render/CommandContextPool.h"
 #include "Igniter/Render/GpuUploader.h"
+#include "Igniter/Render/Swapchain.h"
 
 namespace ig
 {
+    class Window;
     class FrameManager;
     class GpuBuffer;
     class GpuBufferDesc;
@@ -39,7 +41,7 @@ namespace ig
         };
 
     public:
-        RenderContext(const FrameManager& frameManager);
+        RenderContext(const Window& window);
         ~RenderContext();
 
         RenderContext(const RenderContext&) = delete;
@@ -55,9 +57,8 @@ namespace ig
         CommandContextPool& GetMainGfxCommandContextPool() { return mainGfxCmdCtxPool; }
         CommandContextPool& GetAsyncComputeCommandContextPool() { return mainGfxCmdCtxPool; }
         GpuUploader& GetGpuUploader() { return gpuUploader; }
-
+        Swapchain& GetSwapchain() { return *swapchain; }
         auto& GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
-
         auto GetBindlessDescriptorHeaps()
         {
             return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()};
@@ -66,10 +67,8 @@ namespace ig
         RenderResource<GpuBuffer> CreateBuffer(const GpuBufferDesc& desc);
         RenderResource<GpuTexture> CreateTexture(const GpuTextureDesc& desc);
         RenderResource<GpuTexture> CreateTexture(GpuTexture&& gpuTexture);
-
         RenderResource<PipelineState> CreatePipelineState(const GraphicsPipelineStateDesc& desc);
         RenderResource<PipelineState> CreatePipelineState(const ComputePipelineStateDesc& desc);
-
         RenderResource<GpuView> CreateConstantBufferView(const RenderResource<GpuBuffer> buffer);
         RenderResource<GpuView> CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
         RenderResource<GpuView> CreateShaderResourceView(const RenderResource<GpuBuffer> buffer);
@@ -83,8 +82,6 @@ namespace ig
         RenderResource<GpuView> CreateDepthStencilView(
             RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         RenderResource<GpuView> CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
-
-        /* Create a non-initialized Gpu View */
         RenderResource<GpuView> CreateGpuView(const EGpuViewType type);
 
         void DestroyBuffer(const RenderResource<GpuBuffer> buffer);
@@ -102,12 +99,13 @@ namespace ig
         const GpuView* Lookup(const RenderResource<GpuView> handle) const;
 
         void FlushQueues();
-        void BeginFrame(const uint8_t localFrameIdx);
+        void PreRender(const LocalFrameIndex localFrameIdx);
+        void PostRender(const LocalFrameIndex localFrameIdx);
 
     private:
-        const FrameManager& frameManager;
-
         RenderDevice renderDevice;
+
+        LocalFrameIndex lastLocalFrameIdx{};
 
         CommandQueue mainGfxQueue;
         CommandContextPool mainGfxCmdCtxPool;
@@ -122,5 +120,7 @@ namespace ig
 
         GpuViewManager gpuViewManager;
         GpuUploader gpuUploader;
+
+        Ptr<Swapchain> swapchain;
     };
 }    // namespace ig

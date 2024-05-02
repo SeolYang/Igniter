@@ -2,6 +2,7 @@
 #include "Igniter/Core/Timer.h"
 #include "Igniter/Core/Log.h"
 #include "Igniter/Core/ContainerUtils.h"
+#include "Igniter/Core/FrameManager.h"
 #include "Igniter/Filesystem/Utils.h"
 #include "Igniter/D3D12/RenderDevice.h"
 #include "Igniter/D3D12/GpuTexture.h"
@@ -159,7 +160,7 @@ namespace ig
         texUploadSync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request("BarrierAfterUpload_TexUpload"_fs);
+        auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
         {
             cmdCtx->Begin();
             cmdCtx->AddPendingTextureBarrier(*newTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -259,7 +260,7 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request("BarrierAfter_TexUpload"_fs);
+        auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(),"BarrierAfter_TexUpload"_fs);
         {
             cmdCtx->Begin();
             cmdCtx->AddPendingTextureBarrier(*newTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
@@ -352,7 +353,7 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request("BarrierAfter_TexUpload"_fs);
+        auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
             cmdCtx->Begin();
             cmdCtx->AddPendingTextureBarrier(*newTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,

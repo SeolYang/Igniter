@@ -284,9 +284,8 @@ namespace fe
             bIsMainSelectionDirty = false;
         }
 
-        const FrameManager& frameManager{Igniter::GetFrameManager()};
         AssetManager& assetManager{Igniter::GetAssetManager()};
-        const uint8_t localFrameIdx{frameManager.GetLocalFrameIndex()};
+        const uint8_t localFrameIdx{FrameManager::GetLocalFrameIndex()};
         if (!bIsPreviewSrvUpdated[localFrameIdx])
         {
             if (previewTextures[localFrameIdx])

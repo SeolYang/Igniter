@@ -323,7 +323,7 @@ namespace ig
         eastl::vector<VersionType> slotVersions{};
 
 #ifdef IG_TRACK_LEAKED_HANDLE
-        eastl::vector<DWORD> lastCallStackTable;
+        eastl::vector<DWORD> lastCallStackTable{};
 #endif
     };
 }    // namespace ig

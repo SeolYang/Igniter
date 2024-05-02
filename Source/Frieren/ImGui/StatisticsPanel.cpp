@@ -2,7 +2,6 @@
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Core/Memory.h"
 #include "Igniter/Core/Timer.h"
-#include "Igniter/Render/Renderer.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
 #include "Frieren/ImGui/StatisticsPanel.h"
 
@@ -12,18 +11,6 @@ namespace fe
     {
         if (bEnablePolling && pollingStep >= pollingInterval)
         {
-            {
-                Renderer& renderer = Igniter::GetRenderer();
-                const TempConstantBufferAllocator& tempConstantBufferAllocator = renderer.GetTempConstantBufferAllocator();
-                const auto [tempCBufferAllocLocalFrame0, tempCBufferAllocLocalFrame1] = tempConstantBufferAllocator.GetUsedSizeInBytes();
-                tempConstantBufferUsedSizeMB[0] = BytesToMegaBytes(tempCBufferAllocLocalFrame0);
-                tempConstantBufferUsedSizeMB[1] = BytesToMegaBytes(tempCBufferAllocLocalFrame1);
-
-                tempConstantBufferSizePerFrameMB = BytesToMegaBytes(tempConstantBufferAllocator.GetReservedSizeInBytesPerFrame());
-                tempConstantBufferOccupancy[0] = static_cast<float>(tempConstantBufferUsedSizeMB[0] / tempConstantBufferSizePerFrameMB);
-                tempConstantBufferOccupancy[1] = static_cast<float>(tempConstantBufferUsedSizeMB[1] / tempConstantBufferSizePerFrameMB);
-            }
-
             {
                 /* #sy_todo Asset Manager나 RenderContext가 소유중인 HandleRegistry의 메모리 사용량을 추적 */
             }

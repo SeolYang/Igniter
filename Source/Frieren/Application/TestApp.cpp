@@ -12,6 +12,7 @@
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
+#include "Frieren/Render/RendererPrototype.h"
 #include "Frieren/Game/Component/FpsCameraController.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/ImGui/EditorCanvas.h"
@@ -19,7 +20,8 @@
 
 namespace fe
 {
-    TestApp::TestApp(const AppDesc& desc) : Application(desc), world(MakePtr<ig::World>())
+    TestApp::TestApp(const AppDesc& desc)
+        : Application(desc), renderer(MakePtr<RendererPrototype>(Igniter::GetWindow(), Igniter::GetRenderContext())), world(MakePtr<ig::World>())
     {
         /* #sy_note 입력 매니저 테스트 */
         InputManager& inputManager = Igniter::GetInputManager();
@@ -173,9 +175,19 @@ namespace fe
         gameSystem->Update(deltaTime, *world);
     }
 
-    void TestApp::Render(const FrameIndex localFrameIdx)
+    void TestApp::PreRender(const LocalFrameIndex localFrameIdx) 
     {
-        Igniter::GetRenderer().Render(localFrameIdx, world->GetRegistry());
+        renderer->PreRender(localFrameIdx);
+    }
+
+    void TestApp::Render(const LocalFrameIndex localFrameIdx)
+    {
+        renderer->Render(localFrameIdx, *world);
+    }
+
+    GpuSync TestApp::PostRender(const LocalFrameIndex localFrameIdx)
+    {
+        return renderer->PostRender(localFrameIdx);
     }
 
     void TestApp::SetGameSystem(Ptr<ig::GameSystem> newGameSystem)

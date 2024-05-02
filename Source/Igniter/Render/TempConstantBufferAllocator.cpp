@@ -8,16 +8,16 @@
 
 namespace ig
 {
-    TempConstantBufferAllocator::TempConstantBufferAllocator(const FrameManager& frameManager, RenderContext& renderContext,
-        const size_t reservedBufferSizeInBytes /*= DefaultReservedBufferSizeInBytes*/)
-        : frameManager(frameManager), renderContext(renderContext), reservedSizeInBytesPerFrame(reservedBufferSizeInBytes)
+    TempConstantBufferAllocator::TempConstantBufferAllocator(
+        RenderContext& renderContext, const size_t reservedBufferSizeInBytes /*= DefaultReservedBufferSizeInBytes*/)
+        : renderContext(renderContext), reservedSizeInBytesPerFrame(reservedBufferSizeInBytes)
     {
         IG_CHECK(reservedSizeInBytesPerFrame % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
 
         GpuBufferDesc desc{};
         desc.AsConstantBuffer(static_cast<uint32_t>(reservedSizeInBytesPerFrame));
 
-        for (const uint8_t localFrameIdx : std::views::iota(0Ui8, NumFramesInFlight))
+        for (const LocalFrameIndex localFrameIdx : std::views::iota(0Ui8, NumFramesInFlight))
         {
             allocatedSizeInBytes[localFrameIdx] = 0;
             desc.DebugName = String(std::format("TempConstantBuffer.LocalFrame{}", localFrameIdx));
@@ -27,18 +27,16 @@ namespace ig
 
     TempConstantBufferAllocator::~TempConstantBufferAllocator()
     {
-        for (const uint8_t localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
+        for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            BeginFrame(localFrameIdx);
+            PreRender(localFrameIdx);
             renderContext.DestroyBuffer(buffers[localFrameIdx]);
         }
     }
 
-    TempConstantBuffer TempConstantBufferAllocator::Allocate(const GpuBufferDesc& desc)
+    TempConstantBuffer TempConstantBufferAllocator::Allocate(const LocalFrameIndex localFrameIdx, const GpuBufferDesc& desc)
     {
-        const uint8_t localFrameIdx = frameManager.GetLocalFrameIndex();
         IG_CHECK(localFrameIdx < NumFramesInFlight);
-
         UniqueLock lock{mutexes[localFrameIdx]};
         const size_t allocSizeInBytes = desc.GetSizeAsBytes();
         const size_t offset = allocatedSizeInBytes[localFrameIdx];
@@ -60,7 +58,7 @@ namespace ig
         return TempConstantBuffer{allocatedViews[localFrameIdx].back(), bufferPtr->Map(offset)};
     }
 
-    void TempConstantBufferAllocator::BeginFrame(const uint8_t localFrameIdx)
+    void TempConstantBufferAllocator::PreRender(const LocalFrameIndex localFrameIdx)
     {
         UniqueLock lock{mutexes[localFrameIdx]};
         for (const RenderResource<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
@@ -87,7 +85,6 @@ namespace ig
 
     std::pair<size_t, size_t> TempConstantBufferAllocator::GetUsedSizeInBytes() const
     {
-        UniqueLock lock{mutexes[frameManager.GetLocalFrameIndex()]};
         return std::make_pair(allocatedSizeInBytes[0], allocatedSizeInBytes[1]);
     }
 }    // namespace ig

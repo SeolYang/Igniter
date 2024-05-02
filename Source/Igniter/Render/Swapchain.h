@@ -1,7 +1,7 @@
 #pragma once
 #include "Igniter/Core/Handle.h"
 #include "Igniter/D3D12/Common.h"
-#include "Igniter/Render/RenderCommon.h"
+#include "Igniter/Render/Common.h"
 
 namespace ig
 {
