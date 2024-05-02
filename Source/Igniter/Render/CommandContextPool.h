@@ -11,6 +11,38 @@ namespace ig
     class CommandContext;
     class CommandContextPool final
     {
+    private:
+        template <typename Deleter>
+        class TempCommandContext final
+        {
+        public:
+            TempCommandContext(CommandContext* cmdCtx, Deleter&& deleter) : cmdCtx(cmdCtx), deleter(deleter) { IG_CHECK(cmdCtx != nullptr); }
+            TempCommandContext(const TempCommandContext&) = delete;
+            TempCommandContext(TempCommandContext&&) noexcept = delete;
+            ~TempCommandContext() { deleter(cmdCtx); }
+
+            TempCommandContext& operator=(const TempCommandContext&) = delete;
+            TempCommandContext& operator=(TempCommandContext&&) noexcept = delete;
+
+            [[nodiscard]] explicit operator CommandContext*() noexcept { return cmdCtx; }
+
+            [[nodiscard]] CommandContext* operator->() noexcept
+            {
+                IG_CHECK(cmdCtx != nullptr);
+                return cmdCtx;
+            }
+
+            [[nodiscard]] CommandContext& operator*() noexcept
+            {
+                IG_CHECK(cmdCtx != nullptr);
+                return *cmdCtx;
+            }
+
+        private:
+            Deleter deleter;
+            CommandContext* cmdCtx = nullptr;
+        };
+
     public:
         CommandContextPool(RenderDevice& renderDevice, const EQueueType cmdCtxType);
         CommandContextPool(const CommandContextPool&) = delete;
@@ -22,18 +54,18 @@ namespace ig
 
         auto Request(const LocalFrameIndex localFrameIdx, const String debugName)
         {
+            IG_CHECK(localFrameIdx < NumFramesInFlight);
+
             UniqueLock poolLock{poolMutex};
             CommandContext* cmdCtx = cmdCtxs.back();
             cmdCtxs.pop_back();
             SetObjectName(&cmdCtx->GetNative(), debugName);
 
-            const auto deleter = [this, localFrameIdx](CommandContext* ptr)
-            {
-                UniqueLock pendingListLock{pendingListMutex};
-                pendingCmdCtxs[localFrameIdx].emplace_back(ptr);
-            };
-
-            return Ptr<CommandContext, decltype(deleter)>{cmdCtx, deleter};
+            return TempCommandContext{cmdCtx, [this, localFrameIdx](CommandContext* ptr)
+                {
+                    UniqueLock pendingListLock{pendingListMutex};
+                    pendingCmdCtxs[localFrameIdx].emplace_back(ptr);
+                }};
         }
 
         void PreRender(const LocalFrameIndex localFrameIdx);
@@ -49,4 +81,5 @@ namespace ig
         Mutex pendingListMutex;
         eastl::array<eastl::vector<CommandContext*>, NumFramesInFlight> pendingCmdCtxs;
     };
+
 }    // namespace ig

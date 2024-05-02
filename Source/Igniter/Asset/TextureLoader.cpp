@@ -167,7 +167,7 @@ namespace ig
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdCtx->End();
         }
-        CommandContext* cmdCtxs[1] = {cmdCtx.get()};
+        CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
         GpuSync barrierSync{mainGfxQueue.MakeSync()};
         barrierSync.WaitOnCpu();
@@ -267,7 +267,7 @@ namespace ig
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdCtx->End();
         }
-        CommandContext* cmdCtxs[1] = {cmdCtx.get()};
+        CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
         GpuSync barrierSync{mainGfxQueue.MakeSync()};
         barrierSync.WaitOnCpu();
@@ -361,7 +361,7 @@ namespace ig
             cmdCtx->End();
         }
 
-        CommandContext* cmdCtxs[1]{cmdCtx.get()};
+        CommandContext* cmdCtxs[1]{(CommandContext*)cmdCtx};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
         GpuSync barrierSync{mainGfxQueue.MakeSync()};
         barrierSync.WaitOnCpu();

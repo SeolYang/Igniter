@@ -87,7 +87,7 @@ namespace fe
         }
         initialCmdCtx->End();
 
-        ig::CommandContext* cmdCtxs[1]{initialCmdCtx.get()};
+        ig::CommandContext* cmdCtxs[1]{(ig::CommandContext*)initialCmdCtx};
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
 #pragma endregion
@@ -189,7 +189,7 @@ namespace fe
         }
         renderCmdCtx->End();
 
-        ig::CommandContext* renderCmdCtxPtrs[] = {renderCmdCtx.get()};
+        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)renderCmdCtx};
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
     }
 
