@@ -1,6 +1,6 @@
 #pragma once
 #include "Igniter/Render/Common.h"
-#include "Igniter/Render/Renderer.h"
+#include "Igniter/Render/RenderPass.h"
 
 namespace ig
 {
@@ -16,7 +16,7 @@ namespace ig
 
 namespace fe
 {
-    class RendererPrototype : public ig::Renderer
+    class RendererPrototype : public ig::RenderPass
     {
     public:
         RendererPrototype(ig::Window& window, ig::RenderContext& renderContext);

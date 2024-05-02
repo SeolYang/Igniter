@@ -5,12 +5,18 @@
 namespace ig
 {
     class World;
-    class Renderer
+    class RenderPass
     {
     public:
-        virtual ~Renderer() = default;
+        virtual ~RenderPass() = default;
+        /* Preparation */
         virtual void PreRender(const LocalFrameIndex localFrameIdx) = 0;
+        /* Record Commands */
         virtual void Render(const LocalFrameIndex localFrameIdx, World& world) = 0;
+        /* Submit */
         virtual GpuSync PostRender(const LocalFrameIndex localFrameIdx) = 0;
     };
 }    // namespace ig
+
+/* A Rendering Pipeline = Composite of Render Passes */
+/* A Renderer = Composite of multiple Rendering Pipelines */

@@ -4,7 +4,7 @@
 #include "Igniter/Core/Window.h"
 #include "Igniter/Input/InputManager.h"
 #include "Igniter/Asset/AssetManager.h"
-#include "Igniter/Render/Renderer.h"
+#include "Igniter/Render/RenderPass.h"
 #include "Igniter/Component/CameraArchetype.h"
 #include "Igniter/Component/CameraComponent.h"
 #include "Igniter/Component/NameComponent.h"

@@ -10,7 +10,7 @@ namespace ig
     class GpuView;
     class FrameManager;
     class Window;
-    class Renderer;
+    class RenderPass;
     class ImGuiCanvas;
     class GpuViewManager;
     class ImGuiRenderer final

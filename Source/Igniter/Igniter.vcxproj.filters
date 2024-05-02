@@ -306,7 +306,7 @@
     <ClInclude Include="Render\RenderContext.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Renderer.h">
+    <ClInclude Include="Render\RenderPass.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\Swapchain.h">

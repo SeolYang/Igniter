@@ -110,7 +110,7 @@
     <ClInclude Include="Render\GpuViewManager.h" />
     <ClInclude Include="Render\Common.h" />
     <ClInclude Include="Render\RenderContext.h" />
-    <ClInclude Include="Render\Renderer.h" />
+    <ClInclude Include="Render\RenderPass.h" />
     <ClInclude Include="Render\Swapchain.h" />
     <ClInclude Include="Render\TempConstantBufferAllocator.h" />
     <ClInclude Include="Render\Utils.h" />
