@@ -20,7 +20,7 @@ namespace fe
         EntityList& operator=(EntityList&&) noexcept = delete;
 
         void OnImGui();
-        Entity GetSelectedEntity() const { return selectedEntity; }
+        ig::Entity GetSelectedEntity() const { return selectedEntity; }
 
         void SetActiveWorld(ig::World* world)
         {
@@ -30,6 +30,6 @@ namespace fe
 
     private:
         ig::World* activeWorld = nullptr;
-        Entity selectedEntity = entt::null;
+        ig::Entity selectedEntity = entt::null;
     };
 }    // namespace fe

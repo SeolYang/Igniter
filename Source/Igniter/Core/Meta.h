@@ -11,7 +11,7 @@ namespace ig::meta
     constexpr inline entt::hashed_string ComponentProperty = "Component"_hs;
     constexpr inline entt::hashed_string AddComponentFunc = "AddComponent"_hs;
     constexpr inline entt::hashed_string RemoveComponentFunc = "RemoveComponent"_hs;
-    constexpr inline entt::hashed_string OnInspectorFunc = "OnInspectorFunc"_hs;    // Signature:OnInspectorFunc(Registry*, Entity);
+    constexpr inline entt::hashed_string OnInspectorFunc = "OnInspectorFunc"_hs;    // Signature:OnInspectorFunc(Registry*, Entity); // #sy_todo -> Ref<Registry>로 변경 할 것
 }    // namespace ig::meta
 
 namespace ig
@@ -73,7 +73,7 @@ namespace ig
     {                                                                                              \
         T##_DefineMeta::T##_DefineMeta()                                                           \
         {                                                                                          \
-            entt::meta<T>().type(TypeHash<T>);                                                     \
+            entt::meta<T>().type(ig::TypeHash<T>);                                                     \
             entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                                 \
             entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase());          \
             entt::meta<T>().prop(ig::meta::ComponentProperty);                                     \

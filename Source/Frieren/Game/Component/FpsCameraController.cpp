@@ -12,7 +12,7 @@ namespace fe
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(FpsCameraController);
     }
 
-    Json& FpsCameraController::Serialize(Json& archive) const
+    ig::Json& FpsCameraController::Serialize(ig::Json& archive) const
     {
         IG_SERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPower);
         IG_SERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPowerAttenuationTime);
@@ -22,7 +22,7 @@ namespace fe
         return archive;
     }
 
-    const Json& FpsCameraController::Deserialize(const Json& archive)
+    const ig::Json& FpsCameraController::Deserialize(const ig::Json& archive)
     {
         IG_DESERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPower, 25.f);
         IG_DESERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPowerAttenuationTime, 0.65f);
@@ -32,7 +32,7 @@ namespace fe
         return archive;
     }
 
-    void FpsCameraController::OnInspector(Registry* registry, const Entity entity)
+    void FpsCameraController::OnInspector(ig::Registry* registry, const ig::Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         fe::FpsCameraController& controller = registry->get<fe::FpsCameraController>(entity);

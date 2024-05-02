@@ -17,13 +17,13 @@ namespace fe
 {
     EditorCanvas::EditorCanvas(TestApp& testApp)
         : app(testApp)
-        , statisticsPanel(MakePtr<StatisticsPanel>())
-        , cachedStringDebugger(MakePtr<CachedStringDebugger>())
-        , entityList(MakePtr<EntityList>())
-        , entityInspector(MakePtr<EntityInspector>(*entityList))
-        , textureImportPanel(MakePtr<TextureImportPanel>())
-        , staticMeshImportPanel(MakePtr<StaticMeshImportPanel>())
-        , assetInspector(MakePtr<AssetInspector>())
+        , statisticsPanel(ig::MakePtr<StatisticsPanel>())
+        , cachedStringDebugger(ig::MakePtr<CachedStringDebugger>())
+        , entityList(ig::MakePtr<EntityList>())
+        , entityInspector(ig::MakePtr<EntityInspector>(*entityList))
+        , textureImportPanel(ig::MakePtr<TextureImportPanel>())
+        , staticMeshImportPanel(ig::MakePtr<StaticMeshImportPanel>())
+        , assetInspector(ig::MakePtr<AssetInspector>())
     {
     }
 
@@ -107,7 +107,7 @@ namespace fe
                     {
                         if (ImGui::MenuItem(type.prop(ig::meta::TitleCaseNameProperty).value().cast<ig::String>().ToCString()))
                         {
-                            app.SetGameSystem(std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<Ptr<GameSystem>>()));
+                            app.SetGameSystem(std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>()));
                         }
                     }
                 }

@@ -20,8 +20,8 @@ namespace fe
         void SelectFileToImport();
 
     private:
-        String path{};
-        StaticMeshImportDesc config;
-        EOpenFileDialogStatus status{};
+        ig::String path{};
+        ig::StaticMeshImportDesc config;
+        ig::EOpenFileDialogStatus status{};
     };
 }    // namespace fe

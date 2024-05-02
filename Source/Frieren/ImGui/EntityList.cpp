@@ -18,16 +18,16 @@ namespace fe
                 if (activeWorld != nullptr)
                 {
                     auto& registry = activeWorld->GetRegistry();
-                    auto entityView = std::views::all(registry.template storage<Entity>());
-                    auto validEntityView = std::views::filter([&registry](const Entity entity) { return registry.valid(entity); });
-                    auto entityNameView = std::views::transform(
-                        [&registry](const Entity entity)
+                    auto entityView = ig::views::all(registry.template storage<ig::Entity>());
+                    auto validEntityView = ig::views::filter([&registry](const ig::Entity entity) { return registry.valid(entity); });
+                    auto entityNameView = ig::views::transform(
+                        [&registry](const ig::Entity entity)
                         {
                             std::string formattedName{};
 
-                            if (registry.all_of<NameComponent>(entity))
+                            if (registry.all_of<ig::NameComponent>(entity))
                             {
-                                auto& nameComponent = registry.get<NameComponent>(entity);
+                                auto& nameComponent = registry.get<ig::NameComponent>(entity);
                                 formattedName = std::format("{} ({})", nameComponent.Name.ToStringView(), entt::to_integral(entity));
                             }
                             else
@@ -38,7 +38,7 @@ namespace fe
                             return std::make_pair(entity, formattedName);
                         });
 
-                    std::vector<std::pair<Entity, std::string>> entityNames{ToVector(entityView | validEntityView | entityNameView)};
+                    std::vector<std::pair<ig::Entity, std::string>> entityNames{ig::ToVector(entityView | validEntityView | entityNameView)};
                     std::sort(entityNames.begin(), entityNames.end(), [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 
                     constexpr ImGuiTreeNodeFlags TreeNodeBaseFlags =

@@ -13,7 +13,7 @@ namespace fe
     void EntityInspector::OnImGui()
     {
         IG_CHECK(entityList != nullptr);
-        const Entity selectedEntity = entityList->GetSelectedEntity();
+        const ig::Entity selectedEntity = entityList->GetSelectedEntity();
         if (selectedEntity == entt::null)
         {
             ImGui::Text("Entity not selected.");
@@ -25,7 +25,7 @@ namespace fe
             return;
         }
 
-        Registry& registry = activeWorld->GetRegistry();
+        ig::Registry& registry = activeWorld->GetRegistry();
         bool bHasDisplayableComponent = false;
 
         for (const auto& [typeID, type] : entt::resolve())
@@ -52,7 +52,7 @@ namespace fe
                 }
             }
 
-            const String* name = nameProperty.value().try_cast<String>();
+            const ig::String* name = nameProperty.value().try_cast<ig::String>();
             if (name == nullptr)
             {
                 continue;

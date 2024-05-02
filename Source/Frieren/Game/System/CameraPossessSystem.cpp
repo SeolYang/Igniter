@@ -21,7 +21,7 @@ namespace fe
 
     void CameraPossessSystem::Update()
     {
-        const Action togglePossessToCamera = Igniter::GetInputManager().GetAction(togglePossessToCameraHandle);
+        const ig::Action togglePossessToCamera = ig::Igniter::GetInputManager().GetAction(togglePossessToCameraHandle);
         if (togglePossessToCamera.State == ig::EInputState::Pressed)
         {
             bEnabled = !bEnabled;

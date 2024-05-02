@@ -21,7 +21,7 @@ namespace fe
 
     private:
         ig::Window& window;
-        Handle<Action, InputManager> togglePossessToCameraHandle;
+        ig::Handle<ig::Action, ig::InputManager> togglePossessToCameraHandle;
         FpsCameraControllSystem& fpsCamControllSystem;
 
         bool bEnabled = false;

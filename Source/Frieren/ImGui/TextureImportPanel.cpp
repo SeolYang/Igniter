@@ -13,7 +13,7 @@ namespace fe
             SelectFileToImport();
         }
 
-        if (status != EOpenFileDialogStatus::Success)
+        if (status != ig::EOpenFileDialogStatus::Success)
         {
             ImGui::Text("Failed to select texture resource file. (Status: %s)", magic_enum::enum_name(status).data());
         }
@@ -22,36 +22,36 @@ namespace fe
             ImGui::SameLine();
             ImGui::Text("%s", path.ToStringView().data());
 
-            if (ImGuiX::BeginEnumCombo<ETextureCompressionMode>("Compression Mode", selectedCompModeIdx))
+            if (ig::ImGuiX::BeginEnumCombo<ig::ETextureCompressionMode>("Compression Mode", selectedCompModeIdx))
             {
-                ImGuiX::EndEnumCombo();
+                ig::ImGuiX::EndEnumCombo();
             }
 
             ImGui::Checkbox("Generate Mips", &config.bGenerateMips);
 
-            if (ImGuiX::BeginEnumCombo<D3D12_FILTER>("Filter", selectedFilterIdx))
+            if (ig::ImGuiX::BeginEnumCombo<D3D12_FILTER>("Filter", selectedFilterIdx))
             {
-                ImGuiX::EndEnumCombo();
+                ig::ImGuiX::EndEnumCombo();
             }
 
-            if (ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(U)", selectedAddressModeU))
+            if (ig::ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(U)", selectedAddressModeU))
             {
-                ImGuiX::EndEnumCombo();
+                ig::ImGuiX::EndEnumCombo();
             }
 
-            if (ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(V)", selectedAddressModeV))
+            if (ig::ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(V)", selectedAddressModeV))
             {
-                ImGuiX::EndEnumCombo();
+                ig::ImGuiX::EndEnumCombo();
             }
 
-            if (ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(W)", selectedAddressModeW))
+            if (ig::ImGuiX::BeginEnumCombo<D3D12_TEXTURE_ADDRESS_MODE>("Address Mode(W)", selectedAddressModeW))
             {
-                ImGuiX::EndEnumCombo();
+                ig::ImGuiX::EndEnumCombo();
             }
 
             if (ImGui::Button("Import"))
             {
-                constexpr auto CompressionModes = magic_enum::enum_values<ETextureCompressionMode>();
+                constexpr auto CompressionModes = magic_enum::enum_values<ig::ETextureCompressionMode>();
                 constexpr auto Filters = magic_enum::enum_values<D3D12_FILTER>();
                 constexpr auto AddressModes = magic_enum::enum_values<D3D12_TEXTURE_ADDRESS_MODE>();
 
@@ -61,7 +61,7 @@ namespace fe
                 config.AddressModeV = AddressModes[selectedAddressModeV];
                 config.AddressModeW = AddressModes[selectedAddressModeW];
 
-                AssetManager& assetManager = Igniter::GetAssetManager();
+                ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
                 assetManager.Import(path, config);
                 return false;
             }
@@ -74,11 +74,11 @@ namespace fe
     {
         config = {};
 
-        static const std::vector<DialogFilter> Filters{
-            DialogFilter{.Name = "Texture Resources"_fs, .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"_fs},
+        static const std::vector<ig::DialogFilter> Filters{
+            ig::DialogFilter{.Name = "Texture Resources"_fs, .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"_fs},
         };
 
-        Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(nullptr, "Texture to import"_fs, Filters);
+        ig::Result<ig::String, ig::EOpenFileDialogStatus> result = ig::OpenFileDialog::Show(nullptr, "Texture to import"_fs, Filters);
         status = result.GetStatus();
         if (result.HasOwnership())
         {

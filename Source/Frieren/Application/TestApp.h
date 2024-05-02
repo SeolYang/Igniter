@@ -15,25 +15,25 @@ namespace fe
     class TestApp : public ig::Application
     {
     public:
-        TestApp(const AppDesc& desc);
+        TestApp(const ig::AppDesc& desc);
         ~TestApp() override;
 
         void PreUpdate(const float) override {}
         void Update(const float deltaTime) override;
         void PostUpdate(const float) override {}
 
-        void PreRender(const LocalFrameIndex localFrameIdx) override;
-        void Render(const LocalFrameIndex localFrameIdx) override;
-        GpuSync PostRender(const LocalFrameIndex localFrameIdx) override;
+        void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
+        void Render(const ig::LocalFrameIndex localFrameIdx) override;
+        ig::GpuSync PostRender(const ig::LocalFrameIndex localFrameIdx) override;
 
-        void SetGameSystem(Ptr<ig::GameSystem> newGameSystem);
+        void SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem);
 
         ig::World* GetActiveWorld() { return world.get(); }
 
     private:
-        Ptr<RendererPrototype> renderer;
-        Ptr<ig::World> world;
-        Ptr<ig::GameSystem> gameSystem;
-        Ptr<EditorCanvas> editorCanvas;
+        ig::Ptr<RendererPrototype> renderer;
+        ig::Ptr<ig::World> world;
+        ig::Ptr<ig::GameSystem> gameSystem;
+        ig::Ptr<EditorCanvas> editorCanvas;
     };
 }    // namespace fe

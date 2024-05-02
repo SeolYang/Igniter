@@ -9,10 +9,10 @@ namespace fe
 {
     void JustSpinningSystem::Update(const float deltaTime, ig::World& world)
     {
-        Registry& registry = world.GetRegistry();
-        registry.view<TransformComponent>().each([deltaTime]([[maybe_unused]] const auto entity, TransformComponent& transform)
+        ig::Registry& registry = world.GetRegistry();
+        registry.view<ig::TransformComponent>().each([deltaTime]([[maybe_unused]] const auto entity, ig::TransformComponent& transform)
         {
-            transform.Rotation *= Quaternion::CreateFromYawPitchRoll(deltaTime, 0.f, 0.f);
+            transform.Rotation *= ig::Quaternion::CreateFromYawPitchRoll(deltaTime, 0.f, 0.f);
         });
     }
 

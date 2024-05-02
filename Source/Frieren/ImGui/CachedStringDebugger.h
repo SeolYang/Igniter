@@ -25,6 +25,6 @@ namespace fe
         bool bLoadRequired = true;
         bool bFiltered = false;
 
-        size_t searchTargetHashVal = InvalidHashVal;
+        size_t searchTargetHashVal = ig::InvalidHashVal;
     };
 }    // namespace fe

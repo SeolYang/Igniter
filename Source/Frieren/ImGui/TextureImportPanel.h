@@ -20,9 +20,9 @@ namespace fe
         void SelectFileToImport();
 
     private:
-        String path{};
-        TextureImportDesc config;
-        EOpenFileDialogStatus status{};
+        ig::String path{};
+        ig::TextureImportDesc config;
+        ig::EOpenFileDialogStatus status{};
 
         int selectedCompModeIdx = 0;
         int selectedFilterIdx = 0;

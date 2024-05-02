@@ -11,7 +11,7 @@ namespace fe
         {
             SelectFileToImport();
         }
-        if (status != EOpenFileDialogStatus::Success)
+        if (status != ig::EOpenFileDialogStatus::Success)
         {
             ImGui::Text("Failed to select model resource file. (Status: %s)", magic_enum::enum_name(status).data());
         }
@@ -33,7 +33,7 @@ namespace fe
 
             if (ImGui::Button("Import"))
             {
-                AssetManager& assetManager = Igniter::GetAssetManager();
+                ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
                 assetManager.Import(path, config);
                 return false;
             }
@@ -46,11 +46,11 @@ namespace fe
     {
         config = {};
 
-        static const std::vector<DialogFilter> Filters{
-            DialogFilter{.Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs},
+        static const std::vector<ig::DialogFilter> Filters{
+            ig::DialogFilter{.Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs},
         };
 
-        Result<String, EOpenFileDialogStatus> result = OpenFileDialog::Show(nullptr, "Model resource to import"_fs, Filters);
+        ig::Result<ig::String, ig::EOpenFileDialogStatus> result = ig::OpenFileDialog::Show(nullptr, "Model resource to import"_fs, Filters);
         status = result.GetStatus();
         if (result.HasOwnership())
         {

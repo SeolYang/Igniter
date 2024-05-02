@@ -22,29 +22,29 @@ namespace fe
         void RenderFilterMenu();
         void RenderMainFrame();
         void RenderAssetStats();
-        void RenderAssetTable(const EAssetCategory assetCategoryFilter, int& selectedIdx, bool* bSelectionDirtyFlagPtr = nullptr);
+        void RenderAssetTable(const ig::EAssetCategory assetCategoryFilter, int& selectedIdx, bool* bSelectionDirtyFlagPtr = nullptr);
         void RenderInspector();
-        void RenderEdit(const AssetInfo& assetInfo);
-        void RenderMaterialEdit(const AssetInfo& assetInfo);
-        void RenderStaticMeshEdit(const AssetInfo& assetInfo);
-        void RenderPreview(const AssetInfo& assetInfo);
-        void RenderTexturePreview(const AssetInfo& assetInfo);
-        void RenderAssetInfo(const AssetInfo& assetInfo);
-        void RenderSelector(const char* label, const Guid guid);
-        int RenderSelectorPopup(const EAssetCategory selectAssetType);
+        void RenderEdit(const ig::AssetInfo& assetInfo);
+        void RenderMaterialEdit(const ig::AssetInfo& assetInfo);
+        void RenderStaticMeshEdit(const ig::AssetInfo& assetInfo);
+        void RenderPreview(const ig::AssetInfo& assetInfo);
+        void RenderTexturePreview(const ig::AssetInfo& assetInfo);
+        void RenderAssetInfo(const ig::AssetInfo& assetInfo);
+        void RenderSelector(const char* label, const ig::Guid guid);
+        int RenderSelectorPopup(const ig::EAssetCategory selectAssetType);
 
     private:
-        RecursiveMutex mutex{};
-        std::vector<AssetManager::Snapshot> snapshots{};
+        ig::RecursiveMutex mutex{};
+        std::vector<ig::AssetManager::Snapshot> snapshots{};
         bool bDirty{true};
-        chrono::system_clock::time_point lastUpdated{chrono::system_clock::now()};
+        ig::chrono::system_clock::time_point lastUpdated{ig::chrono::system_clock::now()};
 
-        EAssetCategory mainTableAssetFilter{EAssetCategory::Unknown};
+        ig::EAssetCategory mainTableAssetFilter{ig::EAssetCategory::Unknown};
         int mainTableSelectedIdx{-1};
         bool bIsMainSelectionDirty = false;
 
-        ManagedAsset<Texture> previewTextures[NumFramesInFlight];
-        bool bIsPreviewSrvUpdated[NumFramesInFlight]{false};
+        ig::ManagedAsset<ig::Texture> previewTextures[ig::NumFramesInFlight];
+        bool bIsPreviewSrvUpdated[ig::NumFramesInFlight]{false};
 
         int selectorTableSelectedIdx{-1};
         bool bOpenSelectorPopup = false;

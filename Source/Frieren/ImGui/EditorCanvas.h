@@ -24,13 +24,13 @@ namespace fe
 
     private:
         TestApp& app;
-        Ptr<StatisticsPanel> statisticsPanel{};
-        Ptr<CachedStringDebugger> cachedStringDebugger{};
-        Ptr<EntityList> entityList{};
-        Ptr<EntityInspector> entityInspector{};
-        Ptr<TextureImportPanel> textureImportPanel{};
-        Ptr<StaticMeshImportPanel> staticMeshImportPanel{};
-        Ptr<AssetInspector> assetInspector{};
+        ig::Ptr<StatisticsPanel> statisticsPanel{};
+        ig::Ptr<CachedStringDebugger> cachedStringDebugger{};
+        ig::Ptr<EntityList> entityList{};
+        ig::Ptr<EntityInspector> entityInspector{};
+        ig::Ptr<TextureImportPanel> textureImportPanel{};
+        ig::Ptr<StaticMeshImportPanel> staticMeshImportPanel{};
+        ig::Ptr<AssetInspector> assetInspector{};
 
         bool bStatisticsPanelOpend = false;
         bool bCachedStringDebuggerOpend = false;

@@ -20,7 +20,7 @@ namespace fe
         ImGui::SameLine();
         if (ImGui::Button("Reset") || bLoadRequired)
         {
-            cachedStrings = String::GetCachedStrings();
+            cachedStrings = ig::String::GetCachedStrings();
             bSortRequired = true;
             bFiltered = false;
             bLoadRequired = false;
@@ -60,7 +60,7 @@ namespace fe
 
             if (bFiltered)
             {
-                if (searchTargetHashVal != InvalidHashVal)
+                if (searchTargetHashVal != ig::InvalidHashVal)
                 {
                     const auto foundItr = std::find_if(cachedStrings.cbegin(), cachedStrings.cend(),
                         [val = searchTargetHashVal](const auto& hashStrPair) { return hashStrPair.first == val; });

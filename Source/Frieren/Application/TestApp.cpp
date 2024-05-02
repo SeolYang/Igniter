@@ -20,23 +20,23 @@
 
 namespace fe
 {
-    TestApp::TestApp(const AppDesc& desc)
-        : Application(desc), renderer(MakePtr<RendererPrototype>(Igniter::GetWindow(), Igniter::GetRenderContext())), world(MakePtr<ig::World>())
+    TestApp::TestApp(const ig::AppDesc& desc)
+        : Application(desc), renderer(ig::MakePtr<RendererPrototype>(ig::Igniter::GetWindow(), ig::Igniter::GetRenderContext())), world(ig::MakePtr<ig::World>())
     {
         /* #sy_note 입력 매니저 테스트 */
-        InputManager& inputManager = Igniter::GetInputManager();
-        inputManager.MapAction("MoveLeft"_fs, EInput::A);
-        inputManager.MapAction("MoveRight"_fs, EInput::D);
-        inputManager.MapAction("MoveForward"_fs, EInput::W);
-        inputManager.MapAction("MoveBackward"_fs, EInput::S);
-        inputManager.MapAction("MoveUp"_fs, EInput::MouseRB);
-        inputManager.MapAction("MoveDown"_fs, EInput::MouseLB);
-        inputManager.MapAction("Sprint"_fs, EInput::Shift);
+        ig::InputManager& inputManager = ig::Igniter::GetInputManager();
+        inputManager.MapAction("MoveLeft"_fs, ig::EInput::A);
+        inputManager.MapAction("MoveRight"_fs, ig::EInput::D);
+        inputManager.MapAction("MoveForward"_fs, ig::EInput::W);
+        inputManager.MapAction("MoveBackward"_fs, ig::EInput::S);
+        inputManager.MapAction("MoveUp"_fs, ig::EInput::MouseRB);
+        inputManager.MapAction("MoveDown"_fs, ig::EInput::MouseLB);
+        inputManager.MapAction("Sprint"_fs, ig::EInput::Shift);
 
-        inputManager.MapAxis("TurnYaw"_fs, EInput::MouseDeltaX, 1.f);
-        inputManager.MapAxis("TurnAxis"_fs, EInput::MouseDeltaY, 1.f);
+        inputManager.MapAxis("TurnYaw"_fs, ig::EInput::MouseDeltaX, 1.f);
+        inputManager.MapAxis("TurnAxis"_fs, ig::EInput::MouseDeltaY, 1.f);
 
-        inputManager.MapAction(String("TogglePossessCamera"), EInput::Space);
+        inputManager.MapAction(ig::String("TogglePossessCamera"), ig::EInput::Space);
         /********************************/
 
         ///* #sy_note 에셋 시스템 테스트 + 게임 플레이 프레임워크 테스트 */
@@ -152,11 +152,11 @@ namespace fe
 
         /* #sy_note ImGui 통합 테스트 */
         editorCanvas = MakePtr<EditorCanvas>(*this);
-        Igniter::SetImGuiCanvas(static_cast<ImGuiCanvas*>(editorCanvas.get()));
+        ig::Igniter::SetImGuiCanvas(static_cast<ig::ImGuiCanvas*>(editorCanvas.get()));
         /************************************/
 
         /* #sy_note Game Mode 타입 메타 정보 테스트 */
-        gameSystem = std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<Ptr<GameSystem>>());
+        gameSystem = std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>());
         /************************************/
 
         // Json dumpedWorld{};
@@ -164,8 +164,8 @@ namespace fe
         // Igniter::GetAssetManager().Import("TestMap"_fs, {.WorldToSerialize = world.get()});
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
-        AssetManager& assetManager = Igniter::GetAssetManager();
-        world = MakePtr<World>(assetManager, assetManager.Load<Map>(xg::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"}));
+        ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+        world = ig::MakePtr<ig::World>(assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"}));
     }
 
     TestApp::~TestApp() {}
@@ -175,22 +175,22 @@ namespace fe
         gameSystem->Update(deltaTime, *world);
     }
 
-    void TestApp::PreRender(const LocalFrameIndex localFrameIdx) 
+    void TestApp::PreRender(const ig::LocalFrameIndex localFrameIdx) 
     {
         renderer->PreRender(localFrameIdx);
     }
 
-    void TestApp::Render(const LocalFrameIndex localFrameIdx)
+    void TestApp::Render(const ig::LocalFrameIndex localFrameIdx)
     {
         renderer->Render(localFrameIdx, *world);
     }
 
-    GpuSync TestApp::PostRender(const LocalFrameIndex localFrameIdx)
+    ig::GpuSync TestApp::PostRender(const ig::LocalFrameIndex localFrameIdx)
     {
         return renderer->PostRender(localFrameIdx);
     }
 
-    void TestApp::SetGameSystem(Ptr<ig::GameSystem> newGameSystem)
+    void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)
     {
         gameSystem = std::move(newGameSystem);
     }

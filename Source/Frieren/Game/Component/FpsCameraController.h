@@ -19,9 +19,9 @@ namespace fe
             return ig::Quaternion::CreateFromYawPitchRoll(ig::Deg2Rad(CurrentYaw), ig::Deg2Rad(CurrentPitch), 0.f);
         }
 
-        Json& Serialize(Json& archive) const;
-        const Json& Deserialize(const Json& archive);
-        static void OnInspector(Registry* registry, const Entity entity);
+        ig::Json& Serialize(ig::Json& archive) const;
+        const ig::Json& Deserialize(const ig::Json& archive);
+        static void OnInspector(ig::Registry* registry, const ig::Entity entity);
 
     public:
         float MovementPower = 25.f;

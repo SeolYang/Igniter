@@ -5,5 +5,4 @@
 namespace fe
 {
     using namespace ig::literals;
-    using namespace ig;
 }

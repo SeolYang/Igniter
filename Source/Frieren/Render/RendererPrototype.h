@@ -16,10 +16,10 @@ namespace ig
 
 namespace fe
 {
-    class RendererPrototype : public Renderer
+    class RendererPrototype : public ig::Renderer
     {
     public:
-        RendererPrototype(Window& window, RenderContext& renderContext);
+        RendererPrototype(ig::Window& window, ig::RenderContext& renderContext);
         RendererPrototype(const RendererPrototype&) = delete;
         RendererPrototype(RendererPrototype&&) noexcept = delete;
         ~RendererPrototype();
@@ -27,21 +27,21 @@ namespace fe
         RendererPrototype& operator=(const RendererPrototype&) = delete;
         RendererPrototype& operator=(RendererPrototype&&) noexcept = delete;
 
-        void PreRender(const LocalFrameIndex localFrameIdx) override;
-        void Render(const LocalFrameIndex localFrameIdx, World& world) override;
-        GpuSync PostRender(const LocalFrameIndex localFrameIdx) override;
+        void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
+        void Render(const ig::LocalFrameIndex localFrameIdx, ig::World& world) override;
+        ig::GpuSync PostRender(const ig::LocalFrameIndex localFrameIdx) override;
 
     private:
-        RenderContext& renderContext;
+        ig::RenderContext& renderContext;
 
-        Viewport mainViewport{};
-        Ptr<ShaderBlob> vs;
-        Ptr<ShaderBlob> ps;
-        Ptr<RootSignature> bindlessRootSignature;
-        Ptr<PipelineState> pso;
-        eastl::array<RenderResource<GpuTexture>, NumFramesInFlight> depthStencils;
-        eastl::array<RenderResource<GpuView>, NumFramesInFlight> dsvs;
-        
-        Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
+        ig::Viewport mainViewport{};
+        ig::Ptr<ig::ShaderBlob> vs;
+        ig::Ptr<ig::ShaderBlob> ps;
+        ig::Ptr<ig::RootSignature> bindlessRootSignature;
+        ig::Ptr<ig::PipelineState> pso;
+        eastl::array<ig::RenderResource<ig::GpuTexture>, ig::NumFramesInFlight> depthStencils;
+        eastl::array<ig::RenderResource<ig::GpuView>, ig::NumFramesInFlight> dsvs;
+
+        ig::Ptr<ig::TempConstantBufferAllocator> tempConstantBufferAllocator;
     };
 }    // namespace fe
