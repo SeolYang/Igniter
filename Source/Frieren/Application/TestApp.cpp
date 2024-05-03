@@ -21,7 +21,9 @@
 namespace fe
 {
     TestApp::TestApp(const ig::AppDesc& desc)
-        : Application(desc), renderer(ig::MakePtr<RendererPrototype>(ig::Igniter::GetWindow(), ig::Igniter::GetRenderContext())), world(ig::MakePtr<ig::World>())
+        : Application(desc)
+        , renderer(ig::MakePtr<RendererPrototype>(ig::Igniter::GetWindow(), ig::Igniter::GetRenderContext()))
+        , world(ig::MakePtr<ig::World>())
     {
         /* #sy_note 입력 매니저 테스트 */
         ig::InputManager& inputManager = ig::Igniter::GetInputManager();
@@ -156,7 +158,8 @@ namespace fe
         /************************************/
 
         /* #sy_note Game Mode 타입 메타 정보 테스트 */
-        gameSystem = std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>());
+        gameSystem =
+            std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>());
         /************************************/
 
         // Json dumpedWorld{};
@@ -175,20 +178,20 @@ namespace fe
         gameSystem->Update(deltaTime, *world);
     }
 
-    void TestApp::PreRender(const ig::LocalFrameIndex localFrameIdx) 
+    void TestApp::PreRender(const ig::LocalFrameIndex localFrameIdx)
     {
         renderer->SetWorld(world.get());
         renderer->PreRender(localFrameIdx);
     }
 
-    void TestApp::Render(const ig::LocalFrameIndex localFrameIdx)
+    ig::GpuSync TestApp::Render(const ig::LocalFrameIndex localFrameIdx)
     {
-        renderer->Render(localFrameIdx);
+        return renderer->Render(localFrameIdx, {});
     }
 
-    ig::GpuSync TestApp::PostRender(const ig::LocalFrameIndex localFrameIdx)
+    void TestApp::PostRender(const ig::LocalFrameIndex localFrameIdx)
     {
-        return renderer->PostRender(localFrameIdx);
+        renderer->PostRender(localFrameIdx);
     }
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)

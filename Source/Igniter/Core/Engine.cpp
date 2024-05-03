@@ -121,12 +121,12 @@ namespace ig
                 localFrameSyncs[localFrameIdx].WaitOnCpu();
                 renderContext->PreRender(localFrameIdx);
                 application.PreRender(localFrameIdx);
+                imguiRenderer->SetImGuiCanvas(imguiCanvas);
             }
 
             /************* Render *************/
             {
                 // #sy_todo 렌더러 인터페이스 및 렌더러 독립 (어플리케이션 단으로 이동/스왑 체인은 RenderContext로 이동)
-                application.Render(localFrameIdx);
                 // #sy_note 어플리케이션 렌더러-ImGui 렌더러 간의 큐 동기화는?
                 // main gfx에서 하나 만들어서 수동으로 동기화?
                 // swapchain에 가장 마지막으로 접근하는 queue가 어떤 것 인지 알 수 있어야 한다..
@@ -147,12 +147,16 @@ namespace ig
                 // guarantees that the first workload (A) finishes before the second workload (B).
                 // 가장 마지막 제안을 수용하는게 그나마 현실적이면서 가장 간단한 방법인 것 같긴 하다..
                 // 아니면 렌더 그래프를 만들던가! -> 웬만하면 피하고 싶음!
-                imguiRenderer->Render(localFrameIdx, imguiCanvas);
+                GpuSync appSync[] {application.Render(localFrameIdx)};
+                GpuSync imguiSync = imguiRenderer->Render(localFrameIdx, appSync); 
+                localFrameSyncs[localFrameIdx]  = imguiSync ? imguiSync : appSync[0];
+                // imgui가 있을때는 imgui의 post render를 통해 main gfx queue와 동기화?
+                // Post Render를 통해서 GpuSync span을 전달해서, 다른 렌더 패스들과 동기화가 가능하도록?
             }
 
             /*********** Post-Render ***********/
             {
-                localFrameSyncs[localFrameIdx] = application.PostRender(localFrameIdx);
+                application.PostRender(localFrameIdx);
                 renderContext->PostRender(localFrameIdx);
             }
 

@@ -17,9 +17,7 @@
 namespace ig
 {
     ImGuiRenderer::ImGuiRenderer(Window& window, RenderContext& renderContext)
-        : renderContext(renderContext)
-        , mainSrv(renderContext.CreateGpuView(EGpuViewType::ShaderResourceView))
-        , gpuViewManager(MakePtr<GpuViewManager>(renderContext.GetRenderDevice()))
+        : renderContext(renderContext), mainSrv(renderContext.CreateGpuView(EGpuViewType::ShaderResourceView))
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -55,47 +53,49 @@ namespace ig
         renderContext.DestroyGpuView(mainSrv);
     }
 
-    void ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx, ImGuiCanvas* canvas)
+    GpuSync ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx, const std::span<GpuSync> syncs)
     {
         /* #sy_note Backbuffer의 최종 상태가 ImGuiRenderer에 의해 결정 되는게 아니도록 수정해야함.. */
         ZoneScoped;
-        ImGui_ImplDX12_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
 
         if (canvas != nullptr)
         {
+            CommandContext& cmdCtx = commandContexts[localFrameIdx];
+            cmdCtx.Begin();
+            ImGui_ImplDX12_NewFrame();
+            ImGui_ImplWin32_NewFrame();
+            ImGui::NewFrame();
+
             canvas->OnImGui();
-        }
-        ImGui::Render();
+            ImGui::Render();
 
-        CommandContext& cmdCtx = commandContexts[localFrameIdx];
-        cmdCtx.Begin();
-        Swapchain& swapchain = renderContext.GetSwapchain();
-        GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
-        const GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
-        cmdCtx.SetRenderTarget(*backBufferRtvPtr);
-        cmdCtx.SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
+            Swapchain& swapchain = renderContext.GetSwapchain();
+            GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
+            const GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
+            cmdCtx.SetRenderTarget(*backBufferRtvPtr);
+            cmdCtx.SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
 
-        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx.GetNative());
+            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx.GetNative());
 
-        if (canvas != nullptr)
-        {
             cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
                 D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
-        }
-        else
-        {
-            cmdCtx.AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+
+            cmdCtx.FlushBarriers();
+            cmdCtx.End();
+
+            CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+
+            for (GpuSync& sync : syncs)
+            {
+                mainGfxQueue.SyncWith(sync);
+            }
+
+            CommandContext* cmdCtxPtrs[]{&cmdCtx};
+            mainGfxQueue.ExecuteContexts(cmdCtxPtrs);
+            return mainGfxQueue.MakeSync();
         }
 
-        cmdCtx.FlushBarriers();
-        cmdCtx.End();
-
-        CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        CommandContext* cmdCtxPtrs[]{&cmdCtx};
-        mainGfxQueue.ExecuteContexts(cmdCtxPtrs);
+        return {};
     }
 
     void ImGuiRenderer::SetupDefaultTheme()

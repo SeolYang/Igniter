@@ -28,11 +28,11 @@ namespace fe
         RendererPrototype& operator=(RendererPrototype&&) noexcept = delete;
 
         /* Scene Data 설정 같은 방식으로 개선할 것! */
-        void SetWorld(ig::World* newWorld) { this->world = newWorld;}
+        void SetWorld(ig::World* newWorld) { this->world = newWorld; }
 
         void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
-        void Render(const ig::LocalFrameIndex localFrameIdx) override;
-        ig::GpuSync PostRender(const ig::LocalFrameIndex localFrameIdx) override;
+        ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx, const std::span<ig::GpuSync> syncs) override;
+        void PostRender([[maybe_unused]] const ig::LocalFrameIndex localFrameIdx) override {}
 
     private:
         ig::World* world = nullptr;

@@ -107,7 +107,7 @@ namespace fe
         tempConstantBufferAllocator->Reset(localFrameIdx);
     }
 
-    void RendererPrototype::Render(const ig::LocalFrameIndex localFrameIdx)
+    ig::GpuSync RendererPrototype::Render(const ig::LocalFrameIndex localFrameIdx, [[maybe_unused]] const std::span<ig::GpuSync> syncs)
     {
         if (world != nullptr)
         {
@@ -195,12 +195,9 @@ namespace fe
 
             ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx};
             mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
+            return mainGfxQueue.MakeSync();
         }
-    }
 
-    ig::GpuSync RendererPrototype::PostRender([[maybe_unused]] const ig::LocalFrameIndex localFrameIdx)
-    {
-        ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        return mainGfxQueue.MakeSync();
+        return {};
     }
 }    // namespace fe

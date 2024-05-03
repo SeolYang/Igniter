@@ -23,8 +23,8 @@ namespace fe
         void PostUpdate(const float) override {}
 
         void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
-        void Render(const ig::LocalFrameIndex localFrameIdx) override;
-        ig::GpuSync PostRender(const ig::LocalFrameIndex localFrameIdx) override;
+        ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx) override;
+        void PostRender(const ig::LocalFrameIndex localFrameIdx) override;
 
         void SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem);
 
