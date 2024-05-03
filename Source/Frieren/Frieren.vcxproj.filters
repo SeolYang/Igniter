@@ -125,5 +125,8 @@
     <ClInclude Include="Render\RendererPrototype.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\EditorCamera.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

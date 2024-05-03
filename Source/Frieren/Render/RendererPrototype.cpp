@@ -52,7 +52,7 @@ namespace fe
             .Type = ig::EShaderType::Vertex,
             .OptimizationLevel = ig::EShaderOptimizationLevel::None};
 
-        const ig::ShaderCompileDesc psDesc{.SourcePath ="Assets/Shader/BasicPixelShader.hlsl"_fs, .Type = ig::EShaderType::Pixel};
+        const ig::ShaderCompileDesc psDesc{.SourcePath = "Assets/Shader/BasicPixelShader.hlsl"_fs, .Type = ig::EShaderType::Pixel};
 
         vs = ig::MakePtr<ig::ShaderBlob>(vsDesc);
         ps = ig::MakePtr<ig::ShaderBlob>(psDesc);
@@ -87,7 +87,7 @@ namespace fe
         }
         initialCmdCtx->End();
 
-        ig::CommandContext* cmdCtxs[1]{(ig::CommandContext*)initialCmdCtx};
+        ig::CommandContext* cmdCtxs[1]{(ig::CommandContext*) initialCmdCtx};
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
 #pragma endregion
@@ -104,93 +104,98 @@ namespace fe
 
     void RendererPrototype::PreRender(const ig::LocalFrameIndex localFrameIdx)
     {
-        tempConstantBufferAllocator->PreRender(localFrameIdx);
+        tempConstantBufferAllocator->Reset(localFrameIdx);
     }
 
-    void RendererPrototype::Render(const ig::LocalFrameIndex localFrameIdx, ig::World& world)
+    void RendererPrototype::Render(const ig::LocalFrameIndex localFrameIdx)
     {
-        ig::Registry& registry = world.GetRegistry();
-        ig::TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
-
-        PerFrameBuffer perFrameBuffer{};
-        auto cameraView = registry.view<ig::CameraComponent, ig::TransformComponent>();
-        IG_CHECK(cameraView.size_hint() == 1);
-        for (auto [entity, camera, transformData] : cameraView.each())
+        if (world != nullptr)
         {
-            /* #sy_todo Multiple Camera, Render Target per camera */
-            /* Column Vector: PVM; Row Vector: MVP  */
-            const ig::Matrix viewMatrix = transformData.CreateView();
-            const ig::Matrix projMatrix = camera.CreatePerspective();
-            perFrameBuffer.ViewProj = ig::ConvertToShaderSuitableForm(viewMatrix * projMatrix);
-        }
-        perFrameConstantBuffer.Write(perFrameBuffer);
+            ig::Registry& registry = world->GetRegistry();
+            ig::TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
 
-        ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
-        renderCmdCtx->Begin(pso.get());
-        {
-            auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
-            renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
-            renderCmdCtx->SetRootSignature(*bindlessRootSignature);
-
-            ig::Swapchain& swapchain = renderContext.GetSwapchain();
-            ig::GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
-            const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
-            renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-            renderCmdCtx->FlushBarriers();
-
-            renderCmdCtx->ClearRenderTarget(*backBufferRtvPtr);
-            ig::GpuView& dsv = *renderContext.Lookup(dsvs[localFrameIdx]);
-            renderCmdCtx->ClearDepth(dsv);
-            renderCmdCtx->SetRenderTarget(*backBufferRtvPtr, dsv);
-            renderCmdCtx->SetViewport(mainViewport);
-            renderCmdCtx->SetScissorRect(mainViewport);
-            renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-            ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
-
-            const auto renderableView = registry.view<ig::StaticMeshComponent, ig::TransformComponent>();
-            ig::GpuView* perFrameCbvPtr = renderContext.Lookup(perFrameConstantBuffer.GetConstantBufferView());
-            for (auto [entity, staticMeshComponent, transform] : renderableView.each())
+            PerFrameBuffer perFrameBuffer{};
+            auto cameraView = registry.view<ig::CameraComponent, ig::TransformComponent>();
+            IG_CHECK(cameraView.size_hint() == 1);
+            for (auto [entity, camera, transformData] : cameraView.each())
             {
-                if (staticMeshComponent.Mesh)
+                /* #sy_todo Multiple Camera, Render Target per camera */
+                /* Column Vector: PVM; Row Vector: MVP  */
+                const ig::Matrix viewMatrix = transformData.CreateView();
+                const ig::Matrix projMatrix = camera.CreatePerspective();
+                perFrameBuffer.ViewProj = ig::ConvertToShaderSuitableForm(viewMatrix * projMatrix);
+            }
+            perFrameConstantBuffer.Write(perFrameBuffer);
+
+            ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
+            auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
+            renderCmdCtx->Begin(pso.get());
+            {
+                auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
+                renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
+                renderCmdCtx->SetRootSignature(*bindlessRootSignature);
+
+                ig::Swapchain& swapchain = renderContext.GetSwapchain();
+                ig::GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
+                const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
+                renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT,
+                    D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+                renderCmdCtx->FlushBarriers();
+
+                renderCmdCtx->ClearRenderTarget(*backBufferRtvPtr);
+                ig::GpuView& dsv = *renderContext.Lookup(dsvs[localFrameIdx]);
+                renderCmdCtx->ClearDepth(dsv);
+                renderCmdCtx->SetRenderTarget(*backBufferRtvPtr, dsv);
+                renderCmdCtx->SetViewport(mainViewport);
+                renderCmdCtx->SetScissorRect(mainViewport);
+                renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+                ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+
+                const auto renderableView = registry.view<ig::StaticMeshComponent, ig::TransformComponent>();
+                ig::GpuView* perFrameCbvPtr = renderContext.Lookup(perFrameConstantBuffer.GetConstantBufferView());
+                for (auto [entity, staticMeshComponent, transform] : renderableView.each())
                 {
-                    ig::StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
-                    ig::GpuBuffer* indexBufferPtr = renderContext.Lookup(staticMeshPtr->GetIndexBuffer());
-                    ig::GpuView* vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
-                    renderCmdCtx->SetIndexBuffer(*indexBufferPtr);
+                    if (staticMeshComponent.Mesh)
                     {
-                        ig::TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator->Allocate<PerObjectBuffer>(localFrameIdx);
-                        ig::GpuView* perObjectCBViewPtr = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
-                        const auto perObjectBuffer = PerObjectBuffer{.LocalToWorld = ig::ConvertToShaderSuitableForm(transform.CreateTransformation())};
-                        perObjectConstantBuffer.Write(perObjectBuffer);
+                        ig::StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
+                        ig::GpuBuffer* indexBufferPtr = renderContext.Lookup(staticMeshPtr->GetIndexBuffer());
+                        ig::GpuView* vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
+                        renderCmdCtx->SetIndexBuffer(*indexBufferPtr);
+                        {
+                            ig::TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator->Allocate<PerObjectBuffer>(localFrameIdx);
+                            ig::GpuView* perObjectCBViewPtr = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
+                            const auto perObjectBuffer =
+                                PerObjectBuffer{.LocalToWorld = ig::ConvertToShaderSuitableForm(transform.CreateTransformation())};
+                            perObjectConstantBuffer.Write(perObjectBuffer);
 
-                        /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
-                        ig::Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
-                        ig::Texture* diffuseTexPtr = assetManager.Lookup(materialPtr->GetDiffuse());
-                        ig::GpuView* diffuseTexSrvPtr = renderContext.Lookup(diffuseTexPtr->GetShaderResourceView());
-                        ig::GpuView* diffuseTexSamplerPtr = renderContext.Lookup(diffuseTexPtr->GetSampler());
+                            /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
+                            ig::Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
+                            ig::Texture* diffuseTexPtr = assetManager.Lookup(materialPtr->GetDiffuse());
+                            ig::GpuView* diffuseTexSrvPtr = renderContext.Lookup(diffuseTexPtr->GetShaderResourceView());
+                            ig::GpuView* diffuseTexSamplerPtr = renderContext.Lookup(diffuseTexPtr->GetSampler());
 
-                        const BasicRenderResources params{.VertexBufferIdx = vertexBufferSrvPtr->Index,
-                            .PerFrameBufferIdx = perFrameCbvPtr->Index,
-                            .PerObjectBufferIdx = perObjectCBViewPtr->Index,
-                            .DiffuseTexIdx = diffuseTexSrvPtr->Index,
-                            .DiffuseTexSamplerIdx = diffuseTexSamplerPtr->Index};
+                            const BasicRenderResources params{.VertexBufferIdx = vertexBufferSrvPtr->Index,
+                                .PerFrameBufferIdx = perFrameCbvPtr->Index,
+                                .PerObjectBufferIdx = perObjectCBViewPtr->Index,
+                                .DiffuseTexIdx = diffuseTexSrvPtr->Index,
+                                .DiffuseTexSamplerIdx = diffuseTexSamplerPtr->Index};
 
-                        renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+                            renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+                        }
+
+                        const ig::StaticMesh::Desc& snapshot = staticMeshPtr->GetSnapshot();
+                        const ig::StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
+                        renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                     }
-
-                    const ig::StaticMesh::Desc& snapshot = staticMeshPtr->GetSnapshot();
-                    const ig::StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
-                    renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                 }
             }
-        }
-        renderCmdCtx->End();
+            renderCmdCtx->End();
 
-        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)renderCmdCtx};
-        mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
+            ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx};
+            mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
+        }
     }
 
     ig::GpuSync RendererPrototype::PostRender([[maybe_unused]] const ig::LocalFrameIndex localFrameIdx)

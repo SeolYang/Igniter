@@ -29,7 +29,7 @@ namespace ig
     {
         for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            PreRender(localFrameIdx);
+            Reset(localFrameIdx);
             renderContext.DestroyBuffer(buffers[localFrameIdx]);
         }
     }
@@ -58,7 +58,7 @@ namespace ig
         return TempConstantBuffer{allocatedViews[localFrameIdx].back(), bufferPtr->Map(offset)};
     }
 
-    void TempConstantBufferAllocator::PreRender(const LocalFrameIndex localFrameIdx)
+    void TempConstantBufferAllocator::Reset(const LocalFrameIndex localFrameIdx)
     {
         UniqueLock lock{mutexes[localFrameIdx]};
         for (const RenderResource<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])

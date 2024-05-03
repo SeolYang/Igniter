@@ -12,7 +12,7 @@ namespace ig
         /* Preparation */
         virtual void PreRender(const LocalFrameIndex localFrameIdx) = 0;
         /* Record Commands */
-        virtual void Render(const LocalFrameIndex localFrameIdx, World& world) = 0;
+        virtual void Render(const LocalFrameIndex localFrameIdx) = 0;
         /* Submit */
         virtual GpuSync PostRender(const LocalFrameIndex localFrameIdx) = 0;
     };

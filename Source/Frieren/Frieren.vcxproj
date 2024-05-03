@@ -58,6 +58,7 @@
     <ClInclude Include="ImGui\StaticMeshImportPanel.h" />
     <ClInclude Include="ImGui\StatisticsPanel.h" />
     <ClInclude Include="ImGui\TextureImportPanel.h" />
+    <ClInclude Include="Render\EditorCamera.h" />
     <ClInclude Include="Render\RendererPrototype.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

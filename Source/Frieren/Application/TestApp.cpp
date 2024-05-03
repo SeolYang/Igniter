@@ -177,12 +177,13 @@ namespace fe
 
     void TestApp::PreRender(const ig::LocalFrameIndex localFrameIdx) 
     {
+        renderer->SetWorld(world.get());
         renderer->PreRender(localFrameIdx);
     }
 
     void TestApp::Render(const ig::LocalFrameIndex localFrameIdx)
     {
-        renderer->Render(localFrameIdx, *world);
+        renderer->Render(localFrameIdx);
     }
 
     ig::GpuSync TestApp::PostRender(const ig::LocalFrameIndex localFrameIdx)

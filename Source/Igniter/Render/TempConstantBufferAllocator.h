@@ -56,7 +56,7 @@ namespace ig
         }
 
         // 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다. 프레임 시작시 반드시 호출해야함.
-        void PreRender(const LocalFrameIndex localFrameIdx);
+        void Reset(const LocalFrameIndex localFrameIdx);
 
         void InitBufferStateTransition(CommandContext& cmdCtx);
 
