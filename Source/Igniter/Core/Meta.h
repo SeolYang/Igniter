@@ -11,7 +11,9 @@ namespace ig::meta
     constexpr inline entt::hashed_string ComponentProperty = "Component"_hs;
     constexpr inline entt::hashed_string AddComponentFunc = "AddComponent"_hs;
     constexpr inline entt::hashed_string RemoveComponentFunc = "RemoveComponent"_hs;
-    constexpr inline entt::hashed_string OnInspectorFunc = "OnInspectorFunc"_hs;    // Signature:OnInspectorFunc(Registry*, Entity); // #sy_todo -> Ref<Registry>로 변경 할 것
+    constexpr inline entt::hashed_string OnInspectorFunc =
+        "OnInspectorFunc"_hs;    // Signature:OnInspectorFunc(Registry*, Entity); // #sy_todo -> Ref<Registry>로 변경 할 것
+    constexpr inline entt::hashed_string StartupAppClass = "StartupClass"_hs;
 }    // namespace ig::meta
 
 namespace ig
@@ -73,7 +75,7 @@ namespace ig
     {                                                                                              \
         T##_DefineMeta::T##_DefineMeta()                                                           \
         {                                                                                          \
-            entt::meta<T>().type(ig::TypeHash<T>);                                                     \
+            entt::meta<T>().type(ig::TypeHash<T>);                                                 \
             entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                                 \
             entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase());          \
             entt::meta<T>().prop(ig::meta::ComponentProperty);                                     \
@@ -82,6 +84,21 @@ namespace ig
             DefineMeta<T>();                                                                       \
         }                                                                                          \
         T##_DefineMeta T##_DefineMeta::_reg;                                                       \
+    }
+
+#define IG_DEFINE_TYPE_META_AS_STARTUP_APP(T)                                             \
+    namespace details::meta                                                               \
+    {                                                                                     \
+        T##_DefineMeta::T##_DefineMeta()                                                  \
+        {                                                                                 \
+            static_assert(std::is_base_of_v<class ig::Application, T>);                   \
+            IG_CHECK(!entt::resolve(StartupAppClass));                                    \
+            entt::meta<T>().type(StartupAppClass);                                        \
+            entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                        \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase()); \
+            DefineMeta<T>();                                                              \
+        }                                                                                 \
+        T##_DefineMeta T##_DefineMeta::_reg;                                              \
     }
 
 #define IG_SET_META_ON_INSPECTOR_FUNC(T, Func)                                           \
