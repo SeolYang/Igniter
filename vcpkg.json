@@ -15,7 +15,6 @@
     "nlohmann-json",
     "magic-enum",
     "spdlog",
-    "sdl2-mixer",
     "utfcpp",
     "catch2",
     "tracy",
@@ -23,13 +22,78 @@
     "entt",
     "crossguid",
     "xxhash",
-    "eastl"
+    "eastl",
+    "taskflow"
   ],
-  "builtin-baseline": "c8696863d371ab7f46e213d8f5ca923c4aef2a00",
+  "builtin-baseline": "943c5ef1c8f6b5e6ced092b242c8299caae2ff01",
   "overrides": [
     {
       "name": "imgui",
-      "version": "1.90"
+      "version": "1.90.2"
+    },
+    {
+      "name": "assimp",
+      "version": "5.4.0"
+    },
+    {
+      "name": "meshoptimizer",
+      "version": "0.20"
+    },
+    {
+      "name":"robin-hood-hashing",
+      "version":"3.11.5"
+    },
+    {
+      "name":"unordered-dense",
+      "version":"4.4.0"
+    },
+    {
+      "name":"nlohmann-json",
+      "version":"3.11.3"
+    },
+    {
+      "name":"magic-enum",
+      "version":"0.9.5"
+    },
+    {
+      "name":"spdlog",
+      "version":"1.14.1"
+    },
+    {
+      "name":"utfcpp",
+      "version":"4.0.5"
+    },
+    {
+      "name":"catch2",
+      "version":"3.5.4"
+    },
+    {
+      "name":"tracy",
+      "version":"0.10.0"
+    },
+    {
+      "name":"directxmath",
+      "version":"2024-02-14"
+    },
+    {
+      "name":"entt",
+      "version":"3.13.2"
+    },
+    {
+      "name":"crossguid",
+      "version":"2021-10-22"
+    },
+    {
+      "name":"xxhash",
+      "version":"0.8.2"
+    },
+    {
+      "name":"eastl",
+      "version":"3.21.12"
+    },
+    {
+      "name":"taskflow",
+      "version":"3.6.0"
     }
   ]
 }
