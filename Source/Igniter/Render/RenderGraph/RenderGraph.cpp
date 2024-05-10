@@ -66,8 +66,8 @@ namespace ig::experimental
         // #sy_todo 여기서 Taskflow를 사용해서 작업 Graph를 미리 생성
         IG_CHECK(dependencyLevels.size() == syncPoints.size());
 
-        const tf::Task renderTask = taskflow.placeholder().name("Render Task:Begin");
-        tf::Task prevSyncTask = renderTask;
+        const tf::Task renderBeginTask = taskflow.placeholder().name("Render Task:Begin");
+        tf::Task prevSyncTask = renderBeginTask;
         for (const size_t dependencyLevelIdx : views::iota(0Ui64, dependencyLevels.size()))
         {
             const details::RGDependencyLevel& dependencyLevel = dependencyLevels[dependencyLevelIdx];
@@ -123,12 +123,13 @@ namespace ig::experimental
                 }
 
                 asyncComputeSubmitTask.work(
-                    [this, renderTask, prevSyncTask]()
+                    [this, renderBeginTask, prevSyncTask]()
                     {
                         CommandQueue& asyncComputeQueue = renderContext.GetAsyncComputeQueue();
                         eastl::vector<CommandContext*> pendingCmdCtxList = ToVector(views::join(asyncComputePendingCmdCtxLists));
-                        if (renderTask != prevSyncTask)
+                        if (renderBeginTask != prevSyncTask)
                         {
+                            // #sy_note 이미 이전 직전 Sync Point에 의해 Main Gfx Queue에서 큐 간 동기화가 일어나기 때문에 그대로 사용
                             GpuSync prevSyncPoint = renderContext.GetMainGfxQueue().GetSync();
                             asyncComputeQueue.SyncWith(prevSyncPoint);
                         }
@@ -157,11 +158,11 @@ namespace ig::experimental
                 }
 
                 asyncCopySubmitTask.work(
-                    [this, renderTask, prevSyncTask]()
+                    [this, renderBeginTask, prevSyncTask]()
                     {
                         CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
                         eastl::vector<CommandContext*> pendingCmdCtxList = ToVector(views::join(asyncCopyPendingCmdCtxLists));
-                        if (renderTask != prevSyncTask)
+                        if (renderBeginTask != prevSyncTask)
                         {
                             GpuSync prevSyncPoint = renderContext.GetMainGfxQueue().GetSync();
                             asyncCopyQueue.SyncWith(prevSyncPoint);
@@ -188,39 +189,39 @@ namespace ig::experimental
                         mainGfxQueue.SyncWith(asyncCopySync);
                     }
 
-                    const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
-                    auto layoutTransitionCmdCtx =
-                        renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), syncPointName);
-                    layoutTransitionCmdCtx->Begin();
-                    /* #sy_todo 미리 RenderGraph에 만들어 놓기? */
-                    for (details::RGLayoutTransition layoutTransition : syncPoint.LayoutTransitions)
+                    // #sy_note Layout Transitions이 필요 없는 경우 단순히 큐 간의 동기화만 보장 하도록
+                    if (!syncPoint.LayoutTransitions.empty())
                     {
-                        IG_CHECK(layoutTransition.Before != layoutTransition.After);
+                        const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
+                        auto layoutTransitionCmdCtx =
+                            renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), syncPointName);
+                        layoutTransitionCmdCtx->Begin();
+                        /* #sy_todo 미리 RenderGraph에 만들어 놓기? */
+                        for (details::RGLayoutTransition layoutTransition : syncPoint.LayoutTransitions)
+                        {
+                            IG_CHECK(layoutTransition.Before != layoutTransition.After);
 
-                        RGTexture rgTexture = resourceInstances[layoutTransition.TextureHandle.Index].GetTexture();
-                        GpuTexture* gpuTexturePtr = renderContext.Lookup(rgTexture.Resources[localFrameIdx]);
-                        IG_CHECK(gpuTexturePtr != nullptr);
-                        layoutTransitionCmdCtx->AddPendingTextureBarrier(*gpuTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, layoutTransition.Before, layoutTransition.After,
-                            D3D12_BARRIER_SUBRESOURCE_RANGE{.IndexOrFirstMipLevel = layoutTransition.TextureHandle.Subresource});
+                            RGTexture rgTexture = resourceInstances[layoutTransition.TextureHandle.Index].GetTexture();
+                            GpuTexture* gpuTexturePtr = renderContext.Lookup(rgTexture.Resources[localFrameIdx]);
+                            IG_CHECK(gpuTexturePtr != nullptr);
+                            layoutTransitionCmdCtx->AddPendingTextureBarrier(*gpuTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, layoutTransition.Before, layoutTransition.After,
+                                D3D12_BARRIER_SUBRESOURCE_RANGE{.IndexOrFirstMipLevel = layoutTransition.TextureHandle.Subresource});
+                        }
+                        layoutTransitionCmdCtx->FlushBarriers();
+                        layoutTransitionCmdCtx->End();
+
+                        CommandContext* cmdCtxs[1]{(CommandContext*) layoutTransitionCmdCtx};
+                        mainGfxQueue.ExecuteContexts(cmdCtxs);
                     }
-                    layoutTransitionCmdCtx->FlushBarriers();
-                    layoutTransitionCmdCtx->End();
-
-                    CommandContext* cmdCtxs[1]{(CommandContext*) layoutTransitionCmdCtx};
-                    mainGfxQueue.ExecuteContexts(cmdCtxs);
                     mainGfxQueue.MakeSync();
                 });
 
             prevSyncTask = syncTask;
         }
 
-        // #sy_todo 여기서 frame end gpu sync를 어떻게 엔진으로 전달 할 것인지 고민하기.
-        // MakeSync -> GetSync? 마지막 Sync Point (마지막 DL -> 원상 복구)에서 결국 main gfx에서 MakeSync를 해주기 때문에 중복
-        tf::Task renderDoneTask = taskflow.emplace([this]() { lastFrameSync = renderContext.GetMainGfxQueue().GetSync(); }).name("Render Task:End");
-        renderDoneTask.succeed(prevSyncTask);
-
-        std::cout << taskflow.dump() << std::endl;
+        tf::Task renderEndTask = taskflow.emplace([this]() { lastFrameSync = renderContext.GetMainGfxQueue().GetSync(); }).name("Render Task:End");
+        renderEndTask.succeed(prevSyncTask);
     }
 
     RenderGraph::~RenderGraph()
