@@ -100,6 +100,7 @@ namespace ig::experimental
             UnorderedMap<RGResourceHandle, D3D12_BARRIER_LAYOUT> WriteDependencies{};
             ERGExecutableQueue ExecuteOn = ERGExecutableQueue::MainGfx;
             bool bHasNonExternalReadDependency = false;
+            uint16_t DependencyLevel = 0;
         };
 
         struct RGDependencyLevel

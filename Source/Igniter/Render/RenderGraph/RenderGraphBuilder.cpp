@@ -173,7 +173,7 @@ namespace ig::experimental
         resourceDependencies[targetBuf].Readers.emplace(renderPasses.size() - 1);
     }
 
-    void RenderGraphBuilder::SortPasses()
+    void RenderGraphBuilder::ResolveDependencies()
     {
         eastl::vector<bool> visited(renderPasses.size());
         eastl::vector<bool> onStack(renderPasses.size());
@@ -191,7 +191,8 @@ namespace ig::experimental
     void RenderGraphBuilder::DFS(const size_t renderPassIdx, const uint16_t depth, eastl::vector<bool>& visited, eastl::vector<bool>& onStack)
     {
         IG_CHECK(!onStack[renderPassIdx] && "Found circular dependency!");
-        if (!visited[renderPassIdx])
+        maxDependencyLevels = std::max(maxDependencyLevels, depth);
+        if (!visited[renderPassIdx] || renderPasses[renderPassIdx].DependencyLevel < depth)
         {
             details::RGRenderPassPackage& renderPassPackage = renderPasses[renderPassIdx];
             UnorderedSet<size_t> readDependentRenderPassIndices;
@@ -202,12 +203,6 @@ namespace ig::experimental
                 readDependentRenderPassIndices.insert(dependencyInfo.Readers.cbegin(), dependencyInfo.Readers.cend());
             }
 
-            if (dependencyLevels.empty() || dependencyLevels.size() <= depth)
-            {
-                dependencyLevels.emplace_back();
-                dependencyLevels.back().Level = depth;
-            }
-
             visited[renderPassIdx] = true;
             onStack[renderPassIdx] = true;
             for (const size_t readDependentRenderPassIdx : readDependentRenderPassIndices)
@@ -216,20 +211,38 @@ namespace ig::experimental
             }
             onStack[renderPassIdx] = false;
 
+            renderPasses[renderPassIdx].DependencyLevel = depth;
+        }
+    }
+
+    void RenderGraphBuilder::BuildDependencyLevels()
+    {
+        ++maxDependencyLevels;
+        dependencyLevels.resize(maxDependencyLevels);
+        for (const uint16_t dependencyLevelIdx : views::iota(0Ui16, maxDependencyLevels))
+        {
+            dependencyLevels[dependencyLevelIdx].Level = dependencyLevelIdx;
+        }
+
+        for (const size_t renderPassIdx : views::iota(0Ui64, renderPasses.size()))
+        {
+            const details::RGRenderPassPackage& renderPassPackage = renderPasses[renderPassIdx];
+            details::RGDependencyLevel& dependencyLevel = dependencyLevels[renderPassPackage.DependencyLevel];
+
             switch (renderPassPackage.ExecuteOn)
             {
                 case details::ERGExecutableQueue::MainGfx:
-                    dependencyLevels[depth].MainGfxQueueRenderPasses.emplace_back(renderPassIdx);
+                    dependencyLevel.MainGfxQueueRenderPasses.emplace_back(renderPassIdx);
                     break;
                 case details::ERGExecutableQueue::AsyncCompute:
-                    dependencyLevels[depth].AsyncComputeQueueRenderPasses.emplace_back(renderPassIdx);
+                    dependencyLevel.AsyncComputeQueueRenderPasses.emplace_back(renderPassIdx);
                     break;
                 case details::ERGExecutableQueue::AsyncCopy:
-                    dependencyLevels[depth].AsyncCopyQueueRenderPasses.emplace_back(renderPassIdx);
+                    dependencyLevel.AsyncCopyQueueRenderPasses.emplace_back(renderPassIdx);
                     break;
             }
 
-            dependencyLevels[depth].RenderPasses.emplace_back(renderPassIdx);
+            dependencyLevel.RenderPasses.emplace_back(renderPassIdx);
         }
     }
 
@@ -317,51 +330,9 @@ namespace ig::experimental
 
     Ptr<RenderGraph> RenderGraphBuilder::Compile()
     {
-        SortPasses();
-        for (const auto& dependencyLevel : dependencyLevels)
-        {
-            IG_LOG(RenderGraphBuilder, Debug, "Dependency Level: {}", dependencyLevel.Level);
-            IG_LOG(RenderGraphBuilder, Debug, "Main Gfx Queue: ");
-            for (const size_t renderPassIdx : dependencyLevel.MainGfxQueueRenderPasses)
-            {
-                IG_LOG(RenderGraphBuilder, Trace, "{}", renderPasses[renderPassIdx].RenderPassPtr->GetName());
-            }
-
-            IG_LOG(RenderGraphBuilder, Debug, "Async Compute Queue: ");
-            for (const size_t renderPassIdx : dependencyLevel.AsyncComputeQueueRenderPasses)
-            {
-                IG_LOG(RenderGraphBuilder, Trace, "{}", renderPasses[renderPassIdx].RenderPassPtr->GetName());
-            }
-
-            IG_LOG(RenderGraphBuilder, Debug, "Async Copy Queue: ");
-            for (const size_t renderPassIdx : dependencyLevel.AsyncCopyQueueRenderPasses)
-            {
-                IG_LOG(RenderGraphBuilder, Trace, "{}", renderPasses[renderPassIdx].RenderPassPtr->GetName());
-            }
-        }
-
+        ResolveDependencies();
+        BuildDependencyLevels();
         BuildSyncPoints();
-        for (size_t syncPointIdx : views::iota(0Ui64, syncPoints.size()))
-        {
-            const details::RGSyncPoint& syncPoint = syncPoints[syncPointIdx];
-            IG_LOG(RenderGraphBuilder, Debug, "DL#{}->DL#{}", syncPointIdx, (syncPointIdx + 1) % syncPoints.size());
-            if (syncPoint.bSyncWithAsyncComputeQueue)
-            {
-                IG_LOG(RenderGraphBuilder, Trace, "* Sync with Async Compute Queue");
-            }
-            if (syncPoint.bSyncWithAsyncCopyQueue)
-            {
-                IG_LOG(RenderGraphBuilder, Trace, "* Sync with Async Compute Queue");
-            }
-
-            for (const details::RGLayoutTransition& layoutTransition : syncPoint.LayoutTransitions)
-            {
-                const String resourceName = resources[layoutTransition.TextureHandle.Index].GetTextureDesc(renderContext).DebugName;
-                IG_LOG(RenderGraphBuilder, Trace, "{}.Subresource:{} = {}  ->  {}", resourceName, layoutTransition.TextureHandle.Subresource,
-                    layoutTransition.Before, layoutTransition.After);
-            }
-        }
-
         return MakePtr<RenderGraph>(*this);
     }
 }    // namespace ig::experimental

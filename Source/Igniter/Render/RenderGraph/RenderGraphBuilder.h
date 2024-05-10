@@ -70,8 +70,9 @@ namespace ig::experimental
         void ReadBuffer(const RGResourceHandle targetBuf);
 
     private:
-        void SortPasses();
+        void ResolveDependencies();
         void DFS(const size_t renderPassIdx, const uint16_t depth, eastl::vector<bool>& visited, eastl::vector<bool>& onStack);
+        void BuildDependencyLevels();
         void BuildSyncPoints();
 
     private:
@@ -83,6 +84,7 @@ namespace ig::experimental
         /* 하나의 원본 핸들이 아니라, 각 Subresource나 버전별로 관리 */
         UnorderedMap<RGResourceHandle, ResourceDependency> resourceDependencies{};
 
+        uint16_t maxDependencyLevels{0};
         eastl::vector<details::RGDependencyLevel> dependencyLevels{};
         eastl::vector<details::RGSyncPoint> syncPoints{};
     };
