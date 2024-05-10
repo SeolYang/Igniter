@@ -28,7 +28,6 @@ namespace fe
         uint32_t DiffuseTexIdx;
         uint32_t DiffuseTexSamplerIdx;
     };
-#pragma endregion
 
     struct PerFrameBuffer
     {
@@ -107,7 +106,7 @@ namespace fe
         tempConstantBufferAllocator->Reset(localFrameIdx);
     }
 
-    ig::GpuSync RendererPrototype::Render(const ig::LocalFrameIndex localFrameIdx, [[maybe_unused]] const std::span<ig::GpuSync> syncs)
+    ig::GpuSync RendererPrototype::Render(const ig::LocalFrameIndex localFrameIdx)
     {
         if (world != nullptr)
         {

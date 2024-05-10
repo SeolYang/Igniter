@@ -38,7 +38,7 @@ namespace fe
                             return std::make_pair(entity, formattedName);
                         });
 
-                    std::vector<std::pair<ig::Entity, std::string>> entityNames{ig::ToVector(entityView | validEntityView | entityNameView)};
+                    eastl::vector<std::pair<ig::Entity, std::string>> entityNames{ig::ToVector(entityView | validEntityView | entityNameView)};
                     std::sort(entityNames.begin(), entityNames.end(), [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 
                     constexpr ImGuiTreeNodeFlags TreeNodeBaseFlags =

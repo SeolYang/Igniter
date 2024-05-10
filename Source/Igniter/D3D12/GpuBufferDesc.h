@@ -50,6 +50,7 @@ namespace ig
         return type == EGpuBufferType::ReadbackBuffer;
     }
 
+    /* #sy_todo 기본 값 설정 */
     class GpuBufferDesc final : public D3D12_RESOURCE_DESC1
     {
     public:

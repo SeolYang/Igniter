@@ -55,7 +55,8 @@ namespace ig
         CommandQueue& GetAsyncComputeQueue() { return asyncComputeQueue; }
         CommandQueue& GetAsyncCopyQueue() { return asyncComputeQueue; }
         CommandContextPool& GetMainGfxCommandContextPool() { return mainGfxCmdCtxPool; }
-        CommandContextPool& GetAsyncComputeCommandContextPool() { return mainGfxCmdCtxPool; }
+        CommandContextPool& GetAsyncComputeCommandContextPool() { return asyncComputeCmdCtxPool; }
+        CommandContextPool& GetAsyncCopyCommandContextPool() { return asyncCopyCmdCtxPool; }
         GpuUploader& GetGpuUploader() { return gpuUploader; }
         Swapchain& GetSwapchain() { return *swapchain; }
         auto& GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
@@ -112,6 +113,7 @@ namespace ig
         CommandQueue asyncComputeQueue;
         CommandContextPool asyncComputeCmdCtxPool;
         CommandQueue asyncCopyQueue;
+        CommandContextPool asyncCopyCmdCtxPool;
 
         ResourceManagePackage<GpuBuffer> bufferPackage;
         ResourceManagePackage<GpuTexture> texturePackage;

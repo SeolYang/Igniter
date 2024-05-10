@@ -11,8 +11,9 @@ namespace ig
         , asyncComputeQueue(*renderDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute))
         , asyncComputeCmdCtxPool(renderDevice, EQueueType::Compute)
         , asyncCopyQueue(*renderDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy))
+        , asyncCopyCmdCtxPool(renderDevice, EQueueType::Copy)
         , gpuViewManager(renderDevice)
-        , gpuUploader(renderDevice, asyncCopyQueue)
+        , gpuUploader(renderDevice)
         , swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight))
     {
     }
@@ -406,7 +407,7 @@ namespace ig
         }
     }
 
-    void RenderContext::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) 
+    void RenderContext::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         swapchain->Present();
     }

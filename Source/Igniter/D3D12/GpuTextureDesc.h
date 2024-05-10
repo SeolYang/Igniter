@@ -12,6 +12,7 @@ namespace ig
     class GpuTextureDesc final : public D3D12_RESOURCE_DESC1
     {
     public:
+        /* #sy_todo 기본 값 설정 */
         GpuTextureDesc() = default;
         virtual ~GpuTextureDesc() = default;
 
@@ -65,7 +66,10 @@ namespace ig
 
         void From(const D3D12_RESOURCE_DESC& desc);
 
+        /* #sy_todo https://learn.microsoft.com/en-us/windows/win32/direct3d12/d3d12calcsubresource 에 따르면 3D 텍스처의 Array Size는 항상 0*/
         size_t GetNumSubresources() const { return static_cast<size_t>(DepthOrArraySize) * MipLevels; }
+
+        uint32_t GetArraySize() const { return IsTexture3D() ? 0 : DepthOrArraySize; }
 
         /* #sy_note 간단한 format(비압축/RGBA)과 간단한 구조(Array, Slice)에 대한 subresource 정보만 생성 */
         std::vector<D3D12_SUBRESOURCE_DATA> GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const;

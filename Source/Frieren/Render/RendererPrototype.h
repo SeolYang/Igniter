@@ -16,7 +16,7 @@ namespace ig
 
 namespace fe
 {
-    class RendererPrototype : public ig::RenderPass
+    class RendererPrototype
     {
     public:
         RendererPrototype(ig::Window& window, ig::RenderContext& renderContext);
@@ -30,9 +30,8 @@ namespace fe
         /* Scene Data 설정 같은 방식으로 개선할 것! */
         void SetWorld(ig::World* newWorld) { this->world = newWorld; }
 
-        void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
-        ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx, const std::span<ig::GpuSync> syncs) override;
-        void PostRender([[maybe_unused]] const ig::LocalFrameIndex localFrameIdx) override {}
+        void PreRender(const ig::LocalFrameIndex localFrameIdx);
+        ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx);
 
     private:
         ig::World* world = nullptr;

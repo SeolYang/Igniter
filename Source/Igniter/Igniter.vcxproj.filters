@@ -70,6 +70,9 @@
     <Filter Include="Source\Application">
       <UniqueIdentifier>{86e27114-564a-4f57-83c7-4ce1d301eb54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Render\RenderGraph">
+      <UniqueIdentifier>{48fea955-4d7e-4c9c-8780-378173311ccb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h">
@@ -360,6 +363,18 @@
     <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
       <Filter>Thirdparty\WinPixEventRuntime</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RenderGraph\RenderPass.h">
+      <Filter>Source\Render\RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderGraph\RederGraphResource.h">
+      <Filter>Source\Render\RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderGraph\RenderGraphBuilder.h">
+      <Filter>Source\Render\RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderGraph\RenderGraph.h">
+      <Filter>Source\Render\RenderGraph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -530,6 +545,12 @@
     <ClCompile Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClCompile>
+    <ClCompile Include="Render\RenderGraph\RenderGraphBuilder.cpp">
+      <Filter>Source\Render\RenderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderGraph\RenderGraph.cpp">
+      <Filter>Source\Render\RenderGraph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
@@ -540,15 +561,14 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
-    <Natvis Include="..\Thirdparty\nlohmann_json\nlohmann_json.natvis" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
       <Filter>Thirdparty\DirectXTex</Filter>
     </None>
     <None Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl">
       <Filter>Thirdparty\SimpleMath</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\Thirdparty\EASTL\EASTL.natvis" />
   </ItemGroup>
 </Project>

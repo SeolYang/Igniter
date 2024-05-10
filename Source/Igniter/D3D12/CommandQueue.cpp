@@ -22,7 +22,7 @@ namespace ig
     {
         IG_CHECK(IsValid());
         auto toNative = views::all(cmdCtxs) | views::filter([](CommandContext* cmdCtx) { return cmdCtx != nullptr; }) | views::transform([](CommandContext* cmdCtx){ return &cmdCtx->GetNative();});
-        std::vector<CommandContext::NativeType*> natives = ToVector(toNative);
+        eastl::vector<CommandContext::NativeType*> natives = ToVector(toNative);
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
@@ -30,6 +30,14 @@ namespace ig
     {
         IG_CHECK(fence);
         const uint64_t syncPoint{syncCounter.fetch_add(1)};
+        IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
+        return GpuSync{*fence.Get(), syncPoint};
+    }
+
+    GpuSync CommandQueue::GetSync() 
+    {
+        IG_CHECK(fence);
+        const uint64_t syncPoint{syncCounter};
         IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
         return GpuSync{*fence.Get(), syncPoint};
     }

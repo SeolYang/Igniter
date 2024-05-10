@@ -5,10 +5,19 @@ namespace ig
 {
     class World;
     class GameSystem;
+    class TempConstantBufferAllocator;
 }    // namespace ig
+
+namespace ig::experimental
+{
+    class RenderGraph;
+}
 
 namespace fe
 {
+    class MainRenderPass;
+    class ImGuiPass;
+    class BackBufferPass;
     class RendererPrototype;
     class TestGameSystem;
     class EditorCanvas;
@@ -31,9 +40,14 @@ namespace fe
         ig::World* GetActiveWorld() { return world.get(); }
 
     private:
-        ig::Ptr<RendererPrototype> renderer;
         ig::Ptr<ig::World> world;
+        ig::Ptr<ig::TempConstantBufferAllocator> tempConstantBufferAllocator;
+        ig::Ptr<ig::experimental::RenderGraph> renderGraph;
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas> editorCanvas;
+
+        MainRenderPass* mainRenderPass = nullptr;
+        ImGuiPass* imGuiPass = nullptr;
+        BackBufferPass* backBufferPass = nullptr;
     };
 }    // namespace fe

@@ -52,6 +52,7 @@ namespace ig
         void CopyBuffer(GpuBuffer& src, const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes);
         void CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx,
             const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
+        void CopyTextureSimple(GpuTexture& src, GpuTexture& dst);
         void SetRootSignature(RootSignature& rootSignature);
         void SetDescriptorHeaps(const std::span<DescriptorHeap*> descriptorHeaps);
         void SetDescriptorHeap(DescriptorHeap& descriptorHeap);

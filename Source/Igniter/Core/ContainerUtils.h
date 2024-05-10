@@ -17,7 +17,7 @@ namespace ig
     template <std::ranges::range R>
     auto ToVector(R&& range)
     {
-        std::vector<std::ranges::range_value_t<R>> newVec{};
+        eastl::vector<std::ranges::range_value_t<R>> newVec{};
         if constexpr (std::ranges::sized_range<R>)
         {
             newVec.reserve(std::ranges::size(range));

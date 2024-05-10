@@ -100,7 +100,7 @@ namespace ig
     class GpuUploader final
     {
     public:
-        GpuUploader(RenderDevice& renderDevice, CommandQueue& asyncCopyQueue);
+        GpuUploader(RenderDevice& renderDevice);
         GpuUploader(const GpuUploader&) = delete;
         GpuUploader(GpuUploader&&) noexcept = delete;
         ~GpuUploader();
@@ -119,7 +119,7 @@ namespace ig
 
     private:
         RenderDevice& renderDevice;
-        CommandQueue& asyncCopyQueue;
+        Ptr<CommandQueue> copyQueue;
 
         constexpr static uint64_t InvalidThreadID = std::numeric_limits<uint64_t>::max();
         std::atomic_uint64_t reservedThreadID = InvalidThreadID;

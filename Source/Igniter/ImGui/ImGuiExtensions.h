@@ -64,4 +64,7 @@ namespace ig::ImGuiX
     void SeparatorText(const std::string_view text);
     bool EditColor3(const std::string_view label, Color& color);
     bool EditColor4(const std::string_view label, Color& color);
+
+    void SetupDefaultTheme();
+    
 }    // namespace ig::ImGuiX

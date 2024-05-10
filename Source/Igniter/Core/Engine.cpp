@@ -39,7 +39,7 @@ namespace ig
         //////////////////////// L2 ////////////////////////
         assetManager = MakePtr<AssetManager>(*renderContext);
         assetManager->RegisterEngineDefault();
-        imguiRenderer = MakePtr<ImGuiRenderer>(*window, *renderContext);
+        //imguiRenderer = MakePtr<ImGuiRenderer>(*window, *renderContext);
         ////////////////////////////////////////////////////
 
         bInitialized = true;
@@ -121,7 +121,7 @@ namespace ig
                 localFrameSyncs[localFrameIdx].WaitOnCpu();
                 renderContext->PreRender(localFrameIdx);
                 application.PreRender(localFrameIdx);
-                imguiRenderer->SetImGuiCanvas(imguiCanvas);
+                //imguiRenderer->SetImGuiCanvas(imguiCanvas);
             }
 
             /************* Render *************/
@@ -147,9 +147,9 @@ namespace ig
                 // guarantees that the first workload (A) finishes before the second workload (B).
                 // 가장 마지막 제안을 수용하는게 그나마 현실적이면서 가장 간단한 방법인 것 같긴 하다..
                 // 아니면 렌더 그래프를 만들던가! -> 웬만하면 피하고 싶음!
-                GpuSync appSync[] {application.Render(localFrameIdx)};
-                GpuSync imguiSync = imguiRenderer->Render(localFrameIdx, appSync); 
-                localFrameSyncs[localFrameIdx]  = imguiSync ? imguiSync : appSync[0];
+                localFrameSyncs[localFrameIdx] = application.Render(localFrameIdx);
+                // GpuSync imguiSync = imguiRenderer->Render(localFrameIdx, appSync);
+                //= imguiSync ? imguiSync : appSync;
                 // imgui가 있을때는 imgui의 post render를 통해 main gfx queue와 동기화?
                 // Post Render를 통해서 GpuSync span을 전달해서, 다른 렌더 패스들과 동기화가 가능하도록?
             }

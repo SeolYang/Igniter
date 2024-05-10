@@ -451,6 +451,7 @@ namespace ig
 
         ComPtr<D3D12MA::Allocation> allocation{};
         ComPtr<ID3D12Resource> resource{};
+        IG_CHECK(textureDesc.InitialLayout != D3D12_BARRIER_LAYOUT_UNDEFINED);
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc, textureDesc.InitialLayout,
                 clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))

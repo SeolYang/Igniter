@@ -182,6 +182,14 @@ namespace ig
         cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
     }
 
+    void CommandContext::CopyTextureSimple(GpuTexture& src, GpuTexture& dst) 
+    {
+        IG_CHECK(src);
+        IG_CHECK(dst);
+
+        cmdList->CopyResource(&dst.GetNative(), &src.GetNative());
+    }
+
     void CommandContext::SetRootSignature(RootSignature& rootSignature)
     {
         IG_CHECK(IsValid());

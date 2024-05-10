@@ -16,6 +16,7 @@
 
 namespace ig
 {
+    /* #sy_todo ImGuiContext로 독립? */
     ImGuiRenderer::ImGuiRenderer(Window& window, RenderContext& renderContext)
         : renderContext(renderContext), mainSrv(renderContext.CreateGpuView(EGpuViewType::ShaderResourceView))
     {
@@ -53,11 +54,10 @@ namespace ig
         renderContext.DestroyGpuView(mainSrv);
     }
 
-    GpuSync ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx, const std::span<GpuSync> syncs)
+    GpuSync ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx, GpuSync appSync)
     {
         /* #sy_note Backbuffer의 최종 상태가 ImGuiRenderer에 의해 결정 되는게 아니도록 수정해야함.. */
         ZoneScoped;
-
         if (canvas != nullptr)
         {
             CommandContext& cmdCtx = commandContexts[localFrameIdx];
@@ -84,12 +84,7 @@ namespace ig
             cmdCtx.End();
 
             CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-
-            for (GpuSync& sync : syncs)
-            {
-                mainGfxQueue.SyncWith(sync);
-            }
-
+            mainGfxQueue.SyncWith(appSync);
             CommandContext* cmdCtxPtrs[]{&cmdCtx};
             mainGfxQueue.ExecuteContexts(cmdCtxPtrs);
             return mainGfxQueue.MakeSync();

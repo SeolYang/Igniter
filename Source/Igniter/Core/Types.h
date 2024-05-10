@@ -31,25 +31,25 @@ namespace ig
     using Option = std::optional<T>;
 
     template <typename T>
-    Option<T> Some(T&& val)
+    inline Option<T> Some(T&& val)
     {
         return std::make_optional(std::forward<T>(val));
     }
 
     template <typename T>
-    Option<T> None()
+    inline Option<T> None()
     {
         return std::nullopt;
     }
 
     template <typename T>
-    Option<Ref<T>> Some(T& reference)
+    inline Option<Ref<T>> Some(T& reference)
     {
         return std::make_optional(std::ref(reference));
     }
 
     template <typename T>
-    Option<Ref<T>> Some(const T& reference)
+    inline Option<Ref<T>> Some(const T& reference)
     {
         return std::make_optional(std::cref(reference));
     }

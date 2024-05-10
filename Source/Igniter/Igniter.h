@@ -144,6 +144,11 @@ using namespace entt::literals;
 #include <EASTL/array.h>
 #include <EASTL/list.h>
 
+#pragma warning(push)
+#pragma warning(disable : 4456)
+#include <taskflow/taskflow.hpp>
+#pragma warning(pop)
+
 #include "Igniter/Core/Assert.h"
 #include "Igniter/Core/Types.h"
 #include "Igniter/Core/Format.h"

@@ -1,0 +1,282 @@
+#include "Igniter/Igniter.h"
+#include "Igniter/Core/ContainerUtils.h"
+#include "Igniter/Render/RenderGraph/RenderGraphBuilder.h"
+#include "Igniter/Render/RenderGraph/RenderGraph.h"
+
+namespace ig::experimental
+{
+    RenderGraph::RenderGraph(RenderGraphBuilder& builder) : renderContext(builder.renderContext)
+    {
+        renderPasses.resize(builder.renderPasses.size());
+        std::transform(builder.renderPasses.begin(), builder.renderPasses.end(), renderPasses.begin(),
+            [](details::RGRenderPassPackage& renderPassPackage) { return std::move(renderPassPackage.RenderPassPtr); });
+
+        dependencyLevels = std::move(builder.dependencyLevels);
+        syncPoints = std::move(builder.syncPoints);
+
+        resourceInstances.reserve(builder.resources.size());
+        for (const auto& resource : builder.resources)
+        {
+            /* #sy_todo 실제로 사용되지 않고있는 (No Writer/Readers) 자원의 경우 무시 */
+            if (resource.Type == details::ERGResourceType::Buffer)
+            {
+                RGBuffer newBuffer{};
+                if (resource.bIsExternal)
+                {
+                    newBuffer = std::get<RGBuffer>(resource.Resource);
+                }
+                else
+                {
+                    const GpuBufferDesc& desc = resource.GetBufferDesc(renderContext);
+                    for (auto& handle : newBuffer.Resources)
+                    {
+                        handle = renderContext.CreateBuffer(desc);
+                    }
+                }
+
+                resourceInstances.emplace_back(details::RGResourceInstance{
+                    .Type = details::ERGResourceType::Buffer, .Resource = newBuffer, .bIsExternal = resource.bIsExternal});
+            }
+            else
+            {
+                RGTexture newTexture{};
+                if (resource.bIsExternal)
+                {
+                    newTexture = std::get<RGTexture>(resource.Resource);
+                }
+                else
+                {
+                    const GpuTextureDesc& desc = resource.GetTextureDesc(renderContext);
+                    for (auto& handle : newTexture.Resources)
+                    {
+                        handle = renderContext.CreateTexture(desc);
+                    }
+                }
+
+                resourceInstances.emplace_back(details::RGResourceInstance{
+                    .Type = details::ERGResourceType::Texture, .Resource = newTexture, .bIsExternal = resource.bIsExternal});
+            }
+        }
+
+        for (auto& renderPass : renderPasses)
+        {
+            renderPass->PostCompile(*this);
+        }
+
+        // #sy_todo 여기서 Taskflow를 사용해서 작업 Graph를 미리 생성
+        IG_CHECK(dependencyLevels.size() == syncPoints.size());
+
+        const tf::Task renderTask = taskflow.placeholder().name("Render Task:Begin");
+        tf::Task prevSyncTask = renderTask;
+        for (const size_t dependencyLevelIdx : views::iota(0Ui64, dependencyLevels.size()))
+        {
+            const details::RGDependencyLevel& dependencyLevel = dependencyLevels[dependencyLevelIdx];
+
+            const String syncPointName{std::format("Sync DL {} -> DL {}", dependencyLevelIdx, (dependencyLevelIdx + 1) % dependencyLevels.size())};
+            tf::Task syncTask = taskflow.placeholder().name(syncPointName.ToStandard());
+
+            // QueueTask (vector<vector<Cmd Ctx>>) <- Render Pass (vector<Cmd Ctx>) <- Sub Render Pass (Cmd Ctx)
+            if (!dependencyLevel.MainGfxQueueRenderPasses.empty())
+            {
+                tf::Task mainGfxTask =
+                    taskflow.emplace([this]() { mainGfxPendingCmdCtxLists.clear(); }).name(std::format("DL#{}: Main Gfx", dependencyLevelIdx));
+                mainGfxTask.succeed(prevSyncTask);
+
+                // 여기서 mainGfxPendingCmdCtxList 통합해서 Execute
+                tf::Task mainGfxSubmitTask = taskflow.placeholder().name(std::format("DL#{}: Main Gfx Submit", dependencyLevelIdx));
+                for (const size_t renderPassIdx : dependencyLevel.MainGfxQueueRenderPasses)
+                {
+                    RenderPass& renderPass = *renderPasses[renderPassIdx];
+                    tf::Task renderPassTask = taskflow
+                                                  .emplace([&renderPass, this](tf::Subflow& renderPassSubflow)
+                                                      { renderPass.Execute(renderPassSubflow, mainGfxPendingCmdCtxLists.emplace_back()); })
+                                                  .name(std::format("DL#{}: {}", dependencyLevelIdx, renderPass.GetName()));
+                    renderPassTask.succeed(mainGfxTask);
+                    mainGfxSubmitTask.succeed(renderPassTask);
+                }
+
+                mainGfxSubmitTask.work(
+                    [this]()
+                    {
+                        eastl::vector<CommandContext*> pendingCmdCtxList = ToVector(views::join(mainGfxPendingCmdCtxLists));
+                        renderContext.GetMainGfxQueue().ExecuteContexts(pendingCmdCtxList);
+                    });
+                syncTask.succeed(mainGfxSubmitTask);
+            }
+
+            if (!dependencyLevel.AsyncComputeQueueRenderPasses.empty())
+            {
+                tf::Task asyncComputeTask = taskflow.emplace([this]() { asyncComputePendingCmdCtxLists.clear(); })
+                                                .name(std::format("DL#{}: Async Compute", dependencyLevelIdx));
+                asyncComputeTask.succeed(prevSyncTask);
+
+                tf::Task asyncComputeSubmitTask = taskflow.placeholder().name(std::format("DL#{}: Async Compute Submit", dependencyLevelIdx));
+                for (const size_t renderPassIdx : dependencyLevel.AsyncComputeQueueRenderPasses)
+                {
+                    RenderPass& renderPass = *renderPasses[renderPassIdx];
+                    tf::Task renderPassTask = taskflow
+                                                  .emplace([&renderPass, this](tf::Subflow& renderPassSubflow)
+                                                      { renderPass.Execute(renderPassSubflow, asyncComputePendingCmdCtxLists.emplace_back()); })
+                                                  .name(std::format("DL#{}: {}", dependencyLevelIdx, renderPass.GetName()));
+                    renderPassTask.succeed(asyncComputeTask);
+                    asyncComputeSubmitTask.succeed(renderPassTask);
+                }
+
+                asyncComputeSubmitTask.work(
+                    [this, renderTask, prevSyncTask]()
+                    {
+                        CommandQueue& asyncComputeQueue = renderContext.GetAsyncComputeQueue();
+                        eastl::vector<CommandContext*> pendingCmdCtxList = ToVector(views::join(asyncComputePendingCmdCtxLists));
+                        if (renderTask != prevSyncTask)
+                        {
+                            GpuSync prevSyncPoint = renderContext.GetMainGfxQueue().GetSync();
+                            asyncComputeQueue.SyncWith(prevSyncPoint);
+                        }
+                        asyncComputeQueue.ExecuteContexts(pendingCmdCtxList);
+                        asyncComputeQueue.MakeSync();
+                    });
+                syncTask.succeed(asyncComputeSubmitTask);
+            }
+
+            if (!dependencyLevel.AsyncCopyQueueRenderPasses.empty())
+            {
+                tf::Task asyncCopyTask =
+                    taskflow.emplace([this]() { asyncComputePendingCmdCtxLists.clear(); }).name(std::format("DL#{}: Async Copy", dependencyLevelIdx));
+                asyncCopyTask.succeed(prevSyncTask);
+
+                tf::Task asyncCopySubmitTask = taskflow.placeholder().name(std::format("DL#{}: Async Copy Submit", dependencyLevelIdx));
+                for (const size_t renderPassIdx : dependencyLevel.AsyncCopyQueueRenderPasses)
+                {
+                    RenderPass& renderPass = *renderPasses[renderPassIdx];
+                    tf::Task renderPassTask = taskflow
+                                                  .emplace([&renderPass, this](tf::Subflow& renderPassSubflow)
+                                                      { renderPass.Execute(renderPassSubflow, asyncCopyPendingCmdCtxLists.emplace_back()); })
+                                                  .name(std::format("DL#{}: {}", dependencyLevelIdx, renderPass.GetName()));
+                    renderPassTask.succeed(asyncCopyTask);
+                    asyncCopySubmitTask.succeed(renderPassTask);
+                }
+
+                asyncCopySubmitTask.work(
+                    [this, renderTask, prevSyncTask]()
+                    {
+                        CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
+                        eastl::vector<CommandContext*> pendingCmdCtxList = ToVector(views::join(asyncCopyPendingCmdCtxLists));
+                        if (renderTask != prevSyncTask)
+                        {
+                            GpuSync prevSyncPoint = renderContext.GetMainGfxQueue().GetSync();
+                            asyncCopyQueue.SyncWith(prevSyncPoint);
+                        }
+                        asyncCopyQueue.ExecuteContexts(pendingCmdCtxList);
+                        asyncCopyQueue.MakeSync();
+                    });
+                syncTask.succeed(asyncCopySubmitTask);
+            }
+
+            syncTask.work(
+                [this, syncPointIdx = dependencyLevelIdx, syncPointName]()
+                {
+                    CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+                    details::RGSyncPoint& syncPoint = syncPoints[syncPointIdx];
+                    if (syncPoint.bSyncWithAsyncComputeQueue)
+                    {
+                        GpuSync asyncComputeSync = renderContext.GetAsyncComputeQueue().GetSync();
+                        mainGfxQueue.SyncWith(asyncComputeSync);
+                    }
+                    if (syncPoint.bSyncWithAsyncCopyQueue)
+                    {
+                        GpuSync asyncCopySync = renderContext.GetAsyncCopyQueue().GetSync();
+                        mainGfxQueue.SyncWith(asyncCopySync);
+                    }
+
+                    const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
+                    auto layoutTransitionCmdCtx =
+                        renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), syncPointName);
+                    layoutTransitionCmdCtx->Begin();
+                    /* #sy_todo 미리 RenderGraph에 만들어 놓기? */
+                    for (details::RGLayoutTransition layoutTransition : syncPoint.LayoutTransitions)
+                    {
+                        IG_CHECK(layoutTransition.Before != layoutTransition.After);
+
+                        RGTexture rgTexture = resourceInstances[layoutTransition.TextureHandle.Index].GetTexture();
+                        GpuTexture* gpuTexturePtr = renderContext.Lookup(rgTexture.Resources[localFrameIdx]);
+                        IG_CHECK(gpuTexturePtr != nullptr);
+                        layoutTransitionCmdCtx->AddPendingTextureBarrier(*gpuTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, layoutTransition.Before, layoutTransition.After,
+                            D3D12_BARRIER_SUBRESOURCE_RANGE{.IndexOrFirstMipLevel = layoutTransition.TextureHandle.Subresource});
+                    }
+                    layoutTransitionCmdCtx->FlushBarriers();
+                    layoutTransitionCmdCtx->End();
+
+                    CommandContext* cmdCtxs[1]{(CommandContext*) layoutTransitionCmdCtx};
+                    mainGfxQueue.ExecuteContexts(cmdCtxs);
+                    mainGfxQueue.MakeSync();
+                });
+
+            prevSyncTask = syncTask;
+        }
+
+        // #sy_todo 여기서 frame end gpu sync를 어떻게 엔진으로 전달 할 것인지 고민하기.
+        // MakeSync -> GetSync? 마지막 Sync Point (마지막 DL -> 원상 복구)에서 결국 main gfx에서 MakeSync를 해주기 때문에 중복
+        tf::Task renderDoneTask = taskflow.emplace([this]() { lastFrameSync = renderContext.GetMainGfxQueue().GetSync(); }).name("Render Task:End");
+        renderDoneTask.succeed(prevSyncTask);
+
+        std::cout << taskflow.dump() << std::endl;
+    }
+
+    RenderGraph::~RenderGraph()
+    {
+        /* #sy_todo External Resource가 아니면 해제 */
+        for (details::RGResourceInstance& resourceInstance : resourceInstances)
+        {
+            if (resourceInstance.bIsExternal)
+            {
+                continue;
+            }
+
+            switch (resourceInstance.Type)
+            {
+                case details::ERGResourceType::Buffer:
+                    for (const auto handle : resourceInstance.GetBuffer().Resources)
+                    {
+                        renderContext.DestroyBuffer(handle);
+                    }
+                    break;
+
+                case details::ERGResourceType::Texture:
+                    for (const auto handle : resourceInstance.GetTexture().Resources)
+                    {
+                        renderContext.DestroyTexture(handle);
+                    }
+                    break;
+            }
+        }
+    }
+
+    // 2024/05/10 기존 Renderer 그대로 포팅해보고 테스트해보기..
+    GpuSync RenderGraph::Execute()
+    {
+        tf::Future<void> execution = executor.run(taskflow);
+        execution.wait();
+        return lastFrameSync;
+    }
+
+    RGBuffer RenderGraph::GetBuffer(const RGResourceHandle handle)
+    {
+        if (handle.Index >= resourceInstances.size() || resourceInstances[handle.Index].Type != details::ERGResourceType::Buffer)
+        {
+            return {};
+        }
+
+        return std::get<RGBuffer>(resourceInstances[handle.Index].Resource);
+    }
+
+    RGTexture RenderGraph::GetTexture(const RGResourceHandle handle)
+    {
+        if (handle.Index >= resourceInstances.size() || resourceInstances[handle.Index].Type != details::ERGResourceType::Texture)
+        {
+            return {};
+        }
+
+        return std::get<RGTexture>(resourceInstances[handle.Index].Resource);
+    }
+}    // namespace ig::experimental

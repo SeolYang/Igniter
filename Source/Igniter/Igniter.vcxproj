@@ -110,6 +110,10 @@
     <ClInclude Include="Render\GpuViewManager.h" />
     <ClInclude Include="Render\Common.h" />
     <ClInclude Include="Render\RenderContext.h" />
+    <ClInclude Include="Render\RenderGraph\RederGraphResource.h" />
+    <ClInclude Include="Render\RenderGraph\RenderGraph.h" />
+    <ClInclude Include="Render\RenderGraph\RenderGraphBuilder.h" />
+    <ClInclude Include="Render\RenderGraph\RenderPass.h" />
     <ClInclude Include="Render\RenderPass.h" />
     <ClInclude Include="Render\Swapchain.h" />
     <ClInclude Include="Render\TempConstantBufferAllocator.h" />
@@ -186,6 +190,8 @@
     <ClCompile Include="Render\GpuUploader.cpp" />
     <ClCompile Include="Render\GpuViewManager.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
+    <ClCompile Include="Render\RenderGraph\RenderGraph.cpp" />
+    <ClCompile Include="Render\RenderGraph\RenderGraphBuilder.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />
     <ClCompile Include="Render\TempConstantBufferAllocator.cpp" />
   </ItemGroup>
@@ -212,12 +218,11 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="..\Thirdparty\EASTL\EASTL.natvis" />
-    <Natvis Include="..\Thirdparty\nlohmann_json\nlohmann_json.natvis" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl" />
     <None Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\Thirdparty\EASTL\EASTL.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

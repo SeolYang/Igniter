@@ -28,6 +28,7 @@ namespace ig
 
         void ExecuteContexts(const std::span<CommandContext*> cmdCtxs);
         GpuSync MakeSync();
+        GpuSync GetSync();
         void SyncWith(GpuSync& sync);
 
     private:
