@@ -220,8 +220,6 @@ namespace ig::experimental
 
         tf::Task renderEndTask = taskflow.emplace([this]() { lastFrameSync = renderContext.GetMainGfxQueue().GetSync(); }).name("Render Task:End");
         renderEndTask.succeed(prevSyncTask);
-
-        std::cout << taskflow.dump() << std::endl;
     }
 
     RenderGraph::~RenderGraph()

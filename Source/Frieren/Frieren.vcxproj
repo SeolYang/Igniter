@@ -162,6 +162,7 @@
       <PrecompiledHeaderFile>Frieren/Frieren.h</PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

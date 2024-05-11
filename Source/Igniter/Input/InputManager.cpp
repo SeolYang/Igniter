@@ -288,6 +288,7 @@ namespace ig
 
     void InputManager::PostUpdate()
     {
+        ZoneScoped;
         for (const EInput input : processedInputs)
         {
             for (const Handle<Action, InputManager> actionHandle : actionSets[ToUnderlying(input)])
