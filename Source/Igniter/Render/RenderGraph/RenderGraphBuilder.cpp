@@ -93,7 +93,7 @@ namespace ig::experimental
 
             const size_t renderPassIdx = renderPasses.size() - 1;
             resourceDependencies[handle].Readers.emplace(renderPassIdx);
-            // -> Equivalent with !Owners.empty() || Writer != None
+            // -> Equivalent with Owners.empty() && Writer == None
             IG_CHECK(!resourceDependencies.contains(newHandle) && "Duplicated Write to same version of resource!");
             resourceDependencies[newHandle].Writer = renderPassIdx;
             resourceDependencies[newHandle].Layout = targetLayout;
@@ -114,7 +114,7 @@ namespace ig::experimental
 
         const size_t renderPassIdx = renderPasses.size() - 1;
         resourceDependencies[targetBuf].Readers.insert(renderPassIdx);
-
+        // -> Equivalent with Owners.empty() && Writer == None
         IG_CHECK(!resourceDependencies.contains(newHandle) && "Duplicated Write to same version of resource!");
         resourceDependencies[newHandle].Writer = renderPassIdx;
         renderPassPackage.WriteDependencies.emplace(newHandle);
@@ -317,11 +317,13 @@ namespace ig::experimental
             {
                 for (const RGResourceHandle handle : renderPasses[renderPassIdx].ReadDependencies)
                 {
-                    const D3D12_BARRIER_LAYOUT after = resourceDependencies[handle].Layout;
-                    if (after == D3D12_BARRIER_LAYOUT_UNDEFINED)
+                    if (resources[handle.Index].Type == details::ERGResourceType::Buffer)
                     {
                         continue;
                     }
+
+                    const D3D12_BARRIER_LAYOUT after = resourceDependencies[handle].Layout;
+                    IG_CHECK(after != D3D12_BARRIER_LAYOUT_UNDEFINED);
 
                     const RGResourceHandle versionLessHandle = handle.MakeVersionLess();
                     const D3D12_BARRIER_LAYOUT before = layoutTable[versionLessHandle];
@@ -335,11 +337,15 @@ namespace ig::experimental
 
                 for (const RGResourceHandle handle : renderPasses[renderPassIdx].WriteDependencies)
                 {
-                    const D3D12_BARRIER_LAYOUT after = resourceDependencies[handle].Layout;
-                    if (after == D3D12_BARRIER_LAYOUT_UNDEFINED)
+                    if (resources[handle.Index].Type == details::ERGResourceType::Buffer)
                     {
                         continue;
                     }
+
+                    const D3D12_BARRIER_LAYOUT after = resourceDependencies[handle].Layout;
+                    if (after == D3D12_BARRIER_LAYOUT_UNDEFINED)
+                        continue;
+                    IG_CHECK(after != D3D12_BARRIER_LAYOUT_UNDEFINED);
 
                     const RGResourceHandle versionLessHandle = handle.MakeVersionLess();
                     const D3D12_BARRIER_LAYOUT before = layoutTable[versionLessHandle];
