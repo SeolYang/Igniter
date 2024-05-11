@@ -386,6 +386,48 @@ namespace fe
         ig::experimental::RGTexture renderOutput;
     };
 
+    class DummyAsyncComputePass : public ig::experimental::RenderPass
+    {
+    public:
+        struct Input
+        {
+            ig::experimental::RGResourceHandle RenderOutput;
+        };
+
+    public:
+        DummyAsyncComputePass(const ig::String name, const Input input, const bool bShouldCreateResource = false)
+            : input(input), bCreateResource(bShouldCreateResource), ig::experimental::RenderPass(name)
+        {
+        }
+        ~DummyAsyncComputePass() override = default;
+
+        void Setup(ig::experimental::RenderGraphBuilder& builder) override
+        {
+            builder.ExecuteOnAsyncCompute();
+            if (!bCreateResource)
+            {
+                AfterRead = builder.ReadTexture(input.RenderOutput, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                return;
+            }
+
+            ig::GpuTextureDesc newDummyDesc{};
+            newDummyDesc.AsTexture2D(32, 32, 1, DXGI_FORMAT_R8_UNORM, true);
+            newDummyDesc.InitialLayout = D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS;
+            builder.WriteTexture(builder.CreateTexture(newDummyDesc), D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS);
+        }
+
+        void PostCompile(ig::experimental::RenderGraph&) override {}
+
+        void Execute([[maybe_unused]] tf::Subflow&, eastl::vector<ig::CommandContext*>&) override {}
+
+    private:
+        bool bCreateResource = false;
+        Input input;
+
+    public:
+        ig::experimental::RGResourceHandle AfterRead;
+    };
+
     TestApp::TestApp(const ig::AppDesc& desc)
         : Application(desc), tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(ig::Igniter::GetRenderContext()))
     {
@@ -393,8 +435,23 @@ namespace fe
         ig::RenderContext& renderContext = ig::Igniter::GetRenderContext();
         ig::experimental::RenderGraphBuilder builder{renderContext};
         mainRenderPass = &builder.AddPass<MainRenderPass>(renderContext, ig::Igniter::GetWindow(), *tempConstantBufferAllocator);
+
+        [[maybe_unused]] DummyAsyncComputePass& dummyPass0 =
+            builder.AddPass<DummyAsyncComputePass>("Dummy.0"_fs, DummyAsyncComputePass::Input{}, true);
+        [[maybe_unused]] DummyAsyncComputePass& dummyPass1 =
+            builder.AddPass<DummyAsyncComputePass>("Dummy.1"_fs, DummyAsyncComputePass::Input{}, true);
+
+        // 여기선 Read
+        [[maybe_unused]] DummyAsyncComputePass& dummyPass2 = builder.AddPass<DummyAsyncComputePass>(
+            "Dummy.2"_fs, DummyAsyncComputePass::Input{.RenderOutput = mainRenderPass->GetOutput().RenderOutput});
+
+        // 여기선 mainRenderPassOutput에 Write
         imGuiPass = &builder.AddPass<ImGuiPass>(
-            renderContext, ig::Igniter::GetWindow(), ImGuiPass::Input{.FinalRenderOutput = mainRenderPass->GetOutput().RenderOutput});
+            renderContext, ig::Igniter::GetWindow(), ImGuiPass::Input{.FinalRenderOutput = dummyPass2.AfterRead});
+
+        // 일반적으로 생각했을때 read가 먼저 일어나고 그 다음에 Write가 일어나면 되겠지만
+        // 현재로서는 구별 불가능.. << 2024/05/11 여기서 부터 생각해볼 것
+
         backBufferPass = &builder.AddPass<BackBufferPass>(
             renderContext, renderContext.GetSwapchain(), BackBufferPass::Input{.RenderOutput = imGuiPass->GetOutput().GuiRenderOutput});
         renderGraph = builder.Compile();

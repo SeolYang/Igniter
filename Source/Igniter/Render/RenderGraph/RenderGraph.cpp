@@ -72,7 +72,7 @@ namespace ig::experimental
         {
             const details::RGDependencyLevel& dependencyLevel = dependencyLevels[dependencyLevelIdx];
 
-            const String syncPointName{std::format("Sync DL {} -> DL {}", dependencyLevelIdx, (dependencyLevelIdx + 1) % dependencyLevels.size())};
+            const String syncPointName{std::format("Sync DL#{} -> DL#{}", dependencyLevelIdx, (dependencyLevelIdx + 1) % dependencyLevels.size())};
             tf::Task syncTask = taskflow.placeholder().name(syncPointName.ToStandard());
 
             // QueueTask (vector<vector<Cmd Ctx>>) <- Render Pass (vector<Cmd Ctx>) <- Sub Render Pass (Cmd Ctx)
@@ -167,6 +167,7 @@ namespace ig::experimental
                             GpuSync prevSyncPoint = renderContext.GetMainGfxQueue().GetSync();
                             asyncCopyQueue.SyncWith(prevSyncPoint);
                         }
+
                         asyncCopyQueue.ExecuteContexts(pendingCmdCtxList);
                         asyncCopyQueue.MakeSync();
                     });
@@ -190,30 +191,27 @@ namespace ig::experimental
                     }
 
                     // #sy_note Layout Transitions이 필요 없는 경우 단순히 큐 간의 동기화만 보장 하도록
-                    if (!syncPoint.LayoutTransitions.empty())
+                    const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
+                    auto layoutTransitionCmdCtx =
+                        renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), syncPointName);
+                    layoutTransitionCmdCtx->Begin();
+                    /* #sy_todo 미리 RenderGraph에 만들어 놓기? */
+                    for (details::RGLayoutTransition layoutTransition : syncPoint.LayoutTransitions)
                     {
-                        const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
-                        auto layoutTransitionCmdCtx =
-                            renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), syncPointName);
-                        layoutTransitionCmdCtx->Begin();
-                        /* #sy_todo 미리 RenderGraph에 만들어 놓기? */
-                        for (details::RGLayoutTransition layoutTransition : syncPoint.LayoutTransitions)
-                        {
-                            IG_CHECK(layoutTransition.Before != layoutTransition.After);
+                        IG_CHECK(layoutTransition.Before != layoutTransition.After);
 
-                            RGTexture rgTexture = resourceInstances[layoutTransition.TextureHandle.Index].GetTexture();
-                            GpuTexture* gpuTexturePtr = renderContext.Lookup(rgTexture.Resources[localFrameIdx]);
-                            IG_CHECK(gpuTexturePtr != nullptr);
-                            layoutTransitionCmdCtx->AddPendingTextureBarrier(*gpuTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, layoutTransition.Before, layoutTransition.After,
-                                D3D12_BARRIER_SUBRESOURCE_RANGE{.IndexOrFirstMipLevel = layoutTransition.TextureHandle.Subresource});
-                        }
-                        layoutTransitionCmdCtx->FlushBarriers();
-                        layoutTransitionCmdCtx->End();
-
-                        CommandContext* cmdCtxs[1]{(CommandContext*) layoutTransitionCmdCtx};
-                        mainGfxQueue.ExecuteContexts(cmdCtxs);
+                        RGTexture rgTexture = resourceInstances[layoutTransition.TextureHandle.Index].GetTexture();
+                        GpuTexture* gpuTexturePtr = renderContext.Lookup(rgTexture.Resources[localFrameIdx]);
+                        IG_CHECK(gpuTexturePtr != nullptr);
+                        layoutTransitionCmdCtx->AddPendingTextureBarrier(*gpuTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, layoutTransition.Before, layoutTransition.After,
+                            D3D12_BARRIER_SUBRESOURCE_RANGE{.IndexOrFirstMipLevel = layoutTransition.TextureHandle.Subresource});
                     }
+                    layoutTransitionCmdCtx->FlushBarriers();
+                    layoutTransitionCmdCtx->End();
+
+                    CommandContext* cmdCtxs[1]{(CommandContext*) layoutTransitionCmdCtx};
+                    mainGfxQueue.ExecuteContexts(cmdCtxs);
                     mainGfxQueue.MakeSync();
                 });
 
@@ -222,6 +220,8 @@ namespace ig::experimental
 
         tf::Task renderEndTask = taskflow.emplace([this]() { lastFrameSync = renderContext.GetMainGfxQueue().GetSync(); }).name("Render Task:End");
         renderEndTask.succeed(prevSyncTask);
+
+        std::cout << taskflow.dump() << std::endl;
     }
 
     RenderGraph::~RenderGraph()
@@ -253,7 +253,6 @@ namespace ig::experimental
         }
     }
 
-    // 2024/05/10 기존 Renderer 그대로 포팅해보고 테스트해보기..
     GpuSync RenderGraph::Execute()
     {
         tf::Future<void> execution = executor.run(taskflow);

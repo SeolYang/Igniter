@@ -83,22 +83,24 @@ namespace ig::experimental
             arraySize = desc.GetArraySize();
         }
 
-        RGResourceHandle subresourceHandleOrigin{.Index = targetTex.Index, .Version = static_cast<uint16_t>(targetTex.Version)};
-        RGResourceHandle subresourceHandle{.Index = targetTex.Index, .Version = static_cast<uint16_t>(targetTex.Version + 1)};
+        RGResourceHandle handle{.Index = targetTex.Index, .Version = static_cast<uint16_t>(targetTex.Version)};
+        RGResourceHandle newHandle{.Index = targetTex.Index, .Version = static_cast<uint16_t>(targetTex.Version + 1)};
         for (const RGTextureSubresouce subresource : subresources)
         {
             IG_CHECK(subresource.MipSlice < mipLevels);
             IG_CHECK(subresource.ArraySlice < arraySize || (subresource.ArraySlice == 0 && arraySize == 0));
-            subresourceHandle.Subresource = subresourceHandleOrigin.Subresource =
-                D3D12CalcSubresource(subresource.MipSlice, subresource.ArraySlice, 0, mipLevels, arraySize);
+            newHandle.Subresource = handle.Subresource = D3D12CalcSubresource(subresource.MipSlice, subresource.ArraySlice, 0, mipLevels, arraySize);
 
             const size_t renderPassIdx = renderPasses.size() - 1;
-            resourceDependencies[subresourceHandleOrigin].Readers.insert(renderPassIdx);
-            renderPassPackage.WriteDependencies[subresourceHandle] = targetLayout;
-            resourceDependencies[subresourceHandle].Writer = renderPassIdx;
+            resourceDependencies[handle].Readers.emplace(renderPassIdx);
+            // -> Equivalent with !Owners.empty() || Writer != None
+            IG_CHECK(!resourceDependencies.contains(newHandle) && "Duplicated Write to same version of resource!");
+            resourceDependencies[newHandle].Writer = renderPassIdx;
+            resourceDependencies[newHandle].Layout = targetLayout;
+            renderPassPackage.WriteDependencies.emplace(newHandle);
         }
 
-        return subresourceHandle;
+        return newHandle;
     }
 
     RGResourceHandle RenderGraphBuilder::WriteBuffer(const RGResourceHandle targetBuf)
@@ -107,18 +109,20 @@ namespace ig::experimental
         IG_CHECK(targetBuf.Index < resources.size());
         IG_CHECK(resources[targetBuf.Index].Type == details::ERGResourceType::Buffer);
 
-        const RGResourceHandle newVersionHandle{
+        const RGResourceHandle newHandle{
             .Index = targetBuf.Index, .Version = static_cast<uint16_t>(targetBuf.Version + 1), .Subresource = targetBuf.Subresource};
 
         const size_t renderPassIdx = renderPasses.size() - 1;
         resourceDependencies[targetBuf].Readers.insert(renderPassIdx);
-        renderPassPackage.WriteDependencies[newVersionHandle] = D3D12_BARRIER_LAYOUT_UNDEFINED;
-        resourceDependencies[newVersionHandle].Writer = renderPassIdx;
 
-        return newVersionHandle;
+        IG_CHECK(!resourceDependencies.contains(newHandle) && "Duplicated Write to same version of resource!");
+        resourceDependencies[newHandle].Writer = renderPassIdx;
+        renderPassPackage.WriteDependencies.emplace(newHandle);
+
+        return newHandle;
     }
 
-    void RenderGraphBuilder::ReadTexture(
+    RGResourceHandle RenderGraphBuilder::ReadTexture(
         const RGResourceHandle targetTex, const D3D12_BARRIER_LAYOUT targetLayout, const eastl::vector<RGTextureSubresouce>& subresources)
     {
         IG_CHECK(targetLayout != D3D12_BARRIER_LAYOUT_UNDEFINED);
@@ -146,72 +150,112 @@ namespace ig::experimental
             arraySize = desc.GetArraySize();
         }
 
-        RGResourceHandle subresourceHandle{.Index = targetTex.Index, .Version = targetTex.Version};
+        RGResourceHandle handle{.Index = targetTex.Index, .Version = targetTex.Version};
+        RGResourceHandle newHandle{.Index = targetTex.Index, .Version = static_cast<uint16_t>(targetTex.Version + 1)};
         for (const RGTextureSubresouce subresource : subresources)
         {
             IG_CHECK(subresource.MipSlice < mipLevels);
             IG_CHECK(subresource.ArraySlice < arraySize || (subresource.ArraySlice == 0 && arraySize == 0));
-            subresourceHandle.Subresource = D3D12CalcSubresource(subresource.MipSlice, subresource.ArraySlice, 0, mipLevels, arraySize);
-            renderPassPackage.ReadDependencies[subresourceHandle] = targetLayout;
-            IG_CHECK(resourceDependencies.contains(subresourceHandle));
-            resourceDependencies[subresourceHandle].Readers.emplace(renderPasses.size() - 1);
+            newHandle.Subresource = handle.Subresource = D3D12CalcSubresource(subresource.MipSlice, subresource.ArraySlice, 0, mipLevels, arraySize);
+
+            const size_t renderPassIdx = renderPasses.size() - 1;
+            resourceDependencies[handle].Readers.emplace(renderPassIdx);
+            IG_CHECK(!resourceDependencies[newHandle].HasWriter());
+            resourceDependencies[newHandle].Owners.emplace(renderPassIdx);
+            IG_CHECK(
+                resourceDependencies[newHandle].Layout == D3D12_BARRIER_LAYOUT_UNDEFINED || resourceDependencies[newHandle].Layout != targetLayout);
+            resourceDependencies[newHandle].Layout = targetLayout;
+            renderPassPackage.ReadDependencies.emplace(newHandle);
         };
+
+        newHandle.Subresource = 0;
+        return newHandle;
     }
 
-    void RenderGraphBuilder::ReadBuffer(const RGResourceHandle targetBuf)
+    RGResourceHandle RenderGraphBuilder::ReadBuffer(const RGResourceHandle targetBuf)
     {
         details::RGRenderPassPackage& renderPassPackage = renderPasses.back();
         IG_CHECK(targetBuf.Index < resources.size());
         IG_CHECK(resources[targetBuf.Index].Type == details::ERGResourceType::Buffer);
-        renderPassPackage.ReadDependencies[targetBuf] = D3D12_BARRIER_LAYOUT_UNDEFINED;
+
+        renderPassPackage.ReadDependencies.emplace(targetBuf);
         if (resources[targetBuf.Index].bIsExternal)
         {
             renderPassPackage.bHasNonExternalReadDependency = true;
         }
 
-        IG_CHECK(resourceDependencies.contains(targetBuf));
-        resourceDependencies[targetBuf].Readers.emplace(renderPasses.size() - 1);
+        RGResourceHandle newHandle{.Index = targetBuf.Index, .Version = static_cast<uint16_t>(targetBuf.Version + 1)};
+        const size_t renderPassIdx = renderPasses.size() - 1;
+        resourceDependencies[targetBuf].Readers.emplace(renderPassIdx);
+        IG_CHECK(!resourceDependencies[newHandle].HasWriter());
+        resourceDependencies[newHandle].Owners.emplace(renderPassIdx);
+
+        return newHandle;
     }
 
-    void RenderGraphBuilder::ResolveDependencies()
+    void RenderGraphBuilder::BuildAdjanceyList()
+    {
+        for (const auto& [handle, resourceDependency] : resourceDependencies)
+        {
+            for (const size_t owner : resourceDependency.Owners)
+            {
+                renderPasses[owner].AdjanceyRenderPasses.insert(resourceDependency.Readers.begin(), resourceDependency.Readers.end());
+            }
+
+            if (resourceDependency.HasWriter())
+            {
+                renderPasses[resourceDependency.Writer].AdjanceyRenderPasses.insert(
+                    resourceDependency.Readers.begin(), resourceDependency.Readers.end());
+            }
+        }
+    }
+
+    void RenderGraphBuilder::BuildTopologicalOrderedRenderPassIndices()
     {
         eastl::vector<bool> visited(renderPasses.size());
         eastl::vector<bool> onStack(renderPasses.size());
 
         for (size_t renderPassIdx : views::iota(0Ui64, renderPasses.size()))
         {
-            details::RGRenderPassPackage& renderPassPackage = renderPasses[renderPassIdx];
-            if (!renderPassPackage.bHasNonExternalReadDependency || renderPassPackage.ReadDependencies.empty())
-            {
-                DFS(renderPassIdx, 0, visited, onStack);
-            }
+            TopologicalSortDFS(renderPassIdx, visited, onStack);
         }
+
+        eastl::reverse(topologicalOrderedRenderPassIndices.begin(), topologicalOrderedRenderPassIndices.end());
     }
 
-    void RenderGraphBuilder::DFS(const size_t renderPassIdx, const uint16_t depth, eastl::vector<bool>& visited, eastl::vector<bool>& onStack)
+    void RenderGraphBuilder::TopologicalSortDFS(const size_t renderPassIdx, eastl::vector<bool>& visited, eastl::vector<bool>& onStack)
     {
         IG_CHECK(!onStack[renderPassIdx] && "Found circular dependency!");
-        maxDependencyLevels = std::max(maxDependencyLevels, depth);
-        if (!visited[renderPassIdx] || renderPasses[renderPassIdx].DependencyLevel < depth)
+        if (!visited[renderPassIdx])
         {
             details::RGRenderPassPackage& renderPassPackage = renderPasses[renderPassIdx];
-            UnorderedSet<size_t> readDependentRenderPassIndices;
-            for (const auto& [writeResourceHandle, layout] : renderPassPackage.WriteDependencies)
-            {
-                const ResourceDependency& dependencyInfo = resourceDependencies[writeResourceHandle];
-                IG_CHECK(dependencyInfo.Writer == renderPassIdx);
-                readDependentRenderPassIndices.insert(dependencyInfo.Readers.cbegin(), dependencyInfo.Readers.cend());
-            }
 
             visited[renderPassIdx] = true;
             onStack[renderPassIdx] = true;
-            for (const size_t readDependentRenderPassIdx : readDependentRenderPassIndices)
+            for (const size_t adjacentRenderPassIdx : renderPassPackage.AdjanceyRenderPasses)
             {
-                DFS(readDependentRenderPassIdx, depth + 1, visited, onStack);
+                TopologicalSortDFS(adjacentRenderPassIdx, visited, onStack);
             }
             onStack[renderPassIdx] = false;
 
-            renderPasses[renderPassIdx].DependencyLevel = depth;
+            topologicalOrderedRenderPassIndices.emplace_back(renderPassIdx);
+        }
+    }
+
+    void RenderGraphBuilder::CalculateDependencyLevels()
+    {
+        for (const size_t renderPassIdx : topologicalOrderedRenderPassIndices)
+        {
+            const details::RGRenderPassPackage& renderPassPackage = renderPasses[renderPassIdx];
+            for (const size_t adjacentRenderPassIdx : renderPassPackage.AdjanceyRenderPasses)
+            {
+                details::RGRenderPassPackage& adjacentRenderPassPackage = renderPasses[adjacentRenderPassIdx];
+                if (adjacentRenderPassPackage.DependencyLevel < renderPassPackage.DependencyLevel + 1)
+                {
+                    adjacentRenderPassPackage.DependencyLevel = renderPassPackage.DependencyLevel + 1;
+                    maxDependencyLevels = std::max(maxDependencyLevels, adjacentRenderPassPackage.DependencyLevel);
+                }
+            }
         }
     }
 
@@ -263,10 +307,6 @@ namespace ig::experimental
             }
         }
 
-        // DL#0 ### SP#0 ### DL#1 ### SP1 ### DL#2 ### SP-LAST
-        // Layout Table의 값과 비교해서 '다르다면' Layout Transition 추가
-        // 같으면 무시
-        // 만약 새로운 값이라면 Layout Table에 새롭게 추가만하기!
         for (size_t dependencyLevelIdx : views::iota(1Ui64, dependencyLevels.size()))
         {
             details::RGSyncPoint& syncPoint = syncPoints.emplace_back();
@@ -275,37 +315,39 @@ namespace ig::experimental
 
             for (const size_t renderPassIdx : dependencyLevels[dependencyLevelIdx].RenderPasses)
             {
-                for (const auto& [handle, layout] : renderPasses[renderPassIdx].ReadDependencies)
+                for (const RGResourceHandle handle : renderPasses[renderPassIdx].ReadDependencies)
                 {
-                    if (layout == D3D12_BARRIER_LAYOUT_UNDEFINED)
+                    const D3D12_BARRIER_LAYOUT after = resourceDependencies[handle].Layout;
+                    if (after == D3D12_BARRIER_LAYOUT_UNDEFINED)
                     {
                         continue;
                     }
 
                     const RGResourceHandle versionLessHandle = handle.MakeVersionLess();
                     const D3D12_BARRIER_LAYOUT before = layoutTable[versionLessHandle];
-                    if (before != layout)
+                    if (before != after)
                     {
                         syncPoint.LayoutTransitions.emplace_back(details::RGLayoutTransition{
-                            .TextureHandle = versionLessHandle, .Before = layoutTable[versionLessHandle], .After = layout});
-                        layoutTable[versionLessHandle] = layout;
+                            .TextureHandle = versionLessHandle, .Before = layoutTable[versionLessHandle], .After = after});
+                        layoutTable[versionLessHandle] = after;
                     }
                 }
 
-                for (const auto& [handle, layout] : renderPasses[renderPassIdx].WriteDependencies)
+                for (const RGResourceHandle handle : renderPasses[renderPassIdx].WriteDependencies)
                 {
-                    if (layout == D3D12_BARRIER_LAYOUT_UNDEFINED)
+                    const D3D12_BARRIER_LAYOUT after = resourceDependencies[handle].Layout;
+                    if (after == D3D12_BARRIER_LAYOUT_UNDEFINED)
                     {
                         continue;
                     }
 
                     const RGResourceHandle versionLessHandle = handle.MakeVersionLess();
                     const D3D12_BARRIER_LAYOUT before = layoutTable[versionLessHandle];
-                    if (before != layout)
+                    if (before != after)
                     {
                         syncPoint.LayoutTransitions.emplace_back(details::RGLayoutTransition{
-                            .TextureHandle = versionLessHandle, .Before = layoutTable[versionLessHandle], .After = layout});
-                        layoutTable[versionLessHandle] = layout;
+                            .TextureHandle = versionLessHandle, .Before = layoutTable[versionLessHandle], .After = after});
+                        layoutTable[versionLessHandle] = after;
                     }
                 }
             }
@@ -330,9 +372,35 @@ namespace ig::experimental
 
     Ptr<RenderGraph> RenderGraphBuilder::Compile()
     {
-        ResolveDependencies();
+        BuildAdjanceyList();
+        for (const auto& renderPassPackage : renderPasses)
+        {
+            std::cout << std::format("{}: ", renderPassPackage.RenderPassPtr->GetName());
+            for (const auto& adjacentPassIdx : renderPassPackage.AdjanceyRenderPasses)
+            {
+                std::cout << std::format("{}, ", renderPasses[adjacentPassIdx].RenderPassPtr->GetName());
+            }
+            std::cout << '\n';
+        }
+        BuildTopologicalOrderedRenderPassIndices();
+        std::cout << "* Topological Sorted" << std::endl;
+        for (const auto& renderPassIdx : topologicalOrderedRenderPassIndices)
+        {
+            const auto& renderPassPackage = renderPasses[renderPassIdx];
+            std::cout << std::format("{}, ", renderPassPackage.RenderPassPtr->GetName());
+        }
+        std::cout << '\n';
+
+        CalculateDependencyLevels();
+        std::cout << "* Dependency Levels" << '\n';
+        for (const auto& renderPassPackage : renderPasses)
+        {
+            std::cout << std::format("{}: {}", renderPassPackage.RenderPassPtr->GetName(), renderPassPackage.DependencyLevel) << '\n';
+        }
+
         BuildDependencyLevels();
         BuildSyncPoints();
         return MakePtr<RenderGraph>(*this);
     }
+
 }    // namespace ig::experimental

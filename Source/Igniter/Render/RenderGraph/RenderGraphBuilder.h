@@ -25,8 +25,13 @@ namespace ig::experimental
         struct ResourceDependency
         {
         public:
+            bool HasWriter() const noexcept { return Writer != 0xffffffffffffffffUi64; }
+
+        public:
             UnorderedSet<size_t> Readers{};
+            UnorderedSet<size_t> Owners{};
             size_t Writer{0xffffffffffffffffUi64};
+            D3D12_BARRIER_LAYOUT Layout{D3D12_BARRIER_LAYOUT_UNDEFINED};
         };
 
     public:
@@ -65,13 +70,15 @@ namespace ig::experimental
             const eastl::vector<RGTextureSubresouce>& subresources = {RGTextureSubresouce{}});
         RGResourceHandle WriteBuffer(const RGResourceHandle targetBuf);
         /* 전달된 핸들의 Subresource 항은 무시됨 */
-        void ReadTexture(const RGResourceHandle targetTex, const D3D12_BARRIER_LAYOUT targetLayout,
+        RGResourceHandle ReadTexture(const RGResourceHandle targetTex, const D3D12_BARRIER_LAYOUT targetLayout,
             const eastl::vector<RGTextureSubresouce>& subresources = {RGTextureSubresouce{}});
-        void ReadBuffer(const RGResourceHandle targetBuf);
+        RGResourceHandle ReadBuffer(const RGResourceHandle targetBuf);
 
     private:
-        void ResolveDependencies();
-        void DFS(const size_t renderPassIdx, const uint16_t depth, eastl::vector<bool>& visited, eastl::vector<bool>& onStack);
+        void BuildAdjanceyList();
+        void BuildTopologicalOrderedRenderPassIndices();
+        void TopologicalSortDFS(const size_t renderPassIdx, eastl::vector<bool>& visited, eastl::vector<bool>& onStack);
+        void CalculateDependencyLevels();
         void BuildDependencyLevels();
         void BuildSyncPoints();
 
@@ -83,6 +90,8 @@ namespace ig::experimental
         eastl::vector<details::RGResource> resources{};
         /* 하나의 원본 핸들이 아니라, 각 Subresource나 버전별로 관리 */
         UnorderedMap<RGResourceHandle, ResourceDependency> resourceDependencies{};
+
+        eastl::vector<size_t> topologicalOrderedRenderPassIndices{};
 
         uint16_t maxDependencyLevels{0};
         eastl::vector<details::RGDependencyLevel> dependencyLevels{};

@@ -96,11 +96,13 @@ namespace ig::experimental
         struct RGRenderPassPackage
         {
             Ptr<RenderPass> RenderPassPtr{};
-            UnorderedMap<RGResourceHandle, D3D12_BARRIER_LAYOUT> ReadDependencies{};
-            UnorderedMap<RGResourceHandle, D3D12_BARRIER_LAYOUT> WriteDependencies{};
+            UnorderedSet<RGResourceHandle> ReadDependencies{};
+            UnorderedSet<RGResourceHandle> WriteDependencies{};
             ERGExecutableQueue ExecuteOn = ERGExecutableQueue::MainGfx;
             bool bHasNonExternalReadDependency = false;
+
             uint16_t DependencyLevel = 0;
+            UnorderedSet<size_t> AdjanceyRenderPasses{};
         };
 
         struct RGDependencyLevel
