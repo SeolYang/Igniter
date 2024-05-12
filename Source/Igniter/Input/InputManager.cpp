@@ -80,9 +80,8 @@ namespace ig
                 }
 
                 RAWINPUTDEVICE rawMouse{};
-                rawMouse.usUsagePage = 0x01;          /* HID_USAGE_PAGE_GENERIC */
-                rawMouse.usUsage = 0x02;              /* HID_USAGE_GENERIC_MOUSE */
-                //rawMouse.dwFlags = RIDEV_NOLEGACY;    // 이러면 완벽하긴 한데.. ImGui 가 마우스 이벤트를 처리하질 못함..
+                rawMouse.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
+                rawMouse.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
                 rawMouse.dwFlags = 0;
                 rawMouse.hwndTarget = window;
                 if (RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse)) == FALSE)
@@ -478,6 +477,7 @@ namespace ig
         return bAnyAxisHandled;
     }
 
+    // #sy_todo 이후에 Raw Keyboard 까지 확장
     void InputManager::PollRawMouseInput()
     {
         UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};

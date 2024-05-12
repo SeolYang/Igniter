@@ -88,23 +88,18 @@ namespace ig
         }
     }
 
-    void Window::PumpMessage() 
+    void Window::PumpMessage()
     {
         ZoneScoped;
         MSG msg;
         ZeroMemory(&msg, sizeof(msg));
-        //while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
-        //{
-        //    if (msg.message == WM_QUIT)
-        //    {
-        //        Igniter::Stop();
-        //    }
+        if (PeekMessage(&msg, windowHandle, WM_MOUSEMOVE, WM_MOUSEMOVE, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
 
-        //    TranslateMessage(&msg);
-        //    DispatchMessage(&msg);
-        //}
-
-        if (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
+        while (PeekMessage(&msg, windowHandle, 0, WM_MOUSEMOVE - 1, PM_REMOVE) || PeekMessage(&msg, windowHandle, WM_MOUSEMOVE + 1, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)
             {
