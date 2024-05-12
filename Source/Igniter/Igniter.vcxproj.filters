@@ -70,9 +70,6 @@
     <Filter Include="Source\Application">
       <UniqueIdentifier>{86e27114-564a-4f57-83c7-4ce1d301eb54}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Render\RenderGraph">
-      <UniqueIdentifier>{48fea955-4d7e-4c9c-8780-378173311ccb}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h">
@@ -309,9 +306,6 @@
     <ClInclude Include="Render\RenderContext.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderPass.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\Swapchain.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
@@ -363,17 +357,17 @@
     <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
       <Filter>Thirdparty\WinPixEventRuntime</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderGraph\RenderPass.h">
-      <Filter>Source\Render\RenderGraph</Filter>
+    <ClInclude Include="Render\RenderGraphBuilder.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderGraph\RederGraphResource.h">
-      <Filter>Source\Render\RenderGraph</Filter>
+    <ClInclude Include="Render\RenderPass.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderGraph\RenderGraphBuilder.h">
-      <Filter>Source\Render\RenderGraph</Filter>
+    <ClInclude Include="Render\RederGraphResource.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderGraph\RenderGraph.h">
-      <Filter>Source\Render\RenderGraph</Filter>
+    <ClInclude Include="Render\RenderGraph.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -545,11 +539,11 @@
     <ClCompile Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <Filter>Thirdparty\SimpleMath</Filter>
     </ClCompile>
-    <ClCompile Include="Render\RenderGraph\RenderGraphBuilder.cpp">
-      <Filter>Source\Render\RenderGraph</Filter>
+    <ClCompile Include="Render\RenderGraphBuilder.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render\RenderGraph\RenderGraph.cpp">
-      <Filter>Source\Render\RenderGraph</Filter>
+    <ClCompile Include="Render\RenderGraph.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

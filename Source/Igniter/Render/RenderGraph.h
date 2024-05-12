@@ -1,14 +1,9 @@
 #pragma once
 #include "Igniter/Igniter.h"
-#include "Igniter/Render/RenderGraph/RederGraphResource.h"
-#include "Igniter/Render/RenderGraph/RenderPass.h"
+#include "Igniter/Render/RederGraphResource.h"
+#include "Igniter/Render/RenderPass.h"
 
 namespace ig
-{
-    class RenderContext;
-}
-
-namespace ig::experimental
 {
     namespace details
     {
@@ -44,6 +39,7 @@ namespace ig::experimental
         };
     }    // namespace details
 
+    class RenderContext;
     class RenderGraphBuilder;
     class RenderGraph final
     {

@@ -6,12 +6,8 @@ namespace ig
     class World;
     class GameSystem;
     class TempConstantBufferAllocator;
-}    // namespace ig
-
-namespace ig::experimental
-{
     class RenderGraph;
-}
+}    // namespace ig
 
 namespace fe
 {
@@ -42,7 +38,7 @@ namespace fe
     private:
         ig::Ptr<ig::World> world;
         ig::Ptr<ig::TempConstantBufferAllocator> tempConstantBufferAllocator;
-        ig::Ptr<ig::experimental::RenderGraph> renderGraph;
+        ig::Ptr<ig::RenderGraph> renderGraph;
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas> editorCanvas;
 

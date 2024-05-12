@@ -10,7 +10,7 @@
 #include "Igniter/Render/RenderPass.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
-#include "Igniter/Render/RenderGraph/RenderGraphBuilder.h"
+#include "Igniter/Render/RenderGraphBuilder.h"
 #include "Igniter/Render/Utils.h"
 #include "Igniter/Component/CameraArchetype.h"
 #include "Igniter/Component/CameraComponent.h"
@@ -28,13 +28,13 @@
 
 namespace fe
 {
-    class MainRenderPass final : public ig::experimental::RenderPass
+    class MainRenderPass final : public ig::RenderPass
     {
     public:
         struct Output
         {
-            ig::experimental::RGResourceHandle RenderOutput;
-            ig::experimental::RGResourceHandle DepthStencilBuffer;
+            ig::RGResourceHandle RenderOutput;
+            ig::RGResourceHandle DepthStencilBuffer;
         };
 
     public:
@@ -43,7 +43,7 @@ namespace fe
             , mainViewport(window.GetViewport())
             , tempConstantBufferAllocator(tempConstantBufferAllocator)
             , world(world)
-            , ig::experimental::RenderPass("MainRenderPass"_fs)
+            , ig::RenderPass("MainRenderPass"_fs)
         {
             /* #sy_note 테스트 코드! 원래 이런식으로 생성 하는건 비 효율적!  */
             ig::RenderDevice& renderDevice = renderContext.GetRenderDevice();
@@ -79,7 +79,7 @@ namespace fe
             renderContext.DestroyPipelineState(pso);
         }
 
-        void Setup(ig::experimental::RenderGraphBuilder& builder) override
+        void Setup(ig::RenderGraphBuilder& builder) override
         {
             ig::GpuTextureDesc renderOutputDesc{};
             renderOutputDesc.AsRenderTarget(
@@ -95,7 +95,7 @@ namespace fe
             output.DepthStencilBuffer = builder.WriteTexture(builder.CreateTexture(depthStencilDesc), D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
         }
 
-        void PostCompile(ig::experimental::RenderGraph& renderGraph) override
+        void PostCompile(ig::RenderGraph& renderGraph) override
         {
             renderTarget = renderGraph.GetTexture(output.RenderOutput);
             depthStencil = renderGraph.GetTexture(output.DepthStencilBuffer);
@@ -216,8 +216,8 @@ namespace fe
         ig::TempConstantBufferAllocator& tempConstantBufferAllocator;
         Output output;
 
-        ig::experimental::RGTexture renderTarget;
-        ig::experimental::RGTexture depthStencil;
+        ig::RGTexture renderTarget;
+        ig::RGTexture depthStencil;
 
         eastl::array<ig::Handle<ig::GpuView, ig::RenderContext>, ig::NumFramesInFlight> rtvs;
         eastl::array<ig::Handle<ig::GpuView, ig::RenderContext>, ig::NumFramesInFlight> dsvs;
@@ -231,22 +231,22 @@ namespace fe
         ig::World* world;
     };
 
-    class ImGuiPass : public ig::experimental::RenderPass
+    class ImGuiPass : public ig::RenderPass
     {
     public:
         struct Input
         {
-            ig::experimental::RGResourceHandle FinalRenderOutput;
+            ig::RGResourceHandle FinalRenderOutput;
         };
 
         struct Output
         {
-            ig::experimental::RGResourceHandle GuiRenderOutput;
+            ig::RGResourceHandle GuiRenderOutput;
         };
 
     public:
         ImGuiPass(ig::RenderContext& renderContext, ig::Window& window, const Input input)
-            : renderContext(renderContext), window(window), input(input), ig::experimental::RenderPass("ImGuiPass"_fs)
+            : renderContext(renderContext), window(window), input(input), ig::RenderPass("ImGuiPass"_fs)
         {
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
@@ -279,12 +279,12 @@ namespace fe
             }
         }
 
-        void Setup(ig::experimental::RenderGraphBuilder& builder) override
+        void Setup(ig::RenderGraphBuilder& builder) override
         {
             output.GuiRenderOutput = builder.WriteTexture(input.FinalRenderOutput, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
         }
 
-        void PostCompile(ig::experimental::RenderGraph& renderGraph) override
+        void PostCompile(ig::RenderGraph& renderGraph) override
         {
             guiRenderOutput = renderGraph.GetTexture(output.GuiRenderOutput);
 
@@ -329,34 +329,34 @@ namespace fe
         Input input;
         Output output;
 
-        ig::experimental::RGTexture guiRenderOutput;
+        ig::RGTexture guiRenderOutput;
         ig::LocalFrameResource<ig::Handle<ig::GpuView, ig::RenderContext>> guiRenderOutputRtv;
 
         ig::ImGuiCanvas* canvas = nullptr;
         ig::RenderResource<ig::GpuView> imguiSrv{};
     };
 
-    class BackBufferPass : public ig::experimental::RenderPass
+    class BackBufferPass : public ig::RenderPass
     {
     public:
         struct Input
         {
-            ig::experimental::RGResourceHandle RenderOutput;
+            ig::RGResourceHandle RenderOutput;
         };
 
     public:
         BackBufferPass(ig::RenderContext& renderContext, ig::Swapchain& swapchain, const Input input)
-            : renderContext(renderContext), swapchain(swapchain), input(input), ig::experimental::RenderPass("BackBufferPass"_fs)
+            : renderContext(renderContext), swapchain(swapchain), input(input), ig::RenderPass("BackBufferPass"_fs)
         {
         }
         ~BackBufferPass() override = default;
 
-        void Setup(ig::experimental::RenderGraphBuilder& builder) override
+        void Setup(ig::RenderGraphBuilder& builder) override
         {
             builder.ReadTexture(input.RenderOutput, D3D12_BARRIER_LAYOUT_COPY_SOURCE);
         }
 
-        void PostCompile(ig::experimental::RenderGraph& renderGraph) override { renderOutput = renderGraph.GetTexture(input.RenderOutput); }
+        void PostCompile(ig::RenderGraph& renderGraph) override { renderOutput = renderGraph.GetTexture(input.RenderOutput); }
 
         void Execute([[maybe_unused]] tf::Subflow& renderPassSubflow, eastl::vector<ig::CommandContext*>& pendingCmdCtxList) override
         {
@@ -383,25 +383,25 @@ namespace fe
         ig::Swapchain& swapchain;
         Input input;
 
-        ig::experimental::RGTexture renderOutput;
+        ig::RGTexture renderOutput;
     };
 
-    class DummyAsyncComputePass : public ig::experimental::RenderPass
+    class DummyAsyncComputePass : public ig::RenderPass
     {
     public:
         struct Input
         {
-            ig::experimental::RGResourceHandle RenderOutput;
+            ig::RGResourceHandle RenderOutput;
         };
 
     public:
         DummyAsyncComputePass(const ig::String name, const Input input, const bool bShouldCreateResource = false)
-            : input(input), bCreateResource(bShouldCreateResource), ig::experimental::RenderPass(name)
+            : input(input), bCreateResource(bShouldCreateResource), ig::RenderPass(name)
         {
         }
         ~DummyAsyncComputePass() override = default;
 
-        void Setup(ig::experimental::RenderGraphBuilder& builder) override
+        void Setup(ig::RenderGraphBuilder& builder) override
         {
             builder.ExecuteOnAsyncCompute();
             if (!bCreateResource)
@@ -416,7 +416,7 @@ namespace fe
             builder.WriteTexture(builder.CreateTexture(newDummyDesc), D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS);
         }
 
-        void PostCompile(ig::experimental::RenderGraph&) override {}
+        void PostCompile(ig::RenderGraph&) override {}
 
         void Execute([[maybe_unused]] tf::Subflow&, eastl::vector<ig::CommandContext*>&) override {}
 
@@ -425,7 +425,7 @@ namespace fe
         Input input;
 
     public:
-        ig::experimental::RGResourceHandle AfterRead;
+        ig::RGResourceHandle AfterRead;
     };
 
     TestApp::TestApp(const ig::AppDesc& desc)
@@ -433,7 +433,7 @@ namespace fe
     {
         /* #sy_test 렌더 그래프 테스트 */
         ig::RenderContext& renderContext = ig::Igniter::GetRenderContext();
-        ig::experimental::RenderGraphBuilder builder{renderContext};
+        ig::RenderGraphBuilder builder{renderContext};
         mainRenderPass = &builder.AddPass<MainRenderPass>(renderContext, ig::Igniter::GetWindow(), *tempConstantBufferAllocator);
 
         [[maybe_unused]] DummyAsyncComputePass& dummyPass0 =
@@ -445,12 +445,8 @@ namespace fe
         [[maybe_unused]] DummyAsyncComputePass& dummyPass2 = builder.AddPass<DummyAsyncComputePass>(
             "Dummy.2"_fs, DummyAsyncComputePass::Input{.RenderOutput = mainRenderPass->GetOutput().RenderOutput});
 
-        // 여기선 mainRenderPassOutput에 Write
         imGuiPass = &builder.AddPass<ImGuiPass>(
             renderContext, ig::Igniter::GetWindow(), ImGuiPass::Input{.FinalRenderOutput = dummyPass2.AfterRead});
-
-        // 일반적으로 생각했을때 read가 먼저 일어나고 그 다음에 Write가 일어나면 되겠지만
-        // 현재로서는 구별 불가능.. << 2024/05/11 여기서 부터 생각해볼 것
 
         backBufferPass = &builder.AddPass<BackBufferPass>(
             renderContext, renderContext.GetSwapchain(), BackBufferPass::Input{.RenderOutput = imGuiPass->GetOutput().GuiRenderOutput});

@@ -339,6 +339,8 @@ namespace ig
 
     void InputManager::HandleRawInput(const LPARAM lParam)
     {
+        /* 2024-05-12 여기서 부터 개선!! GetRawInputData->GetRawInputBuffer! */
+        ZoneScoped;
         UINT pcbSize{};
         GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &pcbSize, sizeof(RAWINPUTHEADER));
         if (rawInputBuffer.size() < pcbSize)
@@ -406,6 +408,7 @@ namespace ig
 
     bool InputManager::HandleAxis(const EInput input, const float value, const bool bIsDifferential)
     {
+        ZoneScoped;
         bool bAnyAxisHandled = false;
         for (const Handle<Axis, InputManager> axis : axisSets[ToUnderlying(input)])
         {

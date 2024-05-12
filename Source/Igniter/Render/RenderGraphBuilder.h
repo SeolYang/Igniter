@@ -1,8 +1,8 @@
 #pragma once
 #include "Igniter/Render/RenderContext.h"
-#include "Igniter/Render/RenderGraph/RederGraphResource.h"
-#include "Igniter/Render/RenderGraph/RenderPass.h"
-#include "Igniter/Render/RenderGraph/RenderGraph.h"
+#include "Igniter/Render/RederGraphResource.h"
+#include "Igniter/Render/RenderPass.h"
+#include "Igniter/Render/RenderGraph.h"
 
 namespace ig
 {
@@ -10,7 +10,7 @@ namespace ig
     class GpuBuffer;
 }    // namespace ig
 
-namespace ig::experimental
+namespace ig
 {
     // 일회용 인스턴스로 디자인 할 것
     // 실제로 빌드 된 다음, RenderGraph에 필요한 모든 자원 소유권을 넘길 것.
@@ -97,4 +97,4 @@ namespace ig::experimental
         eastl::vector<details::RGDependencyLevel> dependencyLevels{};
         eastl::vector<details::RGSyncPoint> syncPoints{};
     };
-}    // namespace ig::experimental
+}    // namespace ig

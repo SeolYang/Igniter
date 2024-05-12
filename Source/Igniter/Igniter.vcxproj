@@ -109,11 +109,10 @@
     <ClInclude Include="Render\GpuUploader.h" />
     <ClInclude Include="Render\GpuViewManager.h" />
     <ClInclude Include="Render\Common.h" />
+    <ClInclude Include="Render\RederGraphResource.h" />
     <ClInclude Include="Render\RenderContext.h" />
-    <ClInclude Include="Render\RenderGraph\RederGraphResource.h" />
-    <ClInclude Include="Render\RenderGraph\RenderGraph.h" />
-    <ClInclude Include="Render\RenderGraph\RenderGraphBuilder.h" />
-    <ClInclude Include="Render\RenderGraph\RenderPass.h" />
+    <ClInclude Include="Render\RenderGraph.h" />
+    <ClInclude Include="Render\RenderGraphBuilder.h" />
     <ClInclude Include="Render\RenderPass.h" />
     <ClInclude Include="Render\Swapchain.h" />
     <ClInclude Include="Render\TempConstantBufferAllocator.h" />
@@ -190,8 +189,8 @@
     <ClCompile Include="Render\GpuUploader.cpp" />
     <ClCompile Include="Render\GpuViewManager.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
-    <ClCompile Include="Render\RenderGraph\RenderGraph.cpp" />
-    <ClCompile Include="Render\RenderGraph\RenderGraphBuilder.cpp" />
+    <ClCompile Include="Render\RenderGraph.cpp" />
+    <ClCompile Include="Render\RenderGraphBuilder.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />
     <ClCompile Include="Render\TempConstantBufferAllocator.cpp" />
   </ItemGroup>

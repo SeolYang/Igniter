@@ -1,10 +1,10 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Log.h"
-#include "Igniter/Render/RenderGraph/RenderGraphBuilder.h"
+#include "Igniter/Render/RenderGraphBuilder.h"
 
 IG_DEFINE_LOG_CATEGORY(RenderGraphBuilder);
 
-namespace ig::experimental
+namespace ig
 {
     RGResourceHandle RenderGraphBuilder::CreateTexture(const GpuTextureDesc& desc)
     {
@@ -409,4 +409,4 @@ namespace ig::experimental
         return MakePtr<RenderGraph>(*this);
     }
 
-}    // namespace ig::experimental
+}    // namespace ig

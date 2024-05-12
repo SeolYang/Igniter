@@ -51,6 +51,7 @@ namespace ig
 
     private:
         int Execute(Application& application);
+        void ProcMessagePump();
 
     private:
         static Igniter* instance;

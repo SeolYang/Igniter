@@ -10,12 +10,7 @@ namespace ig
     class GpuTexture;
     class GpuBuffer;
     class RenderContext;
-}    // namespace ig
-
-namespace ig::experimental
-{
     class RenderPass;
-
     using RGBuffer = LocalFrameResource<Handle<GpuBuffer, RenderContext>>;
     using RGTexture = LocalFrameResource<Handle<GpuTexture, RenderContext>>;
 
@@ -127,13 +122,13 @@ namespace ig::experimental
             bool bSyncWithAsyncCopyQueue = false;
             eastl::vector<RGLayoutTransition> LayoutTransitions{};
         };
-    }
+    }    // namespace details
 
-}    // namespace ig::experimental
+}    // namespace ig
 
 template <>
-struct std::hash<ig::experimental::RGResourceHandle>
+struct std::hash<ig::RGResourceHandle>
 {
 public:
-    inline size_t operator()(const ig::experimental::RGResourceHandle& handle) const noexcept { return (uint64_t) handle; }
+    inline size_t operator()(const ig::RGResourceHandle& handle) const noexcept { return (uint64_t) handle; }
 };

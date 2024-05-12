@@ -39,7 +39,7 @@ namespace ig
         //////////////////////// L2 ////////////////////////
         assetManager = MakePtr<AssetManager>(*renderContext);
         assetManager->RegisterEngineDefault();
-        //imguiRenderer = MakePtr<ImGuiRenderer>(*window, *renderContext);
+        // imguiRenderer = MakePtr<ImGuiRenderer>(*window, *renderContext);
         ////////////////////////////////////////////////////
 
         bInitialized = true;
@@ -84,18 +84,7 @@ namespace ig
 
             /************* Event Handle/Proccess/Dispatch *************/
             {
-                MSG msg;
-                ZeroMemory(&msg, sizeof(msg));
-                while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-                {
-                    if (msg.message == WM_QUIT)
-                    {
-                        bShouldExit = true;
-                    }
-
-                    TranslateMessage(&msg);
-                    DispatchMessage(&msg);
-                }
+                ProcMessagePump();
                 assetManager->DispatchEvent();
             }
 
@@ -121,7 +110,7 @@ namespace ig
                 localFrameSyncs[localFrameIdx].WaitOnCpu();
                 renderContext->PreRender(localFrameIdx);
                 application.PreRender(localFrameIdx);
-                //imguiRenderer->SetImGuiCanvas(imguiCanvas);
+                // imguiRenderer->SetImGuiCanvas(imguiCanvas);
             }
 
             /************* Render *************/
@@ -168,6 +157,43 @@ namespace ig
         renderContext->FlushQueues();
         IG_LOG(Engine, Info, "Extinguishing Engine Main Loop.");
         return 0;
+    }
+
+    void Igniter::ProcMessagePump()
+    {
+        ZoneScoped;
+        MSG msg;
+        ZeroMemory(&msg, sizeof(msg));
+        bool bKeep = false;
+        do 
+        {
+            {
+                ZoneScopedN("PeekMessage");
+                bKeep = PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE);
+            }
+
+            {
+                ZoneScopedN("TranslateMessage");
+                TranslateMessage(&msg);
+            }
+
+            {
+                ZoneScopedN("DispatchMessage");
+                DispatchMessage(&msg);
+            }
+        } while (bKeep);
+
+        //while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        //{
+        //    ZoneScoped;
+        //    if (msg.message == WM_QUIT)
+        //    {
+        //        bShouldExit = true;
+        //    }
+
+        //    TranslateMessage(&msg);
+        //    DispatchMessage(&msg);
+        //}
     }
 
     void Igniter::SetImGuiCanvas(ImGuiCanvas* canvas)

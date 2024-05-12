@@ -1,9 +1,9 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/ContainerUtils.h"
-#include "Igniter/Render/RenderGraph/RenderGraphBuilder.h"
-#include "Igniter/Render/RenderGraph/RenderGraph.h"
+#include "Igniter/Render/RenderGraphBuilder.h"
+#include "Igniter/Render/RenderGraph.h"
 
-namespace ig::experimental
+namespace ig
 {
     RenderGraph::RenderGraph(RenderGraphBuilder& builder) : renderContext(builder.renderContext)
     {
@@ -277,4 +277,4 @@ namespace ig::experimental
 
         return std::get<RGTexture>(resourceInstances[handle.Index].Resource);
     }
-}    // namespace ig::experimental
+}    // namespace ig
