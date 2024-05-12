@@ -13,6 +13,7 @@ namespace ig
 
         dependencyLevels = std::move(builder.dependencyLevels);
         syncPoints = std::move(builder.syncPoints);
+        IG_CHECK(dependencyLevels.size() == syncPoints.size());
 
         resourceInstances.reserve(builder.resources.size());
         for (const auto& resource : builder.resources)
@@ -63,9 +64,7 @@ namespace ig
             renderPass->PostCompile(*this);
         }
 
-        // #sy_todo 여기서 Taskflow를 사용해서 작업 Graph를 미리 생성
-        IG_CHECK(dependencyLevels.size() == syncPoints.size());
-
+        /******** 렌더 태스크 그래프 생성 *********/
         const tf::Task renderBeginTask = taskflow.placeholder().name("Render Task:Begin");
         tf::Task prevSyncTask = renderBeginTask;
         for (const size_t dependencyLevelIdx : views::iota(0Ui64, dependencyLevels.size()))
@@ -78,21 +77,27 @@ namespace ig
             // QueueTask (vector<vector<Cmd Ctx>>) <- Render Pass (vector<Cmd Ctx>) <- Sub Render Pass (Cmd Ctx)
             if (!dependencyLevel.MainGfxQueueRenderPasses.empty())
             {
-                tf::Task mainGfxTask =
-                    taskflow.emplace([this]() { mainGfxPendingCmdCtxLists.clear(); }).name(std::format("DL#{}: Main Gfx", dependencyLevelIdx));
+                tf::Task mainGfxTask = taskflow.placeholder().name(std::format("DL#{}: Main Gfx", dependencyLevelIdx));
                 mainGfxTask.succeed(prevSyncTask);
-
-                // 여기서 mainGfxPendingCmdCtxList 통합해서 Execute
                 tf::Task mainGfxSubmitTask = taskflow.placeholder().name(std::format("DL#{}: Main Gfx Submit", dependencyLevelIdx));
+
+                mainGfxPendingCmdCtxLists.resize(std::max(mainGfxPendingCmdCtxLists.size(), dependencyLevel.MainGfxQueueRenderPasses.size()));
+                size_t localRenderPassIdx = 0;    // 현재 Dependency Level의 Main Gfx Queue Render Passes 내에서의 인덱스
                 for (const size_t renderPassIdx : dependencyLevel.MainGfxQueueRenderPasses)
                 {
                     RenderPass& renderPass = *renderPasses[renderPassIdx];
                     tf::Task renderPassTask = taskflow
-                                                  .emplace([&renderPass, this](tf::Subflow& renderPassSubflow)
-                                                      { renderPass.Execute(renderPassSubflow, mainGfxPendingCmdCtxLists.emplace_back()); })
+                                                  .emplace(
+                                                      [this, &renderPass, localRenderPassIdx](tf::Subflow& renderPassSubflow)
+                                                      {
+                                                          mainGfxPendingCmdCtxLists[localRenderPassIdx].clear();
+                                                          renderPass.Execute(renderPassSubflow, mainGfxPendingCmdCtxLists[localRenderPassIdx]);
+                                                      })
                                                   .name(std::format("DL#{}: {}", dependencyLevelIdx, renderPass.GetName()));
                     renderPassTask.succeed(mainGfxTask);
                     mainGfxSubmitTask.succeed(renderPassTask);
+
+                    ++localRenderPassIdx;
                 }
 
                 mainGfxSubmitTask.work(
@@ -106,20 +111,28 @@ namespace ig
 
             if (!dependencyLevel.AsyncComputeQueueRenderPasses.empty())
             {
-                tf::Task asyncComputeTask = taskflow.emplace([this]() { asyncComputePendingCmdCtxLists.clear(); })
-                                                .name(std::format("DL#{}: Async Compute", dependencyLevelIdx));
+                tf::Task asyncComputeTask = taskflow.placeholder().name(std::format("DL#{}: Async Compute", dependencyLevelIdx));
                 asyncComputeTask.succeed(prevSyncTask);
-
                 tf::Task asyncComputeSubmitTask = taskflow.placeholder().name(std::format("DL#{}: Async Compute Submit", dependencyLevelIdx));
+
+                asyncComputePendingCmdCtxLists.resize(
+                    std::max(asyncComputePendingCmdCtxLists.size(), dependencyLevel.AsyncComputeQueueRenderPasses.size()));
+                size_t localRenderPassIdx = 0;    // 현재 Dependency Level의 Async Compute Queue Render Passes 내에서의 인덱스
                 for (const size_t renderPassIdx : dependencyLevel.AsyncComputeQueueRenderPasses)
                 {
                     RenderPass& renderPass = *renderPasses[renderPassIdx];
                     tf::Task renderPassTask = taskflow
-                                                  .emplace([&renderPass, this](tf::Subflow& renderPassSubflow)
-                                                      { renderPass.Execute(renderPassSubflow, asyncComputePendingCmdCtxLists.emplace_back()); })
+                                                  .emplace(
+                                                      [this, &renderPass, localRenderPassIdx](tf::Subflow& renderPassSubflow)
+                                                      {
+                                                          asyncComputePendingCmdCtxLists[localRenderPassIdx].clear();
+                                                          renderPass.Execute(renderPassSubflow, asyncComputePendingCmdCtxLists[localRenderPassIdx]);
+                                                      })
                                                   .name(std::format("DL#{}: {}", dependencyLevelIdx, renderPass.GetName()));
                     renderPassTask.succeed(asyncComputeTask);
                     asyncComputeSubmitTask.succeed(renderPassTask);
+
+                    ++localRenderPassIdx;
                 }
 
                 asyncComputeSubmitTask.work(
@@ -141,20 +154,27 @@ namespace ig
 
             if (!dependencyLevel.AsyncCopyQueueRenderPasses.empty())
             {
-                tf::Task asyncCopyTask =
-                    taskflow.emplace([this]() { asyncComputePendingCmdCtxLists.clear(); }).name(std::format("DL#{}: Async Copy", dependencyLevelIdx));
+                tf::Task asyncCopyTask = taskflow.placeholder().name(std::format("DL#{}: Async Copy", dependencyLevelIdx));
                 asyncCopyTask.succeed(prevSyncTask);
-
                 tf::Task asyncCopySubmitTask = taskflow.placeholder().name(std::format("DL#{}: Async Copy Submit", dependencyLevelIdx));
+
+                asyncCopyPendingCmdCtxLists.resize(std::max(asyncCopyPendingCmdCtxLists.size(), dependencyLevel.AsyncCopyQueueRenderPasses.size()));
+                size_t localRenderPassIdx = 0;    // 현재 Dependency Level의 Async Copy Queue Render Passes 내에서의 인덱스
                 for (const size_t renderPassIdx : dependencyLevel.AsyncCopyQueueRenderPasses)
                 {
                     RenderPass& renderPass = *renderPasses[renderPassIdx];
                     tf::Task renderPassTask = taskflow
-                                                  .emplace([&renderPass, this](tf::Subflow& renderPassSubflow)
-                                                      { renderPass.Execute(renderPassSubflow, asyncCopyPendingCmdCtxLists.emplace_back()); })
+                                                  .emplace(
+                                                      [this, &renderPass, localRenderPassIdx](tf::Subflow& renderPassSubflow)
+                                                      {
+                                                          asyncCopyPendingCmdCtxLists[localRenderPassIdx].clear();
+                                                          renderPass.Execute(renderPassSubflow, asyncCopyPendingCmdCtxLists[localRenderPassIdx]);
+                                                      })
                                                   .name(std::format("DL#{}: {}", dependencyLevelIdx, renderPass.GetName()));
                     renderPassTask.succeed(asyncCopyTask);
                     asyncCopySubmitTask.succeed(renderPassTask);
+
+                    ++localRenderPassIdx;
                 }
 
                 asyncCopySubmitTask.work(
