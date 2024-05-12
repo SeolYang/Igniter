@@ -579,7 +579,6 @@ namespace fe
 
         /* #sy_test ImGui 통합 테스트 */
         editorCanvas = MakePtr<EditorCanvas>(*this);
-        ig::Igniter::SetImGuiCanvas(static_cast<ig::ImGuiCanvas*>(editorCanvas.get()));
         /************************************/
 
         /* #sy_test Game Mode 타입 메타 정보 테스트 */

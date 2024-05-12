@@ -41,12 +41,9 @@ namespace ig
         [[nodiscard]] static InputManager& GetInputManager();
         [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
-        [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
         bool static IsInitialized() { return instance != nullptr && instance->bInitialized; }
-
-        [[nodiscard]] static void SetImGuiCanvas(ImGuiCanvas* canvas);
 
         static void Stop();
 
@@ -75,11 +72,6 @@ namespace ig
 
         //////////////////////// L2 ////////////////////////
         Ptr<AssetManager> assetManager;
-        Ptr<ImGuiRenderer> imguiRenderer;
-        ////////////////////////////////////////////////////
-
-        //////////////////////// APP ///////////////////////
-        ImGuiCanvas* imguiCanvas = nullptr;
         ////////////////////////////////////////////////////
     };
 }    // namespace ig

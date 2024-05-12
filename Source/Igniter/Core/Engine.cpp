@@ -39,7 +39,6 @@ namespace ig
         //////////////////////// L2 ////////////////////////
         assetManager = MakePtr<AssetManager>(*renderContext);
         assetManager->RegisterEngineDefault();
-        // imguiRenderer = MakePtr<ImGuiRenderer>(*window, *renderContext);
         ////////////////////////////////////////////////////
 
         bInitialized = true;
@@ -50,7 +49,6 @@ namespace ig
         IG_LOG(Engine, Info, "Extinguishing Engine Runtime.");
 
         //////////////////////// L2 ////////////////////////
-        imguiRenderer.reset();
         assetManager->UnRegisterEngineDefault();
         assetManager.reset();
         ////////////////////////////////////////////////////
@@ -164,43 +162,16 @@ namespace ig
         ZoneScoped;
         MSG msg;
         ZeroMemory(&msg, sizeof(msg));
-        bool bKeep = false;
-        do
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
+            ZoneScoped;
+            if (msg.message == WM_QUIT)
             {
-                ZoneScopedN("PeekMessage");
-                bKeep = PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE);
+                bShouldExit = true;
             }
 
-            {
-                ZoneScopedN("TranslateMessage");
-                TranslateMessage(&msg);
-            }
-
-            {
-                ZoneScopedN("DispatchMessage");
-                DispatchMessage(&msg);
-            }
-        } while (bKeep);
-
-        // while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-        //{
-        //     ZoneScoped;
-        //     if (msg.message == WM_QUIT)
-        //     {
-        //         bShouldExit = true;
-        //     }
-
-        //    TranslateMessage(&msg);
-        //    DispatchMessage(&msg);
-        //}
-    }
-
-    void Igniter::SetImGuiCanvas(ImGuiCanvas* canvas)
-    {
-        if (instance != nullptr)
-        {
-            instance->imguiCanvas = canvas;
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }
     }
 
@@ -238,12 +209,6 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->inputManager;
-    }
-
-    ImGuiRenderer& Igniter::GetImGuiRenderer()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->imguiRenderer;
     }
 
     AssetManager& Igniter::GetAssetManager()
