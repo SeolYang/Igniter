@@ -251,9 +251,9 @@ namespace ig
         }
     }
 
-    GpuSync RenderGraph::Execute()
+    GpuSync RenderGraph::Execute(tf::Executor& taskExecutor)
     {
-        tf::Future<void> execution = executor.run(taskflow);
+        tf::Future<void> execution = taskExecutor.run(taskflow);
         execution.wait();
         return lastFrameSync;
     }

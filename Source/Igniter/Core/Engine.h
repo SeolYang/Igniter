@@ -35,6 +35,7 @@ namespace ig
         Igniter& operator=(const Igniter&) = delete;
         Igniter& operator=(Igniter&&) noexcept = delete;
 
+        [[nodiscard]] static tf::Executor& GetTaskExecutor();
         [[nodiscard]] static Timer& GetTimer();
         [[nodiscard]] static Window& GetWindow();
         [[nodiscard]] static InputManager& GetInputManager();
@@ -62,6 +63,7 @@ namespace ig
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////
+        tf::Executor taskExecutor{};
         Ptr<Timer> timer;
         Ptr<Window> window;
         Ptr<InputManager> inputManager;

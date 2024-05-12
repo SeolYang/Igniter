@@ -165,7 +165,7 @@ namespace ig
         MSG msg;
         ZeroMemory(&msg, sizeof(msg));
         bool bKeep = false;
-        do 
+        do
         {
             {
                 ZoneScopedN("PeekMessage");
@@ -183,13 +183,13 @@ namespace ig
             }
         } while (bKeep);
 
-        //while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        // while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         //{
-        //    ZoneScoped;
-        //    if (msg.message == WM_QUIT)
-        //    {
-        //        bShouldExit = true;
-        //    }
+        //     ZoneScoped;
+        //     if (msg.message == WM_QUIT)
+        //     {
+        //         bShouldExit = true;
+        //     }
 
         //    TranslateMessage(&msg);
         //    DispatchMessage(&msg);
@@ -208,6 +208,12 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         instance->bShouldExit = true;
+    }
+
+    tf::Executor& Igniter::GetTaskExecutor()
+    {
+        IG_CHECK(instance != nullptr);
+        return instance->taskExecutor;
     }
 
     Timer& Igniter::GetTimer()

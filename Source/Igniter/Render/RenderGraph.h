@@ -52,7 +52,7 @@ namespace ig
         RenderGraph& operator=(const RenderGraph&) = delete;
         RenderGraph& operator=(RenderGraph&&) noexcept = delete;
 
-        GpuSync Execute();
+        GpuSync Execute(tf::Executor& taskExecutor);
 
         RGBuffer GetBuffer(const RGResourceHandle handle);
         RGTexture GetTexture(const RGResourceHandle handle);
@@ -68,7 +68,6 @@ namespace ig
 
         eastl::vector<details::RGResourceInstance> resourceInstances{};
 
-        tf::Executor executor{std::thread::hardware_concurrency()};
         tf::Taskflow taskflow{"Render Graph"};
 
         eastl::vector<eastl::vector<CommandContext*>> mainGfxPendingCmdCtxLists{};

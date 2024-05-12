@@ -36,6 +36,8 @@ namespace fe
         ig::World* GetActiveWorld() { return world.get(); }
 
     private:
+        tf::Executor& taskExecutor;
+
         ig::Ptr<ig::World> world;
         ig::Ptr<ig::TempConstantBufferAllocator> tempConstantBufferAllocator;
         ig::Ptr<ig::RenderGraph> renderGraph;

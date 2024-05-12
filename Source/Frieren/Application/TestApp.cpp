@@ -351,10 +351,7 @@ namespace fe
         }
         ~BackBufferPass() override = default;
 
-        void Setup(ig::RenderGraphBuilder& builder) override
-        {
-            builder.ReadTexture(input.RenderOutput, D3D12_BARRIER_LAYOUT_COPY_SOURCE);
-        }
+        void Setup(ig::RenderGraphBuilder& builder) override { builder.ReadTexture(input.RenderOutput, D3D12_BARRIER_LAYOUT_COPY_SOURCE); }
 
         void PostCompile(ig::RenderGraph& renderGraph) override { renderOutput = renderGraph.GetTexture(input.RenderOutput); }
 
@@ -429,7 +426,9 @@ namespace fe
     };
 
     TestApp::TestApp(const ig::AppDesc& desc)
-        : Application(desc), tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(ig::Igniter::GetRenderContext()))
+        : taskExecutor(ig::Igniter::GetTaskExecutor())
+        , tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(ig::Igniter::GetRenderContext()))
+        , Application(desc)
     {
         /* #sy_test 렌더 그래프 테스트 */
         ig::RenderContext& renderContext = ig::Igniter::GetRenderContext();
@@ -445,8 +444,7 @@ namespace fe
         [[maybe_unused]] DummyAsyncComputePass& dummyPass2 = builder.AddPass<DummyAsyncComputePass>(
             "Dummy.2"_fs, DummyAsyncComputePass::Input{.RenderOutput = mainRenderPass->GetOutput().RenderOutput});
 
-        imGuiPass = &builder.AddPass<ImGuiPass>(
-            renderContext, ig::Igniter::GetWindow(), ImGuiPass::Input{.FinalRenderOutput = dummyPass2.AfterRead});
+        imGuiPass = &builder.AddPass<ImGuiPass>(renderContext, ig::Igniter::GetWindow(), ImGuiPass::Input{.FinalRenderOutput = dummyPass2.AfterRead});
 
         backBufferPass = &builder.AddPass<BackBufferPass>(
             renderContext, renderContext.GetSwapchain(), BackBufferPass::Input{.RenderOutput = imGuiPass->GetOutput().GuiRenderOutput});
@@ -614,7 +612,7 @@ namespace fe
 
     ig::GpuSync TestApp::Render(const ig::LocalFrameIndex)
     {
-        return renderGraph->Execute();
+        return renderGraph->Execute(taskExecutor);
     }
 
     void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex)
