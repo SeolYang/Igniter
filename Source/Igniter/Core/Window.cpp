@@ -1,10 +1,9 @@
 #include "Igniter/Igniter.h"
-#include "Igniter/Core/Window.h"
 #include "Igniter/Core/EmbededSettings.h"
 #include "Igniter/Core/Log.h"
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Input/InputManager.h"
-#include "Igniter/ImGui/ImGuiCanvas.h"
+#include "Igniter/Core/Window.h"
 
 IG_DEFINE_LOG_CATEGORY(Window);
 
@@ -86,6 +85,34 @@ namespace ig
         {
             bIsCursorVisible = false;
             ::ShowCursor(FALSE);
+        }
+    }
+
+    void Window::PumpMessage() 
+    {
+        ZoneScoped;
+        MSG msg;
+        ZeroMemory(&msg, sizeof(msg));
+        //while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
+        //{
+        //    if (msg.message == WM_QUIT)
+        //    {
+        //        Igniter::Stop();
+        //    }
+
+        //    TranslateMessage(&msg);
+        //    DispatchMessage(&msg);
+        //}
+
+        if (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT)
+            {
+                Igniter::Stop();
+            }
+
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }
     }
 

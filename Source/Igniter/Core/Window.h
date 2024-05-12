@@ -34,6 +34,8 @@ namespace ig
 
         void SetCursorVisibility(const bool bVisible);
 
+        void PumpMessage();
+
     private:
         static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 

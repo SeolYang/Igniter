@@ -59,6 +59,7 @@
 #define WIN32_MEAN_AND_LEAN
 #endif
 #include <Windows.h>
+#include <WinDNS.h>
 #include <strsafe.h>
 #include <shobjidl.h>
 

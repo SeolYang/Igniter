@@ -67,6 +67,12 @@ namespace ig
             EInput MappedInput{EInput::None};
         };
 
+        struct RawMouseInput
+        {
+            float DeltaX = 0.f;
+            float DeltaY = 0.f;
+        };
+
     public:
         InputManager();
         InputManager(const InputManager&) = delete;
@@ -90,6 +96,8 @@ namespace ig
         [[nodiscard]] Axis GetAxis(const Handle<Axis, InputManager> axis) const;
 
         void HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
+
+        void HandleRawMouseInput();
         void PostUpdate();
 
     private:
@@ -101,6 +109,8 @@ namespace ig
         bool HandleReleaseAction(const EInput input);
 
         bool HandleAxis(const EInput input, const float value, const bool bIsDifferential = false);
+
+        void PollRawMouseInput();
 
     private:
         HandleRegistry<Action, InputManager> actionRegistry;
@@ -115,6 +125,12 @@ namespace ig
 
         UnorderedSet<EInput> processedInputs;
 
+
+        std::jthread rawMouseInputPollingThread;
+        HANDLE rawMouseInputPollingDoneEvent{INVALID_HANDLE_VALUE};
+        Mutex rawMouseInputPollingMutex;
         eastl::vector<uint8_t> rawInputBuffer;
+        eastl::vector<RawMouseInput> polledRawMouseInputs;
+        size_t rawInputOffset{sizeof(RAWINPUTHEADER)};
     };
 }    // namespace ig

@@ -69,30 +69,62 @@ namespace ig
 
     InputManager::InputManager()
     {
-        RAWINPUTDEVICE mouseRID{};
-        mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-        mouseRID.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
-        mouseRID.dwFlags = 0;
-        mouseRID.hwndTarget = nullptr;
+        rawMouseInputPollingDoneEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        rawMouseInputPollingThread = std::jthread{[this]()
+            {
+                HWND window = CreateWindowEx(0, TEXT("Message"), NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
+                if (window == NULL)
+                {
+                    IG_LOG(InputManager, Fatal, "Failed to create raw input message window. {:#X}", GetLastError());
+                    return;
+                }
 
-        if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
-        {
-            IG_LOG(InputManager, Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
-        }
+                RAWINPUTDEVICE rawMouse{};
+                rawMouse.usUsagePage = 0x01;          /* HID_USAGE_PAGE_GENERIC */
+                rawMouse.usUsage = 0x02;              /* HID_USAGE_GENERIC_MOUSE */
+                //rawMouse.dwFlags = RIDEV_NOLEGACY;    // 이러면 완벽하긴 한데.. ImGui 가 마우스 이벤트를 처리하질 못함..
+                rawMouse.dwFlags = 0;
+                rawMouse.hwndTarget = window;
+                if (RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse)) == FALSE)
+                {
+                    IG_LOG(InputManager, Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
+                    DestroyWindow(window);
+                    return;
+                }
+
+                BOOL bIsWow64 = FALSE;
+                if (IsWow64Process(GetCurrentProcess(), &bIsWow64) && bIsWow64)
+                {
+                    rawInputOffset += 8;
+                }
+
+                while (true)
+                {
+                    ZoneScoped;
+                    // https://learn.microsoft.com/ko-kr/windows/win32/api/winuser/nf-winuser-msgwaitformultipleobjects
+                    if (const bool bDoneEventSignaled =
+                            MsgWaitForMultipleObjects(1, &this->rawMouseInputPollingDoneEvent, FALSE, INFINITE, QS_RAWINPUT) != WAIT_OBJECT_0 + 1;
+                        bDoneEventSignaled)
+                    {
+                        break;
+                    }
+
+                    [[maybe_unused]] const DWORD messageType = GetQueueStatus(QS_RAWINPUT);
+
+                    this->PollRawMouseInput();
+                }
+
+                rawMouse.dwFlags |= RIDEV_REMOVE;
+                RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse));
+                DestroyWindow(window);
+            }};
     }
 
     InputManager::~InputManager()
     {
-        RAWINPUTDEVICE mouseRID{};
-        mouseRID.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-        mouseRID.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
-        mouseRID.dwFlags = RIDEV_REMOVE;
-        mouseRID.hwndTarget = nullptr;
-
-        if (RegisterRawInputDevices(&mouseRID, 1, sizeof(mouseRID)) == FALSE)
-        {
-            IG_LOG(InputManager, Error, "Failed to unregister raw input mouse. {:#X}", GetLastError());
-        }
+        SetEvent(rawMouseInputPollingDoneEvent);
+        rawMouseInputPollingThread.join();
+        CloseHandle(rawMouseInputPollingDoneEvent);
 
         for (const auto& [_, mappedAction] : nameActionTable)
         {
@@ -286,6 +318,24 @@ namespace ig
         }
     }
 
+    void InputManager::HandleRawMouseInput()
+    {
+        ZoneScoped;
+        UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
+        if (!polledRawMouseInputs.empty())
+        {
+            processedInputs.insert(EInput::MouseDeltaX);
+            processedInputs.insert(EInput::MouseDeltaY);
+        }
+
+        for (const RawMouseInput rawMouseInput : polledRawMouseInputs)
+        {
+            HandleAxis(EInput::MouseDeltaX, rawMouseInput.DeltaX, true);
+            HandleAxis(EInput::MouseDeltaY, rawMouseInput.DeltaY, true);
+        }
+        polledRawMouseInputs.clear();
+    }
+
     void InputManager::PostUpdate()
     {
         ZoneScoped;
@@ -339,7 +389,6 @@ namespace ig
 
     void InputManager::HandleRawInput(const LPARAM lParam)
     {
-        /* 2024-05-12 여기서 부터 개선!! GetRawInputData->GetRawInputBuffer! */
         ZoneScoped;
         UINT pcbSize{};
         GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &pcbSize, sizeof(RAWINPUTHEADER));
@@ -427,5 +476,39 @@ namespace ig
         }
 
         return bAnyAxisHandled;
+    }
+
+    void InputManager::PollRawMouseInput()
+    {
+        UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
+        while (true)
+        {
+            UINT cbSize = 0;
+            if (GetRawInputBuffer(NULL, &cbSize, sizeof(RAWINPUTHEADER)) != 0)
+            {
+                break;
+            }
+
+            const size_t newBufferSize = cbSize * 32Ui64;
+            if (rawInputBuffer.size() < newBufferSize)
+            {
+                rawInputBuffer.resize(newBufferSize);
+            }
+
+            auto sizeOfBuffer = static_cast<UINT>(rawInputBuffer.size());
+            const size_t numInputs = GetRawInputBuffer((RAWINPUT*) rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
+            if (numInputs == 0 || numInputs == NumericMaxOfValue(numInputs))
+            {
+                break;
+            }
+
+            auto* currentRawInput = (RAWINPUT*) rawInputBuffer.data();
+            for (size_t idx = 0; idx < numInputs; ++idx, currentRawInput = NEXTRAWINPUTBLOCK(currentRawInput))
+            {
+                auto* rawMouse = (RAWMOUSE*) ((BYTE*) currentRawInput + rawInputOffset);
+                // 더 많은 마우스 이벤트를 얻을 수 있음!
+                polledRawMouseInputs.emplace_back(RawMouseInput{.DeltaX = (float) rawMouse->lLastX, .DeltaY = (float) rawMouse->lLastY});
+            }
+        }
     }
 }    // namespace ig
