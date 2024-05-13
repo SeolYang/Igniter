@@ -7,8 +7,8 @@
 
 namespace ig
 {
-    Swapchain::Swapchain(const Window& window, RenderContext& renderContext, const uint8_t desiredNumBackBuffers, const bool bEnableVSync /*= true*/)
-        : renderContext(renderContext), numBackBuffers(desiredNumBackBuffers + 2), bVSyncEnabled(bEnableVSync)
+    Swapchain::Swapchain(const Window& window, RenderContext& renderContext, const bool bEnableVSync /*= true*/)
+        : renderContext(renderContext), bVSyncEnabled(bEnableVSync)
     {
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
 
@@ -32,7 +32,7 @@ namespace ig
         desc.Stereo = false;
         desc.SampleDesc = {1, 0};
         desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        desc.BufferCount = numBackBuffers;
+        desc.BufferCount = NumFramesInFlight;
         desc.Scaling = DXGI_SCALING_STRETCH;
         desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
@@ -47,28 +47,23 @@ namespace ig
         IG_VERIFY_SUCCEEDED(factory->MakeWindowAssociation(window.GetNative(), DXGI_MWA_NO_ALT_ENTER));
         IG_VERIFY_SUCCEEDED(swapchain1.As(&swapchain));
 
-        renderTargetViews.reserve(numBackBuffers);
-        backBuffers.reserve(numBackBuffers);
-        for (uint32_t idx = 0; idx < numBackBuffers; ++idx)
+        for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
             ComPtr<ID3D12Resource1> resource;
-            IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(idx, IID_PPV_ARGS(&resource)));
-            SetObjectName(resource.Get(), std::format("Backbuffer {}", idx));
-            backBuffers.emplace_back(renderContext.CreateTexture(GpuTexture{resource}));
-            renderTargetViews.emplace_back(renderContext.CreateRenderTargetView(backBuffers[idx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0}));
+            IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(localFrameIdx, IID_PPV_ARGS(&resource)));
+            SetObjectName(resource.Get(), std::format("Backbuffer LF#{}", localFrameIdx));
+            backBuffers.LocalFrameResources[localFrameIdx] = renderContext.CreateTexture(GpuTexture{resource});
+            renderTargetViews.LocalFrameResources[localFrameIdx] =
+                renderContext.CreateRenderTargetView(backBuffers.LocalFrameResources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
         }
     }
 
     Swapchain::~Swapchain()
     {
-        for (const RenderResource<GpuView> rtv : renderTargetViews)
+        for (uint32_t idx = 0; idx < NumFramesInFlight; ++idx)
         {
-            renderContext.DestroyGpuView(rtv);
-        }
-
-        for (const RenderResource<GpuTexture> backBuffer : backBuffers)
-        {
-            renderContext.DestroyTexture(backBuffer);
+            renderContext.DestroyGpuView(renderTargetViews.LocalFrameResources[idx]);
+            renderContext.DestroyTexture(backBuffers.LocalFrameResources[idx]);
         }
     }
 

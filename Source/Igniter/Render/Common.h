@@ -7,9 +7,9 @@ namespace ig
     using RenderResource = Handle<Ty, class RenderContext>;
 
     template <typename Ty>
-    struct LocalFrameResource
+    struct FrameResource
     {
     public:
-        eastl::array<Ty, NumFramesInFlight> Resources;
+        eastl::array<Ty, NumFramesInFlight> LocalFrameResources{};
     };
 }    // namespace ig

@@ -11,8 +11,8 @@ namespace ig
     class GpuBuffer;
     class RenderContext;
     class RenderPass;
-    using RGBuffer = LocalFrameResource<Handle<GpuBuffer, RenderContext>>;
-    using RGTexture = LocalFrameResource<Handle<GpuTexture, RenderContext>>;
+    using RGBuffer = FrameResource<Handle<GpuBuffer, RenderContext>>;
+    using RGTexture = FrameResource<Handle<GpuTexture, RenderContext>>;
 
     struct RGResourceHandle final
     {
@@ -57,7 +57,7 @@ namespace ig
                 IG_CHECK(Type == ERGResourceType::Buffer);
                 if (bIsExternal)
                 {
-                    return renderContext.Lookup(std::get<RGBuffer>(Resource).Resources[0])->GetDesc();
+                    return renderContext.Lookup(std::get<RGBuffer>(Resource).LocalFrameResources[0])->GetDesc();
                 }
 
                 return std::get<GpuBufferDesc>(Resource);
@@ -68,7 +68,7 @@ namespace ig
                 IG_CHECK(Type == ERGResourceType::Texture);
                 if (bIsExternal)
                 {
-                    return renderContext.Lookup(std::get<RGTexture>(Resource).Resources[0])->GetDesc();
+                    return renderContext.Lookup(std::get<RGTexture>(Resource).LocalFrameResources[0])->GetDesc();
                 }
 
                 return std::get<GpuTextureDesc>(Resource);

@@ -102,9 +102,10 @@ namespace fe
 
             for (ig::LocalFrameIndex localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
             {
-                rtvs[localFrameIdx] =
-                    renderContext.CreateRenderTargetView(renderTarget.Resources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
-                dsvs[localFrameIdx] = renderContext.CreateDepthStencilView(depthStencil.Resources[localFrameIdx], D3D12_TEX2D_DSV{.MipSlice = 0});
+                rtvs[localFrameIdx] = renderContext.CreateRenderTargetView(
+                    renderTarget.LocalFrameResources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
+                dsvs[localFrameIdx] =
+                    renderContext.CreateDepthStencilView(depthStencil.LocalFrameResources[localFrameIdx], D3D12_TEX2D_DSV{.MipSlice = 0});
             }
         }
 
@@ -274,7 +275,7 @@ namespace fe
 
             for (const ig::LocalFrameIndex localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
             {
-                renderContext.DestroyGpuView(guiRenderOutputRtv.Resources[localFrameIdx]);
+                renderContext.DestroyGpuView(guiRenderOutputRtv.LocalFrameResources[localFrameIdx]);
             }
         }
 
@@ -289,8 +290,8 @@ namespace fe
 
             for (const ig::LocalFrameIndex localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
             {
-                guiRenderOutputRtv.Resources[localFrameIdx] =
-                    renderContext.CreateRenderTargetView(guiRenderOutput.Resources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
+                guiRenderOutputRtv.LocalFrameResources[localFrameIdx] = renderContext.CreateRenderTargetView(
+                    guiRenderOutput.LocalFrameResources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
             }
         }
 
@@ -310,7 +311,7 @@ namespace fe
             }
             ImGui::Render();
 
-            cmdCtx->SetRenderTarget(*renderContext.Lookup(guiRenderOutputRtv.Resources[localFrameIdx]));
+            cmdCtx->SetRenderTarget(*renderContext.Lookup(guiRenderOutputRtv.LocalFrameResources[localFrameIdx]));
             cmdCtx->SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
             ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx->GetNative());
             cmdCtx->End();
@@ -329,7 +330,7 @@ namespace fe
         Output output;
 
         ig::RGTexture guiRenderOutput;
-        ig::LocalFrameResource<ig::Handle<ig::GpuView, ig::RenderContext>> guiRenderOutputRtv;
+        ig::FrameResource<ig::Handle<ig::GpuView, ig::RenderContext>> guiRenderOutputRtv;
 
         ig::ImGuiCanvas* canvas = nullptr;
         ig::RenderResource<ig::GpuView> imguiSrv{};
@@ -364,7 +365,7 @@ namespace fe
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_COPY_DEST);
             cmdCtx->FlushBarriers();
 
-            cmdCtx->CopyTextureSimple(*renderContext.Lookup(renderOutput.Resources[localFrameIdx]), backBuffer);
+            cmdCtx->CopyTextureSimple(*renderContext.Lookup(renderOutput.LocalFrameResources[localFrameIdx]), backBuffer);
 
             cmdCtx->AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COPY_DEST, D3D12_BARRIER_LAYOUT_COMMON);
@@ -375,7 +376,7 @@ namespace fe
 
     private:
         ig::RenderContext& renderContext;
-        // Swapchain은 다소 특이한 경우
+        // Swapchain은 다소 특이한 경우 -> 2024/05/13 이후로 특이 케이스 X; swapchain의 back buffer도 이젠 External Resource로 등록 사용 가능
         ig::Swapchain& swapchain;
         Input input;
 

@@ -29,7 +29,7 @@ namespace ig
                 else
                 {
                     const GpuBufferDesc& desc = resource.GetBufferDesc(renderContext);
-                    for (auto& handle : newBuffer.Resources)
+                    for (auto& handle : newBuffer.LocalFrameResources)
                     {
                         handle = renderContext.CreateBuffer(desc);
                     }
@@ -48,7 +48,7 @@ namespace ig
                 else
                 {
                     const GpuTextureDesc& desc = resource.GetTextureDesc(renderContext);
-                    for (auto& handle : newTexture.Resources)
+                    for (auto& handle : newTexture.LocalFrameResources)
                     {
                         handle = renderContext.CreateTexture(desc);
                     }
@@ -221,7 +221,7 @@ namespace ig
                         IG_CHECK(layoutTransition.Before != layoutTransition.After);
 
                         RGTexture rgTexture = resourceInstances[layoutTransition.TextureHandle.Index].GetTexture();
-                        GpuTexture* gpuTexturePtr = renderContext.Lookup(rgTexture.Resources[localFrameIdx]);
+                        GpuTexture* gpuTexturePtr = renderContext.Lookup(rgTexture.LocalFrameResources[localFrameIdx]);
                         IG_CHECK(gpuTexturePtr != nullptr);
                         layoutTransitionCmdCtx->AddPendingTextureBarrier(*gpuTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, layoutTransition.Before, layoutTransition.After,
@@ -255,14 +255,14 @@ namespace ig
             switch (resourceInstance.Type)
             {
                 case details::ERGResourceType::Buffer:
-                    for (const auto handle : resourceInstance.GetBuffer().Resources)
+                    for (const auto handle : resourceInstance.GetBuffer().LocalFrameResources)
                     {
                         renderContext.DestroyBuffer(handle);
                     }
                     break;
 
                 case details::ERGResourceType::Texture:
-                    for (const auto handle : resourceInstance.GetTexture().Resources)
+                    for (const auto handle : resourceInstance.GetTexture().LocalFrameResources)
                     {
                         renderContext.DestroyTexture(handle);
                     }
