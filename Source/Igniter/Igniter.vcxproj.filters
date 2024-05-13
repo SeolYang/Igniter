@@ -369,6 +369,9 @@
     <ClInclude Include="Render\RenderGraph.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="ImGui\ImGuiContext.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -544,6 +547,9 @@
     </ClCompile>
     <ClCompile Include="Render\RenderGraph.cpp">
       <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\ImGuiContext.cpp">
+      <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

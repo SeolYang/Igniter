@@ -103,7 +103,6 @@ namespace ig
     private:
         void HandleKeyDown(const WPARAM wParam, const bool bIsMouse);
         void HandleKeyUp(const WPARAM wParam, const bool bIsMouse);
-        void HandleRawInput(const LPARAM lParam);
 
         bool HandlePressAction(const EInput input);
         bool HandleReleaseAction(const EInput input);

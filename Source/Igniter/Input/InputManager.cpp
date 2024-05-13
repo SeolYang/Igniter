@@ -281,7 +281,7 @@ namespace ig
         return *axisPtr;
     }
 
-    void InputManager::HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam)
+    void InputManager::HandleEvent(const uint32_t message, const WPARAM wParam, [[maybe_unused]] const LPARAM lParam)
     {
         constexpr WPARAM mouseLBWParam = 1;
         constexpr WPARAM mouseRBWParam = 2;
@@ -307,13 +307,6 @@ namespace ig
             case WM_KEYUP:
                 HandleKeyUp(wParam, false);
                 break;
-
-            case WM_INPUT:
-                HandleRawInput(lParam);
-                break;
-
-            default:
-                break;
         }
     }
 
@@ -323,16 +316,20 @@ namespace ig
         UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
         if (!polledRawMouseInputs.empty())
         {
+            float deltaX = 0.f;
+            float deltaY = 0.f;
+            for (const RawMouseInput rawMouseInput : polledRawMouseInputs)
+            {
+                deltaX += rawMouseInput.DeltaX;
+                deltaY += rawMouseInput.DeltaY;
+            }
+            HandleAxis(EInput::MouseDeltaX, deltaX, true);
+            HandleAxis(EInput::MouseDeltaY, deltaY, true);
             processedInputs.insert(EInput::MouseDeltaX);
             processedInputs.insert(EInput::MouseDeltaY);
-        }
 
-        for (const RawMouseInput rawMouseInput : polledRawMouseInputs)
-        {
-            HandleAxis(EInput::MouseDeltaX, rawMouseInput.DeltaX, true);
-            HandleAxis(EInput::MouseDeltaY, rawMouseInput.DeltaY, true);
+            polledRawMouseInputs.clear();
         }
-        polledRawMouseInputs.clear();
     }
 
     void InputManager::PostUpdate()
@@ -384,40 +381,6 @@ namespace ig
         const EInput input = WParamToInput(wParam, bIsMouse);
         HandleReleaseAction(input);
         HandleAxis(input, 0.f);
-    }
-
-    void InputManager::HandleRawInput(const LPARAM lParam)
-    {
-        ZoneScoped;
-        UINT pcbSize{};
-        GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &pcbSize, sizeof(RAWINPUTHEADER));
-        if (rawInputBuffer.size() < pcbSize)
-        {
-            rawInputBuffer.resize(pcbSize);
-        }
-
-        if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawInputBuffer.data(), &pcbSize, sizeof(RAWINPUTHEADER)) != pcbSize)
-        {
-            IG_LOG(InputManager, Fatal, "GetRawInputData does not return correct size!");
-            return;
-        }
-
-        const auto* rawInput = reinterpret_cast<RAWINPUT*>(rawInputBuffer.data());
-        IG_CHECK(rawInput != nullptr);
-        if (rawInput->header.dwType == RIM_TYPEMOUSE)
-        {
-            const auto deltaX = rawInput->data.mouse.lLastX;
-            const auto deltaY = rawInput->data.mouse.lLastY;
-            if (HandleAxis(EInput::MouseDeltaX, static_cast<float>(deltaX), true))
-            {
-                processedInputs.insert(EInput::MouseDeltaX);
-            }
-
-            if (HandleAxis(EInput::MouseDeltaY, static_cast<float>(deltaY), true))
-            {
-                processedInputs.insert(EInput::MouseDeltaY);
-            }
-        }
     }
 
     bool InputManager::HandlePressAction(const EInput input)
