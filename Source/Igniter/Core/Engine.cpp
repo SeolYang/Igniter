@@ -176,4 +176,10 @@ namespace ig
         IG_CHECK(instance != nullptr);
         return *instance->assetManager;
     }
+
+    ImGuiContext& Igniter::GetImGuiContext() 
+    {
+        IG_CHECK(instance != nullptr);
+        return *instance->imguiContext;
+    }
 }    // namespace ig

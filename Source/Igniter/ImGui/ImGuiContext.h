@@ -17,9 +17,14 @@ namespace ig
         ImGuiContext& operator=(const ImGuiContext&) = delete;
         ImGuiContext& operator=(ImGuiContext&&) noexcept = delete;
 
+        void SetInputEnabled(const bool bEnabled) noexcept { bInputEnabled = bEnabled; }
+
+        void HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
     private:
         RenderContext& renderContext;
         Handle<GpuView, RenderContext> fontSrv{};
 
+        bool bInputEnabled = true;
     };
 }    // namespace ig

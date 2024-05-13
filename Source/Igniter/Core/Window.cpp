@@ -3,6 +3,7 @@
 #include "Igniter/Core/Log.h"
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Input/InputManager.h"
+#include "Igniter/ImGui/ImGuiContext.h"
 #include "Igniter/Core/Window.h"
 
 IG_DEFINE_LOG_CATEGORY(Window);
@@ -127,6 +128,7 @@ namespace ig
 
         if (Igniter::IsInitialized())
         {
+            Igniter::GetImGuiContext().HandleWindowProc(hWnd, uMsg, wParam, lParam);
             Igniter::GetInputManager().HandleEvent(uMsg, wParam, lParam);
         }
 

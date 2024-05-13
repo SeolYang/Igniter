@@ -32,4 +32,13 @@ namespace ig
         ImGui::DestroyContext();
         renderContext.DestroyGpuView(fontSrv);
     }
+
+    void ImGuiContext::HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    {
+        if (bInputEnabled)
+        {
+            ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
+        }
+    }
+
 }    // namespace ig

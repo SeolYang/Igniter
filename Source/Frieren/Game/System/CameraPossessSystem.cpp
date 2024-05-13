@@ -3,6 +3,7 @@
 #include "Igniter/Core/Log.h"
 #include "Igniter/Core/Engine.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
+#include "Igniter/ImGui/ImGuiContext.h"
 #include "Frieren/Game/System/CameraPossessSystem.h"
 #include "Frieren/Game/System/FpsCameraControllSystem.h"
 
@@ -31,15 +32,14 @@ namespace fe
 
     void CameraPossessSystem::Configure()
     {
-        ImGuiIO& io = ImGui::GetIO();
+        ig::ImGuiContext& imguiContext = ig::Igniter::GetImGuiContext();
         if (bEnabled)
         {
             IG_LOG(CameraPossessSystem, Debug, "Possess to Camera.");
             fpsCamControllSystem.SetIgnoreInput(false);
             window.SetCursorVisibility(false);
             window.ClipCursor();
-            io.WantCaptureKeyboard = false;
-            io.WantCaptureMouse = false;
+            imguiContext.SetInputEnabled(false);
         }
         else
         {
@@ -47,8 +47,7 @@ namespace fe
             fpsCamControllSystem.SetIgnoreInput(true);
             window.SetCursorVisibility(true);
             window.UnclipCursor();
-            io.WantCaptureKeyboard = true;
-            io.WantCaptureMouse = true;
+            imguiContext.SetInputEnabled(true);
         }
     }
 }    // namespace fe

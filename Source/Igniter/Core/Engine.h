@@ -37,6 +37,7 @@ namespace ig
         [[nodiscard]] static InputManager& GetInputManager();
         [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
+        [[nodiscard]] static ImGuiContext& GetImGuiContext();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
         bool static IsInitialized() { return instance != nullptr && instance->bInitialized; }
