@@ -12,16 +12,12 @@ namespace ig
     };
 
     class Application;
-    class FrameManager;
     class Timer;
     class Window;
     class RenderContext;
-    class GpuUploader;
     class InputManager;
     class AssetManager;
-    class ImGuiCanvas;
-    class ImGuiRenderer;
-    class GameInstance;
+    class ImGuiContext;
     class Igniter final
     {
         friend class Application;
@@ -71,6 +67,7 @@ namespace ig
 
         //////////////////////// L2 ////////////////////////
         Ptr<AssetManager> assetManager;
+        Ptr<ImGuiContext> imguiContext;
         ////////////////////////////////////////////////////
     };
 }    // namespace ig

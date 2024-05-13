@@ -10,8 +10,8 @@
 #include "Igniter/Core/ComInitializer.h"
 #include "Igniter/Input/InputManager.h"
 #include "Igniter/Render/RenderContext.h"
-#include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Igniter/Asset/AssetManager.h"
+#include "Igniter/ImGui/ImGuiContext.h"
 #include "Igniter/Application/Application.h"
 
 IG_DEFINE_LOG_CATEGORY(Engine);
@@ -39,6 +39,7 @@ namespace ig
         //////////////////////// L2 ////////////////////////
         assetManager = MakePtr<AssetManager>(*renderContext);
         assetManager->RegisterEngineDefault();
+        imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
         ////////////////////////////////////////////////////
 
         bInitialized = true;
@@ -49,6 +50,7 @@ namespace ig
         IG_LOG(Engine, Info, "Extinguishing Engine Runtime.");
 
         //////////////////////// L2 ////////////////////////
+        imguiContext.reset();
         assetManager->UnRegisterEngineDefault();
         assetManager.reset();
         ////////////////////////////////////////////////////

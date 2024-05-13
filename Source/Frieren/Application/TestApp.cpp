@@ -249,30 +249,10 @@ namespace fe
         ImGuiPass(ig::RenderContext& renderContext, ig::Window& window, const Input input)
             : renderContext(renderContext), window(window), input(input), ig::RenderPass("ImGuiPass"_fs)
         {
-            IMGUI_CHECKVERSION();
-            ImGui::CreateContext();
-            ImGuiIO& io = ImGui::GetIO();
-            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-            io.Fonts->AddFontFromFileTTF("Fonts/D2Coding-ligature.ttf", 18, nullptr, io.Fonts->GetGlyphRangesKorean());
-            ig::ImGuiX::SetupDefaultTheme();
-
-            imguiSrv = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
-            ig::GpuView* imguiSrvPtr = renderContext.Lookup(imguiSrv);
-            ig::RenderDevice& renderDevice = renderContext.GetRenderDevice();
-            ImGui_ImplWin32_Init(window.GetNative());
-            ImGui_ImplDX12_Init(&renderDevice.GetNative(), ig::NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM,
-                &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), imguiSrvPtr->CPUHandle, imguiSrvPtr->GPUHandle);
         }
 
         ~ImGuiPass() override
         {
-            ImGui_ImplDX12_Shutdown();
-            ImGui_ImplWin32_Shutdown();
-            ImGui::DestroyContext();
-
-            renderContext.DestroyGpuView(imguiSrv);
-
             for (const ig::LocalFrameIndex localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
             {
                 renderContext.DestroyGpuView(guiRenderOutputRtv.LocalFrameResources[localFrameIdx]);

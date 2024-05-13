@@ -451,8 +451,9 @@ namespace ig
             {
                 break;
             }
-
-            const size_t newBufferSize = cbSize * 32Ui64;
+            
+            constexpr size_t BatchMessageSize = 64Ui64;
+            const size_t newBufferSize = cbSize * BatchMessageSize;
             if (rawInputBuffer.size() < newBufferSize)
             {
                 rawInputBuffer.resize(newBufferSize);

@@ -285,9 +285,6 @@
     <ClInclude Include="ImGui\ImGuiExtensions.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\ImGuiRenderer.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="Input\InputManager.h">
       <Filter>Source\Input</Filter>
     </ClInclude>
@@ -507,9 +504,6 @@
       <Filter>Source\Gameplay</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\ImGuiExtensions.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\ImGuiRenderer.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Input\InputManager.cpp">
