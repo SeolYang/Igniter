@@ -70,9 +70,9 @@ namespace ig
 
         tf::Taskflow taskflow{"Render Graph"};
 
-        eastl::vector<eastl::vector<CommandContext*>> mainGfxPendingCmdCtxLists{};
-        eastl::vector<eastl::vector<CommandContext*>> asyncComputePendingCmdCtxLists{};
-        eastl::vector<eastl::vector<CommandContext*>> asyncCopyPendingCmdCtxLists{};
+        eastl::vector<CommandContext*> mainGfxPendingCmdCtxList{};
+        eastl::vector<CommandContext*> asyncComputePendingCmdCtxList{};
+        eastl::vector<CommandContext*> asyncCopyPendingCmdCtxList{};
 
         GpuSync lastFrameSync;
     };

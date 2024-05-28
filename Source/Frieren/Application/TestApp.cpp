@@ -109,7 +109,7 @@ namespace fe
             }
         }
 
-        void Execute([[maybe_unused]] tf::Subflow& renderPassSubflow, eastl::vector<ig::CommandContext*>& pendingCmdCtxList) override
+        void Execute([[maybe_unused]] tf::Subflow& renderPassSubflow, ig::CommandContext& cmdCtx) override
         {
             struct BasicRenderResources
             {
@@ -147,21 +147,20 @@ namespace fe
             }
             perFrameConstantBuffer.Write(perFrameBuffer);
 
-            auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainRenderPass"_fs);
-            renderCmdCtx->Begin(renderContext.Lookup(pso));
+            cmdCtx.Begin(renderContext.Lookup(pso));
             {
                 auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
-                renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
-                renderCmdCtx->SetRootSignature(*rootSignature);
+                cmdCtx.SetDescriptorHeaps(bindlessDescHeaps);
+                cmdCtx.SetRootSignature(*rootSignature);
 
                 ig::GpuView& rtv = *renderContext.Lookup(rtvs[localFrameIdx]);
-                renderCmdCtx->ClearRenderTarget(rtv);
+                cmdCtx.ClearRenderTarget(rtv);
                 ig::GpuView& dsv = *renderContext.Lookup(dsvs[localFrameIdx]);
-                renderCmdCtx->ClearDepth(dsv);
-                renderCmdCtx->SetRenderTarget(rtv, dsv);
-                renderCmdCtx->SetViewport(mainViewport);
-                renderCmdCtx->SetScissorRect(mainViewport);
-                renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                cmdCtx.ClearDepth(dsv);
+                cmdCtx.SetRenderTarget(rtv, dsv);
+                cmdCtx.SetViewport(mainViewport);
+                cmdCtx.SetScissorRect(mainViewport);
+                cmdCtx.SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
                 ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
 
@@ -174,7 +173,7 @@ namespace fe
                         ig::StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
                         ig::GpuBuffer* indexBufferPtr = renderContext.Lookup(staticMeshPtr->GetIndexBuffer());
                         ig::GpuView* vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
-                        renderCmdCtx->SetIndexBuffer(*indexBufferPtr);
+                        cmdCtx.SetIndexBuffer(*indexBufferPtr);
                         {
                             ig::TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator.Allocate<PerObjectBuffer>(localFrameIdx);
                             ig::GpuView* perObjectCBViewPtr = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
@@ -194,17 +193,16 @@ namespace fe
                                 .DiffuseTexIdx = diffuseTexSrvPtr->Index,
                                 .DiffuseTexSamplerIdx = diffuseTexSamplerPtr->Index};
 
-                            renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+                            cmdCtx.SetRoot32BitConstants(0, params, 0);
                         }
 
                         const ig::StaticMesh::Desc& snapshot = staticMeshPtr->GetSnapshot();
                         const ig::StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
-                        renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
+                        cmdCtx.DrawIndexed(loadDesc.NumIndices);
                     }
                 }
             }
-            renderCmdCtx->End();
-            pendingCmdCtxList.emplace_back((ig::CommandContext*) renderCmdCtx);
+            cmdCtx.End();
         }
 
         Output GetOutput() const { return output; }
@@ -275,11 +273,10 @@ namespace fe
             }
         }
 
-        void Execute([[maybe_unused]] tf::Subflow& renderPassSubflow, eastl::vector<ig::CommandContext*>& pendingCmdCtxList) override
+        void Execute([[maybe_unused]] tf::Subflow& renderPassSubflow, ig::CommandContext& cmdCtx) override
         {
             const ig::LocalFrameIndex localFrameIdx = ig::FrameManager::GetLocalFrameIndex();
-            auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "ImGuiRenderPass"_fs);
-            cmdCtx->Begin();
+            cmdCtx.Begin();
 
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
@@ -291,12 +288,10 @@ namespace fe
             }
             ImGui::Render();
 
-            cmdCtx->SetRenderTarget(*renderContext.Lookup(guiRenderOutputRtv.LocalFrameResources[localFrameIdx]));
-            cmdCtx->SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
-            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx->GetNative());
-            cmdCtx->End();
-
-            pendingCmdCtxList.emplace_back((ig::CommandContext*) cmdCtx);
+            cmdCtx.SetRenderTarget(*renderContext.Lookup(guiRenderOutputRtv.LocalFrameResources[localFrameIdx]));
+            cmdCtx.SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
+            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &cmdCtx.GetNative());
+            cmdCtx.End();
         }
 
         Output GetOutput() const { return output; }
@@ -335,23 +330,21 @@ namespace fe
 
         void PostCompile(ig::RenderGraph& renderGraph) override { renderOutput = renderGraph.GetTexture(input.RenderOutput); }
 
-        void Execute([[maybe_unused]] tf::Subflow& renderPassSubflow, eastl::vector<ig::CommandContext*>& pendingCmdCtxList) override
+        void Execute([[maybe_unused]] tf::Subflow& renderPassSubflow, ig::CommandContext& cmdCtx) override
         {
             const ig::LocalFrameIndex localFrameIdx = ig::FrameManager::GetLocalFrameIndex();
-            auto cmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "BackBufferCopyPass"_fs);
-            cmdCtx->Begin();
+            cmdCtx.Begin();
             ig::GpuTexture& backBuffer = *renderContext.Lookup(swapchain.GetBackBuffer());
-            cmdCtx->AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
+            cmdCtx.AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_COPY_DEST);
-            cmdCtx->FlushBarriers();
+            cmdCtx.FlushBarriers();
 
-            cmdCtx->CopyTextureSimple(*renderContext.Lookup(renderOutput.LocalFrameResources[localFrameIdx]), backBuffer);
+            cmdCtx.CopyTextureSimple(*renderContext.Lookup(renderOutput.LocalFrameResources[localFrameIdx]), backBuffer);
 
-            cmdCtx->AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
+            cmdCtx.AddPendingTextureBarrier(backBuffer, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COPY_DEST, D3D12_BARRIER_LAYOUT_COMMON);
-            cmdCtx->FlushBarriers();
-            cmdCtx->End();
-            pendingCmdCtxList.emplace_back((ig::CommandContext*) cmdCtx);
+            cmdCtx.FlushBarriers();
+            cmdCtx.End();
         }
 
     private:
@@ -395,7 +388,7 @@ namespace fe
 
         void PostCompile(ig::RenderGraph&) override {}
 
-        void Execute([[maybe_unused]] tf::Subflow&, eastl::vector<ig::CommandContext*>&) override {}
+        void Execute([[maybe_unused]] tf::Subflow&, ig::CommandContext&) override {}
 
     private:
         bool bCreateResource = false;
@@ -415,16 +408,8 @@ namespace fe
         ig::RenderGraphBuilder builder{renderContext};
         mainRenderPass = &builder.AddPass<MainRenderPass>(renderContext, ig::Igniter::GetWindow(), *tempConstantBufferAllocator);
 
-        [[maybe_unused]] DummyAsyncComputePass& dummyPass0 =
-            builder.AddPass<DummyAsyncComputePass>("Dummy.0"_fs, DummyAsyncComputePass::Input{}, true);
-        [[maybe_unused]] DummyAsyncComputePass& dummyPass1 =
-            builder.AddPass<DummyAsyncComputePass>("Dummy.1"_fs, DummyAsyncComputePass::Input{}, true);
 
-        // 여기선 Read
-        [[maybe_unused]] DummyAsyncComputePass& dummyPass2 = builder.AddPass<DummyAsyncComputePass>(
-            "Dummy.2"_fs, DummyAsyncComputePass::Input{.RenderOutput = mainRenderPass->GetOutput().RenderOutput});
-
-        imGuiPass = &builder.AddPass<ImGuiPass>(renderContext, ig::Igniter::GetWindow(), ImGuiPass::Input{.FinalRenderOutput = dummyPass2.AfterRead});
+        imGuiPass = &builder.AddPass<ImGuiPass>(renderContext, ig::Igniter::GetWindow(), ImGuiPass::Input{.FinalRenderOutput =  mainRenderPass->GetOutput().RenderOutput});
 
         backBufferPass = &builder.AddPass<BackBufferPass>(
             renderContext, renderContext.GetSwapchain(), BackBufferPass::Input{.RenderOutput = imGuiPass->GetOutput().GuiRenderOutput});

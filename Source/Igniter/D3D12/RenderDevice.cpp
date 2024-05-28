@@ -272,8 +272,6 @@ namespace ig
         const D3D12_COMMAND_LIST_TYPE cmdListType = ToNativeCommandListType(targetQueueType);
         IG_CHECK(cmdListType != D3D12_COMMAND_LIST_TYPE_NONE);
 
-        /* #sy_todo_prio https://learn.microsoft.com/en-us/windows/win32/direct3d12/recording-command-lists-and-bundles#recording-command-lists Allocator per thread */
-        // thread local?
         ComPtr<ID3D12CommandAllocator> newCmdAllocator;
         if (const HRESULT result = device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator)); !SUCCEEDED(result))
         {
