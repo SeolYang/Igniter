@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    void RenderPass::Execute(const ig::LocalFrameIndex localFrameIdx)
+    void RenderPass::Execute(const LocalFrameIndex localFrameIdx)
     {
         if (bIsActivated)
         {

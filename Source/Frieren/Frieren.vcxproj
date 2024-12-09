@@ -40,7 +40,7 @@
     <ClCompile Include="ImGui\StatisticsPanel.cpp" />
     <ClCompile Include="ImGui\TextureImportPanel.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Render\RendererPrototype.cpp" />
+    <ClCompile Include="Render\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\TestApp.h" />
@@ -59,7 +59,7 @@
     <ClInclude Include="ImGui\StatisticsPanel.h" />
     <ClInclude Include="ImGui\TextureImportPanel.h" />
     <ClInclude Include="Render\EditorCamera.h" />
-    <ClInclude Include="Render\RendererPrototype.h" />
+    <ClInclude Include="Render\Renderer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -1,8 +1,9 @@
 #pragma once
-#include "Igniter/Render/Common.h"
+#include "Igniter/Render/Renderer.h"
 
 namespace ig
 {
+    class Renderer;
     class World;
     class Window;
     class ShaderBlob;
@@ -16,23 +17,23 @@ namespace ig
 
 namespace fe
 {
-    class RendererPrototype
+    class Renderer : public ig::Renderer
     {
     public:
-        RendererPrototype(ig::Window& window, ig::RenderContext& renderContext);
-        RendererPrototype(const RendererPrototype&) = delete;
-        RendererPrototype(RendererPrototype&&) noexcept = delete;
-        ~RendererPrototype();
+        Renderer(ig::Window& window, ig::RenderContext& renderContext);
+        Renderer(const Renderer&) = delete;
+        Renderer(Renderer&&) noexcept = delete;
+        virtual ~Renderer();
 
-        RendererPrototype& operator=(const RendererPrototype&) = delete;
-        RendererPrototype& operator=(RendererPrototype&&) noexcept = delete;
+        Renderer& operator=(const Renderer&) = delete;
+        Renderer& operator=(Renderer&&) noexcept = delete;
 
         /* Scene Data 설정 같은 방식으로 개선할 것! */
         void SetWorld(ig::World* newWorld) { this->world = newWorld; }
         void SetImGuiCanvas(ig::ImGuiCanvas* canvas) { this->imguiCanvas = canvas; }
 
-        void PreRender(const ig::LocalFrameIndex localFrameIdx);
-        ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx);
+        virtual void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
+        virtual ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx) override;
 
     private:
         ig::World* world = nullptr;

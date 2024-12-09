@@ -15,9 +15,9 @@
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Component/CameraComponent.h"
 #include "Igniter/Component/StaticMeshComponent.h"
-#include "Frieren/Render/RendererPrototype.h"
+#include "Frieren/Render/Renderer.h"
 
-IG_DEFINE_LOG_CATEGORY(RendererPrototype);
+IG_DEFINE_LOG_CATEGORY(Renderer);
 
 namespace fe
 {
@@ -40,7 +40,7 @@ namespace fe
         ig::Matrix LocalToWorld{};
     };
 
-    RendererPrototype::RendererPrototype(ig::Window& window, ig::RenderContext& renderContext)
+    Renderer::Renderer(ig::Window& window, ig::RenderContext& renderContext)
         : renderContext(renderContext)
         , mainViewport(window.GetViewport())
         , tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(renderContext))
@@ -94,7 +94,7 @@ namespace fe
 #pragma endregion
     }
 
-    RendererPrototype::~RendererPrototype()
+    Renderer::~Renderer()
     {
         for (const auto localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
         {
@@ -103,12 +103,12 @@ namespace fe
         }
     }
 
-    void RendererPrototype::PreRender(const ig::LocalFrameIndex localFrameIdx)
+    void Renderer::PreRender(const ig::LocalFrameIndex localFrameIdx)
     {
         tempConstantBufferAllocator->Reset(localFrameIdx);
     }
 
-    ig::GpuSync RendererPrototype::Render(const ig::LocalFrameIndex localFrameIdx)
+    ig::GpuSync Renderer::Render(const ig::LocalFrameIndex localFrameIdx)
     {
         if (world != nullptr)
         {

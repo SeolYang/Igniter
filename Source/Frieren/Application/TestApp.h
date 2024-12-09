@@ -9,7 +9,7 @@ namespace ig
 
 namespace fe
 {
-    class RendererPrototype;
+    class Renderer;
     class TestGameSystem;
     class EditorCanvas;
     class TestApp : public ig::Application
@@ -37,6 +37,6 @@ namespace fe
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas> editorCanvas;
 
-        ig::Ptr<RendererPrototype> renderer;
+        ig::Ptr<Renderer> renderer;
     };
 }    // namespace fe

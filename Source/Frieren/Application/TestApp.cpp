@@ -18,7 +18,7 @@
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
-#include "Frieren/Render/RendererPrototype.h"
+#include "Frieren/Render/Renderer.h"
 #include "Frieren/Game/Component/FpsCameraController.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/ImGui/EditorCanvas.h"
@@ -28,7 +28,7 @@ namespace fe
 {
     TestApp::TestApp(const ig::AppDesc& desc)
         : taskExecutor(ig::Igniter::GetTaskExecutor())
-        , renderer(ig::MakePtr<fe::RendererPrototype>(ig::Igniter::GetWindow(), ig::Igniter::GetRenderContext()))
+        , renderer(ig::MakePtr<fe::Renderer>(ig::Igniter::GetWindow(), ig::Igniter::GetRenderContext()))
         , Application(desc)
     {
         /* #sy_test 입력 매니저 테스트 */
