@@ -5,15 +5,10 @@ namespace ig
 {
     class World;
     class GameSystem;
-    class TempConstantBufferAllocator;
-    class RenderGraph;
 }    // namespace ig
 
 namespace fe
 {
-    class MainRenderPass;
-    class ImGuiPass;
-    class BackBufferPass;
     class RendererPrototype;
     class TestGameSystem;
     class EditorCanvas;
@@ -39,13 +34,9 @@ namespace fe
         tf::Executor& taskExecutor;
 
         ig::Ptr<ig::World> world;
-        ig::Ptr<ig::TempConstantBufferAllocator> tempConstantBufferAllocator;
-        ig::Ptr<ig::RenderGraph> renderGraph;
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas> editorCanvas;
 
-        MainRenderPass* mainRenderPass = nullptr;
-        ImGuiPass* imGuiPass = nullptr;
-        BackBufferPass* backBufferPass = nullptr;
+        ig::Ptr<RendererPrototype> renderer;
     };
 }    // namespace fe

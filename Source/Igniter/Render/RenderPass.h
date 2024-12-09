@@ -1,3 +1,4 @@
+/* !!!!!!!!!!!!!!!!!!! 간소화를 위해 더 이상 활용하지 말 것 !!!!!!!!!!!!!!!!!!! */
 #pragma once
 #include "Igniter/Core/String.h"
 #include "Igniter/D3D12/Common.h"

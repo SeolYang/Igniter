@@ -9,6 +9,7 @@
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/Utils.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
+#include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/Component/TransformComponent.h"
@@ -89,6 +90,7 @@ namespace fe
         ig::CommandContext* cmdCtxs[1]{(ig::CommandContext*) initialCmdCtx};
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
+
 #pragma endregion
     }
 
@@ -126,6 +128,10 @@ namespace fe
             }
             perFrameConstantBuffer.Write(perFrameBuffer);
 
+            ig::Swapchain& swapchain = renderContext.GetSwapchain();
+            ig::GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
+            const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
+
             ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
             auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
             renderCmdCtx->Begin(pso.get());
@@ -134,9 +140,6 @@ namespace fe
                 renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
                 renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
-                ig::Swapchain& swapchain = renderContext.GetSwapchain();
-                ig::GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
-                const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
                 renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT,
                     D3D12_BARRIER_LAYOUT_RENDER_TARGET);
@@ -192,7 +195,30 @@ namespace fe
             }
             renderCmdCtx->End();
 
-            ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx};
+            auto imguiCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
+            imguiCmdCtx->Begin();
+            {
+                ImGui_ImplDX12_NewFrame();
+                ImGui_ImplWin32_NewFrame();
+                ImGui::NewFrame();
+
+                if (imguiCanvas != nullptr)
+                {
+                    imguiCanvas->OnImGui();
+                }
+                ImGui::Render();
+
+                imguiCmdCtx->SetRenderTarget(*backBufferRtvPtr);
+                imguiCmdCtx->SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
+                ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &imguiCmdCtx->GetNative());
+
+                imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+                imguiCmdCtx->FlushBarriers();
+            }
+            imguiCmdCtx->End();
+
+            ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx, (ig::CommandContext*) imguiCmdCtx};
             mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
             return mainGfxQueue.MakeSync();
         }

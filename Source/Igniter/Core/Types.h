@@ -58,7 +58,7 @@ namespace ig
     using Ptr = std::unique_ptr<T, Dx>;
 
     template <typename T, typename... Args>
-        requires !std::is_array_v<T>
+        requires (!std::is_array_v<T>)
                  Ptr<T> MakePtr(Args && ... args)
     {
         return std::make_unique<T>(std::forward<Args>(args)...);

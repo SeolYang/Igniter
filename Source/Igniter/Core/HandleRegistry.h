@@ -45,14 +45,15 @@ namespace ig
                 {
                     if (!IsMarkedAsFreeSlot(slot))
                     {
+                        Ty* slotElementPtr = CalcAddressOfSlot(slot);
+                        slotElementPtr->~Ty();
+
 #ifdef IG_TRACK_LEAKED_HANDLE
                         PrintToDebugger("*** Found Leaked Handle!!! ***\n");
                         PrintToDebugger(CallStack::Dump(lastCallStackTable[slot]));
                         PrintToDebugger("\n");
-                        IG_CHECK_NO_ENTRY();
 #endif
-                        Ty* slotElementPtr = CalcAddressOfSlot(slot);
-                        slotElementPtr->~Ty();
+                        IG_CHECK_NO_ENTRY();
                     }
                 }
             }

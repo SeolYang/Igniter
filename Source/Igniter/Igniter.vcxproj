@@ -111,6 +111,7 @@
     <ClInclude Include="Render\Common.h" />
     <ClInclude Include="Render\RederGraphResource.h" />
     <ClInclude Include="Render\RenderContext.h" />
+    <ClInclude Include="Render\RendererBase.h" />
     <ClInclude Include="Render\RenderGraph.h" />
     <ClInclude Include="Render\RenderGraphBuilder.h" />
     <ClInclude Include="Render\RenderPass.h" />

@@ -29,8 +29,7 @@ namespace ig
         void Log(const std::string_view logMessage, Args&&... args)
         {
             spdlog::logger& logger = QueryCategory<Category>();
-            const std::string formattedMessage = std::vformat(logMessage, std::make_format_args(std::forward<Args>(args)...));
-
+            const std::string formattedMessage = std::vformat(logMessage, std::make_format_args(args...));
             switch (Verbosity)
             {
                 case ELogVerbosity::Info:

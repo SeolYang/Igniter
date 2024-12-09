@@ -369,6 +369,9 @@
     <ClInclude Include="ImGui\ImGuiContext.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RendererBase.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">

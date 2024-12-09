@@ -12,6 +12,7 @@ namespace ig
     class GpuTexture;
     class GpuView;
     class TempConstantBufferAllocator;
+    class ImGuiCanvas;
 }    // namespace ig
 
 namespace fe
@@ -29,12 +30,14 @@ namespace fe
 
         /* Scene Data 설정 같은 방식으로 개선할 것! */
         void SetWorld(ig::World* newWorld) { this->world = newWorld; }
+        void SetImGuiCanvas(ig::ImGuiCanvas* canvas) { this->imguiCanvas = canvas; }
 
         void PreRender(const ig::LocalFrameIndex localFrameIdx);
         ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx);
 
     private:
         ig::World* world = nullptr;
+        ig::ImGuiCanvas* imguiCanvas = nullptr;
         ig::RenderContext& renderContext;
 
         ig::Viewport mainViewport{};

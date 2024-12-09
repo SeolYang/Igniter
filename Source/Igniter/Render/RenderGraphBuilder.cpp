@@ -1,3 +1,4 @@
+/* !!!!!!!!!!!!!!!!!!! 간소화를 위해 더 이상 활용하지 말 것 !!!!!!!!!!!!!!!!!!! */
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Log.h"
 #include "Igniter/Render/RenderGraphBuilder.h"

@@ -41,7 +41,7 @@ namespace ig
         ComPtr<ID3D12CommandQueue> native;
         const EQueueType type;
 
-        Mutex mutex;
+        /*Mutex mutex;*/
         ComPtr<ID3D12Fence> fence;
         std::atomic_uint64_t syncCounter{1};
     };
