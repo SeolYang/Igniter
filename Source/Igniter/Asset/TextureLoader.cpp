@@ -9,7 +9,6 @@
 #include "Igniter/D3D12/GpuView.h"
 #include "Igniter/D3D12/CommandContext.h"
 #include "Igniter/Render/GpuUploader.h"
-#include "Igniter/Render/RenderPass.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Asset/TextureLoader.h"
 

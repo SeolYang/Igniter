@@ -354,23 +354,8 @@
     <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\PIXEventsLegacy.h">
       <Filter>Thirdparty\WinPixEventRuntime</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderGraphBuilder.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RenderPass.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RederGraphResource.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RenderGraph.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="ImGui\ImGuiContext.h">
       <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RendererBase.h">
-      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -538,12 +523,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <Filter>Thirdparty\SimpleMath</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\RenderGraphBuilder.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\RenderGraph.cpp">
-      <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\ImGuiContext.cpp">
       <Filter>Source\ImGui</Filter>

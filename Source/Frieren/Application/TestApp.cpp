@@ -178,8 +178,8 @@ namespace fe
         world = ig::MakePtr<ig::World>(assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"}));
         renderer->SetWorld(world.get());
         renderer->SetImGuiCanvas(editorCanvas.get());
-        //mainRenderPass->SetWorld(world.get());
-        //imGuiPass->SetCanvas(editorCanvas.get());
+        // mainRenderPass->SetWorld(world.get());
+        // imGuiPass->SetCanvas(editorCanvas.get());
     }
 
     TestApp::~TestApp() {}
@@ -199,9 +199,7 @@ namespace fe
         return renderer->Render(localFrameIdx);
     }
 
-    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex)
-    {
-    }
+    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex) {}
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)
     {

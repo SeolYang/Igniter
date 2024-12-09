@@ -1,6 +1,5 @@
 #pragma once
 #include "Igniter/Render/Common.h"
-#include "Igniter/Render/RenderPass.h"
 
 namespace ig
 {
