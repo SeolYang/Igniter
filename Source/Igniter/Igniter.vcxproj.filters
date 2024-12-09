@@ -357,6 +357,12 @@
     <ClInclude Include="ImGui\ImGuiContext.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Renderer.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderPass.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -526,6 +532,9 @@
     </ClCompile>
     <ClCompile Include="ImGui\ImGuiContext.cpp">
       <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderPass.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

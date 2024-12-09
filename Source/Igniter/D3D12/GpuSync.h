@@ -4,7 +4,6 @@
 namespace ig
 {
     class CommandQueue;
-
     class GpuSync final
     {
         friend class CommandQueue;
