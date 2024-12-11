@@ -30,14 +30,12 @@ namespace fe
 
         /* Scene Data 설정 같은 방식으로 개선할 것! */
         void SetWorld(ig::World* newWorld) { this->world = newWorld; }
-        void SetImGuiCanvas(ig::ImGuiCanvas* canvas) { this->imguiCanvas = canvas; }
 
         virtual void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
         virtual ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx) override;
 
     private:
         ig::World* world = nullptr;
-        ig::ImGuiCanvas* imguiCanvas = nullptr;
         ig::RenderContext& renderContext;
 
         ig::Viewport mainViewport{};

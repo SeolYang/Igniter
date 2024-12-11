@@ -12,6 +12,7 @@
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/ImGui/ImGuiContext.h"
+#include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Igniter/Application/Application.h"
 
 IG_DEFINE_LOG_CATEGORY(Engine);
@@ -40,6 +41,7 @@ namespace ig
         assetManager = MakePtr<AssetManager>(*renderContext);
         assetManager->RegisterEngineDefault();
         imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
+        imguiRenderer = MakePtr<ImGuiRenderer>(*renderContext);
         ////////////////////////////////////////////////////
 
         bInitialized = true;
@@ -106,17 +108,26 @@ namespace ig
                 application.PostUpdate(deltaTime);
             }
 
-            /*********** Pre-Render ***********/
+            /* Rendering: Wait for GPU */
             {
                 localFrameSyncs[localFrameIdx].WaitOnCpu();
-                renderContext->PreRender(localFrameIdx);
-                application.PreRender(localFrameIdx);
-                // imguiRenderer->SetImGuiCanvas(imguiCanvas);
+                imguiRenderSyncs[localFrameIdx].WaitOnCpu();
             }
 
-            /************* Render *************/
+            /*********** Pre-Render ***********/
+            {
+                renderContext->PreRender(localFrameIdx);
+                application.PreRender(localFrameIdx);
+            }
+
+            /************* Main Renderer: Render *************/
             {
                 localFrameSyncs[localFrameIdx] = application.Render(localFrameIdx);
+            }
+
+            /*********** ImGui Renderer: Render ***********/
+            {
+                imguiRenderSyncs[localFrameIdx] = imguiRenderer->Render(localFrameIdx);
             }
 
             /*********** Post-Render ***********/
@@ -177,9 +188,15 @@ namespace ig
         return *instance->assetManager;
     }
 
-    ImGuiContext& Igniter::GetImGuiContext() 
+    ImGuiContext& Igniter::GetImGuiContext()
     {
         IG_CHECK(instance != nullptr);
         return *instance->imguiContext;
+    }
+
+    ImGuiRenderer& Igniter::GetImGuiRenderer()
+    {
+        IG_CHECK(instance != nullptr);
+        return *instance->imguiRenderer;
     }
 }    // namespace ig

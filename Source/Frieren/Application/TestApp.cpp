@@ -18,6 +18,7 @@
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
+#include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Frieren/Render/Renderer.h"
 #include "Frieren/Game/Component/FpsCameraController.h"
 #include "Frieren/Game/System/TestGameSystem.h"
@@ -177,7 +178,9 @@ namespace fe
         ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
         world = ig::MakePtr<ig::World>(assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"}));
         renderer->SetWorld(world.get());
-        renderer->SetImGuiCanvas(editorCanvas.get());
+
+        ig::ImGuiRenderer& imGuiRenderer = ig::Igniter::GetImGuiRenderer();
+        imGuiRenderer.SetTargetCanvas(editorCanvas.get());
         // mainRenderPass->SetWorld(world.get());
         // imGuiPass->SetCanvas(editorCanvas.get());
     }

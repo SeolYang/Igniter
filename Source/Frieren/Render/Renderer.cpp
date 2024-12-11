@@ -192,33 +192,15 @@ namespace fe
                         renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                     }
                 }
+
+                renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET,
+                    D3D12_BARRIER_LAYOUT_PRESENT);
+                renderCmdCtx->FlushBarriers();
             }
             renderCmdCtx->End();
 
-            auto imguiCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
-            imguiCmdCtx->Begin();
-            {
-                ImGui_ImplDX12_NewFrame();
-                ImGui_ImplWin32_NewFrame();
-                ImGui::NewFrame();
-
-                if (imguiCanvas != nullptr)
-                {
-                    imguiCanvas->OnImGui();
-                }
-                ImGui::Render();
-
-                imguiCmdCtx->SetRenderTarget(*backBufferRtvPtr);
-                imguiCmdCtx->SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
-                ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &imguiCmdCtx->GetNative());
-
-                imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
-                imguiCmdCtx->FlushBarriers();
-            }
-            imguiCmdCtx->End();
-
-            ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx, (ig::CommandContext*) imguiCmdCtx};
+            ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx};
             mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
             return mainGfxQueue.MakeSync();
         }

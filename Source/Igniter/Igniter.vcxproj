@@ -104,6 +104,7 @@
     <ClInclude Include="ImGui\ImGuiCanvas.h" />
     <ClInclude Include="ImGui\ImGuiContext.h" />
     <ClInclude Include="ImGui\ImGuiExtensions.h" />
+    <ClInclude Include="ImGui\ImGuiRenderer.h" />
     <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="Render\CommandContextPool.h" />
     <ClInclude Include="Render\GpuUploader.h" />
@@ -182,6 +183,7 @@
     </ClCompile>
     <ClCompile Include="ImGui\ImGuiContext.cpp" />
     <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
+    <ClCompile Include="ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="Render\CommandContextPool.cpp" />
     <ClCompile Include="Render\GpuUploader.cpp" />

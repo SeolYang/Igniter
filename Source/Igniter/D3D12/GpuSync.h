@@ -33,6 +33,8 @@ namespace ig
 
         void WaitOnCpu();
 
+        static GpuSync Invalid() { return {}; }
+
     private:
         GpuSync(ID3D12Fence& fence, const size_t syncPoint);
 

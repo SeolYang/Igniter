@@ -18,6 +18,7 @@ namespace ig
     class InputManager;
     class AssetManager;
     class ImGuiContext;
+    class ImGuiRenderer;
     class Igniter final
     {
         friend class Application;
@@ -38,6 +39,7 @@ namespace ig
         [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static ImGuiContext& GetImGuiContext();
+        [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
         bool static IsInitialized() { return instance != nullptr && instance->bInitialized; }
@@ -53,6 +55,7 @@ namespace ig
         bool bShouldExit = false;
 
         eastl::array<GpuSync, NumFramesInFlight> localFrameSyncs{};
+        eastl::array<GpuSync, NumFramesInFlight> imguiRenderSyncs{};
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////
@@ -69,6 +72,7 @@ namespace ig
         //////////////////////// L2 ////////////////////////
         Ptr<AssetManager> assetManager;
         Ptr<ImGuiContext> imguiContext;
+        Ptr<ImGuiRenderer> imguiRenderer;
         ////////////////////////////////////////////////////
     };
 }    // namespace ig
