@@ -27,17 +27,17 @@ namespace ig
 {
     template <typename Ty, typename Dependency>
         requires(sizeof(Ty) >= sizeof(uint32_t))
-    class HandleRegistry final
+    class HandleStorage final
     {
     private:
         using SlotType = uint32_t;
         using VersionType = uint32_t;
 
     public:
-        HandleRegistry() { GrowChunks(); }
-        HandleRegistry(const HandleRegistry&) = delete;
-        HandleRegistry(HandleRegistry&&) noexcept = delete;
-        ~HandleRegistry()
+        HandleStorage() { GrowChunks(); }
+        HandleStorage(const HandleStorage&) = delete;
+        HandleStorage(HandleStorage&&) noexcept = delete;
+        ~HandleStorage()
         {
             if (freeSlots.size() != slotCapacity)
             {
@@ -67,8 +67,8 @@ namespace ig
             }
         }
 
-        HandleRegistry& operator=(const HandleRegistry&) = delete;
-        HandleRegistry& operator=(HandleRegistry&&) noexcept = delete;
+        HandleStorage& operator=(const HandleStorage&) = delete;
+        HandleStorage& operator=(HandleStorage&&) noexcept = delete;
 
         [[nodiscard]] size_t GetCapacity() const { return slotCapacity; }
         [[nodiscard]] size_t GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
@@ -298,7 +298,7 @@ namespace ig
         /*
          * LSB 0~21     <22 bits>  : Slot Bit
          * LSB 22~47    <26 bits>  : Version Bits
-         * LSB 48~64    <16 bits>  : Type Validation Bits
+         * LSB 48~63    <16 bits>  : Type Validation Bits
          */
         constexpr static size_t SlotSizeInBits = 22;
         constexpr static size_t VersionOffset = SlotSizeInBits;

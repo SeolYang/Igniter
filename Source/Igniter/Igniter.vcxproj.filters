@@ -189,7 +189,7 @@
     <ClInclude Include="Core\Handle.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\HandleRegistry.h">
+    <ClInclude Include="Core\HandleStorage.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Hash.h">

@@ -1,7 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/String.h"
-#include "Igniter/Core/HandleRegistry.h"
+#include "Igniter/Core/HandleStorage.h"
 
 namespace ig
 {
@@ -112,8 +112,8 @@ namespace ig
         void PollRawMouseInput();
 
     private:
-        HandleRegistry<Action, InputManager> actionRegistry;
-        HandleRegistry<Axis, InputManager> axisRegistry;
+        HandleStorage<Action, InputManager> actionRegistry;
+        HandleStorage<Axis, InputManager> axisRegistry;
 
         UnorderedMap<String, ActionMapping> nameActionTable{};
         UnorderedMap<String, AxisMapping> nameAxisTable{};

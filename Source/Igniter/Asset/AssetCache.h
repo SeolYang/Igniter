@@ -2,7 +2,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/String.h"
 #include "Igniter/Core/Handle.h"
-#include "Igniter/Core/HandleRegistry.h"
+#include "Igniter/Core/HandleStorage.h"
 #include "Igniter/Asset/Common.h"
 
 namespace ig::details
@@ -142,7 +142,7 @@ namespace ig::details
 
     private:
         mutable SharedMutex mutex;
-        HandleRegistry<T, class AssetManager> registry;
+        HandleStorage<T, class AssetManager> registry;
         UnorderedMap<Guid, ManagedAsset<T>> cachedAssets{};
         UnorderedMap<Guid, uint32_t> refCounterTable{};
     };

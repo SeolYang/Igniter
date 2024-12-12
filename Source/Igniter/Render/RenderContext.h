@@ -1,7 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Handle.h"
-#include "Igniter/Core/HandleRegistry.h"
+#include "Igniter/Core/HandleStorage.h"
 #include "Igniter/D3D12/RenderDevice.h"
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/GpuBuffer.h"
@@ -35,7 +35,7 @@ namespace ig
         struct ResourceManagePackage
         {
             mutable SharedMutex Mut;
-            HandleRegistry<Ty, RenderContext> Registry;
+            HandleStorage<Ty, RenderContext> Registry;
             eastl::array<Mutex, NumFramesInFlight> PendingListMut;
             eastl::array<eastl::vector<RenderResource<Ty>>, NumFramesInFlight> PendingDestroyList;
         };
