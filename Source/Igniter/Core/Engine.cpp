@@ -87,6 +87,11 @@ namespace ig
             /************* Event Handle/Proccess/Dispatch *************/
             {
                 window->PumpMessage();
+                if (bShouldExit)
+                {
+                    break;
+                }
+
                 inputManager->HandleRawMouseInput();
                 assetManager->DispatchEvent();
             }

@@ -312,7 +312,7 @@ namespace fe
                 ig::GpuView* srvPtr = renderContext.Lookup(srv);
                 if (srvPtr != nullptr)
                 {
-                    ImGui::Image(reinterpret_cast<ImTextureID>(srvPtr->GPUHandle.ptr), ImVec2{256, 256});
+                    ImGui::Image(srvPtr->GPUHandle.ptr, ImVec2{256, 256});
                 }
             }
         }

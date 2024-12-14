@@ -103,11 +103,6 @@ namespace ig
 
         while (PeekMessage(&msg, windowHandle, 0, WM_MOUSEMOVE - 1, PM_REMOVE) || PeekMessage(&msg, windowHandle, WM_MOUSEMOVE + 1, 0, PM_REMOVE))
         {
-            if (msg.message == WM_QUIT)
-            {
-                Engine::Stop();
-            }
-
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
@@ -115,6 +110,19 @@ namespace ig
 
     LRESULT CALLBACK Window::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
     {
+        switch (uMsg)
+        {
+            case WM_CLOSE:
+                Engine::Stop();
+                return 0;
+            case WM_DESTROY:
+                PostQuitMessage(0);
+                return 0;
+
+            default:
+                break;
+        }
+
         if (Engine::IsInitialized())
         {
             if (Engine::GetImGuiContext().HandleWindowProc(hWnd, uMsg, wParam, lParam))
@@ -126,16 +134,6 @@ namespace ig
             {
                 return true;
             }
-        }
-
-        switch (uMsg)
-        {
-            case WM_DESTROY:
-                PostQuitMessage(0);
-                return 0;
-
-            default:
-                break;
         }
 
         return DefWindowProc(hWnd, uMsg, wParam, lParam);

@@ -14,6 +14,8 @@ namespace ig
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        // @todo Host Viewport가 아닌, Secondary Viewport 에 대한 이벤트가 도저히 전달되지 않는 것 같음..
+        // 하나 걸리는 점은, Raw Input 처리로 인해서 제대로 전달이 안되는 것 같음..
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.Fonts->AddFontFromFileTTF("Fonts/D2Coding-ligature.ttf", 18, nullptr, io.Fonts->GetGlyphRangesKorean());
         ig::ImGuiX::SetupDefaultTheme();
@@ -25,10 +27,11 @@ namespace ig
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
+        ImGui_ImplWin32_Init(window.GetNative());
+
         fontSrv = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
         ig::GpuView* fontSrvPtr = renderContext.Lookup(fontSrv);
         ig::RenderDevice& renderDevice = renderContext.GetRenderDevice();
-        ImGui_ImplWin32_Init(window.GetNative());
         ImGui_ImplDX12_Init(&renderDevice.GetNative(), ig::NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM,
             &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), fontSrvPtr->CPUHandle, fontSrvPtr->GPUHandle);
     }

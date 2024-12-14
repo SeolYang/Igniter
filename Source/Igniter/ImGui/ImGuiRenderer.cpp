@@ -40,8 +40,14 @@ namespace ig
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
-            ImGui::ShowDemoWindow(nullptr);
             targetCanvas->OnImGui();
+
+            // @test Multiple-Viewports 기능을 위한 테스트 코드
+            if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+            {
+                ImGui::ShowDemoWindow(nullptr);
+            }
+
             ImGui::Render();
 
             imguiCmdCtx->SetRenderTarget(*backBufferRtvPtr);
