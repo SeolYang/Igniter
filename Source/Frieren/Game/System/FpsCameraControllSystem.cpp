@@ -13,7 +13,7 @@ namespace fe
 {
     FpsCameraControllSystem::FpsCameraControllSystem()
     {
-        auto& inputManager = ig::Igniter::GetInputManager();
+        auto& inputManager = ig::Engine::GetInputManager();
         moveLeftActionHandle = inputManager.QueryAction(ig::String("MoveLeft"));
         moveRightActionHandle = inputManager.QueryAction(ig::String("MoveRight"));
         moveForwardActionHandle = inputManager.QueryAction(ig::String("MoveForward"));
@@ -31,7 +31,7 @@ namespace fe
     void FpsCameraControllSystem::Update(const float deltaTime, ig::World& world)
     {
         ig::Registry& registry = world.GetRegistry();
-        const auto& inputManager = ig::Igniter::GetInputManager();
+        const auto& inputManager = ig::Engine::GetInputManager();
         const ig::Action moveLeftAction = inputManager.GetAction(moveLeftActionHandle);
         const ig::Action moveRightAction = inputManager.GetAction(moveRightActionHandle);
         const ig::Action moveForwardAction = inputManager.GetAction(moveForwardActionHandle);

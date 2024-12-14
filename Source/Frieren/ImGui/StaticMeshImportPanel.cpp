@@ -33,7 +33,7 @@ namespace fe
 
             if (ImGui::Button("Import"))
             {
-                ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+                ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
                 assetManager.Import(path, config);
                 return false;
             }

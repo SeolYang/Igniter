@@ -30,7 +30,7 @@ namespace fe
 
         if (ImGui::TreeNodeEx("Engine (Real-time)", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
         {
-            const ig::Timer& timer = ig::Igniter::GetTimer();
+            const ig::Timer& timer = ig::Engine::GetTimer();
             ImGui::Text("FPS: %d", timer.GetStableFps());
             ImGui::Text("Delta Time: %d ms", timer.GetDeltaTimeMillis());
             ImGui::TreePop();

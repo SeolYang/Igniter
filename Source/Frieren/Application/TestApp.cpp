@@ -28,12 +28,12 @@
 namespace fe
 {
     TestApp::TestApp(const ig::AppDesc& desc)
-        : taskExecutor(ig::Igniter::GetTaskExecutor())
-        , renderer(ig::MakePtr<fe::Renderer>(ig::Igniter::GetWindow(), ig::Igniter::GetRenderContext()))
+        : taskExecutor(ig::Engine::GetTaskExecutor())
+        , renderer(ig::MakePtr<fe::Renderer>(ig::Engine::GetWindow(), ig::Engine::GetRenderContext()))
         , Application(desc)
     {
         /* #sy_test 입력 매니저 테스트 */
-        ig::InputManager& inputManager = ig::Igniter::GetInputManager();
+        ig::InputManager& inputManager = ig::Engine::GetInputManager();
         inputManager.MapAction("MoveLeft"_fs, ig::EInput::A);
         inputManager.MapAction("MoveRight"_fs, ig::EInput::D);
         inputManager.MapAction("MoveForward"_fs, ig::EInput::W);
@@ -175,11 +175,11 @@ namespace fe
         // Igniter::GetAssetManager().Import("TestMap"_fs, {.WorldToSerialize = world.get()});
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
-        ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         world = ig::MakePtr<ig::World>(assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"}));
         renderer->SetWorld(world.get());
 
-        ig::ImGuiRenderer& imGuiRenderer = ig::Igniter::GetImGuiRenderer();
+        ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();
         imGuiRenderer.SetTargetCanvas(editorCanvas.get());
         // mainRenderPass->SetWorld(world.get());
         // imGuiPass->SetCanvas(editorCanvas.get());

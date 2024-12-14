@@ -15,7 +15,7 @@ namespace fe
 {
     AssetInspector::AssetInspector()
     {
-        ig::AssetManager& assetManager{ig::Igniter::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         ig::AssetManager::ModifiedEvent& modifiedEvent{assetManager.GetModifiedEvent()};
         modifiedEvent.Subscribe("AssetInspector"_fs,
             [this](const std::reference_wrapper<const ig::AssetManager> assetManagerRef)
@@ -47,7 +47,7 @@ namespace fe
         {
             if (previewTexture)
             {
-                ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+                ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
                 assetManager.Unload(previewTexture);
             }
         }
@@ -274,7 +274,7 @@ namespace fe
 
     void AssetInspector::RenderTexturePreview(const ig::AssetInfo& assetInfo)
     {
-        ig::RenderContext& renderContext{ig::Igniter::GetRenderContext()};
+        ig::RenderContext& renderContext{ig::Engine::GetRenderContext()};
         if (bIsMainSelectionDirty)
         {
             for (bool& previewSrvUpdateFlag : bIsPreviewSrvUpdated)
@@ -285,7 +285,7 @@ namespace fe
             bIsMainSelectionDirty = false;
         }
 
-        ig::AssetManager& assetManager{ig::Igniter::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         const ig::LocalFrameIndex localFrameIdx{ig::FrameManager::GetLocalFrameIndex()};
         if (!bIsPreviewSrvUpdated[localFrameIdx])
         {
@@ -320,7 +320,7 @@ namespace fe
 
     void AssetInspector::RenderMaterialEdit(const ig::AssetInfo& assetInfo)
     {
-        ig::AssetManager& assetManager{ig::Igniter::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         std::optional<ig::Material::LoadDesc> loadDescOpt{assetManager.GetLoadDesc<ig::Material>(assetInfo.GetGuid())};
         ig::ImGuiX::SeparatorText("Material");
         if (!loadDescOpt)
@@ -345,7 +345,7 @@ namespace fe
 
     void AssetInspector::RenderStaticMeshEdit(const ig::AssetInfo& assetInfo)
     {
-        ig::AssetManager& assetManager{ig::Igniter::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         std::optional<ig::StaticMesh::LoadDesc> loadDescOpt{assetManager.GetLoadDesc<ig::StaticMesh>(assetInfo.GetGuid())};
         ig::ImGuiX::SeparatorText("Static Mesh");
         if (!loadDescOpt)
@@ -384,7 +384,7 @@ namespace fe
             return;
         }
 
-        ig::AssetManager& assetManager{ig::Igniter::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         std::optional<ig::AssetInfo> assetInfoOpt{assetManager.GetAssetInfo(guid)};
         if (!assetInfoOpt)
         {

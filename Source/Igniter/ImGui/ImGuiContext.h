@@ -30,7 +30,7 @@ namespace ig
             }
         }
 
-        void HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+        bool HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     private:
         RenderContext& renderContext;

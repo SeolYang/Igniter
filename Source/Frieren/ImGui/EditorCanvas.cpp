@@ -37,13 +37,13 @@ namespace fe
             {
                 if (ImGui::MenuItem("Save All Asset Changes", "Ctrl+A+S"))
                 {
-                    ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+                    ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
                     assetManager.SaveAllChanges();
                 }
 
                 if (ImGui::MenuItem("Exit (Alt+F4)"))
                 {
-                    ig::Igniter::Stop();
+                    ig::Engine::Stop();
                 }
 
                 ImGui::EndMenu();

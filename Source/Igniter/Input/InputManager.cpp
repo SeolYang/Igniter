@@ -281,7 +281,7 @@ namespace ig
         return *axisPtr;
     }
 
-    void InputManager::HandleEvent(const uint32_t message, const WPARAM wParam, [[maybe_unused]] const LPARAM lParam)
+    bool InputManager::HandleEvent(const uint32_t message, const WPARAM wParam, [[maybe_unused]] const LPARAM lParam)
     {
         constexpr WPARAM mouseLBWParam = 1;
         constexpr WPARAM mouseRBWParam = 2;
@@ -291,22 +291,25 @@ namespace ig
             case WM_LBUTTONDOWN:
             case WM_RBUTTONDOWN:
                 HandleKeyDown(wParam, true);
-                break;
+                return true;
 
             case WM_KEYDOWN:
                 HandleKeyDown(wParam, false);
-                break;
+                return true;
 
             case WM_LBUTTONUP:
                 HandleKeyUp(mouseLBWParam, true);
-                break;
+                return true;
             case WM_RBUTTONUP:
                 HandleKeyUp(mouseRBWParam, true);
-                break;
+                return true;
 
             case WM_KEYUP:
                 HandleKeyUp(wParam, false);
-                break;
+                return true;
+
+            default:
+                return false;
         }
     }
 
@@ -451,7 +454,7 @@ namespace ig
             {
                 break;
             }
-            
+
             constexpr size_t BatchMessageSize = 64Ui64;
             const size_t newBufferSize = cbSize * BatchMessageSize;
             if (rawInputBuffer.size() < newBufferSize)

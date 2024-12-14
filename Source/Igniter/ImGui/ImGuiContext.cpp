@@ -14,8 +14,16 @@ namespace ig
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.Fonts->AddFontFromFileTTF("Fonts/D2Coding-ligature.ttf", 18, nullptr, io.Fonts->GetGlyphRangesKorean());
         ig::ImGuiX::SetupDefaultTheme();
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGuiStyle& style = ImGui::GetStyle();
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
 
         fontSrv = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
         ig::GpuView* fontSrvPtr = renderContext.Lookup(fontSrv);
@@ -33,12 +41,16 @@ namespace ig
         renderContext.DestroyGpuView(fontSrv);
     }
 
-    void ImGuiContext::HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    bool ImGuiContext::HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         if (bInputEnabled)
         {
-            ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
+            if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+            {
+                return true;
+            }
         }
-    }
 
+        return false;
+    }
 }    // namespace ig

@@ -153,7 +153,7 @@ namespace fe
                 renderCmdCtx->SetScissorRect(mainViewport);
                 renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-                ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+                ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
 
                 const auto renderableView = registry.view<ig::StaticMeshComponent, ig::TransformComponent>();
                 ig::GpuView* perFrameCbvPtr = renderContext.Lookup(perFrameConstantBuffer.GetConstantBufferView());

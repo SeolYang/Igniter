@@ -15,13 +15,13 @@ namespace ig
 
     StaticMeshComponent::~StaticMeshComponent()
     {
-        AssetManager& assetManager = Igniter::GetAssetManager();
+        AssetManager& assetManager = Engine::GetAssetManager();
         assetManager.Unload(Mesh);
     }
 
     Json& StaticMeshComponent::Serialize(Json& archive) const
     {
-        AssetManager& assetManager = Igniter::GetAssetManager();
+        AssetManager& assetManager = Engine::GetAssetManager();
         StaticMesh* mesh = assetManager.Lookup(Mesh);
         if (mesh != nullptr)
         {
@@ -37,7 +37,7 @@ namespace ig
         IG_DESERIALIZE_GUID_JSON(archive, staticMeshGuid, ContainerKey, MeshGuidKey, Guid{});
         if (staticMeshGuid.isValid())
         {
-            AssetManager& assetManager = Igniter::GetAssetManager();
+            AssetManager& assetManager = Engine::GetAssetManager();
             Mesh = assetManager.Load<StaticMesh>(staticMeshGuid);
         }
 
@@ -47,7 +47,7 @@ namespace ig
     void StaticMeshComponent::OnInspector(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
-        const AssetManager& assetManager = Igniter::GetAssetManager();
+        const AssetManager& assetManager = Engine::GetAssetManager();
         StaticMeshComponent& staticMeshComponent = registry->get<StaticMeshComponent>(entity);
         IG_CHECK(staticMeshComponent.Mesh);
         const StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);

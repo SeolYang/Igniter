@@ -19,9 +19,9 @@ IG_DEFINE_LOG_CATEGORY(Engine);
 
 namespace ig
 {
-    Igniter* Igniter::instance = nullptr;
+    Engine* Engine::instance = nullptr;
 
-    Igniter::Igniter(const IgniterDesc& desc)
+    Engine::Engine(const IgniterDesc& desc)
     {
         instance = this;
         CoInitializeUnique();
@@ -47,7 +47,7 @@ namespace ig
         bInitialized = true;
     }
 
-    Igniter::~Igniter()
+    Engine::~Engine()
     {
         IG_LOG(Engine, Info, "Extinguishing Engine Runtime.");
 
@@ -74,7 +74,7 @@ namespace ig
         }
     }
 
-    int Igniter::Execute(Application& application)
+    int Engine::Execute(Application& application)
     {
         IG_LOG(Engine, Info, "Igniting Main Loop!");
         while (!bShouldExit)
@@ -146,55 +146,55 @@ namespace ig
         return 0;
     }
 
-    void Igniter::Stop()
+    void Engine::Stop()
     {
         IG_CHECK(instance != nullptr);
         instance->bShouldExit = true;
     }
 
-    tf::Executor& Igniter::GetTaskExecutor()
+    tf::Executor& Engine::GetTaskExecutor()
     {
         IG_CHECK(instance != nullptr);
         return instance->taskExecutor;
     }
 
-    Timer& Igniter::GetTimer()
+    Timer& Engine::GetTimer()
     {
         IG_CHECK(instance != nullptr);
         return *instance->timer;
     }
 
-    Window& Igniter::GetWindow()
+    Window& Engine::GetWindow()
     {
         IG_CHECK(instance != nullptr);
         return *instance->window;
     }
 
-    RenderContext& Igniter::GetRenderContext()
+    RenderContext& Engine::GetRenderContext()
     {
         IG_CHECK(instance != nullptr);
         return *instance->renderContext;
     }
 
-    InputManager& Igniter::GetInputManager()
+    InputManager& Engine::GetInputManager()
     {
         IG_CHECK(instance != nullptr);
         return *instance->inputManager;
     }
 
-    AssetManager& Igniter::GetAssetManager()
+    AssetManager& Engine::GetAssetManager()
     {
         IG_CHECK(instance != nullptr);
         return *instance->assetManager;
     }
 
-    ImGuiContext& Igniter::GetImGuiContext()
+    ImGuiContext& Engine::GetImGuiContext()
     {
         IG_CHECK(instance != nullptr);
         return *instance->imguiContext;
     }
 
-    ImGuiRenderer& Igniter::GetImGuiRenderer()
+    ImGuiRenderer& Engine::GetImGuiRenderer()
     {
         IG_CHECK(instance != nullptr);
         return *instance->imguiRenderer;

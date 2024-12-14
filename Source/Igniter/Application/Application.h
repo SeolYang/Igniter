@@ -11,7 +11,7 @@ namespace ig
         uint32_t WindowWidth, WindowHeight;
     };
 
-    class Igniter;
+    class Engine;
     class Application
     {
     public:
@@ -36,6 +36,6 @@ namespace ig
         Application(const AppDesc& desc);
 
     private:
-        Ptr<Igniter> engine;
+        Ptr<Engine> engine;
     };
 }    // namespace ig

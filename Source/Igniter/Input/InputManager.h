@@ -95,7 +95,7 @@ namespace ig
         [[nodiscard]] Action GetAction(const Handle<Action, InputManager> action) const;
         [[nodiscard]] Axis GetAxis(const Handle<Axis, InputManager> axis) const;
 
-        void HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
+        bool HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
 
         void HandleRawMouseInput();
         void PostUpdate();

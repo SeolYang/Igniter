@@ -19,18 +19,18 @@ namespace ig
     class AssetManager;
     class ImGuiContext;
     class ImGuiRenderer;
-    class Igniter final
+    class Engine final
     {
         friend class Application;
 
     public:
-        Igniter(const IgniterDesc& desc);
-        ~Igniter();
+        Engine(const IgniterDesc& desc);
+        ~Engine();
 
-        Igniter(const Igniter&) = delete;
-        Igniter(Igniter&&) noexcept = delete;
-        Igniter& operator=(const Igniter&) = delete;
-        Igniter& operator=(Igniter&&) noexcept = delete;
+        Engine(const Engine&) = delete;
+        Engine(Engine&&) noexcept = delete;
+        Engine& operator=(const Engine&) = delete;
+        Engine& operator=(Engine&&) noexcept = delete;
 
         [[nodiscard]] static tf::Executor& GetTaskExecutor();
         [[nodiscard]] static Timer& GetTimer();
@@ -50,7 +50,7 @@ namespace ig
         int Execute(Application& application);
 
     private:
-        static Igniter* instance;
+        static Engine* instance;
         bool bInitialized = false;
         bool bShouldExit = false;
 

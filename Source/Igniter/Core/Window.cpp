@@ -94,6 +94,7 @@ namespace ig
         ZoneScoped;
         MSG msg;
         ZeroMemory(&msg, sizeof(msg));
+
         if (PeekMessage(&msg, windowHandle, WM_MOUSEMOVE, WM_MOUSEMOVE, PM_REMOVE))
         {
             TranslateMessage(&msg);
@@ -104,7 +105,7 @@ namespace ig
         {
             if (msg.message == WM_QUIT)
             {
-                Igniter::Stop();
+                Engine::Stop();
             }
 
             TranslateMessage(&msg);
@@ -114,7 +115,18 @@ namespace ig
 
     LRESULT CALLBACK Window::WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
     {
-        ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
+        if (Engine::IsInitialized())
+        {
+            if (Engine::GetImGuiContext().HandleWindowProc(hWnd, uMsg, wParam, lParam))
+            {
+                return true;
+            }
+
+            if (Engine::GetInputManager().HandleEvent(uMsg, wParam, lParam))
+            {
+                return true;
+            }
+        }
 
         switch (uMsg)
         {
@@ -124,12 +136,6 @@ namespace ig
 
             default:
                 break;
-        }
-
-        if (Igniter::IsInitialized())
-        {
-            Igniter::GetImGuiContext().HandleWindowProc(hWnd, uMsg, wParam, lParam);
-            Igniter::GetInputManager().HandleEvent(uMsg, wParam, lParam);
         }
 
         return DefWindowProc(hWnd, uMsg, wParam, lParam);

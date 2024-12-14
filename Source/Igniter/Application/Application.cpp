@@ -8,7 +8,7 @@ namespace ig
     {
         const IgniterDesc engineDesc{.WindowWidth = desc.WindowWidth, .WindowHeight = desc.WindowHeight, .WindowTitle = desc.WindowTitle};
 
-        engine = MakePtr<Igniter>(engineDesc);
+        engine = MakePtr<Engine>(engineDesc);
     }
 
     Application::~Application() {}

@@ -61,7 +61,7 @@ namespace fe
                 config.AddressModeV = AddressModes[selectedAddressModeV];
                 config.AddressModeW = AddressModes[selectedAddressModeW];
 
-                ig::AssetManager& assetManager = ig::Igniter::GetAssetManager();
+                ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
                 assetManager.Import(path, config);
                 return false;
             }
