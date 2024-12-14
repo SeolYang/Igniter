@@ -10,6 +10,8 @@ namespace ig
     public:
         ~StaticMeshComponent();
 
+        StaticMeshComponent& operator=(StaticMeshComponent&& rhs) noexcept = default;
+
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
@@ -20,7 +22,6 @@ namespace ig
     private:
         constexpr static std::string_view ContainerKey{"StaticMeshComponent"};
         constexpr static std::string_view MeshGuidKey{"StaticMeshGuid"};
-
     };
 
     IG_DECLARE_TYPE_META(StaticMeshComponent);
