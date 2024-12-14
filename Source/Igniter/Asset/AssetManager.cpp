@@ -36,8 +36,6 @@ namespace ig
                     snapshot.RefCount);
             }
         }
-
-        SaveAllChanges();
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetCategory assetType)
