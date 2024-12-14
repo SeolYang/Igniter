@@ -2,6 +2,7 @@
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Core/Log.h"
 #include "Igniter/Core/ContainerUtils.h"
+#include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Component/NameComponent.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
@@ -44,7 +45,8 @@ namespace fe
                     eastl::vector<std::pair<ig::Entity, std::string>> entityNames{ig::ToVector(entityView | validEntityView | entityNameView)};
                     std::sort(entityNames.begin(), entityNames.end(), [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 
-                    constexpr std::string_view entityManagementPopupID{"EntityManagementPopup"};
+                    constexpr std::string_view EntityManagementPopupID{"EntityManagementPopup"};
+                    constexpr std::string_view EntityCreatePopupID{"EntityCreatePopup"};
                     constexpr ImGuiTreeNodeFlags TreeNodeBaseFlags =
                         ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
                     for (const auto& [entity, entityName] : entityNames)
@@ -66,7 +68,7 @@ namespace fe
 
                             if (bIsRightClicked)
                             {
-                                ImGui::OpenPopup(entityManagementPopupID.data());
+                                ImGui::OpenPopup(EntityManagementPopupID.data());
                             }
                         }
 
@@ -77,23 +79,44 @@ namespace fe
                         }
                     }
 
-                    if ((selectedEntity != ig::NullEntity) && ImGui::BeginPopup(entityManagementPopupID.data()))
+                    if (selectedEntity != ig::NullEntity)
                     {
-                        ImGui::SeparatorText("Manage Entity");
-                        if (ImGui::Selectable("Delete"))
+                        if (ImGui::BeginPopup(EntityManagementPopupID.data()))
                         {
-                            IG_CHECK(selectedEntity != ig::NullEntity);
-                            const auto* nameComponent = registry.try_get<ig::NameComponent>(selectedEntity);
-                            IG_LOG(EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameComponent->Name,
-                                entt::to_integral(selectedEntity));
-                            registry.destroy(selectedEntity);
-                            selectedEntity = ig::NullEntity;
-                        }
+                            ImGui::SeparatorText("Manage Entity");
+                            if (ImGui::Selectable("Delete"))
+                            {
+                                IG_CHECK(selectedEntity != ig::NullEntity);
+                                const auto* nameComponent = registry.try_get<ig::NameComponent>(selectedEntity);
+                                IG_LOG(EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameComponent->Name,
+                                    entt::to_integral(selectedEntity));
+                                registry.destroy(selectedEntity);
+                                selectedEntity = ig::NullEntity;
+                            }
 
-                        if (ImGui::Selectable("Clone(Not Impl Yet)", false, ImGuiSelectableFlags_Disabled))
+                            if (ImGui::Selectable("Clone(Not Impl Yet)", false, ImGuiSelectableFlags_Disabled))
+                            {
+                            }
+
+                            ImGui::EndPopup();
+                        }
+                    }
+
+                    if (ImGui::IsMouseClicked(1) && !bIsItemClicked)
+                    {
+                        ImGui::OpenPopup(EntityCreatePopupID.data());
+                    }
+
+                    if (ImGui::BeginPopup(EntityCreatePopupID.data()))
+                    {
+                        if (ImGui::Selectable("Create New Entity"))
                         {
+                            const ig::Entity newEntity = registry.create();
+                            registry.emplace<ig::TransformComponent>(newEntity);
+                            ig::NameComponent& newNameComponent = registry.emplace<ig::NameComponent>(newEntity);
+                            newNameComponent.Name = "New Entity"_fs;
+                            selectedEntity = newEntity;
                         }
-
                         ImGui::EndPopup();
                     }
                 }
