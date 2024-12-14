@@ -89,11 +89,13 @@ namespace fe
                     bCachedStringDebuggerOpend = !bCachedStringDebuggerOpend;
                 }
 
-                if (ImGui::MenuItem("Entity Inspector"))
+                if (ImGui::MenuItem("Entities"))
                 {
+                    bEntityListOpend = !bEntityListOpend;
+                    entityList->SetActiveWorld(app.GetActiveWorld());
+
                     bEntityInspectorOpend = !bEntityInspectorOpend;
                     entityInspector->SetActiveWorld(app.GetActiveWorld());
-                    entityList->SetActiveWorld(app.GetActiveWorld());
                 }
 
                 ImGui::EndMenu();
@@ -107,7 +109,8 @@ namespace fe
                     {
                         if (ImGui::MenuItem(type.prop(ig::meta::TitleCaseNameProperty).value().cast<ig::String>().ToCString()))
                         {
-                            app.SetGameSystem(std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>()));
+                            app.SetGameSystem(
+                                std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>()));
                         }
                     }
                 }
@@ -118,45 +121,66 @@ namespace fe
             ImGui::EndMainMenuBar();
         }
 
-        if (bStatisticsPanelOpend && ImGui::Begin("Statistics", &bStatisticsPanelOpend))
+        if (bStaticMeshImportPanelOpend)
         {
-            statisticsPanel->OnImGui();
+            if (ImGui::Begin("Statistics", &bStatisticsPanelOpend))
+            {
+                statisticsPanel->OnImGui();
+            }
             ImGui::End();
         }
 
-        if (bCachedStringDebuggerOpend && ImGui::Begin("Cached String Debugger", &bCachedStringDebuggerOpend))
+        if (bCachedStringDebuggerOpend)
         {
-            cachedStringDebugger->OnImGui();
+            if (ImGui::Begin("Cached String Debugger", &bCachedStringDebuggerOpend))
+            {
+                cachedStringDebugger->OnImGui();
+            }
             ImGui::End();
         }
 
-        if (bEntityInspectorOpend && ImGui::Begin("Entity Outliner", &bEntityInspectorOpend))
+        if (bEntityListOpend)
         {
-            entityList->OnImGui();
+            if (ImGui::Begin("Entity List", &bEntityListOpend))
+            {
+                entityList->OnImGui();
+            }
             ImGui::End();
         }
 
-        if (bEntityInspectorOpend && ImGui::Begin("Entity Inspector", &bEntityInspectorOpend))
+        if (bEntityInspectorOpend)
         {
-            entityInspector->OnImGui();
+            if (ImGui::Begin("Entity Inspector", &bEntityInspectorOpend))
+            {
+                entityInspector->OnImGui();
+            }
             ImGui::End();
         }
 
-        if (bTextureImportPanelOpend && ImGui::Begin("Texture Importer", &bTextureImportPanelOpend))
+        if (bTextureImportPanelOpend)
         {
-            bTextureImportPanelOpend = textureImportPanel->OnImGui();
+            if (ImGui::Begin("Texture Importer", &bTextureImportPanelOpend))
+            {
+                bTextureImportPanelOpend = textureImportPanel->OnImGui();
+            }
             ImGui::End();
         }
 
-        if (bStaticMeshImportPanelOpend && ImGui::Begin("Static Mesh Importer", &bStaticMeshImportPanelOpend))
+        if (bStaticMeshImportPanelOpend)
         {
-            bStaticMeshImportPanelOpend = staticMeshImportPanel->OnImGui();
+            if (ImGui::Begin("Static Mesh Importer", &bStaticMeshImportPanelOpend))
+            {
+                bStaticMeshImportPanelOpend = staticMeshImportPanel->OnImGui();
+            }
             ImGui::End();
         }
 
-        if (bAssetInspectorOpend && ImGui::Begin("Asset Inspector", &bAssetInspectorOpend, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar))
+        if (bAssetInspectorOpend)
         {
-            assetInspector->OnImGui();
+            if (ImGui::Begin("Asset Inspector", &bAssetInspectorOpend, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar))
+            {
+                assetInspector->OnImGui();
+            }
             ImGui::End();
         }
     }

@@ -35,6 +35,7 @@ namespace fe
         bool bStatisticsPanelOpend = false;
         bool bCachedStringDebuggerOpend = false;
         bool bEntityInspectorOpend = false;
+        bool bEntityListOpend = false;
         bool bTextureImportPanelOpend = false;
         bool bStaticMeshImportPanelOpend = false;
         bool bAssetInspectorOpend = false;

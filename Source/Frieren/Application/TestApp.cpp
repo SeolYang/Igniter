@@ -181,8 +181,6 @@ namespace fe
 
         ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();
         imGuiRenderer.SetTargetCanvas(editorCanvas.get());
-        // mainRenderPass->SetWorld(world.get());
-        // imGuiPass->SetCanvas(editorCanvas.get());
     }
 
     TestApp::~TestApp() {}

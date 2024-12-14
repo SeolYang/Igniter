@@ -89,6 +89,7 @@ namespace ig
     using UnorderedSet = ankerl::unordered_dense::set<Key>;
 
     using Entity = entt::entity;
+    constexpr auto NullEntity = entt::null;
     using Registry = entt::registry;
 
     using Json = nlohmann::json;

@@ -124,7 +124,6 @@ namespace ig
 
         UnorderedSet<EInput> processedInputs;
 
-
         std::jthread rawMouseInputPollingThread;
         HANDLE rawMouseInputPollingDoneEvent{INVALID_HANDLE_VALUE};
         Mutex rawMouseInputPollingMutex;
