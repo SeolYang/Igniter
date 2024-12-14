@@ -77,21 +77,21 @@ namespace fe
                         }
                     }
 
-                    if (ImGui::BeginPopup(entityManagementPopupID.data()))
+                    if ((selectedEntity != ig::NullEntity) && ImGui::BeginPopup(entityManagementPopupID.data()))
                     {
                         ImGui::SeparatorText("Manage Entity");
                         if (ImGui::Selectable("Delete"))
                         {
                             IG_CHECK(selectedEntity != ig::NullEntity);
                             const auto* nameComponent = registry.try_get<ig::NameComponent>(selectedEntity);
-                            IG_LOG(EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameComponent->Name, entt::to_integral(selectedEntity));
+                            IG_LOG(EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameComponent->Name,
+                                entt::to_integral(selectedEntity));
                             registry.destroy(selectedEntity);
                             selectedEntity = ig::NullEntity;
                         }
 
                         if (ImGui::Selectable("Clone(Not Impl Yet)", false, ImGuiSelectableFlags_Disabled))
                         {
-
                         }
 
                         ImGui::EndPopup();
@@ -100,7 +100,6 @@ namespace fe
 
                 ImGui::TreePop();
             }
-
         }
         ImGui::EndChild();
 
