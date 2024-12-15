@@ -34,11 +34,13 @@ namespace fe
             IG_CHECK(name != nullptr);
 
             const bool bIsRemovableComponent = entt::resolve<ig::NameComponent>() != type && entt::resolve<ig::TransformComponent>() != type;
-            componentInfos.emplace_back(ComponentInfo{typeID, type, *name, ig::String{std::format("Remove##{}", *name)}, bIsRemovableComponent});
+            componentInfos.emplace_back(
+                ComponentInfo{typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)}, bIsRemovableComponent});
         }
 
         componentInfos.shrink_to_fit();
         componentInfoIndicesToDisplay.reserve(componentInfos.size());
+        addableComponentInfoIndices.reserve(componentInfos.size());
     }
 
     void EntityInspector::OnImGui()
@@ -51,6 +53,11 @@ namespace fe
         {
             ImGui::Text("Entity not selected.");
             return;
+        }
+
+        if (ImGui::Button("Attach Component", ImVec2(-FLT_MIN, 0.0f)))
+        {
+            // popup?
         }
 
         const bool bDisplayableComponentDoesNotExists = componentInfoIndicesToDisplay.empty();
@@ -69,19 +76,45 @@ namespace fe
                 continue;
             }
 
+            if (componentInfo.bIsRemovable && ImGui::Button(componentInfo.RemoveButtonLabel.ToCString(), ImVec2(-FLT_MIN, 0.0f)))
+            {
+                componentToRemove = componentInfoIdx;
+            }
+
             if (!ig::meta::Invoke(componentInfo.Type, ig::meta::OnInspectorFunc, &registry, selectedEntity))
             {
                 continue;
             }
+        }
 
-            if (componentInfo.bIsRemovable && ImGui::Button(componentInfo.RemoveButtonLabel.ToCString()))
+        if (componentToRemove != (size_t) -1)
+        {
+            ImGui::OpenPopup("Detach Component?");
+        }
+
+        if (ImGui::BeginPopupModal("Detach Component?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("정말로 컴포넌트를 제거 하시겠습니까?");
+            if (ImGui::Button("OK"))
             {
+                const ComponentInfo& componentInfo = componentInfos[componentToRemove];
                 if (ig::meta::Invoke(componentInfo.Type, ig::meta::RemoveComponentFunc, ig::Ref{registry}, selectedEntity))
                 {
                     // #sy_todo 컴포넌트 제거 사실 로깅?
                     bForceDirty = true;
                 }
+
+                componentToRemove = (size_t) -1;
+                ImGui::CloseCurrentPopup();
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+            {
+                componentToRemove = (size_t) -1;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
         }
     }
 
@@ -95,6 +128,7 @@ namespace fe
 
         bForceDirty = false;
         componentInfoIndicesToDisplay.clear();
+        addableComponentInfoIndices.clear();
         latestEntity = selectedEntity;
         if (selectedEntity == ig::NullEntity)
         {
@@ -108,10 +142,12 @@ namespace fe
             const entt::sparse_set* componentStorage = registry.storage(componentInfo.ID);
             if (componentStorage == nullptr || !componentStorage->contains(selectedEntity))
             {
-                continue;
+                addableComponentInfoIndices.emplace_back(idx);
             }
-
-            componentInfoIndicesToDisplay.emplace_back(idx);
+            else
+            {
+                componentInfoIndicesToDisplay.emplace_back(idx);
+            }
         }
     }
 }    // namespace fe
