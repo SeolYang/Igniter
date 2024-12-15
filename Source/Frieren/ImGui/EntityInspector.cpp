@@ -30,18 +30,18 @@ namespace fe
 
         for (const auto& [typeID, type] : entt::resolve())
         {
-            if (!type.prop(ig::meta::ComponentProperty))
+            if (!ig::meta::IsComponent(type))
             {
                 continue;
             }
 
-            entt::sparse_set* componentStorage = registry.storage(typeID);
+            const entt::sparse_set* componentStorage = registry.storage(typeID);
             if (componentStorage == nullptr || !componentStorage->contains(selectedEntity))
             {
                 continue;
             }
 
-            entt::meta_prop nameProperty = type.prop(ig::meta::TitleCaseNameProperty);
+            ig::meta::Property nameProperty = type.prop(ig::meta::TitleCaseNameProperty);
             if (!nameProperty)
             {
                 // fallback
@@ -65,12 +65,10 @@ namespace fe
                 continue;
             }
 
-            entt::meta_func onEditorFunc = type.func(ig::meta::OnInspectorFunc);
-            if (!onEditorFunc)
+            if (!ig::meta::Invoke(type, ig::meta::OnInspectorFunc, &registry, selectedEntity))
             {
-                continue;
+                continue;;
             }
-            onEditorFunc.invoke(type, &registry, selectedEntity);
         }
 
         if (!bHasDisplayableComponent)

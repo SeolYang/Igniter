@@ -102,7 +102,7 @@ namespace fe
                         }
                     }
 
-                    if (ImGui::IsMouseClicked(1) && !bIsItemClicked)
+                    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && !bIsItemClicked)
                     {
                         ImGui::OpenPopup(EntityCreatePopupID.data());
                     }
