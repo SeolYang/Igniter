@@ -49,6 +49,24 @@ namespace fe
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Editor"))
+            {
+                if (ImGui::MenuItem("Entities"))
+                {
+                    bEntityListOpend = !bEntityListOpend;
+                    entityList->SetActiveWorld(app.GetActiveWorld());
+
+                    bEntityInspectorOpend = !bEntityInspectorOpend;
+                    entityInspector->SetActiveWorld(app.GetActiveWorld());
+                }
+
+                if (ImGui::MenuItem("Editor Camera", nullptr, nullptr, false))
+                {
+                }
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::BeginMenu("Assets"))
             {
                 if (ImGui::MenuItem("Asset Inspector"))
@@ -89,15 +107,6 @@ namespace fe
                     bCachedStringDebuggerOpend = !bCachedStringDebuggerOpend;
                 }
 
-                if (ImGui::MenuItem("Entities"))
-                {
-                    bEntityListOpend = !bEntityListOpend;
-                    entityList->SetActiveWorld(app.GetActiveWorld());
-
-                    bEntityInspectorOpend = !bEntityInspectorOpend;
-                    entityInspector->SetActiveWorld(app.GetActiveWorld());
-                }
-
                 ImGui::EndMenu();
             }
 
@@ -121,7 +130,7 @@ namespace fe
             ImGui::EndMainMenuBar();
         }
 
-        if (bStaticMeshImportPanelOpend)
+        if (bStatisticsPanelOpend)
         {
             if (ImGui::Begin("Statistics", &bStatisticsPanelOpend))
             {
