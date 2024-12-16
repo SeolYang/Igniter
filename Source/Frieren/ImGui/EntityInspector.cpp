@@ -33,9 +33,8 @@ namespace fe
             const ig::String* name = nameProperty.value().try_cast<ig::String>();
             IG_CHECK(name != nullptr);
 
-            const bool bIsRemovableComponent = entt::resolve<ig::NameComponent>() != type && entt::resolve<ig::TransformComponent>() != type;
             componentInfos.emplace_back(ComponentInfo{typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
-                ig::String{std::format("{}##SelectableComponent", *name)}, bIsRemovableComponent});
+                ig::String{std::format("{}##SelectableComponent", *name)}});
         }
 
         componentInfos.shrink_to_fit();
@@ -101,7 +100,7 @@ namespace fe
                 continue;
             }
 
-            if (componentInfo.bIsRemovable && ImGui::Button(componentInfo.RemoveButtonLabel.ToCString(), ImVec2(-FLT_MIN, 0.0f)))
+            if (ImGui::Button(componentInfo.RemoveButtonLabel.ToCString(), ImVec2(-FLT_MIN, 0.0f)))
             {
                 componentToRemove = componentInfoIdx;
             }

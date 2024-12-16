@@ -10,6 +10,7 @@ namespace ig
     public:
         ~StaticMeshComponent();
 
+        // #sy_todo 만약, 기존에 Mesh 핸들을 가지고있었다면 해제해주어야함, copy operation에도 동일 처리 필요
         StaticMeshComponent& operator=(StaticMeshComponent&& rhs) noexcept = default;
 
         Json& Serialize(Json& archive) const;

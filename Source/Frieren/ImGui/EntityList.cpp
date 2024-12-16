@@ -34,7 +34,7 @@ namespace fe
                         }
                         else
                         {
-                            formattedName = std::format("Entity {}", entt::to_integral(entity));
+                            formattedName = std::format("Unnamed ({})", entt::to_integral(entity));
                         }
 
                         return std::make_pair(entity, formattedName);
@@ -131,9 +131,6 @@ namespace fe
                 if (ImGui::Selectable("Create New Entity"))
                 {
                     const ig::Entity newEntity = registry.create();
-                    registry.emplace<ig::TransformComponent>(newEntity);
-                    ig::NameComponent& newNameComponent = registry.emplace<ig::NameComponent>(newEntity);
-                    newNameComponent.Name = "New Entity"_fs;
                     selectedEntity = newEntity;
                 }
                 ImGui::EndPopup();
