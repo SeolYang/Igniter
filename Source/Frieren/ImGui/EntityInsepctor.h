@@ -18,6 +18,7 @@ namespace fe
             ig::meta::Type Type;
             ig::String NameToDisplay;
             ig::String RemoveButtonLabel;
+            ig::String AttachSelectableLabel;
             bool bIsRemovable;
         };
 

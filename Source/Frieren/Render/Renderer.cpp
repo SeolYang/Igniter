@@ -110,51 +110,67 @@ namespace fe
 
     ig::GpuSync Renderer::Render(const ig::LocalFrameIndex localFrameIdx)
     {
-        if (world != nullptr)
+        if (world == nullptr)
         {
-            ig::Registry& registry = world->GetRegistry();
-            ig::TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
+            return ig::GpuSync::Invalid();
+        }
 
-            PerFrameBuffer perFrameBuffer{};
-            auto cameraView = registry.view<ig::CameraComponent, ig::TransformComponent>();
-            IG_CHECK(cameraView.size_hint() == 1);
-            for (auto [entity, camera, transformData] : cameraView.each())
+        ig::Registry& registry = world->GetRegistry();
+        ig::TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
+
+        PerFrameBuffer perFrameBuffer{};
+        auto cameraView = registry.view<ig::CameraComponent, ig::TransformComponent>();
+
+        ig::Swapchain& swapchain = renderContext.GetSwapchain();
+        ig::GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
+        const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
+
+        ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
+        auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
+
+        bool bRenderable = false;
+        for (auto [entity, camera, transformData] : cameraView.each())
+        {
+            /* #sy_todo Multiple Camera, Render Target per camera */
+            /* Column Vector: PVM; Row Vector: MVP  */
+            if (!camera.bIsMainCamera)
             {
-                /* #sy_todo Multiple Camera, Render Target per camera */
-                /* Column Vector: PVM; Row Vector: MVP  */
-                const ig::Matrix viewMatrix = transformData.CreateView();
-                const ig::Matrix projMatrix = camera.CreatePerspective();
-                perFrameBuffer.ViewProj = ig::ConvertToShaderSuitableForm(viewMatrix * projMatrix);
+                continue;
             }
-            perFrameConstantBuffer.Write(perFrameBuffer);
 
-            ig::Swapchain& swapchain = renderContext.GetSwapchain();
-            ig::GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
-            const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
-
-            ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-            auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
-            renderCmdCtx->Begin(pso.get());
+            if (camera.CameraViewport.width < 1.f || camera.CameraViewport.height < 1.f)
             {
-                auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
-                renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
-                renderCmdCtx->SetRootSignature(*bindlessRootSignature);
+                continue;
+            }
 
-                renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT,
-                    D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-                renderCmdCtx->FlushBarriers();
+            const ig::Matrix viewMatrix = transformData.CreateView();
+            const ig::Matrix projMatrix = camera.CreatePerspective();
+            perFrameBuffer.ViewProj = ig::ConvertToShaderSuitableForm(viewMatrix * projMatrix);
+            perFrameConstantBuffer.Write(perFrameBuffer);
+            bRenderable = true;
+        }
 
-                renderCmdCtx->ClearRenderTarget(*backBufferRtvPtr);
-                ig::GpuView& dsv = *renderContext.Lookup(dsvs[localFrameIdx]);
-                renderCmdCtx->ClearDepth(dsv);
-                renderCmdCtx->SetRenderTarget(*backBufferRtvPtr, dsv);
-                renderCmdCtx->SetViewport(mainViewport);
-                renderCmdCtx->SetScissorRect(mainViewport);
-                renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        renderCmdCtx->Begin(pso.get());
+        {
+            auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
+            renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
+            renderCmdCtx->SetRootSignature(*bindlessRootSignature);
 
+            renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            renderCmdCtx->FlushBarriers();
+
+            renderCmdCtx->ClearRenderTarget(*backBufferRtvPtr);
+            ig::GpuView& dsv = *renderContext.Lookup(dsvs[localFrameIdx]);
+            renderCmdCtx->ClearDepth(dsv);
+            renderCmdCtx->SetRenderTarget(*backBufferRtvPtr, dsv);
+            renderCmdCtx->SetViewport(mainViewport);
+            renderCmdCtx->SetScissorRect(mainViewport);
+            renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+            if (bRenderable)
+            {
                 ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-
                 const auto renderableView = registry.view<ig::StaticMeshComponent, ig::TransformComponent>();
                 ig::GpuView* perFrameCbvPtr = renderContext.Lookup(perFrameConstantBuffer.GetConstantBufferView());
                 for (auto [entity, staticMeshComponent, transform] : renderableView.each())
@@ -192,19 +208,16 @@ namespace fe
                         renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                     }
                 }
-
-                renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET,
-                    D3D12_BARRIER_LAYOUT_PRESENT);
-                renderCmdCtx->FlushBarriers();
             }
-            renderCmdCtx->End();
 
-            ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx};
-            mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
-            return mainGfxQueue.MakeSync();
+            renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            renderCmdCtx->FlushBarriers();
         }
+        renderCmdCtx->End();
 
-        return {};
+        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) renderCmdCtx};
+        mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
+        return mainGfxQueue.MakeSync();
     }
 }    // namespace fe

@@ -16,14 +16,13 @@ namespace fe
     {
         const auto& inputManager = ig::Engine::GetInputManager();
         togglePossessToCameraHandle = inputManager.QueryAction(ig::String("TogglePossessCamera"));
-
         Configure();
     }
 
     void CameraPossessSystem::Update()
     {
         const ig::Action togglePossessToCamera = ig::Engine::GetInputManager().GetAction(togglePossessToCameraHandle);
-        if (togglePossessToCamera.State == ig::EInputState::Pressed)
+        if (togglePossessToCamera.State == ig::EInputState::Pressed && !ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow))
         {
             bEnabled = !bEnabled;
             Configure();

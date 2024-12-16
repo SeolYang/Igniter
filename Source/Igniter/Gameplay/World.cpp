@@ -15,7 +15,7 @@ namespace ig
     {
         if (map)
         {
-            Map* mapPtr = assetManager.Lookup(map);
+            const Map* mapPtr = assetManager.Lookup(map);
             if (mapPtr != nullptr)
             {
                 Deserialize(mapPtr->GetSerializedWorld());

@@ -47,9 +47,14 @@ namespace ig
     void StaticMeshComponent::OnInspector(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
-        const AssetManager& assetManager = Engine::GetAssetManager();
         StaticMeshComponent& staticMeshComponent = registry->get<StaticMeshComponent>(entity);
-        IG_CHECK(staticMeshComponent.Mesh);
+        if (!staticMeshComponent.Mesh)
+        {
+            ImGui::Text("Static Mesh Component not selected.");
+            return;
+        }
+
+        const AssetManager& assetManager = Engine::GetAssetManager();
         const StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
 
         const StaticMesh::Desc& staticMeshSnapshot{staticMeshPtr->GetSnapshot()};

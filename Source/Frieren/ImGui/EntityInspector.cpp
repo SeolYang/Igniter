@@ -34,8 +34,8 @@ namespace fe
             IG_CHECK(name != nullptr);
 
             const bool bIsRemovableComponent = entt::resolve<ig::NameComponent>() != type && entt::resolve<ig::TransformComponent>() != type;
-            componentInfos.emplace_back(
-                ComponentInfo{typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)}, bIsRemovableComponent});
+            componentInfos.emplace_back(ComponentInfo{typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
+                ig::String{std::format("{}##SelectableComponent", *name)}, bIsRemovableComponent});
         }
 
         componentInfos.shrink_to_fit();
@@ -55,9 +55,35 @@ namespace fe
             return;
         }
 
+        constexpr std::string_view attachComponentPopup{"AttachComponentPopup"};
+        ig::Registry& registry = activeWorld->GetRegistry();
         if (ImGui::Button("Attach Component", ImVec2(-FLT_MIN, 0.0f)))
         {
-            // popup?
+            ImGui::OpenPopup(attachComponentPopup.data());
+        }
+
+        if (ImGui::BeginPopup(attachComponentPopup.data()))
+        {
+            static ImGuiTextFilter filter;
+            filter.Draw();
+            ImGui::Separator();
+            for (const size_t addableComponentInfoIdx : addableComponentInfoIndices)
+            {
+                const ComponentInfo& componentInfo = componentInfos[addableComponentInfoIdx];
+                if (!filter.PassFilter(componentInfo.NameToDisplay.ToCString()))
+                {
+                    continue;
+                }
+
+                if (ImGui::Selectable(componentInfo.AttachSelectableLabel.ToCString()))
+                {
+                    if (ig::meta::Invoke(componentInfo.Type, ig::meta::AddComponentFunc, ig::Ref{registry}, selectedEntity))
+                    {
+                        bForceDirty = true;
+                    }
+                }
+            }
+            ImGui::EndPopup();
         }
 
         const bool bDisplayableComponentDoesNotExists = componentInfoIndicesToDisplay.empty();
@@ -67,7 +93,6 @@ namespace fe
             return;
         }
 
-        ig::Registry& registry = activeWorld->GetRegistry();
         for (const size_t componentInfoIdx : componentInfoIndicesToDisplay)
         {
             const ComponentInfo& componentInfo = componentInfos[componentInfoIdx];
