@@ -50,7 +50,7 @@ namespace ig
         StaticMeshComponent& staticMeshComponent = registry->get<StaticMeshComponent>(entity);
         if (!staticMeshComponent.Mesh)
         {
-            ImGui::Text("Static Mesh Component not selected.");
+            ImGui::Text("Static Mesh Component does not selected.");
             return;
         }
 

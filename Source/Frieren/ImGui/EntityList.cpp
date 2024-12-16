@@ -93,8 +93,9 @@ namespace fe
                     {
                         IG_CHECK(selectedEntity != ig::NullEntity);
                         const auto* nameComponent = registry.try_get<ig::NameComponent>(selectedEntity);
+                        const ig::String nameStr = nameComponent == nullptr ? "Unnamed"_fs : nameComponent->Name;
                         IG_LOG(
-                            EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameComponent->Name, entt::to_integral(selectedEntity));
+                            EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameStr, entt::to_integral(selectedEntity));
                         registry.destroy(selectedEntity);
                         selectedEntity = ig::NullEntity;
                     }
