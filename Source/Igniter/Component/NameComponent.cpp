@@ -28,7 +28,11 @@ namespace ig
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         NameComponent& nameComponent = registry->get<NameComponent>(entity);
-        ImGui::Text(nameComponent.Name.ToCString());
+        std::string nameInput = nameComponent.Name.ToStandard();
+        if (ImGui::InputText("Name", &nameInput, ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            nameComponent.Name = String{nameInput};
+        }
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(NameComponent);
