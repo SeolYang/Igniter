@@ -174,7 +174,7 @@ namespace fe
                                 return bAscendingRequired ? lhs.Info.GetGuid().bytes() < rhs.Info.GetGuid().bytes()
                                                           : lhs.Info.GetGuid().bytes() > rhs.Info.GetGuid().bytes();
                             case 2:
-                                comp = lhs.Info.GetVirtualPath().ToStringView().compare(rhs.Info.GetVirtualPath().ToStringView());
+                                comp = lhs.Info.GetVirtualPath().Compare(rhs.Info.GetVirtualPath());
                                 return bAscendingRequired ? comp < 0 : comp > 0;
 
                             case 3:
