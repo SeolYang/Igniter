@@ -116,7 +116,6 @@ namespace ig
             /* Rendering: Wait for GPU */
             {
                 localFrameSyncs[localFrameIdx].WaitOnCpu();
-                imguiRenderSyncs[localFrameIdx].WaitOnCpu();
             }
 
             /*********** Pre-Render ***********/
@@ -125,14 +124,10 @@ namespace ig
                 application.PreRender(localFrameIdx);
             }
 
-            /************* Main Renderer: Render *************/
             {
-                localFrameSyncs[localFrameIdx] = application.Render(localFrameIdx);
-            }
-
-            /*********** ImGui Renderer: Render ***********/
-            {
-                imguiRenderSyncs[localFrameIdx] = imguiRenderer->Render(localFrameIdx);
+                GpuSync mainRenderPipelineSyncPoint = application.Render(localFrameIdx);
+                imguiRenderer->SetMainPipelineSyncPoint(mainRenderPipelineSyncPoint);
+                localFrameSyncs[localFrameIdx] = imguiRenderer->Render(localFrameIdx);
             }
 
             /*********** Post-Render ***********/

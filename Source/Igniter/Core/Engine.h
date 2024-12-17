@@ -55,7 +55,6 @@ namespace ig
         bool bShouldExit = false;
 
         eastl::array<GpuSync, NumFramesInFlight> localFrameSyncs{};
-        eastl::array<GpuSync, NumFramesInFlight> imguiRenderSyncs{};
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////

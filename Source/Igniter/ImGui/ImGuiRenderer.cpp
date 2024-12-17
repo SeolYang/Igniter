@@ -13,20 +13,20 @@ namespace ig
     {
         if (targetCanvas == nullptr)
         {
-            return GpuSync::Invalid();
+            return mainPipelineSyncPoint;
         }
 
         Swapchain& swapchain = renderContext.GetSwapchain();
         GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
         if (backBufferPtr == nullptr)
         {
-            return GpuSync::Invalid();
+            return mainPipelineSyncPoint;
         }
 
         const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
         if (backBufferRtvPtr == nullptr)
         {
-            return GpuSync::Invalid();
+            return mainPipelineSyncPoint;
         }
 
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
@@ -61,6 +61,7 @@ namespace ig
         imguiCmdCtx->End();
 
         ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) imguiCmdCtx};
+        mainGfxQueue.SyncWith(mainPipelineSyncPoint);
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
 
         if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
