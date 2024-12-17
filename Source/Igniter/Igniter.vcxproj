@@ -101,6 +101,7 @@
     <ClInclude Include="Gameplay\GameSystem.h" />
     <ClInclude Include="Gameplay\World.h" />
     <ClInclude Include="Igniter.h" />
+    <ClInclude Include="ImGui\AssetSelectModalPopup.h" />
     <ClInclude Include="ImGui\ImGuiCanvas.h" />
     <ClInclude Include="ImGui\ImGuiContext.h" />
     <ClInclude Include="ImGui\ImGuiExtensions.h" />
@@ -181,6 +182,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ImGui\AssetSelectModalPopup.cpp" />
     <ClCompile Include="ImGui\ImGuiContext.cpp" />
     <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="ImGui\ImGuiRenderer.cpp" />

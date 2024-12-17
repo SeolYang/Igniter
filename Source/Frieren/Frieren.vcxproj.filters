@@ -107,9 +107,6 @@
     <ClInclude Include="Gui\AssetInspector.h">
       <Filter>Source\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\AssetSelector.h">
-      <Filter>Source\GUI</Filter>
-    </ClInclude>
     <ClInclude Include="Gui\CachedStringDebugger.h">
       <Filter>Source\GUI</Filter>
     </ClInclude>

@@ -3,6 +3,7 @@
 #include "Igniter/Core/Json.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Component/StaticMeshComponent.h"
+#include "Igniter/ImGui/AssetSelectModalPopup.h"
 
 namespace ig
 {
@@ -47,22 +48,50 @@ namespace ig
     void StaticMeshComponent::OnInspector(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
+        AssetManager& assetManager = Engine::GetAssetManager();
         StaticMeshComponent& staticMeshComponent = registry->get<StaticMeshComponent>(entity);
-        if (!staticMeshComponent.Mesh)
+
+        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{"Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh};
+        if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{-FLT_MIN, 0.f}))
         {
-            ImGui::Text("Static Mesh Component does not selected.");
-            return;
+            staticMeshSelectModalPopup.Open();
         }
 
-        const AssetManager& assetManager = Engine::GetAssetManager();
-        const StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
+        if (staticMeshComponent.Mesh)
+        {
+            const StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
 
-        const StaticMesh::Desc& staticMeshSnapshot{staticMeshPtr->GetSnapshot()};
-        ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
+            const StaticMesh::Desc& staticMeshSnapshot{staticMeshPtr->GetSnapshot()};
+            ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
 
-        const Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
-        const Material::Desc& materialSnapshot{materialPtr->GetSnapshot()};
-        ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
+            const Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
+            const Material::Desc& materialSnapshot{materialPtr->GetSnapshot()};
+            ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
+        }
+        else
+        {
+            ImGui::Text("Static Mesh Component does not selected.");
+        }
+
+        if (staticMeshSelectModalPopup.Begin())
+        {
+            if (staticMeshSelectModalPopup.IsAssetSelected())
+            {
+                const Guid selectedGuid = staticMeshSelectModalPopup.GetSelectedAssetGuid();
+                if (!selectedGuid.isValid())
+                {
+                    return;
+                }
+
+                ManagedAsset<StaticMesh> selectedAsset = assetManager.Load<StaticMesh>(selectedGuid);
+                if (staticMeshComponent.Mesh && (selectedAsset != staticMeshComponent.Mesh))
+                {
+                    assetManager.Unload(staticMeshComponent.Mesh);
+                }
+                staticMeshComponent.Mesh = selectedAsset;
+            }
+            staticMeshSelectModalPopup.End();
+        }
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(StaticMeshComponent);

@@ -51,7 +51,6 @@
     <ClInclude Include="Game\System\JustSpinningSystem.h" />
     <ClInclude Include="Game\System\TestGameSystem.h" />
     <ClInclude Include="Gui\AssetInspector.h" />
-    <ClInclude Include="Gui\AssetSelector.h" />
     <ClInclude Include="Gui\CachedStringDebugger.h" />
     <ClInclude Include="Gui\EditorCanvas.h" />
     <ClInclude Include="Gui\EntityInsepctor.h" />

@@ -366,6 +366,9 @@
     <ClInclude Include="ImGui\ImGuiRenderer.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="ImGui\AssetSelectModalPopup.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -540,6 +543,9 @@
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\ImGuiRenderer.cpp">
+      <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\AssetSelectModalPopup.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
