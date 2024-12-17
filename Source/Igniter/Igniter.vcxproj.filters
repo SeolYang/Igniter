@@ -369,6 +369,9 @@
     <ClInclude Include="ImGui\AssetSelectModalPopup.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="ImGui\TextureView.h">
+      <Filter>Source\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">

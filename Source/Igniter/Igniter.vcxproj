@@ -106,6 +106,7 @@
     <ClInclude Include="ImGui\ImGuiContext.h" />
     <ClInclude Include="ImGui\ImGuiExtensions.h" />
     <ClInclude Include="ImGui\ImGuiRenderer.h" />
+    <ClInclude Include="ImGui\TextureView.h" />
     <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="Render\CommandContextPool.h" />
     <ClInclude Include="Render\GpuUploader.h" />

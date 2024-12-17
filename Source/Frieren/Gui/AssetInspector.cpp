@@ -43,13 +43,10 @@ namespace fe
 
     AssetInspector::~AssetInspector()
     {
-        for (const ig::ManagedAsset<ig::Texture> previewTexture : previewTextures)
+        if (previewTexture)
         {
-            if (previewTexture)
-            {
-                ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-                assetManager.Unload(previewTexture);
-            }
+            ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+            assetManager.Unload(previewTexture);
         }
     }
 
@@ -275,47 +272,29 @@ namespace fe
     void AssetInspector::RenderTexturePreview(const ig::AssetInfo& assetInfo)
     {
         ig::RenderContext& renderContext{ig::Engine::GetRenderContext()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
+
         if (bIsMainSelectionDirty)
         {
-            for (bool& previewSrvUpdateFlag : bIsPreviewSrvUpdated)
-            {
-                previewSrvUpdateFlag = false;
-            }
-
             bIsMainSelectionDirty = false;
-        }
-
-        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
-        const ig::LocalFrameIndex localFrameIdx{ig::FrameManager::GetLocalFrameIndex()};
-        if (!bIsPreviewSrvUpdated[localFrameIdx])
-        {
-            if (previewTextures[localFrameIdx])
+            if (previewTexture)
             {
-                assetManager.Unload(previewTextures[localFrameIdx]);
-                previewTextures[localFrameIdx] = {};
+                assetManager.Unload(previewTexture);
             }
 
-            previewTextures[localFrameIdx] = assetManager.LoadTexture(assetInfo.GetGuid());
-
-            if (previewTextures[localFrameIdx])
-            {
-                bIsPreviewSrvUpdated[localFrameIdx] = true;
-            }
+            previewTexture = assetManager.Load<ig::Texture>(assetInfo.GetGuid());
         }
+        IG_CHECK(previewTexture);
 
-        if (bIsPreviewSrvUpdated[localFrameIdx])
-        {
-            ig::Texture* previewTexturePtr = assetManager.Lookup(previewTextures[localFrameIdx]);
-            if (previewTexturePtr != nullptr)
-            {
-                const ig::RenderResource<ig::GpuView> srv = previewTexturePtr->GetShaderResourceView();
-                ig::GpuView* srvPtr = renderContext.Lookup(srv);
-                if (srvPtr != nullptr)
-                {
-                    ImGui::Image(srvPtr->GPUHandle.ptr, ImVec2{256, 256});
-                }
-            }
-        }
+        ig::Texture* previewTexturePtr = assetManager.Lookup(previewTexture);
+        IG_CHECK(previewTexturePtr != nullptr);
+
+        const ig::RenderResource<ig::GpuView> previewTextureSrv = previewTexturePtr->GetShaderResourceView();
+        IG_CHECK(previewTextureSrv);
+        ig::GpuView* previewTextureSrvPtr = renderContext.Lookup(previewTextureSrv);
+        IG_CHECK(previewTextureSrvPtr != nullptr);
+        IG_CHECK(previewTextureSrvPtr->HasValidGPUHandle());
+        ImGui::Image(previewTextureSrvPtr->GPUHandle.ptr, ImVec2{256.f, 256.f});
     }
 
     void AssetInspector::RenderMaterialEdit(const ig::AssetInfo& assetInfo)
