@@ -6,7 +6,7 @@
 #include "Igniter/Component/NameComponent.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
-#include "Frieren/ImGui/EntityList.h"
+#include "Frieren/Gui/EntityList.h"
 
 IG_DEFINE_LOG_CATEGORY(EditorEntityList);
 

@@ -5,8 +5,8 @@
 #include "Igniter/Component/NameComponent.h"
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Gameplay/World.h"
-#include "Frieren/ImGui/EntityInsepctor.h"
-#include "Frieren/ImGui/EntityList.h"
+#include "Frieren/Gui/EntityInsepctor.h"
+#include "Frieren/Gui/EntityList.h"
 
 namespace fe
 {

@@ -1,7 +1,7 @@
 #include "Frieren/Frieren.h"
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Asset/AssetManager.h"
-#include "Frieren/ImGui/StaticMeshImportPanel.h"
+#include "Frieren/Gui/StaticMeshImportPanel.h"
 
 namespace fe
 {

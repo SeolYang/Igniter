@@ -3,7 +3,7 @@
 #include "Igniter/Core/Memory.h"
 #include "Igniter/Core/Timer.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
-#include "Frieren/ImGui/StatisticsPanel.h"
+#include "Frieren/Gui/StatisticsPanel.h"
 
 namespace fe
 {

@@ -4,14 +4,14 @@
 #include "Igniter/Gameplay/GameSystem.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Frieren/Application/TestApp.h"
-#include "Frieren/ImGui/StatisticsPanel.h"
-#include "Frieren/ImGui/CachedStringDebugger.h"
-#include "Frieren/ImGui/EntityInsepctor.h"
-#include "Frieren/ImGui/EntityList.h"
-#include "Frieren/ImGui/TextureImportPanel.h"
-#include "Frieren/ImGui/StaticMeshImportPanel.h"
-#include "Frieren/ImGui/AssetInspector.h"
-#include "Frieren/ImGui/EditorCanvas.h"
+#include "Frieren/Gui/StatisticsPanel.h"
+#include "Frieren/Gui/CachedStringDebugger.h"
+#include "Frieren/Gui/EntityInsepctor.h"
+#include "Frieren/Gui/EntityList.h"
+#include "Frieren/Gui/TextureImportPanel.h"
+#include "Frieren/Gui/StaticMeshImportPanel.h"
+#include "Frieren/Gui/AssetInspector.h"
+#include "Frieren/Gui/EditorCanvas.h"
 
 namespace fe
 {

@@ -81,7 +81,6 @@ namespace ig
         const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
         void SetVirtualPath(const String newVirtualPath);
-
         void SetScope(const EAssetScope newScope) { scope = (newScope == EAssetScope::Engine) ? EAssetScope::Static : newScope; }
 
     private:

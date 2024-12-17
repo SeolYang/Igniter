@@ -22,7 +22,7 @@
 #include "Frieren/Render/Renderer.h"
 #include "Frieren/Game/Component/FpsCameraController.h"
 #include "Frieren/Game/System/TestGameSystem.h"
-#include "Frieren/ImGui/EditorCanvas.h"
+#include "Frieren/Gui/EditorCanvas.h"
 #include "Frieren/Application/TestApp.h"
 
 namespace fe

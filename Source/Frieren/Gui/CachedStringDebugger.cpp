@@ -1,6 +1,6 @@
 #include "Frieren/Frieren.h"
 #include "Igniter/Core/String.h"
-#include "Frieren/ImGUi/CachedStringDebugger.h"
+#include "Frieren/Gui/CachedStringDebugger.h"
 
 namespace fe
 {

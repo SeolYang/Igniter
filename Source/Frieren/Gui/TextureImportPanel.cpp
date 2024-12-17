@@ -2,7 +2,7 @@
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
-#include "Frieren/ImGui/TextureImportPanel.h"
+#include "Frieren/Gui/TextureImportPanel.h"
 
 namespace fe
 {

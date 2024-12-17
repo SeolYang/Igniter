@@ -9,7 +9,7 @@
 #include "Igniter/D3D12/RenderDevice.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
-#include "Frieren/ImGui/AssetInspector.h"
+#include "Frieren/Gui/AssetInspector.h"
 
 namespace fe
 {
@@ -18,7 +18,7 @@ namespace fe
         ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         ig::AssetManager::ModifiedEvent& modifiedEvent{assetManager.GetModifiedEvent()};
         modifiedEvent.Subscribe("AssetInspector"_fs,
-            [this](const std::reference_wrapper<const ig::AssetManager> assetManagerRef)
+            [this](const ig::CRef<ig::AssetManager> assetManagerRef)
             {
                 ig::RecursiveLock lock{mutex};
                 const ig::AssetManager& assetManager{assetManagerRef.get()};

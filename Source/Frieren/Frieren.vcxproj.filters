@@ -4,9 +4,6 @@
     <Filter Include="Source">
       <UniqueIdentifier>{d4ee7ba6-6fc0-4763-8bc3-d83995e99e49}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\ImGui">
-      <UniqueIdentifier>{e07b64ff-aa45-4891-8b15-a93434d14b93}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Game">
       <UniqueIdentifier>{90d310ba-3bcc-4b92-8ee0-215f8f3fa0d3}</UniqueIdentifier>
     </Filter>
@@ -22,34 +19,13 @@
     <Filter Include="Source\Render">
       <UniqueIdentifier>{ccad7419-62f6-4763-8acd-d15b50adf1fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\GUI">
+      <UniqueIdentifier>{e07b64ff-aa45-4891-8b15-a93434d14b93}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\TestApp.cpp">
       <Filter>Source\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\AssetInspector.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\CachedStringDebugger.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\EditorCanvas.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\EntityInspector.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\EntityList.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\StaticMeshImportPanel.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\StatisticsPanel.cpp">
-      <Filter>Source\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\TextureImportPanel.cpp">
-      <Filter>Source\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Frieren.cpp">
       <Filter>Source</Filter>
@@ -75,34 +51,34 @@
     <ClCompile Include="Render\Renderer.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Gui\AssetInspector.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\CachedStringDebugger.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\EditorCanvas.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\EntityInspector.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\EntityList.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\StaticMeshImportPanel.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\StatisticsPanel.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\TextureImportPanel.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\TestApp.h">
       <Filter>Source\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\AssetInspector.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\CachedStringDebugger.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\EditorCanvas.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\EntityInsepctor.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\EntityList.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\StaticMeshImportPanel.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\StatisticsPanel.h">
-      <Filter>Source\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\TextureImportPanel.h">
-      <Filter>Source\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Frieren.h">
       <Filter>Source</Filter>
@@ -127,6 +103,33 @@
     </ClInclude>
     <ClInclude Include="Render\EditorCamera.h">
       <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\AssetInspector.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\AssetSelector.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\CachedStringDebugger.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\EditorCanvas.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\EntityInsepctor.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\EntityList.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\StaticMeshImportPanel.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\StatisticsPanel.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\TextureImportPanel.h">
+      <Filter>Source\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

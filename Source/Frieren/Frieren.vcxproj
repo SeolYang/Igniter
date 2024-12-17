@@ -31,14 +31,14 @@
     <ClCompile Include="Game\System\FpsCameraControllSystem.cpp" />
     <ClCompile Include="Game\System\JustSpinningSystem.cpp" />
     <ClCompile Include="Game\System\TestGameSystem.cpp" />
-    <ClCompile Include="ImGui\AssetInspector.cpp" />
-    <ClCompile Include="ImGui\CachedStringDebugger.cpp" />
-    <ClCompile Include="ImGui\EditorCanvas.cpp" />
-    <ClCompile Include="ImGui\EntityInspector.cpp" />
-    <ClCompile Include="ImGui\EntityList.cpp" />
-    <ClCompile Include="ImGui\StaticMeshImportPanel.cpp" />
-    <ClCompile Include="ImGui\StatisticsPanel.cpp" />
-    <ClCompile Include="ImGui\TextureImportPanel.cpp" />
+    <ClCompile Include="Gui\AssetInspector.cpp" />
+    <ClCompile Include="Gui\CachedStringDebugger.cpp" />
+    <ClCompile Include="Gui\EditorCanvas.cpp" />
+    <ClCompile Include="Gui\EntityInspector.cpp" />
+    <ClCompile Include="Gui\EntityList.cpp" />
+    <ClCompile Include="Gui\StaticMeshImportPanel.cpp" />
+    <ClCompile Include="Gui\StatisticsPanel.cpp" />
+    <ClCompile Include="Gui\TextureImportPanel.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Render\Renderer.cpp" />
   </ItemGroup>
@@ -50,14 +50,15 @@
     <ClInclude Include="Game\System\FpsCameraControllSystem.h" />
     <ClInclude Include="Game\System\JustSpinningSystem.h" />
     <ClInclude Include="Game\System\TestGameSystem.h" />
-    <ClInclude Include="ImGui\AssetInspector.h" />
-    <ClInclude Include="ImGui\CachedStringDebugger.h" />
-    <ClInclude Include="ImGui\EditorCanvas.h" />
-    <ClInclude Include="ImGui\EntityInsepctor.h" />
-    <ClInclude Include="ImGui\EntityList.h" />
-    <ClInclude Include="ImGui\StaticMeshImportPanel.h" />
-    <ClInclude Include="ImGui\StatisticsPanel.h" />
-    <ClInclude Include="ImGui\TextureImportPanel.h" />
+    <ClInclude Include="Gui\AssetInspector.h" />
+    <ClInclude Include="Gui\AssetSelector.h" />
+    <ClInclude Include="Gui\CachedStringDebugger.h" />
+    <ClInclude Include="Gui\EditorCanvas.h" />
+    <ClInclude Include="Gui\EntityInsepctor.h" />
+    <ClInclude Include="Gui\EntityList.h" />
+    <ClInclude Include="Gui\StaticMeshImportPanel.h" />
+    <ClInclude Include="Gui\StatisticsPanel.h" />
+    <ClInclude Include="Gui\TextureImportPanel.h" />
     <ClInclude Include="Render\EditorCamera.h" />
     <ClInclude Include="Render\Renderer.h" />
   </ItemGroup>
