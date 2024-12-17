@@ -83,6 +83,8 @@ namespace ig
 
         [[nodiscard]] String ToTitleCase() const;
 
+        [[nodiscard]] int Compare(const String other) const noexcept;
+
         static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
     private:

@@ -134,7 +134,7 @@ namespace ig
         return std::vector<String>{splitStrViews.begin(), splitStrViews.end()};
     }
 
-    String String::ToTitleCase() const 
+    String String::ToTitleCase() const
     {
         if (!IsValid())
         {
@@ -150,6 +150,16 @@ namespace ig
         std::string value{spacedStr.ToStandard()};
         std::transform(value.begin(), value.begin() + 1, value.begin(), [](const char character) { return (char) std::toupper((int) character); });
         return String{value};
+    }
+
+    int String::Compare(const String other) const noexcept
+    {
+        if (this->hashOfString == other.hashOfString)
+        {
+            return true;
+        }
+
+        return this->ToStringView().compare(other.ToStringView());
     }
 
     std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()
