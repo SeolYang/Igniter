@@ -19,6 +19,7 @@ namespace ig
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.Fonts->AddFontFromFileTTF("Fonts/D2Coding-ligature.ttf", 18, nullptr, io.Fonts->GetGlyphRangesKorean());
         ig::ImGuiX::SetupDefaultTheme();
+        //ig::ImGuiX::SetupTransparentTheme(true, 0.75f);
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {

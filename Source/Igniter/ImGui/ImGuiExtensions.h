@@ -66,4 +66,6 @@ namespace ig::ImGuiX
     bool EditColor4(const std::string_view label, Color& color);
 
     void SetupDefaultTheme();
+    void SetupTransparentTheme(bool bStyleDark_, float alpha_);
+
 }    // namespace ig::ImGuiX

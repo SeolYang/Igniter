@@ -51,12 +51,6 @@ namespace ig
         AssetManager& assetManager = Engine::GetAssetManager();
         StaticMeshComponent& staticMeshComponent = registry->get<StaticMeshComponent>(entity);
 
-        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{"Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh};
-        if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{-FLT_MIN, 0.f}))
-        {
-            staticMeshSelectModalPopup.Open();
-        }
-
         if (staticMeshComponent.Mesh)
         {
             const StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
@@ -73,6 +67,11 @@ namespace ig
             ImGui::Text("Static Mesh Component does not selected.");
         }
 
+        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{"Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh};
+        if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{-FLT_MIN, 0.f}))
+        {
+            staticMeshSelectModalPopup.Open();
+        }
         if (staticMeshSelectModalPopup.Begin())
         {
             if (staticMeshSelectModalPopup.IsAssetSelected())
