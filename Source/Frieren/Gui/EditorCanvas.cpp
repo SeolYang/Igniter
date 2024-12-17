@@ -15,15 +15,15 @@
 
 namespace fe
 {
-    EditorCanvas::EditorCanvas(TestApp& testApp)
-        : app(testApp)
-        , statisticsPanel(ig::MakePtr<StatisticsPanel>())
-        , cachedStringDebugger(ig::MakePtr<CachedStringDebugger>())
-        , entityList(ig::MakePtr<EntityList>())
-        , entityInspector(ig::MakePtr<EntityInspector>(*entityList))
-        , textureImportPanel(ig::MakePtr<TextureImportPanel>())
-        , staticMeshImportPanel(ig::MakePtr<StaticMeshImportPanel>())
-        , assetInspector(ig::MakePtr<AssetInspector>())
+    EditorCanvas::EditorCanvas(TestApp& testApp) :
+        app(testApp),
+        statisticsPanel(ig::MakePtr<StatisticsPanel>()), 
+        cachedStringDebugger(ig::MakePtr<CachedStringDebugger>()),
+        entityList(ig::MakePtr<EntityList>()), 
+        entityInspector(ig::MakePtr<EntityInspector>(*entityList)),
+        textureImportPanel(ig::MakePtr<TextureImportPanel>()), 
+        staticMeshImportPanel(ig::MakePtr<StaticMeshImportPanel>()),
+        assetInspector(ig::MakePtr<AssetInspector>())
     {
     }
 

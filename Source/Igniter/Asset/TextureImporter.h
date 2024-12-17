@@ -42,6 +42,6 @@ namespace ig
 
     private:
         Mutex compressionMutex{};
-        ID3D11Device* d3d11Device{nullptr};
+        ID3D11Device* d3d11Device{ nullptr };
     };
 }    // namespace ig

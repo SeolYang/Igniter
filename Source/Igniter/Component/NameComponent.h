@@ -12,7 +12,7 @@ namespace ig
         static void OnInspector(Registry* registry, const Entity entity);
 
     public:
-        String Name{"New Entity"};
+        String Name{ "New Entity" };
     };
 
     IG_DECLARE_TYPE_META(NameComponent);

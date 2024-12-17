@@ -33,8 +33,8 @@ namespace fe
             const ig::String* name = nameProperty.value().try_cast<ig::String>();
             IG_CHECK(name != nullptr);
 
-            componentInfos.emplace_back(ComponentInfo{typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
-                ig::String{std::format("{}##SelectableComponent", *name)}});
+            componentInfos.emplace_back(ComponentInfo{ typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
+                ig::String{std::format("{}##SelectableComponent", *name)} });
         }
 
         componentInfos.shrink_to_fit();
@@ -54,7 +54,7 @@ namespace fe
             return;
         }
 
-        constexpr std::string_view attachComponentPopup{"AttachComponentPopup"};
+        constexpr std::string_view attachComponentPopup{ "AttachComponentPopup" };
         ig::Registry& registry = activeWorld->GetRegistry();
         if (ImGui::Button("Attach Component", ImVec2(-FLT_MIN, 0.0f)))
         {
@@ -76,7 +76,7 @@ namespace fe
 
                 if (ImGui::Selectable(componentInfo.AttachSelectableLabel.ToCString()))
                 {
-                    if (ig::meta::Invoke(componentInfo.Type, ig::meta::AddComponentFunc, ig::Ref{registry}, selectedEntity))
+                    if (ig::meta::Invoke(componentInfo.Type, ig::meta::AddComponentFunc, ig::Ref{ registry }, selectedEntity))
                     {
                         bForceDirty = true;
                     }
@@ -111,7 +111,7 @@ namespace fe
             }
         }
 
-        if (componentToRemove != (size_t) -1)
+        if (componentToRemove != (size_t)-1)
         {
             ImGui::OpenPopup("Detach Component?");
         }
@@ -122,19 +122,19 @@ namespace fe
             if (ImGui::Button("OK"))
             {
                 const ComponentInfo& componentInfo = componentInfos[componentToRemove];
-                if (ig::meta::Invoke(componentInfo.Type, ig::meta::RemoveComponentFunc, ig::Ref{registry}, selectedEntity))
+                if (ig::meta::Invoke(componentInfo.Type, ig::meta::RemoveComponentFunc, ig::Ref{ registry }, selectedEntity))
                 {
                     // #sy_todo 컴포넌트 제거 사실 로깅?
                     bForceDirty = true;
                 }
 
-                componentToRemove = (size_t) -1;
+                componentToRemove = (size_t)-1;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
             if (ImGui::Button("Cancel"))
             {
-                componentToRemove = (size_t) -1;
+                componentToRemove = (size_t)-1;
                 ImGui::CloseCurrentPopup();
             }
 

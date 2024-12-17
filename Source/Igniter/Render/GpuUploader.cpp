@@ -133,7 +133,7 @@ namespace ig
         IG_CHECK(bufferCpuAddr != nullptr);
 
         newRequest->CmdCtx->Begin();
-        return UploadContext{buffer.get(), bufferCpuAddr, newRequest};
+        return UploadContext{ buffer.get(), bufferCpuAddr, newRequest };
     }
 
     std::optional<GpuSync> GpuUploader::Submit(UploadContext& context)
@@ -154,7 +154,7 @@ namespace ig
         details::UploadRequest& request = context.GetRequest();
         request.CmdCtx->End();
 
-        CommandContext* cmdCtxPtrs[] = {request.CmdCtx.get()};
+        CommandContext* cmdCtxPtrs[] = { request.CmdCtx.get() };
         copyQueue->ExecuteContexts(cmdCtxPtrs);
         request.Sync = copyQueue->MakeSync();
         IG_CHECK(request.Sync.IsValid());

@@ -57,7 +57,7 @@ namespace ig
         String& operator=(const std::string_view rhs);
         String& operator=(const std::wstring_view rhs);
 
-        [[nodiscard]] operator const std::string&() const { return ToStandard(); }
+        [[nodiscard]] operator const std::string& () const { return ToStandard(); }
         [[nodiscard]] operator std::string_view() const { return ToStringView(); }
         [[nodiscard]] operator std::wstring() const { return ToWideString(); }
 
@@ -93,19 +93,19 @@ namespace ig
         [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
 
     private:
-        uint64_t hashOfString{0};
+        uint64_t hashOfString{ 0 };
     };
 
     namespace literals
     {
         inline String operator""_fs(const char* str, const size_t count)
         {
-            return std::string_view{str, count};
+            return std::string_view{ str, count };
         }
 
         inline String operator""_fs(const wchar_t* wstr, const size_t count)
         {
-            return std::wstring_view{wstr, count};
+            return std::wstring_view{ wstr, count };
         }
     }    // namespace literals
     using namespace literals;

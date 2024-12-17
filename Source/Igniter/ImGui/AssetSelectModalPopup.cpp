@@ -4,8 +4,10 @@
 
 namespace ig::ImGuiX
 {
-    AssetSelectModalPopup::AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter)
-        : label(label), assetInfoChildLabel(std::format("{}##Child", label)), assetCategoryToFilter(assetCategoryToFilter)
+    AssetSelectModalPopup::AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter) :
+        label(label),
+        assetInfoChildLabel(std::format("{}##Child", label)),
+        assetCategoryToFilter(assetCategoryToFilter)
     {
         IG_CHECK(assetCategoryToFilter != ig::EAssetCategory::Unknown);
     }
@@ -32,11 +34,12 @@ namespace ig::ImGuiX
         {
             if (snapshot.Info.GetCategory() == assetCategoryToFilter)
             {
-                cachedAssetInfos.emplace_back(AssetInfo{snapshot, ig::String{std::format("{}##Selectable", snapshot.Info.GetVirtualPath())}});
+                cachedAssetInfos.emplace_back(AssetInfo{ snapshot, ig::String{std::format("{}##Selectable", snapshot.Info.GetVirtualPath())} });
             }
         }
 
-        std::sort(cachedAssetInfos.begin(), cachedAssetInfos.end(), [](const AssetInfo& lhs, const AssetInfo& rhs){
+        std::sort(cachedAssetInfos.begin(), cachedAssetInfos.end(), [](const AssetInfo& lhs, const AssetInfo& rhs)
+        {
             return (lhs.Snapshot.Info.GetVirtualPath().Compare(rhs.Snapshot.Info.GetVirtualPath())) < 0;
         });
     }
@@ -51,25 +54,27 @@ namespace ig::ImGuiX
         filter.Draw();
         ImGui::Separator();
 
-        if (ImGui::BeginChild(assetInfoChildLabel.ToCString(), ImVec2{-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8.f},
-                ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar))
+        if (ImGui::BeginChild(assetInfoChildLabel.ToCString(),
+            ImVec2{ -FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8.f },
+            ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY,
+            ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar))
+        {
+            for (const AssetInfo& cachedAssetInfo : cachedAssetInfos)
             {
-                for (const AssetInfo& cachedAssetInfo : cachedAssetInfos)
+                const ig::Guid& guid = cachedAssetInfo.Snapshot.Info.GetGuid();
+                bool bSelected = guid == selectedGuid;
+                if (filter.PassFilter(cachedAssetInfo.Snapshot.Info.GetVirtualPath().ToCString()) &&
+                    ImGui::Selectable(cachedAssetInfo.SelectableLabel.ToCString(), &bSelected, ImGuiSelectableFlags_DontClosePopups))
                 {
-                    const ig::Guid& guid = cachedAssetInfo.Snapshot.Info.GetGuid();
-                    bool bSelected = guid == selectedGuid;
-                    if (filter.PassFilter(cachedAssetInfo.Snapshot.Info.GetVirtualPath().ToCString()) &&
-                        ImGui::Selectable(cachedAssetInfo.SelectableLabel.ToCString(), &bSelected, ImGuiSelectableFlags_DontClosePopups))
-                    {
-                        selectedGuid = guid;
-                    }
+                    selectedGuid = guid;
                 }
             }
+        }
         ImGui::EndChild();
 
         const bool bShouldActiveSelectButton = selectedGuid.isValid();
         const float buttonWidth = bShouldActiveSelectButton ? ImGui::GetContentRegionAvail().x * 0.49f : ImGui::GetContentRegionAvail().x;
-        if (bShouldActiveSelectButton && ImGui::Button("Select", ImVec2{buttonWidth, 0.f}))
+        if (bShouldActiveSelectButton && ImGui::Button("Select", ImVec2{ buttonWidth, 0.f }))
         {
             bAssetSelected = true;
             ImGui::CloseCurrentPopup();
@@ -80,7 +85,7 @@ namespace ig::ImGuiX
             ImGui::SameLine();
         }
 
-        if (ImGui::Button("Close", ImVec2{buttonWidth, 0.f}))
+        if (ImGui::Button("Close", ImVec2{ buttonWidth, 0.f }))
         {
             bAssetSelected = false;
             ImGui::CloseCurrentPopup();

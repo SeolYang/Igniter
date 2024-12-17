@@ -78,7 +78,7 @@ namespace ig
 
     public:
         Texture(RenderContext& renderContext, const Desc& snapshot, const RenderResource<GpuTexture> gpuTexture, const RenderResource<GpuView> srv,
-            const RenderResource<GpuView> sampler);
+                const RenderResource<GpuView> sampler);
         Texture(const Texture&) = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();
@@ -98,7 +98,7 @@ namespace ig
         static constexpr std::string_view EngineDefaultBlack = "Engine\\Black";
 
     private:
-        RenderContext* renderContext{nullptr};
+        RenderContext* renderContext{ nullptr };
         Desc snapshot{};
         RenderResource<GpuTexture> gpuTexture{};
         RenderResource<GpuView> srv{};

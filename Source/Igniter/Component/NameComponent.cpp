@@ -31,7 +31,7 @@ namespace ig
         std::string nameInput = nameComponent.Name.ToStandard();
         if (ImGui::InputText("Name", &nameInput, ImGuiInputTextFlags_EnterReturnsTrue))
         {
-            nameComponent.Name = String{nameInput};
+            nameComponent.Name = String{ nameInput };
         }
     }
 

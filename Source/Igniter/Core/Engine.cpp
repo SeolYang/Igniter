@@ -29,7 +29,7 @@ namespace ig
         IG_LOG(Engine, Info, "Igniting Engine Runtime!");
         //////////////////////// L0 ////////////////////////
         timer = MakePtr<Timer>();
-        window = MakePtr<Window>(WindowDescription{.Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle});
+        window = MakePtr<Window>(WindowDescription{ .Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle });
         inputManager = MakePtr<InputManager>();
         ////////////////////////////////////////////////////
 

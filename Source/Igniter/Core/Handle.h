@@ -25,10 +25,10 @@ namespace ig
         [[nodiscard]] bool IsNull() const noexcept { return Value == NullValue; }
 
     private:
-        constexpr static uint64_t NullValue{std::numeric_limits<uint64_t>::max()};
+        constexpr static uint64_t NullValue{ std::numeric_limits<uint64_t>::max() };
 
     public:
-        uint64_t Value{NullValue};
+        uint64_t Value{ NullValue };
     };
 }    // namespace ig
 

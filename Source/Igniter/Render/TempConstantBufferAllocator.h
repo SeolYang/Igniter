@@ -25,7 +25,7 @@ namespace ig
         [[nodiscard]] RenderResource<GpuView> GetConstantBufferView() const { return cbv; }
 
     private:
-        uint8_t* mappedPtr{nullptr};
+        uint8_t* mappedPtr{ nullptr };
         RenderResource<GpuView> cbv{};
     };
 
@@ -36,8 +36,7 @@ namespace ig
     class TempConstantBufferAllocator final
     {
     public:
-        TempConstantBufferAllocator(RenderContext& renderContext,
-            const size_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
+        TempConstantBufferAllocator(RenderContext& renderContext, const size_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
         TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
         ~TempConstantBufferAllocator();
@@ -75,7 +74,7 @@ namespace ig
 
         mutable eastl::array<Mutex, NumFramesInFlight> mutexes;
         eastl::array<RenderResource<GpuBuffer>, NumFramesInFlight> buffers;
-        eastl::array<size_t, NumFramesInFlight> allocatedSizeInBytes{0};
+        eastl::array<size_t, NumFramesInFlight> allocatedSizeInBytes{ 0 };
         eastl::array<eastl::vector<RenderResource<GpuView>>, NumFramesInFlight> allocatedViews;
     };
 }    // namespace ig

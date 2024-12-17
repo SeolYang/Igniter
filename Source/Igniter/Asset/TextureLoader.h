@@ -36,7 +36,7 @@ namespace ig
         FailedCreateSamplerView,
     };
 
-    
+
     class AssetManager;
     class RenderContext;
     class TextureLoader final

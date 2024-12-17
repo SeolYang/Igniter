@@ -21,7 +21,7 @@ namespace ig
         Event& operator=(Event&&) noexcept = default;
 
         template <typename I, typename D>
-            requires std::is_convertible_v<I, Identifier> && std::is_convertible_v<D, DelegateType>
+            requires std::is_convertible_v<I, Identifier>&& std::is_convertible_v<D, DelegateType>
         void Subscribe(I&& id, D&& delegate)
         {
             subscribeTable.insert_or_assign(std::forward<I>(id), std::forward<D>(delegate));

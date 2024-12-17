@@ -21,8 +21,8 @@ namespace ig
         ManagedAsset<StaticMesh> Mesh{};
 
     private:
-        constexpr static std::string_view ContainerKey{"StaticMeshComponent"};
-        constexpr static std::string_view MeshGuidKey{"StaticMeshGuid"};
+        constexpr static std::string_view ContainerKey{ "StaticMeshComponent" };
+        constexpr static std::string_view MeshGuidKey{ "StaticMeshGuid" };
     };
 
     IG_DECLARE_TYPE_META(StaticMeshComponent);

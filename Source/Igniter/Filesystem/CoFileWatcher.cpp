@@ -9,7 +9,7 @@ namespace ig
     CoFileWatcher::CoFileWatcher(const String directoryPathStr, const EFileWatchFilterFlags filters, const bool bWatchRecursively /*= true*/)
         : directoryPath(directoryPathStr.ToStringView())
         , directory(CreateFile(directoryPath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
-              FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, nullptr))
+                    FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, nullptr))
         , filters(filters)
         , bWatchRecursively(bWatchRecursively)
         , task(CoFileWatcher::Watch(this))
@@ -30,7 +30,7 @@ namespace ig
         this->bEnsureCatchChanges = bEnsureCatch;
         this->bIgnoreDirectoryChanges = bIgnoreDirectory;
         task.Resume();
-        std::vector<FileChangeInfo> tempBuffer{std::move(buffer)};
+        std::vector<FileChangeInfo> tempBuffer{ std::move(buffer) };
         return tempBuffer;
     }
 
@@ -41,16 +41,16 @@ namespace ig
 
         constexpr size_t ReservedRawBufferSizeInBytes = 1024Ui64 * 1024Ui64;
         std::vector<uint8_t> rawBuffer(ReservedRawBufferSizeInBytes);
-        WCHAR fileNameBuffer[MAX_PATH]{0};
+        WCHAR fileNameBuffer[MAX_PATH]{ 0 };
 
         while (!watcher->bStopWatching)
         {
-            OVERLAPPED overlapped{0};
+            OVERLAPPED overlapped{ 0 };
             overlapped.hEvent = CreateEvent(nullptr, 0, 0, nullptr);
 
             const bool bRequestSucceeded =
                 ReadDirectoryChangesExW(watcher->directory, rawBuffer.data(), ReservedRawBufferSizeInBytes, watcher->bWatchRecursively,
-                    static_cast<DWORD>(watcher->filters), nullptr, &overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
+                                        static_cast<DWORD>(watcher->filters), nullptr, &overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
 
             if (bRequestSucceeded)
             {
@@ -71,7 +71,7 @@ namespace ig
 
                 if (waitResult == WAIT_OBJECT_0)
                 {
-                    DWORD transferedBytes{0};
+                    DWORD transferedBytes{ 0 };
                     GetOverlappedResult(watcher->directory, &overlapped, &transferedBytes, FALSE);
                     if (transferedBytes == 0)
                     {
@@ -91,11 +91,11 @@ namespace ig
                         const Path notifiedPath = watcher->directoryPath / fileNameBuffer;
                         if (!fs::is_directory(notifiedPath) || !watcher->bIgnoreDirectoryChanges)
                         {
-                            watcher->buffer.emplace_back(FileChangeInfo{static_cast<EFileWatchAction>(notifyInfo->Action),
+                            watcher->buffer.emplace_back(FileChangeInfo{ static_cast<EFileWatchAction>(notifyInfo->Action),
                                 watcher->directoryPath / fileNameBuffer, static_cast<uint64_t>(notifyInfo->CreationTime.QuadPart),
                                 static_cast<uint64_t>(notifyInfo->LastModificationTime.QuadPart),
                                 static_cast<uint64_t>(notifyInfo->LastChangeTime.QuadPart),
-                                static_cast<uint64_t>(notifyInfo->LastAccessTime.QuadPart), static_cast<uint64_t>(notifyInfo->FileSize.QuadPart)});
+                                static_cast<uint64_t>(notifyInfo->LastAccessTime.QuadPart), static_cast<uint64_t>(notifyInfo->FileSize.QuadPart) });
                         }
 
                         if (notifyInfo->NextEntryOffset > 0)

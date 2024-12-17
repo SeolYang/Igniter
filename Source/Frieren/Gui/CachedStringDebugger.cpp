@@ -27,8 +27,10 @@ namespace fe
             inputBuffer[0] = '\0';
         }
 
-        constexpr ImGuiTableFlags flags = ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders |
-                                          ImGuiTableFlags_ScrollY | ImGuiTableFlags_HighlightHoveredColumn;
+        constexpr ImGuiTableFlags flags =
+            ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable |
+            ImGuiTableFlags_RowBg | ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_Borders |
+            ImGuiTableFlags_ScrollY;
 
         if (ImGui::BeginTable("Cached Hash-String Table", 2, flags))
         {
@@ -41,8 +43,10 @@ namespace fe
                 if (sortSpecs->SpecsDirty || bSortRequired)
                 {
                     std::sort(cachedStrings.begin(), cachedStrings.end(),
-                        [sortSpec = sortSpecs->Specs[0]](const auto& lhs, const auto& rhs)
-                        { return (sortSpec.SortDirection == ImGuiSortDirection_Ascending) ? (lhs.first < rhs.first) : (lhs.first >= rhs.first); });
+                              [sortSpec = sortSpecs->Specs[0]](const auto& lhs, const auto& rhs)
+                    {
+                        return (sortSpec.SortDirection == ImGuiSortDirection_Ascending) ? (lhs.first < rhs.first) : (lhs.first >= rhs.first);
+                    });
 
                     sortSpecs->SpecsDirty = false;
                     bSortRequired = false;
@@ -63,7 +67,7 @@ namespace fe
                 if (searchTargetHashVal != ig::InvalidHashVal)
                 {
                     const auto foundItr = std::find_if(cachedStrings.cbegin(), cachedStrings.cend(),
-                        [val = searchTargetHashVal](const auto& hashStrPair) { return hashStrPair.first == val; });
+                                                       [val = searchTargetHashVal](const auto& hashStrPair) { return hashStrPair.first == val; });
 
                     if (foundItr != cachedStrings.cend())
                     {

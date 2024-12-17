@@ -70,7 +70,7 @@ namespace ig
         IG_CHECK(sampler);
     }
 
-    Texture::~Texture() 
+    Texture::~Texture()
     {
         if (renderContext != nullptr)
         {
@@ -87,13 +87,13 @@ namespace ig::details
     {
         switch (dim)
         {
-            case DirectX::TEX_DIMENSION_TEXTURE1D:
-                return ETextureDimension::Tex1D;
-            default:
-            case DirectX::TEX_DIMENSION_TEXTURE2D:
-                return ETextureDimension::Tex2D;
-            case DirectX::TEX_DIMENSION_TEXTURE3D:
-                return ETextureDimension::Tex3D;
+        case DirectX::TEX_DIMENSION_TEXTURE1D:
+            return ETextureDimension::Tex1D;
+        default:
+        case DirectX::TEX_DIMENSION_TEXTURE2D:
+            return ETextureDimension::Tex2D;
+        case DirectX::TEX_DIMENSION_TEXTURE3D:
+            return ETextureDimension::Tex3D;
         }
     }
 }    // namespace ig::details

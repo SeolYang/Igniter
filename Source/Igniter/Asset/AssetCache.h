@@ -43,7 +43,7 @@ namespace ig::details
         {
             IG_CHECK(guid.isValid());
 
-            ReadWriteLock rwLock{mutex};
+            ReadWriteLock rwLock{ mutex };
             IG_CHECK(!cachedAssets.contains(guid));
             IG_CHECK(!refCounterTable.contains(guid));
             cachedAssets[guid] = registry.Create(std::move(asset));
@@ -52,42 +52,42 @@ namespace ig::details
 
         void Invalidate(const Guid& guid) override
         {
-            ReadWriteLock rwLock{mutex};
+            ReadWriteLock rwLock{ mutex };
             InvalidateUnsafe(guid);
         }
 
         [[nodiscard]] ManagedAsset<T> Load(const Guid& guid)
         {
-            ReadWriteLock rwLock{mutex};
+            ReadWriteLock rwLock{ mutex };
             return LoadUnsafe(guid);
         }
 
         [[nodiscard]] bool IsCached(const Guid& guid) const override
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             return IsCachedUnsafe(guid);
         }
 
         [[nodiscard]] T* Lookup(const ManagedAsset<T> handle)
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             return registry.Lookup(handle);
         }
 
         [[nodiscard]] const T* Lookup(const ManagedAsset<T> handle) const
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             return registry.Lookup(handle);
         }
 
         void Unload(const AssetInfo& assetInfo)
         {
             const Guid& guid = assetInfo.GetGuid();
-            ReadWriteLock rwLock{mutex};
+            ReadWriteLock rwLock{ mutex };
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
             IG_CHECK(refCounterTable[guid] > 0);
-            const uint32_t refCount{--refCounterTable[guid]};
+            const uint32_t refCount{ --refCounterTable[guid] };
             if (refCount == 0 && assetInfo.GetScope() == EAssetScope::Managed)
             {
                 InvalidateUnsafe(guid);
@@ -98,12 +98,12 @@ namespace ig::details
 
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const override
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             std::vector<Snapshot> refCounterSnapshots{};
             refCounterSnapshots.reserve(refCounterTable.size());
             for (const auto& guidRefCounter : refCounterTable)
             {
-                refCounterSnapshots.emplace_back(Snapshot{.Guid = guidRefCounter.first, .RefCount = guidRefCounter.second});
+                refCounterSnapshots.emplace_back(Snapshot{ .Guid = guidRefCounter.first, .RefCount = guidRefCounter.second });
             }
 
             return refCounterSnapshots;

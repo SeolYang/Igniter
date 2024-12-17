@@ -101,14 +101,14 @@ namespace ig::details
         template <Asset T>
         [[nodiscard]] T::LoadDesc GetLoadDesc(const Guid& guid) const
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             return GetLoadDescUnsafe<T>(guid);
         }
 
         template <Asset T>
         [[nodiscard]] T::LoadDesc GetLoadDesc(const String virtualPath) const
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             IG_CHECK(ContainsUnsafe(AssetCategoryOf<T>, virtualPath));
             return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath));
         }
@@ -116,14 +116,14 @@ namespace ig::details
         template <Asset T>
         [[nodiscard]] void UpdateLoadDesc(const Guid& guid, const typename T::LoadDesc& loadDesc)
         {
-            ReadWriteLock rwLock{mutex};
+            ReadWriteLock rwLock{ mutex };
             UpdateLoadDescUnsafe<T>(guid, loadDesc);
         }
 
         template <Asset T>
         [[nodiscard]] void UpdateLoadDesc(const String virtualPath, const typename T::LoadDesc& loadDesc)
         {
-            ReadWriteLock rwLock{mutex};
+            ReadWriteLock rwLock{ mutex };
             IG_CHECK(ContainsUnsafe(AssetCategoryOf<T>, virtualPath));
             UpdateLoadDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath), loadDesc);
         }
@@ -131,14 +131,14 @@ namespace ig::details
         template <Asset T>
         [[nodiscard]] T::Desc GetDesc(const Guid& guid) const
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             return GetDescUnsafe<T>(guid);
         }
 
         template <Asset T>
         [[nodiscard]] T::Desc GetDesc(const String virtualPath) const
         {
-            ReadOnlyLock lock{mutex};
+            ReadOnlyLock lock{ mutex };
             IG_CHECK(ContainsUnsafe(AssetCategoryOf<T>, virtualPath));
             return GetDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath));
         }
@@ -146,19 +146,19 @@ namespace ig::details
         template <Asset T>
         void Create(const AssetInfo& newInfo, const typename T::LoadDesc& loadDesc)
         {
-            ReadWriteLock rwLock{mutex};
+            ReadWriteLock rwLock{ mutex };
             IG_CHECK(newInfo.IsValid());
             IG_CHECK(!ContainsUnsafe(newInfo.GetGuid()));
 
-            const Guid& guid{newInfo.GetGuid()};
-            const String virtualPath{newInfo.GetVirtualPath()};
+            const Guid& guid{ newInfo.GetGuid() };
+            const String virtualPath{ newInfo.GetVirtualPath() };
             IG_CHECK(IsValidVirtualPath(virtualPath));
 
             VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetCategory());
             IG_CHECK(!virtualPathGuidTable.contains(virtualPath));
 
-            AssetDescMap<T>& assetDescTable{GetDescMap<T>()};
-            assetDescTable.Insert(guid, typename T::Desc{newInfo, loadDesc});
+            AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
+            assetDescTable.Insert(guid, typename T::Desc{ newInfo, loadDesc });
             virtualPathGuidTable[virtualPath] = guid;
         }
 
@@ -201,7 +201,7 @@ namespace ig::details
         [[nodiscard]] T::LoadDesc GetLoadDescUnsafe(const Guid& guid) const
         {
             IG_CHECK(ContainsUnsafe(guid));
-            const AssetDescMap<T>& assetDescTable{GetDescMap<T>()};
+            const AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
             return assetDescTable.GetDesc(guid).LoadDescriptor;
         }
 
@@ -209,7 +209,7 @@ namespace ig::details
         void UpdateLoadDescUnsafe(const Guid& guid, const typename T::LoadDesc& loadDesc)
         {
             IG_CHECK(ContainsUnsafe(guid));
-            AssetDescMap<T>& assetDescTable{GetDescMap<T>()};
+            AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
             assetDescTable.Update(guid, loadDesc);
         }
 
@@ -217,7 +217,7 @@ namespace ig::details
         [[nodiscard]] T::Desc GetDescUnsafe(const Guid& guid) const
         {
             IG_CHECK(ContainsUnsafe(guid));
-            const AssetDescMap<T>& assetDescTable{GetDescMap<T>()};
+            const AssetDescMap<T>& assetDescTable{ GetDescMap<T>() };
             return assetDescTable.GetDesc(guid);
         }
 

@@ -14,7 +14,7 @@ namespace ig
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(TransformComponent);
     }
 
-    Json& TransformComponent::Serialize(Json& archive) const 
+    Json& TransformComponent::Serialize(Json& archive) const
     {
         /* Position */
         IG_SERIALIZE_JSON_SIMPLE(TransformComponent, archive, Position.x);

@@ -7,9 +7,52 @@ namespace ig
     namespace chrono = std::chrono;
     namespace ranges = std::ranges;
     namespace views = std::views;
-
     using namespace DirectX::SimpleMath;
     using namespace std::chrono_literals;
+
+    using U8 = uint8_t;
+    using U16 = uint16_t;
+    using U32 = uint32_t;
+    using U64 = uint64_t;
+    using F32 = float;
+    using F64 = double;
+    using I8 = int8_t;
+    using I16 = int16_t;
+    using I32 = int32_t;
+    using I64 = int64_t;
+    using Size = size_t;
+    using Index = size_t;
+    constexpr Index InvalidIndex = 0xffffffffffffffffUi64;
+    constexpr U32 InvalidIndexU32 = 0xffffffffU;
+    using GlobalFrameIndex = Index;
+    using LocalFrameIndex = U8;
+
+    template <typename T, typename Dx = std::default_delete<T>>
+    using Ptr = std::unique_ptr<T, Dx>;
+    template <typename T>
+    using SharedPtr = std::shared_ptr<T>;
+    template <typename T>
+    using Ref = std::reference_wrapper<T>;
+    template <typename T>
+    using CRef = Ref<const T>;
+
+    using Path = std::filesystem::path;
+
+    template <typename Key, typename T>
+    using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;
+    template <typename Key>
+    using StableUnorderedSet = robin_hood::unordered_node_set<Key>;
+    template <typename Key, typename T>
+    using UnorderedMap = ankerl::unordered_dense::map<Key, T>;
+    template <typename Key>
+    using UnorderedSet = ankerl::unordered_dense::set<Key>;
+
+    using Entity = entt::entity;
+    constexpr auto NullEntity = entt::null;
+    using Registry = entt::registry;
+
+    using Json = nlohmann::json;
+    using Guid = xg::Guid;
 
     using SharedMutex = std::shared_mutex;
     using ReadOnlyLock = std::shared_lock<SharedMutex>;
@@ -20,12 +63,6 @@ namespace ig
     using UniqueLock = std::unique_lock<Mutex>;
     template <typename... Mutexes>
     using ScopedLock = std::scoped_lock<Mutexes...>;
-
-    template <typename T>
-    using Ref = std::reference_wrapper<T>;
-
-    template <typename T>
-    using CRef = Ref<const T>;
 
     template <typename T>
     using Option = std::optional<T>;
@@ -54,12 +91,9 @@ namespace ig
         return std::make_optional(std::cref(reference));
     }
 
-    template <typename T, typename Dx = std::default_delete<T>>
-    using Ptr = std::unique_ptr<T, Dx>;
-
     template <typename T, typename... Args>
         requires (!std::is_array_v<T>)
-                 Ptr<T> MakePtr(Args && ... args)
+    Ptr<T> MakePtr(Args&& ... args)
     {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
@@ -70,36 +104,6 @@ namespace ig
     {
         return std::make_unique<T>(size);
     }
-
-    template <typename T>
-    using SharedPtr = std::shared_ptr<T>;
-
-    using Path = std::filesystem::path;
-
-    template <typename Key, typename T>
-    using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;
-
-    template <typename Key>
-    using StableUnorderedSet = robin_hood::unordered_node_set<Key>;
-
-    template <typename Key, typename T>
-    using UnorderedMap = ankerl::unordered_dense::map<Key, T>;
-
-    template <typename Key>
-    using UnorderedSet = ankerl::unordered_dense::set<Key>;
-
-    using Entity = entt::entity;
-    constexpr auto NullEntity = entt::null;
-    using Registry = entt::registry;
-
-    using Json = nlohmann::json;
-    using Guid = xg::Guid;
-
-    using GlobalFrameIndex = size_t;
-    using LocalFrameIndex = uint8_t;
-
-    constexpr uint64_t InvalidIndex = 0xffffffffffffffffUi64;
-    constexpr uint32_t InvalidIndexU32 = 0xffffffffU;
 
     template <typename T>
         requires std::is_arithmetic_v<std::decay_t<T>>

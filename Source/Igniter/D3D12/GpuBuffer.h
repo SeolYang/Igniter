@@ -45,9 +45,11 @@ namespace ig
             std::optional<D3D12_VERTEX_BUFFER_VIEW> view{};
             if (desc.GetBufferType() == EGpuBufferType::VertexBuffer)
             {
-                view = D3D12_VERTEX_BUFFER_VIEW{.BufferLocation = resource->GetGPUVirtualAddress(),
+                view = D3D12_VERTEX_BUFFER_VIEW{
+                    .BufferLocation = resource->GetGPUVirtualAddress(),
                     .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
-                    .StrideInBytes = desc.GetStructureByteStride()};
+                    .StrideInBytes = desc.GetStructureByteStride()
+                };
             }
 
             return view;
@@ -58,9 +60,10 @@ namespace ig
             std::optional<D3D12_INDEX_BUFFER_VIEW> view{};
             if (desc.GetBufferType() == EGpuBufferType::IndexBuffer)
             {
-                view = D3D12_INDEX_BUFFER_VIEW{.BufferLocation = resource->GetGPUVirtualAddress(),
+                view = D3D12_INDEX_BUFFER_VIEW{
+                    .BufferLocation = resource->GetGPUVirtualAddress(),
                     .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
-                    .Format = desc.GetIndexFormat()};
+                    .Format = desc.GetIndexFormat() };
             }
 
             return view;

@@ -29,12 +29,14 @@ namespace ig
             return mainPipelineSyncPoint;
         }
 
-        ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
+        ig::CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
         auto imguiCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "ImGuiCommandContext"_fs);
         imguiCmdCtx->Begin();
         {
-            imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
+                                                  D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                                  D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                                  D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
             imguiCmdCtx->FlushBarriers();
 
             ImGui_ImplDX12_NewFrame();
@@ -54,13 +56,15 @@ namespace ig
             imguiCmdCtx->SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
             ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &imguiCmdCtx->GetNative());
 
-            imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr, D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
-                D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
+                                                  D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                                                  D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                                  D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
             imguiCmdCtx->FlushBarriers();
         }
         imguiCmdCtx->End();
 
-        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*) imguiCmdCtx};
+        ig::CommandContext* renderCmdCtxPtrs[] = { (ig::CommandContext*)imguiCmdCtx };
         mainGfxQueue.SyncWith(mainPipelineSyncPoint);
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
 

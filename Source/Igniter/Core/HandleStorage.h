@@ -82,7 +82,7 @@ namespace ig
             }
             IG_CHECK(!freeSlots.empty());
 
-            Handle<Ty, Dependency> newHandle{0};
+            Handle<Ty, Dependency> newHandle{ 0 };
             const SlotType newSlot = freeSlots.back();
             freeSlots.pop_back();
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));

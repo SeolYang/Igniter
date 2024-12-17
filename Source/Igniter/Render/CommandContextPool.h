@@ -24,7 +24,7 @@ namespace ig
             TempCommandContext& operator=(const TempCommandContext&) = delete;
             TempCommandContext& operator=(TempCommandContext&&) noexcept = delete;
 
-            [[nodiscard]] explicit operator CommandContext*() noexcept { return cmdCtx; }
+            [[nodiscard]] explicit operator CommandContext* () noexcept { return cmdCtx; }
 
             [[nodiscard]] CommandContext* operator->() noexcept
             {
@@ -56,16 +56,16 @@ namespace ig
         {
             IG_CHECK(localFrameIdx < NumFramesInFlight);
 
-            UniqueLock poolLock{poolMutex};
+            UniqueLock poolLock{ poolMutex };
             CommandContext* cmdCtx = cmdCtxs.back();
             cmdCtxs.pop_back();
             SetObjectName(&cmdCtx->GetNative(), debugName);
 
-            return TempCommandContext{cmdCtx, [this, localFrameIdx](CommandContext* ptr)
+            return TempCommandContext{ cmdCtx, [this, localFrameIdx](CommandContext* ptr)
                 {
                     UniqueLock pendingListLock{pendingListMutex};
                     pendingCmdCtxs[localFrameIdx].emplace_back(ptr);
-                }};
+                } };
         }
 
         void PreRender(const LocalFrameIndex localFrameIdx);

@@ -16,7 +16,7 @@ namespace ig
     const Json& MaterialLoadDesc::Deserialize(const Json& archive)
     {
         *this = {};
-        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseTexGuid, Guid{DefaultTextureGuid});
+        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseTexGuid, Guid{ DefaultTextureGuid });
         return archive;
     }
 

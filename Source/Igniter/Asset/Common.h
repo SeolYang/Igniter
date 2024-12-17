@@ -21,10 +21,10 @@ namespace ig::details
 
 namespace ig
 {
-    inline constexpr GuidBytes DefaultTextureGuid{GuidBytesFrom("ec5ba4d0-9b40-40d7-bec6-c4dd41809fd2")};
-    inline constexpr GuidBytes DefaultWhiteTextureGuid{GuidBytesFrom("b4595432-4968-4dd6-b766-13fdcf7435da")};
-    inline constexpr GuidBytes DefaultBlackTextureGuid{GuidBytesFrom("d923e9f9-1651-4393-9636-1a231c7a2b6d")};
-    inline constexpr GuidBytes DefaultMaterialGuid{GuidBytesFrom("ca932248-e2d7-4b4f-9d28-2140f1bf30e3")};
+    inline constexpr GuidBytes DefaultTextureGuid{ GuidBytesFrom("ec5ba4d0-9b40-40d7-bec6-c4dd41809fd2") };
+    inline constexpr GuidBytes DefaultWhiteTextureGuid{ GuidBytesFrom("b4595432-4968-4dd6-b766-13fdcf7435da") };
+    inline constexpr GuidBytes DefaultBlackTextureGuid{ GuidBytesFrom("d923e9f9-1651-4393-9636-1a231c7a2b6d") };
+    inline constexpr GuidBytes DefaultMaterialGuid{ GuidBytesFrom("ca932248-e2d7-4b4f-9d28-2140f1bf30e3") };
 
     enum class EAssetCategory
     {
@@ -110,14 +110,15 @@ namespace ig
 
     template <typename T>
     concept Asset =
-        requires(T asset) {
-            typename T::ImportDesc;
-            typename T::LoadDesc;
-            typename T::Desc;
-            {
-                asset.GetSnapshot()
-            } -> std::same_as<const typename T::Desc&>;
-        } && std::is_move_constructible_v<T> && std::is_move_assignable_v<T> && std::is_same_v<typename T::Desc, AssetDesc<T>> &&
+        requires(T asset)
+    {
+        typename T::ImportDesc;
+        typename T::LoadDesc;
+        typename T::Desc;
+        {
+            asset.GetSnapshot()
+        } -> std::same_as<const typename T::Desc&>;
+    }&& std::is_move_constructible_v<T>&& std::is_move_assignable_v<T>&& std::is_same_v<typename T::Desc, AssetDesc<T>>&&
         AssetCategoryOf<T> != EAssetCategory::Unknown;
 
     template <typename T>

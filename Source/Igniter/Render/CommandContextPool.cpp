@@ -5,7 +5,7 @@
 namespace ig
 {
     CommandContextPool::CommandContextPool(RenderDevice& renderDevice, const EQueueType cmdCtxType)
-        : frameManager(frameManager), numReservedCtx(NumTargetCommandContextPerThread * std::thread::hardware_concurrency() * NumFramesInFlight)
+        : frameManager(frameManager), numReservedCtx(NumTargetCommandContextPerThread* std::thread::hardware_concurrency()* NumFramesInFlight)
     {
         IG_CHECK(numReservedCtx > 0);
         cmdCtxs.reserve(numReservedCtx);
@@ -34,7 +34,7 @@ namespace ig
 
     void CommandContextPool::PreRender(const LocalFrameIndex localFrameIdx)
     {
-        ScopedLock lock{poolMutex, pendingListMutex};
+        ScopedLock lock{ poolMutex, pendingListMutex };
         for (CommandContext* cmdCtx : pendingCmdCtxs[localFrameIdx])
         {
             cmdCtxs.emplace_back(cmdCtx);

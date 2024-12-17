@@ -60,10 +60,7 @@ namespace ig
         GpuUploader& GetGpuUploader() { return gpuUploader; }
         Swapchain& GetSwapchain() { return *swapchain; }
         auto& GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
-        auto GetBindlessDescriptorHeaps()
-        {
-            return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()};
-        }
+        auto GetBindlessDescriptorHeaps() { return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), & gpuViewManager.GetSamplerDescHeap()}; }
 
         RenderResource<GpuBuffer> CreateBuffer(const GpuBufferDesc& desc);
         RenderResource<GpuTexture> CreateTexture(const GpuTextureDesc& desc);
@@ -74,14 +71,10 @@ namespace ig
         RenderResource<GpuView> CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
         RenderResource<GpuView> CreateShaderResourceView(const RenderResource<GpuBuffer> buffer);
         RenderResource<GpuView> CreateUnorderedAccessView(const RenderResource<GpuBuffer> buffer);
-        RenderResource<GpuView> CreateShaderResourceView(
-            RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView> CreateUnorderedAccessView(
-            RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView> CreateRenderTargetView(
-            RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView> CreateDepthStencilView(
-            RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateShaderResourceView(RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateUnorderedAccessView(RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateRenderTargetView(RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView> CreateDepthStencilView(RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         RenderResource<GpuView> CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
         RenderResource<GpuView> CreateGpuView(const EGpuViewType type);
 

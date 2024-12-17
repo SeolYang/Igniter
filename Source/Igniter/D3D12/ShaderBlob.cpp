@@ -16,33 +16,33 @@ namespace ig
         arguments.push_back(TEXT("-T"));
         switch (desc.Type)
         {
-            case EShaderType::Vertex:
-                arguments.push_back(TEXT("vs_6_6"));
-                break;
-            case EShaderType::Pixel:
-                arguments.push_back(TEXT("ps_6_6"));
-                break;
-            case EShaderType::Domain:
-                arguments.push_back(TEXT("ds_6_6"));
-                break;
-            case EShaderType::Hull:
-                arguments.push_back(TEXT("hs_6_6"));
-                break;
-            case EShaderType::Geometry:
-                arguments.push_back(TEXT("gs_6_6"));
-                break;
-            case EShaderType::Compute:
-                arguments.push_back(TEXT("cs_6_6"));
-                break;
-            case EShaderType::Mesh:
-                arguments.push_back(TEXT("ms_6_6"));
-                break;
-            case EShaderType::Amplification:
-                arguments.push_back(TEXT("as_6_6"));
-                break;
-            default:
-                IG_VERIFY(false);
-                break;
+        case EShaderType::Vertex:
+            arguments.push_back(TEXT("vs_6_6"));
+            break;
+        case EShaderType::Pixel:
+            arguments.push_back(TEXT("ps_6_6"));
+            break;
+        case EShaderType::Domain:
+            arguments.push_back(TEXT("ds_6_6"));
+            break;
+        case EShaderType::Hull:
+            arguments.push_back(TEXT("hs_6_6"));
+            break;
+        case EShaderType::Geometry:
+            arguments.push_back(TEXT("gs_6_6"));
+            break;
+        case EShaderType::Compute:
+            arguments.push_back(TEXT("cs_6_6"));
+            break;
+        case EShaderType::Mesh:
+            arguments.push_back(TEXT("ms_6_6"));
+            break;
+        case EShaderType::Amplification:
+            arguments.push_back(TEXT("as_6_6"));
+            break;
+        default:
+            IG_VERIFY(false);
+            break;
         }
 
         arguments.push_back(TEXT("-Qstrip_debug"));
@@ -55,21 +55,21 @@ namespace ig
 
         switch (desc.OptimizationLevel)
         {
-            case EShaderOptimizationLevel::None:
-                arguments.push_back(TEXT("-Od"));
-                break;
-            case EShaderOptimizationLevel::O0:
-                arguments.push_back(TEXT("-O0"));
-                break;
-            case EShaderOptimizationLevel::O1:
-                arguments.push_back(TEXT("-O1"));
-                break;
-            case EShaderOptimizationLevel::O2:
-                arguments.push_back(TEXT("-O2"));
-                break;
-            case EShaderOptimizationLevel::O3:
-                arguments.push_back(TEXT("-O3"));
-                break;
+        case EShaderOptimizationLevel::None:
+            arguments.push_back(TEXT("-Od"));
+            break;
+        case EShaderOptimizationLevel::O0:
+            arguments.push_back(TEXT("-O0"));
+            break;
+        case EShaderOptimizationLevel::O1:
+            arguments.push_back(TEXT("-O1"));
+            break;
+        case EShaderOptimizationLevel::O2:
+            arguments.push_back(TEXT("-O2"));
+            break;
+        case EShaderOptimizationLevel::O3:
+            arguments.push_back(TEXT("-O3"));
+            break;
         }
 
         if (desc.bDisableValidation)
@@ -109,10 +109,10 @@ namespace ig
         ComPtr<IDxcCompiler3> compiler;
         IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.ReleaseAndGetAddressOf())));
 
-        const DxcBuffer buffer{.Ptr = sourceBlob->GetBufferPointer(), .Size = sourceBlob->GetBufferSize(), .Encoding = codePage};
+        const DxcBuffer buffer{ .Ptr = sourceBlob->GetBufferPointer(), .Size = sourceBlob->GetBufferSize(), .Encoding = codePage };
 
         IG_VERIFY_SUCCEEDED(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
-            IID_PPV_ARGS(compiledResult.GetAddressOf())));
+                            IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
         ComPtr<IDxcBlobUtf8> errors;
         compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);

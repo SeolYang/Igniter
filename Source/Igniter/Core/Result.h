@@ -22,7 +22,7 @@ namespace ig
 
     /* 일반적인 Error Code 의 확장 버전. */
     template <typename T, ResultStatus E>
-        requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T>
+        requires std::is_move_constructible_v<T>&& std::is_move_assignable_v<T>
     class [[nodiscard]] Result final
     {
     public:
@@ -77,7 +77,7 @@ namespace ig
         friend Result<Ty, En> MakeSuccess(Args&&... args);
 
         template <typename T, auto Status>
-            requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
+            requires(ResultStatus<decltype(Status)>&& Status != decltype(Status)::Success)
         friend Result<T, decltype(Status)> MakeFail();
 
         Result(const E newStatus) : dummy{}, status(newStatus) {}
@@ -110,7 +110,7 @@ namespace ig
     }
 
     template <typename T, auto Status>
-        requires(ResultStatus<decltype(Status)> && Status != decltype(Status)::Success)
+        requires(ResultStatus<decltype(Status)>&& Status != decltype(Status)::Success)
     Result<T, decltype(Status)> MakeFail()
     {
         return Result<T, decltype(Status)>{Status};

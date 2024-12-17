@@ -31,12 +31,12 @@ namespace ig
 
     namespace key
     {
-        constexpr inline std::string_view AssetInfo{"AssetInfo"};
-        constexpr inline std::string_view CreationTime{"CreationTime"};
-        constexpr inline std::string_view Guid{"Guid"};
-        constexpr inline std::string_view VirtualPath{"VirtualPath"};
-        constexpr inline std::string_view Category{"Category"};
-        constexpr inline std::string_view Scope{"Scope"};
+        constexpr inline std::string_view AssetInfo{ "AssetInfo" };
+        constexpr inline std::string_view CreationTime{ "CreationTime" };
+        constexpr inline std::string_view Guid{ "Guid" };
+        constexpr inline std::string_view VirtualPath{ "VirtualPath" };
+        constexpr inline std::string_view Category{ "Category" };
+        constexpr inline std::string_view Scope{ "Scope" };
     }    // namespace key
 
     Json& AssetInfo::Serialize(Json& archive) const
@@ -89,33 +89,33 @@ namespace ig
         IG_CHECK(type != EAssetCategory::Unknown);
         switch (type)
         {
-            case EAssetCategory::Texture:
-                return Path{details::TextureAssetRootPath};
-            case EAssetCategory::StaticMesh:
-                return Path{details::StaticMeshAssetRootPath};
-            case EAssetCategory::SkeletalMesh:
-                return Path{details::SkeletalMeshAssetRootPath};
-            case EAssetCategory::Audio:
-                return Path{details::AudioAssetRootPath};
-            case EAssetCategory::Material:
-                return Path{details::MaterialAssetRootPath};
-            case EAssetCategory::Map:
-                return Path{details::MapAssetRootPath};
-            [[unlikely]] default:
-                IG_CHECK_NO_ENTRY();
-                return Path{};
+        case EAssetCategory::Texture:
+            return Path{ details::TextureAssetRootPath };
+        case EAssetCategory::StaticMesh:
+            return Path{ details::StaticMeshAssetRootPath };
+        case EAssetCategory::SkeletalMesh:
+            return Path{ details::SkeletalMeshAssetRootPath };
+        case EAssetCategory::Audio:
+            return Path{ details::AudioAssetRootPath };
+        case EAssetCategory::Material:
+            return Path{ details::MaterialAssetRootPath };
+        case EAssetCategory::Map:
+            return Path{ details::MapAssetRootPath };
+        [[unlikely]] default:
+            IG_CHECK_NO_ENTRY();
+            return Path{};
         }
     }
 
     Path MakeAssetPath(const EAssetCategory type, const xg::Guid& guid)
     {
         IG_CHECK(guid.isValid() && type != EAssetCategory::Unknown);
-        return Path{GetAssetDirectoryPath(type)} / guid.str();
+        return Path{ GetAssetDirectoryPath(type) } / guid.str();
     }
 
     Path MakeAssetMetadataPath(const EAssetCategory type, const xg::Guid& guid)
     {
-        Path newAssetPath{MakeAssetPath(type, guid)};
+        Path newAssetPath{ MakeAssetPath(type, guid) };
         if (!newAssetPath.empty())
         {
             newAssetPath.replace_extension(details::MetadataExt);
@@ -133,7 +133,7 @@ namespace ig
     {
         std::string extension = resPath.extension().string();
         std::transform(extension.begin(), extension.end(), extension.begin(),
-            [](const char character) { return static_cast<char>(::tolower(static_cast<int>(character))); });
+                       [](const char character) { return static_cast<char>(::tolower(static_cast<int>(character))); });
 
         return extension == details::MetadataExt;
     }
@@ -145,7 +145,7 @@ namespace ig
             return xg::Guid{};
         }
 
-        return xg::Guid{path.replace_extension().filename().string()};
+        return xg::Guid{ path.replace_extension().filename().string() };
     }
 
     bool IsValidVirtualPath(const String virtualPath)
@@ -155,7 +155,7 @@ namespace ig
             return false;
         }
 
-        static const std::regex VirtualPathRegex{R"([^\s/\\]*(\\[^\s/\\]*)*)", std::regex_constants::optimize};
+        static const std::regex VirtualPathRegex{ R"([^\s/\\]*(\\[^\s/\\]*)*)", std::regex_constants::optimize };
         return RegexMatch(virtualPath, VirtualPathRegex);
     }
 
@@ -166,8 +166,8 @@ namespace ig
             return String{};
         }
 
-        static const std::regex ReplaceWhiteSpacesRegex{R"(\s+)", std::regex_constants::optimize};
-        static const std::regex ReplaceUnpreferredSlash{"/+", std::regex_constants::optimize};
+        static const std::regex ReplaceWhiteSpacesRegex{ R"(\s+)", std::regex_constants::optimize };
+        static const std::regex ReplaceUnpreferredSlash{ "/+", std::regex_constants::optimize };
         return RegexReplace(RegexReplace(virtualPath, ReplaceWhiteSpacesRegex, "_"_fs), ReplaceUnpreferredSlash, details::VirtualPathSeparator);
     }
 }    // namespace ig

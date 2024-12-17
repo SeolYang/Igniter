@@ -36,16 +36,16 @@ namespace fe
     private:
         ig::RecursiveMutex mutex{};
         std::vector<ig::AssetManager::Snapshot> snapshots{};
-        bool bDirty{true};
-        ig::chrono::system_clock::time_point lastUpdated{ig::chrono::system_clock::now()};
+        bool bDirty{ true };
+        ig::chrono::system_clock::time_point lastUpdated{ ig::chrono::system_clock::now() };
 
-        ig::EAssetCategory mainTableAssetFilter{ig::EAssetCategory::Unknown};
-        int mainTableSelectedIdx{-1};
+        ig::EAssetCategory mainTableAssetFilter{ ig::EAssetCategory::Unknown };
+        int mainTableSelectedIdx{ -1 };
         bool bIsMainSelectionDirty = false;
 
         ig::ManagedAsset<ig::Texture> previewTexture{};
 
-        int selectorTableSelectedIdx{-1};
+        int selectorTableSelectedIdx{ -1 };
         bool bOpenSelectorPopup = false;
     };
 }    // namespace fe

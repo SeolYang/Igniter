@@ -55,11 +55,11 @@ namespace ig
         {
             const StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
 
-            const StaticMesh::Desc& staticMeshSnapshot{staticMeshPtr->GetSnapshot()};
+            const StaticMesh::Desc& staticMeshSnapshot{ staticMeshPtr->GetSnapshot() };
             ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
 
             const Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
-            const Material::Desc& materialSnapshot{materialPtr->GetSnapshot()};
+            const Material::Desc& materialSnapshot{ materialPtr->GetSnapshot() };
             ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
         }
         else
@@ -67,8 +67,8 @@ namespace ig
             ImGui::Text("Static Mesh Component does not selected.");
         }
 
-        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{"Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh};
-        if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{-FLT_MIN, 0.f}))
+        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{ "Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh };
+        if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{ -FLT_MIN, 0.f }))
         {
             staticMeshSelectModalPopup.Open();
         }

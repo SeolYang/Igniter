@@ -33,7 +33,7 @@ namespace ig
 
     private:
         DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
-            const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap, const uint32_t descriptorHandleIncSizeInHeap);
+                       const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap, const uint32_t descriptorHandleIncSizeInHeap);
 
     private:
         EDescriptorHeapType descriptorHeapType;

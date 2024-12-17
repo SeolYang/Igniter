@@ -32,28 +32,28 @@ namespace ig
             const std::string formattedMessage = std::vformat(logMessage, std::make_format_args(args...));
             switch (Verbosity)
             {
-                case ELogVerbosity::Info:
-                    logger.info(formattedMessage);
-                    break;
-                case ELogVerbosity::Trace:
-                    logger.trace(formattedMessage);
-                    break;
+            case ELogVerbosity::Info:
+                logger.info(formattedMessage);
+                break;
+            case ELogVerbosity::Trace:
+                logger.trace(formattedMessage);
+                break;
 
-                case ELogVerbosity::Warning:
-                    logger.warn(formattedMessage);
-                    break;
+            case ELogVerbosity::Warning:
+                logger.warn(formattedMessage);
+                break;
 
-                case ELogVerbosity::Error:
-                    logger.error(formattedMessage);
-                    break;
+            case ELogVerbosity::Error:
+                logger.error(formattedMessage);
+                break;
 
-                case ELogVerbosity::Fatal:
-                    logger.critical(formattedMessage);
-                    break;
+            case ELogVerbosity::Fatal:
+                logger.critical(formattedMessage);
+                break;
 
-                case ELogVerbosity::Debug:
-                    logger.debug(formattedMessage);
-                    break;
+            case ELogVerbosity::Debug:
+                logger.debug(formattedMessage);
+                break;
             }
         }
 
@@ -69,11 +69,11 @@ namespace ig
         template <typename C>
         spdlog::logger& QueryCategory()
         {
-            UniqueLock lock{categoryMapMutex};
+            UniqueLock lock{ categoryMapMutex };
             auto itr = categoryMap.find(TypeHash64<C>);
             if (itr == categoryMap.end())
             {
-                spdlog::logger* newLogger = new spdlog::logger(C::CategoryName.data(), {consoleSink, fileSink});
+                spdlog::logger* newLogger = new spdlog::logger(C::CategoryName.data(), { consoleSink, fileSink });
                 newLogger->set_level(spdlog::level::trace);
                 itr = categoryMap.insert(itr, std::make_pair(TypeHash64<C>, newLogger));
             }

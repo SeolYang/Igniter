@@ -30,7 +30,7 @@ namespace ig
          */
         desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         desc.Stereo = false;
-        desc.SampleDesc = {1, 0};
+        desc.SampleDesc = { 1, 0 };
         desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         desc.BufferCount = NumFramesInFlight;
         desc.Scaling = DXGI_SCALING_STRETCH;
@@ -52,9 +52,9 @@ namespace ig
             ComPtr<ID3D12Resource1> resource;
             IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(localFrameIdx, IID_PPV_ARGS(&resource)));
             SetObjectName(resource.Get(), std::format("Backbuffer LF#{}", localFrameIdx));
-            backBuffers.LocalFrameResources[localFrameIdx] = renderContext.CreateTexture(GpuTexture{resource});
+            backBuffers.LocalFrameResources[localFrameIdx] = renderContext.CreateTexture(GpuTexture{ resource });
             renderTargetViews.LocalFrameResources[localFrameIdx] =
-                renderContext.CreateRenderTargetView(backBuffers.LocalFrameResources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
+                renderContext.CreateRenderTargetView(backBuffers.LocalFrameResources[localFrameIdx], D3D12_TEX2D_RTV{ .MipSlice = 0, .PlaneSlice = 0 });
         }
     }
 

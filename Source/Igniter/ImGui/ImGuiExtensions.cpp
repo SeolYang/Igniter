@@ -13,14 +13,14 @@ namespace ig::ImGuiX
     bool EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format)
     {
         bool bModified = false;
-        constexpr ImColor XComponentColor{0.8f, 0.15f, 0.f, 1.f};
-        constexpr ImColor YComponentColor{0.404f, 0.66f, 0.f, 1.f};
-        constexpr ImColor ZComponentColor{0.172f, 0.5f, 0.93f, 1.f};
+        constexpr ImColor XComponentColor{ 0.8f, 0.15f, 0.f, 1.f };
+        constexpr ImColor YComponentColor{ 0.404f, 0.66f, 0.f, 1.f };
+        constexpr ImColor ZComponentColor{ 0.172f, 0.5f, 0.93f, 1.f };
         constexpr auto CalculateColorBoxRect =
             [](const float width, const float offset, const ImVec2 cursorPos, const ImVec2 labelSize, const ImVec2 framePadding)
         {
-            return ImRect{ImVec2{cursorPos.x + offset, cursorPos.y + labelSize.y * 0.35f},
-                ImVec2{cursorPos.x + offset + width, cursorPos.y + labelSize.y * 0.65f + framePadding.y * 2.f}};
+            return ImRect{ ImVec2{cursorPos.x + offset, cursorPos.y + labelSize.y * 0.35f},
+                ImVec2{cursorPos.x + offset + width, cursorPos.y + labelSize.y * 0.65f + framePadding.y * 2.f} };
         };
 
         ImGuiContext& g = *GImGui;
@@ -37,7 +37,7 @@ namespace ig::ImGuiX
         constexpr float ColorBoxRounding = 3.5f;
         ImGui::PushID(0);
         {
-            const ImRect colorBoxRect{CalculateColorBoxRect(ColorBoxWidth, ColorBoxOffset, window->DC.CursorPos, labelSize, style.FramePadding)};
+            const ImRect colorBoxRect{ CalculateColorBoxRect(ColorBoxWidth, ColorBoxOffset, window->DC.CursorPos, labelSize, style.FramePadding) };
             bModified |= ImGui::DragFloat("", &vector.x, speed, 0.f, 0.f, format.data());
             window->DrawList->AddRectFilled(colorBoxRect.Min, colorBoxRect.Max, XComponentColor, ColorBoxRounding);
         }
@@ -47,7 +47,7 @@ namespace ig::ImGuiX
         ImGui::PushID(1);
         {
             ImGui::SameLine(0.f, style.ItemInnerSpacing.x);
-            const ImRect colorBoxRect{CalculateColorBoxRect(ColorBoxWidth, ColorBoxOffset, window->DC.CursorPos, labelSize, style.FramePadding)};
+            const ImRect colorBoxRect{ CalculateColorBoxRect(ColorBoxWidth, ColorBoxOffset, window->DC.CursorPos, labelSize, style.FramePadding) };
             bModified |= ImGui::DragFloat("", &vector.y, speed, 0.f, 0.f, format.data());
             window->DrawList->AddRectFilled(colorBoxRect.Min, colorBoxRect.Max, YComponentColor, ColorBoxRounding);
         }
@@ -57,7 +57,7 @@ namespace ig::ImGuiX
         ImGui::PushID(2);
         {
             ImGui::SameLine(0.f, style.ItemInnerSpacing.x);
-            const ImRect colorBoxRect{CalculateColorBoxRect(ColorBoxWidth, ColorBoxOffset, window->DC.CursorPos, labelSize, style.FramePadding)};
+            const ImRect colorBoxRect{ CalculateColorBoxRect(ColorBoxWidth, ColorBoxOffset, window->DC.CursorPos, labelSize, style.FramePadding) };
             bModified |= ImGui::DragFloat("", &vector.z, speed, 0.f, 0.f, format.data());
             window->DrawList->AddRectFilled(colorBoxRect.Min, colorBoxRect.Max, ZComponentColor, ColorBoxRounding);
         }
@@ -74,8 +74,8 @@ namespace ig::ImGuiX
     {
         ImGui::PushID(label.data());
         bool bModifiedVal = false;
-        ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImVec4{0.05f, 0.05f, 0.05f, 1.f});
-        ImGui::PushStyleColor(ImGuiCol_TableBorderStrong, ImVec4{0.05f, 0.05f, 0.05f, 1.f});
+        ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImVec4{ 0.05f, 0.05f, 0.05f, 1.f });
+        ImGui::PushStyleColor(ImGuiCol_TableBorderStrong, ImVec4{ 0.05f, 0.05f, 0.05f, 1.f });
         if (ImGui::BeginTable("##TransformTable", 2, ImGuiTableFlags_BordersInner | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable))
         {
             ImGui::TableNextColumn();
@@ -94,7 +94,7 @@ namespace ig::ImGuiX
             if (EditVector3("EditRotation", eulerAngles, 0.5f, "%.3f°"))
             {
                 transform.Rotation =
-                    Quaternion::CreateFromYawPitchRoll(Vector3{Deg2Rad(eulerAngles.x), Deg2Rad(eulerAngles.y), Deg2Rad(eulerAngles.z)});
+                    Quaternion::CreateFromYawPitchRoll(Vector3{ Deg2Rad(eulerAngles.x), Deg2Rad(eulerAngles.y), Deg2Rad(eulerAngles.z) });
                 bModifiedVal = true;
             }
             ImGui::TableNextRow();
@@ -114,7 +114,7 @@ namespace ig::ImGuiX
     {
         constexpr float SeparatorThickness = 1.0f;
         constexpr float SeparatorOffset = 10.f;
-        const ImVec2 textSize{ImGui::CalcTextSize(text.data())};
+        const ImVec2 textSize{ ImGui::CalcTextSize(text.data()) };
         ImGui::Text(text.data());
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + SeparatorOffset);
@@ -125,7 +125,7 @@ namespace ig::ImGuiX
     bool EditColor3(const std::string_view label, Color& color)
     {
         /* #sy_todo 사이즈 조절 */
-        float colorVal[3]{color.R(), color.G(), color.B()};
+        float colorVal[3]{ color.R(), color.G(), color.B() };
         if (ImGui::ColorEdit3(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
         {
             color.x = colorVal[0];
@@ -140,7 +140,7 @@ namespace ig::ImGuiX
     bool EditColor4(const std::string_view label, Color& color)
     {
         /* #sy_todo 사이즈 조절 (원본 구현 참고) */
-        float colorVal[4]{color.R(), color.G(), color.B(), color.A()};
+        float colorVal[4]{ color.R(), color.G(), color.B(), color.A() };
         if (ImGui::ColorEdit4(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
         {
             color.x = colorVal[0];

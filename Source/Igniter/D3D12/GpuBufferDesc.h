@@ -93,14 +93,14 @@ namespace ig
 
             switch (structureByteStride)
             {
-                default:
-                    return DXGI_FORMAT_UNKNOWN;
-                case 1:
-                    return DXGI_FORMAT_R8_UINT;
-                case 2:
-                    return DXGI_FORMAT_R16_UINT;
-                case 4:
-                    return DXGI_FORMAT_R32_UINT;
+            default:
+                return DXGI_FORMAT_UNKNOWN;
+            case 1:
+                return DXGI_FORMAT_R8_UINT;
+            case 2:
+                return DXGI_FORMAT_R16_UINT;
+            case 4:
+                return DXGI_FORMAT_R32_UINT;
             }
         }
 
@@ -122,7 +122,7 @@ namespace ig
         void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
 
     public:
-        String DebugName = String{"Unknown Buffer"};
+        String DebugName = String{ "Unknown Buffer" };
 
     private:
         uint32_t structureByteStride = 1;

@@ -23,7 +23,7 @@ namespace ig
         const Json& Deserialize(const Json& archive);
 
     public:
-        Guid DiffuseTexGuid{DefaultTextureGuid};
+        Guid DiffuseTexGuid{ DefaultTextureGuid };
     };
 
     class AssetManager;
@@ -50,10 +50,10 @@ namespace ig
 
     public:
         /* #sy_wip Common 헤더로 이동 */
-        static constexpr std::string_view EngineDefault{"Engine\\Default"};
+        static constexpr std::string_view EngineDefault{ "Engine\\Default" };
 
     private:
-        AssetManager* assetManager{nullptr};
+        AssetManager* assetManager{ nullptr };
         Desc snapshot{};
         ManagedAsset<Texture> diffuse{};
     };

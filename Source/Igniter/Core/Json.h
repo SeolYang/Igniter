@@ -43,11 +43,11 @@ namespace ig::details
 
     template <typename T>
     concept ConvertibleJsonInternalSigned =
-        !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_signed_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
+        !std::is_floating_point_v<T> && !std::is_same_v<T, bool>&& std::is_signed_v<T>&& std::is_convertible_v<T, Json::number_unsigned_t>;
 
     template <typename T>
     concept ConvertibleJsonInternalUnsigned =
-        !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
+        !std::is_floating_point_v<T> && !std::is_same_v<T, bool>&& std::is_unsigned_v<T>&& std::is_convertible_v<T, Json::number_unsigned_t>;
 
     template <typename T>
     concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, Json::number_float_t>;

@@ -60,15 +60,15 @@ namespace ig
     {
         switch (type)
         {
-            default:
-            case EDescriptorHeapType::CBV_SRV_UAV:
-                return cbvSrvUavDescriptorHandleIncrementSize;
-            case EDescriptorHeapType::Sampler:
-                return samplerDescritorHandleIncrementSize;
-            case EDescriptorHeapType::DSV:
-                return dsvDescriptorHandleIncrementSize;
-            case EDescriptorHeapType::RTV:
-                return rtvDescriptorHandleIncrementSize;
+        default:
+        case EDescriptorHeapType::CBV_SRV_UAV:
+            return cbvSrvUavDescriptorHandleIncrementSize;
+        case EDescriptorHeapType::Sampler:
+            return samplerDescritorHandleIncrementSize;
+        case EDescriptorHeapType::DSV:
+            return dsvDescriptorHandleIncrementSize;
+        case EDescriptorHeapType::RTV:
+            return rtvDescriptorHandleIncrementSize;
         }
     }
 
@@ -173,12 +173,12 @@ namespace ig
          */
         switch (features.RaytracingTier())
         {
-            case D3D12_RAYTRACING_TIER_1_0:
-                bRaytracing10Supported = true;
-                break;
-            case D3D12_RAYTRACING_TIER_1_1:
-                bRaytracing11Supported = true;
-                break;
+        case D3D12_RAYTRACING_TIER_1_0:
+            bRaytracing10Supported = true;
+            break;
+        case D3D12_RAYTRACING_TIER_1_1:
+            bRaytracing11Supported = true;
+            break;
         }
 
         bRaytracing10Supported = bRaytracing11Supported ? true : bRaytracing10Supported;
@@ -194,19 +194,19 @@ namespace ig
          * https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_resource_heap_tier
          */
 
-        /**
-         * D3D12_FEATURE_DATA_D3D12_OPTIONS6
-         * Variable Shading Rate Tier: https://learn.microsoft.com/en-us/windows/win32/direct3d12/vrs#feature-tiers
-         */
+         /**
+          * D3D12_FEATURE_DATA_D3D12_OPTIONS6
+          * Variable Shading Rate Tier: https://learn.microsoft.com/en-us/windows/win32/direct3d12/vrs#feature-tiers
+          */
 
-        // D3D12_FEATURE_DATA_D3D12_OPTIONS7: Mesh Shader/Sampler Feedback Tier
-        // D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS
+          // D3D12_FEATURE_DATA_D3D12_OPTIONS7: Mesh Shader/Sampler Feedback Tier
+          // D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS
 
-        /*
-         * #sy_todo Virtual Texturing using tiled resource
-         * D3D12_TILED_RESOURCES_TIER > 2 for virtual texturing + texture streaming
-         * https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_tiled_resources_tier
-         */
+          /*
+           * #sy_todo Virtual Texturing using tiled resource
+           * D3D12_TILED_RESOURCES_TIER > 2 for virtual texturing + texture streaming
+           * https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_tiled_resources_tier
+           */
     }
 
     void RenderDevice::CacheDescriptorHandleIncrementSize()
@@ -240,7 +240,7 @@ namespace ig
         const D3D12_COMMAND_LIST_TYPE cmdListType = ToNativeCommandListType(queueType);
         IG_CHECK(cmdListType != D3D12_COMMAND_LIST_TYPE_NONE);
 
-        const D3D12_COMMAND_QUEUE_DESC desc = {.Type = cmdListType, .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE, .NodeMask = 0};
+        const D3D12_COMMAND_QUEUE_DESC desc = { .Type = cmdListType, .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE, .NodeMask = 0 };
 
         ComPtr<ID3D12CommandQueue> newCmdQueue;
         if (const HRESULT result = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue)); !SUCCEEDED(result))
@@ -262,7 +262,7 @@ namespace ig
         IG_CHECK(newFence);
         SetObjectName(newFence.Get(), std::format("{} Sync Fence", debugName));
 
-        return CommandQueue{std::move(newCmdQueue), queueType, std::move(newFence)};
+        return CommandQueue{ std::move(newCmdQueue), queueType, std::move(newFence) };
     }
 
     Option<CommandContext> RenderDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
@@ -290,28 +290,28 @@ namespace ig
         IG_CHECK(newCmdAllocator);
         IG_CHECK(newCmdList);
         SetObjectName(newCmdList.Get(), debugName);
-        return CommandContext{std::move(newCmdAllocator), std::move(newCmdList), targetQueueType};
+        return CommandContext{ std::move(newCmdAllocator), std::move(newCmdList), targetQueueType };
     }
 
     Option<RootSignature> RenderDevice::CreateBindlessRootSignature()
     {
         IG_CHECK(device);
         constexpr uint8_t NumReservedConstants = 16;
-        const D3D12_ROOT_PARAMETER rootParam{.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+        const D3D12_ROOT_PARAMETER rootParam{ .ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
             .Constants = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},
-            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL};
+            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL };
 
-        const D3D12_ROOT_SIGNATURE_DESC desc{.NumParameters = 1,
+        const D3D12_ROOT_SIGNATURE_DESC desc{ .NumParameters = 1,
             .pParameters = &rootParam,
             .NumStaticSamplers = 0,
             .pStaticSamplers = nullptr,
             .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED |
-                     D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT};
+                     D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT };
 
         ComPtr<ID3DBlob> errorBlob;
         ComPtr<ID3DBlob> rootSignatureBlob;
         if (const HRESULT result =
-                D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
+            D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
             !SUCCEEDED(result))
         {
             IG_LOG(RenderDevice, Error, "Failed to serialize root signature. HRESULT: {:#X}, Message: {}", result, errorBlob->GetBufferPointer());
@@ -320,7 +320,7 @@ namespace ig
 
         ComPtr<ID3D12RootSignature> newRootSignature;
         if (const HRESULT result = device->CreateRootSignature(
-                0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
+            0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
             !SUCCEEDED(result))
         {
             IG_LOG(RenderDevice, Error, "Failed to create root signature. HRESULT: {:#X}", result);
@@ -328,7 +328,7 @@ namespace ig
         }
 
         IG_CHECK(newRootSignature);
-        return RootSignature{std::move(newRootSignature)};
+        return RootSignature{ std::move(newRootSignature) };
     }
 
     Option<PipelineState> RenderDevice::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
@@ -345,7 +345,7 @@ namespace ig
 
         IG_CHECK(newPipelineState);
         SetObjectName(newPipelineState.Get(), desc.Name);
-        return PipelineState{std::move(newPipelineState), true};
+        return PipelineState{ std::move(newPipelineState), true };
     }
 
     Option<PipelineState> RenderDevice::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
@@ -361,7 +361,7 @@ namespace ig
 
         IG_CHECK(newPipelineState);
         SetObjectName(newPipelineState.Get(), desc.Name);
-        return PipelineState{std::move(newPipelineState), false};
+        return PipelineState{ std::move(newPipelineState), false };
     }
 
     Option<DescriptorHeap> RenderDevice::CreateDescriptorHeap(
@@ -374,10 +374,10 @@ namespace ig
 
         const bool bIsShaderVisibleDescriptorHeap = IsShaderVisibleDescriptorHeapType(descriptorHeapType);
 
-        const D3D12_DESCRIPTOR_HEAP_DESC desc{.Type = targetDescriptorHeapType,
+        const D3D12_DESCRIPTOR_HEAP_DESC desc{ .Type = targetDescriptorHeapType,
             .NumDescriptors = numDescriptors,
             .Flags = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-            .NodeMask = 0};
+            .NodeMask = 0 };
 
         ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
         if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap)); !SUCCEEDED(result))
@@ -388,8 +388,8 @@ namespace ig
 
         IG_CHECK(newDescriptorHeap);
         SetObjectName(newDescriptorHeap.Get(), debugName);
-        return DescriptorHeap{descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
-            GetDescriptorHandleIncrementSize(descriptorHeapType)};
+        return DescriptorHeap{ descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
+            GetDescriptorHandleIncrementSize(descriptorHeapType) };
     }
 
     void RenderDevice::CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView)
@@ -418,7 +418,7 @@ namespace ig
         ComPtr<D3D12MA::Allocation> allocation{};
         ComPtr<ID3D12Resource> resource{};
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &bufferDesc, D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr, 0, nullptr,
-                allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+            allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(RenderDevice, Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
@@ -428,7 +428,7 @@ namespace ig
         IG_CHECK(allocation);
         IG_CHECK(resource);
         SetObjectName(resource.Get(), bufferDesc.DebugName);
-        return GpuBuffer{bufferDesc, std::move(allocation), std::move(resource)};
+        return GpuBuffer{ bufferDesc, std::move(allocation), std::move(resource) };
     }
 
     Option<GpuTexture> RenderDevice::CreateTexture(const GpuTextureDesc& textureDesc)
@@ -440,18 +440,18 @@ namespace ig
         Option<D3D12_CLEAR_VALUE> clearValue{};
         if (textureDesc.IsRenderTargetCompatible())
         {
-            clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .Color = {0.f, 0.f, 0.f, 1.f}};
+            clearValue = D3D12_CLEAR_VALUE{ .Format = textureDesc.Format, .Color = {0.f, 0.f, 0.f, 1.f} };
         }
         else if (textureDesc.IsDepthStencilCompatible())
         {
-            clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .DepthStencil = {.Depth = 1.f, .Stencil = 0}};
+            clearValue = D3D12_CLEAR_VALUE{ .Format = textureDesc.Format, .DepthStencil = {.Depth = 1.f, .Stencil = 0} };
         }
 
         ComPtr<D3D12MA::Allocation> allocation{};
         ComPtr<ID3D12Resource> resource{};
         IG_CHECK(textureDesc.InitialLayout != D3D12_BARRIER_LAYOUT_UNDEFINED);
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc, textureDesc.InitialLayout,
-                clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+            clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(RenderDevice, Error, "Failed to create texture resource. HRESULT: {:#X}", result);
@@ -461,7 +461,7 @@ namespace ig
         IG_CHECK(allocation);
         IG_CHECK(resource);
         SetObjectName(resource.Get(), textureDesc.DebugName);
-        return GpuTexture{textureDesc, std::move(allocation), std::move(resource)};
+        return GpuTexture{ textureDesc, std::move(allocation), std::move(resource) };
     }
 
     ComPtr<D3D12MA::Pool> RenderDevice::CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc)
@@ -488,7 +488,7 @@ namespace ig
         footPrints.RowSizesInBytes.resize(numSubresources);
 
         device->GetCopyableFootprints1(&resDesc, firstSubresource, numSubresources, baseOffset, footPrints.Layouts.data(), footPrints.NumRows.data(),
-            footPrints.RowSizesInBytes.data(), &footPrints.RequiredSize);
+                                       footPrints.RowSizesInBytes.data(), &footPrints.RequiredSize);
 
         IG_CHECK(footPrints.RequiredSize > 0);
         IG_CHECK(!footPrints.Layouts.empty());
@@ -522,7 +522,7 @@ namespace ig
         if (gpuView.Type == EGpuViewType::ConstantBufferView)
         {
             const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
-                .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)};
+                .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes) };
             device->CreateConstantBufferView(&cbvDesc, gpuView.CPUHandle);
         }
         else

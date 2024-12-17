@@ -17,27 +17,27 @@ namespace ig
         virtual ~GpuTextureDesc() = default;
 
         void AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false,
-            const bool bEnableSimultaneousAccess = false);
+                         const bool bEnableSimultaneousAccess = false);
         void AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
-            const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
-            const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                         const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
+                         const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
         void AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth, const uint16_t mipLevels, const DXGI_FORMAT format,
-            const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
-            const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                         const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
+                         const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
 
         void AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
-            const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false, const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                            const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false, const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
         void AsDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format);
 
         void AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,
-            const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false);
+                              const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false);
         void AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength, const uint16_t mipLevels,
-            const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false,
-            const bool bEnableMSAA = false, const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                              const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false,
+                              const bool bEnableMSAA = false, const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
 
         void AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
-            const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
-            const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                       const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
+                       const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
 
         bool IsUnorderedAccessCompatible() const;
         bool IsDepthStencilCompatible() const;
@@ -75,7 +75,7 @@ namespace ig
         std::vector<D3D12_SUBRESOURCE_DATA> GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const;
 
     public:
-        String DebugName = String{"Unknown Texture"};
+        String DebugName = String{ "Unknown Texture" };
         D3D12_BARRIER_LAYOUT InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
     private:

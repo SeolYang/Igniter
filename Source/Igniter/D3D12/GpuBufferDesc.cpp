@@ -19,7 +19,7 @@ namespace ig
         Height = 1;
         DepthOrArraySize = 1;
         MipLevels = 1;
-        SampleDesc = {.Count = 1, .Quality = 0};
+        SampleDesc = { .Count = 1, .Quality = 0 };
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         Flags = D3D12_RESOURCE_FLAG_NONE;
         Format = DXGI_FORMAT_UNKNOWN;
@@ -43,7 +43,7 @@ namespace ig
         Height = 1;
         DepthOrArraySize = 1;
         MipLevels = 1;
-        SampleDesc = {.Count = 1, .Quality = 0};
+        SampleDesc = { .Count = 1, .Quality = 0 };
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         Flags = bIsShaderReadWritable ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
         Format = DXGI_FORMAT_UNKNOWN;
@@ -65,7 +65,7 @@ namespace ig
         Height = 1;
         DepthOrArraySize = 1;
         MipLevels = 1;
-        SampleDesc = {.Count = 1, .Quality = 0};
+        SampleDesc = { .Count = 1, .Quality = 0 };
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         Flags = D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
         Format = DXGI_FORMAT_UNKNOWN;
@@ -87,7 +87,7 @@ namespace ig
         Height = 1;
         DepthOrArraySize = 1;
         MipLevels = 1;
-        SampleDesc = {.Count = 1, .Quality = 0};
+        SampleDesc = { .Count = 1, .Quality = 0 };
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         Flags = D3D12_RESOURCE_FLAG_NONE;
         Format = DXGI_FORMAT_UNKNOWN;
@@ -110,7 +110,7 @@ namespace ig
         Height = 1;
         DepthOrArraySize = 1;
         MipLevels = 1;
-        SampleDesc = {.Count = 1, .Quality = 0};
+        SampleDesc = { .Count = 1, .Quality = 0 };
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         Flags = D3D12_RESOURCE_FLAG_NONE;
     }
@@ -132,7 +132,7 @@ namespace ig
         Height = 1;
         DepthOrArraySize = 1;
         MipLevels = 1;
-        SampleDesc = {.Count = 1, .Quality = 0};
+        SampleDesc = { .Count = 1, .Quality = 0 };
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         Flags = D3D12_RESOURCE_FLAG_NONE;
     }
@@ -140,18 +140,18 @@ namespace ig
     D3D12MA::ALLOCATION_DESC GpuBufferDesc::GetAllocationDesc() const
     {
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
-        D3D12MA::ALLOCATION_DESC desc{.HeapType = D3D12_HEAP_TYPE_DEFAULT};
+        D3D12MA::ALLOCATION_DESC desc{ .HeapType = D3D12_HEAP_TYPE_DEFAULT };
         switch (bufferType)
         {
-            case EGpuBufferType::ConstantBuffer:
-                desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
-                break;
-            case EGpuBufferType::UploadBuffer:
-                desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
-                break;
-            case EGpuBufferType::ReadbackBuffer:
-                desc.HeapType = D3D12_HEAP_TYPE_READBACK;
-                break;
+        case EGpuBufferType::ConstantBuffer:
+            desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+            break;
+        case EGpuBufferType::UploadBuffer:
+            desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
+            break;
+        case EGpuBufferType::ReadbackBuffer:
+            desc.HeapType = D3D12_HEAP_TYPE_READBACK;
+            break;
         }
 
         return desc;
@@ -164,7 +164,7 @@ namespace ig
         std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{};
         if (IsConstantBufferViewCompatibleBuffer(bufferType))
         {
-            desc = D3D12_CONSTANT_BUFFER_VIEW_DESC{.BufferLocation = bufferLocation, .SizeInBytes = static_cast<uint32_t>(Width)};
+            desc = D3D12_CONSTANT_BUFFER_VIEW_DESC{ .BufferLocation = bufferLocation, .SizeInBytes = static_cast<uint32_t>(Width) };
         }
 
         return desc;
@@ -177,10 +177,10 @@ namespace ig
         std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> desc{};
         if (IsShaderResourceViewCompatibleBuffer(bufferType))
         {
-            desc = D3D12_SHADER_RESOURCE_VIEW_DESC{.Format = DXGI_FORMAT_UNKNOWN,
+            desc = D3D12_SHADER_RESOURCE_VIEW_DESC{ .Format = DXGI_FORMAT_UNKNOWN,
                 .ViewDimension = D3D12_SRV_DIMENSION_BUFFER,
                 .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-                .Buffer = {.FirstElement = 0, .NumElements = numElements, .StructureByteStride = structureByteStride}};
+                .Buffer = {.FirstElement = 0, .NumElements = numElements, .StructureByteStride = structureByteStride} };
         }
 
         return desc;
@@ -193,10 +193,10 @@ namespace ig
         std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> desc{};
         if (IsUnorderdAccessViewCompatibleBuffer(bufferType) && bIsShaderReadWritable)
         {
-            desc = D3D12_UNORDERED_ACCESS_VIEW_DESC{.Format = DXGI_FORMAT_UNKNOWN,
+            desc = D3D12_UNORDERED_ACCESS_VIEW_DESC{
+                .Format = DXGI_FORMAT_UNKNOWN,
                 .ViewDimension = D3D12_UAV_DIMENSION_BUFFER,
-                .Buffer = {
-                    .FirstElement = 0, .NumElements = numElements, .StructureByteStride = structureByteStride, .Flags = D3D12_BUFFER_UAV_FLAG_NONE}};
+                .Buffer = {.FirstElement = 0, .NumElements = numElements, .StructureByteStride = structureByteStride, .Flags = D3D12_BUFFER_UAV_FLAG_NONE} };
         }
 
         return desc;

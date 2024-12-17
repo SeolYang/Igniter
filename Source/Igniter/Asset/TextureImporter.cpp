@@ -41,16 +41,16 @@ namespace ig
     {
         switch (compMode)
         {
-            case ETextureCompressionMode::BC4:
-                return IsUnormFormat(format) ? DXGI_FORMAT_BC4_UNORM : DXGI_FORMAT_BC4_SNORM;
-            case ETextureCompressionMode::BC5:
-                return IsUnormFormat(format) ? DXGI_FORMAT_BC5_UNORM : DXGI_FORMAT_BC5_SNORM;
-            case ETextureCompressionMode::BC6H:
-                return IsUnsignedFormat(format) ? DXGI_FORMAT_BC6H_UF16 : DXGI_FORMAT_BC6H_SF16;
-            case ETextureCompressionMode::BC7:
-                return DirectX::IsSRGB(format) ? DXGI_FORMAT_BC7_UNORM_SRGB : DXGI_FORMAT_BC7_UNORM;
-            default:
-                return DXGI_FORMAT_UNKNOWN;
+        case ETextureCompressionMode::BC4:
+            return IsUnormFormat(format) ? DXGI_FORMAT_BC4_UNORM : DXGI_FORMAT_BC4_SNORM;
+        case ETextureCompressionMode::BC5:
+            return IsUnormFormat(format) ? DXGI_FORMAT_BC5_UNORM : DXGI_FORMAT_BC5_SNORM;
+        case ETextureCompressionMode::BC6H:
+            return IsUnsignedFormat(format) ? DXGI_FORMAT_BC6H_UF16 : DXGI_FORMAT_BC6H_SF16;
+        case ETextureCompressionMode::BC7:
+            return DirectX::IsSRGB(format) ? DXGI_FORMAT_BC7_UNORM_SRGB : DXGI_FORMAT_BC7_UNORM;
+        default:
+            return DXGI_FORMAT_UNKNOWN;
         }
     }
 
@@ -82,7 +82,7 @@ namespace ig
     {
         CoInitializeUnique();
 
-        const Path resPath{resPathStr.ToStringView()};
+        const Path resPath{ resPathStr.ToStringView() };
         if (!fs::exists(resPath))
         {
             return MakeFail<Texture::Desc, ETextureImportStatus::FileDoesNotExists>();
@@ -100,9 +100,9 @@ namespace ig
             // 만약 DDS 타입이면, 바로 가공 없이 에셋으로 사용한다. 이 경우,
             // 제공된 config 은 무시된다.; 애초에 DDS로 미리 가공했는데 다시 압축을 풀고, 밉맵을 생성하고 할 필요가 없음.
             IG_LOG(TextureImporter, Warning,
-                "For DDS files, the provided configuration values are disregarded, "
-                "and the supplied file is used as the asset as it is. File: {}",
-                resPathStr.ToStringView());
+                   "For DDS files, the provided configuration values are disregarded, "
+                   "and the supplied file is used as the asset as it is. File: {}",
+                   resPathStr.ToStringView());
 
             loadRes = DirectX::LoadFromDDSFile(resPath.c_str(), DirectX::DDS_FLAGS_NONE, &texMetadata, targetTex);
             bIsDDSFormat = true;
@@ -150,7 +150,7 @@ namespace ig
             {
                 DirectX::ScratchImage mipChain{};
                 const HRESULT genRes = DirectX::GenerateMipMaps(targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
-                    bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR, 0, mipChain);
+                                                                bIsHDRFormat ? DirectX::TEX_FILTER_FANT : DirectX::TEX_FILTER_LINEAR, 0, mipChain);
                 if (FAILED(genRes))
                 {
                     return MakeFail<Texture::Desc, ETextureImportStatus::FailedGenerateMips>();
@@ -166,20 +166,20 @@ namespace ig
                 if (bIsHDRFormat && importDesc.CompressionMode != ETextureCompressionMode::BC6H)
                 {
                     IG_LOG(TextureImporter, Warning,
-                        "The compression method for HDR extension textures is "
-                        "enforced "
-                        "to be the 'BC6H' algorithm. File: {}",
-                        resPathStr.ToStringView());
+                           "The compression method for HDR extension textures is "
+                           "enforced "
+                           "to be the 'BC6H' algorithm. File: {}",
+                           resPathStr.ToStringView());
 
                     importDesc.CompressionMode = ETextureCompressionMode::BC6H;
                 }
                 else if (IsGreyScaleFormat(texMetadata.format) && importDesc.CompressionMode == ETextureCompressionMode::BC4)
                 {
                     IG_LOG(TextureImporter, Warning,
-                        "The compression method for greyscale-formatted "
-                        "textures is "
-                        "enforced to be the 'BC4' algorithm. File: {}",
-                        resPathStr.ToStringView());
+                           "The compression method for greyscale-formatted "
+                           "textures is "
+                           "enforced to be the 'BC4' algorithm. File: {}",
+                           resPathStr.ToStringView());
 
                     importDesc.CompressionMode = ETextureCompressionMode::BC4;
                 }
@@ -188,21 +188,21 @@ namespace ig
                 const DXGI_FORMAT compFormat = AsBCnFormat(importDesc.CompressionMode, texMetadata.format);
 
                 const bool bIsGPUCodecAvailable = d3d11Device != nullptr && (importDesc.CompressionMode == ETextureCompressionMode::BC6H ||
-                                                                                importDesc.CompressionMode == ETextureCompressionMode::BC7);
+                                                                             importDesc.CompressionMode == ETextureCompressionMode::BC7);
 
                 HRESULT compRes = S_FALSE;
                 DirectX::ScratchImage compTex{};
                 {
-                    UniqueLock lock{compressionMutex};
+                    UniqueLock lock{ compressionMutex };
                     if (bIsGPUCodecAvailable)
                     {
                         compRes = DirectX::Compress(d3d11Device, targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(),
-                            compFormat, static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags), DirectX::TEX_ALPHA_WEIGHT_DEFAULT, compTex);
+                                                    compFormat, static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags), DirectX::TEX_ALPHA_WEIGHT_DEFAULT, compTex);
                     }
                     else
                     {
                         compRes = DirectX::Compress(targetTex.GetImages(), targetTex.GetImageCount(), targetTex.GetMetadata(), compFormat,
-                            static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags), DirectX::TEX_ALPHA_WEIGHT_DEFAULT, compTex);
+                                                    static_cast<DirectX::TEX_COMPRESS_FLAGS>(compFlags), DirectX::TEX_ALPHA_WEIGHT_DEFAULT, compTex);
                     }
                 }
 
@@ -217,11 +217,11 @@ namespace ig
         }
 
         /* Configure Texture Resource Metadata */
-        const ResourceInfo resInfo{.Category = EAssetCategory::Texture};
+        const ResourceInfo resInfo{ .Category = EAssetCategory::Texture };
         Json resMetadata{};
         resMetadata << resInfo << importDesc;
 
-        const Path resMetadataPath{MakeResourceMetadataPath(resPath)};
+        const Path resMetadataPath{ MakeResourceMetadataPath(resPath) };
         if (SaveJsonToFile(resMetadataPath, resMetadata))
         {
             IG_LOG(TextureImporter, Warning, "Failed to create resource metadata {}.", resMetadataPath.string());
@@ -230,8 +230,8 @@ namespace ig
         /* Configure Texture Asset Metadata */
         texMetadata = targetTex.GetMetadata();
 
-        const AssetInfo assetInfo{MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetCategory::Texture};
-        const TextureLoadDesc newLoadConfig{.Format = texMetadata.format,
+        const AssetInfo assetInfo{ MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetCategory::Texture };
+        const TextureLoadDesc newLoadConfig{ .Format = texMetadata.format,
             .Dimension = details::AsTexDimension(texMetadata.dimension),
             .Width = static_cast<uint32_t>(texMetadata.width),
             .Height = static_cast<uint32_t>(texMetadata.height),
@@ -241,7 +241,7 @@ namespace ig
             .Filter = importDesc.Filter,
             .AddressModeU = importDesc.AddressModeU,
             .AddressModeV = importDesc.AddressModeV,
-            .AddressModeW = importDesc.AddressModeW};
+            .AddressModeW = importDesc.AddressModeW };
 
         Json assetMetadata{};
         assetMetadata << assetInfo << newLoadConfig;

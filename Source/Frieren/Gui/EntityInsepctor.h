@@ -46,6 +46,6 @@ namespace fe
         eastl::vector<size_t> componentInfoIndicesToDisplay;
         eastl::vector<size_t> addableComponentInfoIndices;
         bool bForceDirty = false;
-        size_t componentToRemove = (size_t) -1;
+        size_t componentToRemove = (size_t)-1;
     };
 }    // namespace fe

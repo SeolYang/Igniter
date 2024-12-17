@@ -16,7 +16,7 @@ namespace ig
     {
         if (exp == 0)
         {
-            return T{1};
+            return T{ 1 };
         }
 
         T result = base;

@@ -13,7 +13,7 @@ namespace ig
         struct CapturedFrames
         {
             void* Frames[MaxNumBackTraceCapture]{};
-            uint16_t NumCapturedFrames{0};
+            uint16_t NumCapturedFrames{ 0 };
         };
 
     public:
@@ -31,7 +31,7 @@ namespace ig
         static CallStack& GetCallStack();
 
     private:
-        HANDLE procHandle{nullptr};
+        HANDLE procHandle{ nullptr };
 
         Mutex mutex{};
         UnorderedMap<DWORD, CapturedFrames> capturedFramesTable{};

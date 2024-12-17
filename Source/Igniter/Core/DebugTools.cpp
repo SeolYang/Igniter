@@ -30,7 +30,7 @@ namespace ig
 
     CallStack::CallStack()
     {
-        const HANDLE currentProc{GetCurrentProcess()};
+        const HANDLE currentProc{ GetCurrentProcess() };
         if (DuplicateHandle(currentProc, currentProc, currentProc, &procHandle, 0, FALSE, DUPLICATE_SAME_ACCESS))
         {
             SymSetOptions(SYMOPT_LOAD_LINES);
@@ -67,7 +67,7 @@ namespace ig
         frames.NumCapturedFrames = CaptureStackBackTrace(1, MaxNumBackTraceCapture, &frames.Frames[0], &backTraceHash);
 
         {
-            UniqueLock lock{callStack.mutex};
+            UniqueLock lock{ callStack.mutex };
             callStack.capturedFramesTable[backTraceHash] = frames;
         }
         return backTraceHash;
@@ -78,7 +78,7 @@ namespace ig
         CallStack& callStack = GetCallStack();
         std::string_view dumped{};
 
-        UniqueLock lock{callStack.mutex};
+        UniqueLock lock{ callStack.mutex };
         if (!callStack.dumpCache.contains(captureHash))
         {
             if (!callStack.capturedFramesTable.contains(captureHash))
@@ -106,8 +106,8 @@ namespace ig
                 details::SymbolInfo symbolInfo{};
                 SymFromAddr(callStack.procHandle, frameAddr, nullptr, &symbolInfo);
 
-                DWORD displacement{0};
-                IMAGEHLP_LINE64 line{.SizeOfStruct = sizeof(IMAGEHLP_LINE64)};
+                DWORD displacement{ 0 };
+                IMAGEHLP_LINE64 line{ .SizeOfStruct = sizeof(IMAGEHLP_LINE64) };
                 if (SymGetLineFromAddr64(callStack.procHandle, frameAddr, &displacement, &line))
                 {
                     outputStream << std::format("{} <= Line: {}; File: {}\n", symbolInfo.Name, line.LineNumber, line.FileName);

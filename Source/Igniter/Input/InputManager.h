@@ -58,13 +58,13 @@ namespace ig
         struct ActionMapping
         {
             Handle<Action, InputManager> ActionHandle{};
-            EInput MappedInput{EInput::None};
+            EInput MappedInput{ EInput::None };
         };
 
         struct AxisMapping
         {
             Handle<Axis, InputManager> AxisHandle{};
-            EInput MappedInput{EInput::None};
+            EInput MappedInput{ EInput::None };
         };
 
         struct RawMouseInput
@@ -125,10 +125,10 @@ namespace ig
         UnorderedSet<EInput> processedInputs;
 
         std::jthread rawMouseInputPollingThread;
-        HANDLE rawMouseInputPollingDoneEvent{INVALID_HANDLE_VALUE};
+        HANDLE rawMouseInputPollingDoneEvent{ INVALID_HANDLE_VALUE };
         Mutex rawMouseInputPollingMutex;
         eastl::vector<uint8_t> rawInputBuffer;
         eastl::vector<RawMouseInput> polledRawMouseInputs;
-        size_t rawInputOffset{sizeof(RAWINPUTHEADER)};
+        size_t rawInputOffset{ sizeof(RAWINPUTHEADER) };
     };
 }    // namespace ig

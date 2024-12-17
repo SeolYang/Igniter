@@ -9,7 +9,7 @@ namespace ig::details
     public:
         struct promise_type
         {
-            FileWatchTask get_return_object() { return FileWatchTask{std::coroutine_handle<promise_type>::from_promise(*this)}; }
+            FileWatchTask get_return_object() { return FileWatchTask{ std::coroutine_handle<promise_type>::from_promise(*this) }; }
 
             auto initial_suspend() { return std::suspend_never{}; }
 
@@ -103,9 +103,9 @@ namespace ig
 
     private:
         Path directoryPath;
-        HANDLE directory{INVALID_HANDLE_VALUE};
+        HANDLE directory{ INVALID_HANDLE_VALUE };
 
-        bool bStopWatching{false};
+        bool bStopWatching{ false };
         bool bWatchRecursively = true;
         EFileWatchFilterFlags filters = EFileWatchFilterFlags::ChangeFileName | EFileWatchFilterFlags::ChangeLastWrite;
         std::vector<FileChangeInfo> buffer{};

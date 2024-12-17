@@ -176,7 +176,7 @@ namespace fe
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        world = ig::MakePtr<ig::World>(assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"}));
+        world = ig::MakePtr<ig::World>(assetManager, assetManager.Load<ig::Map>(ig::Guid{ "92d1aad6-7d75-41a4-be10-c9f8bfdb787e" }));
         renderer->SetWorld(world.get());
 
         ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();

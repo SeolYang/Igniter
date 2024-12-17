@@ -37,7 +37,7 @@ namespace ig
     TempConstantBuffer TempConstantBufferAllocator::Allocate(const LocalFrameIndex localFrameIdx, const GpuBufferDesc& desc)
     {
         IG_CHECK(localFrameIdx < NumFramesInFlight);
-        UniqueLock lock{mutexes[localFrameIdx]};
+        UniqueLock lock{ mutexes[localFrameIdx] };
         const size_t allocSizeInBytes = desc.GetSizeAsBytes();
         const size_t offset = allocatedSizeInBytes[localFrameIdx];
         allocatedSizeInBytes[localFrameIdx] += allocSizeInBytes;
@@ -46,21 +46,21 @@ namespace ig
         GpuBuffer* bufferPtr = renderContext.Lookup(buffers[localFrameIdx]);
         if (bufferPtr == nullptr)
         {
-            return TempConstantBuffer{{}, nullptr};
+            return TempConstantBuffer{ {}, nullptr };
         }
 
         allocatedViews[localFrameIdx].emplace_back(renderContext.CreateConstantBufferView(buffers[localFrameIdx], offset, allocSizeInBytes));
         if (!allocatedViews[localFrameIdx].back())
         {
-            return TempConstantBuffer{{}, nullptr};
+            return TempConstantBuffer{ {}, nullptr };
         }
 
-        return TempConstantBuffer{allocatedViews[localFrameIdx].back(), bufferPtr->Map(offset)};
+        return TempConstantBuffer{ allocatedViews[localFrameIdx].back(), bufferPtr->Map(offset) };
     }
 
     void TempConstantBufferAllocator::Reset(const LocalFrameIndex localFrameIdx)
     {
-        UniqueLock lock{mutexes[localFrameIdx]};
+        UniqueLock lock{ mutexes[localFrameIdx] };
         for (const RenderResource<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
         {
             renderContext.DestroyGpuView(gpuViewHandle);
@@ -77,8 +77,9 @@ namespace ig
             IG_CHECK(bufferPtr != nullptr);
 
             /* #sy_todo 제대로 상태 전이 시킬 것 */
-            cmdCtx.AddPendingBufferBarrier(*bufferPtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_ALL_SHADING, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                D3D12_BARRIER_ACCESS_CONSTANT_BUFFER);
+            cmdCtx.AddPendingBufferBarrier(*bufferPtr,
+                                           D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_ALL_SHADING,
+                                           D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_CONSTANT_BUFFER);
         }
         cmdCtx.FlushBarriers();
     }

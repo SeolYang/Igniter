@@ -27,40 +27,40 @@ namespace ig
             switch (wParam)
             {
                 /** Characters */
-                case 'W':
-                case 'w':
-                    return EInput::W;
+            case 'W':
+            case 'w':
+                return EInput::W;
 
-                case 'S':
-                case 's':
-                    return EInput::S;
+            case 'S':
+            case 's':
+                return EInput::S;
 
-                case 'A':
-                case 'a':
-                    return EInput::A;
+            case 'A':
+            case 'a':
+                return EInput::A;
 
-                case 'D':
-                case 'd':
-                    return EInput::D;
+            case 'D':
+            case 'd':
+                return EInput::D;
 
                 /** Virtual Keys */
-                case VK_SPACE:
-                    return EInput::Space;
+            case VK_SPACE:
+                return EInput::Space;
 
-                case VK_LBUTTON:
-                    return EInput::MouseLB;
+            case VK_LBUTTON:
+                return EInput::MouseLB;
 
-                case VK_RBUTTON:
-                    return EInput::MouseRB;
+            case VK_RBUTTON:
+                return EInput::MouseRB;
 
-                case VK_SHIFT:
-                    return EInput::Shift;
+            case VK_SHIFT:
+                return EInput::Shift;
 
-                case VK_CONTROL:
-                    return EInput::Control;
+            case VK_CONTROL:
+                return EInput::Control;
 
-                default:
-                    break;
+            default:
+                break;
             }
 
             return EInput::None;
@@ -70,7 +70,7 @@ namespace ig
     InputManager::InputManager()
     {
         rawMouseInputPollingDoneEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-        rawMouseInputPollingThread = std::jthread{[this]()
+        rawMouseInputPollingThread = std::jthread{ [this]()
             {
                 HWND window = CreateWindowEx(0, TEXT("Message"), NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
                 if (window == NULL)
@@ -116,7 +116,7 @@ namespace ig
                 rawMouse.dwFlags |= RIDEV_REMOVE;
                 RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse));
                 DestroyWindow(window);
-            }};
+            } };
     }
 
     InputManager::~InputManager()
@@ -157,7 +157,7 @@ namespace ig
         }
 
         const Handle<Action, InputManager> newHandle = actionRegistry.Create();
-        nameActionTable[name] = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
+        nameActionTable[name] = ActionMapping{ .ActionHandle = newHandle, .MappedInput = input };
         IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
         actionSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManager, Info, "Action {} mapped to '{}'", name, input);
@@ -199,7 +199,7 @@ namespace ig
         }
 
         const Handle<Axis, InputManager> newHandle = axisRegistry.Create(scale);
-        nameAxisTable[name] = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
+        nameAxisTable[name] = AxisMapping{ .AxisHandle = newHandle, .MappedInput = input };
         IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
         axisSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManager, Info, "Axis {} mapped to '{}'", name, input);
@@ -288,35 +288,35 @@ namespace ig
 
         switch (message)
         {
-            case WM_LBUTTONDOWN:
-            case WM_RBUTTONDOWN:
-                HandleKeyDown(wParam, true);
-                return true;
+        case WM_LBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+            HandleKeyDown(wParam, true);
+            return true;
 
-            case WM_KEYDOWN:
-                HandleKeyDown(wParam, false);
-                return true;
+        case WM_KEYDOWN:
+            HandleKeyDown(wParam, false);
+            return true;
 
-            case WM_LBUTTONUP:
-                HandleKeyUp(mouseLBWParam, true);
-                return true;
-            case WM_RBUTTONUP:
-                HandleKeyUp(mouseRBWParam, true);
-                return true;
+        case WM_LBUTTONUP:
+            HandleKeyUp(mouseLBWParam, true);
+            return true;
+        case WM_RBUTTONUP:
+            HandleKeyUp(mouseRBWParam, true);
+            return true;
 
-            case WM_KEYUP:
-                HandleKeyUp(wParam, false);
-                return true;
+        case WM_KEYUP:
+            HandleKeyUp(wParam, false);
+            return true;
 
-            default:
-                return false;
+        default:
+            return false;
         }
     }
 
     void InputManager::HandleRawMouseInput()
     {
         ZoneScoped;
-        UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
+        UniqueLock rawMouseInputPollingLock{ this->rawMouseInputPollingMutex };
         if (!polledRawMouseInputs.empty())
         {
             float deltaX = 0.f;
@@ -346,16 +346,16 @@ namespace ig
                 IG_CHECK(actionPtr != nullptr);
                 switch (actionPtr->State)
                 {
-                    case EInputState::Pressed:
-                        actionPtr->State = EInputState::OnPressing;
-                        break;
+                case EInputState::Pressed:
+                    actionPtr->State = EInputState::OnPressing;
+                    break;
 
-                    case EInputState::Released:
-                        actionPtr->State = EInputState::None;
-                        break;
+                case EInputState::Released:
+                    actionPtr->State = EInputState::None;
+                    break;
 
-                    default:
-                        break;
+                default:
+                    break;
                 }
             }
 
@@ -395,13 +395,13 @@ namespace ig
             IG_CHECK(actionPtr != nullptr);
             switch (actionPtr->State)
             {
-                case EInputState::None:
-                case EInputState::Released:
-                    actionPtr->State = EInputState::Pressed;
-                    bAnyPress = true;
-                    break;
-                default:
-                    break;
+            case EInputState::None:
+            case EInputState::Released:
+                actionPtr->State = EInputState::Pressed;
+                bAnyPress = true;
+                break;
+            default:
+                break;
             }
         }
 
@@ -446,7 +446,7 @@ namespace ig
     // #sy_todo 이후에 Raw Keyboard 까지 확장
     void InputManager::PollRawMouseInput()
     {
-        UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
+        UniqueLock rawMouseInputPollingLock{ this->rawMouseInputPollingMutex };
         while (true)
         {
             UINT cbSize = 0;
@@ -463,18 +463,18 @@ namespace ig
             }
 
             auto sizeOfBuffer = static_cast<UINT>(rawInputBuffer.size());
-            const size_t numInputs = GetRawInputBuffer((RAWINPUT*) rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
+            const size_t numInputs = GetRawInputBuffer((RAWINPUT*)rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
             if (numInputs == 0 || numInputs == NumericMaxOfValue(numInputs))
             {
                 break;
             }
 
-            auto* currentRawInput = (RAWINPUT*) rawInputBuffer.data();
+            auto* currentRawInput = (RAWINPUT*)rawInputBuffer.data();
             for (size_t idx = 0; idx < numInputs; ++idx, currentRawInput = NEXTRAWINPUTBLOCK(currentRawInput))
             {
-                auto* rawMouse = (RAWMOUSE*) ((BYTE*) currentRawInput + rawInputOffset);
+                auto* rawMouse = (RAWMOUSE*)((BYTE*)currentRawInput + rawInputOffset);
                 // 더 많은 마우스 이벤트를 얻을 수 있음!
-                polledRawMouseInputs.emplace_back(RawMouseInput{.DeltaX = (float) rawMouse->lLastX, .DeltaY = (float) rawMouse->lLastY});
+                polledRawMouseInputs.emplace_back(RawMouseInput{ .DeltaX = (float)rawMouse->lLastX, .DeltaY = (float)rawMouse->lLastY });
             }
         }
     }

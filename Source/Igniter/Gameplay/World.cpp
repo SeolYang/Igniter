@@ -23,13 +23,13 @@ namespace ig
         }
     }
 
-     World::~World() 
-     {
-         if (assetManager != nullptr && !map.IsNull())
-         {
+    World::~World()
+    {
+        if (assetManager != nullptr && !map.IsNull())
+        {
             assetManager->Unload(map);
-         }
-     }
+        }
+    }
 
     Json& World::Serialize(Json& archive) const
     {
@@ -92,7 +92,7 @@ namespace ig
                 if (!resolvedType)
                 {
                     IG_LOG(World, Warning, "Ignored Component {}({}): {} does not registered to meta registry.", nameProperty.value().cast<String>(),
-                        componentID);
+                           componentID);
                     continue;
                 }
 
@@ -100,7 +100,7 @@ namespace ig
                 if (!addComponent)
                 {
                     IG_LOG(World, Warning, "Ignored Type ID: {} add component meta function does not registered to meta registry.",
-                        nameProperty.value().cast<String>());
+                           nameProperty.value().cast<String>());
                     continue;
                 }
 
@@ -114,7 +114,7 @@ namespace ig
                 if (!deserializeJson)
                 {
                     IG_LOG(World, Warning, "Ignored component {}({}) deserialization. The deserialize meta function does not registered.",
-                        nameProperty.value().cast<String>(), componentID);
+                           nameProperty.value().cast<String>(), componentID);
                     continue;
                 }
 
