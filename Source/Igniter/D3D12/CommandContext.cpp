@@ -52,6 +52,9 @@ namespace ig
 
     void CommandContext::End()
     {
+        IG_CHECK(pendingGlobalBarriers.empty());
+        IG_CHECK(pendingTextureBarriers.empty());
+        IG_CHECK(pendingBufferBarriers.empty());
         IG_VERIFY(cmdList.Get() != nullptr);
         IG_VERIFY_SUCCEEDED(cmdList->Close());
     }
@@ -94,17 +97,31 @@ namespace ig
     void CommandContext::FlushBarriers()
     {
         IG_CHECK(IsValid());
-        const D3D12_BARRIER_GROUP barrierGroups[3] = {{.Type = D3D12_BARRIER_TYPE_GLOBAL,
-                                                          .NumBarriers = static_cast<uint32_t>(pendingGlobalBarriers.size()),
-                                                          .pGlobalBarriers = pendingGlobalBarriers.data()},
-            {.Type = D3D12_BARRIER_TYPE_TEXTURE,
-                .NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()),
-                .pTextureBarriers = pendingTextureBarriers.data()},
-            {.Type = D3D12_BARRIER_TYPE_BUFFER,
-                .NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()),
-                .pBufferBarriers = pendingBufferBarriers.data()}};
+        eastl::vector<D3D12_BARRIER_GROUP> barrierGroups{};
+        barrierGroups.reserve(3);
 
-        cmdList->Barrier(3, barrierGroups);
+        if (!pendingGlobalBarriers.empty())
+        {
+            barrierGroups.emplace_back(D3D12_BARRIER_GROUP{.Type = D3D12_BARRIER_TYPE_GLOBAL,
+                .NumBarriers = static_cast<uint32_t>(pendingGlobalBarriers.size()),
+                .pGlobalBarriers = pendingGlobalBarriers.data()});
+        }
+
+        if (!pendingTextureBarriers.empty())
+        {
+            barrierGroups.emplace_back(D3D12_BARRIER_GROUP{.Type = D3D12_BARRIER_TYPE_TEXTURE,
+                .NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()),
+                .pTextureBarriers = pendingTextureBarriers.data()});
+        }
+
+        if (!pendingBufferBarriers.empty())
+        {
+            barrierGroups.emplace_back(D3D12_BARRIER_GROUP{.Type = D3D12_BARRIER_TYPE_BUFFER,
+                .NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()),
+                .pBufferBarriers = pendingBufferBarriers.data()});
+        }
+
+        cmdList->Barrier((UINT32)barrierGroups.size(), barrierGroups.data());
         pendingGlobalBarriers.clear();
         pendingTextureBarriers.clear();
         pendingBufferBarriers.clear();
@@ -182,7 +199,7 @@ namespace ig
         cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
     }
 
-    void CommandContext::CopyTextureSimple(GpuTexture& src, GpuTexture& dst) 
+    void CommandContext::CopyTextureSimple(GpuTexture& src, GpuTexture& dst)
     {
         IG_CHECK(src);
         IG_CHECK(dst);

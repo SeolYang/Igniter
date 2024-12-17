@@ -164,6 +164,7 @@ namespace ig
             cmdCtx->Begin();
             cmdCtx->AddPendingTextureBarrier(*newTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+            cmdCtx->FlushBarriers();
             cmdCtx->End();
         }
         CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
@@ -264,6 +265,7 @@ namespace ig
             cmdCtx->Begin();
             cmdCtx->AddPendingTextureBarrier(*newTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+            cmdCtx->FlushBarriers();
             cmdCtx->End();
         }
         CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
@@ -357,6 +359,7 @@ namespace ig
             cmdCtx->Begin();
             cmdCtx->AddPendingTextureBarrier(*newTexturePtr, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_ACCESS_NO_ACCESS,
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+            cmdCtx->FlushBarriers();
             cmdCtx->End();
         }
 
