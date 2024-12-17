@@ -35,6 +35,10 @@ namespace ig::ImGuiX
                 cachedAssetInfos.emplace_back(AssetInfo{snapshot, ig::String{std::format("{}##Selectable", snapshot.Info.GetVirtualPath())}});
             }
         }
+
+        std::sort(cachedAssetInfos.begin(), cachedAssetInfos.end(), [](const AssetInfo& lhs, const AssetInfo& rhs){
+            return (lhs.Snapshot.Info.GetVirtualPath().ToStringView().compare(rhs.Snapshot.Info.GetVirtualPath().ToStringView())) < 0;
+        });
     }
 
     bool AssetSelectModalPopup::Begin()
