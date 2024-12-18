@@ -23,7 +23,8 @@
     "crossguid",
     "xxhash",
     "eastl",
-    "taskflow"
+    "taskflow",
+    "joltphysics"
   ],
   "builtin-baseline": "943c5ef1c8f6b5e6ced092b242c8299caae2ff01",
   "overrides": [
@@ -94,6 +95,10 @@
     {
       "name":"taskflow",
       "version":"3.6.0"
+    },
+    {
+      "name":"joltphysics",
+      "version":"5.2.0"
     }
   ]
 }

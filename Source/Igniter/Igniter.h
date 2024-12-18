@@ -149,6 +149,18 @@ using namespace entt::literals;
 #include <taskflow/taskflow.hpp>
 #pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4505)
+#include <fmod/fmod.hpp>
+#include <fmod/fmod_codec.h>
+#include <fmod/fmod_dsp.h>
+#include <fmod/fmod_dsp_effects.h>
+#include <fmod/fmod_errors.h>
+#include <fmod/fmod_output.h>
+#pragma warning(pop)
+
+#include <Jolt/Jolt.h>
+
 #include "Igniter/Core/Assert.h"
 #include "Igniter/Core/Types.h"
 #include "Igniter/Core/Format.h"
