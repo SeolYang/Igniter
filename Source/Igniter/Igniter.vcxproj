@@ -25,6 +25,14 @@
     <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcerrors.h" />
     <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcisense.h" />
     <ClInclude Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.h" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod.h" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod.hpp" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_codec.h" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_common.h" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_dsp.h" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_dsp_effects.h" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_errors.h" />
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_output.h" />
     <ClInclude Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.h" />
     <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3.h" />
     <ClInclude Include="..\..\Thirdparty\WinPixEventRuntime\include\WinPixEventRuntime\pix3_win.h" />
@@ -220,6 +228,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl" />
+    <None Include="..\..\Thirdparty\fmod\include\fmod\fmod.cs" />
+    <None Include="..\..\Thirdparty\fmod\include\fmod\fmod_dsp.cs" />
+    <None Include="..\..\Thirdparty\fmod\include\fmod\fmod_errors.cs" />
     <None Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
@@ -325,7 +336,7 @@
       <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;$(SolutionDir)Thirdparty\fmod\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -345,7 +356,9 @@ xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D1
 xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmod.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -361,7 +374,7 @@ xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "
       <PreprocessorDefinitions>IG_TRACK_LEAKED_HANDLE;DO_CHECK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;$(SolutionDir)Thirdparty\fmod\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -381,7 +394,9 @@ xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D1
 xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmod.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -397,7 +412,7 @@ xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "
       <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;NOMINMAX;WIN32_MEAN_AND_LEAN;_DISABLE_VECTOR_ANNOTATION;_DISABLE_STRING_ANNOTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;$(SolutionDir)Thirdparty\fmod\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -417,7 +432,9 @@ xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D1
 xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmod.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>
@@ -435,7 +452,7 @@ xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;$(SolutionDir)Thirdparty\fmod\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -453,9 +470,12 @@ xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "
     <PostBuildEvent>
       <Command>mkdir "$(TargetDir)\D3D12"
 xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
 xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
-xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmod.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /d</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>

@@ -70,6 +70,9 @@
     <Filter Include="Source\Application">
       <UniqueIdentifier>{86e27114-564a-4f57-83c7-4ce1d301eb54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thirdparty\fmod">
+      <UniqueIdentifier>{3702722f-128f-4e55-8655-413f7608b2a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h">
@@ -372,6 +375,30 @@
     <ClInclude Include="ImGui\TextureView.h">
       <Filter>Source\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_dsp.h">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_dsp_effects.h">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_errors.h">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_output.h">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod.h">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod.hpp">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_codec.h">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_common.h">
+      <Filter>Thirdparty\fmod</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -566,6 +593,15 @@
     </None>
     <None Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.inl">
       <Filter>Thirdparty\SimpleMath</Filter>
+    </None>
+    <None Include="..\..\Thirdparty\fmod\include\fmod\fmod_dsp.cs">
+      <Filter>Thirdparty\fmod</Filter>
+    </None>
+    <None Include="..\..\Thirdparty\fmod\include\fmod\fmod_errors.cs">
+      <Filter>Thirdparty\fmod</Filter>
+    </None>
+    <None Include="..\..\Thirdparty\fmod\include\fmod\fmod.cs">
+      <Filter>Thirdparty\fmod</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
