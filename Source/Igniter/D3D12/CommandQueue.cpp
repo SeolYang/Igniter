@@ -31,23 +31,27 @@ namespace ig
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
-    GpuSyncPoint CommandQueue::MakeSyncPoint(GpuFence& fence)
+    GpuSyncPoint CommandQueue::MakeSyncPointWithSignal(GpuFence& fence)
     {
         IG_CHECK(fence);
-        const U64 counter{ fence.IncreaseCounter() };
-
-        ID3D12Fence& nativeFence = fence.GetNative();
-        if (FAILED(native->Signal(&nativeFence, counter)))
+        const GpuSyncPoint syncPoint{ fence.MakeSyncPoint() };
+        if(!syncPoint.IsValid())
         {
             return GpuSyncPoint::Invalid();
         }
 
-        return GpuSyncPoint{ nativeFence , counter };
+        ID3D12Fence& nativeFence = fence.GetNative();
+        if (FAILED(native->Signal(&nativeFence, syncPoint.GetSyncPoint())))
+        {
+            return GpuSyncPoint::Invalid();
+        }
+
+        return syncPoint;
     }
 
-    GpuSyncPoint CommandQueue::MakeSyncPoint()
+    GpuSyncPoint CommandQueue::MakeSyncPointWithSignal()
     {
-        return MakeSyncPoint(internalFence);
+        return MakeSyncPointWithSignal(internalFence);
     }
 
     void CommandQueue::SyncWith(GpuSyncPoint& syncPoint)

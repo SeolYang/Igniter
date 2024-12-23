@@ -31,7 +31,12 @@ namespace ig
         [[nodiscard]] bool IsValid() const noexcept { return fence; }
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
-        U64 IncreaseCounter() { return counter.fetch_add(1); }
+        GpuSyncPoint MakeSyncPoint()
+        {
+            const U64 syncPointCounter{ counter.fetch_add(1) };
+            IG_CHECK(syncPointCounter > 1);
+            return GpuSyncPoint{ *fence.Get(), syncPointCounter };
+        }
 
     private:
         GpuFence(ComPtr<ID3D12Fence> fence) :

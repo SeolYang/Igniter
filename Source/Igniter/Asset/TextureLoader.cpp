@@ -171,7 +171,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = { (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPoint() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPointWithSignal() };
         barrierSync.WaitOnCpu();
 
         const RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -274,7 +274,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = { (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPoint() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPointWithSignal() };
         barrierSync.WaitOnCpu();
 
         RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -375,7 +375,7 @@ namespace ig
 
         CommandContext* cmdCtxs[1]{ (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPoint() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPointWithSignal() };
         barrierSync.WaitOnCpu();
 
         const RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,

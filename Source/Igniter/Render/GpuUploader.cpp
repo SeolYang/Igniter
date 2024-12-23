@@ -156,7 +156,7 @@ namespace ig
 
         CommandContext* cmdCtxPtrs[] = { request.CmdCtx.get() };
         copyQueue->ExecuteContexts(cmdCtxPtrs);
-        request.Sync = copyQueue->MakeSyncPoint();
+        request.Sync = copyQueue->MakeSyncPointWithSignal();
         IG_CHECK(request.Sync.IsValid());
         context.Reset();
         reservedThreadID.store(InvalidThreadID, std::memory_order::release);
@@ -230,7 +230,7 @@ namespace ig
 
     void GpuUploader::FlushQueue()
     {
-        GpuSyncPoint copyQueueFlushSync = copyQueue->MakeSyncPoint();
+        GpuSyncPoint copyQueueFlushSync = copyQueue->MakeSyncPointWithSignal();
         copyQueueFlushSync.WaitOnCpu();
     }
 

@@ -6,7 +6,7 @@ namespace ig
     class CommandQueue;
     class GpuSyncPoint final
     {
-        friend class CommandQueue;
+        friend class GpuFence;
 
     public:
         GpuSyncPoint() = default;
@@ -30,6 +30,11 @@ namespace ig
         [[nodiscard]] size_t GetSyncPoint() const noexcept { return syncPoint; }
         [[nodiscard]] size_t GetCompletedSyncPoint() const;
         [[nodiscard]] bool IsExpired() const { return GetSyncPoint() <= GetCompletedSyncPoint(); }
+        [[nodiscard]] ID3D12Fence& GetFence()
+        {
+            IG_CHECK(fence != nullptr);
+            return *fence;
+        }
 
         [[nodiscard]] GpuSyncPoint Prev() const;
 
@@ -39,11 +44,6 @@ namespace ig
 
     private:
         GpuSyncPoint(ID3D12Fence& fence, const size_t syncPoint);
-        [[nodiscard]] ID3D12Fence& GetFence()
-        {
-            IG_CHECK(fence != nullptr);
-            return *fence;
-        }
 
     private:
         ID3D12Fence* fence = nullptr;
