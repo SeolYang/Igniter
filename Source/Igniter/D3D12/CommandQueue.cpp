@@ -39,14 +39,6 @@ namespace ig
         return GpuSyncPoint{ *fence.Get(), syncPoint };
     }
 
-    GpuSyncPoint CommandQueue::GetSync()
-    {
-        IG_CHECK(fence);
-        const uint64_t syncPoint{ syncCounter };
-        IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
-        return GpuSyncPoint{ *fence.Get(), syncPoint };
-    }
-
     void CommandQueue::SyncWith(GpuSyncPoint& sync)
     {
         IG_CHECK(native);
