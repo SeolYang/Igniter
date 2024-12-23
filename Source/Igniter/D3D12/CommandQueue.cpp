@@ -3,11 +3,11 @@
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/CommandContext.h"
 #include "Igniter/D3D12/GpuDevice.h"
-#include "Igniter/D3D12/Fence.h"
+#include "Igniter/D3D12/GpuFence.h"
 
 namespace ig
 {
-    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, Fence internalFence) :
+    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, GpuFence internalFence) :
         native(std::move(newNativeQueue)),
         type(specifiedType),
         internalFence(std::move(internalFence))
@@ -31,7 +31,7 @@ namespace ig
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
-    GpuSyncPoint CommandQueue::MakeSyncPoint(Fence& fence)
+    GpuSyncPoint CommandQueue::MakeSyncPoint(GpuFence& fence)
     {
         IG_CHECK(fence);
         const U64 counter{ fence.IncreaseCounter() };

@@ -13,7 +13,7 @@
 #include "Igniter/D3D12/GPUBuffer.h"
 #include "Igniter/D3D12/GPUTextureDesc.h"
 #include "Igniter/D3D12/GPUTexture.h"
-#include "Igniter/D3D12/Fence.h"
+#include "Igniter/D3D12/GpuFence.h"
 
 IG_DEFINE_LOG_CATEGORY(GpuDevice);
 
@@ -253,7 +253,7 @@ namespace ig
         IG_CHECK(newCmdQueue);
         SetObjectName(newCmdQueue.Get(), debugName);
 
-        Option<Fence> newFenceOpt = CreateFence(std::format("{} Sync Fence", debugName));
+        Option<GpuFence> newFenceOpt = CreateFence(std::format("{} Sync Fence", debugName));
         if (!newFenceOpt)
         {
             IG_LOG(GpuDevice, Error, "Failed to create queue internal fence.");
@@ -389,7 +389,7 @@ namespace ig
             GetDescriptorHandleIncrementSize(descriptorHeapType) };
     }
 
-    Option<Fence> GpuDevice::CreateFence(const std::string_view debugName)
+    Option<GpuFence> GpuDevice::CreateFence(const std::string_view debugName)
     {
         ComPtr<ID3D12Fence> newFence{};
         if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence)); !SUCCEEDED(result))
@@ -400,7 +400,7 @@ namespace ig
 
         IG_CHECK(newFence);
         SetObjectName(newFence.Get(), debugName);
-        return Fence{ std::move(newFence) };
+        return GpuFence{ std::move(newFence) };
     }
 
     void GpuDevice::CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView)

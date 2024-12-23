@@ -1,14 +1,14 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/D3D12/Common.h"
-#include "Igniter/D3D12/Fence.h"
+#include "Igniter/D3D12/GpuFence.h"
 #include "Igniter/D3D12/GpuSyncPoint.h"
 
 namespace ig
 {
     class GpuDevice;
     class CommandContext;
-    class Fence;
+    class GpuFence;
     class CommandQueue final
     {
         friend class GpuDevice;
@@ -28,12 +28,12 @@ namespace ig
         EQueueType GetType() const { return type; }
 
         void ExecuteContexts(const std::span<CommandContext*> cmdCtxs);
-        GpuSyncPoint MakeSyncPoint(Fence& externalFence);
+        GpuSyncPoint MakeSyncPoint(GpuFence& externalFence);
         GpuSyncPoint MakeSyncPoint();
         void SyncWith(GpuSyncPoint& syncPoint);
 
     private:
-        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, Fence internalFence);
+        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, GpuFence internalFence);
 
     private:
         static constexpr size_t RecommendedMinNumCommandContexts = 16;
@@ -42,6 +42,6 @@ namespace ig
         ComPtr<ID3D12CommandQueue> native;
         const EQueueType type;
 
-        Fence internalFence;
+        GpuFence internalFence;
     };
 }    // namespace ig

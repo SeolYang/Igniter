@@ -15,7 +15,7 @@ namespace ig
     class ComputePipelineStateDesc;
     class PipelineState;
     class RootSignature;
-    class Fence;
+    class GpuFence;
     class GpuDevice final
     {
     public:
@@ -43,7 +43,7 @@ namespace ig
 
         Option<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
 
-        Option<Fence> CreateFence(const std::string_view debugName);
+        Option<GpuFence> CreateFence(const std::string_view debugName);
 
         void CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView);
 

@@ -4,23 +4,23 @@
 
 namespace ig
 {
-    class Fence final
+    class GpuFence final
     {
         friend class GpuDevice;
         friend class CommandQueue;
 
     public:
-        Fence(const Fence& other) = delete;
-        Fence(Fence&& other) noexcept :
+        GpuFence(const GpuFence& other) = delete;
+        GpuFence(GpuFence&& other) noexcept :
             counter(other.counter.exchange(1)),
             fence(std::move(other.fence))
         {
         }
 
-        ~Fence() = default;
+        ~GpuFence() = default;
 
-        Fence& operator=(const Fence&) = delete;
-        Fence& operator=(Fence&& other) noexcept
+        GpuFence& operator=(const GpuFence&) = delete;
+        GpuFence& operator=(GpuFence&& other) noexcept
         {
             this->counter = other.counter.exchange(1);
             this->fence = std::move(other.fence);
@@ -34,7 +34,7 @@ namespace ig
         U64 IncreaseCounter() { return counter.fetch_add(1); }
 
     private:
-        Fence(ComPtr<ID3D12Fence> fence) :
+        GpuFence(ComPtr<ID3D12Fence> fence) :
             fence(std::move(fence))
         {
         }

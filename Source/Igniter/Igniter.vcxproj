@@ -92,7 +92,7 @@
     <ClInclude Include="D3D12\CommandQueue.h" />
     <ClInclude Include="D3D12\Common.h" />
     <ClInclude Include="D3D12\DescriptorHeap.h" />
-    <ClInclude Include="D3D12\Fence.h" />
+    <ClInclude Include="D3D12\GpuFence.h" />
     <ClInclude Include="D3D12\GpuBuffer.h" />
     <ClInclude Include="D3D12\GpuBufferDesc.h" />
     <ClInclude Include="D3D12\GpuSyncPoint.h" />

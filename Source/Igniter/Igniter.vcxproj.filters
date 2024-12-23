@@ -402,7 +402,7 @@
     <ClInclude Include="Render\GpuStorage.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="D3D12\Fence.h">
+    <ClInclude Include="D3D12\GpuFence.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
