@@ -51,6 +51,16 @@ namespace ig
         return 0;
     }
 
+    GpuSyncPoint GpuSyncPoint::Prev() const
+    {
+        if (Invalid() || syncPoint == 1)
+        {
+            return Invalid();
+        }
+
+        return GpuSyncPoint{ *fence, syncPoint - 1 };
+    }
+
     void GpuSyncPoint::WaitOnCpu()
     {
         if (fence != nullptr && syncPoint > GetCompletedSyncPoint())

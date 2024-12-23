@@ -27,10 +27,11 @@ namespace ig
         [[nodiscard]] bool IsValid() const noexcept { return fence != nullptr && syncPoint > 0; }
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
-
         [[nodiscard]] size_t GetSyncPoint() const noexcept { return syncPoint; }
         [[nodiscard]] size_t GetCompletedSyncPoint() const;
         [[nodiscard]] bool IsExpired() const { return GetSyncPoint() <= GetCompletedSyncPoint(); }
+
+        [[nodiscard]] GpuSyncPoint Prev() const;
 
         void WaitOnCpu();
 
