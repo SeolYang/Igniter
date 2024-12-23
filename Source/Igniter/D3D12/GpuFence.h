@@ -34,7 +34,7 @@ namespace ig
         GpuSyncPoint MakeSyncPoint()
         {
             const U64 syncPointCounter{ counter.fetch_add(1) };
-            IG_CHECK(syncPointCounter > 1);
+            IG_CHECK(syncPointCounter >= 1);
             return GpuSyncPoint{ *fence.Get(), syncPointCounter };
         }
 

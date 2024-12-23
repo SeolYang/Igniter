@@ -42,13 +42,13 @@ namespace ig
 
     size_t GpuSyncPoint::GetCompletedSyncPoint() const
     {
-        if (fence != nullptr)
+        IG_CHECK(fence != nullptr);
+        if (!IsValid())
         {
-            return fence->GetCompletedValue();
+            return std::numeric_limits<size_t>::max();
         }
 
-        IG_CHECK_NO_ENTRY();
-        return 0;
+        return fence->GetCompletedValue();
     }
 
     GpuSyncPoint GpuSyncPoint::Prev() const
