@@ -93,7 +93,6 @@ namespace ig
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
-            newHandle.Value = SetBits<TypeHashBitsOffset, TypeHashSizeInBits>(newHandle.Value, ReduceHashTo16Bits(TypeHash64<Ty>));
 
 #ifdef IG_TRACK_LEAKED_HANDLE
             lastCallStackTable[newSlot] = CallStack::Capture();
@@ -105,11 +104,6 @@ namespace ig
         void Destroy(const Handle<Ty, Dependency> handle)
         {
             if (handle.IsNull())
-            {
-                return;
-            }
-
-            if (ReduceHashTo16Bits(TypeHash64<Ty>) != MaskBits<TypeHashBitsOffset, TypeHashSizeInBits>(handle.Value))
             {
                 return;
             }
@@ -152,11 +146,6 @@ namespace ig
                 return nullptr;
             }
 
-            if (ReduceHashTo16Bits(TypeHash64<Ty>) != MaskBits<TypeHashBitsOffset, TypeHashSizeInBits>(handle.Value))
-            {
-                return nullptr;
-            }
-
             const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);
             if (!IsSlotInRange(slot))
             {
@@ -180,11 +169,6 @@ namespace ig
         const Ty* Lookup(const Handle<Ty, Dependency> handle) const
         {
             if (handle.IsNull())
-            {
-                return nullptr;
-            }
-
-            if (ReduceHashTo16Bits(TypeHash64<Ty>) != MaskBits<TypeHashBitsOffset, TypeHashSizeInBits>(handle.Value))
             {
                 return nullptr;
             }
@@ -297,20 +281,20 @@ namespace ig
         constexpr static size_t ChunkSizeInBytes = details::GetHeuristicOptimalChunkSize<Ty>();
 
         /*
-         * LSB 0~21     <22 bits>  : Slot Bit
-         * LSB 22~47    <26 bits>  : Version Bits
-         * LSB 48~63    <16 bits>  : Type Validation Bits
+         * LSB 0~31     <30 bits>  : Slot Bit
+         * LSB 32~63    <32 bits>  : Version Bits
+         *  LSB 32~62   <31 bits>  : Version Number Bits
+         *  LSB 63      <1 bit>    : Reserved To Destroy Bit
          */
-        constexpr static size_t SlotSizeInBits     = 22;
-        constexpr static size_t VersionOffset      = SlotSizeInBits;
-        constexpr static size_t VersionSizeInBits  = 26;
-        constexpr static size_t TypeHashBitsOffset = VersionOffset + VersionSizeInBits;
-        constexpr static size_t TypeHashSizeInBits = 16;
-        static_assert(TypeHashBitsOffset + TypeHashSizeInBits == 64);
-
+        constexpr static size_t SlotSizeInBits    = 30;
+        constexpr static size_t VersionOffset     = SlotSizeInBits;
+        constexpr static size_t VersionSizeInBits = 32;
+        constexpr static size_t DestroyReservedFlagBit = 1;
+        constexpr static size_t ReservedBits = 2;
+        static_assert(VersionOffset + VersionSizeInBits + ReservedBits == 64);
         constexpr static size_t      SizeOfElement    = sizeof(Ty);
-        constexpr static size_t      MaxNumSlots      = Pow(2, SlotSizeInBits);
-        constexpr static VersionType MaxVersion       = Pow(2, VersionSizeInBits);
+        constexpr static size_t      MaxNumSlots      = Pow<size_t>(2, SlotSizeInBits);
+        constexpr static VersionType MaxVersion       = Pow<VersionType>(2, VersionSizeInBits - DestroyReservedFlagBit);
         constexpr static size_t      NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
         static_assert(NumSlotsPerChunk <= MaxNumSlots);
         constexpr static size_t MaxNumChunks = MaxNumSlots / NumSlotsPerChunk;

@@ -33,6 +33,7 @@
 #include <future>
 #include <coroutine>
 #include <regex>
+#include <numbers>
 
 #ifndef UTF_CPP_CPLUSPLUS
 #define UTF_CPP_CPLUSPLUS 201703L
