@@ -1,7 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/String.h"
-#include "Igniter/D3D12/GpuSync.h"
+#include "Igniter/D3D12/GpuSyncPoint.h"
 
 namespace ig
 {
@@ -29,7 +29,7 @@ namespace ig
         virtual void PostUpdate(const float deltaTime) = 0;
 
         virtual void PreRender(const LocalFrameIndex localFrameIdx) = 0;
-        virtual GpuSync Render(const LocalFrameIndex localFrameIdx) = 0;
+        virtual GpuSyncPoint Render(const LocalFrameIndex localFrameIdx) = 0;
         virtual void PostRender(const LocalFrameIndex localFrameIdx) = 0;
 
     protected:

@@ -9,9 +9,9 @@
 
 namespace ig
 {
-    GpuUploader::GpuUploader(RenderDevice& renderDevice)
-        : renderDevice(renderDevice)
-        , copyQueue(MakePtr<CommandQueue>(renderDevice.CreateCommandQueue("GpuUploader_CopyQueue", EQueueType::Copy).value()))
+    GpuUploader::GpuUploader(RenderDevice& renderDevice) :
+        renderDevice(renderDevice),
+        copyQueue(MakePtr<CommandQueue>(renderDevice.CreateCommandQueue("GpuUploader_CopyQueue", EQueueType::Copy).value()))
     {
         ResizeUnsafe(InitialBufferCapacity);
         for (size_t idx = 0; idx < RequestCapacity; ++idx)
@@ -136,7 +136,7 @@ namespace ig
         return UploadContext{ buffer.get(), bufferCpuAddr, newRequest };
     }
 
-    std::optional<GpuSync> GpuUploader::Submit(UploadContext& context)
+    std::optional<GpuSyncPoint> GpuUploader::Submit(UploadContext& context)
     {
         const static thread_local size_t tuid = ThreadUIDGenerator::GetUID();
         if (reservedThreadID.load(std::memory_order::acquire) != tuid)
@@ -230,7 +230,7 @@ namespace ig
 
     void GpuUploader::FlushQueue()
     {
-        GpuSync copyQueueFlushSync = copyQueue->MakeSync();
+        GpuSyncPoint copyQueueFlushSync = copyQueue->MakeSync();
         copyQueueFlushSync.WaitOnCpu();
     }
 

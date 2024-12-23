@@ -109,7 +109,7 @@ namespace ig
                 bVertexBufferDecodeSucceed = true;
             }
         }
-        std::optional<GpuSync> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
+        std::optional<GpuSyncPoint> verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
         IG_CHECK(verticesUploadSync);
 
         bool bIndexBufferDecodeSucceed = false;
@@ -127,7 +127,7 @@ namespace ig
                 bIndexBufferDecodeSucceed = true;
             }
         }
-        std::optional<GpuSync> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
+        std::optional<GpuSyncPoint> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
         IG_CHECK(indicesUploadSync);
 
         ManagedAsset<Material> material{assetManager.Load<Material>(loadDesc.MaterialGuid)};

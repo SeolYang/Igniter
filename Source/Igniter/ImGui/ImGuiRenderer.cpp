@@ -9,7 +9,7 @@ namespace ig
 {
     ImGuiRenderer::ImGuiRenderer(RenderContext& renderContext) : renderContext(renderContext) {}
 
-    GpuSync ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx)
+    GpuSyncPoint ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx)
     {
         if (targetCanvas == nullptr)
         {

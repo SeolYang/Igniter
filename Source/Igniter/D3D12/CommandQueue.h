@@ -1,7 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/D3D12/Common.h"
-#include "Igniter/D3D12/GpuSync.h"
+#include "Igniter/D3D12/GpuSyncPoint.h"
 
 namespace ig
 {
@@ -27,9 +27,9 @@ namespace ig
         EQueueType GetType() const { return type; }
 
         void ExecuteContexts(const std::span<CommandContext*> cmdCtxs);
-        GpuSync MakeSync();
-        GpuSync GetSync();
-        void SyncWith(GpuSync& sync);
+        GpuSyncPoint MakeSync();
+        GpuSyncPoint GetSync();
+        void SyncWith(GpuSyncPoint& sync);
 
     private:
         CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, ComPtr<ID3D12Fence> newFence);

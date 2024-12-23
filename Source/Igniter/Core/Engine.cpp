@@ -125,7 +125,7 @@ namespace ig
             }
 
             {
-                GpuSync mainRenderPipelineSyncPoint = application.Render(localFrameIdx);
+                GpuSyncPoint mainRenderPipelineSyncPoint = application.Render(localFrameIdx);
                 imguiRenderer->SetMainPipelineSyncPoint(mainRenderPipelineSyncPoint);
                 localFrameSyncs[localFrameIdx] = imguiRenderer->Render(localFrameIdx);
             }

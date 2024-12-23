@@ -107,11 +107,11 @@ namespace fe
         tempConstantBufferAllocator->Reset(localFrameIdx);
     }
 
-    ig::GpuSync Renderer::Render(const ig::LocalFrameIndex localFrameIdx)
+    ig::GpuSyncPoint Renderer::Render(const ig::LocalFrameIndex localFrameIdx)
     {
         if (world == nullptr)
         {
-            return ig::GpuSync::Invalid();
+            return ig::GpuSyncPoint::Invalid();
         }
 
         ig::Registry& registry = world->GetRegistry();

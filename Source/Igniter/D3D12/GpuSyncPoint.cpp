@@ -1,44 +1,46 @@
 #include "Igniter/Igniter.h"
-#include "Igniter/D3D12/GpuSync.h"
+#include "Igniter/D3D12/GpuSyncPoint.h"
 
 namespace ig
 {
-    GpuSync::GpuSync(ID3D12Fence& fence, const size_t syncPoint) : fence(&fence), syncPoint(syncPoint)
+    GpuSyncPoint::GpuSyncPoint(ComPtr<ID3D12Fence> fence, const size_t syncPoint) :
+        fence(fence),
+        syncPoint(syncPoint)
     {
         IG_CHECK(IsValid());
     }
 
-    bool GpuSync::operator<(const GpuSync& rhs) const noexcept
+    bool GpuSyncPoint::operator<(const GpuSyncPoint& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) && syncPoint < rhs.syncPoint;
     }
 
-    bool GpuSync::operator>(const GpuSync& rhs) const noexcept
+    bool GpuSyncPoint::operator>(const GpuSyncPoint& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) && syncPoint > rhs.syncPoint;
     }
 
-    bool GpuSync::operator>=(const GpuSync& rhs) const noexcept
+    bool GpuSyncPoint::operator>=(const GpuSyncPoint& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) && syncPoint >= rhs.syncPoint;
     }
 
-    bool GpuSync::operator!=(const GpuSync& rhs) const noexcept
+    bool GpuSyncPoint::operator!=(const GpuSyncPoint& rhs) const noexcept
     {
         return fence != rhs.fence;
     }
 
-    bool GpuSync::operator==(const GpuSync& rhs) const noexcept
+    bool GpuSyncPoint::operator==(const GpuSyncPoint& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) && syncPoint == rhs.syncPoint;
     }
 
-    bool GpuSync::operator<=(const GpuSync& rhs) const noexcept
+    bool GpuSyncPoint::operator<=(const GpuSyncPoint& rhs) const noexcept
     {
         return (fence != nullptr && (fence == rhs.fence)) && syncPoint <= rhs.syncPoint;
     }
 
-    size_t GpuSync::GetCompletedSyncPoint() const
+    size_t GpuSyncPoint::GetCompletedSyncPoint() const
     {
         if (fence != nullptr)
         {
@@ -49,7 +51,7 @@ namespace ig
         return 0;
     }
 
-    void GpuSync::WaitOnCpu()
+    void GpuSyncPoint::WaitOnCpu()
     {
         if (fence != nullptr && syncPoint > GetCompletedSyncPoint())
         {

@@ -11,14 +11,14 @@ namespace ig
         ImGuiRenderer(RenderContext& renderContext);
         virtual ~ImGuiRenderer() = default;
 
-        virtual GpuSync Render(const LocalFrameIndex localFrameIdx) override;
+        virtual GpuSyncPoint Render(const LocalFrameIndex localFrameIdx) override;
 
         void SetTargetCanvas(ImGuiCanvas* canvasToRender = nullptr) { this->targetCanvas = canvasToRender; }
-        void SetMainPipelineSyncPoint(GpuSync syncPoint) { mainPipelineSyncPoint = syncPoint; }
+        void SetMainPipelineSyncPoint(GpuSyncPoint syncPoint) { mainPipelineSyncPoint = syncPoint; }
 
     private:
         RenderContext& renderContext;
         ImGuiCanvas* targetCanvas = nullptr;
-        GpuSync mainPipelineSyncPoint;
+        GpuSyncPoint mainPipelineSyncPoint;
     };
 }    // namespace ig

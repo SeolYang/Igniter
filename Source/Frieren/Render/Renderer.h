@@ -32,7 +32,7 @@ namespace fe
         void SetWorld(ig::World* newWorld) { this->world = newWorld; }
 
         virtual void PreRender(const ig::LocalFrameIndex localFrameIdx) override;
-        virtual ig::GpuSync Render(const ig::LocalFrameIndex localFrameIdx) override;
+        virtual ig::GpuSyncPoint Render(const ig::LocalFrameIndex localFrameIdx) override;
 
     private:
         ig::World* world = nullptr;

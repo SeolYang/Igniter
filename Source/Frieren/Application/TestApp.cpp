@@ -195,7 +195,7 @@ namespace fe
         renderer->PreRender(localFrameIdx);
     }
 
-    ig::GpuSync TestApp::Render(const ig::LocalFrameIndex localFrameIdx)
+    ig::GpuSyncPoint TestApp::Render(const ig::LocalFrameIndex localFrameIdx)
     {
         return renderer->Render(localFrameIdx);
     }

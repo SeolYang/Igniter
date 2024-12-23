@@ -1,6 +1,6 @@
 #pragma once
 #include "Igniter/Igniter.h"
-#include "Igniter/D3D12/GpuSync.h"
+#include "Igniter/D3D12/GpuSyncPoint.h"
 
 namespace ig
 {
@@ -22,7 +22,7 @@ namespace ig
             size_t OffsetInBytes = 0;
             size_t SizeInBytes = 0;
             size_t PaddingInBytes = 0;
-            GpuSync Sync{};
+            GpuSyncPoint Sync{};
         };
     }    // namespace details
 
@@ -109,7 +109,7 @@ namespace ig
         GpuUploader& operator=(GpuUploader&&) noexcept = delete;
 
         [[nodiscard]] UploadContext Reserve(const size_t requestSize);
-        std::optional<GpuSync> Submit(UploadContext& context);
+        std::optional<GpuSyncPoint> Submit(UploadContext& context);
 
     private:
         details::UploadRequest* AllocateRequestUnsafe();

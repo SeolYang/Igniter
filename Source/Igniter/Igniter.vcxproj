@@ -94,7 +94,7 @@
     <ClInclude Include="D3D12\DescriptorHeap.h" />
     <ClInclude Include="D3D12\GpuBuffer.h" />
     <ClInclude Include="D3D12\GpuBufferDesc.h" />
-    <ClInclude Include="D3D12\GpuSync.h" />
+    <ClInclude Include="D3D12\GpuSyncPoint.h" />
     <ClInclude Include="D3D12\GpuTexture.h" />
     <ClInclude Include="D3D12\GpuTextureDesc.h" />
     <ClInclude Include="D3D12\GpuView.h" />
@@ -117,6 +117,7 @@
     <ClInclude Include="ImGui\TextureView.h" />
     <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="Render\CommandContextPool.h" />
+    <ClInclude Include="Render\GpuStorage.h" />
     <ClInclude Include="Render\GpuUploader.h" />
     <ClInclude Include="Render\GpuViewManager.h" />
     <ClInclude Include="Render\Common.h" />
@@ -174,7 +175,7 @@
     <ClCompile Include="D3D12\DescriptorHeap.cpp" />
     <ClCompile Include="D3D12\GpuBuffer.cpp" />
     <ClCompile Include="D3D12\GpuBufferDesc.cpp" />
-    <ClCompile Include="D3D12\GpuSync.cpp" />
+    <ClCompile Include="D3D12\GpuSyncPoint.cpp" />
     <ClCompile Include="D3D12\GpuTexture.cpp" />
     <ClCompile Include="D3D12\GPUTextureDesc.cpp" />
     <ClCompile Include="D3D12\PipelineState.cpp" />

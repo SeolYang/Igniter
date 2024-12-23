@@ -240,7 +240,7 @@
     <ClInclude Include="D3D12\GpuBufferDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="D3D12\GpuSync.h">
+    <ClInclude Include="D3D12\GpuSyncPoint.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="D3D12\GpuTexture.h">
@@ -399,6 +399,9 @@
     <ClInclude Include="..\..\Thirdparty\fmod\include\fmod\fmod_common.h">
       <Filter>Thirdparty\fmod</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GpuStorage.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -500,7 +503,7 @@
     <ClCompile Include="D3D12\GpuBufferDesc.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="D3D12\GpuSync.cpp">
+    <ClCompile Include="D3D12\GpuSyncPoint.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="D3D12\GpuTexture.cpp">

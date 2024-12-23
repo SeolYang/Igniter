@@ -154,7 +154,7 @@ namespace ig
         IG_CHECK(newTexturePtr != nullptr);
         texUploadCtx.CopyTextureSimple(*newTexturePtr, destCopyableFootprints, subresources);
 
-        std::optional<GpuSync> texUploadSync = gpuUploader.Submit(texUploadCtx);
+        std::optional<GpuSyncPoint> texUploadSync = gpuUploader.Submit(texUploadCtx);
         IG_CHECK(texUploadSync);
         texUploadSync->WaitOnCpu();
 
@@ -171,7 +171,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = { (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSync barrierSync{ mainGfxQueue.MakeSync() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSync() };
         barrierSync.WaitOnCpu();
 
         const RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -257,7 +257,7 @@ namespace ig
         IG_CHECK(newTexturePtr != nullptr);
         std::vector<D3D12_SUBRESOURCE_DATA> subresources{ subresource };
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);
-        std::optional<GpuSync> sync{ gpuUploader.Submit(uploadCtx) };
+        std::optional<GpuSyncPoint> sync{ gpuUploader.Submit(uploadCtx) };
         IG_CHECK(sync);
         sync->WaitOnCpu();
 
@@ -274,7 +274,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = { (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSync barrierSync{ mainGfxQueue.MakeSync() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSync() };
         barrierSync.WaitOnCpu();
 
         RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -357,7 +357,7 @@ namespace ig
         const GpuCopyableFootprints dstCopyableFootprints{ renderContext.GetRenderDevice().GetCopyableFootprints(texDesc, 0, 1, 0) };
         UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);
-        std::optional<GpuSync> sync{ gpuUploader.Submit(uploadCtx) };
+        std::optional<GpuSyncPoint> sync{ gpuUploader.Submit(uploadCtx) };
         IG_CHECK(sync);
         sync->WaitOnCpu();
 
@@ -375,7 +375,7 @@ namespace ig
 
         CommandContext* cmdCtxs[1]{ (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSync barrierSync{ mainGfxQueue.MakeSync() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSync() };
         barrierSync.WaitOnCpu();
 
         const RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
