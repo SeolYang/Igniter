@@ -38,7 +38,7 @@
     },
     {
       "name": "meshoptimizer",
-      "version": "0.20"
+      "version": "0.22"
     },
     {
       "name":"robin-hood-hashing",
