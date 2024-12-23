@@ -31,15 +31,15 @@ namespace ig
 
         [[nodiscard]] Vector3 GetUpDirection() const { return Vector3::Transform(Vector3::Up, Rotation); }
 
-        Json& Serialize(Json& archive) const;
+        Json&       Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
     public:
-        Vector3 Position{};
-        Vector3 Scale{ 1.f, 1.f, 1.f };
+        Vector3    Position{ };
+        Vector3    Scale{1.f, 1.f, 1.f};
         Quaternion Rotation;
     };
 
     IG_DECLARE_TYPE_META(TransformComponent);
-}    // namespace ig
+} // namespace ig

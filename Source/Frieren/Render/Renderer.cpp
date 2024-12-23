@@ -32,12 +32,12 @@ namespace fe
 
     struct PerFrameBuffer
     {
-        ig::Matrix ViewProj{};
+        ig::Matrix ViewProj{ };
     };
 
     struct PerObjectBuffer
     {
-        ig::Matrix LocalToWorld{};
+        ig::Matrix LocalToWorld{ };
     };
 
     Renderer::Renderer(ig::Window& window, ig::RenderContext& renderContext) :\
@@ -46,13 +46,15 @@ namespace fe
         tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(renderContext))
     {
         ig::GpuDevice& gpuDevice = renderContext.GetGpuDevice();
-        bindlessRootSignature = ig::MakePtr<ig::RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
+        bindlessRootSignature    = ig::MakePtr<ig::RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
 
-        const ig::ShaderCompileDesc vsDesc{ .SourcePath = "Assets/Shader/BasicVertexShader.hlsl"_fs,
+        const ig::ShaderCompileDesc vsDesc{
+            .SourcePath = "Assets/Shader/BasicVertexShader.hlsl"_fs,
             .Type = ig::EShaderType::Vertex,
-            .OptimizationLevel = ig::EShaderOptimizationLevel::None };
+            .OptimizationLevel = ig::EShaderOptimizationLevel::None
+        };
 
-        const ig::ShaderCompileDesc psDesc{ .SourcePath = "Assets/Shader/BasicPixelShader.hlsl"_fs, .Type = ig::EShaderType::Pixel };
+        const ig::ShaderCompileDesc psDesc{.SourcePath = "Assets/Shader/BasicPixelShader.hlsl"_fs, .Type = ig::EShaderType::Pixel};
 
         vs = ig::MakePtr<ig::ShaderBlob>(vsDesc);
         ps = ig::MakePtr<ig::ShaderBlob>(psDesc);
@@ -62,9 +64,9 @@ namespace fe
         psoDesc.SetPixelShader(*ps);
         psoDesc.SetRootSignature(*bindlessRootSignature);
         psoDesc.NumRenderTargets = 1;
-        psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-        psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-        pso = ig::MakePtr<ig::PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
+        psoDesc.RTVFormats[0]    = DXGI_FORMAT_R8G8B8A8_UNORM;
+        psoDesc.DSVFormat        = DXGI_FORMAT_D32_FLOAT;
+        pso                      = ig::MakePtr<ig::PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
 
         ig::GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
@@ -76,7 +78,7 @@ namespace fe
             for (const ig::LocalFrameIndex localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
             {
                 depthStencils[localFrameIdx] = renderContext.CreateTexture(depthStencilDesc);
-                dsvs[localFrameIdx] = renderContext.CreateDepthStencilView(depthStencils[localFrameIdx], D3D12_TEX2D_DSV{ .MipSlice = 0 });
+                dsvs[localFrameIdx]          = renderContext.CreateDepthStencilView(depthStencils[localFrameIdx], D3D12_TEX2D_DSV{.MipSlice = 0});
 
                 initialCmdCtx->AddPendingTextureBarrier(*renderContext.Lookup(depthStencils[localFrameIdx]),
                                                         D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
@@ -88,8 +90,8 @@ namespace fe
         }
         initialCmdCtx->End();
 
-        ig::CommandContext* cmdCtxs[1]{ (ig::CommandContext*)initialCmdCtx };
-        ig::CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
+        ig::CommandContext* cmdCtxs[1]{(ig::CommandContext*)initialCmdCtx};
+        ig::CommandQueue&   mainGfxQueue{renderContext.GetMainGfxQueue()};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
     }
 
@@ -114,18 +116,18 @@ namespace fe
             return ig::GpuSyncPoint::Invalid();
         }
 
-        ig::Registry& registry = world->GetRegistry();
+        ig::Registry&          registry               = world->GetRegistry();
         ig::TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
 
-        PerFrameBuffer perFrameBuffer{};
-        auto cameraView = registry.view<ig::CameraComponent, ig::TransformComponent>();
+        PerFrameBuffer perFrameBuffer{ };
+        auto           cameraView = registry.view<ig::CameraComponent, ig::TransformComponent>();
 
-        ig::Swapchain& swapchain = renderContext.GetSwapchain();
-        ig::GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
+        ig::Swapchain&     swapchain        = renderContext.GetSwapchain();
+        ig::GpuTexture*    backBufferPtr    = renderContext.Lookup(swapchain.GetBackBuffer());
         const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
 
-        ig::CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
-        auto renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
+        ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
+        auto              renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
 
         bool bRenderable = false;
         for (auto [entity, camera, transformData] : cameraView.each())
@@ -144,7 +146,7 @@ namespace fe
 
             const ig::Matrix viewMatrix = transformData.CreateView();
             const ig::Matrix projMatrix = camera.CreatePerspective();
-            perFrameBuffer.ViewProj = ig::ConvertToShaderSuitableForm(viewMatrix * projMatrix);
+            perFrameBuffer.ViewProj     = ig::ConvertToShaderSuitableForm(viewMatrix * projMatrix);
             perFrameConstantBuffer.Write(perFrameBuffer);
             bRenderable = true;
         }
@@ -171,40 +173,42 @@ namespace fe
 
             if (bRenderable)
             {
-                ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-                const auto renderableView = registry.view<ig::StaticMeshComponent, ig::TransformComponent>();
-                ig::GpuView* perFrameCbvPtr = renderContext.Lookup(perFrameConstantBuffer.GetConstantBufferView());
+                ig::AssetManager& assetManager   = ig::Engine::GetAssetManager();
+                const auto        renderableView = registry.view<ig::StaticMeshComponent, ig::TransformComponent>();
+                ig::GpuView*      perFrameCbvPtr = renderContext.Lookup(perFrameConstantBuffer.GetConstantBufferView());
                 for (auto [entity, staticMeshComponent, transform] : renderableView.each())
                 {
                     if (staticMeshComponent.Mesh)
                     {
-                        ig::StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
-                        ig::GpuBuffer* indexBufferPtr = renderContext.Lookup(staticMeshPtr->GetIndexBuffer());
-                        ig::GpuView* vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
+                        ig::StaticMesh* staticMeshPtr      = assetManager.Lookup(staticMeshComponent.Mesh);
+                        ig::GpuBuffer*  indexBufferPtr     = renderContext.Lookup(staticMeshPtr->GetIndexBuffer());
+                        ig::GpuView*    vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
                         renderCmdCtx->SetIndexBuffer(*indexBufferPtr);
                         {
                             ig::TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator->Allocate<PerObjectBuffer>(localFrameIdx);
-                            ig::GpuView* perObjectCBViewPtr = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
-                            const auto perObjectBuffer =
-                                PerObjectBuffer{ .LocalToWorld = ig::ConvertToShaderSuitableForm(transform.CreateTransformation()) };
+                            ig::GpuView*           perObjectCBViewPtr      = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
+                            const auto             perObjectBuffer         =
+                                    PerObjectBuffer{.LocalToWorld = ig::ConvertToShaderSuitableForm(transform.CreateTransformation())};
                             perObjectConstantBuffer.Write(perObjectBuffer);
 
                             /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
-                            ig::Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
-                            ig::Texture* diffuseTexPtr = assetManager.Lookup(materialPtr->GetDiffuse());
-                            ig::GpuView* diffuseTexSrvPtr = renderContext.Lookup(diffuseTexPtr->GetShaderResourceView());
-                            ig::GpuView* diffuseTexSamplerPtr = renderContext.Lookup(diffuseTexPtr->GetSampler());
+                            ig::Material* materialPtr          = assetManager.Lookup(staticMeshPtr->GetMaterial());
+                            ig::Texture*  diffuseTexPtr        = assetManager.Lookup(materialPtr->GetDiffuse());
+                            ig::GpuView*  diffuseTexSrvPtr     = renderContext.Lookup(diffuseTexPtr->GetShaderResourceView());
+                            ig::GpuView*  diffuseTexSamplerPtr = renderContext.Lookup(diffuseTexPtr->GetSampler());
 
-                            const BasicRenderResources params{ .VertexBufferIdx = vertexBufferSrvPtr->Index,
+                            const BasicRenderResources params{
+                                .VertexBufferIdx = vertexBufferSrvPtr->Index,
                                 .PerFrameBufferIdx = perFrameCbvPtr->Index,
                                 .PerObjectBufferIdx = perObjectCBViewPtr->Index,
                                 .DiffuseTexIdx = diffuseTexSrvPtr->Index,
-                                .DiffuseTexSamplerIdx = diffuseTexSamplerPtr->Index };
+                                .DiffuseTexSamplerIdx = diffuseTexSamplerPtr->Index
+                            };
 
                             renderCmdCtx->SetRoot32BitConstants(0, params, 0);
                         }
 
-                        const ig::StaticMesh::Desc& snapshot = staticMeshPtr->GetSnapshot();
+                        const ig::StaticMesh::Desc&     snapshot = staticMeshPtr->GetSnapshot();
                         const ig::StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
                         renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
                     }
@@ -219,8 +223,8 @@ namespace fe
         }
         renderCmdCtx->End();
 
-        ig::CommandContext* renderCmdCtxPtrs[] = { (ig::CommandContext*)renderCmdCtx };
+        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)renderCmdCtx};
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
         return mainGfxQueue.MakeSyncPointWithSignal();
     }
-}    // namespace fe
+} // namespace fe

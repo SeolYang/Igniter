@@ -5,6 +5,7 @@
 namespace ig
 {
     class GpuDevice;
+
     class GpuTexture final
     {
         friend class GpuDevice;
@@ -44,8 +45,8 @@ namespace ig
         GpuTexture(const GpuTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource);
 
     private:
-        GpuTextureDesc desc;
+        GpuTextureDesc              desc;
         ComPtr<D3D12MA::Allocation> allocation;
-        ComPtr<ID3D12Resource> resource;
+        ComPtr<ID3D12Resource>      resource;
     };
-}    // namespace ig
+} // namespace ig

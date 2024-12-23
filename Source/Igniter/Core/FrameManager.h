@@ -6,14 +6,15 @@ namespace ig
     class FrameManager final
     {
     public:
-        FrameManager(const FrameManager&) = delete;
+        FrameManager(const FrameManager&)     = delete;
         FrameManager(FrameManager&&) noexcept = delete;
-        ~FrameManager() = default;
+        ~FrameManager()                       = default;
 
         static GlobalFrameIndex GetGlobalFrameIndex() { return GetInstance().globalFrameIdx; }
-        static LocalFrameIndex GetLocalFrameIndex() { return GetInstance().localFrameIdx; }
+        static LocalFrameIndex  GetLocalFrameIndex() { return GetInstance().localFrameIdx; }
 
         static LocalFrameIndex BeginFrame() { return GetInstance().localFrameIdx; }
+
         static void EndFrame()
         {
             FrameManager& frameManager = GetInstance();
@@ -26,12 +27,12 @@ namespace ig
 
         static FrameManager& GetInstance()
         {
-            static FrameManager frameManager{};
+            static FrameManager frameManager{ };
             return frameManager;
         }
 
     private:
         GlobalFrameIndex globalFrameIdx = 0;
-        LocalFrameIndex localFrameIdx = 0;
+        LocalFrameIndex  localFrameIdx  = 0;
     };
-}    // namespace ig
+} // namespace ig

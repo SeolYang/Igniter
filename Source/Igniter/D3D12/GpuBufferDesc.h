@@ -104,15 +104,15 @@ namespace ig
             }
         }
 
-        bool IsCPUAccessible() const { return bIsCPUAccessible; }
+        bool           IsCPUAccessible() const { return bIsCPUAccessible; }
         EGpuBufferType GetBufferType() const { return bufferType; }
-        uint32_t GetStructureByteStride() const { return structureByteStride; }
-        uint32_t GetNumElements() const { return numElements; }
-        uint64_t GetSizeAsBytes() const { return Width; }
+        uint32_t       GetStructureByteStride() const { return structureByteStride; }
+        uint32_t       GetNumElements() const { return numElements; }
+        uint64_t       GetSizeAsBytes() const { return Width; }
 
-        D3D12MA::ALLOCATION_DESC GetAllocationDesc() const;
-        std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
-        std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ToShaderResourceViewDesc() const;
+        D3D12MA::ALLOCATION_DESC                        GetAllocationDesc() const;
+        std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>  ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
+        std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>  ToShaderResourceViewDesc() const;
         std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc() const;
 
         void From(const D3D12_RESOURCE_DESC& desc);
@@ -122,14 +122,14 @@ namespace ig
         void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
 
     public:
-        String DebugName = String{ "Unknown Buffer" };
+        String DebugName = String{"Unknown Buffer"};
 
     private:
-        uint32_t structureByteStride = 1;
-        uint32_t numElements = 1;
-        EGpuBufferType bufferType = EGpuBufferType::Unknown;
-        bool bIsShaderReadWritable = false;
-        bool bIsCPUAccessible = false;
-        D3D12MA::Pool* customPool = nullptr;
+        uint32_t       structureByteStride   = 1;
+        uint32_t       numElements           = 1;
+        EGpuBufferType bufferType            = EGpuBufferType::Unknown;
+        bool           bIsShaderReadWritable = false;
+        bool           bIsCPUAccessible      = false;
+        D3D12MA::Pool* customPool            = nullptr;
     };
-}    // namespace ig
+} // namespace ig

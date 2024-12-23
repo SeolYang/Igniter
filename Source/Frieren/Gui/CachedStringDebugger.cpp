@@ -13,24 +13,24 @@ namespace fe
 
         if (ImGui::Button("Search"))
         {
-            bFiltered = true;
+            bFiltered           = true;
             searchTargetHashVal = std::stoull(inputBuffer);
         }
 
         ImGui::SameLine();
         if (ImGui::Button("Reset") || bLoadRequired)
         {
-            cachedStrings = ig::String::GetCachedStrings();
-            bSortRequired = true;
-            bFiltered = false;
-            bLoadRequired = false;
+            cachedStrings  = ig::String::GetCachedStrings();
+            bSortRequired  = true;
+            bFiltered      = false;
+            bLoadRequired  = false;
             inputBuffer[0] = '\0';
         }
 
         constexpr ImGuiTableFlags flags =
-            ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable |
-            ImGuiTableFlags_RowBg | ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_Borders |
-            ImGuiTableFlags_ScrollY;
+                ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable |
+                ImGuiTableFlags_RowBg | ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_Borders |
+                ImGuiTableFlags_ScrollY;
 
         if (ImGui::BeginTable("Cached Hash-String Table", 2, flags))
         {
@@ -44,12 +44,12 @@ namespace fe
                 {
                     std::sort(cachedStrings.begin(), cachedStrings.end(),
                               [sortSpec = sortSpecs->Specs[0]](const auto& lhs, const auto& rhs)
-                    {
-                        return (sortSpec.SortDirection == ImGuiSortDirection_Ascending) ? (lhs.first < rhs.first) : (lhs.first >= rhs.first);
-                    });
+                              {
+                                  return (sortSpec.SortDirection == ImGuiSortDirection_Ascending) ? (lhs.first < rhs.first) : (lhs.first >= rhs.first);
+                              });
 
                     sortSpecs->SpecsDirty = false;
-                    bSortRequired = false;
+                    bSortRequired         = false;
                 }
             }
 
@@ -86,4 +86,4 @@ namespace fe
             ImGui::EndTable();
         }
     }
-}    // namespace fe
+} // namespace fe

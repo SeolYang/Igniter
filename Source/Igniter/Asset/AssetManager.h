@@ -34,12 +34,13 @@ namespace ig
     class MaterialLoader;
     class MapCreator;
     class MapLoader;
+
     class AssetManager final
     {
     private:
         using VirtualPathGuidTable = UnorderedMap<String, Guid>;
-        using AssetMutex = Mutex;
-        using AssetLock = UniqueLock;
+        using AssetMutex           = Mutex;
+        using AssetLock            = UniqueLock;
 
     public:
         using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
@@ -50,17 +51,17 @@ namespace ig
             bool IsCached() const { return RefCount > 0 || Info.GetScope() == EAssetScope::Static || Info.GetScope() == EAssetScope::Engine; }
 
         public:
-            AssetInfo Info{};
-            uint32_t RefCount{};
+            AssetInfo Info{ };
+            uint32_t  RefCount{ };
         };
 
     public:
         AssetManager(RenderContext& renderContext);
-        AssetManager(const AssetManager&) = delete;
+        AssetManager(const AssetManager&)     = delete;
         AssetManager(AssetManager&&) noexcept = delete;
         ~AssetManager();
 
-        AssetManager& operator=(const AssetManager&) = delete;
+        AssetManager& operator=(const AssetManager&)     = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
 
         void RegisterEngineDefault();
@@ -72,19 +73,19 @@ namespace ig
          * 에셋의 레퍼런스 카운트가 증가함. 즉 반드시 1번의 로드에 최소 1번의 언로드를 매칭 시켜주어야 함.
          */
 
-        Guid Import(const String resPath, const TextureImportDesc& desc);
+        Guid                                Import(const String resPath, const TextureImportDesc& desc);
         [[nodiscard]] ManagedAsset<Texture> LoadTexture(const Guid& guid);
         [[nodiscard]] ManagedAsset<Texture> LoadTexture(const String virtualPath);
 
-        std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc);
+        std::vector<Guid>                      Import(const String resPath, const StaticMeshImportDesc& desc);
         [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const Guid& guid);
         [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
-        Guid Import(const String virtualPath, const MaterialCreateDesc& createDesc);
+        Guid                                 Import(const String virtualPath, const MaterialCreateDesc& createDesc);
         [[nodiscard]] ManagedAsset<Material> LoadMaterial(const Guid& guid);
         [[nodiscard]] ManagedAsset<Material> LoadMaterial(const String virtualPath);
 
-        Guid Import(const String virtualPath, const MapCreateDesc& desc);
+        Guid                            Import(const String virtualPath, const MapCreateDesc& desc);
         [[nodiscard]] ManagedAsset<Map> LoadMap(const Guid& guid);
         [[nodiscard]] ManagedAsset<Map> LoadMap(const String virtualPath);
 
@@ -139,8 +140,8 @@ namespace ig
                 return false;
             }
 
-            bool bSuceeded = false;
-            const typename T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
+            bool                   bSuceeded = false;
+            const typename T::Desc desc{assetMonitor->GetDesc<T>(guid)};
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
                 bSuceeded = ReloadImpl<Texture>(guid, desc, *textureLoader);
@@ -191,11 +192,11 @@ namespace ig
         {
             /* #sy_todo not thread safe... make it safe! */
             details::AssetCache<T>& cache = GetCache<T>();
-            T* ptr = cache.Lookup(handle);
+            T*                      ptr   = cache.Lookup(handle);
             if (ptr != nullptr)
             {
                 const T::Desc& desc = ptr->GetSnapshot();
-                AssetLock assetLock{ GetAssetMutex(desc.Info.GetGuid()) };
+                AssetLock      assetLock{GetAssetMutex(desc.Info.GetGuid())};
                 cache.Unload(desc.Info);
             }
         }
@@ -240,19 +241,20 @@ namespace ig
         {
             return static_cast<details::AssetCache<T>&>(GetTypelessCache(AssetCategoryOf<T>));
         }
+
         template <Asset T>
         const details::AssetCache<T>& GetCache() const
         {
             return static_cast<const details::AssetCache<T>&>(GetTypelessCache(AssetCategoryOf<T>));
         }
 
-        details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType);
+        details::TypelessAssetCache&       GetTypelessCache(const EAssetCategory assetType);
         const details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType) const;
 
         template <Asset T, ResultStatus ImportStatus>
         std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)
         {
-            constexpr auto AssetType{ AssetCategoryOf<T> };
+            constexpr auto AssetType{AssetCategoryOf<T>};
             if (!result.HasOwnership())
             {
                 IG_LOG(AssetManager, Error, "{}: Failed({}) to import \"{}\".", AssetType, result.GetStatus(), resPath);
@@ -260,18 +262,18 @@ namespace ig
                 return std::nullopt;
             }
 
-            const T::Desc desc{ result.Take() };
-            AssetInfo assetInfo{ desc.Info };
+            const T::Desc desc{result.Take()};
+            AssetInfo     assetInfo{desc.Info};
             IG_CHECK(assetInfo.IsValid());
             IG_CHECK(assetInfo.GetCategory() == AssetType);
 
-            const String virtualPath{ assetInfo.GetVirtualPath() };
+            const String virtualPath{assetInfo.GetVirtualPath()};
             IG_CHECK(IsValidVirtualPath(virtualPath));
 
-            bool bShouldReload{ false };
+            bool bShouldReload{false};
             if (assetMonitor->Contains(AssetType, virtualPath))
             {
-                const AssetInfo oldAssetInfo{ assetMonitor->GetAssetInfo(AssetType, virtualPath) };
+                const AssetInfo oldAssetInfo{assetMonitor->GetAssetInfo(AssetType, virtualPath)};
                 IG_CHECK(oldAssetInfo.IsValid());
                 if (oldAssetInfo.GetScope() == EAssetScope::Engine)
                 {
@@ -283,10 +285,10 @@ namespace ig
 
                 assetMonitor->Remove(oldAssetInfo.GetGuid(), false);
 
-                const Path oldAssetPath{ MakeAssetPath(AssetType, oldAssetInfo.GetGuid()) };
-                const Path oldAssetMetadataPath{ MakeAssetMetadataPath(AssetType, oldAssetInfo.GetGuid()) };
-                const Path currentAssetPath{ MakeAssetPath(AssetType, assetInfo.GetGuid()) };
-                const Path currentAssetMetadataPath{ MakeAssetMetadataPath(AssetType, assetInfo.GetGuid()) };
+                const Path oldAssetPath{MakeAssetPath(AssetType, oldAssetInfo.GetGuid())};
+                const Path oldAssetMetadataPath{MakeAssetMetadataPath(AssetType, oldAssetInfo.GetGuid())};
+                const Path currentAssetPath{MakeAssetPath(AssetType, assetInfo.GetGuid())};
+                const Path currentAssetMetadataPath{MakeAssetMetadataPath(AssetType, assetInfo.GetGuid())};
                 IG_CHECK(fs::exists(oldAssetPath));
                 IG_CHECK(fs::exists(oldAssetMetadataPath));
                 IG_CHECK(fs::exists(currentAssetPath));
@@ -318,21 +320,21 @@ namespace ig
             if (!assetMonitor->Contains(guid))
             {
                 IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
-                return ManagedAsset<T>{};
+                return ManagedAsset<T>{ };
             }
 
-            AssetLock assetLock{ GetAssetMutex(guid) };
-            details::AssetCache<T>& assetCache{ GetCache<T>() };
+            AssetLock               assetLock{GetAssetMutex(guid)};
+            details::AssetCache<T>& assetCache{GetCache<T>()};
             if (!assetCache.IsCached(guid))
             {
-                const T::Desc desc{ assetMonitor->GetDesc<T>(guid) };
+                const T::Desc desc{assetMonitor->GetDesc<T>(guid)};
                 IG_CHECK(desc.Info.GetGuid() == guid);
-                auto result{ loader.Load(desc) };
+                auto result{loader.Load(desc)};
                 if (!result.HasOwnership())
                 {
                     IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
                            desc.Info.GetVirtualPath(), guid);
-                    return ManagedAsset<T>{};
+                    return ManagedAsset<T>{ };
                 }
 
                 assetCache.Cache(guid, result.Take());
@@ -356,21 +358,21 @@ namespace ig
              */
             IG_CHECK(assetMonitor->Contains(guid));
             IG_CHECK(desc.Info.GetGuid() == guid);
-            details::AssetCache<T>& assetCache{ GetCache<T>() };
-            AssetLock assetLock{ GetAssetMutex(guid) };
+            details::AssetCache<T>& assetCache{GetCache<T>()};
+            AssetLock               assetLock{GetAssetMutex(guid)};
             if (!assetCache.IsCached(guid))
             {
                 return false;
             }
 
-            auto result{ loader.Load(desc) };
+            auto result{loader.Load(desc)};
             if (!result.HasOwnership())
             {
                 IG_LOG(AssetManager, Error, "{} asset \"{}\" failed to reload.", AssetCategoryOf<T>, guid);
                 return false;
             }
 
-            ManagedAsset<T> cachedAsset{ assetCache.Load(guid) };
+            ManagedAsset<T> cachedAsset{assetCache.Load(guid)};
             if (cachedAsset)
             {
                 T* cachedAssetPtr = assetCache.Lookup(cachedAsset);
@@ -399,47 +401,47 @@ namespace ig
                 return;
             }
 
-            T asset{ assetResult.Take() };
-            const typename T::Desc& desc{ asset.GetSnapshot() };
-            const AssetInfo& assetInfo{ desc.Info };
+            T                       asset{assetResult.Take()};
+            const typename T::Desc& desc{asset.GetSnapshot()};
+            const AssetInfo&        assetInfo{desc.Info};
             IG_CHECK(assetInfo.IsValid());
             IG_CHECK(assetInfo.GetCategory() == AssetCategoryOf<T>);
             IG_CHECK(assetInfo.GetScope() == EAssetScope::Engine);
 
             /* #sy_note GUID를 고정으로 할지 말지.. 일단 Virtual Path는 고정적이고, Import 되고난 이후엔 Virtual Path로 접근 가능하니 유동적으로 */
-            Result<typename T::Desc, details::EDefaultDummyStatus> dummyResult{ MakeSuccess<typename T::Desc, details::EDefaultDummyStatus>(desc) };
+            Result<typename T::Desc, details::EDefaultDummyStatus> dummyResult{MakeSuccess<typename T::Desc, details::EDefaultDummyStatus>(desc)};
             IG_CHECK(dummyResult.HasOwnership());
-            std::optional<Guid> guidOpt{ ImportImpl<T>(assetInfo.GetVirtualPath(), dummyResult) };
+            std::optional<Guid> guidOpt{ImportImpl<T>(assetInfo.GetVirtualPath(), dummyResult)};
             IG_CHECK(guidOpt);
 
-            const Guid& guid{ *guidOpt };
+            const Guid& guid{*guidOpt};
             IG_CHECK(guid.isValid());
-            AssetLock assetLock{ GetAssetMutex(guid) };
-            details::AssetCache<T>& assetCache{ GetCache<T>() };
+            AssetLock               assetLock{GetAssetMutex(guid)};
+            details::AssetCache<T>& assetCache{GetCache<T>()};
             IG_CHECK(!assetCache.IsCached(guid));
             assetCache.Cache(guid, std::move(asset));
         }
 
     private:
-        Ptr<details::AssetMonitor> assetMonitor;
+        Ptr<details::AssetMonitor>                    assetMonitor;
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
-        Mutex assetMutexTableMutex;
+        Mutex                                assetMutexTableMutex;
         StableUnorderedMap<Guid, AssetMutex> assetMutexTable;
 
         Ptr<TextureImporter> textureImporter;
-        Ptr<TextureLoader> textureLoader;
+        Ptr<TextureLoader>   textureLoader;
 
         Ptr<StaticMeshImporter> staticMeshImporter;
-        Ptr<StaticMeshLoader> staticMeshLoader;
+        Ptr<StaticMeshLoader>   staticMeshLoader;
 
         Ptr<MaterialImporter> materialImporter;
-        Ptr<MaterialLoader> materialLoader;
+        Ptr<MaterialLoader>   materialLoader;
 
         Ptr<MapCreator> mapCreator;
-        Ptr<MapLoader> mapLoader;
+        Ptr<MapLoader>  mapLoader;
 
-        bool bIsDirty = false;
+        bool          bIsDirty = false;
         ModifiedEvent assetModifiedEvent;
     };
-}    // namespace ig
+} // namespace ig

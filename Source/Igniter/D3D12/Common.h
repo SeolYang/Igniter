@@ -69,21 +69,21 @@ namespace ig
     bool IsSupportGpuView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType);
 
     using GpuTextureSrvDesc = std::variant<D3D12_TEX1D_SRV, D3D12_TEX2D_SRV, D3D12_TEX2DMS_SRV, D3D12_TEX3D_SRV, D3D12_TEXCUBE_SRV,
-        D3D12_TEX1D_ARRAY_SRV, D3D12_TEX2D_ARRAY_SRV, D3D12_TEX2DMS_ARRAY_SRV, D3D12_TEXCUBE_ARRAY_SRV>;
+                                           D3D12_TEX1D_ARRAY_SRV, D3D12_TEX2D_ARRAY_SRV, D3D12_TEX2DMS_ARRAY_SRV, D3D12_TEXCUBE_ARRAY_SRV>;
     using GpuTextureUavDesc = std::variant<D3D12_TEX1D_UAV, D3D12_TEX2D_UAV, D3D12_TEX2DMS_UAV, D3D12_TEX3D_UAV, D3D12_TEX1D_ARRAY_UAV,
-        D3D12_TEX2D_ARRAY_UAV, D3D12_TEX2DMS_ARRAY_UAV>;
+                                           D3D12_TEX2D_ARRAY_UAV, D3D12_TEX2DMS_ARRAY_UAV>;
     using GpuTextureRtvDesc = std::variant<D3D12_TEX1D_RTV, D3D12_TEX2D_RTV, D3D12_TEX2DMS_RTV, D3D12_TEX3D_RTV, D3D12_TEX1D_ARRAY_RTV,
-        D3D12_TEX2D_ARRAY_RTV, D3D12_TEX2DMS_ARRAY_RTV>;
+                                           D3D12_TEX2D_ARRAY_RTV, D3D12_TEX2DMS_ARRAY_RTV>;
     using GpuTextureDsvDesc =
-        std::variant<D3D12_TEX1D_DSV, D3D12_TEX2D_DSV, D3D12_TEX2DMS_DSV, D3D12_TEX1D_ARRAY_DSV, D3D12_TEX2D_ARRAY_DSV, D3D12_TEX2DMS_ARRAY_DSV>;
+    std::variant<D3D12_TEX1D_DSV, D3D12_TEX2D_DSV, D3D12_TEX2DMS_DSV, D3D12_TEX1D_ARRAY_DSV, D3D12_TEX2D_ARRAY_DSV, D3D12_TEX2DMS_ARRAY_DSV>;
 
     struct GpuCopyableFootprints final
     {
     public:
-        size_t RequiredSize = 0;
-        std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
-        std::vector<uint32_t> NumRows{};
-        std::vector<size_t> RowSizesInBytes{};
+        size_t                                          RequiredSize = 0;
+        std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{ };
+        std::vector<uint32_t>                           NumRows{ };
+        std::vector<size_t>                             RowSizesInBytes{ };
     };
 
     constexpr inline bool IsGreyScaleFormat(const DXGI_FORMAT format)
@@ -199,4 +199,4 @@ namespace ig
     }
 
     void SetObjectName(ID3D12Object* object, const std::string_view name);
-}    // namespace ig
+} // namespace ig

@@ -16,4 +16,4 @@ namespace ig
             ExecuteWhenInactive(localFrameIdx);
         }
     }
-}    // namespace ig
+} // namespace ig

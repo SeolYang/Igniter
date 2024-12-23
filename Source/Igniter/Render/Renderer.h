@@ -9,8 +9,8 @@ namespace ig
     public:
         virtual ~Renderer() = default;
 
-        virtual void PreRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
+        virtual void         PreRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) { }
         virtual GpuSyncPoint Render(const LocalFrameIndex localFrameIdx) = 0;
-        virtual void PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
+        virtual void         PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) { }
     };
-}    // namespace ig
+} // namespace ig

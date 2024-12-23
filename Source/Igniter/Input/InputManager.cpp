@@ -26,7 +26,7 @@ namespace ig
 
             switch (wParam)
             {
-                /** Characters */
+            /** Characters */
             case 'W':
             case 'w':
                 return EInput::W;
@@ -43,7 +43,7 @@ namespace ig
             case 'd':
                 return EInput::D;
 
-                /** Virtual Keys */
+            /** Virtual Keys */
             case VK_SPACE:
                 return EInput::Space;
 
@@ -65,12 +65,13 @@ namespace ig
 
             return EInput::None;
         }
-    }    // namespace
+    } // namespace
 
     InputManager::InputManager()
     {
         rawMouseInputPollingDoneEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-        rawMouseInputPollingThread = std::jthread{ [this]()
+        rawMouseInputPollingThread    = std::jthread{
+            [this]()
             {
                 HWND window = CreateWindowEx(0, TEXT("Message"), NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
                 if (window == NULL)
@@ -79,11 +80,11 @@ namespace ig
                     return;
                 }
 
-                RAWINPUTDEVICE rawMouse{};
+                RAWINPUTDEVICE rawMouse{ };
                 rawMouse.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-                rawMouse.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
-                rawMouse.dwFlags = 0;
-                rawMouse.hwndTarget = window;
+                rawMouse.usUsage     = 0x02; /* HID_USAGE_GENERIC_MOUSE */
+                rawMouse.dwFlags     = 0;
+                rawMouse.hwndTarget  = window;
                 if (RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse)) == FALSE)
                 {
                     IG_LOG(InputManager, Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
@@ -102,7 +103,7 @@ namespace ig
                     ZoneScoped;
                     // https://learn.microsoft.com/ko-kr/windows/win32/api/winuser/nf-winuser-msgwaitformultipleobjects
                     if (const bool bDoneEventSignaled =
-                            MsgWaitForMultipleObjects(1, &this->rawMouseInputPollingDoneEvent, FALSE, INFINITE, QS_RAWINPUT) != WAIT_OBJECT_0 + 1;
+                                MsgWaitForMultipleObjects(1, &this->rawMouseInputPollingDoneEvent, FALSE, INFINITE, QS_RAWINPUT) != WAIT_OBJECT_0 + 1;
                         bDoneEventSignaled)
                     {
                         break;
@@ -116,7 +117,8 @@ namespace ig
                 rawMouse.dwFlags |= RIDEV_REMOVE;
                 RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse));
                 DestroyWindow(window);
-            } };
+            }
+        };
     }
 
     InputManager::~InputManager()
@@ -157,7 +159,7 @@ namespace ig
         }
 
         const Handle<Action, InputManager> newHandle = actionRegistry.Create();
-        nameActionTable[name] = ActionMapping{ .ActionHandle = newHandle, .MappedInput = input };
+        nameActionTable[name]                        = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
         IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
         actionSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManager, Info, "Action {} mapped to '{}'", name, input);
@@ -199,7 +201,7 @@ namespace ig
         }
 
         const Handle<Axis, InputManager> newHandle = axisRegistry.Create(scale);
-        nameAxisTable[name] = AxisMapping{ .AxisHandle = newHandle, .MappedInput = input };
+        nameAxisTable[name]                        = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
         IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
         axisSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManager, Info, "Axis {} mapped to '{}'", name, input);
@@ -242,7 +244,7 @@ namespace ig
         }
 
         IG_LOG(InputManager, Error, "Action {} does not exists.", name);
-        return Handle<Action, InputManager>{};
+        return Handle<Action, InputManager>{ };
     }
 
     Handle<Axis, InputManager> InputManager::QueryAxis(const String name) const
@@ -254,7 +256,7 @@ namespace ig
         }
 
         IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
-        return Handle<Axis, InputManager>{};
+        return Handle<Axis, InputManager>{ };
     }
 
     Action InputManager::GetAction(const Handle<Action, InputManager> action) const
@@ -263,7 +265,7 @@ namespace ig
         if (actionPtr == nullptr)
         {
             IG_LOG(InputManager, Error, "The action handle is not valid.");
-            return Action{};
+            return Action{ };
         }
 
         return *actionPtr;
@@ -275,7 +277,7 @@ namespace ig
         if (axisPtr == nullptr)
         {
             IG_LOG(InputManager, Error, "The action handle is not valid.");
-            return Axis{};
+            return Axis{ };
         }
 
         return *axisPtr;
@@ -316,7 +318,7 @@ namespace ig
     void InputManager::HandleRawMouseInput()
     {
         ZoneScoped;
-        UniqueLock rawMouseInputPollingLock{ this->rawMouseInputPollingMutex };
+        UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
         if (!polledRawMouseInputs.empty())
         {
             float deltaX = 0.f;
@@ -446,7 +448,7 @@ namespace ig
     // #sy_todo 이후에 Raw Keyboard 까지 확장
     void InputManager::PollRawMouseInput()
     {
-        UniqueLock rawMouseInputPollingLock{ this->rawMouseInputPollingMutex };
+        UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
         while (true)
         {
             UINT cbSize = 0;
@@ -456,14 +458,14 @@ namespace ig
             }
 
             constexpr size_t BatchMessageSize = 64Ui64;
-            const size_t newBufferSize = cbSize * BatchMessageSize;
+            const size_t     newBufferSize    = cbSize * BatchMessageSize;
             if (rawInputBuffer.size() < newBufferSize)
             {
                 rawInputBuffer.resize(newBufferSize);
             }
 
-            auto sizeOfBuffer = static_cast<UINT>(rawInputBuffer.size());
-            const size_t numInputs = GetRawInputBuffer((RAWINPUT*)rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
+            auto         sizeOfBuffer = static_cast<UINT>(rawInputBuffer.size());
+            const size_t numInputs    = GetRawInputBuffer((RAWINPUT*)rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
             if (numInputs == 0 || numInputs == NumericMaxOfValue(numInputs))
             {
                 break;
@@ -474,8 +476,8 @@ namespace ig
             {
                 auto* rawMouse = (RAWMOUSE*)((BYTE*)currentRawInput + rawInputOffset);
                 // 더 많은 마우스 이벤트를 얻을 수 있음!
-                polledRawMouseInputs.emplace_back(RawMouseInput{ .DeltaX = (float)rawMouse->lLastX, .DeltaY = (float)rawMouse->lLastY });
+                polledRawMouseInputs.emplace_back(RawMouseInput{.DeltaX = (float)rawMouse->lLastX, .DeltaY = (float)rawMouse->lLastY});
             }
         }
     }
-}    // namespace ig
+} // namespace ig

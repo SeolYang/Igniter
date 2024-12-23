@@ -8,4 +8,4 @@ namespace ig
     public:
         static size_t GetUID();
     };
-}    // namespace ig
+} // namespace ig

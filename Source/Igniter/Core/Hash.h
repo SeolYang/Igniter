@@ -9,8 +9,8 @@ namespace ig
     inline uint64_t HashRange(const uint32_t* const begin, const uint32_t* const end, uint64_t hash)
     {
 #if ENABLE_SSE_CRC32
-        const uint64_t* iter64 = (const uint64_t*)AlignUp(begin, 8);
-        const uint64_t* const end64 = (const uint64_t* const)AlignDown(end, 8);
+        const uint64_t*       iter64 = (const uint64_t*)AlignUp(begin, 8);
+        const uint64_t* const end64  = (const uint64_t* const)AlignDown(end, 8);
 
         if ((uint32_t*)iter64 > begin)
         {
@@ -84,4 +84,4 @@ namespace ig
     {
         return static_cast<uint16_t>((hash * 0x8000800080008001Ui64) >> 48);
     }
-}    // namespace ig
+} // namespace ig

@@ -44,17 +44,17 @@ namespace fe
 
     void StaticMeshImportPanel::SelectFileToImport()
     {
-        config = {};
+        config = { };
 
         static const std::vector<ig::DialogFilter> Filters{
             ig::DialogFilter{.Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs},
         };
 
         ig::Result<ig::String, ig::EOpenFileDialogStatus> result = ig::OpenFileDialog::Show(nullptr, "Model resource to import"_fs, Filters);
-        status = result.GetStatus();
+        status                                                   = result.GetStatus();
         if (result.HasOwnership())
         {
             path = result.Take();
         }
     }
-}    // namespace fe
+} // namespace fe

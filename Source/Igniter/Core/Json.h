@@ -11,7 +11,7 @@ namespace ig::details
     {
         if (!archive.contains(containerKey))
         {
-            archive[containerKey] = nlohmann::json{};
+            archive[containerKey] = nlohmann::json{ };
         }
 
         IG_CHECK(!archive[containerKey].is_discarded());
@@ -43,11 +43,11 @@ namespace ig::details
 
     template <typename T>
     concept ConvertibleJsonInternalSigned =
-        !std::is_floating_point_v<T> && !std::is_same_v<T, bool>&& std::is_signed_v<T>&& std::is_convertible_v<T, Json::number_unsigned_t>;
+            !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_signed_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
 
     template <typename T>
     concept ConvertibleJsonInternalUnsigned =
-        !std::is_floating_point_v<T> && !std::is_same_v<T, bool>&& std::is_unsigned_v<T>&& std::is_convertible_v<T, Json::number_unsigned_t>;
+            !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
 
     template <typename T>
     concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, Json::number_float_t>;
@@ -99,7 +99,7 @@ namespace ig::details
 
     template <typename T>
     using JsonInternal_t = JsonInternal<T>::Type;
-}    // namespace ig::details
+} // namespace ig::details
 
 #define IG_SERIALIZE_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) ig::details::Serialize(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY)
 

@@ -15,14 +15,14 @@ namespace ig
             return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
         }
 
-        Json& Serialize(Json& archive) const;
+        Json&       Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
     public:
-        Viewport CameraViewport{ 0.f, 0.f, 1280.f, 720.f };
-        float NearZ = 0.1f;
-        float FarZ = 1000.f;
+        Viewport CameraViewport{0.f, 0.f, 1280.f, 720.f};
+        float    NearZ = 0.1f;
+        float    FarZ  = 1000.f;
         /* Degrees Field Of View */
         float Fov = 45.f;
 
@@ -31,4 +31,4 @@ namespace ig
     };
 
     IG_DECLARE_TYPE_META(CameraComponent);
-}    // namespace ig
+} // namespace ig

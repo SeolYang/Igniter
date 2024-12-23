@@ -23,7 +23,7 @@ namespace ig
     Json& StaticMeshComponent::Serialize(Json& archive) const
     {
         AssetManager& assetManager = Engine::GetAssetManager();
-        StaticMesh* mesh = assetManager.Lookup(Mesh);
+        StaticMesh*   mesh         = assetManager.Lookup(Mesh);
         if (mesh != nullptr)
         {
             IG_SERIALIZE_GUID_JSON(archive, mesh->GetSnapshot().Info.GetGuid(), ContainerKey, MeshGuidKey);
@@ -34,12 +34,12 @@ namespace ig
 
     const Json& StaticMeshComponent::Deserialize(const Json& archive)
     {
-        Guid staticMeshGuid{};
+        Guid staticMeshGuid{ };
         IG_DESERIALIZE_GUID_JSON(archive, staticMeshGuid, ContainerKey, MeshGuidKey, Guid{});
         if (staticMeshGuid.isValid())
         {
             AssetManager& assetManager = Engine::GetAssetManager();
-            Mesh = assetManager.Load<StaticMesh>(staticMeshGuid);
+            Mesh                       = assetManager.Load<StaticMesh>(staticMeshGuid);
         }
 
         return archive;
@@ -48,18 +48,18 @@ namespace ig
     void StaticMeshComponent::OnInspector(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
-        AssetManager& assetManager = Engine::GetAssetManager();
+        AssetManager&        assetManager        = Engine::GetAssetManager();
         StaticMeshComponent& staticMeshComponent = registry->get<StaticMeshComponent>(entity);
 
         if (staticMeshComponent.Mesh)
         {
             const StaticMesh* staticMeshPtr = assetManager.Lookup(staticMeshComponent.Mesh);
 
-            const StaticMesh::Desc& staticMeshSnapshot{ staticMeshPtr->GetSnapshot() };
+            const StaticMesh::Desc& staticMeshSnapshot{staticMeshPtr->GetSnapshot()};
             ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
 
-            const Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
-            const Material::Desc& materialSnapshot{ materialPtr->GetSnapshot() };
+            const Material*       materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
+            const Material::Desc& materialSnapshot{materialPtr->GetSnapshot()};
             ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
         }
         else
@@ -67,8 +67,8 @@ namespace ig
             ImGui::Text("Static Mesh Component does not selected.");
         }
 
-        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{ "Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh };
-        if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{ -FLT_MIN, 0.f }))
+        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{"Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh};
+        if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{-FLT_MIN, 0.f}))
         {
             staticMeshSelectModalPopup.Open();
         }
@@ -94,4 +94,4 @@ namespace ig
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(StaticMeshComponent);
-}    // namespace ig
+} // namespace ig

@@ -7,22 +7,22 @@ namespace ig
     {
         if (!fs::exists(path))
         {
-            return Json{};
+            return Json{ };
         }
 
-        std::ifstream fileStream{ path.c_str() };
+        std::ifstream fileStream{path.c_str()};
         if (!fileStream.is_open())
         {
-            return Json{};
+            return Json{ };
         }
 
-        Json newJson{ Json::parse(fileStream, nullptr, false) };
-        return newJson.is_discarded() ? Json{} : newJson;
+        Json newJson{Json::parse(fileStream, nullptr, false)};
+        return newJson.is_discarded() ? Json{ } : newJson;
     }
 
     inline bool SaveJsonToFile(const Path& path, const Json& jsonData)
     {
-        std::ofstream fileStream{ path.c_str() };
+        std::ofstream fileStream{path.c_str()};
         if (!fileStream.is_open())
         {
             return false;
@@ -41,7 +41,7 @@ namespace ig
             return blob;
         }
 
-        std::ifstream blobStream{ path.c_str(), std::ios::in | std::ios::binary };
+        std::ifstream blobStream{path.c_str(), std::ios::in | std::ios::binary};
         if (!blobStream.is_open())
         {
             return blob;
@@ -58,7 +58,7 @@ namespace ig
     {
         IG_CHECK(blob.size_bytes() > 0);
 
-        std::ofstream fileStream{ path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc };
+        std::ofstream fileStream{path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc};
         if (!fileStream.is_open())
         {
             return false;
@@ -73,7 +73,7 @@ namespace ig
     inline bool SaveBlobsToFile(const Path& path, const std::array<std::span<const uint8_t>, N> blobs)
     {
         IG_CHECK(blobs.size() > 0);
-        std::ofstream fileStream{ path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc };
+        std::ofstream fileStream{path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc};
         if (!fileStream.is_open())
         {
             return false;
@@ -88,4 +88,4 @@ namespace ig
         fileStream.close();
         return true;
     }
-}    // namespace ig
+} // namespace ig

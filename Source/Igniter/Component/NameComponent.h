@@ -7,13 +7,13 @@ namespace ig
     struct NameComponent
     {
     public:
-        Json& Serialize(Json& archive) const;
+        Json&       Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
     public:
-        String Name{ "New Entity" };
+        String Name{"New Entity"};
     };
 
     IG_DECLARE_TYPE_META(NameComponent);
-}    // namespace ig
+} // namespace ig

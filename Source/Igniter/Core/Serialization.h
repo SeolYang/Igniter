@@ -3,14 +3,14 @@
 
 namespace ig::meta
 {
-    constexpr inline entt::hashed_string SerializeComponentJsonFunc = "SerializeComponentJson"_hs;
+    constexpr inline entt::hashed_string SerializeComponentJsonFunc   = "SerializeComponentJson"_hs;
     constexpr inline entt::hashed_string DeserializeComponentJsonFunc = "DeserializeComponentJson"_hs;
-}    // namespace ig::meta
+} // namespace ig::meta
 
 namespace ig
 {
     template <typename Archive, typename Ty>
-    concept Serializable = requires(Archive & archive, Ty & data, const Ty & constData)
+    concept Serializable = requires(Archive& archive, Ty& data, const Ty& constData)
     {
         {
             constData.Serialize(archive)
@@ -72,7 +72,7 @@ namespace ig
             component.Deserialize(archiveRef.get());
         }
     }
-}    // namespace ig
+} // namespace ig
 
 #define IG_SET_META_JSON_SERIALIZABLE_COMPONENT(T)                                                             \
     entt::meta<T>().template func<&ig::SerializeComponent<ig::Json, T>>(ig::meta::SerializeComponentJsonFunc); \

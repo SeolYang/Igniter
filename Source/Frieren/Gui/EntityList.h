@@ -11,25 +11,25 @@ namespace fe
     class EntityList final
     {
     public:
-        EntityList() = default;
-        EntityList(const EntityList&) = delete;
+        EntityList()                      = default;
+        EntityList(const EntityList&)     = delete;
         EntityList(EntityList&&) noexcept = delete;
-        ~EntityList() = default;
+        ~EntityList()                     = default;
 
-        EntityList& operator=(const EntityList&) = delete;
+        EntityList& operator=(const EntityList&)     = delete;
         EntityList& operator=(EntityList&&) noexcept = delete;
 
-        void OnImGui();
+        void       OnImGui();
         ig::Entity GetSelectedEntity() const { return selectedEntity; }
 
         void SetActiveWorld(ig::World* world)
         {
             selectedEntity = entt::null;
-            activeWorld = world;
+            activeWorld    = world;
         }
 
     private:
-        ig::World* activeWorld = nullptr;
+        ig::World* activeWorld    = nullptr;
         ig::Entity selectedEntity = entt::null;
     };
-}    // namespace fe
+} // namespace fe

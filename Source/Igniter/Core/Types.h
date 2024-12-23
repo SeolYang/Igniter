@@ -10,22 +10,22 @@ namespace ig
     using namespace DirectX::SimpleMath;
     using namespace std::chrono_literals;
 
-    using U8 = uint8_t;
-    using U16 = uint16_t;
-    using U32 = uint32_t;
-    using U64 = uint64_t;
-    using F32 = float;
-    using F64 = double;
-    using I8 = int8_t;
-    using I16 = int16_t;
-    using I32 = int32_t;
-    using I64 = int64_t;
-    using Size = size_t;
-    using Index = size_t;
-    constexpr Index InvalidIndex = 0xffffffffffffffffUi64;
-    constexpr U32 InvalidIndexU32 = 0xffffffffU;
-    using GlobalFrameIndex = Index;
-    using LocalFrameIndex = U8;
+    using U8                        = uint8_t;
+    using U16                       = uint16_t;
+    using U32                       = uint32_t;
+    using U64                       = uint64_t;
+    using F32                       = float;
+    using F64                       = double;
+    using I8                        = int8_t;
+    using I16                       = int16_t;
+    using I32                       = int32_t;
+    using I64                       = int64_t;
+    using Size                      = size_t;
+    using Index                     = size_t;
+    constexpr Index InvalidIndex    = 0xffffffffffffffffUi64;
+    constexpr U32   InvalidIndexU32 = 0xffffffffU;
+    using GlobalFrameIndex          = Index;
+    using LocalFrameIndex           = U8;
 
     template <typename T, typename Dx = std::default_delete<T>>
     using Ptr = std::unique_ptr<T, Dx>;
@@ -47,20 +47,20 @@ namespace ig
     template <typename Key>
     using UnorderedSet = ankerl::unordered_dense::set<Key>;
 
-    using Entity = entt::entity;
+    using Entity              = entt::entity;
     constexpr auto NullEntity = entt::null;
-    using Registry = entt::registry;
+    using Registry            = entt::registry;
 
     using Json = nlohmann::json;
     using Guid = xg::Guid;
 
-    using SharedMutex = std::shared_mutex;
-    using ReadOnlyLock = std::shared_lock<SharedMutex>;
-    using ReadWriteLock = std::unique_lock<SharedMutex>;
+    using SharedMutex    = std::shared_mutex;
+    using ReadOnlyLock   = std::shared_lock<SharedMutex>;
+    using ReadWriteLock  = std::unique_lock<SharedMutex>;
     using RecursiveMutex = std::recursive_mutex;
-    using RecursiveLock = std::unique_lock<RecursiveMutex>;
-    using Mutex = std::mutex;
-    using UniqueLock = std::unique_lock<Mutex>;
+    using RecursiveLock  = std::unique_lock<RecursiveMutex>;
+    using Mutex          = std::mutex;
+    using UniqueLock     = std::unique_lock<Mutex>;
     template <typename... Mutexes>
     using ScopedLock = std::scoped_lock<Mutexes...>;
 
@@ -93,7 +93,7 @@ namespace ig
 
     template <typename T, typename... Args>
         requires (!std::is_array_v<T>)
-    Ptr<T> MakePtr(Args&& ... args)
+    Ptr<T> MakePtr(Args&&... args)
     {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
@@ -151,10 +151,10 @@ namespace ig
     consteval auto GetTypeName() noexcept
     {
         constexpr std::string_view funcSignature = __FUNCSIG__;
-        constexpr auto offset = funcSignature.find_first_not_of(' ', funcSignature.find_first_of('<') + 1);
+        constexpr auto             offset        = funcSignature.find_first_not_of(' ', funcSignature.find_first_of('<') + 1);
         return funcSignature.substr(offset, funcSignature.find_last_of('>') - offset);
     }
-}    // namespace ig
+} // namespace ig
 
 #define IG_NUMERIC_MIN_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::min()
 #define IG_NUMERIC_MAX_OF(X) std::numeric_limits<std::decay_t<decltype(X)>>::max()

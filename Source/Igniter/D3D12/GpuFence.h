@@ -11,41 +11,39 @@ namespace ig
 
     public:
         GpuFence(const GpuFence& other) = delete;
+
         GpuFence(GpuFence&& other) noexcept :
             counter(other.counter.exchange(1)),
-            fence(std::move(other.fence))
-        {
-        }
+            fence(std::move(other.fence)) { }
 
         ~GpuFence() = default;
 
         GpuFence& operator=(const GpuFence&) = delete;
+
         GpuFence& operator=(GpuFence&& other) noexcept
         {
             this->counter = other.counter.exchange(1);
-            this->fence = std::move(other.fence);
+            this->fence   = std::move(other.fence);
             return *this;
         }
 
-        ID3D12Fence& GetNative() { return *fence.Get(); }
+        ID3D12Fence&       GetNative() { return *fence.Get(); }
         [[nodiscard]] bool IsValid() const noexcept { return fence; }
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
         GpuSyncPoint MakeSyncPoint()
         {
-            const U64 syncPointCounter{ counter.fetch_add(1) };
+            const U64 syncPointCounter{counter.fetch_add(1)};
             IG_CHECK(syncPointCounter >= 1);
-            return GpuSyncPoint{ *fence.Get(), syncPointCounter };
+            return GpuSyncPoint{*fence.Get(), syncPointCounter};
         }
 
     private:
         GpuFence(ComPtr<ID3D12Fence> fence) :
-            fence(std::move(fence))
-        {
-        }
+            fence(std::move(fence)) { }
 
     private:
-        std::atomic_uint64_t counter{ 1 };
-        ComPtr<ID3D12Fence> fence;
+        std::atomic_uint64_t counter{1};
+        ComPtr<ID3D12Fence>  fence;
     };
 }

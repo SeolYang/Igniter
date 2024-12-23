@@ -19,7 +19,7 @@ namespace ig
 
     const Json& TextureImportDesc::Deserialize(const Json& archive)
     {
-        *this = {};
+        *this = { };
         IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, CompressionMode, ETextureCompressionMode::None);
         IG_DESERIALIZE_JSON_SIMPLE(TextureImportDesc, archive, bGenerateMips, false);
         IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -47,7 +47,7 @@ namespace ig
 
     const Json& TextureLoadDesc::Deserialize(const Json& archive)
     {
-        *this = {};
+        *this = { };
         IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Format, DXGI_FORMAT_UNKNOWN);
         IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Dimension, ETextureDimension::Tex2D);
         IG_DESERIALIZE_JSON_SIMPLE(TextureLoadDesc, archive, Width, 0);
@@ -79,7 +79,7 @@ namespace ig
             renderContext->DestroyGpuView(sampler);
         }
     }
-}    // namespace ig
+} // namespace ig
 
 namespace ig::details
 {
@@ -96,4 +96,4 @@ namespace ig::details
             return ETextureDimension::Tex3D;
         }
     }
-}    // namespace ig::details
+} // namespace ig::details

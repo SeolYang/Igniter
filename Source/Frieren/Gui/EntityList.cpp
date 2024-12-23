@@ -20,16 +20,16 @@ namespace fe
             auto& registry = activeWorld->GetRegistry();
             if (ImGui::TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                auto entityView = ig::views::all(registry.template storage<ig::Entity>());
+                auto entityView      = ig::views::all(registry.template storage<ig::Entity>());
                 auto validEntityView = ig::views::filter([&registry](const ig::Entity entity) { return registry.valid(entity); });
-                auto entityNameView = ig::views::transform([&registry](const ig::Entity entity)
+                auto entityNameView  = ig::views::transform([&registry](const ig::Entity entity)
                 {
-                    std::string formattedName{};
+                    std::string formattedName{ };
 
                     if (registry.all_of<ig::NameComponent>(entity))
                     {
                         auto& nameComponent = registry.get<ig::NameComponent>(entity);
-                        formattedName = std::format("{} ({})", nameComponent.Name.ToStringView(), entt::to_integral(entity));
+                        formattedName       = std::format("{} ({})", nameComponent.Name.ToStringView(), entt::to_integral(entity));
                     }
                     else
                     {
@@ -39,29 +39,29 @@ namespace fe
                     return std::make_pair(entity, formattedName);
                 });
 
-                eastl::vector<std::pair<ig::Entity, std::string>> entityNames{ ig::ToVector(entityView | validEntityView | entityNameView) };
+                eastl::vector<std::pair<ig::Entity, std::string>> entityNames{ig::ToVector(entityView | validEntityView | entityNameView)};
                 std::sort(entityNames.begin(), entityNames.end(), [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 
-                constexpr std::string_view EntityManagementPopupID{ "EntityManagementPopup" };
+                constexpr std::string_view   EntityManagementPopupID{"EntityManagementPopup"};
                 constexpr ImGuiTreeNodeFlags TreeNodeBaseFlags =
-                    ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+                        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
                 bool bShouldOpenEntityManagementPopup = false;
                 for (const auto& [entity, entityName] : entityNames)
                 {
-                    auto nodeFlags = TreeNodeBaseFlags;
+                    auto       nodeFlags   = TreeNodeBaseFlags;
                     const bool bIsSelected = entity == selectedEntity;
                     if (bIsSelected)
                     {
                         nodeFlags |= ImGuiTreeNodeFlags_Selected;
                     }
 
-                    const bool bIsOpened = ImGui::TreeNodeEx(entityName.c_str(), nodeFlags);
-                    const bool bIsLeftMouseButtonClicked = ImGui::IsItemClicked();
+                    const bool bIsOpened                  = ImGui::TreeNodeEx(entityName.c_str(), nodeFlags);
+                    const bool bIsLeftMouseButtonClicked  = ImGui::IsItemClicked();
                     const bool bIsRightMouseButtonClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
-                    const bool bIsAnyMouseClicked = bIsLeftMouseButtonClicked || bIsRightMouseButtonClicked;
-                    const bool bIsClickedByMouse = ImGui::IsItemHovered() && bIsAnyMouseClicked;
-                    const bool bIsClickedByKeyboard = ImGui::IsKeyPressed(ImGuiKey_Enter) && ImGui::IsItemToggledOpen();
+                    const bool bIsAnyMouseClicked         = bIsLeftMouseButtonClicked || bIsRightMouseButtonClicked;
+                    const bool bIsClickedByMouse          = ImGui::IsItemHovered() && bIsAnyMouseClicked;
+                    const bool bIsClickedByKeyboard       = ImGui::IsKeyPressed(ImGuiKey_Enter) && ImGui::IsItemToggledOpen();
                     if (const bool bShouldSelectEntity = bIsClickedByMouse || bIsClickedByKeyboard; bShouldSelectEntity)
                     {
                         selectedEntity = entity;
@@ -91,17 +91,15 @@ namespace fe
                     if (ImGui::Selectable("Delete"))
                     {
                         IG_CHECK(selectedEntity != ig::NullEntity);
-                        const auto* nameComponent = registry.try_get<ig::NameComponent>(selectedEntity);
-                        const ig::String nameStr = nameComponent == nullptr ? "Unnamed"_fs : nameComponent->Name;
+                        const auto*      nameComponent = registry.try_get<ig::NameComponent>(selectedEntity);
+                        const ig::String nameStr       = nameComponent == nullptr ? "Unnamed"_fs : nameComponent->Name;
                         IG_LOG(
                             EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameStr, entt::to_integral(selectedEntity));
                         registry.destroy(selectedEntity);
                         selectedEntity = ig::NullEntity;
                     }
 
-                    if (ImGui::Selectable("Clone(Not Impl Yet)", false, ImGuiSelectableFlags_Disabled))
-                    {
-                    }
+                    if (ImGui::Selectable("Clone(Not Impl Yet)", false, ImGuiSelectableFlags_Disabled)) { }
 
                     ImGui::EndPopup();
                 }
@@ -120,7 +118,7 @@ namespace fe
                 selectedEntity = entt::null;
             }
 
-            constexpr std::string_view EntityCreatePopupID{ "EntityCreatePopup" };
+            constexpr std::string_view EntityCreatePopupID{"EntityCreatePopup"};
             if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && !bIsItemClicked)
             {
                 ImGui::OpenPopup(EntityCreatePopupID.data());
@@ -131,10 +129,10 @@ namespace fe
                 if (ImGui::Selectable("Create New Entity"))
                 {
                     const ig::Entity newEntity = registry.create();
-                    selectedEntity = newEntity;
+                    selectedEntity             = newEntity;
                 }
                 ImGui::EndPopup();
             }
         }
     }
-}    // namespace fe
+} // namespace fe

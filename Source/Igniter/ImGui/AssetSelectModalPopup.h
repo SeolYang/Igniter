@@ -13,19 +13,20 @@ namespace ig::ImGuiX
     {
     private:
         using AssetSnapshot = ig::AssetManager::Snapshot;
+
         struct AssetInfo
         {
             AssetSnapshot Snapshot;
-            ig::String SelectableLabel;
+            ig::String    SelectableLabel;
         };
 
     public:
         AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter);
-        AssetSelectModalPopup(const AssetSelectModalPopup&) = delete;
+        AssetSelectModalPopup(const AssetSelectModalPopup&)     = delete;
         AssetSelectModalPopup(AssetSelectModalPopup&&) noexcept = delete;
-        ~AssetSelectModalPopup() = default;
+        ~AssetSelectModalPopup()                                = default;
 
-        AssetSelectModalPopup& operator=(const AssetSelectModalPopup&) = delete;
+        AssetSelectModalPopup& operator=(const AssetSelectModalPopup&)     = delete;
         AssetSelectModalPopup& operator=(AssetSelectModalPopup&&) noexcept = delete;
 
         void Open();
@@ -33,18 +34,18 @@ namespace ig::ImGuiX
         void End();
 
         [[nodiscard]] bool IsAssetSelected() const { return bAssetSelected; }
-        ig::Guid GetSelectedAssetGuid() const { return selectedGuid; }
+        ig::Guid           GetSelectedAssetGuid() const { return selectedGuid; }
 
     private:
         void TakeAssetSnapshotsFromManager();
 
     private:
-        ig::String label;
-        ig::String assetInfoChildLabel;
-        ig::EAssetCategory assetCategoryToFilter = ig::EAssetCategory::Unknown;
+        ig::String               label;
+        ig::String               assetInfoChildLabel;
+        ig::EAssetCategory       assetCategoryToFilter = ig::EAssetCategory::Unknown;
         eastl::vector<AssetInfo> cachedAssetInfos;
-        ImGuiTextFilter filter;
-        ig::Guid selectedGuid;
-        bool bAssetSelected = false;
+        ImGuiTextFilter          filter;
+        ig::Guid                 selectedGuid;
+        bool                     bAssetSelected = false;
     };
-}    // namespace ig::ImGuiX
+} // namespace ig::ImGuiX

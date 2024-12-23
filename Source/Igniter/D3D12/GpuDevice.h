@@ -16,29 +16,30 @@ namespace ig
     class PipelineState;
     class RootSignature;
     class GpuFence;
+
     class GpuDevice final
     {
     public:
         GpuDevice();
         ~GpuDevice();
 
-        GpuDevice(const GpuDevice&) = delete;
+        GpuDevice(const GpuDevice&)     = delete;
         GpuDevice(GpuDevice&&) noexcept = delete;
 
-        GpuDevice& operator=(const GpuDevice&) = delete;
+        GpuDevice& operator=(const GpuDevice&)     = delete;
         GpuDevice& operator=(GpuDevice&&) noexcept = delete;
 
         [[nodiscard]] auto& GetNative() { return *device.Get(); }
-        uint32_t GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
+        uint32_t            GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
-        Option<CommandQueue> CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
+        Option<CommandQueue>   CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
         Option<CommandContext> CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType);
 
         Option<RootSignature> CreateBindlessRootSignature();
         Option<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
         Option<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
 
-        Option<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
+        Option<GpuBuffer>  CreateBuffer(const GpuBufferDesc& bufferDesc);
         Option<GpuTexture> CreateTexture(const GpuTextureDesc& textureDesc);
 
         Option<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
@@ -72,19 +73,19 @@ namespace ig
         bool CreateMemoryAllcator();
 
     private:
-        ComPtr<IDXGIAdapter> adapter;
+        ComPtr<IDXGIAdapter>   adapter;
         ComPtr<ID3D12Device10> device;
 
         D3D12MA::Allocator* allocator = nullptr;
 
         uint32_t cbvSrvUavDescriptorHandleIncrementSize = 0;
-        uint32_t samplerDescritorHandleIncrementSize = 0;
-        uint32_t dsvDescriptorHandleIncrementSize = 0;
-        uint32_t rtvDescriptorHandleIncrementSize = 0;
+        uint32_t samplerDescritorHandleIncrementSize    = 0;
+        uint32_t dsvDescriptorHandleIncrementSize       = 0;
+        uint32_t rtvDescriptorHandleIncrementSize       = 0;
 
         bool bEnhancedBarriersSupported = false;
-        bool bRaytracing10Supported = false;
-        bool bRaytracing11Supported = false;
-        bool bShaderModel66Supported = false;
+        bool bRaytracing10Supported     = false;
+        bool bRaytracing11Supported     = false;
+        bool bShaderModel66Supported    = false;
     };
-}    // namespace ig
+} // namespace ig

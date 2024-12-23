@@ -7,10 +7,11 @@
 namespace ig
 {
     class GpuView;
+
     struct TempConstantBuffer final
     {
     public:
-        TempConstantBuffer(const RenderResource<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) {}
+        TempConstantBuffer(const RenderResource<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) { }
         ~TempConstantBuffer() = default;
 
         template <typename T>
@@ -25,23 +26,24 @@ namespace ig
         [[nodiscard]] RenderResource<GpuView> GetConstantBufferView() const { return cbv; }
 
     private:
-        uint8_t* mappedPtr{ nullptr };
-        RenderResource<GpuView> cbv{};
+        uint8_t*                mappedPtr{nullptr};
+        RenderResource<GpuView> cbv{ };
     };
 
     class FrameManager;
     class GpuBuffer;
     class RenderContext;
     class CommandContext;
+
     class TempConstantBufferAllocator final
     {
     public:
         TempConstantBufferAllocator(RenderContext& renderContext, const size_t reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
-        TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
+        TempConstantBufferAllocator(const TempConstantBufferAllocator&)     = delete;
         TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
         ~TempConstantBufferAllocator();
 
-        TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&) = delete;
+        TempConstantBufferAllocator& operator=(const TempConstantBufferAllocator&)     = delete;
         TempConstantBufferAllocator& operator=(TempConstantBufferAllocator&&) noexcept = delete;
 
         TempConstantBuffer Allocate(const LocalFrameIndex localFrameIdx, const GpuBufferDesc& desc);
@@ -49,7 +51,7 @@ namespace ig
         template <typename T>
         TempConstantBuffer Allocate(const LocalFrameIndex localFrameIdx)
         {
-            GpuBufferDesc constantBufferDesc{};
+            GpuBufferDesc constantBufferDesc{ };
             constantBufferDesc.AsConstantBuffer<T>();
             return Allocate(localFrameIdx, constantBufferDesc);
         }
@@ -72,9 +74,9 @@ namespace ig
 
         size_t reservedSizeInBytesPerFrame;
 
-        mutable eastl::array<Mutex, NumFramesInFlight> mutexes;
-        eastl::array<RenderResource<GpuBuffer>, NumFramesInFlight> buffers;
-        eastl::array<size_t, NumFramesInFlight> allocatedSizeInBytes{ 0 };
+        mutable eastl::array<Mutex, NumFramesInFlight>                          mutexes;
+        eastl::array<RenderResource<GpuBuffer>, NumFramesInFlight>              buffers;
+        eastl::array<size_t, NumFramesInFlight>                                 allocatedSizeInBytes{0};
         eastl::array<eastl::vector<RenderResource<GpuView>>, NumFramesInFlight> allocatedViews;
     };
-}    // namespace ig
+} // namespace ig

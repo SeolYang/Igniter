@@ -58,7 +58,7 @@ namespace ig
             return Invalid();
         }
 
-        return GpuSyncPoint{ *fence, syncPoint - 1 };
+        return GpuSyncPoint{*fence, syncPoint - 1};
     }
 
     void GpuSyncPoint::WaitOnCpu()
@@ -68,4 +68,4 @@ namespace ig
             fence->SetEventOnCompletion(syncPoint, nullptr);
         }
     }
-}    // namespace ig
+} // namespace ig

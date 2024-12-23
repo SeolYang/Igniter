@@ -5,7 +5,7 @@
 
 namespace ig
 {
-    template<>
+    template <>
     void DefineMeta<NameComponent>()
     {
         IG_SET_META_ON_INSPECTOR_FUNC(NameComponent, NameComponent::OnInspector);
@@ -28,12 +28,12 @@ namespace ig
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         NameComponent& nameComponent = registry->get<NameComponent>(entity);
-        std::string nameInput = nameComponent.Name.ToStandard();
+        std::string    nameInput     = nameComponent.Name.ToStandard();
         if (ImGui::InputText("Name", &nameInput, ImGuiInputTextFlags_EnterReturnsTrue))
         {
-            nameComponent.Name = String{ nameInput };
+            nameComponent.Name = String{nameInput};
         }
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(NameComponent);
-}    // namespace ig
+} // namespace ig

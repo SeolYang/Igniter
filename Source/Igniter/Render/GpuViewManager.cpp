@@ -11,9 +11,7 @@ namespace ig
         cbvSrvUavHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerCbvSrvUavHeap", EDescriptorHeapType::CBV_SRV_UAV, numCbvSrvUavDescriptors).value())),
         samplerHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value())),
         rtvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerRtvHeap", EDescriptorHeapType::RTV, numRtvDescriptors).value())),
-        dsvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value()))
-    {
-    }
+        dsvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value())) { }
 
     GpuViewManager::~GpuViewManager()
     {
@@ -153,7 +151,7 @@ namespace ig
         IG_CHECK(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
 
         /* #sy_todo DescriptorHeap.h:30 해결 후 바로 Allocate 반환 하는 방식으로 변경 할 것 */
-        std::optional<GpuView> allocatedView{};
+        std::optional<GpuView> allocatedView{ };
         switch (type)
         {
         case EGpuViewType::ConstantBufferView:
@@ -176,7 +174,7 @@ namespace ig
             break;
         }
 
-        return allocatedView ? *allocatedView : GpuView{};
+        return allocatedView ? *allocatedView : GpuView{ };
     }
 
     void GpuViewManager::Deallocate(const GpuView& gpuView)
@@ -227,4 +225,4 @@ namespace ig
     {
         return *dsvHeap;
     }
-}    // namespace ig
+} // namespace ig

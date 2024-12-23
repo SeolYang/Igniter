@@ -64,4 +64,4 @@ namespace ig
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(TransformComponent);
-}    // namespace ig
+} // namespace ig

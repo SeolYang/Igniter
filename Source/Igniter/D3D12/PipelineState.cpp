@@ -4,9 +4,7 @@
 namespace ig
 {
     PipelineState::PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO)
-        : native(std::move(newPSO)), bIsGraphics(bIsGraphicsPSO)
-    {
-    }
+        : native(std::move(newPSO)), bIsGraphics(bIsGraphicsPSO) { }
 
-    PipelineState::~PipelineState() {}
-}    // namespace ig
+    PipelineState::~PipelineState() { }
+} // namespace ig

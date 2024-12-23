@@ -11,6 +11,6 @@ namespace ig
     struct FrameResource
     {
     public:
-        eastl::array<Ty, NumFramesInFlight> LocalFrameResources{};
+        eastl::array<Ty, NumFramesInFlight> LocalFrameResources{ };
     };
-}    // namespace ig
+} // namespace ig

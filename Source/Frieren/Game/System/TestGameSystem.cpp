@@ -10,10 +10,8 @@ namespace fe
         cameraPossessSystem.Update();
     }
 
-    template<>
-    void DefineMeta<TestGameSystem>()
-    {
-    }
+    template <>
+    void DefineMeta<TestGameSystem>() { }
 
     IG_DEFINE_TYPE_META_AS_GAME_SYSTEM(TestGameSystem);
-}    // namespace fe
+} // namespace fe

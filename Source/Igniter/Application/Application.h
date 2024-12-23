@@ -7,19 +7,20 @@ namespace ig
 {
     struct AppDesc
     {
-        String WindowTitle;
+        String   WindowTitle;
         uint32_t WindowWidth, WindowHeight;
     };
 
     class Engine;
+
     class Application
     {
     public:
-        Application(const Application&) = delete;
+        Application(const Application&)     = delete;
         Application(Application&&) noexcept = delete;
         virtual ~Application();
 
-        Application& operator=(const Application&) = delete;
+        Application& operator=(const Application&)     = delete;
         Application& operator=(Application&&) noexcept = delete;
 
         int Execute();
@@ -28,9 +29,9 @@ namespace ig
         virtual void Update(const float deltaTime) = 0;
         virtual void PostUpdate(const float deltaTime) = 0;
 
-        virtual void PreRender(const LocalFrameIndex localFrameIdx) = 0;
+        virtual void         PreRender(const LocalFrameIndex localFrameIdx) = 0;
         virtual GpuSyncPoint Render(const LocalFrameIndex localFrameIdx) = 0;
-        virtual void PostRender(const LocalFrameIndex localFrameIdx) = 0;
+        virtual void         PostRender(const LocalFrameIndex localFrameIdx) = 0;
 
     protected:
         Application(const AppDesc& desc);
@@ -38,4 +39,4 @@ namespace ig
     private:
         Ptr<Engine> engine;
     };
-}    // namespace ig
+} // namespace ig

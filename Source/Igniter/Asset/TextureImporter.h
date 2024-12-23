@@ -30,18 +30,18 @@ namespace ig
 
     public:
         TextureImporter();
-        TextureImporter(const TextureImporter&) = delete;
+        TextureImporter(const TextureImporter&)     = delete;
         TextureImporter(TextureImporter&&) noexcept = delete;
         ~TextureImporter();
 
-        TextureImporter& operator=(const TextureImporter&) = delete;
+        TextureImporter& operator=(const TextureImporter&)     = delete;
         TextureImporter& operator=(TextureImporter&&) noexcept = delete;
 
     private:
         Result<Texture::Desc, ETextureImportStatus> Import(const String resPathStr, TextureImportDesc config);
 
     private:
-        Mutex compressionMutex{};
-        ID3D11Device* d3d11Device{ nullptr };
+        Mutex         compressionMutex{ };
+        ID3D11Device* d3d11Device{nullptr};
     };
-}    // namespace ig
+} // namespace ig

@@ -15,18 +15,18 @@ namespace ig
     }
 
     std::vector<String> RegexMatchN(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags
-    /*= std::regex_constants::match_default*/)
+                                    /*= std::regex_constants::match_default*/)
     {
-        std::vector<String> result{};
+        std::vector<String> result{ };
         if (str.IsValid())
         {
-            std::cmatch matches{};
+            std::cmatch matches{ };
             if (std::regex_match(str.ToCString(), matches, regex, flags))
             {
                 result.reserve(matches.size());
                 for (const auto& subMatch : matches)
                 {
-                    result.emplace_back(std::string_view{ subMatch.first, static_cast<size_t>(subMatch.length()) });
+                    result.emplace_back(std::string_view{subMatch.first, static_cast<size_t>(subMatch.length())});
                 }
             }
         }
@@ -36,14 +36,14 @@ namespace ig
 
     std::vector<String> RegexSearch(const String str, const std::regex& regex)
     {
-        std::vector<String> result{};
+        std::vector<String> result{ };
         if (str.IsValid())
         {
-            const char* searchBegin{ str.ToCString() };
-            std::cmatch match{};
+            const char* searchBegin{str.ToCString()};
+            std::cmatch match{ };
             while (std::regex_search(searchBegin, match, regex))
             {
-                result.emplace_back(std::string_view{ match[0].first, static_cast<size_t>(match[0].length()) });
+                result.emplace_back(std::string_view{match[0].first, static_cast<size_t>(match[0].length())});
                 searchBegin = match.suffix().first;
             }
         }
@@ -51,14 +51,14 @@ namespace ig
         return result;
     }
 
-    String RegexReplace(const String str, const std::regex& regex, const String replacePattern,
+    String RegexReplace(const String                                str, const std::regex& regex, const String replacePattern,
                         const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
         if (!str.IsValid())
         {
-            return {};
+            return { };
         }
 
-        return String{ std::regex_replace(str.ToStandard(), regex, replacePattern.ToStandard(), flags) };
+        return String{std::regex_replace(str.ToStandard(), regex, replacePattern.ToStandard(), flags)};
     }
-}    // namespace ig
+} // namespace ig

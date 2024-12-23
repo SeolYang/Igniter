@@ -18,7 +18,7 @@ namespace ig
         {
             uploadRequests[idx].Reset();
             uploadRequests[idx].CmdCtx =
-                MakePtr<CommandContext>(gpuDevice.CreateCommandContext(std::format("Gpu Uploader CmdCtx{}", idx), EQueueType::Copy).value());
+                    MakePtr<CommandContext>(gpuDevice.CreateCommandContext(std::format("Gpu Uploader CmdCtx{}", idx), EQueueType::Copy).value());
         }
     }
 
@@ -33,8 +33,8 @@ namespace ig
 
     UploadContext GpuUploader::Reserve(const size_t requestSize)
     {
-        const static thread_local size_t tuid = ThreadUIDGenerator::GetUID();
-        size_t expected = InvalidThreadID;
+        const static thread_local size_t tuid     = ThreadUIDGenerator::GetUID();
+        size_t                           expected = InvalidThreadID;
         while (!reservedThreadID.compare_exchange_weak(expected, tuid, std::memory_order::acq_rel))
         {
             expected = InvalidThreadID;
@@ -62,10 +62,10 @@ namespace ig
         IG_CHECK(newRequest != nullptr);
         if (bufferHead + alignedRequestSize <= bufferCapacity)
         {
-            newRequest->OffsetInBytes = bufferHead;
-            newRequest->SizeInBytes = alignedRequestSize;
+            newRequest->OffsetInBytes  = bufferHead;
+            newRequest->SizeInBytes    = alignedRequestSize;
             newRequest->PaddingInBytes = 0;
-            newRequest->Sync = {};
+            newRequest->Sync           = { };
 
             bufferHead = (bufferHead + alignedRequestSize) % bufferCapacity;
             bufferUsedSizeInBytes += alignedRequestSize;
@@ -77,10 +77,10 @@ namespace ig
 
             if ((bufferUsedSizeInBytes + padding + alignedRequestSize) <= bufferCapacity)
             {
-                newRequest->OffsetInBytes = 0;
-                newRequest->SizeInBytes = alignedRequestSize;
+                newRequest->OffsetInBytes  = 0;
+                newRequest->SizeInBytes    = alignedRequestSize;
                 newRequest->PaddingInBytes = padding;
-                newRequest->Sync = {};
+                newRequest->Sync           = { };
 
                 bufferHead = alignedRequestSize;
                 bufferUsedSizeInBytes += (alignedRequestSize + padding);
@@ -94,10 +94,10 @@ namespace ig
 
                 if (numInFlightRequests > 1)
                 {
-                    newRequest->OffsetInBytes = 0;
-                    newRequest->SizeInBytes = alignedRequestSize;
+                    newRequest->OffsetInBytes  = 0;
+                    newRequest->SizeInBytes    = alignedRequestSize;
                     newRequest->PaddingInBytes = padding;
-                    newRequest->Sync = {};
+                    newRequest->Sync           = { };
 
                     bufferHead = alignedRequestSize;
                     bufferUsedSizeInBytes += (alignedRequestSize + padding);
@@ -106,16 +106,16 @@ namespace ig
                 {
                     IG_CHECK(bufferUsedSizeInBytes == 0);
                     numInFlightRequests = 0;
-                    requestHead = 0;
-                    requestTail = 0;
+                    requestHead         = 0;
+                    requestTail         = 0;
 
-                    newRequest = AllocateRequestUnsafe();
-                    newRequest->OffsetInBytes = 0;
-                    newRequest->SizeInBytes = alignedRequestSize;
+                    newRequest                 = AllocateRequestUnsafe();
+                    newRequest->OffsetInBytes  = 0;
+                    newRequest->SizeInBytes    = alignedRequestSize;
                     newRequest->PaddingInBytes = 0;
-                    newRequest->Sync = {};
+                    newRequest->Sync           = { };
 
-                    bufferHead = alignedRequestSize;
+                    bufferHead            = alignedRequestSize;
                     bufferUsedSizeInBytes = alignedRequestSize;
                 }
                 else
@@ -133,7 +133,7 @@ namespace ig
         IG_CHECK(bufferCpuAddr != nullptr);
 
         newRequest->CmdCtx->Begin();
-        return UploadContext{ buffer.get(), bufferCpuAddr, newRequest };
+        return UploadContext{buffer.get(), bufferCpuAddr, newRequest};
     }
 
     std::optional<GpuSyncPoint> GpuUploader::Submit(UploadContext& context)
@@ -142,19 +142,19 @@ namespace ig
         if (reservedThreadID.load(std::memory_order::acquire) != tuid)
         {
             IG_CHECK_NO_ENTRY();
-            return {};
+            return { };
         }
 
         if (!context.IsValid())
         {
             IG_CHECK_NO_ENTRY();
-            return {};
+            return { };
         }
 
         details::UploadRequest& request = context.GetRequest();
         request.CmdCtx->End();
 
-        CommandContext* cmdCtxPtrs[] = { request.CmdCtx.get() };
+        CommandContext* cmdCtxPtrs[] = {request.CmdCtx.get()};
         copyQueue->ExecuteContexts(cmdCtxPtrs);
         request.Sync = copyQueue->MakeSyncPointWithSignal();
         IG_CHECK(request.Sync.IsValid());
@@ -172,7 +172,7 @@ namespace ig
         }
 
         details::UploadRequest* newRequest = &uploadRequests[requestHead];
-        requestHead = (requestHead + 1) % RequestCapacity;
+        requestHead                        = (requestHead + 1) % RequestCapacity;
         ++numInFlightRequests;
         return newRequest;
     }
@@ -209,17 +209,17 @@ namespace ig
             }
 
             static const auto UploadBufferName = String("Async Upload Buffer");
-            GpuBufferDesc bufferDesc{};
+            GpuBufferDesc     bufferDesc{ };
             bufferDesc.AsUploadBuffer(static_cast<uint32_t>(alignedNewSize));
             bufferDesc.DebugName = UploadBufferName;
-            buffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(bufferDesc).value());
+            buffer               = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(bufferDesc).value());
 
-            bufferCapacity = alignedNewSize;
-            bufferHead = 0;
+            bufferCapacity        = alignedNewSize;
+            bufferHead            = 0;
             bufferUsedSizeInBytes = 0;
-            bufferCpuAddr = buffer->Map(0);
+            bufferCpuAddr         = buffer->Map(0);
 
-            requestHead = 0;
+            requestHead         = 0;
             numInFlightRequests = 0;
         }
         else
@@ -286,12 +286,12 @@ namespace ig
         /* Write subresources to upload buffer */
         for (uint32_t idx = 0; idx < subresources.size(); ++idx)
         {
-            const D3D12_SUBRESOURCE_DATA& srcSubresource = subresources[idx];
-            const D3D12_SUBRESOURCE_FOOTPRINT& dstFootprint = dstCopyableFootprints.Layouts[idx].Footprint;
-            const size_t rowSizesInBytes = dstCopyableFootprints.RowSizesInBytes[idx];
+            const D3D12_SUBRESOURCE_DATA&      srcSubresource  = subresources[idx];
+            const D3D12_SUBRESOURCE_FOOTPRINT& dstFootprint    = dstCopyableFootprints.Layouts[idx].Footprint;
+            const size_t                       rowSizesInBytes = dstCopyableFootprints.RowSizesInBytes[idx];
             for (uint32_t z = 0; z < dstFootprint.Depth; ++z)
             {
-                const size_t dstSlicePitch = static_cast<size_t>(dstFootprint.RowPitch) * dstCopyableFootprints.NumRows[idx];
+                const size_t dstSlicePitch  = static_cast<size_t>(dstFootprint.RowPitch) * dstCopyableFootprints.NumRows[idx];
                 const size_t dstSliceOffset = dstSlicePitch * z;
                 const size_t srcSliceOffset = srcSubresource.SlicePitch * z;
                 for (uint32_t y = 0; y < dstCopyableFootprints.NumRows[idx]; ++y)
@@ -308,4 +308,4 @@ namespace ig
             CopyTextureRegion(0, dst, idx, dstCopyableFootprints.Layouts[idx]);
         }
     }
-}    // namespace ig
+} // namespace ig

@@ -14,7 +14,7 @@ namespace fe
     CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
         : window(ig::Engine::GetWindow()), fpsCamControllSystem(fpsCamControllSystem)
     {
-        const auto& inputManager = ig::Engine::GetInputManager();
+        const auto& inputManager    = ig::Engine::GetInputManager();
         togglePossessToCameraHandle = inputManager.QueryAction(ig::String("TogglePossessCamera"));
         Configure();
     }
@@ -49,4 +49,4 @@ namespace fe
             imguiContext.SetInputEnabled(true);
         }
     }
-}    // namespace fe
+} // namespace fe

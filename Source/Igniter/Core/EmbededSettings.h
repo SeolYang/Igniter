@@ -4,4 +4,4 @@
 namespace ig::settings
 {
     inline constexpr std::string_view GameName = "Untitled";
-}    // namespace ig::settings
+} // namespace ig::settings

@@ -11,29 +11,29 @@ namespace ig
         renderContext(renderContext),
         debugName(debugName),
         elementSize(elementSize),
-        bufferSize(initialNumElements* elementSize),
+        bufferSize(initialNumElements * elementSize),
         bIsShaderReadWritable(bIsShaderReadWritable),
         fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
     {
         IG_CHECK(initialNumElements > 0);
         IG_CHECK(elementSize > 0);
-        GpuBufferDesc bufferDesc{};
+        GpuBufferDesc bufferDesc{ };
         bufferDesc.DebugName = debugName;
         bufferDesc.AsStructuredBuffer(elementSize, initialNumElements, bIsShaderReadWritable);
 
         gpuBuffer = renderContext.CreateBuffer(bufferDesc);
-        srv = renderContext.CreateShaderResourceView(gpuBuffer);
+        srv       = renderContext.CreateShaderResourceView(gpuBuffer);
 
         if (bIsShaderReadWritable)
         {
             uav = renderContext.CreateUnorderedAccessView(gpuBuffer);
         }
 
-        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{ .Size = bufferSize };
-        D3D12MA::VirtualBlock* newVirtualBlock{ nullptr };
-        [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
+        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSize};
+        D3D12MA::VirtualBlock*            newVirtualBlock{nullptr};
+        [[maybe_unused]] const HRESULT    hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
         // 여기서 Virtual Block 할당 실패를 핸들 해야하나? 로그에 남겨야 하나?
-        blocks.emplace_back(Block{ .VirtualBlock = newVirtualBlock, .Offset = 0 });
+        blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = 0});
     }
 
     GpuStorage::~GpuStorage()
@@ -73,7 +73,7 @@ namespace ig
         }
 
         const Size allocSize = numElements * elementSize;
-        Allocation newAllocation{};
+        Allocation newAllocation{ };
         for (Index blockIdx = 0; blockIdx < blocks.size(); ++blockIdx)
         {
             if (AllocateWithBlock(allocSize, blockIdx, newAllocation))
@@ -113,9 +113,9 @@ namespace ig
     bool GpuStorage::AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation)
     {
         IG_CHECK(blockIdx < blocks.size());
-        const D3D12MA::VIRTUAL_ALLOCATION_DESC allocDesc{ .Size = allocSize };
-        D3D12MA::VirtualAllocation virtualAllocation{};
-        Size allocOffset = 0;
+        const D3D12MA::VIRTUAL_ALLOCATION_DESC allocDesc{.Size = allocSize};
+        D3D12MA::VirtualAllocation             virtualAllocation{ };
+        Size                                   allocOffset = 0;
 
         Block& block = blocks[blockIdx];
         IG_CHECK(block.VirtualBlock != nullptr);
@@ -150,7 +150,7 @@ namespace ig
         IG_CHECK(newBufferSize > 0);
         IG_CHECK((newBufferSize - bufferSize) > 0);
 
-        GpuBufferDesc newGpuBufferDesc{};
+        GpuBufferDesc newGpuBufferDesc{ };
         newGpuBufferDesc.DebugName = debugName;
         newGpuBufferDesc.AsStructuredBuffer(elementSize, static_cast<U32>(newBufferSize / elementSize), bIsShaderReadWritable);
         RenderResource<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(newGpuBufferDesc);
@@ -159,21 +159,21 @@ namespace ig
             return false;
         }
 
-        GpuBuffer* gpuBufferPtr = renderContext.Lookup(gpuBuffer);
+        GpuBuffer* gpuBufferPtr    = renderContext.Lookup(gpuBuffer);
         GpuBuffer* newGpuBufferPtr = renderContext.Lookup(newGpuBuffer);
         IG_CHECK(gpuBufferPtr != nullptr);
         IG_CHECK(newGpuBufferPtr != nullptr);
 
-        CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
-        CommandContextPool& contextPool = renderContext.GetAsyncCopyCommandContextPool();
-        auto copyCmdCtx = contextPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
+        CommandQueue&       asyncCopyQueue = renderContext.GetAsyncCopyQueue();
+        CommandContextPool& contextPool    = renderContext.GetAsyncCopyCommandContextPool();
+        auto                copyCmdCtx     = contextPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
         copyCmdCtx->Begin();
         {
             copyCmdCtx->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
         }
         copyCmdCtx->End();
 
-        GpuSyncPoint newSyncPoint = fence.MakeSyncPoint();
+        GpuSyncPoint newSyncPoint  = fence.MakeSyncPoint();
         GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
         if (prevSyncPoint)
         {
@@ -183,7 +183,7 @@ namespace ig
             asyncCopyQueue.SyncWith(prevSyncPoint);
         }
 
-        ig::CommandContext* copyCmdCtxs[] = { (ig::CommandContext*)copyCmdCtx };
+        ig::CommandContext* copyCmdCtxs[] = {(ig::CommandContext*)copyCmdCtx};
         asyncCopyQueue.ExecuteContexts(copyCmdCtxs);
         asyncCopyQueue.Signal(newSyncPoint);
 
@@ -201,7 +201,7 @@ namespace ig
         }
 
         gpuBuffer = newGpuBuffer;
-        srv = renderContext.CreateShaderResourceView(gpuBuffer);
+        srv       = renderContext.CreateShaderResourceView(gpuBuffer);
         if (bIsShaderReadWritable)
         {
             uav = renderContext.CreateUnorderedAccessView(gpuBuffer);

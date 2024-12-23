@@ -25,7 +25,7 @@ namespace ig
 
     const Json& StaticMeshImportDesc::Deserialize(const Json& archive)
     {
-        *this = {};
+        *this = { };
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bMakeLeftHanded, bMakeLeftHanded);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipUVs, bFlipUVs);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipWindingOrder, bFlipWindingOrder);
@@ -51,7 +51,7 @@ namespace ig
 
     const Json& StaticMeshLoadDesc::Deserialize(const Json& archive)
     {
-        *this = {};
+        *this = { };
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices, NumVertices);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices, NumIndices);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes, CompressedVerticesSizeInBytes);
@@ -60,17 +60,15 @@ namespace ig
         return archive;
     }
 
-    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const RenderResource<GpuBuffer> vertexBuffer,
-        const RenderResource<GpuView> vertexBufferSrv, const RenderResource<GpuBuffer> indexBuffer, const ManagedAsset<Material> material)
+    StaticMesh::StaticMesh(RenderContext&                renderContext, AssetManager&                     assetManager, const Desc&                 snapshot, const RenderResource<GpuBuffer> vertexBuffer,
+                           const RenderResource<GpuView> vertexBufferSrv, const RenderResource<GpuBuffer> indexBuffer, const ManagedAsset<Material> material)
         : renderContext(&renderContext)
-        , assetManager(&assetManager)
-        , snapshot(snapshot)
-        , vertexBuffer(vertexBuffer)
-        , vertexBufferSrv(vertexBufferSrv)
-        , indexBuffer(indexBuffer)
-        , material(material)
-    {
-    }
+          , assetManager(&assetManager)
+          , snapshot(snapshot)
+          , vertexBuffer(vertexBuffer)
+          , vertexBufferSrv(vertexBufferSrv)
+          , indexBuffer(indexBuffer)
+          , material(material) { }
 
     StaticMesh::~StaticMesh()
     {
@@ -86,4 +84,4 @@ namespace ig
             renderContext->DestroyGpuView(vertexBufferSrv);
         }
     }
-}    // namespace ig
+} // namespace ig

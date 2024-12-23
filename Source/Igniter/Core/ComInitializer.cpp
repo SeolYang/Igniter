@@ -6,7 +6,7 @@ namespace ig
     class CoInitializer final
     {
     public:
-        CoInitializer() : result(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)) {}
+        CoInitializer() : result(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)) { }
 
         ~CoInitializer() { CoUninitialize(); }
 
@@ -25,4 +25,4 @@ namespace ig
         static thread_local CoInitializer initializer;
         return initializer.GetResult();
     }
-}    // namespace ig
+} // namespace ig

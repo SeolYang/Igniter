@@ -23,16 +23,16 @@ namespace ig
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
-            ImGuiStyle& style = ImGui::GetStyle();
-            style.WindowRounding = 0.0f;
+            ImGuiStyle& style                 = ImGui::GetStyle();
+            style.WindowRounding              = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
         ImGui_ImplWin32_Init(window.GetNative());
 
-        fontSrv = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
-        ig::GpuView* fontSrvPtr = renderContext.Lookup(fontSrv);
-        ig::GpuDevice& gpuDevice = renderContext.GetGpuDevice();
+        fontSrv                   = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
+        ig::GpuView*   fontSrvPtr = renderContext.Lookup(fontSrv);
+        ig::GpuDevice& gpuDevice  = renderContext.GetGpuDevice();
         ImGui_ImplDX12_Init(&gpuDevice.GetNative(), ig::NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM,
                             &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), fontSrvPtr->CPUHandle, fontSrvPtr->GPUHandle);
     }
@@ -57,4 +57,4 @@ namespace ig
 
         return false;
     }
-}    // namespace ig
+} // namespace ig

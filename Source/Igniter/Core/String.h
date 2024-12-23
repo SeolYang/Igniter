@@ -45,19 +45,19 @@ namespace ig
     class String final
     {
     public:
-        String() noexcept = default;
+        String() noexcept              = default;
         String(const String&) noexcept = default;
-        String(String&&) noexcept = default;
+        String(String&&) noexcept      = default;
         String(const std::string_view strView);
         String(const std::wstring_view strView);
         ~String() noexcept = default;
 
         String& operator=(const String&) noexcept = default;
-        String& operator=(String&&) noexcept = default;
+        String& operator=(String&&) noexcept      = default;
         String& operator=(const std::string_view rhs);
         String& operator=(const std::wstring_view rhs);
 
-        [[nodiscard]] operator const std::string& () const { return ToStandard(); }
+        [[nodiscard]] operator const std::string&() const { return ToStandard(); }
         [[nodiscard]] operator std::string_view() const { return ToStringView(); }
         [[nodiscard]] operator std::wstring() const { return ToWideString(); }
 
@@ -68,16 +68,16 @@ namespace ig
         void SetString(const std::string_view strView);
 
         [[nodiscard]] const std::string& ToStandard() const;
-        [[nodiscard]] std::string_view ToStringView() const;
-        [[nodiscard]] const char* ToCString() const;
-        [[nodiscard]] std::wstring ToWideString() const;
-        [[nodiscard]] Path ToPath() const;
+        [[nodiscard]] std::string_view   ToStringView() const;
+        [[nodiscard]] const char*        ToCString() const;
+        [[nodiscard]] std::wstring       ToWideString() const;
+        [[nodiscard]] Path               ToPath() const;
 
         [[nodiscard]] static String FromPath(const Path& path);
 
         [[nodiscard]] uint64_t GetHash() const noexcept { return hashOfString; }
-        [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
-        [[nodiscard]] bool IsEmpty() const noexcept { return hashOfString == 0; }
+        [[nodiscard]] bool     IsValid() const noexcept { return hashOfString != InvalidHashVal; }
+        [[nodiscard]] bool     IsEmpty() const noexcept { return hashOfString == 0; }
 
         [[nodiscard]] std::vector<String> Split(const String delimiter) const;
 
@@ -90,26 +90,26 @@ namespace ig
     private:
         using HashStringMap = StableUnorderedMap<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
-        [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
+        [[nodiscard]] static SharedMutex&   GetHashStringMapMutex();
 
     private:
-        uint64_t hashOfString{ 0 };
+        uint64_t hashOfString{0};
     };
 
     namespace literals
     {
         inline String operator""_fs(const char* str, const size_t count)
         {
-            return std::string_view{ str, count };
+            return std::string_view{str, count};
         }
 
         inline String operator""_fs(const wchar_t* wstr, const size_t count)
         {
-            return std::wstring_view{ wstr, count };
+            return std::wstring_view{wstr, count};
         }
-    }    // namespace literals
+    } // namespace literals
     using namespace literals;
-}    // namespace ig
+} // namespace ig
 
 template <>
 struct std::hash<ig::String>

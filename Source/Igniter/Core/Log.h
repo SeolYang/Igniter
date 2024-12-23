@@ -18,17 +18,17 @@ namespace ig
     class Logger final
     {
     public:
-        Logger(const Logger&) = delete;
+        Logger(const Logger&)     = delete;
         Logger(Logger&&) noexcept = delete;
         ~Logger();
 
-        Logger& operator=(const Logger&) = delete;
+        Logger& operator=(const Logger&)     = delete;
         Logger& operator=(Logger&&) noexcept = delete;
 
         template <typename Category, ELogVerbosity Verbosity, typename... Args>
         void Log(const std::string_view logMessage, Args&&... args)
         {
-            spdlog::logger& logger = QueryCategory<Category>();
+            spdlog::logger&   logger           = QueryCategory<Category>();
             const std::string formattedMessage = std::vformat(logMessage, std::make_format_args(args...));
             switch (Verbosity)
             {
@@ -59,7 +59,7 @@ namespace ig
 
         static Logger& GetInstance()
         {
-            static Logger instance{};
+            static Logger instance{ };
             return instance;
         }
 
@@ -69,11 +69,11 @@ namespace ig
         template <typename C>
         spdlog::logger& QueryCategory()
         {
-            UniqueLock lock{ categoryMapMutex };
-            auto itr = categoryMap.find(TypeHash64<C>);
+            UniqueLock lock{categoryMapMutex};
+            auto       itr = categoryMap.find(TypeHash64<C>);
             if (itr == categoryMap.end())
             {
-                spdlog::logger* newLogger = new spdlog::logger(C::CategoryName.data(), { consoleSink, fileSink });
+                spdlog::logger* newLogger = new spdlog::logger(C::CategoryName.data(), {consoleSink, fileSink});
                 newLogger->set_level(spdlog::level::trace);
                 itr = categoryMap.insert(itr, std::make_pair(TypeHash64<C>, newLogger));
             }
@@ -83,14 +83,14 @@ namespace ig
 
     private:
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
-        std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
-        Mutex categoryMapMutex;
-        UnorderedMap<uint64_t, spdlog::logger*> categoryMap;
+        std::shared_ptr<spdlog::sinks::basic_file_sink_mt>   fileSink;
+        Mutex                                                categoryMapMutex;
+        UnorderedMap<uint64_t, spdlog::logger*>              categoryMap;
 
     private:
         static constexpr std::string_view FileName = "Log";
     };
-}    // namespace ig
+} // namespace ig
 
 /* #sy_note 카테고리의 고유성을 보장하기 위해, 네임스페이스의 밖에 정의되어야 함. */
 #define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)                                \

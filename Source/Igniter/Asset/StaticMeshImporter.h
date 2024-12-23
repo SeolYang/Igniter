@@ -22,11 +22,11 @@ namespace ig
 
     public:
         StaticMeshImporter(AssetManager& assetManager);
-        StaticMeshImporter(const StaticMeshImporter&) = delete;
+        StaticMeshImporter(const StaticMeshImporter&)     = delete;
         StaticMeshImporter(StaticMeshImporter&&) noexcept = delete;
-        ~StaticMeshImporter() = default;
+        ~StaticMeshImporter()                             = default;
 
-        StaticMeshImporter& operator=(const StaticMeshImporter&) = delete;
+        StaticMeshImporter& operator=(const StaticMeshImporter&)     = delete;
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
     private:
@@ -35,4 +35,4 @@ namespace ig
     private:
         AssetManager& assetManager;
     };
-}    // namespace ig
+} // namespace ig

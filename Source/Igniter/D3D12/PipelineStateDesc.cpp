@@ -70,4 +70,4 @@ namespace ig
         IG_CHECK(nativeBlob.GetBufferSize() > 0);
         this->CS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
     }
-}    // namespace ig
+} // namespace ig

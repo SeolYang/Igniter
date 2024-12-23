@@ -15,15 +15,13 @@ namespace ig
 
     const Json& MaterialLoadDesc::Deserialize(const Json& archive)
     {
-        *this = {};
+        *this = { };
         IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseTexGuid, Guid{ DefaultTextureGuid });
         return archive;
     }
 
     Material::Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse)
-        : assetManager(&assetManager), snapshot(snapshot), diffuse(diffuse)
-    {
-    }
+        : assetManager(&assetManager), snapshot(snapshot), diffuse(diffuse) { }
 
     Material::~Material()
     {
@@ -32,4 +30,4 @@ namespace ig
             assetManager->Unload(diffuse);
         }
     }
-}    // namespace ig
+} // namespace ig

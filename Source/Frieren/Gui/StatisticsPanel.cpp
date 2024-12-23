@@ -21,7 +21,7 @@ namespace fe
         if (ImGui::RadioButton("##EnablePollingStatistics", bEnablePolling))
         {
             bEnablePolling = !bEnablePolling;
-            pollingStep = 0;
+            pollingStep    = 0;
         }
 
         ImGui::SameLine();
@@ -47,4 +47,4 @@ namespace fe
         }
         ++pollingStep;
     }
-}    // namespace fe
+} // namespace fe

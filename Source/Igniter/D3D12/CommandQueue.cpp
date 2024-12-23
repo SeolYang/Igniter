@@ -10,24 +10,20 @@ namespace ig
     CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, GpuFence internalFence) :
         native(std::move(newNativeQueue)),
         type(specifiedType),
-        internalFence(std::move(internalFence))
-    {
-    }
+        internalFence(std::move(internalFence)) { }
 
     CommandQueue::CommandQueue(CommandQueue&& other) noexcept :
         native(std::move(other.native)),
         type(other.type),
-        internalFence(std::move(other.internalFence))
-    {
-    }
+        internalFence(std::move(other.internalFence)) { }
 
-    CommandQueue::~CommandQueue() {}
+    CommandQueue::~CommandQueue() { }
 
     void CommandQueue::ExecuteContexts(const std::span<CommandContext*> cmdCtxs)
     {
         IG_CHECK(IsValid());
-        auto toNative = views::all(cmdCtxs) | views::filter([](CommandContext* cmdCtx) { return cmdCtx != nullptr; }) | views::transform([](CommandContext* cmdCtx) { return &cmdCtx->GetNative(); });
-        eastl::vector<CommandContext::NativeType*> natives = ToVector(toNative);
+        auto                                       toNative = views::all(cmdCtxs) | views::filter([](CommandContext* cmdCtx) { return cmdCtx != nullptr; }) | views::transform([](CommandContext* cmdCtx) { return &cmdCtx->GetNative(); });
+        eastl::vector<CommandContext::NativeType*> natives  = ToVector(toNative);
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
@@ -49,8 +45,8 @@ namespace ig
     {
         IG_CHECK(native);
         IG_CHECK(fence);
-        GpuSyncPoint syncPoint{ fence.MakeSyncPoint() };
-        if(!syncPoint.IsValid())
+        GpuSyncPoint syncPoint{fence.MakeSyncPoint()};
+        if (!syncPoint.IsValid())
         {
             return GpuSyncPoint::Invalid();
         }
@@ -74,4 +70,4 @@ namespace ig
         ID3D12Fence& nativeFence = syncPoint.GetFence();
         IG_VERIFY_SUCCEEDED(native->Wait(&nativeFence, syncPoint.GetSyncPoint()));
     }
-}    // namespace ig
+} // namespace ig

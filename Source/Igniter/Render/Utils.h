@@ -8,4 +8,4 @@ namespace ig
     {
         return rowMajorRowVectorMat.Transpose();
     }
-}    // namespace ig
+} // namespace ig

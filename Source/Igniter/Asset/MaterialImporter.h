@@ -13,17 +13,18 @@ namespace ig
     };
 
     class AssetManager;
+
     class MaterialImporter final
     {
         friend class AssetManager;
 
     public:
         MaterialImporter(AssetManager& assetManager);
-        MaterialImporter(const MaterialImporter&) = delete;
+        MaterialImporter(const MaterialImporter&)     = delete;
         MaterialImporter(MaterialImporter&&) noexcept = delete;
-        ~MaterialImporter() = default;
+        ~MaterialImporter()                           = default;
 
-        MaterialImporter& operator=(const MaterialImporter&) = delete;
+        MaterialImporter& operator=(const MaterialImporter&)     = delete;
         MaterialImporter& operator=(MaterialImporter&&) noexcept = delete;
 
     private:
@@ -32,4 +33,4 @@ namespace ig
     private:
         AssetManager& assetManager;
     };
-}    // namespace ig
+} // namespace ig

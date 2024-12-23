@@ -16,7 +16,7 @@ namespace ig
     {
         if (exp == 0)
         {
-            return T{ 1 };
+            return T{1};
         }
 
         T result = base;
@@ -35,7 +35,7 @@ namespace ig
         return std::uniform_int_distribution<T>{min, max}(generator);
     }
 
-    inline constexpr float Pi32 = 3.1415926535897932384626433832795028841971693993751058209749445923078164062f;
+    inline constexpr float Pi32        = 3.1415926535897932384626433832795028841971693993751058209749445923078164062f;
     inline constexpr float InversePi32 = 1.f / Pi32;
 
     inline constexpr float Rad2Deg(const float radians)
@@ -67,4 +67,4 @@ namespace ig
         const float t = std::clamp<float>((x - min) / (max - min), 0.0f, 1.0f);
         return t * t * t * (t * (6.f * t - 15.f) + 10.f);
     }
-}    // namespace ig
+} // namespace ig

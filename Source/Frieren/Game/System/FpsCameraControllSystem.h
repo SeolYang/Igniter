@@ -6,7 +6,7 @@ namespace ig
 {
     class Timer;
     class World;
-}    // namespace ig
+} // namespace ig
 
 namespace fe
 {
@@ -33,4 +33,4 @@ namespace fe
 
         ig::Handle<ig::Action, ig::InputManager> sprintActionHandle;
     };
-}    // namespace fe
+} // namespace fe

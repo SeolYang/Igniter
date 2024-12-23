@@ -51,4 +51,4 @@ namespace fe
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(FpsCameraController);
-}    // namespace fe
+} // namespace fe

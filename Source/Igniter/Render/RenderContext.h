@@ -19,6 +19,12 @@
 
 namespace ig
 {
+    template <typename Ty>
+    struct StorageSpace
+    {
+        GpuStorage::Allocation Allocation;
+    };
+
     class Window;
     class FrameManager;
     class GpuBuffer;
@@ -26,6 +32,8 @@ namespace ig
     class GpuTexture;
     class GpuTextureDesc;
     class PipelineState;
+    struct VertexSM;
+
     class RenderContext final
     {
     private:
@@ -35,9 +43,9 @@ namespace ig
         template <typename Ty>
         struct ResourceManagePackage
         {
-            mutable SharedMutex Mut;
-            HandleStorage<Ty, RenderContext> Registry;
-            eastl::array<Mutex, NumFramesInFlight> PendingListMut;
+            mutable SharedMutex                                                Mut;
+            HandleStorage<Ty, RenderContext>                                   Registry;
+            eastl::array<Mutex, NumFramesInFlight>                             PendingListMut;
             eastl::array<eastl::vector<RenderResource<Ty>>, NumFramesInFlight> PendingDestroyList;
         };
 
@@ -45,56 +53,59 @@ namespace ig
         RenderContext(const Window& window);
         ~RenderContext();
 
-        RenderContext(const RenderContext&) = delete;
+        RenderContext(const RenderContext&)     = delete;
         RenderContext(RenderContext&&) noexcept = delete;
 
-        RenderContext& operator=(const RenderContext&) = delete;
+        RenderContext& operator=(const RenderContext&)     = delete;
         RenderContext& operator=(RenderContext&&) noexcept = delete;
 
-        GpuDevice& GetGpuDevice() { return gpuDevice; }
-        CommandQueue& GetMainGfxQueue() { return mainGfxQueue; }
-        CommandQueue& GetAsyncComputeQueue() { return asyncComputeQueue; }
-        CommandQueue& GetAsyncCopyQueue() { return asyncComputeQueue; }
+        GpuDevice&          GetGpuDevice() { return gpuDevice; }
+        CommandQueue&       GetMainGfxQueue() { return mainGfxQueue; }
+        CommandQueue&       GetAsyncComputeQueue() { return asyncComputeQueue; }
+        CommandQueue&       GetAsyncCopyQueue() { return asyncComputeQueue; }
         CommandContextPool& GetMainGfxCommandContextPool() { return mainGfxCmdCtxPool; }
         CommandContextPool& GetAsyncComputeCommandContextPool() { return asyncComputeCmdCtxPool; }
         CommandContextPool& GetAsyncCopyCommandContextPool() { return asyncCopyCmdCtxPool; }
-        GpuUploader& GetGpuUploader() { return gpuUploader; }
-        Swapchain& GetSwapchain() { return *swapchain; }
-        auto& GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
-        auto GetBindlessDescriptorHeaps() { return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), & gpuViewManager.GetSamplerDescHeap()}; }
+        GpuUploader&        GetGpuUploader() { return gpuUploader; }
+        Swapchain&          GetSwapchain() { return *swapchain; }
+        auto&               GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
+        auto                GetBindlessDescriptorHeaps() { return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()}; }
 
-        RenderResource<GpuBuffer> CreateBuffer(const GpuBufferDesc& desc);
-        RenderResource<GpuTexture> CreateTexture(const GpuTextureDesc& desc);
-        RenderResource<GpuTexture> CreateTexture(GpuTexture&& gpuTexture);
+        RenderResource<GpuBuffer>     CreateBuffer(const GpuBufferDesc& desc);
+        RenderResource<GpuTexture>    CreateTexture(const GpuTextureDesc& desc);
+        RenderResource<GpuTexture>    CreateTexture(GpuTexture&& gpuTexture);
         RenderResource<PipelineState> CreatePipelineState(const GraphicsPipelineStateDesc& desc);
         RenderResource<PipelineState> CreatePipelineState(const ComputePipelineStateDesc& desc);
-        RenderResource<GpuView> CreateConstantBufferView(const RenderResource<GpuBuffer> buffer);
-        RenderResource<GpuView> CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
-        RenderResource<GpuView> CreateShaderResourceView(const RenderResource<GpuBuffer> buffer);
-        RenderResource<GpuView> CreateUnorderedAccessView(const RenderResource<GpuBuffer> buffer);
-        RenderResource<GpuView> CreateShaderResourceView(RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView> CreateUnorderedAccessView(RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView> CreateRenderTargetView(RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView> CreateDepthStencilView(RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView> CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
-        RenderResource<GpuView> CreateGpuView(const EGpuViewType type);
+        RenderResource<GpuView>       CreateConstantBufferView(const RenderResource<GpuBuffer> buffer);
+        RenderResource<GpuView>       CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
+        RenderResource<GpuView>       CreateShaderResourceView(const RenderResource<GpuBuffer> buffer);
+        RenderResource<GpuView>       CreateUnorderedAccessView(const RenderResource<GpuBuffer> buffer);
+        RenderResource<GpuView>       CreateShaderResourceView(RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView>       CreateUnorderedAccessView(RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView>       CreateRenderTargetView(RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView>       CreateDepthStencilView(RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderResource<GpuView>       CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
+        RenderResource<GpuView>       CreateGpuView(const EGpuViewType type);
 
-        RenderResource<GpuStorage::Allocation> AllocateStaticMeshVertices(const Size numVertices);
-        RenderResource<GpuStorage::Allocation> AllocateMeshIndices(const Size numIndices);
+        RenderResource<StorageSpace<VertexSM>> AllocateStaticMeshSpace(const U32 numVertices);
+        RenderResource<StorageSpace<U32>>      AllocateMeshIndexSpace(const U32 numIndices);
 
         void DestroyBuffer(const RenderResource<GpuBuffer> buffer);
         void DestroyTexture(const RenderResource<GpuTexture> texture);
         void DestroyPipelineState(const RenderResource<PipelineState> state);
         void DestroyGpuView(const RenderResource<GpuView> view);
 
-        GpuBuffer* Lookup(const RenderResource<GpuBuffer> handle);
-        const GpuBuffer* Lookup(const RenderResource<GpuBuffer> handle) const;
-        GpuTexture* Lookup(const RenderResource<GpuTexture> handle);
-        const GpuTexture* Lookup(const RenderResource<GpuTexture> handle) const;
-        PipelineState* Lookup(const RenderResource<PipelineState> handle);
+        GpuBuffer*           Lookup(const RenderResource<GpuBuffer> handle);
+        const GpuBuffer*     Lookup(const RenderResource<GpuBuffer> handle) const;
+        GpuTexture*          Lookup(const RenderResource<GpuTexture> handle);
+        const GpuTexture*    Lookup(const RenderResource<GpuTexture> handle) const;
+        PipelineState*       Lookup(const RenderResource<PipelineState> handle);
         const PipelineState* Lookup(const RenderResource<PipelineState> handle) const;
-        GpuView* Lookup(const RenderResource<GpuView> handle);
-        const GpuView* Lookup(const RenderResource<GpuView> handle) const;
+        GpuView*             Lookup(const RenderResource<GpuView> handle);
+        const GpuView*       Lookup(const RenderResource<GpuView> handle) const;
+
+        const StorageSpace<VertexSM>* Lookup(const RenderResource<StorageSpace<VertexSM>> handle) const;
+        const StorageSpace<U32>*      Lookup(const RenderResource<StorageSpace<U32>> handle) const;
 
         void FlushQueues();
         void PreRender(const LocalFrameIndex localFrameIdx);
@@ -103,29 +114,28 @@ namespace ig
     private:
         GpuDevice gpuDevice;
 
-        LocalFrameIndex lastLocalFrameIdx{};
+        LocalFrameIndex lastLocalFrameIdx{ };
 
-        CommandQueue mainGfxQueue;
+        CommandQueue       mainGfxQueue;
         CommandContextPool mainGfxCmdCtxPool;
-        CommandQueue asyncComputeQueue;
+        CommandQueue       asyncComputeQueue;
         CommandContextPool asyncComputeCmdCtxPool;
-        CommandQueue asyncCopyQueue;
+        CommandQueue       asyncCopyQueue;
         CommandContextPool asyncCopyCmdCtxPool;
 
-        ResourceManagePackage<GpuBuffer> bufferPackage;
-        ResourceManagePackage<GpuTexture> texturePackage;
+        ResourceManagePackage<GpuBuffer>     bufferPackage;
+        ResourceManagePackage<GpuTexture>    texturePackage;
         ResourceManagePackage<PipelineState> pipelineStatePackage;
-        ResourceManagePackage<GpuView> gpuViewPackage;
+        ResourceManagePackage<GpuView>       gpuViewPackage;
 
         GpuViewManager gpuViewManager;
-        GpuUploader gpuUploader;
+        GpuUploader    gpuUploader;
 
         Ptr<Swapchain> swapchain;
 
-        GpuStorage staticMeshVertexStorage;
+        GpuStorage                                    staticMeshVertexStorage;
         ResourceManagePackage<GpuStorage::Allocation> staticMeshVertexAllocationPackage;
-        GpuStorage meshIndexStorage;
+        GpuStorage                                    meshIndexStorage;
         ResourceManagePackage<GpuStorage::Allocation> meshIndexAllocationPackage;
-
     };
-}    // namespace ig
+} // namespace ig

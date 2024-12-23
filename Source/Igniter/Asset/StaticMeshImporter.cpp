@@ -12,7 +12,7 @@ namespace ig
 {
     constexpr inline size_t NumIndicesPerFace = 3;
 
-    StaticMeshImporter::StaticMeshImporter(AssetManager& assetManager) : assetManager(assetManager) {}
+    StaticMeshImporter::StaticMeshImporter(AssetManager& assetManager) : assetManager(assetManager) { }
 
     static bool CheckAssimpSceneLoadingSucceed(const String resPathStr, const Assimp::Importer& importer, const aiScene* scene)
     {
@@ -26,12 +26,12 @@ namespace ig
     }
 
     static void ProcessStaticMeshData(
-        const aiMesh& mesh, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices, const uint32_t vertexIdxOffset = 0)
+        const aiMesh& mesh, std::vector<VertexSM>& vertices, std::vector<uint32_t>& indices, const uint32_t vertexIdxOffset = 0)
     {
         for (size_t vertexIdx = 0; vertexIdx < mesh.mNumVertices; ++vertexIdx)
         {
             const aiVector3D& position = mesh.mVertices[vertexIdx];
-            const aiVector3D& normal = mesh.mNormals[vertexIdx];
+            const aiVector3D& normal   = mesh.mNormals[vertexIdx];
             const aiVector3D& uvCoords = mesh.mTextureCoords[0][vertexIdx];
 
             vertices.emplace_back(
@@ -48,8 +48,8 @@ namespace ig
         }
     }
 
-    static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr, const std::string_view meshName,
-        const Guid materialGuid, const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices)
+    static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr, const std::string_view         meshName,
+                                                                                 const Guid   materialGuid, const std::vector<VertexSM>& vertices, const std::vector<uint32_t>& indices)
     {
         IG_CHECK(!vertices.empty());
         IG_CHECK(!indices.empty());
@@ -58,22 +58,22 @@ namespace ig
         const std::string_view resPathStrView = resPathStr.ToStringView();
 
         std::vector<uint32_t> remap(indices.size());
-        const size_t remappedVertexCount =
-            meshopt_generateVertexRemap(remap.data(), indices.data(), indices.size(), vertices.data(), indices.size(), sizeof(StaticMeshVertex));
+        const size_t          remappedVertexCount =
+                meshopt_generateVertexRemap(remap.data(), indices.data(), indices.size(), vertices.data(), indices.size(), sizeof(VertexSM));
 
         std::vector<uint32_t> remappedIndices(indices.size());
-        std::vector<StaticMeshVertex> remappedVertices(remappedVertexCount);
+        std::vector<VertexSM> remappedVertices(remappedVertexCount);
 
         meshopt_remapIndexBuffer(remappedIndices.data(), indices.data(), indices.size(), remap.data());
-        meshopt_remapVertexBuffer(remappedVertices.data(), vertices.data(), vertices.size(), sizeof(StaticMeshVertex), remap.data());
+        meshopt_remapVertexBuffer(remappedVertices.data(), vertices.data(), vertices.size(), sizeof(VertexSM), remap.data());
         IG_LOG(StaticMeshImporter, Info, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
 
         constexpr float CacheHitRatioThreshold = 1.02f;
         meshopt_optimizeVertexCache(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.size());
         meshopt_optimizeOverdraw(remappedIndices.data(), remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x,
-            remappedVertices.size(), sizeof(StaticMeshVertex), CacheHitRatioThreshold);
+                                 remappedVertices.size(), sizeof(VertexSM), CacheHitRatioThreshold);
         meshopt_optimizeVertexFetch(remappedVertices.data(), remappedIndices.data(), remappedIndices.size(), remappedVertices.data(),
-            remappedVertices.size(), sizeof(StaticMeshVertex));
+                                    remappedVertices.size(), sizeof(VertexSM));
 
         /* #sy_ref https://www.realtimerendering.com/blog/acmr-and-atvr/ */
         IG_LOG(StaticMeshImporter, Info, "Optimization Statistics \"{}({})\"", resPathStrView, meshName);
@@ -84,10 +84,10 @@ namespace ig
         const auto intelVcs = meshopt_analyzeVertexCache(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), 128, 0, 0);
 
         const auto vfs =
-            meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), sizeof(StaticMeshVertex));
+                meshopt_analyzeVertexFetch(remappedIndices.data(), remappedIndices.size(), remappedVertices.size(), sizeof(VertexSM));
 
         const auto os = meshopt_analyzeOverdraw(
-            remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(StaticMeshVertex));
+            remappedIndices.data(), remappedIndices.size(), &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(VertexSM));
 
         IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(NVIDIA) - ACMR: {} / ATVR: {}", nvidiaVcs.acmr, nvidiaVcs.atvr);
         IG_LOG(StaticMeshImporter, Info, "Vertex Cache Statistics(AMD) - ACMR: {} / ATVR: {}", amdVcs.acmr, amdVcs.atvr);
@@ -99,23 +99,25 @@ namespace ig
         meshopt_encodeVertexVersion(0);
         meshopt_encodeIndexVersion(1);
 
-        std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(), sizeof(StaticMeshVertex)));
+        std::vector<uint8_t> encodedVertices(meshopt_encodeVertexBufferBound(remappedVertices.size(), sizeof(VertexSM)));
         std::vector<uint8_t> encodedIndices(meshopt_encodeIndexBufferBound(remappedIndices.size(), remappedVertices.size()));
 
         encodedVertices.resize(meshopt_encodeVertexBuffer(
-            encodedVertices.data(), encodedVertices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(StaticMeshVertex)));
+            encodedVertices.data(), encodedVertices.size(), remappedVertices.data(), remappedVertices.size(), sizeof(VertexSM)));
         encodedIndices.resize(
             meshopt_encodeIndexBuffer(encodedIndices.data(), encodedIndices.size(), remappedIndices.data(), remappedIndices.size()));
 
         const AssetInfo assetInfo{MakeVirtualPathPreferred(meshName), EAssetCategory::StaticMesh};
 
-        const StaticMeshLoadDesc newLoadConfig{.NumVertices = static_cast<uint32_t>(remappedVertices.size()),
+        const StaticMeshLoadDesc newLoadConfig{
+            .NumVertices = static_cast<uint32_t>(remappedVertices.size()),
             .NumIndices = static_cast<uint32_t>(remappedIndices.size()),
             .CompressedVerticesSizeInBytes = encodedVertices.size(),
             .CompressedIndicesSizeInBytes = encodedIndices.size(),
-            .MaterialGuid = materialGuid};
+            .MaterialGuid = materialGuid
+        };
 
-        Json assetMetadata{};
+        Json assetMetadata{ };
         assetMetadata << assetInfo << newLoadConfig;
 
         const Path newMetaPath = MakeAssetMetadataPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
@@ -140,7 +142,7 @@ namespace ig
         const String resPathStr, const StaticMesh::ImportDesc& desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
-        const Path resPath{resPathStr.ToStringView()};
+        const Path                                                     resPath{resPathStr.ToStringView()};
         if (!fs::exists(resPath))
         {
             results.emplace_back(MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FileDoesNotExists>());
@@ -158,7 +160,7 @@ namespace ig
         importFlags |= desc.bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
 
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(resPathStr.ToStandard(), importFlags);
+        const aiScene*   scene = importer.ReadFile(resPathStr.ToStandard(), importFlags);
         {
             if (!CheckAssimpSceneLoadingSucceed(resPathStr, importer, scene))
             {
@@ -167,14 +169,14 @@ namespace ig
             }
 
             /* Create Materials */
-            UnorderedMap<uint32_t, Guid> materialGuidTable{};
+            UnorderedMap<uint32_t, Guid> materialGuidTable{ };
             if (desc.bImportMaterials)
             {
                 for (uint32_t materialIdx = 0; materialIdx < scene->mNumMaterials; ++materialIdx)
                 {
-                    const aiMaterial& material = *scene->mMaterials[materialIdx];
+                    const aiMaterial& material     = *scene->mMaterials[materialIdx];
                     materialGuidTable[materialIdx] = assetManager.Import(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
-                        MaterialCreateDesc{.DiffuseVirtualPath = Texture::EngineDefault});
+                                                                         MaterialCreateDesc{.DiffuseVirtualPath = Texture::EngineDefault});
                 }
             }
 
@@ -184,8 +186,8 @@ namespace ig
             std::vector<xg::Guid> importedStaticMeshGuid(scene->mNumMeshes);
             for (size_t meshIdx = 0; meshIdx < scene->mNumMeshes; ++meshIdx)
             {
-                const aiMesh& mesh = *scene->mMeshes[meshIdx];
-                std::vector<StaticMeshVertex> vertices;
+                const aiMesh&         mesh = *scene->mMeshes[meshIdx];
+                std::vector<VertexSM> vertices;
                 std::vector<uint32_t> indices;
 
                 vertices.reserve(mesh.mNumVertices);
@@ -205,15 +207,15 @@ namespace ig
                     continue;
                 }
 
-                const Guid materialGuid = desc.bImportMaterials ? materialGuidTable[mesh.mMaterialIndex] : Guid{DefaultMaterialGuid};
-                const std::string meshName = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
+                const Guid        materialGuid = desc.bImportMaterials ? materialGuidTable[mesh.mMaterialIndex] : Guid{DefaultMaterialGuid};
+                const std::string meshName     = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
                 results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, materialGuid, vertices, indices));
             }
         }
         importer.FreeScene();
 
         const ResourceInfo resInfo{.Category = EAssetCategory::StaticMesh};
-        Json resMetadata{};
+        Json               resMetadata{ };
         resMetadata << resInfo << desc;
         const Path resMetaPath = MakeResourceMetadataPath(resPath);
         if (!SaveJsonToFile(resMetaPath, resMetadata))
@@ -224,4 +226,4 @@ namespace ig
         IG_CHECK(results.size() > 0);
         return results;
     }
-}    // namespace ig
+} // namespace ig

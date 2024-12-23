@@ -9,25 +9,26 @@ namespace ig
 namespace fe
 {
     class EntityList;
+
     class EntityInspector final
     {
     private:
         struct ComponentInfo
         {
-            entt::id_type ID;
+            entt::id_type  ID;
             ig::meta::Type Type;
-            ig::String NameToDisplay;
-            ig::String RemoveButtonLabel;
-            ig::String AttachSelectableLabel;
+            ig::String     NameToDisplay;
+            ig::String     RemoveButtonLabel;
+            ig::String     AttachSelectableLabel;
         };
 
     public:
         explicit EntityInspector(const EntityList& entityList);
-        EntityInspector(const EntityInspector&) = delete;
+        EntityInspector(const EntityInspector&)     = delete;
         EntityInspector(EntityInspector&&) noexcept = delete;
-        ~EntityInspector() = default;
+        ~EntityInspector()                          = default;
 
-        EntityInspector& operator=(const EntityInspector&) = delete;
+        EntityInspector& operator=(const EntityInspector&)     = delete;
         EntityInspector& operator=(EntityInspector&&) noexcept = delete;
 
         void OnImGui();
@@ -38,14 +39,14 @@ namespace fe
         void UpdateDirty(const ig::Entity selectedEntity);
 
     private:
-        ig::World* activeWorld = nullptr;
+        ig::World*        activeWorld = nullptr;
         const EntityList* entityList;
-        ig::Entity latestEntity = ig::NullEntity;
+        ig::Entity        latestEntity = ig::NullEntity;
 
         eastl::vector<ComponentInfo> componentInfos;
-        eastl::vector<size_t> componentInfoIndicesToDisplay;
-        eastl::vector<size_t> addableComponentInfoIndices;
-        bool bForceDirty = false;
-        size_t componentToRemove = (size_t)-1;
+        eastl::vector<size_t>        componentInfoIndicesToDisplay;
+        eastl::vector<size_t>        addableComponentInfoIndices;
+        bool                         bForceDirty       = false;
+        size_t                       componentToRemove = (size_t)-1;
     };
-}    // namespace fe
+} // namespace fe

@@ -5,6 +5,7 @@ namespace ig
 {
     class RenderContext;
     class ImGuiCanvas;
+
     class ImGuiRenderer : public Renderer
     {
     public:
@@ -18,7 +19,7 @@ namespace ig
 
     private:
         RenderContext& renderContext;
-        ImGuiCanvas* targetCanvas = nullptr;
-        GpuSyncPoint mainPipelineSyncPoint;
+        ImGuiCanvas*   targetCanvas = nullptr;
+        GpuSyncPoint   mainPipelineSyncPoint;
     };
-}    // namespace ig
+} // namespace ig

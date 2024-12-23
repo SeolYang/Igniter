@@ -3,10 +3,10 @@
 
 namespace ig
 {
-    struct StaticMeshVertex
+    struct VertexSM
     {
         Vector3 Position;
         Vector3 Normal;
         Vector2 UVCoords;
     };
-}    // namespace ig
+} // namespace ig

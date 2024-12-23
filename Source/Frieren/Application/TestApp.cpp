@@ -1,35 +1,22 @@
 #include "Frieren/Frieren.h"
 #include "Igniter/Core/String.h"
 #include "Igniter/Core/FrameManager.h"
-#include "Igniter/Core/Window.h"
 #include "Igniter/Input/InputManager.h"
-#include "Igniter/D3D12/ShaderBlob.h"
-#include "Igniter/D3D12/RootSignature.h"
-#include "Igniter/D3D12/DescriptorHeap.h"
 #include "Igniter/Asset/AssetManager.h"
-#include "Igniter/Render/RenderContext.h"
-#include "Igniter/Render/TempConstantBufferAllocator.h"
-#include "Igniter/Render/Utils.h"
-#include "Igniter/Component/CameraArchetype.h"
-#include "Igniter/Component/CameraComponent.h"
-#include "Igniter/Component/NameComponent.h"
-#include "Igniter/Component/StaticMeshComponent.h"
-#include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
-#include "Igniter/ImGui/ImGuiExtensions.h"
 #include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Frieren/Render/Renderer.h"
-#include "Frieren/Game/Component/FpsCameraController.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/Gui/EditorCanvas.h"
 #include "Frieren/Application/TestApp.h"
 
 namespace fe
 {
-    TestApp::TestApp(const ig::AppDesc& desc)
-        : taskExecutor(ig::Engine::GetTaskExecutor())
-        , renderer(ig::MakePtr<fe::Renderer>(ig::Engine::GetWindow(), ig::Engine::GetRenderContext()))
+    TestApp::TestApp(const ig::AppDesc& desc) :
+        taskExecutor(&ig::Engine::GetTaskExecutor())
+        , renderer(ig::MakePtr<fe::Renderer>(
+            ig::Engine::GetWindow(), ig::Engine::GetRenderContext()))
         , Application(desc)
     {
         /* #sy_test 입력 매니저 테스트 */
@@ -167,7 +154,9 @@ namespace fe
 
         /* #sy_test Game Mode 타입 메타 정보 테스트 */
         gameSystem =
-            std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>());
+                std::move(
+                    *entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({ }).try_cast<ig::Ptr
+                        <ig::GameSystem>>());
         /************************************/
 
         // Json dumpedWorld{};
@@ -176,14 +165,20 @@ namespace fe
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        world = ig::MakePtr<ig::World>(assetManager, assetManager.Load<ig::Map>(ig::Guid{ "92d1aad6-7d75-41a4-be10-c9f8bfdb787e" }));
+        world                          = ig::MakePtr<ig::World>(assetManager,
+                                       assetManager.Load<ig::Map>(ig::Guid{
+                                           "92d1aad6-7d75-41a4-be10-c9f8bfdb787e"
+                                       }));
         renderer->SetWorld(world.get());
 
         ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();
         imGuiRenderer.SetTargetCanvas(editorCanvas.get());
     }
 
-    TestApp::~TestApp() {}
+    TestApp::~TestApp()
+    {
+        // Empty
+    }
 
     void TestApp::Update(const float deltaTime)
     {
@@ -200,10 +195,10 @@ namespace fe
         return renderer->Render(localFrameIdx);
     }
 
-    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex) {}
+    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex) { }
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)
     {
         gameSystem = std::move(newGameSystem);
     }
-}    // namespace fe
+} // namespace fe

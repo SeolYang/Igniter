@@ -18,29 +18,29 @@ namespace ig
             return MakeFail<Map::Desc, EMapCreateStatus::InvalidAssetType>();
         }
 
-        Json serializedWorld{};
+        Json serializedWorld{ };
         if (desc.WorldToSerialize != nullptr)
         {
             desc.WorldToSerialize->Serialize(serializedWorld);
         }
 
-        Json serializedMeta{};
+        Json serializedMeta{ };
         serializedMeta << assetInfo;
 
-        const Path metadataPath{ MakeAssetMetadataPath(EAssetCategory::Map, assetInfo.GetGuid()) };
+        const Path metadataPath{MakeAssetMetadataPath(EAssetCategory::Map, assetInfo.GetGuid())};
         IG_CHECK(!metadataPath.empty());
         if (!SaveJsonToFile(metadataPath, serializedMeta))
         {
             return MakeFail<Map::Desc, EMapCreateStatus::FailedSaveMetadata>();
         }
 
-        const Path assetPath{ MakeAssetPath(EAssetCategory::Map, assetInfo.GetGuid()) };
+        const Path assetPath{MakeAssetPath(EAssetCategory::Map, assetInfo.GetGuid())};
 
         if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, Json::to_ubjson(serializedWorld)))
         {
             return MakeFail<Map::Desc, EMapCreateStatus::FailedSaveAsset>();
         }
 
-        return MakeSuccess<Map::Desc, EMapCreateStatus>(Map::Desc{ .Info = assetInfo });
+        return MakeSuccess<Map::Desc, EMapCreateStatus>(Map::Desc{.Info = assetInfo});
     }
-}    // namespace ig
+} // namespace ig

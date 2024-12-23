@@ -7,7 +7,7 @@
 
 namespace ig
 {
-    ImGuiRenderer::ImGuiRenderer(RenderContext& renderContext) : renderContext(renderContext) {}
+    ImGuiRenderer::ImGuiRenderer(RenderContext& renderContext) : renderContext(renderContext) { }
 
     GpuSyncPoint ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx)
     {
@@ -16,7 +16,7 @@ namespace ig
             return mainPipelineSyncPoint;
         }
 
-        Swapchain& swapchain = renderContext.GetSwapchain();
+        Swapchain&  swapchain     = renderContext.GetSwapchain();
         GpuTexture* backBufferPtr = renderContext.Lookup(swapchain.GetBackBuffer());
         if (backBufferPtr == nullptr)
         {
@@ -29,8 +29,8 @@ namespace ig
             return mainPipelineSyncPoint;
         }
 
-        ig::CommandQueue& mainGfxQueue{ renderContext.GetMainGfxQueue() };
-        auto imguiCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "ImGuiCommandContext"_fs);
+        ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
+        auto              imguiCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "ImGuiCommandContext"_fs);
         imguiCmdCtx->Begin();
         {
             imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
@@ -64,7 +64,7 @@ namespace ig
         }
         imguiCmdCtx->End();
 
-        ig::CommandContext* renderCmdCtxPtrs[] = { (ig::CommandContext*)imguiCmdCtx };
+        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)imguiCmdCtx};
         mainGfxQueue.SyncWith(mainPipelineSyncPoint);
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
 
@@ -76,4 +76,4 @@ namespace ig
 
         return mainGfxQueue.MakeSyncPointWithSignal();
     }
-}    // namespace ig
+} // namespace ig

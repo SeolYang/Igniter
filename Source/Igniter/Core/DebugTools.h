@@ -12,17 +12,17 @@ namespace ig
 
         struct CapturedFrames
         {
-            void* Frames[MaxNumBackTraceCapture]{};
-            uint16_t NumCapturedFrames{ 0 };
+            void*    Frames[MaxNumBackTraceCapture]{ };
+            uint16_t NumCapturedFrames{0};
         };
 
     public:
-        CallStack(const CallStack&) = delete;
-        CallStack(CallStack&&) noexcept = delete;
-        CallStack& operator=(const CallStack&) = delete;
+        CallStack(const CallStack&)                = delete;
+        CallStack(CallStack&&) noexcept            = delete;
+        CallStack& operator=(const CallStack&)     = delete;
         CallStack& operator=(CallStack&&) noexcept = delete;
 
-        static uint32_t Capture();
+        static uint32_t         Capture();
         static std::string_view Dump(const DWORD captureHash);
 
     private:
@@ -31,10 +31,10 @@ namespace ig
         static CallStack& GetCallStack();
 
     private:
-        HANDLE procHandle{ nullptr };
+        HANDLE procHandle{nullptr};
 
-        Mutex mutex{};
-        UnorderedMap<DWORD, CapturedFrames> capturedFramesTable{};
-        UnorderedMap<DWORD, std::string> dumpCache{};
+        Mutex                               mutex{ };
+        UnorderedMap<DWORD, CapturedFrames> capturedFramesTable{ };
+        UnorderedMap<DWORD, std::string>    dumpCache{ };
     };
-}    // namespace ig
+} // namespace ig

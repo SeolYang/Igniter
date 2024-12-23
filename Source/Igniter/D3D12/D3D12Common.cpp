@@ -35,7 +35,7 @@ namespace ig
         {
         case EDescriptorHeapType::CBV_SRV_UAV:
             return gpuViewType == EGpuViewType::ShaderResourceView || gpuViewType == EGpuViewType::ConstantBufferView ||
-                gpuViewType == EGpuViewType::UnorderedAccessView;
+                    gpuViewType == EGpuViewType::UnorderedAccessView;
         case EDescriptorHeapType::Sampler:
             return gpuViewType == EGpuViewType::Sampler;
         case EDescriptorHeapType::RTV:
@@ -54,4 +54,4 @@ namespace ig
             object->SetName(Wider(name).c_str());
         }
     }
-}    // namespace ig
+} // namespace ig

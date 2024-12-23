@@ -20,45 +20,44 @@ namespace ig
         {
         public:
             [[nodiscard]] bool IsValid() const noexcept { return VirtualAllocation.AllocHandle != 0 && AllocSize > 0 && BlockIndex != InvalidIndex; }
-            static Allocation Invalid() { return Allocation{}; }
+            static Allocation  Invalid() { return Allocation{ }; }
 
         public:
-            Index BlockIndex = InvalidIndex;
-            D3D12MA::VirtualAllocation VirtualAllocation{};
+            Index                      BlockIndex = InvalidIndex;
+            D3D12MA::VirtualAllocation VirtualAllocation{ };
 
-            Size Offset = 0;
+            Size Offset      = 0;
             Size OffsetIndex = 0;
-            Size AllocSize = 0;
+            Size AllocSize   = 0;
             Size NumElements = 0;
-
         };
 
     private:
         struct Block
         {
             D3D12MA::VirtualBlock* VirtualBlock = nullptr;
-            Size Offset = 0;
+            Size                   Offset       = 0;
         };
 
     public:
         GpuStorage(RenderContext& renderContext, const String debugName, const U32 elementSize, const U32 initialNumElements, const bool bIsShaderReadWritable = false);
-        GpuStorage(const GpuStorage&) = delete;
+        GpuStorage(const GpuStorage&)     = delete;
         GpuStorage(GpuStorage&&) noexcept = delete;
         ~GpuStorage();
 
-        GpuStorage& operator=(const GpuStorage&) = delete;
+        GpuStorage& operator=(const GpuStorage&)     = delete;
         GpuStorage& operator=(GpuStorage&&) noexcept = delete;
 
         Allocation Allocate(const Size numElements);
-        void Deallocate(const Allocation& allocation);
+        void       Deallocate(const Allocation& allocation);
 
-        [[nodiscard]] Size GetAllocatedSize() const noexcept { return allocatedSize; }
-        [[nodiscard]] Size GetBufferSize() const noexcept { return bufferSize; }
+        [[nodiscard]] Size      GetAllocatedSize() const noexcept { return allocatedSize; }
+        [[nodiscard]] Size      GetBufferSize() const noexcept { return bufferSize; }
         [[nodiscard]] GpuFence& GetStorageFence() noexcept { return fence; }
 
         [[nodiscard]] RenderResource<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
-        [[nodiscard]] RenderResource<GpuView> GetShaderResourceView() const noexcept { return srv; }
-        [[nodiscard]] RenderResource<GpuView> GetUnorderedResourceView() const noexcept { return uav; }
+        [[nodiscard]] RenderResource<GpuView>   GetShaderResourceView() const noexcept { return srv; }
+        [[nodiscard]] RenderResource<GpuView>   GetUnorderedResourceView() const noexcept { return uav; }
 
     private:
         bool AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation);
@@ -76,15 +75,15 @@ namespace ig
 
         String debugName;
 
-        U32 elementSize = 1;
-        Size allocatedSize = 0;
-        Size bufferSize = 0;
+        U32  elementSize           = 1;
+        Size allocatedSize         = 0;
+        Size bufferSize            = 0;
         bool bIsShaderReadWritable = false;
 
         GpuFence fence;
 
         RenderResource<GpuBuffer> gpuBuffer;
-        eastl::vector<Block> blocks;
+        eastl::vector<Block>      blocks;
 
         RenderResource<GpuView> srv;
         RenderResource<GpuView> uav;

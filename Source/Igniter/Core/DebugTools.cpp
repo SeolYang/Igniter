@@ -12,14 +12,14 @@ namespace ig::details
     public:
         SymbolInfo()
         {
-            MaxNameLen = BufferSize;
+            MaxNameLen   = BufferSize;
             SizeOfStruct = sizeof(SYMBOL_INFO);
         }
 
     private:
-        char buffer[BufferSize]{};
+        char buffer[BufferSize]{ };
     };
-}    // namespace ig::details
+} // namespace ig::details
 
 namespace ig
 {
@@ -30,7 +30,7 @@ namespace ig
 
     CallStack::CallStack()
     {
-        const HANDLE currentProc{ GetCurrentProcess() };
+        const HANDLE currentProc{GetCurrentProcess()};
         if (DuplicateHandle(currentProc, currentProc, currentProc, &procHandle, 0, FALSE, DUPLICATE_SAME_ACCESS))
         {
             SymSetOptions(SYMOPT_LOAD_LINES);
@@ -55,19 +55,19 @@ namespace ig
 
     CallStack& CallStack::GetCallStack()
     {
-        static CallStack callStack{};
+        static CallStack callStack{ };
         return callStack;
     }
 
     uint32_t CallStack::Capture()
     {
-        CallStack& callStack = GetCallStack();
-        CapturedFrames frames{};
-        DWORD backTraceHash{};
+        CallStack&     callStack = GetCallStack();
+        CapturedFrames frames{ };
+        DWORD          backTraceHash{ };
         frames.NumCapturedFrames = CaptureStackBackTrace(1, MaxNumBackTraceCapture, &frames.Frames[0], &backTraceHash);
 
         {
-            UniqueLock lock{ callStack.mutex };
+            UniqueLock lock{callStack.mutex};
             callStack.capturedFramesTable[backTraceHash] = frames;
         }
         return backTraceHash;
@@ -75,25 +75,25 @@ namespace ig
 
     std::string_view CallStack::Dump(const DWORD captureHash)
     {
-        CallStack& callStack = GetCallStack();
-        std::string_view dumped{};
+        CallStack&       callStack = GetCallStack();
+        std::string_view dumped{ };
 
-        UniqueLock lock{ callStack.mutex };
+        UniqueLock lock{callStack.mutex};
         if (!callStack.dumpCache.contains(captureHash))
         {
             if (!callStack.capturedFramesTable.contains(captureHash))
             {
-                return {};
+                return { };
             }
 
             if (callStack.procHandle == nullptr)
             {
                 PrintToDebugger("Symbol lookup table does not initialized.");
-                return {};
+                return { };
             }
 
             const CapturedFrames& capturedFrames = callStack.capturedFramesTable[captureHash];
-            std::ostringstream outputStream{};
+            std::ostringstream    outputStream{ };
             for (size_t idx = 0; idx < capturedFrames.NumCapturedFrames; ++idx)
             {
                 const void* const frame = capturedFrames.Frames[idx];
@@ -102,12 +102,12 @@ namespace ig
                     continue;
                 }
 
-                const DWORD64 frameAddr = reinterpret_cast<DWORD64>(frame);
-                details::SymbolInfo symbolInfo{};
+                const DWORD64       frameAddr = reinterpret_cast<DWORD64>(frame);
+                details::SymbolInfo symbolInfo{ };
                 SymFromAddr(callStack.procHandle, frameAddr, nullptr, &symbolInfo);
 
-                DWORD displacement{ 0 };
-                IMAGEHLP_LINE64 line{ .SizeOfStruct = sizeof(IMAGEHLP_LINE64) };
+                DWORD           displacement{0};
+                IMAGEHLP_LINE64 line{.SizeOfStruct = sizeof(IMAGEHLP_LINE64)};
                 if (SymGetLineFromAddr64(callStack.procHandle, frameAddr, &displacement, &line))
                 {
                     outputStream << std::format("{} <= Line: {}; File: {}\n", symbolInfo.Name, line.LineNumber, line.FileName);
@@ -124,4 +124,4 @@ namespace ig
         dumped = callStack.dumpCache[captureHash];
         return dumped;
     }
-}    // namespace ig
+} // namespace ig

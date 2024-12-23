@@ -6,7 +6,7 @@ namespace ig
 {
     Result<Map, EMapLoadStatus> MapLoader::Load(const Map::Desc& desc)
     {
-        const AssetInfo& assetInfo{ desc.Info };
+        const AssetInfo& assetInfo{desc.Info};
         if (!assetInfo.IsValid())
         {
             return MakeFail<Map, EMapLoadStatus::InvalidAssetInfo>();
@@ -24,6 +24,6 @@ namespace ig
         }
 
         /* #sy_todo ubjson 으로 저장할지, 아니면 그냥 json으로 저장할지 load desc 에서 설정 할 수 있도록 할 것! */
-        return MakeSuccess<Map, EMapLoadStatus>(Map{ desc, Json::from_ubjson(LoadBlobFromFile(assetPath)) });
+        return MakeSuccess<Map, EMapLoadStatus>(Map{desc, Json::from_ubjson(LoadBlobFromFile(assetPath))});
     }
-}    // namespace ig
+} // namespace ig

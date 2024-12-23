@@ -70,5 +70,6 @@ namespace ig
 
         ImGui::Checkbox("Is Main Camera", &camera.bIsMainCamera);
     }
+
     IG_DEFINE_TYPE_META_AS_COMPONENT(CameraComponent);
-}    // namespace ig
+} // namespace ig

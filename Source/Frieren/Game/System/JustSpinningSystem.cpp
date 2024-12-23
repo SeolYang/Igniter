@@ -17,9 +17,7 @@ namespace fe
     }
 
     template <>
-    void DefineMeta<JustSpinningSystem>()
-    {
-    }
+    void DefineMeta<JustSpinningSystem>() { }
 
     IG_DEFINE_TYPE_META_AS_GAME_SYSTEM(JustSpinningSystem);
-}    // namespace fe
+} // namespace fe

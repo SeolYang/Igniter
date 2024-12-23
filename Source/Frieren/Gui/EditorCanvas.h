@@ -14,6 +14,7 @@ namespace fe
     class StaticMeshImportPanel;
     class AssetInspector;
     class TestApp;
+
     class EditorCanvas final : public ig::ImGuiCanvas
     {
     public:
@@ -23,21 +24,21 @@ namespace fe
         void OnImGui() override;
 
     private:
-        TestApp& app;
-        ig::Ptr<StatisticsPanel> statisticsPanel{};
-        ig::Ptr<CachedStringDebugger> cachedStringDebugger{};
-        ig::Ptr<EntityList> entityList{};
-        ig::Ptr<EntityInspector> entityInspector{};
-        ig::Ptr<TextureImportPanel> textureImportPanel{};
-        ig::Ptr<StaticMeshImportPanel> staticMeshImportPanel{};
-        ig::Ptr<AssetInspector> assetInspector{};
+        TestApp&                       app;
+        ig::Ptr<StatisticsPanel>       statisticsPanel{ };
+        ig::Ptr<CachedStringDebugger>  cachedStringDebugger{ };
+        ig::Ptr<EntityList>            entityList{ };
+        ig::Ptr<EntityInspector>       entityInspector{ };
+        ig::Ptr<TextureImportPanel>    textureImportPanel{ };
+        ig::Ptr<StaticMeshImportPanel> staticMeshImportPanel{ };
+        ig::Ptr<AssetInspector>        assetInspector{ };
 
-        bool bStatisticsPanelOpend = false;
-        bool bCachedStringDebuggerOpend = false;
-        bool bEntityInspectorOpend = false;
-        bool bEntityListOpend = false;
-        bool bTextureImportPanelOpend = false;
+        bool bStatisticsPanelOpend       = false;
+        bool bCachedStringDebuggerOpend  = false;
+        bool bEntityInspectorOpend       = false;
+        bool bEntityListOpend            = false;
+        bool bTextureImportPanelOpend    = false;
         bool bStaticMeshImportPanelOpend = false;
-        bool bAssetInspectorOpend = false;
+        bool bAssetInspectorOpend        = false;
     };
-}    // namespace fe
+} // namespace fe

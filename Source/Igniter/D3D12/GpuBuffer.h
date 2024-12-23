@@ -5,6 +5,7 @@
 namespace ig
 {
     class GpuDevice;
+
     class GpuBuffer final
     {
         friend class GpuDevice;
@@ -36,13 +37,13 @@ namespace ig
         }
 
         uint8_t* Map(const uint64_t offset = 0);
-        void Unmap();
+        void     Unmap();
 
         GPUResourceMapGuard MapGuard(const uint64_t offset = 0);
 
         std::optional<D3D12_VERTEX_BUFFER_VIEW> GetVertexBufferView() const
         {
-            std::optional<D3D12_VERTEX_BUFFER_VIEW> view{};
+            std::optional<D3D12_VERTEX_BUFFER_VIEW> view{ };
             if (desc.GetBufferType() == EGpuBufferType::VertexBuffer)
             {
                 view = D3D12_VERTEX_BUFFER_VIEW{
@@ -57,13 +58,14 @@ namespace ig
 
         std::optional<D3D12_INDEX_BUFFER_VIEW> GetIndexBufferView() const
         {
-            std::optional<D3D12_INDEX_BUFFER_VIEW> view{};
+            std::optional<D3D12_INDEX_BUFFER_VIEW> view{ };
             if (desc.GetBufferType() == EGpuBufferType::IndexBuffer)
             {
                 view = D3D12_INDEX_BUFFER_VIEW{
                     .BufferLocation = resource->GetGPUVirtualAddress(),
                     .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
-                    .Format = desc.GetIndexFormat() };
+                    .Format = desc.GetIndexFormat()
+                };
             }
 
             return view;
@@ -73,8 +75,8 @@ namespace ig
         GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource);
 
     private:
-        GpuBufferDesc desc;
+        GpuBufferDesc               desc;
         ComPtr<D3D12MA::Allocation> allocation;
-        ComPtr<ID3D12Resource> resource;
+        ComPtr<ID3D12Resource>      resource;
     };
-}    // namespace ig
+} // namespace ig

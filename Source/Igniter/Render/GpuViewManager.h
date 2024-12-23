@@ -10,19 +10,20 @@ namespace ig
     class DescriptorHeap;
     class GpuTexture;
     class GpuBuffer;
+
     class GpuViewManager final
     {
     public:
-        GpuViewManager(GpuDevice& gpuDevice,
+        GpuViewManager(GpuDevice&     gpuDevice,
                        const uint32_t numCbvSrvUavDescriptors = DefaultNumCbvSrvUavDescriptors,
-                       const uint32_t numSamplerDescriptors = DefaultNumSamplerDescriptors,
-                       const uint32_t numRtvDescriptors = DefaultNumRtvDescriptors,
-                       const uint32_t numDsvDescriptors = DefaultNumDsvDescriptors);
-        GpuViewManager(const GpuViewManager&) = delete;
+                       const uint32_t numSamplerDescriptors   = DefaultNumSamplerDescriptors,
+                       const uint32_t numRtvDescriptors       = DefaultNumRtvDescriptors,
+                       const uint32_t numDsvDescriptors       = DefaultNumDsvDescriptors);
+        GpuViewManager(const GpuViewManager&)     = delete;
         GpuViewManager(GpuViewManager&&) noexcept = delete;
         ~GpuViewManager();
 
-        GpuViewManager& operator=(const GpuViewManager&) = delete;
+        GpuViewManager& operator=(const GpuViewManager&)     = delete;
         GpuViewManager& operator=(GpuViewManager&&) noexcept = delete;
 
         GpuView Allocate(const EGpuViewType type);
@@ -47,11 +48,11 @@ namespace ig
 
     private:
         constexpr static uint32_t DefaultNumCbvSrvUavDescriptors = 4096;
-        constexpr static uint32_t DefaultNumSamplerDescriptors = 64;
-        constexpr static uint32_t DefaultNumRtvDescriptors = 512;
-        constexpr static uint32_t DefaultNumDsvDescriptors = DefaultNumRtvDescriptors;
+        constexpr static uint32_t DefaultNumSamplerDescriptors   = 64;
+        constexpr static uint32_t DefaultNumRtvDescriptors       = 512;
+        constexpr static uint32_t DefaultNumDsvDescriptors       = DefaultNumRtvDescriptors;
 
-        GpuDevice& gpuDevice;
+        GpuDevice&          gpuDevice;
         Ptr<DescriptorHeap> cbvSrvUavHeap;
         Ptr<DescriptorHeap> samplerHeap;
         Ptr<DescriptorHeap> rtvHeap;
@@ -59,4 +60,4 @@ namespace ig
 
         UnorderedMap<uint64_t, GpuView> cachedSamplerView;
     };
-}    // namespace ig
+} // namespace ig

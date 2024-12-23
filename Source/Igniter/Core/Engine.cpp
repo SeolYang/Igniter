@@ -28,8 +28,8 @@ namespace ig
         IG_LOG(Engine, Info, "Igniter Engine Version {}", version::Version);
         IG_LOG(Engine, Info, "Igniting Engine Runtime!");
         //////////////////////// L0 ////////////////////////
-        timer = MakePtr<Timer>();
-        window = MakePtr<Window>(WindowDescription{ .Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle });
+        timer        = MakePtr<Timer>();
+        window       = MakePtr<Window>(WindowDescription{.Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle});
         inputManager = MakePtr<InputManager>();
         ////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ namespace ig
         //////////////////////// L2 ////////////////////////
         assetManager = MakePtr<AssetManager>(*renderContext);
         assetManager->RegisterEngineDefault();
-        imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
+        imguiContext  = MakePtr<ImGuiContext>(*window, *renderContext);
         imguiRenderer = MakePtr<ImGuiRenderer>(*renderContext);
         ////////////////////////////////////////////////////
 
@@ -199,4 +199,4 @@ namespace ig
         IG_CHECK(instance != nullptr);
         return *instance->imguiRenderer;
     }
-}    // namespace ig
+} // namespace ig
