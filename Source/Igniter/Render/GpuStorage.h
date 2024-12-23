@@ -147,6 +147,10 @@ namespace ig
         [[nodiscard]] Size GetBufferSize() const noexcept { return bufferSize; }
         [[nodiscard]] GpuFence& GetStorageFence() noexcept { return fence; }
 
+        [[nodiscard]] RenderResource<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
+        [[nodiscard]] RenderResource<GpuView> GetShaderResourceView() const noexcept { return srv; }
+        [[nodiscard]] RenderResource<GpuView> GetUnorderedResourceView() const noexcept { return uav; }
+
     private:
         bool AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation)
         {
