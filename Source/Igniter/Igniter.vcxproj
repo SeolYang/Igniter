@@ -199,6 +199,7 @@
     <ClCompile Include="ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="Render\CommandContextPool.cpp" />
+    <ClCompile Include="Render\GpuStorage.cpp" />
     <ClCompile Include="Render\GpuUploader.cpp" />
     <ClCompile Include="Render\GpuViewManager.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />

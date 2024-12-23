@@ -1,6 +1,8 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/FrameManager.h"
 #include "Igniter/Core/Window.h"
+#include "Igniter/Render/GpuStorage.h"
+#include "Igniter/Render/Vertex.h"
 #include "Igniter/Render/RenderContext.h"
 
 namespace ig
@@ -14,7 +16,9 @@ namespace ig
         asyncCopyCmdCtxPool(gpuDevice, EQueueType::Copy),
         gpuViewManager(gpuDevice),
         gpuUploader(gpuDevice),
-        swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight))
+        swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight)),
+        staticMeshVertexStorage(GpuStorage(*this, "StaticMeshVertexStorage"_fs, sizeof(StaticMeshVertex), 16 * 1024, false)),
+        meshIndexStorage(GpuStorage(*this, "MeshIndexStorage"_fs, sizeof(U32), 3 * 16 * 1024, false))
     {
     }
 
@@ -103,8 +107,7 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    RenderResource<GpuView> RenderContext::CreateConstantBufferView(
-        const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
+    RenderResource<GpuView> RenderContext::CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
     {
         ScopedLock registryLock{ bufferPackage.Mut, gpuViewPackage.Mut };
         GpuBuffer* const bufferPtr = bufferPackage.Registry.Lookup(buffer);
@@ -161,8 +164,7 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    RenderResource<GpuView> RenderContext::CreateShaderResourceView(
-        RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateShaderResourceView(RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{ texturePackage.Mut, gpuViewPackage.Mut };
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
@@ -181,8 +183,7 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    RenderResource<GpuView> RenderContext::CreateUnorderedAccessView(
-        RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateUnorderedAccessView(RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{ texturePackage.Mut, gpuViewPackage.Mut };
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
@@ -201,8 +202,7 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    RenderResource<GpuView> RenderContext::CreateRenderTargetView(
-        RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateRenderTargetView(RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{ texturePackage.Mut, gpuViewPackage.Mut };
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);
@@ -221,8 +221,7 @@ namespace ig
         return gpuViewPackage.Registry.Create(newView);
     }
 
-    RenderResource<GpuView> RenderContext::CreateDepthStencilView(
-        RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    RenderResource<GpuView> RenderContext::CreateDepthStencilView(RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock registryLock{ texturePackage.Mut, gpuViewPackage.Mut };
         GpuTexture* const texturePtr = texturePackage.Registry.Lookup(texture);

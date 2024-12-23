@@ -11,9 +11,10 @@
 #include "Igniter/D3D12/PipelineState.h"
 #include "Igniter/D3D12/PipelineStateDesc.h"
 #include "Igniter/Render/Common.h"
-#include "Igniter/Render/GpuViewManager.h"
 #include "Igniter/Render/CommandContextPool.h"
+#include "Igniter/Render/GpuViewManager.h"
 #include "Igniter/Render/GpuUploader.h"
+#include "Igniter/Render/GpuStorage.h"
 #include "Igniter/Render/Swapchain.h"
 
 namespace ig
@@ -78,6 +79,9 @@ namespace ig
         RenderResource<GpuView> CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
         RenderResource<GpuView> CreateGpuView(const EGpuViewType type);
 
+        RenderResource<GpuStorage::Allocation> AllocateStaticMeshVertices(const Size numVertices);
+        RenderResource<GpuStorage::Allocation> AllocateMeshIndices(const Size numIndices);
+
         void DestroyBuffer(const RenderResource<GpuBuffer> buffer);
         void DestroyTexture(const RenderResource<GpuTexture> texture);
         void DestroyPipelineState(const RenderResource<PipelineState> state);
@@ -117,5 +121,11 @@ namespace ig
         GpuUploader gpuUploader;
 
         Ptr<Swapchain> swapchain;
+
+        GpuStorage staticMeshVertexStorage;
+        ResourceManagePackage<GpuStorage::Allocation> staticMeshVertexAllocationPackage;
+        GpuStorage meshIndexStorage;
+        ResourceManagePackage<GpuStorage::Allocation> meshIndexAllocationPackage;
+
     };
 }    // namespace ig

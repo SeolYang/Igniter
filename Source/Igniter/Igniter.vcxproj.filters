@@ -584,6 +584,9 @@
     <ClCompile Include="ImGui\AssetSelectModalPopup.cpp">
       <Filter>Source\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GpuStorage.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
