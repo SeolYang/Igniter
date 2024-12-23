@@ -365,7 +365,7 @@ namespace ig
             ScopedLock bufferPackageLock{bufferPackage.Mut, bufferPackage.PendingListMut[localFrameIdx]};
             for (const auto handle : bufferPackage.PendingDestroyList[localFrameIdx])
             {
-                bufferPackage.Registry.Destroy(handle);
+                bufferPackage.Registry.DestroyImmediate(handle);
             }
             bufferPackage.PendingDestroyList[localFrameIdx].clear();
         }
@@ -375,7 +375,7 @@ namespace ig
             ScopedLock texturePackageLock{texturePackage.Mut, texturePackage.PendingListMut[localFrameIdx]};
             for (const auto handle : texturePackage.PendingDestroyList[localFrameIdx])
             {
-                texturePackage.Registry.Destroy(handle);
+                texturePackage.Registry.DestroyImmediate(handle);
             }
             texturePackage.PendingDestroyList[localFrameIdx].clear();
         }
@@ -385,7 +385,7 @@ namespace ig
             ScopedLock pipelineStatePackageLock{pipelineStatePackage.Mut, pipelineStatePackage.PendingListMut[localFrameIdx]};
             for (const auto handle : pipelineStatePackage.PendingDestroyList[localFrameIdx])
             {
-                pipelineStatePackage.Registry.Destroy(handle);
+                pipelineStatePackage.Registry.DestroyImmediate(handle);
             }
             pipelineStatePackage.PendingDestroyList[localFrameIdx].clear();
         }
@@ -396,7 +396,7 @@ namespace ig
             for (const auto handle : gpuViewPackage.PendingDestroyList[localFrameIdx])
             {
                 gpuViewManager.Deallocate(*gpuViewPackage.Registry.Lookup(handle));
-                gpuViewPackage.Registry.Destroy(handle);
+                gpuViewPackage.Registry.DestroyImmediate(handle);
             }
             gpuViewPackage.PendingDestroyList[localFrameIdx].clear();
         }

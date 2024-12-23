@@ -1,8 +1,6 @@
 #pragma once
 #include "Igniter/Igniter.h"
-#include "Igniter/Core/Hash.h"
 #include "Igniter/Core/Memory.h"
-#include "Igniter/Core/Result.h"
 #include "Igniter/Core/Handle.h"
 #ifdef IG_TRACK_LEAKED_HANDLE
 #include "Igniter/Core/DebugTools.h"
@@ -93,6 +91,7 @@ namespace ig
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
+            IG_CHECK(!reservedToDestroyFlags[newSlot]);
 
 #ifdef IG_TRACK_LEAKED_HANDLE
             lastCallStackTable[newSlot] = CallStack::Capture();
@@ -120,8 +119,36 @@ namespace ig
                 return;
             }
 
-            const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
-            if (version != slotVersions[slot])
+            if (const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
+                version != slotVersions[slot])
+            {
+                return;
+            }
+
+            reservedToDestroyFlags[slot] = true;
+        }
+
+        void DestroyImmediate(const Handle<Ty, Dependency> handle)
+        {
+            if (handle.IsNull())
+            {
+                return;
+            }
+
+            const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);
+            if (!IsSlotInRange(slot))
+            {
+                return;
+            }
+
+            if (IsMarkedAsFreeSlot(slot))
+            {
+                IG_CHECK_NO_ENTRY();
+                return;
+            }
+
+            if (const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
+                version != slotVersions[slot])
             {
                 return;
             }
@@ -130,7 +157,8 @@ namespace ig
              * 만약 2^{VersionBits} 만큼 할당-해제가 발생해 버전 값에 오버플로우가 일어나는 것은, 실제로 맨 처음 할당 되었던 핸들 객체가
              * 더 이상 존재하지 않아서 충돌이 일어나기 힘든 조건이라고 가정.
              */
-            slotVersions[slot] = (slotVersions[slot] + 1) % MaxVersion;
+            slotVersions[slot]           = (slotVersions[slot] + 1) % MaxVersion;
+            reservedToDestroyFlags[slot] = false;
 
             Ty* slotElementPtr = CalcAddressOfSlot(slot);
             slotElementPtr->~Ty();
@@ -157,8 +185,13 @@ namespace ig
                 return nullptr;
             }
 
-            const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
-            if (version != slotVersions[slot])
+            if (const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
+                version != slotVersions[slot])
+            {
+                return nullptr;
+            }
+
+            if (reservedToDestroyFlags[slot])
             {
                 return nullptr;
             }
@@ -184,12 +217,17 @@ namespace ig
                 return nullptr;
             }
 
-            const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
-            if (version != slotVersions[slot])
+            if (const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
+                version != slotVersions[slot])
             {
                 return nullptr;
             }
 
+            if (reservedToDestroyFlags[slot])
+            {
+                return nullptr;
+            }
+            
             return CalcAddressOfSlot(slot);
         }
 
@@ -213,6 +251,7 @@ namespace ig
             slotCapacity                   = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
             freeSlots.reserve(slotCapacity);
             slotVersions.resize(slotCapacity);
+            reservedToDestroyFlags.resize(slotCapacity);
 
             for (const SlotType newSlot : views::iota(oldSlotCapacity, slotCapacity) | views::reverse)
             {
@@ -281,25 +320,23 @@ namespace ig
         constexpr static size_t ChunkSizeInBytes = details::GetHeuristicOptimalChunkSize<Ty>();
 
         /*
-         * LSB 0~31     <30 bits>  : Slot Bit
-         * LSB 32~63    <32 bits>  : Version Bits
-         *  LSB 32~62   <31 bits>  : Version Number Bits
-         *  LSB 63      <1 bit>    : Reserved To Destroy Bit
+         * LSB 0~29     <30 bits>  : Slot Bit
+         * LSB 29~61    <32 bits>  : Version Bits
+         * LSB 62~63    <2  bits>  : Reserved for future
          */
         constexpr static size_t SlotSizeInBits    = 30;
         constexpr static size_t VersionOffset     = SlotSizeInBits;
         constexpr static size_t VersionSizeInBits = 32;
-        constexpr static size_t DestroyReservedFlagBit = 1;
-        constexpr static size_t ReservedBits = 2;
+        constexpr static size_t ReservedBits      = 2;
         static_assert(VersionOffset + VersionSizeInBits + ReservedBits == 64);
         constexpr static size_t      SizeOfElement    = sizeof(Ty);
         constexpr static size_t      MaxNumSlots      = Pow<size_t>(2, SlotSizeInBits);
-        constexpr static VersionType MaxVersion       = Pow<VersionType>(2, VersionSizeInBits - DestroyReservedFlagBit);
+        constexpr static VersionType MaxVersion       = Pow<VersionType>(2, VersionSizeInBits) - 1;
         constexpr static size_t      NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
         static_assert(NumSlotsPerChunk <= MaxNumSlots);
         constexpr static size_t MaxNumChunks = MaxNumSlots / NumSlotsPerChunk;
 
-        constexpr static uint32_t FreeSlotMagicNumber = 0xF3EE6102;
+        constexpr static uint32_t FreeSlotMagicNumber = 0xF3EE6102u;
 
         constexpr static size_t InitialNumChunks = 4;
         eastl::vector<uint8_t*> chunks{ };
@@ -307,6 +344,7 @@ namespace ig
         uint32_t                   slotCapacity = 0;
         eastl::vector<SlotType>    freeSlots{ };
         eastl::vector<VersionType> slotVersions{ };
+        eastl::bitvector<>         reservedToDestroyFlags{ };
 
 #ifdef IG_TRACK_LEAKED_HANDLE
         eastl::vector<DWORD> lastCallStackTable{};

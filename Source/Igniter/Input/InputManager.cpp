@@ -129,12 +129,12 @@ namespace ig
 
         for (const auto& [_, mappedAction] : nameActionTable)
         {
-            actionRegistry.Destroy(mappedAction.ActionHandle);
+            actionRegistry.DestroyImmediate(mappedAction.ActionHandle);
         }
 
         for (const auto& [_, mappedAxis] : nameAxisTable)
         {
-            axisRegistry.Destroy(mappedAxis.AxisHandle);
+            axisRegistry.DestroyImmediate(mappedAxis.AxisHandle);
         }
     }
 
@@ -176,7 +176,7 @@ namespace ig
         const auto [handle, mappedInput] = nameActionTable[name];
         IG_CHECK(actionSets[ToUnderlying(mappedInput)].contains(handle));
         actionSets[ToUnderlying(mappedInput)].erase(handle);
-        actionRegistry.Destroy(handle);
+        actionRegistry.DestroyImmediate(handle);
         IG_LOG(InputManager, Info, "Action {} unmapped from '{}'.", name, mappedInput);
     }
 
@@ -218,7 +218,7 @@ namespace ig
         const auto [handle, mappedInput] = nameAxisTable[name];
         IG_CHECK(axisSets[ToUnderlying(mappedInput)].contains(handle));
         axisSets[ToUnderlying(mappedInput)].erase(handle);
-        axisRegistry.Destroy(handle);
+        axisRegistry.DestroyImmediate(handle);
         IG_LOG(InputManager, Info, "Axis {} unmapped from '{}'.", name, mappedInput);
     }
 

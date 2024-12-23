@@ -144,6 +144,7 @@ using namespace entt::literals;
 #include <EASTL/vector.h>
 #include <EASTL/array.h>
 #include <EASTL/list.h>
+#include <EASTL/bitvector.h>
 
 #pragma warning(push)
 #pragma warning(disable : 4456)
