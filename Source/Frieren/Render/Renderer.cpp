@@ -45,7 +45,7 @@ namespace fe
         mainViewport(window.GetViewport()),
         tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(renderContext))
     {
-        ig::GpuDevice& gpuDevice = renderContext.GetRenderDevice();
+        ig::GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         bindlessRootSignature = ig::MakePtr<ig::RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
 
         const ig::ShaderCompileDesc vsDesc{ .SourcePath = "Assets/Shader/BasicVertexShader.hlsl"_fs,
@@ -221,6 +221,6 @@ namespace fe
 
         ig::CommandContext* renderCmdCtxPtrs[] = { (ig::CommandContext*)renderCmdCtx };
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
-        return mainGfxQueue.MakeSync();
+        return mainGfxQueue.MakeSyncPoint();
     }
 }    // namespace fe

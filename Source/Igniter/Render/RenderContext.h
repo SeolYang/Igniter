@@ -50,7 +50,7 @@ namespace ig
         RenderContext& operator=(const RenderContext&) = delete;
         RenderContext& operator=(RenderContext&&) noexcept = delete;
 
-        GpuDevice& GetRenderDevice() { return gpuDevice; }
+        GpuDevice& GetGpuDevice() { return gpuDevice; }
         CommandQueue& GetMainGfxQueue() { return mainGfxQueue; }
         CommandQueue& GetAsyncComputeQueue() { return asyncComputeQueue; }
         CommandQueue& GetAsyncCopyQueue() { return asyncComputeQueue; }

@@ -13,6 +13,7 @@
 #include "Igniter/D3D12/GPUBuffer.h"
 #include "Igniter/D3D12/GPUTextureDesc.h"
 #include "Igniter/D3D12/GPUTexture.h"
+#include "Igniter/D3D12/Fence.h"
 
 IG_DEFINE_LOG_CATEGORY(GpuDevice);
 
@@ -252,17 +253,14 @@ namespace ig
         IG_CHECK(newCmdQueue);
         SetObjectName(newCmdQueue.Get(), debugName);
 
-        ComPtr<ID3D12Fence> newFence{};
-        if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence)); !SUCCEEDED(result))
+        Option<Fence> newFenceOpt = CreateFence(std::format("{} Sync Fence", debugName));
+        if (!newFenceOpt)
         {
-            IG_LOG(GpuDevice, Error, "Failed to create queue sync fence. HRESULT: {:#X}", result);
+            IG_LOG(GpuDevice, Error, "Failed to create queue internal fence.");
             return {};
         }
 
-        IG_CHECK(newFence);
-        SetObjectName(newFence.Get(), std::format("{} Sync Fence", debugName));
-
-        return CommandQueue{ std::move(newCmdQueue), queueType, std::move(newFence) };
+        return CommandQueue{ std::move(newCmdQueue), queueType, std::move(newFenceOpt.value()) };
     }
 
     Option<CommandContext> GpuDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
@@ -364,8 +362,7 @@ namespace ig
         return PipelineState{ std::move(newPipelineState), false };
     }
 
-    Option<DescriptorHeap> GpuDevice::CreateDescriptorHeap(
-        const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
+    Option<DescriptorHeap> GpuDevice::CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
     {
         IG_CHECK(device);
 
@@ -390,6 +387,20 @@ namespace ig
         SetObjectName(newDescriptorHeap.Get(), debugName);
         return DescriptorHeap{ descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
             GetDescriptorHandleIncrementSize(descriptorHeapType) };
+    }
+
+    Option<Fence> GpuDevice::CreateFence(const std::string_view debugName)
+    {
+        ComPtr<ID3D12Fence> newFence{};
+        if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence)); !SUCCEEDED(result))
+        {
+            IG_LOG(GpuDevice, Error, "Failed to create queue sync fence. HRESULT: {:#X}", result);
+            return {};
+        }
+
+        IG_CHECK(newFence);
+        SetObjectName(newFence.Get(), debugName);
+        return Fence{ std::move(newFence) };
     }
 
     void GpuDevice::CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView)
@@ -479,8 +490,7 @@ namespace ig
         return customPool;
     }
 
-    GpuCopyableFootprints GpuDevice::GetCopyableFootprints(
-        const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset)
+    GpuCopyableFootprints GpuDevice::GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset)
     {
         GpuCopyableFootprints footPrints{};
         footPrints.Layouts.resize(numSubresources);

@@ -354,9 +354,9 @@ namespace ig
 
     void RenderContext::FlushQueues()
     {
-        mainGfxQueue.MakeSync().WaitOnCpu();
-        asyncComputeQueue.MakeSync().WaitOnCpu();
-        asyncCopyQueue.MakeSync().WaitOnCpu();
+        mainGfxQueue.MakeSyncPoint().WaitOnCpu();
+        asyncComputeQueue.MakeSyncPoint().WaitOnCpu();
+        asyncCopyQueue.MakeSyncPoint().WaitOnCpu();
     }
 
     void RenderContext::PreRender(const LocalFrameIndex localFrameIdx)

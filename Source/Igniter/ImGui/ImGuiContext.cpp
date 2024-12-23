@@ -32,7 +32,7 @@ namespace ig
 
         fontSrv = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
         ig::GpuView* fontSrvPtr = renderContext.Lookup(fontSrv);
-        ig::GpuDevice& gpuDevice = renderContext.GetRenderDevice();
+        ig::GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         ImGui_ImplDX12_Init(&gpuDevice.GetNative(), ig::NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM,
                             &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), fontSrvPtr->CPUHandle, fontSrvPtr->GPUHandle);
     }

@@ -3,11 +3,9 @@
 
 namespace ig
 {
-    class Fence;
     class CommandQueue;
     class GpuSyncPoint final
     {
-        friend class Fence;
         friend class CommandQueue;
 
     public:

@@ -147,7 +147,7 @@ namespace ig
         GpuUploader& gpuUploader{ renderContext.GetGpuUploader() };
 
         const GpuCopyableFootprints destCopyableFootprints =
-            renderContext.GetRenderDevice().GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
+            renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
         UploadContext texUploadCtx = gpuUploader.Reserve(destCopyableFootprints.RequiredSize);
 
         GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
@@ -171,7 +171,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = { (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSync() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPoint() };
         barrierSync.WaitOnCpu();
 
         const RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -251,7 +251,7 @@ namespace ig
         };
 
         GpuUploader& gpuUploader{ renderContext.GetGpuUploader() };
-        const GpuCopyableFootprints dstCopyableFootprints{ renderContext.GetRenderDevice().GetCopyableFootprints(texDesc, 0, 1, 0) };
+        const GpuCopyableFootprints dstCopyableFootprints{ renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0) };
         UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
         GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
         IG_CHECK(newTexturePtr != nullptr);
@@ -274,7 +274,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = { (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSync() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPoint() };
         barrierSync.WaitOnCpu();
 
         RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -354,7 +354,7 @@ namespace ig
         std::vector<D3D12_SUBRESOURCE_DATA> subresources{ subresource };
 
         GpuUploader& gpuUploader{ renderContext.GetGpuUploader() };
-        const GpuCopyableFootprints dstCopyableFootprints{ renderContext.GetRenderDevice().GetCopyableFootprints(texDesc, 0, 1, 0) };
+        const GpuCopyableFootprints dstCopyableFootprints{ renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0) };
         UploadContext uploadCtx{ gpuUploader.Reserve(dstCopyableFootprints.RequiredSize) };
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);
         std::optional<GpuSyncPoint> sync{ gpuUploader.Submit(uploadCtx) };
@@ -375,7 +375,7 @@ namespace ig
 
         CommandContext* cmdCtxs[1]{ (CommandContext*)cmdCtx };
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSync() };
+        GpuSyncPoint barrierSync{ mainGfxQueue.MakeSyncPoint() };
         barrierSync.WaitOnCpu();
 
         const RenderResource<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,

@@ -74,6 +74,6 @@ namespace ig
             ImGui::RenderPlatformWindowsDefault();
         }
 
-        return mainGfxQueue.MakeSync();
+        return mainGfxQueue.MakeSyncPoint();
     }
 }    // namespace ig
