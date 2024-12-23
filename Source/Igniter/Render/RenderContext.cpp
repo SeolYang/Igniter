@@ -16,9 +16,7 @@ namespace ig
         asyncCopyCmdCtxPool(gpuDevice, EQueueType::Copy),
         gpuViewManager(gpuDevice),
         gpuUploader(gpuDevice),
-        swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight)),
-        staticMeshVertexStorage(GpuStorage(*this, "StaticMeshVertexStorage"_fs, sizeof(VertexSM), 16 * 1024, false)),
-        meshIndexStorage(GpuStorage(*this, "MeshIndexStorage"_fs, sizeof(U32), 3 * 16 * 1024, false)) { }
+        swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight)) { }
 
     RenderContext::~RenderContext()
     {

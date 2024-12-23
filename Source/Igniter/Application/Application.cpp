@@ -10,9 +10,7 @@ namespace ig
         engine = MakePtr<Engine>(engineDesc);
     }
 
-    Application::~Application()
-    {
-    }
+    Application::~Application() { }
 
     int Application::Execute()
     {
