@@ -5,12 +5,12 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
     class CommandContext;
 
     class CommandQueue final
     {
-        friend class RenderDevice;
+        friend class GpuDevice;
 
     public:
         CommandQueue(const CommandQueue&) = delete;

@@ -100,7 +100,7 @@ namespace ig
     class GpuUploader final
     {
     public:
-        GpuUploader(RenderDevice& renderDevice);
+        GpuUploader(GpuDevice& gpuDevice);
         GpuUploader(const GpuUploader&) = delete;
         GpuUploader(GpuUploader&&) noexcept = delete;
         ~GpuUploader();
@@ -118,7 +118,7 @@ namespace ig
         void FlushQueue();
 
     private:
-        RenderDevice& renderDevice;
+        GpuDevice& gpuDevice;
         Ptr<CommandQueue> copyQueue;
 
         constexpr static uint64_t InvalidThreadID = std::numeric_limits<uint64_t>::max();

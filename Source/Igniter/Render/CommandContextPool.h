@@ -7,7 +7,7 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
     class CommandContext;
     class CommandContextPool final
     {
@@ -44,7 +44,7 @@ namespace ig
         };
 
     public:
-        CommandContextPool(RenderDevice& renderDevice, const EQueueType cmdCtxType);
+        CommandContextPool(GpuDevice& gpuDevice, const EQueueType cmdCtxType);
         CommandContextPool(const CommandContextPool&) = delete;
         CommandContextPool(CommandContextPool&&) noexcept = delete;
         ~CommandContextPool();

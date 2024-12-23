@@ -1,10 +1,10 @@
 #include "Igniter/Igniter.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/Render/CommandContextPool.h"
 
 namespace ig
 {
-    CommandContextPool::CommandContextPool(RenderDevice& renderDevice, const EQueueType cmdCtxType)
+    CommandContextPool::CommandContextPool(GpuDevice& gpuDevice, const EQueueType cmdCtxType)
         : frameManager(frameManager), numReservedCtx(NumTargetCommandContextPerThread* std::thread::hardware_concurrency()* NumFramesInFlight)
     {
         IG_CHECK(numReservedCtx > 0);
@@ -12,7 +12,7 @@ namespace ig
         preservedCmdCtxs.reserve(numReservedCtx);
         for (const auto idx : views::iota(0Ui64, numReservedCtx))
         {
-            cmdCtxs.push_back(new CommandContext(renderDevice.CreateCommandContext(std::format("{}_Pool-{}", cmdCtxType, idx), cmdCtxType).value()));
+            cmdCtxs.push_back(new CommandContext(gpuDevice.CreateCommandContext(std::format("{}_Pool-{}", cmdCtxType, idx), cmdCtxType).value()));
             preservedCmdCtxs.push_back(cmdCtxs.back());
         }
     }

@@ -4,10 +4,10 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
     class GpuBuffer final
     {
-        friend class RenderDevice;
+        friend class GpuDevice;
 
     public:
         GpuBuffer(ComPtr<ID3D12Resource> bufferResource);

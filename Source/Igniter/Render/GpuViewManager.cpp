@@ -1,17 +1,17 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Hash.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/DescriptorHeap.h"
 #include "Igniter/Render/GpuViewManager.h"
 
 namespace ig
 {
-    GpuViewManager::GpuViewManager(RenderDevice& renderDevice, const uint32_t numCbvSrvUavDescriptors, const uint32_t numSamplerDescriptors, const uint32_t numRtvDescriptors, const uint32_t numDsvDescriptors) :
-        renderDevice(renderDevice),
-        cbvSrvUavHeap(MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("GpuViewManagerCbvSrvUavHeap", EDescriptorHeapType::CBV_SRV_UAV, numCbvSrvUavDescriptors).value())),
-        samplerHeap(MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value())),
-        rtvHeap(MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("GpuViewManagerRtvHeap", EDescriptorHeapType::RTV, numRtvDescriptors).value())),
-        dsvHeap(MakePtr<DescriptorHeap>(renderDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value()))
+    GpuViewManager::GpuViewManager(GpuDevice& gpuDevice, const uint32_t numCbvSrvUavDescriptors, const uint32_t numSamplerDescriptors, const uint32_t numRtvDescriptors, const uint32_t numDsvDescriptors) :
+        gpuDevice(gpuDevice),
+        cbvSrvUavHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerCbvSrvUavHeap", EDescriptorHeapType::CBV_SRV_UAV, numCbvSrvUavDescriptors).value())),
+        samplerHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value())),
+        rtvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerRtvHeap", EDescriptorHeapType::RTV, numRtvDescriptors).value())),
+        dsvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value()))
     {
     }
 
@@ -29,7 +29,7 @@ namespace ig
         if (newCBV)
         {
             IG_CHECK(newCBV.Type == EGpuViewType::ConstantBufferView);
-            renderDevice.UpdateConstantBufferView(newCBV, gpuBuffer);
+            gpuDevice.UpdateConstantBufferView(newCBV, gpuBuffer);
         }
 
         return newCBV;
@@ -45,7 +45,7 @@ namespace ig
         if (newCBV)
         {
             IG_CHECK(newCBV.Type == EGpuViewType::ConstantBufferView);
-            renderDevice.UpdateConstantBufferView(newCBV, gpuBuffer, offset, sizeInBytes);
+            gpuDevice.UpdateConstantBufferView(newCBV, gpuBuffer, offset, sizeInBytes);
         }
 
         return newCBV;
@@ -57,7 +57,7 @@ namespace ig
         if (newSRV)
         {
             IG_CHECK(newSRV.Type == EGpuViewType::ShaderResourceView);
-            renderDevice.UpdateShaderResourceView(newSRV, gpuBuffer);
+            gpuDevice.UpdateShaderResourceView(newSRV, gpuBuffer);
         }
 
         return newSRV;
@@ -69,7 +69,7 @@ namespace ig
         if (newUAV)
         {
             IG_CHECK(newUAV.Type == EGpuViewType::UnorderedAccessView);
-            renderDevice.UpdateUnorderedAccessView(newUAV, gpuBuffer);
+            gpuDevice.UpdateUnorderedAccessView(newUAV, gpuBuffer);
         }
 
         return newUAV;
@@ -82,7 +82,7 @@ namespace ig
         if (newSRV)
         {
             IG_CHECK(newSRV.Type == EGpuViewType::ShaderResourceView);
-            renderDevice.UpdateShaderResourceView(newSRV, gpuTexture, srvDesc, desireViewFormat);
+            gpuDevice.UpdateShaderResourceView(newSRV, gpuTexture, srvDesc, desireViewFormat);
         }
 
         return newSRV;
@@ -95,7 +95,7 @@ namespace ig
         if (newUAV)
         {
             IG_CHECK(newUAV.Type == EGpuViewType::UnorderedAccessView);
-            renderDevice.UpdateUnorderedAccessView(newUAV, gpuTexture, uavDesc, desireViewFormat);
+            gpuDevice.UpdateUnorderedAccessView(newUAV, gpuTexture, uavDesc, desireViewFormat);
         }
 
         return newUAV;
@@ -108,7 +108,7 @@ namespace ig
         if (newRTV)
         {
             IG_CHECK(newRTV.Type == EGpuViewType::RenderTargetView);
-            renderDevice.UpdateRenderTargetView(newRTV, gpuTexture, rtvDesc, desireViewFormat);
+            gpuDevice.UpdateRenderTargetView(newRTV, gpuTexture, rtvDesc, desireViewFormat);
         }
 
         return newRTV;
@@ -121,7 +121,7 @@ namespace ig
         if (newDSV)
         {
             IG_CHECK(newDSV.Type == EGpuViewType::DepthStencilView);
-            renderDevice.UpdateDepthStencilView(newDSV, gpuTexture, dsvDesc, desireViewFormat);
+            gpuDevice.UpdateDepthStencilView(newDSV, gpuTexture, dsvDesc, desireViewFormat);
         }
 
         return newDSV;
@@ -141,7 +141,7 @@ namespace ig
         if (samplerView)
         {
             IG_CHECK(samplerView.Type == EGpuViewType::Sampler);
-            renderDevice.CreateSampler(desc, samplerView);
+            gpuDevice.CreateSampler(desc, samplerView);
             cachedSamplerView[samplerDescHashVal] = samplerView;
         }
 

@@ -92,6 +92,7 @@
     <ClInclude Include="D3D12\CommandQueue.h" />
     <ClInclude Include="D3D12\Common.h" />
     <ClInclude Include="D3D12\DescriptorHeap.h" />
+    <ClInclude Include="D3D12\Fence.h" />
     <ClInclude Include="D3D12\GpuBuffer.h" />
     <ClInclude Include="D3D12\GpuBufferDesc.h" />
     <ClInclude Include="D3D12\GpuSyncPoint.h" />
@@ -100,7 +101,7 @@
     <ClInclude Include="D3D12\GpuView.h" />
     <ClInclude Include="D3D12\PipelineState.h" />
     <ClInclude Include="D3D12\PipelineStateDesc.h" />
-    <ClInclude Include="D3D12\RenderDevice.h" />
+    <ClInclude Include="D3D12\GpuDevice.h" />
     <ClInclude Include="D3D12\RootSignature.h" />
     <ClInclude Include="D3D12\ShaderBlob.h" />
     <ClInclude Include="Filesystem\CoFileWatcher.h" />
@@ -180,7 +181,7 @@
     <ClCompile Include="D3D12\GPUTextureDesc.cpp" />
     <ClCompile Include="D3D12\PipelineState.cpp" />
     <ClCompile Include="D3D12\PipelineStateDesc.cpp" />
-    <ClCompile Include="D3D12\RenderDevice.cpp" />
+    <ClCompile Include="D3D12\GpuDevice.cpp" />
     <ClCompile Include="D3D12\RootSignature.cpp" />
     <ClCompile Include="D3D12\ShaderBlob.cpp" />
     <ClCompile Include="Filesystem\CoFileWatcher.cpp" />

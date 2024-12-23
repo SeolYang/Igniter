@@ -45,8 +45,8 @@ namespace fe
         mainViewport(window.GetViewport()),
         tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(renderContext))
     {
-        ig::RenderDevice& renderDevice = renderContext.GetRenderDevice();
-        bindlessRootSignature = ig::MakePtr<ig::RootSignature>(renderDevice.CreateBindlessRootSignature().value());
+        ig::GpuDevice& gpuDevice = renderContext.GetRenderDevice();
+        bindlessRootSignature = ig::MakePtr<ig::RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
 
         const ig::ShaderCompileDesc vsDesc{ .SourcePath = "Assets/Shader/BasicVertexShader.hlsl"_fs,
             .Type = ig::EShaderType::Vertex,
@@ -64,7 +64,7 @@ namespace fe
         psoDesc.NumRenderTargets = 1;
         psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-        pso = ig::MakePtr<ig::PipelineState>(renderDevice.CreateGraphicsPipelineState(psoDesc).value());
+        pso = ig::MakePtr<ig::PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
 
         ig::GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;

@@ -2,7 +2,7 @@
 #include "Igniter/Core/ContainerUtils.h"
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/CommandContext.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 
 namespace ig
 {
@@ -36,7 +36,7 @@ namespace ig
         IG_CHECK(fence);
         const uint64_t syncPoint{ syncCounter.fetch_add(1) };
         IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
-        return GpuSyncPoint{ fence, syncPoint };
+        return GpuSyncPoint{ *fence.Get(), syncPoint };
     }
 
     GpuSyncPoint CommandQueue::GetSync()
@@ -44,7 +44,7 @@ namespace ig
         IG_CHECK(fence);
         const uint64_t syncPoint{ syncCounter };
         IG_VERIFY_SUCCEEDED(native->Signal(fence.Get(), syncPoint));
-        return GpuSyncPoint{ fence, syncPoint };
+        return GpuSyncPoint{ *fence.Get(), syncPoint };
     }
 
     void CommandQueue::SyncWith(GpuSyncPoint& sync)

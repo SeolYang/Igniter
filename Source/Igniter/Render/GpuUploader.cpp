@@ -4,21 +4,21 @@
 #include "Igniter/D3D12/CommandContext.h"
 #include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/D3D12/GpuTexture.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/Render/GpuUploader.h"
 
 namespace ig
 {
-    GpuUploader::GpuUploader(RenderDevice& renderDevice) :
-        renderDevice(renderDevice),
-        copyQueue(MakePtr<CommandQueue>(renderDevice.CreateCommandQueue("GpuUploader_CopyQueue", EQueueType::Copy).value()))
+    GpuUploader::GpuUploader(GpuDevice& gpuDevice) :
+        gpuDevice(gpuDevice),
+        copyQueue(MakePtr<CommandQueue>(gpuDevice.CreateCommandQueue("GpuUploader_CopyQueue", EQueueType::Copy).value()))
     {
         ResizeUnsafe(InitialBufferCapacity);
         for (size_t idx = 0; idx < RequestCapacity; ++idx)
         {
             uploadRequests[idx].Reset();
             uploadRequests[idx].CmdCtx =
-                MakePtr<CommandContext>(renderDevice.CreateCommandContext(std::format("Gpu Uploader CmdCtx{}", idx), EQueueType::Copy).value());
+                MakePtr<CommandContext>(gpuDevice.CreateCommandContext(std::format("Gpu Uploader CmdCtx{}", idx), EQueueType::Copy).value());
         }
     }
 
@@ -212,7 +212,7 @@ namespace ig
             GpuBufferDesc bufferDesc{};
             bufferDesc.AsUploadBuffer(static_cast<uint32_t>(alignedNewSize));
             bufferDesc.DebugName = UploadBufferName;
-            buffer = MakePtr<GpuBuffer>(renderDevice.CreateBuffer(bufferDesc).value());
+            buffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(bufferDesc).value());
 
             bufferCapacity = alignedNewSize;
             bufferHead = 0;

@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
     class DescriptorHeap;
     class GpuTexture;
     class GpuBuffer;
@@ -12,7 +12,7 @@ namespace ig
     class PipelineState;
     class CommandContext final
     {
-        friend class RenderDevice;
+        friend class GpuDevice;
 
     public:
         using NativeType = ID3D12GraphicsCommandList7;

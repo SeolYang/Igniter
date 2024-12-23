@@ -6,7 +6,7 @@
 #include "Igniter/D3D12/GpuTextureDesc.h"
 #include "Igniter/D3D12/GpuTexture.h"
 #include "Igniter/D3D12/GpuView.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
 #include "Frieren/Gui/AssetInspector.h"

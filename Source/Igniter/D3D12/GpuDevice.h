@@ -16,17 +16,17 @@ namespace ig
     class PipelineState;
     class RootSignature;
 
-    class RenderDevice final
+    class GpuDevice final
     {
     public:
-        RenderDevice();
-        ~RenderDevice();
+        GpuDevice();
+        ~GpuDevice();
 
-        RenderDevice(const RenderDevice&) = delete;
-        RenderDevice(RenderDevice&&) noexcept = delete;
+        GpuDevice(const GpuDevice&) = delete;
+        GpuDevice(GpuDevice&&) noexcept = delete;
 
-        RenderDevice& operator=(const RenderDevice&) = delete;
-        RenderDevice& operator=(RenderDevice&&) noexcept = delete;
+        GpuDevice& operator=(const GpuDevice&) = delete;
+        GpuDevice& operator=(GpuDevice&&) noexcept = delete;
 
         [[nodiscard]] auto& GetNative() { return *device.Get(); }
         uint32_t GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;

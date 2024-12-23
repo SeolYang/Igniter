@@ -4,12 +4,12 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
     class GpuView;
 
     class DescriptorHeap final
     {
-        friend class RenderDevice;
+        friend class GpuDevice;
 
     public:
         DescriptorHeap(const DescriptorHeap&) = delete;

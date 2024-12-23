@@ -3,11 +3,11 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
 
     class RootSignature final
     {
-        friend class RenderDevice;
+        friend class GpuDevice;
 
     public:
         RootSignature(const RootSignature&) = delete;

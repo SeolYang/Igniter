@@ -6,14 +6,14 @@
 namespace ig
 {
     RenderContext::RenderContext(const Window& window) :
-        mainGfxQueue(*renderDevice.CreateCommandQueue("MainGfx", EQueueType::Graphics)),
-        mainGfxCmdCtxPool(renderDevice, EQueueType::Graphics),
-        asyncComputeQueue(*renderDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute)),
-        asyncComputeCmdCtxPool(renderDevice, EQueueType::Compute),
-        asyncCopyQueue(*renderDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy)),
-        asyncCopyCmdCtxPool(renderDevice, EQueueType::Copy),
-        gpuViewManager(renderDevice),
-        gpuUploader(renderDevice),
+        mainGfxQueue(*gpuDevice.CreateCommandQueue("MainGfx", EQueueType::Graphics)),
+        mainGfxCmdCtxPool(gpuDevice, EQueueType::Graphics),
+        asyncComputeQueue(*gpuDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute)),
+        asyncComputeCmdCtxPool(gpuDevice, EQueueType::Compute),
+        asyncCopyQueue(*gpuDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy)),
+        asyncCopyCmdCtxPool(gpuDevice, EQueueType::Copy),
+        gpuViewManager(gpuDevice),
+        gpuUploader(gpuDevice),
         swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight))
     {
     }
@@ -32,7 +32,7 @@ namespace ig
 
     RenderResource<GpuBuffer> RenderContext::CreateBuffer(const GpuBufferDesc& desc)
     {
-        Option<GpuBuffer> newBuffer = renderDevice.CreateBuffer(desc);
+        Option<GpuBuffer> newBuffer = gpuDevice.CreateBuffer(desc);
         if (!newBuffer)
         {
             return RenderResource<GpuBuffer>{};
@@ -44,7 +44,7 @@ namespace ig
 
     RenderResource<GpuTexture> RenderContext::CreateTexture(const GpuTextureDesc& desc)
     {
-        Option<GpuTexture> newTexture = renderDevice.CreateTexture(desc);
+        Option<GpuTexture> newTexture = gpuDevice.CreateTexture(desc);
         if (!newTexture)
         {
             return RenderResource<GpuTexture>{};
@@ -62,7 +62,7 @@ namespace ig
 
     RenderResource<PipelineState> RenderContext::CreatePipelineState(const GraphicsPipelineStateDesc& desc)
     {
-        Option<PipelineState> newPipelineState = renderDevice.CreateGraphicsPipelineState(desc);
+        Option<PipelineState> newPipelineState = gpuDevice.CreateGraphicsPipelineState(desc);
         if (!newPipelineState)
         {
             return RenderResource<PipelineState>{};
@@ -74,7 +74,7 @@ namespace ig
 
     RenderResource<PipelineState> RenderContext::CreatePipelineState(const ComputePipelineStateDesc& desc)
     {
-        Option<PipelineState> newPipelineState = renderDevice.CreateComputePipelineState(desc);
+        Option<PipelineState> newPipelineState = gpuDevice.CreateComputePipelineState(desc);
         if (!newPipelineState)
         {
             return RenderResource<PipelineState>{};

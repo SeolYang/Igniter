@@ -3,10 +3,14 @@
 
 namespace ig
 {
+    class Fence;
+    class CommandQueue;
     class GpuSyncPoint final
     {
+        friend class Fence;
+        friend class CommandQueue;
+
     public:
-        GpuSyncPoint(ComPtr<ID3D12Fence> fence, const size_t syncPoint);
         GpuSyncPoint() = default;
         GpuSyncPoint(const GpuSyncPoint&) = default;
         GpuSyncPoint(GpuSyncPoint&&) noexcept = default;
@@ -24,11 +28,7 @@ namespace ig
 
         [[nodiscard]] bool IsValid() const noexcept { return fence != nullptr && syncPoint > 0; }
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
-        [[nodiscard]] ID3D12Fence& GetFence()
-        {
-            IG_CHECK(fence != nullptr);
-            return *fence.Get();
-        }
+
 
         [[nodiscard]] size_t GetSyncPoint() const noexcept { return syncPoint; }
         [[nodiscard]] size_t GetCompletedSyncPoint() const;
@@ -39,7 +39,15 @@ namespace ig
         static GpuSyncPoint Invalid() { return {}; }
 
     private:
-        ComPtr<ID3D12Fence> fence{};
+        GpuSyncPoint(ID3D12Fence& fence, const size_t syncPoint);
+        [[nodiscard]] ID3D12Fence& GetFence()
+        {
+            IG_CHECK(fence != nullptr);
+            return *fence;
+        }
+
+    private:
+        ID3D12Fence* fence = nullptr;
         size_t syncPoint = 0;
     };
 }    // namespace ig

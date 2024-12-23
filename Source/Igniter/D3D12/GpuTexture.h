@@ -4,10 +4,10 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
     class GpuTexture final
     {
-        friend class RenderDevice;
+        friend class GpuDevice;
 
     public:
         GpuTexture(ComPtr<ID3D12Resource> textureResource);

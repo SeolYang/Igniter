@@ -3,7 +3,7 @@
 #include "Igniter/Core/Timer.h"
 #include "Igniter/Core/Handle.h"
 #include "Igniter/Filesystem/Utils.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/D3D12/GpuBufferDesc.h"
 #include "Igniter/Render/Vertex.h"

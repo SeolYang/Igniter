@@ -6,14 +6,14 @@
 
 namespace ig
 {
-    class RenderDevice;
+    class GpuDevice;
     class DescriptorHeap;
     class GpuTexture;
     class GpuBuffer;
     class GpuViewManager final
     {
     public:
-        GpuViewManager(RenderDevice& renderDevice,
+        GpuViewManager(GpuDevice& gpuDevice,
                        const uint32_t numCbvSrvUavDescriptors = DefaultNumCbvSrvUavDescriptors,
                        const uint32_t numSamplerDescriptors = DefaultNumSamplerDescriptors,
                        const uint32_t numRtvDescriptors = DefaultNumRtvDescriptors,
@@ -51,7 +51,7 @@ namespace ig
         constexpr static uint32_t DefaultNumRtvDescriptors = 512;
         constexpr static uint32_t DefaultNumDsvDescriptors = DefaultNumRtvDescriptors;
 
-        RenderDevice& renderDevice;
+        GpuDevice& gpuDevice;
         Ptr<DescriptorHeap> cbvSrvUavHeap;
         Ptr<DescriptorHeap> samplerHeap;
         Ptr<DescriptorHeap> rtvHeap;

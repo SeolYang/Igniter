@@ -2,7 +2,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Handle.h"
 #include "Igniter/Core/HandleStorage.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/D3D12/GpuBufferDesc.h"
@@ -50,7 +50,7 @@ namespace ig
         RenderContext& operator=(const RenderContext&) = delete;
         RenderContext& operator=(RenderContext&&) noexcept = delete;
 
-        RenderDevice& GetRenderDevice() { return renderDevice; }
+        GpuDevice& GetRenderDevice() { return gpuDevice; }
         CommandQueue& GetMainGfxQueue() { return mainGfxQueue; }
         CommandQueue& GetAsyncComputeQueue() { return asyncComputeQueue; }
         CommandQueue& GetAsyncCopyQueue() { return asyncComputeQueue; }
@@ -97,7 +97,7 @@ namespace ig
         void PostRender(const LocalFrameIndex localFrameIdx);
 
     private:
-        RenderDevice renderDevice;
+        GpuDevice gpuDevice;
 
         LocalFrameIndex lastLocalFrameIdx{};
 

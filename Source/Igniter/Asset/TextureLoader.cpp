@@ -4,7 +4,7 @@
 #include "Igniter/Core/ContainerUtils.h"
 #include "Igniter/Core/FrameManager.h"
 #include "Igniter/Filesystem/Utils.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/GpuTexture.h"
 #include "Igniter/D3D12/GpuView.h"
 #include "Igniter/D3D12/CommandContext.h"
@@ -123,7 +123,7 @@ namespace ig
         texDesc.DebugName = String(std::format("{}({})", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
         texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
-        /* Create Texture from RenderDevice */
+        /* Create Texture from GpuDevice */
         const RenderResource<GpuTexture> newTexture = renderContext.CreateTexture(texDesc);
         if (!newTexture)
         {

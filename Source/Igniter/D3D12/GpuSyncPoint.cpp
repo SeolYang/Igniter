@@ -3,8 +3,8 @@
 
 namespace ig
 {
-    GpuSyncPoint::GpuSyncPoint(ComPtr<ID3D12Fence> fence, const size_t syncPoint) :
-        fence(fence),
+    GpuSyncPoint::GpuSyncPoint(ID3D12Fence& fence, const size_t syncPoint) :
+        fence(&fence),
         syncPoint(syncPoint)
     {
         IG_CHECK(IsValid());

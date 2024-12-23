@@ -258,7 +258,7 @@
     <ClInclude Include="D3D12\PipelineStateDesc.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="D3D12\RenderDevice.h">
+    <ClInclude Include="D3D12\GpuDevice.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="D3D12\RootSignature.h">
@@ -402,6 +402,9 @@
     <ClInclude Include="Render\GpuStorage.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="D3D12\Fence.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -518,7 +521,7 @@
     <ClCompile Include="D3D12\PipelineStateDesc.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="D3D12\RenderDevice.cpp">
+    <ClCompile Include="D3D12\GpuDevice.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="D3D12\RootSignature.cpp">

@@ -1,7 +1,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/ContainerUtils.h"
 #include "Igniter/D3D12/CommandContext.h"
-#include "Igniter/D3D12/RenderDevice.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/GPUTextureDesc.h"
 #include "Igniter/D3D12/GPUTexture.h"
 #include "Igniter/D3D12/GPUBufferDesc.h"
