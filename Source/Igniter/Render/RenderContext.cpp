@@ -267,8 +267,9 @@ namespace ig
     {
         if (buffer)
         {
-            UniqueLock pendingListLock{bufferPackage.PendingListMut[lastLocalFrameIdx]};
+            ScopedLock packageLock{bufferPackage.Mut, bufferPackage.PendingListMut[lastLocalFrameIdx]};
             bufferPackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(buffer);
+            bufferPackage.Registry.Destroy(buffer);
         }
     }
 
@@ -276,8 +277,9 @@ namespace ig
     {
         if (texture)
         {
-            UniqueLock pendingListLock{texturePackage.PendingListMut[lastLocalFrameIdx]};
+            ScopedLock packageLock{texturePackage.Mut, texturePackage.PendingListMut[lastLocalFrameIdx]};
             texturePackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(texture);
+            texturePackage.Registry.Destroy(texture);
         }
     }
 
@@ -285,8 +287,9 @@ namespace ig
     {
         if (state)
         {
-            UniqueLock pendingListLock{pipelineStatePackage.PendingListMut[lastLocalFrameIdx]};
+            ScopedLock packageLock{pipelineStatePackage.Mut, pipelineStatePackage.PendingListMut[lastLocalFrameIdx]};
             pipelineStatePackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(state);
+            pipelineStatePackage.Registry.Destroy(state);
         }
     }
 
@@ -294,8 +297,9 @@ namespace ig
     {
         if (view)
         {
-            UniqueLock pendingListLock{gpuViewPackage.PendingListMut[lastLocalFrameIdx]};
+            ScopedLock packageLock{gpuViewPackage.Mut, gpuViewPackage.PendingListMut[lastLocalFrameIdx]};
             gpuViewPackage.PendingDestroyList[lastLocalFrameIdx].emplace_back(view);
+            gpuViewPackage.Registry.Destroy(view);
         }
     }
 
@@ -395,7 +399,7 @@ namespace ig
             ScopedLock gpuViewPackageLock{gpuViewPackage.Mut, gpuViewPackage.PendingListMut[localFrameIdx]};
             for (const auto handle : gpuViewPackage.PendingDestroyList[localFrameIdx])
             {
-                gpuViewManager.Deallocate(*gpuViewPackage.Registry.Lookup(handle));
+                gpuViewManager.Deallocate(*gpuViewPackage.Registry.LookupUnsafe(handle));
                 gpuViewPackage.Registry.DestroyImmediate(handle);
             }
             gpuViewPackage.PendingDestroyList[localFrameIdx].clear();

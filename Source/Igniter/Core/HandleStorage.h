@@ -167,7 +167,8 @@ namespace ig
             freeSlots.push_back(slot);
         }
 
-        Ty* Lookup(const Handle<Ty, Dependency> handle)
+        // Destroy 예약 마킹이 되어있어도 데이터를 가져옴
+        Ty* LookupUnsafe(const Handle<Ty, Dependency> handle)
         {
             if (handle.IsNull())
             {
@@ -187,11 +188,6 @@ namespace ig
 
             if (const VersionType version = MaskBits<VersionOffset, VersionSizeInBits, VersionType>(handle.Value);
                 version != slotVersions[slot])
-            {
-                return nullptr;
-            }
-
-            if (reservedToDestroyFlags[slot])
             {
                 return nullptr;
             }
@@ -199,7 +195,7 @@ namespace ig
             return CalcAddressOfSlot(slot);
         }
 
-        const Ty* Lookup(const Handle<Ty, Dependency> handle) const
+        const Ty* LookupUnsafe(const Handle<Ty, Dependency> handle) const
         {
             if (handle.IsNull())
             {
@@ -223,12 +219,31 @@ namespace ig
                 return nullptr;
             }
 
-            if (reservedToDestroyFlags[slot])
+            return CalcAddressOfSlot(slot);
+        }
+
+        Ty* Lookup(const Handle<Ty, Dependency> handle)
+        {
+            Ty* const ptr = LookupUnsafe(handle);
+            if (const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);
+                ptr != nullptr && reservedToDestroyFlags[slot])
             {
                 return nullptr;
             }
-            
-            return CalcAddressOfSlot(slot);
+
+            return ptr;
+        }
+
+        const Ty* Lookup(const Handle<Ty, Dependency> handle) const
+        {
+            const Ty* const ptr = LookupUnsafe(handle);
+            if (const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);
+                ptr != nullptr && reservedToDestroyFlags[slot])
+            {
+                return nullptr;
+            }
+
+            return ptr;
         }
 
     private:
