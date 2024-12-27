@@ -9,7 +9,7 @@
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/Utils.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
-#include "Igniter/ImGui/ImGuiCanvas.h"
+#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/Component/TransformComponent.h"
@@ -28,6 +28,7 @@ namespace fe
         uint32_t PerObjectBufferIdx;
         uint32_t DiffuseTexIdx;
         uint32_t DiffuseTexSamplerIdx;
+        uint32_t VertexStorageOffset;
     };
 
     struct PerFrameBuffer
@@ -49,12 +50,12 @@ namespace fe
         bindlessRootSignature    = ig::MakePtr<ig::RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
 
         const ig::ShaderCompileDesc vsDesc{
-            .SourcePath = "Assets/Shader/BasicVertexShader.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/BasicVertexShader.hlsl"_fs,
             .Type = ig::EShaderType::Vertex,
             .OptimizationLevel = ig::EShaderOptimizationLevel::None
         };
 
-        const ig::ShaderCompileDesc psDesc{.SourcePath = "Assets/Shader/BasicPixelShader.hlsl"_fs, .Type = ig::EShaderType::Pixel};
+        const ig::ShaderCompileDesc psDesc{.SourcePath = "Assets/Shaders/BasicPixelShader.hlsl"_fs, .Type = ig::EShaderType::Pixel};
 
         vs = ig::MakePtr<ig::ShaderBlob>(vsDesc);
         ps = ig::MakePtr<ig::ShaderBlob>(psDesc);
@@ -126,6 +127,12 @@ namespace fe
         ig::GpuTexture*    backBufferPtr    = renderContext.Lookup(swapchain.GetBackBuffer());
         const ig::GpuView* backBufferRtvPtr = renderContext.Lookup(swapchain.GetRenderTargetView());
 
+        ig::MeshStorage&                      meshStorage                   = ig::Engine::GetMeshStorage();
+        const ig::RenderHandle<ig::GpuView>   staticMeshVertexStorageSrv    = meshStorage.GetStaticMeshVertexStorageShaderResourceView();
+        const ig::GpuView*                    staticMeshVertexStorageSrvPtr = renderContext.Lookup(staticMeshVertexStorageSrv);
+        const ig::RenderHandle<ig::GpuBuffer> vertexIndexStorageBuffer      = meshStorage.GetVertexIndexStorageBuffer();
+        ig::GpuBuffer*                        vertexIndexStorageBufferPtr   = renderContext.Lookup(vertexIndexStorageBuffer);
+
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         auto              renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
 
@@ -171,6 +178,8 @@ namespace fe
             renderCmdCtx->SetScissorRect(mainViewport);
             renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+            renderCmdCtx->SetIndexBuffer(*vertexIndexStorageBufferPtr);
+
             if (bRenderable)
             {
                 ig::AssetManager& assetManager   = ig::Engine::GetAssetManager();
@@ -180,15 +189,13 @@ namespace fe
                 {
                     if (staticMeshComponent.Mesh)
                     {
-                        ig::StaticMesh* staticMeshPtr      = assetManager.Lookup(staticMeshComponent.Mesh);
-                        ig::GpuBuffer*  indexBufferPtr     = renderContext.Lookup(staticMeshPtr->GetIndexBuffer());
-                        ig::GpuView*    vertexBufferSrvPtr = renderContext.Lookup(staticMeshPtr->GetVertexBufferSrv());
-                        renderCmdCtx->SetIndexBuffer(*indexBufferPtr);
+                        ig::StaticMesh*                             staticMeshPtr    = assetManager.Lookup(staticMeshComponent.Mesh);
+                        const ig::MeshStorage::Space<ig::VertexSM>* vertexSpace      = meshStorage.Lookup(staticMeshPtr->GetVertexSpace());
+                        const ig::MeshStorage::Space<ig::U32>*      vertexIndexSpace = meshStorage.Lookup(staticMeshPtr->GetVertexIndexSpace());
                         {
                             ig::TempConstantBuffer perObjectConstantBuffer = tempConstantBufferAllocator->Allocate<PerObjectBuffer>(localFrameIdx);
-                            ig::GpuView*           perObjectCBViewPtr      = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
-                            const auto             perObjectBuffer         =
-                                    PerObjectBuffer{.LocalToWorld = ig::ConvertToShaderSuitableForm(transform.CreateTransformation())};
+                            const ig::GpuView*     perObjectCbvPtr         = renderContext.Lookup(perObjectConstantBuffer.GetConstantBufferView());
+                            const auto             perObjectBuffer         = PerObjectBuffer{.LocalToWorld = ig::ConvertToShaderSuitableForm(transform.CreateTransformation())};
                             perObjectConstantBuffer.Write(perObjectBuffer);
 
                             /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
@@ -198,19 +205,18 @@ namespace fe
                             ig::GpuView*  diffuseTexSamplerPtr = renderContext.Lookup(diffuseTexPtr->GetSampler());
 
                             const BasicRenderResources params{
-                                .VertexBufferIdx = vertexBufferSrvPtr->Index,
+                                .VertexBufferIdx = staticMeshVertexStorageSrvPtr->Index,
                                 .PerFrameBufferIdx = perFrameCbvPtr->Index,
-                                .PerObjectBufferIdx = perObjectCBViewPtr->Index,
+                                .PerObjectBufferIdx = perObjectCbvPtr->Index,
                                 .DiffuseTexIdx = diffuseTexSrvPtr->Index,
-                                .DiffuseTexSamplerIdx = diffuseTexSamplerPtr->Index
+                                .DiffuseTexSamplerIdx = diffuseTexSamplerPtr->Index,
+                                .VertexStorageOffset = static_cast<ig::U32>(vertexSpace->Allocation.OffsetIndex)
                             };
 
                             renderCmdCtx->SetRoot32BitConstants(0, params, 0);
                         }
 
-                        const ig::StaticMesh::Desc&     snapshot = staticMeshPtr->GetSnapshot();
-                        const ig::StaticMesh::LoadDesc& loadDesc = snapshot.LoadDescriptor;
-                        renderCmdCtx->DrawIndexed(loadDesc.NumIndices);
+                        renderCmdCtx->DrawIndexed((ig::U32)vertexIndexSpace->Allocation.NumElements, (ig::U32)vertexIndexSpace->Allocation.OffsetIndex);
                     }
                 }
             }

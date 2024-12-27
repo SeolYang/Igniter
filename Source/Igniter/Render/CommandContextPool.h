@@ -77,6 +77,7 @@ namespace ig
         constexpr static size_t NumTargetCommandContextPerThread = 8;
         const FrameManager&     frameManager;
         const size_t            numReservedCtx;
+        const EQueueType        cmdQueueType;
 
         Mutex                                                           poolMutex;
         eastl::vector<CommandContext*>                                  preservedCmdCtxs;

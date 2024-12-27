@@ -335,7 +335,8 @@ namespace ig
 
     void CommandContext::SetRoot32BitConstants(const uint32_t registerSlot,
                                                const uint32_t num32BitValuesToSet,
-                                               const void*    srcData, const uint32_t destOffsetIn32BitValues)
+                                               const void*    srcData,
+                                               const uint32_t destOffsetIn32BitValues)
     {
         constexpr uint32_t NumMaximumRootConstants = 64;
         IG_VERIFY(num32BitValuesToSet < NumMaximumRootConstants);

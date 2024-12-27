@@ -4,6 +4,11 @@
 
 namespace ig
 {
+    class CommandQueue;
+    class CommandContext;
+    class GpuTexture;
+    class GpuBuffer;
+
     namespace details
     {
         struct UploadRequest final
@@ -25,9 +30,6 @@ namespace ig
             GpuSyncPoint                    Sync{ };
         };
     } // namespace details
-
-    class CommandQueue;
-    class CommandContext;
 
     class UploadContext final
     {

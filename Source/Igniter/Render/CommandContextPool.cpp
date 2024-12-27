@@ -6,7 +6,8 @@ namespace ig
 {
     CommandContextPool::CommandContextPool(GpuDevice& gpuDevice, const EQueueType cmdCtxType) :
         frameManager(frameManager),
-        numReservedCtx(NumTargetCommandContextPerThread * std::thread::hardware_concurrency() * NumFramesInFlight)
+        numReservedCtx(NumTargetCommandContextPerThread * std::thread::hardware_concurrency() * NumFramesInFlight),
+        cmdQueueType(cmdCtxType)
     {
         IG_CHECK(numReservedCtx > 0);
         cmdCtxs.reserve(numReservedCtx);

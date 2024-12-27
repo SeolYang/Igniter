@@ -15,9 +15,8 @@ namespace ig
         BlobSizeMismatch,
         InvalidCompressedVerticesSize,
         InvalidCompressedIndicesSize,
-        FailedCreateVertexBuffer,
-        FailedCreateVertexBufferSrv,
-        FailedCreateIndexBuffer,
+        FailedCreateVertexSpace,
+        FailedCreateVertexIndexSpace,
         FailedDecodeVertexBuffer,
         FailedDecodeIndexBuffer,
     };
@@ -40,9 +39,9 @@ namespace ig
         StaticMeshLoader& operator=(StaticMeshLoader&&) noexcept = delete;
 
     private:
-        Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc);
+        Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc) const;
 
-    public:
+    private:
         RenderContext& renderContext;
         AssetManager&  assetManager;
     };

@@ -50,6 +50,11 @@ namespace ig
         return type == EGpuBufferType::ReadbackBuffer;
     }
 
+    constexpr bool IsIndexBufferCompatible(const EGpuBufferType type)
+    {
+        return type == EGpuBufferType::IndexBuffer || type == EGpuBufferType::StructuredBuffer;
+    }
+
     /* #sy_todo 기본 값 설정 */
     class GpuBufferDesc final : public D3D12_RESOURCE_DESC1
     {
@@ -86,7 +91,7 @@ namespace ig
 
         [[nodiscard]] DXGI_FORMAT GetIndexFormat() const noexcept
         {
-            if (bufferType != EGpuBufferType::IndexBuffer)
+            if (!IsIndexBufferCompatible(bufferType))
             {
                 return DXGI_FORMAT_UNKNOWN;
             }

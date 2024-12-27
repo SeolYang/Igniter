@@ -1,8 +1,7 @@
 #pragma once
 #include "Igniter/Core/Handle.h"
-#include "Igniter/Core/String.h"
-#include "Igniter/Core/Result.h"
 #include "Igniter/Render/Common.h"
+#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Asset/Common.h"
 #include "Igniter/Asset/Material.h"
 
@@ -10,7 +9,7 @@ namespace ig
 {
     class StaticMesh;
     template <>
-    constexpr inline EAssetCategory AssetCategoryOf<StaticMesh> = EAssetCategory::StaticMesh;
+    constexpr inline auto AssetCategoryOf<StaticMesh> = EAssetCategory::StaticMesh;
 
     struct StaticMeshImportDesc
     {
@@ -61,8 +60,7 @@ namespace ig
         using Desc       = AssetDesc<StaticMesh>;
 
     public:
-        StaticMesh(RenderContext&                renderContext, AssetManager&                     assetManager, const Desc&                 snapshot, const RenderHandle<GpuBuffer> vertexBuffer,
-                   const RenderHandle<GpuView> vertexBufferSrv, const RenderHandle<GpuBuffer> indexBuffer, const ManagedAsset<Material> material);
+        StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material);
         StaticMesh(const StaticMesh&)     = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();
@@ -70,19 +68,17 @@ namespace ig
         StaticMesh& operator=(const StaticMesh&)     = delete;
         StaticMesh& operator=(StaticMesh&&) noexcept = default;
 
-        const Desc&               GetSnapshot() const { return snapshot; }
-        RenderHandle<GpuBuffer> GetVertexBuffer() const { return vertexBuffer; }
-        RenderHandle<GpuView>   GetVertexBufferSrv() const { return vertexBufferSrv; }
-        RenderHandle<GpuBuffer> GetIndexBuffer() const { return indexBuffer; }
-        ManagedAsset<Material>    GetMaterial() const { return material; }
+        [[nodiscard]] const Desc&                   GetSnapshot() const { return snapshot; }
+        [[nodiscard]] MeshStorage::Handle<VertexSM> GetVertexSpace() const noexcept { return vertexSpace; }
+        [[nodiscard]] MeshStorage::Handle<U32>      GetVertexIndexSpace() const noexcept { return vertexIndexSpace; }
+        [[nodiscard]] ManagedAsset<Material>        GetMaterial() const noexcept { return material; }
 
     private:
-        RenderContext*            renderContext{nullptr};
-        AssetManager*             assetManager{nullptr};
-        Desc                      snapshot{ };
-        RenderHandle<GpuBuffer> vertexBuffer{ };
-        RenderHandle<GpuView>   vertexBufferSrv{ };
-        RenderHandle<GpuBuffer> indexBuffer{ };
-        ManagedAsset<Material>    material{ };
+        RenderContext*                renderContext{nullptr};
+        AssetManager*                 assetManager{nullptr};
+        Desc                          snapshot{ };
+        MeshStorage::Handle<VertexSM> vertexSpace{ };
+        MeshStorage::Handle<U32>      vertexIndexSpace{ };
+        ManagedAsset<Material>        material{ };
     };
 } // namespace ig

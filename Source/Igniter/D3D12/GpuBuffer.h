@@ -59,7 +59,7 @@ namespace ig
         std::optional<D3D12_INDEX_BUFFER_VIEW> GetIndexBufferView() const
         {
             std::optional<D3D12_INDEX_BUFFER_VIEW> view{ };
-            if (desc.GetBufferType() == EGpuBufferType::IndexBuffer)
+            if (IsIndexBufferCompatible(desc.GetBufferType()))
             {
                 view = D3D12_INDEX_BUFFER_VIEW{
                     .BufferLocation = resource->GetGPUVirtualAddress(),

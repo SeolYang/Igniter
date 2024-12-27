@@ -405,6 +405,9 @@
     <ClInclude Include="D3D12\GpuFence.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Render\MeshStorage.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -587,14 +590,9 @@
     <ClCompile Include="Render\GpuStorage.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Assets\Shader\BasicVertexShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="Assets\Shader\BasicPixelShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
+    <ClCompile Include="Render\MeshStorage.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">

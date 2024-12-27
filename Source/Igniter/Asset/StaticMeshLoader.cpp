@@ -1,11 +1,9 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Log.h"
-#include "Igniter/Core/Timer.h"
 #include "Igniter/Core/Handle.h"
+#include "Igniter/Core/Engine.h"
 #include "Igniter/Filesystem/Utils.h"
-#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/GpuBuffer.h"
-#include "Igniter/D3D12/GpuBufferDesc.h"
 #include "Igniter/Render/Vertex.h"
 #include "Igniter/Render/GpuUploader.h"
 #include "Igniter/Render/RenderContext.h"
@@ -19,7 +17,7 @@ namespace ig
     StaticMeshLoader::StaticMeshLoader(RenderContext& renderContext, AssetManager& assetManager)
         : renderContext(renderContext), assetManager(assetManager) { }
 
-    Result<StaticMesh, EStaticMeshLoadStatus> StaticMeshLoader::Load(const StaticMesh::Desc& desc)
+    Result<StaticMesh, EStaticMeshLoadStatus> StaticMeshLoader::Load(const StaticMesh::Desc& desc) const
     {
         const AssetInfo&          assetInfo{desc.Info};
         const StaticMeshLoadDesc& loadDesc{desc.LoadDescriptor};
@@ -58,52 +56,42 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::BlobSizeMismatch>();
         }
 
-        GpuBufferDesc vertexBufferDesc{ };
-        vertexBufferDesc.AsStructuredBuffer<VertexSM>(loadDesc.NumVertices);
-        vertexBufferDesc.DebugName = String(std::format("{}({})_Vertices", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
-        if (vertexBufferDesc.GetSizeAsBytes() < loadDesc.CompressedVerticesSizeInBytes)
+        MeshStorage&                        meshStorage = Engine::GetMeshStorage();
+        const MeshStorage::Handle<VertexSM> vertexSpace = meshStorage.CreateStaticMeshVertexSpace(loadDesc.NumVertices);
+        if (!vertexSpace)
         {
-            return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedVerticesSize>();
+            return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexSpace>();
         }
 
-        GpuBufferDesc indexBufferDesc{ };
-        indexBufferDesc.AsIndexBuffer<uint32_t>(loadDesc.NumIndices);
-        indexBufferDesc.DebugName = String(std::format("{}({})_Indices", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
-        if (indexBufferDesc.GetSizeAsBytes() < loadDesc.CompressedIndicesSizeInBytes)
+        const MeshStorage::Handle<U32> vertexIndexSpace = meshStorage.CreateVertexIndexSpace(loadDesc.NumIndices);
+        if (!vertexIndexSpace)
         {
-            return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedIndicesSize>();
+            return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexIndexSpace>();
         }
 
-        const RenderHandle<GpuBuffer> vertexBuffer = renderContext.CreateBuffer(vertexBufferDesc);
-        if (!vertexBuffer)
-        {
-            return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBuffer>();
-        }
-
-        const RenderHandle<GpuView> vertexBufferSrv = renderContext.CreateShaderResourceView(vertexBuffer);
-        if (!vertexBufferSrv)
-        {
-            return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBufferSrv>();
-        }
-
-        const RenderHandle<GpuBuffer> indexBuffer = renderContext.CreateBuffer(indexBufferDesc);
-        if (!indexBuffer)
-        {
-            return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateIndexBuffer>();
-        }
+        const MeshStorage::Space<VertexSM>* vertexSpacePtr      = meshStorage.Lookup(vertexSpace);
+        const MeshStorage::Space<U32>*      vertexIndexSpacePtr = meshStorage.Lookup(vertexIndexSpace);
+        IG_CHECK(vertexSpacePtr != nullptr && vertexIndexSpacePtr != nullptr);
+        IG_CHECK(vertexSpacePtr->Allocation.NumElements == loadDesc.NumVertices);
+        IG_CHECK(vertexIndexSpacePtr->Allocation.NumElements == loadDesc.NumIndices);
 
         GpuUploader&  gpuUploader{renderContext.GetGpuUploader()};
         bool          bVertexBufferDecodeSucceed = false;
-        UploadContext verticesUploadCtx          = gpuUploader.Reserve(vertexBufferDesc.GetSizeAsBytes());
+        UploadContext verticesUploadCtx          = gpuUploader.Reserve(vertexSpacePtr->Allocation.AllocSize);
         {
-            const size_t compressedVerticesOffset = 0;
-            const int    decodeResult             = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(), loadDesc.NumVertices,
-                                                                sizeof(VertexSM), blob.data() + compressedVerticesOffset, loadDesc.CompressedVerticesSizeInBytes);
+            constexpr size_t compressedVerticesOffset = 0;
+            const int        decodeResult             = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(),
+                                                                loadDesc.NumVertices,
+                                                                sizeof(VertexSM),
+                                                                blob.data() + compressedVerticesOffset,
+                                                                loadDesc.CompressedVerticesSizeInBytes);
             if (decodeResult == 0)
             {
-                GpuBuffer* vertexBufferPtr = renderContext.Lookup(vertexBuffer);
-                IG_CHECK(vertexBufferPtr != nullptr);
-                verticesUploadCtx.CopyBuffer(0, vertexBufferDesc.GetSizeAsBytes(), *vertexBufferPtr);
+                const RenderHandle<GpuBuffer> vertexStorageBuffer    = meshStorage.GetStaticMeshVertexStorageBuffer();
+                GpuBuffer*                    vertexStorageBufferPtr = renderContext.Lookup(vertexStorageBuffer);
+                IG_CHECK(vertexStorageBufferPtr != nullptr);
+                verticesUploadCtx.CopyBuffer(0, vertexSpacePtr->Allocation.AllocSize,
+                                             *vertexStorageBufferPtr, vertexSpacePtr->Allocation.Offset);
                 bVertexBufferDecodeSucceed = true;
             }
         }
@@ -111,7 +99,7 @@ namespace ig
         IG_CHECK(verticesUploadSync);
 
         bool          bIndexBufferDecodeSucceed = false;
-        UploadContext indicesUploadCtx          = gpuUploader.Reserve(indexBufferDesc.GetSizeAsBytes());
+        UploadContext indicesUploadCtx          = gpuUploader.Reserve(vertexIndexSpacePtr->Allocation.AllocSize);
         {
             const size_t compressedIndicesOffset = loadDesc.CompressedVerticesSizeInBytes;
             const int    decodeResult            = meshopt_decodeIndexBuffer<uint32_t>(reinterpret_cast<uint32_t*>(indicesUploadCtx.GetOffsettedCpuAddress()),
@@ -119,16 +107,18 @@ namespace ig
 
             if (decodeResult == 0)
             {
-                GpuBuffer* indexBufferPtr = renderContext.Lookup(indexBuffer);
-                IG_CHECK(indexBufferPtr != nullptr);
-                indicesUploadCtx.CopyBuffer(0, indexBufferDesc.GetSizeAsBytes(), *indexBufferPtr);
+                const RenderHandle<GpuBuffer> vertexIndexStorageBuffer    = meshStorage.GetVertexIndexStorageBuffer();
+                GpuBuffer*                    vertexIndexStorageBufferPtr = renderContext.Lookup(vertexIndexStorageBuffer);
+                IG_CHECK(vertexIndexStorageBufferPtr != nullptr);
+                indicesUploadCtx.CopyBuffer(0, vertexIndexSpacePtr->Allocation.AllocSize,
+                                            *vertexIndexStorageBufferPtr, vertexIndexSpacePtr->Allocation.Offset);
                 bIndexBufferDecodeSucceed = true;
             }
         }
         std::optional<GpuSyncPoint> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
         IG_CHECK(indicesUploadSync);
 
-        ManagedAsset<Material> material{assetManager.Load<Material>(loadDesc.MaterialGuid)};
+        const ManagedAsset<Material> material{assetManager.Load<Material>(loadDesc.MaterialGuid)};
         IG_CHECK(material);
 
         verticesUploadSync->WaitOnCpu();
@@ -145,6 +135,6 @@ namespace ig
         }
 
         return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(
-            StaticMesh{renderContext, assetManager, desc, vertexBuffer, vertexBufferSrv, indexBuffer, material});
+            StaticMesh{renderContext, assetManager, desc, vertexSpace, vertexIndexSpace, material});
     }
 } // namespace ig

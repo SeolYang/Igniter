@@ -1,8 +1,8 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Json.h"
 #include "Igniter/Core/Engine.h"
-#include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/Render/RenderContext.h"
+#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Asset/StaticMesh.h"
 
@@ -60,15 +60,11 @@ namespace ig
         return archive;
     }
 
-    StaticMesh::StaticMesh(RenderContext&                renderContext, AssetManager&                     assetManager, const Desc&                 snapshot, const RenderHandle<GpuBuffer> vertexBuffer,
-                           const RenderHandle<GpuView> vertexBufferSrv, const RenderHandle<GpuBuffer> indexBuffer, const ManagedAsset<Material> material)
-        : renderContext(&renderContext)
-          , assetManager(&assetManager)
-          , snapshot(snapshot)
-          , vertexBuffer(vertexBuffer)
-          , vertexBufferSrv(vertexBufferSrv)
-          , indexBuffer(indexBuffer)
-          , material(material) { }
+    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material)
+        : renderContext(&renderContext), assetManager(&assetManager),
+          snapshot(snapshot),
+          vertexSpace(vertexSpace), vertexIndexSpace(vertexIndexSpace),
+          material(material) { }
 
     StaticMesh::~StaticMesh()
     {
@@ -77,11 +73,8 @@ namespace ig
             assetManager->Unload(material);
         }
 
-        if (renderContext != nullptr)
-        {
-            renderContext->DestroyBuffer(vertexBuffer);
-            renderContext->DestroyBuffer(indexBuffer);
-            renderContext->DestroyGpuView(vertexBufferSrv);
-        }
+        MeshStorage& meshStorage = Engine::GetMeshStorage();
+        meshStorage.Destroy(vertexSpace);
+        meshStorage.Destroy(vertexIndexSpace);
     }
 } // namespace ig

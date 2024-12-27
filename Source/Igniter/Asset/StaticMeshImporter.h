@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    enum class EStaticMeshImportStatus
+    enum class EStaticMeshImportStatus :U8
     {
         Success,
         FileDoesNotExists,
@@ -21,7 +21,7 @@ namespace ig
         friend class AssetManager;
 
     public:
-        StaticMeshImporter(AssetManager& assetManager);
+        explicit StaticMeshImporter(AssetManager& assetManager);
         StaticMeshImporter(const StaticMeshImporter&)     = delete;
         StaticMeshImporter(StaticMeshImporter&&) noexcept = delete;
         ~StaticMeshImporter()                             = default;
