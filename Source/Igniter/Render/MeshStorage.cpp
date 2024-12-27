@@ -6,7 +6,7 @@ namespace ig
     MeshStorage::MeshStorage(RenderContext& renderContext) :
         renderContext(renderContext),
         staticMeshVertexGpuStorage(renderContext, "StaticMeshVertexStorage"_fs, static_cast<U32>(sizeof(VertexSM)), 8192u, false),
-        vertexIndexGpuStorage(renderContext, "VertexIndexStorage"_fs, static_cast<U32>(sizeof(U32)), 16u * 8192u, false) { }
+        vertexIndexGpuStorage(renderContext, "VertexIndexStorage"_fs, static_cast<U32>(sizeof(U32)), 16u * 8192u, false) {}
 
     MeshStorage::~MeshStorage()
     {
@@ -24,7 +24,7 @@ namespace ig
         const Space<VertexSM> newVertexSpace{staticMeshVertexGpuStorage.Allocate(numVertices)};
         if (!newVertexSpace.Allocation.IsValid())
         {
-            return MeshStorage::Handle<VertexSM>{ };
+            return MeshStorage::Handle<VertexSM>{};
         }
 
         return staticMeshVertexSpacePackage.Storage.Create(newVertexSpace);
@@ -38,7 +38,7 @@ namespace ig
         const Space<U32> newIndexSpace{vertexIndexGpuStorage.Allocate(numIndices)};
         if (!newIndexSpace.Allocation.IsValid())
         {
-            return MeshStorage::Handle<U32>{ };
+            return MeshStorage::Handle<U32>{};
         }
 
         return vertexIndexSpacePackage.Storage.Create(newIndexSpace);
@@ -91,7 +91,7 @@ namespace ig
             ScopedLock packageLock{staticMeshVertexSpacePackage.StorageMutex, staticMeshVertexSpacePackage.DeferredDestroyPendingListMutex.Resources[currentLocalFrameIdx]};
             for (const auto handle : staticMeshVertexSpacePackage.DeferredDestroyPendingList.Resources[currentLocalFrameIdx])
             {
-                const Space<VertexSM>* space = staticMeshVertexSpacePackage.Storage.Lookup(handle);
+                const Space<VertexSM>* space = staticMeshVertexSpacePackage.Storage.LookupUnsafe(handle);
                 IG_CHECK(space != nullptr);
                 staticMeshVertexGpuStorage.Deallocate(space->Allocation);
                 staticMeshVertexSpacePackage.Storage.Destroy(handle);
@@ -103,7 +103,7 @@ namespace ig
             ScopedLock packageLock{vertexIndexSpacePackage.StorageMutex, vertexIndexSpacePackage.DeferredDestroyPendingListMutex.Resources[currentLocalFrameIdx]};
             for (const auto handle : vertexIndexSpacePackage.DeferredDestroyPendingList.Resources[currentLocalFrameIdx])
             {
-                const Space<U32>* space = vertexIndexSpacePackage.Storage.Lookup(handle);
+                const Space<U32>* space = vertexIndexSpacePackage.Storage.LookupUnsafe(handle);
                 IG_CHECK(space != nullptr);
                 vertexIndexGpuStorage.Deallocate(space->Allocation);
                 vertexIndexSpacePackage.Storage.Destroy(handle);
@@ -118,15 +118,15 @@ namespace ig
         {
             ReadOnlyLock storageMutex{staticMeshVertexSpacePackage.StorageMutex};
             stats.StaticMeshVertexStorageUsage = staticMeshVertexGpuStorage.GetAllocatedSize();
-            stats.StaticMeshVertexStorageSize = staticMeshVertexGpuStorage.GetBufferSize();
+            stats.StaticMeshVertexStorageSize  = staticMeshVertexGpuStorage.GetBufferSize();
         }
 
         {
             ReadOnlyLock storageMutex{vertexIndexSpacePackage.StorageMutex};
             stats.VertexIndexStorageUsage = vertexIndexGpuStorage.GetAllocatedSize();
-            stats.VertexIndexStorageSize = vertexIndexGpuStorage.GetBufferSize();
+            stats.VertexIndexStorageSize  = vertexIndexGpuStorage.GetBufferSize();
         }
 
         return stats;
     }
-}
+} // namespace ig
