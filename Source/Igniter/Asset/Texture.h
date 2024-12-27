@@ -78,8 +78,8 @@ namespace ig
         using Desc       = AssetDesc<Texture>;
 
     public:
-        Texture(RenderContext&                renderContext, const Desc& snapshot, const RenderResource<GpuTexture> gpuTexture, const RenderResource<GpuView> srv,
-                const RenderResource<GpuView> sampler);
+        Texture(RenderContext&                renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv,
+                const RenderHandle<GpuView> sampler);
         Texture(const Texture&)     = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();
@@ -88,9 +88,9 @@ namespace ig
         Texture& operator=(Texture&&) noexcept = default;
 
         const Desc&                GetSnapshot() const { return snapshot; }
-        RenderResource<GpuTexture> GetGpuTexture() const { return gpuTexture; }
-        RenderResource<GpuView>    GetShaderResourceView() const { return srv; }
-        RenderResource<GpuView>    GetSampler() const { return sampler; }
+        RenderHandle<GpuTexture> GetGpuTexture() const { return gpuTexture; }
+        RenderHandle<GpuView>    GetShaderResourceView() const { return srv; }
+        RenderHandle<GpuView>    GetSampler() const { return sampler; }
 
     public:
         /* #sy_wip Common으로 이동 */
@@ -101,9 +101,9 @@ namespace ig
     private:
         RenderContext*             renderContext{nullptr};
         Desc                       snapshot{ };
-        RenderResource<GpuTexture> gpuTexture{ };
-        RenderResource<GpuView>    srv{ };
-        RenderResource<GpuView>    sampler{ };
+        RenderHandle<GpuTexture> gpuTexture{ };
+        RenderHandle<GpuView>    srv{ };
+        RenderHandle<GpuView>    sampler{ };
     };
 } // namespace ig
 

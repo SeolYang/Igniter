@@ -43,8 +43,8 @@ namespace fe
         ig::Ptr<ig::ShaderBlob>                                                 ps;
         ig::Ptr<ig::RootSignature>                                              bindlessRootSignature;
         ig::Ptr<ig::PipelineState>                                              pso;
-        eastl::array<ig::RenderResource<ig::GpuTexture>, ig::NumFramesInFlight> depthStencils;
-        eastl::array<ig::RenderResource<ig::GpuView>, ig::NumFramesInFlight>    dsvs;
+        eastl::array<ig::RenderHandle<ig::GpuTexture>, ig::NumFramesInFlight> depthStencils;
+        eastl::array<ig::RenderHandle<ig::GpuView>, ig::NumFramesInFlight>    dsvs;
 
         ig::Ptr<ig::TempConstantBufferAllocator> tempConstantBufferAllocator;
     };

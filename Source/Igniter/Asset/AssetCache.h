@@ -132,7 +132,7 @@ namespace ig::details
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
 
-            registry.DestroyImmediate(cachedAssets[guid]);
+            registry.Destroy(cachedAssets[guid]);
             cachedAssets.erase(guid);
             refCounterTable.erase(guid);
         }

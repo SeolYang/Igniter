@@ -61,7 +61,7 @@ namespace ig
     void TempConstantBufferAllocator::Reset(const LocalFrameIndex localFrameIdx)
     {
         UniqueLock lock{mutexes[localFrameIdx]};
-        for (const RenderResource<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
+        for (const RenderHandle<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
         {
             renderContext.DestroyGpuView(gpuViewHandle);
         }
@@ -71,7 +71,7 @@ namespace ig
 
     void TempConstantBufferAllocator::InitBufferStateTransition(CommandContext& cmdCtx)
     {
-        for (const RenderResource<GpuBuffer> buffer : buffers)
+        for (const RenderHandle<GpuBuffer> buffer : buffers)
         {
             GpuBuffer* bufferPtr = renderContext.Lookup(buffer);
             IG_CHECK(bufferPtr != nullptr);

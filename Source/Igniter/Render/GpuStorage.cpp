@@ -153,7 +153,7 @@ namespace ig
         GpuBufferDesc newGpuBufferDesc{ };
         newGpuBufferDesc.DebugName = debugName;
         newGpuBufferDesc.AsStructuredBuffer(elementSize, static_cast<U32>(newBufferSize / elementSize), bIsShaderReadWritable);
-        RenderResource<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(newGpuBufferDesc);
+        RenderHandle<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(newGpuBufferDesc);
         if (!newGpuBuffer)
         {
             return false;

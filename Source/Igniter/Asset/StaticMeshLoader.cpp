@@ -74,19 +74,19 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::InvalidCompressedIndicesSize>();
         }
 
-        const RenderResource<GpuBuffer> vertexBuffer = renderContext.CreateBuffer(vertexBufferDesc);
+        const RenderHandle<GpuBuffer> vertexBuffer = renderContext.CreateBuffer(vertexBufferDesc);
         if (!vertexBuffer)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBuffer>();
         }
 
-        const RenderResource<GpuView> vertexBufferSrv = renderContext.CreateShaderResourceView(vertexBuffer);
+        const RenderHandle<GpuView> vertexBufferSrv = renderContext.CreateShaderResourceView(vertexBuffer);
         if (!vertexBufferSrv)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexBufferSrv>();
         }
 
-        const RenderResource<GpuBuffer> indexBuffer = renderContext.CreateBuffer(indexBufferDesc);
+        const RenderHandle<GpuBuffer> indexBuffer = renderContext.CreateBuffer(indexBufferDesc);
         if (!indexBuffer)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateIndexBuffer>();

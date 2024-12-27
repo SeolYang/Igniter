@@ -61,8 +61,8 @@ namespace ig
         using Desc       = AssetDesc<StaticMesh>;
 
     public:
-        StaticMesh(RenderContext&                renderContext, AssetManager&                     assetManager, const Desc&                 snapshot, const RenderResource<GpuBuffer> vertexBuffer,
-                   const RenderResource<GpuView> vertexBufferSrv, const RenderResource<GpuBuffer> indexBuffer, const ManagedAsset<Material> material);
+        StaticMesh(RenderContext&                renderContext, AssetManager&                     assetManager, const Desc&                 snapshot, const RenderHandle<GpuBuffer> vertexBuffer,
+                   const RenderHandle<GpuView> vertexBufferSrv, const RenderHandle<GpuBuffer> indexBuffer, const ManagedAsset<Material> material);
         StaticMesh(const StaticMesh&)     = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();
@@ -71,18 +71,18 @@ namespace ig
         StaticMesh& operator=(StaticMesh&&) noexcept = default;
 
         const Desc&               GetSnapshot() const { return snapshot; }
-        RenderResource<GpuBuffer> GetVertexBuffer() const { return vertexBuffer; }
-        RenderResource<GpuView>   GetVertexBufferSrv() const { return vertexBufferSrv; }
-        RenderResource<GpuBuffer> GetIndexBuffer() const { return indexBuffer; }
+        RenderHandle<GpuBuffer> GetVertexBuffer() const { return vertexBuffer; }
+        RenderHandle<GpuView>   GetVertexBufferSrv() const { return vertexBufferSrv; }
+        RenderHandle<GpuBuffer> GetIndexBuffer() const { return indexBuffer; }
         ManagedAsset<Material>    GetMaterial() const { return material; }
 
     private:
         RenderContext*            renderContext{nullptr};
         AssetManager*             assetManager{nullptr};
         Desc                      snapshot{ };
-        RenderResource<GpuBuffer> vertexBuffer{ };
-        RenderResource<GpuView>   vertexBufferSrv{ };
-        RenderResource<GpuBuffer> indexBuffer{ };
+        RenderHandle<GpuBuffer> vertexBuffer{ };
+        RenderHandle<GpuView>   vertexBufferSrv{ };
+        RenderHandle<GpuBuffer> indexBuffer{ };
         ManagedAsset<Material>    material{ };
     };
 } // namespace ig

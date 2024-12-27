@@ -11,7 +11,7 @@ namespace ig
     struct TempConstantBuffer final
     {
     public:
-        TempConstantBuffer(const RenderResource<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) { }
+        TempConstantBuffer(const RenderHandle<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) { }
         ~TempConstantBuffer() = default;
 
         template <typename T>
@@ -23,11 +23,11 @@ namespace ig
             }
         }
 
-        [[nodiscard]] RenderResource<GpuView> GetConstantBufferView() const { return cbv; }
+        [[nodiscard]] RenderHandle<GpuView> GetConstantBufferView() const { return cbv; }
 
     private:
         uint8_t*                mappedPtr{nullptr};
-        RenderResource<GpuView> cbv{ };
+        RenderHandle<GpuView> cbv{ };
     };
 
     class FrameManager;
@@ -75,8 +75,8 @@ namespace ig
         size_t reservedSizeInBytesPerFrame;
 
         mutable eastl::array<Mutex, NumFramesInFlight>                          mutexes;
-        eastl::array<RenderResource<GpuBuffer>, NumFramesInFlight>              buffers;
+        eastl::array<RenderHandle<GpuBuffer>, NumFramesInFlight>              buffers;
         eastl::array<size_t, NumFramesInFlight>                                 allocatedSizeInBytes{0};
-        eastl::array<eastl::vector<RenderResource<GpuView>>, NumFramesInFlight> allocatedViews;
+        eastl::array<eastl::vector<RenderHandle<GpuView>>, NumFramesInFlight> allocatedViews;
     };
 } // namespace ig

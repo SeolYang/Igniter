@@ -1,7 +1,5 @@
 #pragma once
 #include "Igniter/Igniter.h"
-#include "Igniter/Core/Handle.h"
-#include "Igniter/Core/HandleStorage.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/GpuBuffer.h"
@@ -25,19 +23,6 @@ namespace ig
 
     class RenderContext final
     {
-    private:
-        // 각 타입에 정의하고, 각 타입에 대해 Create/Destroy에서 rw lock, Lookup 에선 read only lock
-        // 각 방식(GpuViewManager,..) 내부 구현이 Thread Safe를 보장하지 않아도 됨
-        // 할당은 여러 스레드에서 이뤄질 수 있지만, 해제는 결국 메인 스레드에서 진행됨
-        template <typename Ty>
-        struct ResourceManagePackage
-        {
-            mutable SharedMutex                                                Mut;
-            HandleStorage<Ty, RenderContext>                                   Registry;
-            eastl::array<Mutex, NumFramesInFlight>                             PendingListMut;
-            eastl::array<eastl::vector<RenderResource<Ty>>, NumFramesInFlight> PendingDestroyList;
-        };
-
     public:
         explicit RenderContext(const Window& window);
         ~RenderContext();
@@ -61,35 +46,35 @@ namespace ig
         [[nodiscard]] auto&               GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
         [[nodiscard]] auto                GetBindlessDescriptorHeaps() { return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()}; }
 
-        RenderResource<GpuBuffer>              CreateBuffer(const GpuBufferDesc& desc);
-        RenderResource<GpuTexture>             CreateTexture(const GpuTextureDesc& desc);
-        RenderResource<GpuTexture>             CreateTexture(GpuTexture&& gpuTexture);
-        RenderResource<PipelineState>          CreatePipelineState(const GraphicsPipelineStateDesc& desc);
-        RenderResource<PipelineState>          CreatePipelineState(const ComputePipelineStateDesc& desc);
-        RenderResource<GpuView>                CreateConstantBufferView(const RenderResource<GpuBuffer> buffer);
-        RenderResource<GpuView>                CreateConstantBufferView(const RenderResource<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
-        RenderResource<GpuView>                CreateShaderResourceView(const RenderResource<GpuBuffer> buffer);
-        RenderResource<GpuView>                CreateUnorderedAccessView(const RenderResource<GpuBuffer> buffer);
-        RenderResource<GpuView>                CreateShaderResourceView(RenderResource<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView>                CreateUnorderedAccessView(RenderResource<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView>                CreateRenderTargetView(RenderResource<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView>                CreateDepthStencilView(RenderResource<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        RenderResource<GpuView>                CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
-        RenderResource<GpuView>                CreateGpuView(const EGpuViewType type);
+        RenderHandle<GpuBuffer>     CreateBuffer(const GpuBufferDesc& desc);
+        RenderHandle<GpuTexture>    CreateTexture(const GpuTextureDesc& desc);
+        RenderHandle<GpuTexture>    CreateTexture(GpuTexture gpuTexture);
+        RenderHandle<PipelineState> CreatePipelineState(const GraphicsPipelineStateDesc& desc);
+        RenderHandle<PipelineState> CreatePipelineState(const ComputePipelineStateDesc& desc);
+        RenderHandle<GpuView>       CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer);
+        RenderHandle<GpuView>       CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
+        RenderHandle<GpuView>       CreateShaderResourceView(const RenderHandle<GpuBuffer> buffer);
+        RenderHandle<GpuView>       CreateUnorderedAccessView(const RenderHandle<GpuBuffer> buffer);
+        RenderHandle<GpuView>       CreateShaderResourceView(RenderHandle<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderHandle<GpuView>       CreateUnorderedAccessView(RenderHandle<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderHandle<GpuView>       CreateRenderTargetView(RenderHandle<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderHandle<GpuView>       CreateDepthStencilView(RenderHandle<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        RenderHandle<GpuView>       CreateSamplerView(const D3D12_SAMPLER_DESC& desc);
+        RenderHandle<GpuView>       CreateGpuView(const EGpuViewType type);
 
-        void DestroyBuffer(const RenderResource<GpuBuffer> buffer);
-        void DestroyTexture(const RenderResource<GpuTexture> texture);
-        void DestroyPipelineState(const RenderResource<PipelineState> state);
-        void DestroyGpuView(const RenderResource<GpuView> view);
+        void DestroyBuffer(const RenderHandle<GpuBuffer> buffer);
+        void DestroyTexture(const RenderHandle<GpuTexture> texture);
+        void DestroyPipelineState(const RenderHandle<PipelineState> state);
+        void DestroyGpuView(const RenderHandle<GpuView> view);
 
-        [[nodiscard]] GpuBuffer*                    Lookup(const RenderResource<GpuBuffer> handle);
-        [[nodiscard]] const GpuBuffer*              Lookup(const RenderResource<GpuBuffer> handle) const;
-        [[nodiscard]] GpuTexture*                   Lookup(const RenderResource<GpuTexture> handle);
-        [[nodiscard]] const GpuTexture*             Lookup(const RenderResource<GpuTexture> handle) const;
-        [[nodiscard]] PipelineState*                Lookup(const RenderResource<PipelineState> handle);
-        [[nodiscard]] const PipelineState*          Lookup(const RenderResource<PipelineState> handle) const;
-        [[nodiscard]] GpuView*                      Lookup(const RenderResource<GpuView> handle);
-        [[nodiscard]] const GpuView*                Lookup(const RenderResource<GpuView> handle) const;
+        [[nodiscard]] GpuBuffer*           Lookup(const RenderHandle<GpuBuffer> handle);
+        [[nodiscard]] const GpuBuffer*     Lookup(const RenderHandle<GpuBuffer> handle) const;
+        [[nodiscard]] GpuTexture*          Lookup(const RenderHandle<GpuTexture> handle);
+        [[nodiscard]] const GpuTexture*    Lookup(const RenderHandle<GpuTexture> handle) const;
+        [[nodiscard]] PipelineState*       Lookup(const RenderHandle<PipelineState> handle);
+        [[nodiscard]] const PipelineState* Lookup(const RenderHandle<PipelineState> handle) const;
+        [[nodiscard]] GpuView*             Lookup(const RenderHandle<GpuView> handle);
+        [[nodiscard]] const GpuView*       Lookup(const RenderHandle<GpuView> handle) const;
 
         void FlushQueues();
         void PreRender(const LocalFrameIndex localFrameIdx);
@@ -107,10 +92,10 @@ namespace ig
         CommandQueue       asyncCopyQueue;
         CommandContextPool asyncCopyCmdCtxPool;
 
-        ResourceManagePackage<GpuBuffer>     bufferPackage;
-        ResourceManagePackage<GpuTexture>    texturePackage;
-        ResourceManagePackage<PipelineState> pipelineStatePackage;
-        ResourceManagePackage<GpuView>       gpuViewPackage;
+        DeferredResourceManagePackage<GpuBuffer, RenderContext>     bufferPackage;
+        DeferredResourceManagePackage<GpuTexture, RenderContext>    texturePackage;
+        DeferredResourceManagePackage<PipelineState, RenderContext> pipelineStatePackage;
+        DeferredResourceManagePackage<GpuView, RenderContext>       gpuViewPackage;
 
         GpuViewManager gpuViewManager;
         GpuUploader    gpuUploader;

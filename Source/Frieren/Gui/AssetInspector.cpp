@@ -292,7 +292,7 @@ namespace fe
         ig::Texture* previewTexturePtr = assetManager.Lookup(previewTexture);
         IG_CHECK(previewTexturePtr != nullptr);
 
-        const ig::RenderResource<ig::GpuView> previewTextureSrv = previewTexturePtr->GetShaderResourceView();
+        const ig::RenderHandle<ig::GpuView> previewTextureSrv = previewTexturePtr->GetShaderResourceView();
         IG_CHECK(previewTextureSrv);
         ig::GpuView* previewTextureSrvPtr = renderContext.Lookup(previewTextureSrv);
         IG_CHECK(previewTextureSrvPtr != nullptr);

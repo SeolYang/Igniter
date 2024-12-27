@@ -1,10 +1,12 @@
 #pragma once
 #include "Igniter/Igniter.h"
+#include "Igniter/Core/String.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/D3D12/GpuFence.h"
 
 namespace ig
 {
+    class RenderContext;
     class GpuBuffer;
     class GpuView;
     // 주의: 렌더링 로직 내에서 Allocation/Deallocation을 지양할 것!
@@ -55,9 +57,9 @@ namespace ig
         [[nodiscard]] Size      GetBufferSize() const noexcept { return bufferSize; }
         [[nodiscard]] GpuFence& GetStorageFence() noexcept { return fence; }
 
-        [[nodiscard]] RenderResource<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
-        [[nodiscard]] RenderResource<GpuView>   GetShaderResourceView() const noexcept { return srv; }
-        [[nodiscard]] RenderResource<GpuView>   GetUnorderedResourceView() const noexcept { return uav; }
+        [[nodiscard]] RenderHandle<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
+        [[nodiscard]] RenderHandle<GpuView>   GetShaderResourceView() const noexcept { return srv; }
+        [[nodiscard]] RenderHandle<GpuView>   GetUnorderedResourceView() const noexcept { return uav; }
 
     private:
         bool AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation);
@@ -82,10 +84,10 @@ namespace ig
 
         GpuFence fence;
 
-        RenderResource<GpuBuffer> gpuBuffer;
+        RenderHandle<GpuBuffer> gpuBuffer;
         eastl::vector<Block>      blocks;
 
-        RenderResource<GpuView> srv;
-        RenderResource<GpuView> uav;
+        RenderHandle<GpuView> srv;
+        RenderHandle<GpuView> uav;
     };
 }

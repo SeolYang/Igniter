@@ -100,7 +100,16 @@ namespace ig
             return newHandle;
         }
 
-        void Destroy(const Handle<Ty, Dependency> handle)
+        /*
+         * 실제로 핸들을 해제하지 않고, 해제될 예정이라고 마킹만 해둔다.
+         * 해제(Destroy) 전 까지 해당 핸들의 슬롯의 버전은 고정되고, 새롭게 핸들을 할당 하더라도
+         * 마킹된 슬롯으로 새로운 핸들이 생성 되지 않는다.
+         * 또한 Lookup 함수를 통한 데이터에 대한 접근이 허용되지 않는다.
+         * LookupUnsafe 함수를 통해 명시적으로 해제 예정 마킹이된 핸들에 대한 데이터 접근이 가능하다.
+         * 하지만 여전히 실제로 해제된 핸들에 대한 데이터 접근을 불가능 하다.
+         * 이러한 매커니즘을 통해 지연된 리소스 해제와 같은 추가적인 기능을 구현 가능하다.
+         */
+        void MarkAsDestroy(const Handle<Ty, Dependency> handle)
         {
             if (handle.IsNull())
             {
@@ -128,7 +137,7 @@ namespace ig
             reservedToDestroyFlags[slot] = true;
         }
 
-        void DestroyImmediate(const Handle<Ty, Dependency> handle)
+        void Destroy(const Handle<Ty, Dependency> handle)
         {
             if (handle.IsNull())
             {

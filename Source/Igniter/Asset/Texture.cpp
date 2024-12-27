@@ -62,7 +62,7 @@ namespace ig
         return archive;
     }
 
-    Texture::Texture(RenderContext& renderContext, const Desc& snapshot, const RenderResource<GpuTexture> gpuTexture, const RenderResource<GpuView> srv, const RenderResource<GpuView> sampler)
+    Texture::Texture(RenderContext& renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv, const RenderHandle<GpuView> sampler)
         : renderContext(&renderContext), snapshot(snapshot), gpuTexture(gpuTexture), srv(srv), sampler(sampler)
     {
         IG_CHECK(gpuTexture);
