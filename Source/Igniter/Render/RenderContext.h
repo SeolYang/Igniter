@@ -36,7 +36,7 @@ namespace ig
         [[nodiscard]] GpuDevice&          GetGpuDevice() { return gpuDevice; }
         [[nodiscard]] CommandQueue&       GetMainGfxQueue() { return mainGfxQueue; }
         [[nodiscard]] CommandQueue&       GetAsyncComputeQueue() { return asyncComputeQueue; }
-        [[nodiscard]] CommandQueue&       GetAsyncCopyQueue() { return asyncComputeQueue; }
+        [[nodiscard]] CommandQueue&       GetAsyncCopyQueue() { return asyncCopyQueue; }
         [[nodiscard]] CommandContextPool& GetMainGfxCommandContextPool() { return mainGfxCmdCtxPool; }
         [[nodiscard]] CommandContextPool& GetAsyncComputeCommandContextPool() { return asyncComputeCmdCtxPool; }
         [[nodiscard]] CommandContextPool& GetAsyncCopyCommandContextPool() { return asyncCopyCmdCtxPool; }
