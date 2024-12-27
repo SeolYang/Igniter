@@ -15,6 +15,7 @@ namespace ig
     class Timer;
     class Window;
     class RenderContext;
+    class MeshStorage;
     class InputManager;
     class AssetManager;
     class ImGuiContext;
@@ -38,6 +39,7 @@ namespace ig
         [[nodiscard]] static Window&        GetWindow();
         [[nodiscard]] static InputManager&  GetInputManager();
         [[nodiscard]] static RenderContext& GetRenderContext();
+        [[nodiscard]] static MeshStorage&   GetMeshStorage();
         [[nodiscard]] static AssetManager&  GetAssetManager();
         [[nodiscard]] static ImGuiContext&  GetImGuiContext();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
@@ -70,6 +72,10 @@ namespace ig
         ////////////////////////////////////////////////////
 
         //////////////////////// L2 ////////////////////////
+        Ptr<MeshStorage> meshStorage;
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L3 ////////////////////////
         Ptr<AssetManager>  assetManager;
         Ptr<ImGuiContext>  imguiContext;
         Ptr<ImGuiRenderer> imguiRenderer;

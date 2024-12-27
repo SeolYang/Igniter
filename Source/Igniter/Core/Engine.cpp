@@ -6,10 +6,10 @@
 #include "Igniter/Core/FrameManager.h"
 #include "Igniter/Core/Timer.h"
 #include "Igniter/Core/Window.h"
-#include "Igniter/Core/EmbededSettings.h"
 #include "Igniter/Core/ComInitializer.h"
 #include "Igniter/Input/InputManager.h"
 #include "Igniter/Render/RenderContext.h"
+#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/ImGui/ImGuiContext.h"
 #include "Igniter/ImGui/ImGuiRenderer.h"
@@ -28,33 +28,50 @@ namespace ig
         IG_LOG(Engine, Info, "Igniter Engine Version {}", version::Version);
         IG_LOG(Engine, Info, "Igniting Engine Runtime!");
         //////////////////////// L0 ////////////////////////
-        timer        = MakePtr<Timer>();
-        window       = MakePtr<Window>(WindowDescription{.Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle});
+        timer = MakePtr<Timer>();
+        IG_LOG(Engine, Info, "Timer Initialized.");
+        window = MakePtr<Window>(WindowDescription{.Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle});
+        IG_LOG(Engine, Info, "Window Initialized.");
         inputManager = MakePtr<InputManager>();
+        IG_LOG(Engine, Info, "Input Manager Initialized.");
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
         renderContext = MakePtr<RenderContext>(*window);
+        IG_LOG(Engine, Info, "Render Context Initialized.");
         ////////////////////////////////////////////////////
 
         //////////////////////// L2 ////////////////////////
-        assetManager = MakePtr<AssetManager>(*renderContext);
-        assetManager->RegisterEngineDefault();
-        imguiContext  = MakePtr<ImGuiContext>(*window, *renderContext);
-        imguiRenderer = MakePtr<ImGuiRenderer>(*renderContext);
+        meshStorage = MakePtr<MeshStorage>(*renderContext);
+        IG_LOG(Engine, Info, "Mesh Storage Initialized.");
         ////////////////////////////////////////////////////
 
+        //////////////////////// L3 ////////////////////////
+        assetManager = MakePtr<AssetManager>(*renderContext);
+        assetManager->RegisterEngineDefault();
+        IG_LOG(Engine, Info, "Asset Manager Initialized.");
+        imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
+        IG_LOG(Engine, Info, "ImGui Context Initialized.");
+        imguiRenderer = MakePtr<ImGuiRenderer>(*renderContext);
+        IG_LOG(Engine, Info, "ImGui Renderer Initialized.");
+        ////////////////////////////////////////////////////
         bInitialized = true;
+
+        IG_LOG(Engine, Info, "Igniter Engine {} Initialized.", version::Version);
     }
 
     Engine::~Engine()
     {
         IG_LOG(Engine, Info, "Extinguishing Engine Runtime.");
 
-        //////////////////////// L2 ////////////////////////
+        //////////////////////// L3 ////////////////////////
         imguiContext.reset();
         assetManager->UnRegisterEngineDefault();
         assetManager.reset();
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L1 ////////////////////////
+        meshStorage.reset();
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
@@ -121,6 +138,7 @@ namespace ig
             /*********** Pre-Render ***********/
             {
                 renderContext->PreRender(localFrameIdx);
+                meshStorage->PreRender(localFrameIdx);
                 application.PreRender(localFrameIdx);
             }
 
@@ -174,6 +192,12 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->renderContext;
+    }
+
+    MeshStorage& Engine::GetMeshStorage()
+    {
+        IG_CHECK(instance != nullptr);
+        return *instance->meshStorage;
     }
 
     InputManager& Engine::GetInputManager()
