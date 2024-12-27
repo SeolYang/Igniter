@@ -7,7 +7,7 @@ namespace ig
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCPUAccessible      = true;
+        bIsCpuAccessible      = true;
         bufferType            = EGpuBufferType::ConstantBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
@@ -31,7 +31,7 @@ namespace ig
         IG_VERIFY(sizeOfElementInBytes > 0);
         IG_VERIFY(numOfElements > 0);
         bIsShaderReadWritable = bEnableShaderReadWrtie;
-        bIsCPUAccessible      = false;
+        bIsCpuAccessible      = false;
         bufferType            = EGpuBufferType::StructuredBuffer;
 
         structureByteStride = sizeOfElementInBytes;
@@ -53,7 +53,7 @@ namespace ig
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCPUAccessible      = true;
+        bIsCpuAccessible      = true;
         bufferType            = EGpuBufferType::UploadBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
@@ -75,7 +75,7 @@ namespace ig
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCPUAccessible      = true;
+        bIsCpuAccessible      = true;
         bufferType            = EGpuBufferType::ReadbackBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
@@ -98,7 +98,7 @@ namespace ig
         IG_VERIFY(sizeOfVertexInBytes > 0);
         IG_VERIFY(numVertices > 0);
         bIsShaderReadWritable = false;
-        bIsCPUAccessible      = false;
+        bIsCpuAccessible      = false;
         bufferType            = EGpuBufferType::VertexBuffer;
 
         structureByteStride = sizeOfVertexInBytes;
@@ -106,7 +106,7 @@ namespace ig
 
         Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
         Alignment        = 0;
-        Width            = sizeOfVertexInBytes * numVertices;
+        Width            = static_cast<Size>(sizeOfVertexInBytes) * numVertices;
         Height           = 1;
         DepthOrArraySize = 1;
         MipLevels        = 1;
@@ -120,7 +120,7 @@ namespace ig
         IG_VERIFY(sizeOfIndexInBytes > 0);
         IG_VERIFY(numIndices > 0);
         bIsShaderReadWritable = false;
-        bIsCPUAccessible      = false;
+        bIsCpuAccessible      = false;
         bufferType            = EGpuBufferType::IndexBuffer;
 
         structureByteStride = sizeOfIndexInBytes;
@@ -128,7 +128,7 @@ namespace ig
 
         Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
         Alignment        = 0;
-        Width            = sizeOfIndexInBytes * numIndices;
+        Width            = static_cast<Size>(sizeOfIndexInBytes) * numIndices;
         Height           = 1;
         DepthOrArraySize = 1;
         MipLevels        = 1;
@@ -147,10 +147,12 @@ namespace ig
             desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
             break;
         case EGpuBufferType::UploadBuffer:
-            desc.HeapType = bIsCPUAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
+            desc.HeapType = bIsCpuAccessible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_GPU_UPLOAD;
             break;
         case EGpuBufferType::ReadbackBuffer:
             desc.HeapType = D3D12_HEAP_TYPE_READBACK;
+            break;
+        default:
             break;
         }
 
@@ -162,7 +164,7 @@ namespace ig
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
         std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{ };
-        if (IsConstantBufferViewCompatibleBuffer(bufferType))
+        if (IsConstantBufferViewCompatible(bufferType))
         {
             desc = D3D12_CONSTANT_BUFFER_VIEW_DESC{.BufferLocation = bufferLocation, .SizeInBytes = static_cast<uint32_t>(Width)};
         }
@@ -175,7 +177,7 @@ namespace ig
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
         std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> desc{ };
-        if (IsShaderResourceViewCompatibleBuffer(bufferType))
+        if (IsShaderResourceViewCompatible(bufferType))
         {
             desc = D3D12_SHADER_RESOURCE_VIEW_DESC{
                 .Format = DXGI_FORMAT_UNKNOWN,
@@ -193,7 +195,7 @@ namespace ig
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
         std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> desc{ };
-        if (IsUnorderdAccessViewCompatibleBuffer(bufferType) && bIsShaderReadWritable)
+        if (IsUnorderedAccessViewCompatible(bufferType) && bIsShaderReadWritable)
         {
             desc = D3D12_UNORDERED_ACCESS_VIEW_DESC{
                 .Format = DXGI_FORMAT_UNKNOWN,
