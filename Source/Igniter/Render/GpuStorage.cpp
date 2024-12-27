@@ -67,7 +67,7 @@ namespace ig
     {
         IG_CHECK(numElements > 0);
         IG_CHECK(blocks.size() > 0);
-        if (!gpuBuffer.IsNull())
+        if (gpuBuffer.IsNull())
         {
             return Allocation::Invalid();
         }
@@ -83,7 +83,6 @@ namespace ig
         }
 
         // Out Of Memory!
-        IG_CHECK((allocSize + allocatedSize) > bufferSize);
         if (!Grow(allocSize))
         {
             return Allocation::Invalid();
@@ -121,13 +120,14 @@ namespace ig
         IG_CHECK(block.VirtualBlock != nullptr);
         if (SUCCEEDED(block.VirtualBlock->Allocate(&allocDesc, &virtualAllocation, &allocOffset)))
         {
+            const Size storageOffset = block.Offset + allocOffset;
             allocatedSize += allocSize;
             allocation = Allocation
             {
                 .BlockIndex = blockIdx,
                 .VirtualAllocation = virtualAllocation,
-                .Offset = allocOffset,
-                .OffsetIndex = allocOffset / elementSize,
+                .Offset = storageOffset,
+                .OffsetIndex = storageOffset / elementSize,
                 .AllocSize = allocSize,
                 .NumElements = allocSize / elementSize
             };
@@ -173,9 +173,9 @@ namespace ig
         }
         copyCmdCtx->End();
 
-        GpuSyncPoint newSyncPoint  = fence.MakeSyncPoint();
-        GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
-        if (prevSyncPoint)
+        GpuSyncPoint newSyncPoint = fence.MakeSyncPoint();
+        if (GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
+            prevSyncPoint)
         {
             // 만약 버퍼에 대한 비동기 쓰기를 지원한다면 Write-After-Read Hazard 발생 가능성이 있음
             // 방지하기 위해선 GpuStorage가 별도의 Fence를 가지고 이를 사용해
@@ -206,6 +206,14 @@ namespace ig
         {
             uav = renderContext.CreateUnorderedAccessView(gpuBuffer);
         }
+
+        const Size                        bufferSizeDiff = newBufferSize - bufferSize;
+        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSizeDiff};
+        D3D12MA::VirtualBlock*            newVirtualBlock{nullptr};
+        [[maybe_unused]] const HRESULT    hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
+        // 여기서 Virtual Block 할당 실패를 핸들 해야하나? 로그에 남겨야 하나?
+        blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = bufferSize});
+
         bufferSize = newBufferSize;
 
         // Storage Fence를 통해 적절한 통제만 해준다면, 굳이 WaitOnCpu를 해주지 않아도 될 것으로 예상
