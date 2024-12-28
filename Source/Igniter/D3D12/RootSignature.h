@@ -5,6 +5,7 @@ namespace ig
 {
     class GpuDevice;
 
+    /* 루트 시그니처 제한 사항: https://learn.microsoft.com/en-us/windows/win32/direct3d12/root-signature-limits */
     class RootSignature final
     {
         friend class GpuDevice;

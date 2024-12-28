@@ -6,40 +6,40 @@ namespace ig
 {
     MaterialLoader::MaterialLoader(AssetManager& assetManager) : assetManager(assetManager) { }
 
-    Result<Material, EMaterialLoadStatus> MaterialLoader::Load(const Material::Desc& desc)
+    Result<MaterialAsset, EMaterialLoadStatus> MaterialLoader::Load(const MaterialAsset::Desc& desc)
     {
         const AssetInfo&          assetInfo{desc.Info};
-        const Material::LoadDesc& loadDesc{desc.LoadDescriptor};
+        const MaterialAsset::LoadDesc& loadDesc{desc.LoadDescriptor};
 
         if (!assetInfo.IsValid())
         {
-            return MakeFail<Material, EMaterialLoadStatus::InvalidAssetInfo>();
+            return MakeFail<MaterialAsset, EMaterialLoadStatus::InvalidAssetInfo>();
         }
 
         if (assetInfo.GetCategory() != EAssetCategory::Material)
         {
-            return MakeFail<Material, EMaterialLoadStatus::AssetTypeMismatch>();
+            return MakeFail<MaterialAsset, EMaterialLoadStatus::AssetTypeMismatch>();
         }
 
         const ManagedAsset<Texture> diffuse{assetManager.LoadTexture(loadDesc.DiffuseTexGuid)};
         if (!diffuse)
         {
-            return MakeFail<Material, EMaterialLoadStatus::FailedLoadDiffuse>();
+            return MakeFail<MaterialAsset, EMaterialLoadStatus::FailedLoadDiffuse>();
         }
 
-        return MakeSuccess<Material, EMaterialLoadStatus>(Material{assetManager, desc, diffuse});
+        return MakeSuccess<MaterialAsset, EMaterialLoadStatus>(MaterialAsset{assetManager, desc, diffuse});
     }
 
-    Result<Material, details::EMakeDefaultMatStatus> MaterialLoader::MakeDefault(const AssetInfo& assetInfo)
+    Result<MaterialAsset, details::EMakeDefaultMatStatus> MaterialLoader::MakeDefault(const AssetInfo& assetInfo)
     {
         if (!assetInfo.IsValid())
         {
-            return MakeFail<Material, details::EMakeDefaultMatStatus::InvalidAssetInfo>();
+            return MakeFail<MaterialAsset, details::EMakeDefaultMatStatus::InvalidAssetInfo>();
         }
 
-        const Material::Desc        snapshot{.Info = assetInfo, .LoadDescriptor = {.DiffuseTexGuid = Guid{DefaultTextureGuid}}};
-        const ManagedAsset<Texture> defaultEngineTex{assetManager.LoadTexture(Material::EngineDefault)};
+        const MaterialAsset::Desc        snapshot{.Info = assetInfo, .LoadDescriptor = {.DiffuseTexGuid = Guid{DefaultTextureGuid}}};
+        const ManagedAsset<Texture> defaultEngineTex{assetManager.LoadTexture(MaterialAsset::EngineDefault)};
         IG_CHECK(defaultEngineTex);
-        return MakeSuccess<Material, details::EMakeDefaultMatStatus>(Material{assetManager, snapshot, defaultEngineTex});
+        return MakeSuccess<MaterialAsset, details::EMakeDefaultMatStatus>(MaterialAsset{assetManager, snapshot, defaultEngineTex});
     }
 } // namespace ig

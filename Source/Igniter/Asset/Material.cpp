@@ -7,23 +7,23 @@
 
 namespace ig
 {
-    Json& MaterialLoadDesc::Serialize(Json& archive) const
+    Json& MaterialAssetLoadDesc::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseTexGuid);
+        IG_SERIALIZE_JSON_SIMPLE(MaterialAssetLoadDesc, archive, DiffuseTexGuid);
         return archive;
     }
 
-    const Json& MaterialLoadDesc::Deserialize(const Json& archive)
+    const Json& MaterialAssetLoadDesc::Deserialize(const Json& archive)
     {
         *this = { };
-        IG_DESERIALIZE_JSON_SIMPLE(MaterialLoadDesc, archive, DiffuseTexGuid, Guid{ DefaultTextureGuid });
+        IG_DESERIALIZE_JSON_SIMPLE(MaterialAssetLoadDesc, archive, DiffuseTexGuid, Guid{ DefaultTextureGuid });
         return archive;
     }
 
-    Material::Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse)
+    MaterialAsset::MaterialAsset(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse)
         : assetManager(&assetManager), snapshot(snapshot), diffuse(diffuse) { }
 
-    Material::~Material()
+    MaterialAsset::~MaterialAsset()
     {
         if (assetManager != nullptr)
         {

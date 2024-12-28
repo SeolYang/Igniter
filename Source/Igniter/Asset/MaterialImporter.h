@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    enum class EMaterialCreateStatus
+    enum class EMaterialAssetImportStatus
     {
         Success,
         InvalidAssetInfo,
@@ -28,7 +28,7 @@ namespace ig
         MaterialImporter& operator=(MaterialImporter&&) noexcept = delete;
 
     private:
-        Result<Material::Desc, EMaterialCreateStatus> Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc);
+        Result<MaterialAsset::Desc, EMaterialAssetImportStatus> Import(const AssetInfo& assetInfo, const MaterialAssetCreateDesc& desc);
 
     private:
         AssetManager& assetManager;

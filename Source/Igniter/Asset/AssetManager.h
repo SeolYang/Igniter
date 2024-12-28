@@ -81,9 +81,9 @@ namespace ig
         [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const Guid& guid);
         [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
 
-        Guid                                 Import(const String virtualPath, const MaterialCreateDesc& createDesc);
-        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const Guid& guid);
-        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const String virtualPath);
+        Guid                                 Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc);
+        [[nodiscard]] ManagedAsset<MaterialAsset> LoadMaterial(const Guid& guid);
+        [[nodiscard]] ManagedAsset<MaterialAsset> LoadMaterial(const String virtualPath);
 
         Guid                            Import(const String virtualPath, const MapCreateDesc& desc);
         [[nodiscard]] ManagedAsset<Map> LoadMap(const Guid& guid);
@@ -152,7 +152,7 @@ namespace ig
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
             {
-                bSuceeded = ReloadImpl<Material>(guid, desc, *materialLoader);
+                bSuceeded = ReloadImpl<MaterialAsset>(guid, desc, *materialLoader);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
             {

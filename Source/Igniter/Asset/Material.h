@@ -6,17 +6,17 @@
 
 namespace ig
 {
-    class Material;
+    class MaterialAsset;
     template <>
-    constexpr inline EAssetCategory AssetCategoryOf<Material> = EAssetCategory::Material;
+    constexpr inline EAssetCategory AssetCategoryOf<MaterialAsset> = EAssetCategory::Material;
 
-    struct MaterialCreateDesc final
+    struct MaterialAssetCreateDesc final
     {
     public:
         String DiffuseVirtualPath{ };
     };
 
-    struct MaterialLoadDesc final
+    struct MaterialAssetLoadDesc final
     {
     public:
         Json&       Serialize(Json& archive) const;
@@ -28,23 +28,23 @@ namespace ig
 
     class AssetManager;
 
-    class Material final
+    class MaterialAsset final
     {
     public:
-        using ImportDesc = MaterialCreateDesc;
-        using LoadDesc   = MaterialLoadDesc;
-        using Desc       = AssetDesc<Material>;
+        using ImportDesc = MaterialAssetCreateDesc;
+        using LoadDesc   = MaterialAssetLoadDesc;
+        using Desc       = AssetDesc<MaterialAsset>;
 
         friend class AssetManager;
 
     public:
-        Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
-        Material(const Material&)     = delete;
-        Material(Material&&) noexcept = default;
-        ~Material();
+        MaterialAsset(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
+        MaterialAsset(const MaterialAsset&)     = delete;
+        MaterialAsset(MaterialAsset&&) noexcept = default;
+        ~MaterialAsset();
 
-        Material& operator=(const Material&)     = delete;
-        Material& operator=(Material&&) noexcept = default;
+        MaterialAsset& operator=(const MaterialAsset&)     = delete;
+        MaterialAsset& operator=(MaterialAsset&&) noexcept = default;
 
         const Desc&           GetSnapshot() const { return snapshot; }
         ManagedAsset<Texture> GetDiffuse() const { return diffuse; }

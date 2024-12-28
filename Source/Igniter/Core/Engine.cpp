@@ -48,7 +48,7 @@ namespace ig
 
         //////////////////////// L3 ////////////////////////
         assetManager = MakePtr<AssetManager>(*renderContext);
-        assetManager->RegisterEngineDefault();
+//        assetManager->RegisterEngineDefault();
         IG_LOG(Engine, Info, "Asset Manager Initialized.");
         imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
         IG_LOG(Engine, Info, "ImGui Context Initialized.");

@@ -294,7 +294,7 @@ namespace ig
     Option<RootSignature> GpuDevice::CreateBindlessRootSignature()
     {
         IG_CHECK(device);
-        constexpr uint8_t          NumReservedConstants = 16;
+        constexpr uint8_t          NumReservedConstants = 16; // 16 DWORDS / 64 DWORDS
         const D3D12_ROOT_PARAMETER rootParam{
             .ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
             .Constants = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},

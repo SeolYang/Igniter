@@ -60,7 +60,7 @@ namespace ig
         return archive;
     }
 
-    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material)
+    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<MaterialAsset> material)
         : renderContext(&renderContext), assetManager(&assetManager),
           snapshot(snapshot),
           vertexSpace(vertexSpace), vertexIndexSpace(vertexIndexSpace),

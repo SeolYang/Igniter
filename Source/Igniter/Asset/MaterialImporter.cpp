@@ -11,16 +11,16 @@ namespace ig
 {
     MaterialImporter::MaterialImporter(AssetManager& assetManager) : assetManager(assetManager) { }
 
-    Result<Material::Desc, EMaterialCreateStatus> MaterialImporter::Import(const AssetInfo& assetInfo, const MaterialCreateDesc& desc)
+    Result<MaterialAsset::Desc, EMaterialAssetImportStatus> MaterialImporter::Import(const AssetInfo& assetInfo, const MaterialAssetCreateDesc& desc)
     {
         if (!assetInfo.IsValid())
         {
-            return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetInfo>();
+            return MakeFail<MaterialAsset::Desc, EMaterialAssetImportStatus::InvalidAssetInfo>();
         }
 
         if (assetInfo.GetCategory() != EAssetCategory::Material)
         {
-            return MakeFail<Material::Desc, EMaterialCreateStatus::InvalidAssetType>();
+            return MakeFail<MaterialAsset::Desc, EMaterialAssetImportStatus::InvalidAssetType>();
         }
 
         const ManagedAsset<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
@@ -35,7 +35,7 @@ namespace ig
         }
         IG_CHECK(diffuseTexGuid.isValid());
 
-        const Material::LoadDesc loadDesc{.DiffuseTexGuid = diffuseTexGuid};
+        const MaterialAsset::LoadDesc loadDesc{.DiffuseTexGuid = diffuseTexGuid};
 
         Json serializedMeta{ };
         serializedMeta << assetInfo << loadDesc;
@@ -44,15 +44,15 @@ namespace ig
         IG_CHECK(!metadataPath.empty());
         if (!SaveJsonToFile(metadataPath, serializedMeta))
         {
-            return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveMetadata>();
+            return MakeFail<MaterialAsset::Desc, EMaterialAssetImportStatus::FailedSaveMetadata>();
         }
 
         const Path assetPath{MakeAssetPath(EAssetCategory::Material, assetInfo.GetGuid())};
         if (!fs::exists(assetPath) && !SaveBlobToFile(assetPath, std::array<uint8_t, 1>{0}))
         {
-            return MakeFail<Material::Desc, EMaterialCreateStatus::FailedSaveAsset>();
+            return MakeFail<MaterialAsset::Desc, EMaterialAssetImportStatus::FailedSaveAsset>();
         }
 
-        return MakeSuccess<Material::Desc, EMaterialCreateStatus>(Material::Desc{.Info = assetInfo, .LoadDescriptor = loadDesc});
+        return MakeSuccess<MaterialAsset::Desc, EMaterialAssetImportStatus>(MaterialAsset::Desc{.Info = assetInfo, .LoadDescriptor = loadDesc});
     }
 } // namespace ig
