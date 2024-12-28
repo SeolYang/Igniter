@@ -166,7 +166,7 @@ namespace fe
         {
             if (ImGui::Begin("Texture Importer", &bTextureImportPanelOpend))
             {
-                bTextureImportPanelOpend = textureImportPanel->OnImGui();
+                bTextureImportPanelOpend = bTextureImportPanelOpend && textureImportPanel->OnImGui();
             }
             ImGui::End();
         }
@@ -175,7 +175,7 @@ namespace fe
         {
             if (ImGui::Begin("Static Mesh Importer", &bStaticMeshImportPanelOpend))
             {
-                bStaticMeshImportPanelOpend = staticMeshImportPanel->OnImGui();
+                bStaticMeshImportPanelOpend = bStaticMeshImportPanelOpend && staticMeshImportPanel->OnImGui();
             }
             ImGui::End();
         }
