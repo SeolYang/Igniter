@@ -64,7 +64,29 @@ namespace ig::ImGuiX
     bool EditColor3(const std::string_view label, Color& color);
     bool EditColor4(const std::string_view label, Color& color);
 
-    //void TextureView()
+    inline void PushPositiveButtonHighlightColor()
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImColor{73, 133, 204, 255}.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor{27, 128, 247, 255}.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor{16, 39, 61, 255}.Value);
+    }
+
+    inline void PopPositiveButtonHighlightColor()
+    {
+        ImGui::PopStyleColor(3);
+    }
+
+    inline void PushNegativeButtonHighlightColor()
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImColor{202, 90, 90, 255}.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor{255, 0, 0, 255}.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor{61, 16, 16, 255}.Value);
+    }
+
+    inline void PopNegativeButtonHighlightColor()
+    {
+        ImGui::PopStyleColor(3);
+    }
 
     ImVec2 GetFramePadding();
 

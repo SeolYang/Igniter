@@ -5,6 +5,7 @@
 #include "Igniter/Component/NameComponent.h"
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Gameplay/World.h"
+#include "Igniter/ImGui/ImGuiExtensions.h"
 #include "Frieren/Gui/EntityInsepctor.h"
 #include "Frieren/Gui/EntityList.h"
 
@@ -59,14 +60,12 @@ namespace fe
         constexpr std::string_view attachComponentPopup{"AttachComponentPopup"};
         ig::Registry&              registry = activeWorld->GetRegistry();
 
-        ImGui::PushStyleColor(ImGuiCol_Button, ImColor{73, 133, 204, 255}.Value);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor{27, 128, 247, 255}.Value);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor{16, 39, 61, 255}.Value);
+        ig::ImGuiX::PushPositiveButtonHighlightColor();
         if (ImGui::Button("Attach Component", ImVec2(-FLT_MIN, 0.0f)))
         {
             ImGui::OpenPopup(attachComponentPopup.data());
         }
-        ImGui::PopStyleColor(3);
+        ig::ImGuiX::PopPositiveButtonHighlightColor();
 
         if (ImGui::BeginPopup(attachComponentPopup.data()))
         {
@@ -107,14 +106,12 @@ namespace fe
                 continue;
             }
 
-            ImGui::PushStyleColor(ImGuiCol_Button, ImColor{202, 90, 90, 255}.Value);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor{255, 0, 0, 255}.Value);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor{61, 16, 16, 255}.Value);
+            ig::ImGuiX::PushNegativeButtonHighlightColor();
             if (ImGui::Button(componentInfo.RemoveButtonLabel.ToCString(), ImVec2(-FLT_MIN, 0.0f)))
             {
                 componentToRemove = componentInfoIdx;
             }
-            ImGui::PopStyleColor(3);
+            ig::ImGuiX::PopNegativeButtonHighlightColor();
 
             if (!ig::meta::Invoke(componentInfo.Type, ig::meta::OnInspectorFunc, &registry, selectedEntity))
             {
