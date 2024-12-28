@@ -23,14 +23,15 @@ namespace fe
                                     ig::RecursiveLock       lock{mutex};
                                     const ig::AssetManager& assetManager{assetManagerRef.get()};
 
-                                    const ig::Guid lastSelectedGuid{mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : ig::Guid{ }};
+                                    const ig::Guid lastSelectedGuid{mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : ig::Guid{}};
                                     snapshots            = assetManager.TakeSnapshots();
                                     bDirty               = true;
                                     mainTableSelectedIdx = -1;
                                     if (lastSelectedGuid.isValid())
                                     {
                                         const auto foundItr = std::find_if(snapshots.cbegin(), snapshots.cend(),
-                                                                           [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot) { return snapshot.Info.GetGuid() == lastSelectedGuid; });
+                                                                           [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot)
+                                                                           { return snapshot.Info.GetGuid() == lastSelectedGuid; });
 
                                         mainTableSelectedIdx = foundItr != snapshots.cend() ? static_cast<int>(foundItr - snapshots.cbegin()) : -1;
                                     }
@@ -124,17 +125,18 @@ namespace fe
             };
 
             ImGui::Text(
-                std::format("#Imported {}: {}\t#Cached {}: {}", mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
-                            mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
-                .c_str());
+                    std::format("#Imported {}: {}\t#Cached {}: {}", mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
+                                mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
+                            .c_str());
         }
         else
         {
-            const auto IsCached = [](const ig::AssetManager::Snapshot& snapshot) { return snapshot.IsCached(); };
+            const auto IsCached = [](const ig::AssetManager::Snapshot& snapshot)
+            { return snapshot.IsCached(); };
 
             ImGui::Text(
-                std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(), std::count_if(snapshots.begin(), snapshots.end(), IsCached))
-                .c_str());
+                    std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(), std::count_if(snapshots.begin(), snapshots.end(), IsCached))
+                            .c_str());
         }
     }
 
@@ -168,7 +170,7 @@ namespace fe
                 std::sort(snapshots.begin(), snapshots.end(),
                           [selectedColumn, bAscendingRequired](const ig::AssetManager::Snapshot& lhs, const ig::AssetManager::Snapshot& rhs)
                           {
-                              int comp{ };
+                              int comp{};
                               switch (selectedColumn)
                               {
                               case 0:
@@ -302,7 +304,7 @@ namespace fe
 
     void AssetInspector::RenderMaterialEdit(const ig::AssetInfo& assetInfo)
     {
-        ig::AssetManager&                     assetManager{ig::Engine::GetAssetManager()};
+        ig::AssetManager&                          assetManager{ig::Engine::GetAssetManager()};
         std::optional<ig::MaterialAsset::LoadDesc> loadDescOpt{assetManager.GetLoadDesc<ig::MaterialAsset>(assetInfo.GetGuid())};
         ig::ImGuiX::SeparatorText("Material");
         if (!loadDescOpt)

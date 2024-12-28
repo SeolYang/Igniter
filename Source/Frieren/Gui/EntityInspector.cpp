@@ -10,7 +10,8 @@
 
 namespace fe
 {
-    EntityInspector::EntityInspector(const EntityList& entityList) : entityList(&entityList)
+    EntityInspector::EntityInspector(const EntityList& entityList) :
+        entityList(&entityList)
     {
         for (const auto& [typeID, type] : entt::resolve())
         {
@@ -34,9 +35,8 @@ namespace fe
             IG_CHECK(name != nullptr);
 
             componentInfos.emplace_back(ComponentInfo{
-                typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
-                ig::String{std::format("{}##SelectableComponent", *name)}
-            });
+                    typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
+                    ig::String{std::format("{}##SelectableComponent", *name)}});
         }
 
         componentInfos.shrink_to_fit();
@@ -58,10 +58,15 @@ namespace fe
 
         constexpr std::string_view attachComponentPopup{"AttachComponentPopup"};
         ig::Registry&              registry = activeWorld->GetRegistry();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImColor{73, 133, 204, 255}.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor{27, 128, 247, 255}.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor{16, 39, 61, 255}.Value);
         if (ImGui::Button("Attach Component", ImVec2(-FLT_MIN, 0.0f)))
         {
             ImGui::OpenPopup(attachComponentPopup.data());
         }
+        ImGui::PopStyleColor(3);
 
         if (ImGui::BeginPopup(attachComponentPopup.data()))
         {
@@ -102,10 +107,14 @@ namespace fe
                 continue;
             }
 
+            ImGui::PushStyleColor(ImGuiCol_Button, ImColor{202, 90, 90, 255}.Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor{255, 0, 0, 255}.Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor{61, 16, 16, 255}.Value);
             if (ImGui::Button(componentInfo.RemoveButtonLabel.ToCString(), ImVec2(-FLT_MIN, 0.0f)))
             {
                 componentToRemove = componentInfoIdx;
             }
+            ImGui::PopStyleColor(3);
 
             if (!ig::meta::Invoke(componentInfo.Type, ig::meta::OnInspectorFunc, &registry, selectedEntity))
             {
