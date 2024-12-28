@@ -305,7 +305,7 @@ namespace fe
     void AssetInspector::RenderMaterialEdit(const ig::AssetInfo& assetInfo)
     {
         ig::AssetManager&                          assetManager{ig::Engine::GetAssetManager()};
-        std::optional<ig::MaterialAsset::LoadDesc> loadDescOpt{assetManager.GetLoadDesc<ig::MaterialAsset>(assetInfo.GetGuid())};
+        std::optional<ig::Material::LoadDesc> loadDescOpt{assetManager.GetLoadDesc<ig::Material>(assetInfo.GetGuid())};
         ig::ImGuiX::SeparatorText("Material");
         if (!loadDescOpt)
         {
@@ -313,7 +313,7 @@ namespace fe
             return;
         }
 
-        ig::MaterialAsset::LoadDesc loadDesc{*loadDescOpt};
+        ig::Material::LoadDesc loadDesc{*loadDescOpt};
         RenderSelector("Diffuse", loadDesc.DiffuseTexGuid);
         int newDiffuseIdx{RenderSelectorPopup(ig::EAssetCategory::Texture)};
         if (newDiffuseIdx != -1)
@@ -322,8 +322,8 @@ namespace fe
             IG_CHECK(newDiffuseInfo.IsValid());
             IG_CHECK(newDiffuseInfo.GetCategory() == ig::EAssetCategory::Texture);
             loadDesc.DiffuseTexGuid = newDiffuseInfo.GetGuid();
-            assetManager.UpdateLoadDesc<ig::MaterialAsset>(assetInfo.GetGuid(), loadDesc);
-            assetManager.Reload<ig::MaterialAsset>(assetInfo.GetGuid());
+            assetManager.UpdateLoadDesc<ig::Material>(assetInfo.GetGuid(), loadDesc);
+            assetManager.Reload<ig::Material>(assetInfo.GetGuid());
         }
     }
 

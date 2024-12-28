@@ -199,7 +199,7 @@ namespace fe
                             perObjectConstantBuffer.Write(perObjectBuffer);
 
                             /* #sy_todo 각각의 Material이나 Diffuse가 Invalid 하다면 Engine Default로 fallback 될 수 있도록 조치 */
-                            ig::MaterialAsset* materialPtr          = assetManager.Lookup(staticMeshPtr->GetMaterial());
+                            ig::Material* materialPtr          = assetManager.Lookup(staticMeshPtr->GetMaterial());
                             ig::Texture*  diffuseTexPtr        = assetManager.Lookup(materialPtr->GetDiffuse());
                             ig::GpuView*  diffuseTexSrvPtr     = renderContext.Lookup(diffuseTexPtr->GetShaderResourceView());
                             ig::GpuView*  diffuseTexSamplerPtr = renderContext.Lookup(diffuseTexPtr->GetSampler());

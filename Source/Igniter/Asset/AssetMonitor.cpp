@@ -25,7 +25,7 @@ namespace ig::details
     {
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::Texture, MakePtr<AssetDescMap<Texture>>()));
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::StaticMesh, MakePtr<AssetDescMap<StaticMesh>>()));
-        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Material, MakePtr<AssetDescMap<MaterialAsset>>()));
+        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Material, MakePtr<AssetDescMap<Material>>()));
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::Map, MakePtr<AssetDescMap<Map>>()));
     }
 

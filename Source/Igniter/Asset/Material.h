@@ -6,9 +6,9 @@
 
 namespace ig
 {
-    class MaterialAsset;
+    class Material;
     template <>
-    constexpr inline EAssetCategory AssetCategoryOf<MaterialAsset> = EAssetCategory::Material;
+    constexpr inline EAssetCategory AssetCategoryOf<Material> = EAssetCategory::Material;
 
     struct MaterialAssetCreateDesc final
     {
@@ -28,23 +28,23 @@ namespace ig
 
     class AssetManager;
 
-    class MaterialAsset final
+    class Material final
     {
     public:
         using ImportDesc = MaterialAssetCreateDesc;
         using LoadDesc   = MaterialAssetLoadDesc;
-        using Desc       = AssetDesc<MaterialAsset>;
+        using Desc       = AssetDesc<Material>;
 
         friend class AssetManager;
 
     public:
-        MaterialAsset(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
-        MaterialAsset(const MaterialAsset&)     = delete;
-        MaterialAsset(MaterialAsset&&) noexcept = default;
-        ~MaterialAsset();
+        Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
+        Material(const Material&)     = delete;
+        Material(Material&&) noexcept = default;
+        ~Material();
 
-        MaterialAsset& operator=(const MaterialAsset&)     = delete;
-        MaterialAsset& operator=(MaterialAsset&&) noexcept = default;
+        Material& operator=(const Material&)     = delete;
+        Material& operator=(Material&&) noexcept = default;
 
         const Desc&           GetSnapshot() const { return snapshot; }
         ManagedAsset<Texture> GetDiffuse() const { return diffuse; }

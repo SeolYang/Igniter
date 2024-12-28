@@ -20,10 +20,10 @@ namespace ig
         return archive;
     }
 
-    MaterialAsset::MaterialAsset(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse)
+    Material::Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse)
         : assetManager(&assetManager), snapshot(snapshot), diffuse(diffuse) { }
 
-    MaterialAsset::~MaterialAsset()
+    Material::~Material()
     {
         if (assetManager != nullptr)
         {

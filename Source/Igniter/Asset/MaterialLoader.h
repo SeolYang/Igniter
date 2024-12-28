@@ -37,8 +37,8 @@ namespace ig
         MaterialLoader& operator=(MaterialLoader&&) noexcept = delete;
 
     private:
-        Result<MaterialAsset, EMaterialLoadStatus>            Load(const MaterialAsset::Desc& desc);
-        Result<MaterialAsset, details::EMakeDefaultMatStatus> MakeDefault(const AssetInfo& assetInfo);
+        Result<Material, EMaterialLoadStatus>            Load(const Material::Desc& desc);
+        Result<Material, details::EMakeDefaultMatStatus> MakeDefault(const AssetInfo& assetInfo);
 
     private:
         AssetManager& assetManager;

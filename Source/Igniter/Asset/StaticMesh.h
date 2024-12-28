@@ -48,7 +48,7 @@ namespace ig
 
     class GpuBuffer;
     class GpuView;
-    class MaterialAsset;
+    class Material;
     class RenderContext;
     class AssetManager;
 
@@ -60,7 +60,7 @@ namespace ig
         using Desc       = AssetDesc<StaticMesh>;
 
     public:
-        StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<MaterialAsset> material);
+        StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material);
         StaticMesh(const StaticMesh&)     = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();
@@ -71,7 +71,7 @@ namespace ig
         [[nodiscard]] const Desc&                   GetSnapshot() const { return snapshot; }
         [[nodiscard]] MeshStorage::Handle<VertexSM> GetVertexSpace() const noexcept { return vertexSpace; }
         [[nodiscard]] MeshStorage::Handle<U32>      GetVertexIndexSpace() const noexcept { return vertexIndexSpace; }
-        [[nodiscard]] ManagedAsset<MaterialAsset>        GetMaterial() const noexcept { return material; }
+        [[nodiscard]] ManagedAsset<Material>        GetMaterial() const noexcept { return material; }
 
     private:
         RenderContext*                renderContext{nullptr};
@@ -79,6 +79,6 @@ namespace ig
         Desc                          snapshot{ };
         MeshStorage::Handle<VertexSM> vertexSpace{ };
         MeshStorage::Handle<U32>      vertexIndexSpace{ };
-        ManagedAsset<MaterialAsset>        material{ };
+        ManagedAsset<Material>        material{ };
     };
 } // namespace ig
