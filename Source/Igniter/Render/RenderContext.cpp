@@ -13,7 +13,15 @@ namespace ig
         asyncCopyCmdCtxPool(gpuDevice, EQueueType::Copy),
         gpuViewManager(gpuDevice),
         gpuUploader(gpuDevice),
-        swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight)) { }
+        swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight))
+    {
+        for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
+        {
+            mainGfxFence.Resources[localFrameIdx]      = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("MainGfxFence{}", localFrameIdx)));
+            asyncComputeFence.Resources[localFrameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("AsyncComputeFence{}", localFrameIdx)));
+            asyncCopyFence.Resources[localFrameIdx]    = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("AsyncCopyFence{}", localFrameIdx)));
+        }
+    }
 
     RenderContext::~RenderContext()
     {
@@ -32,7 +40,7 @@ namespace ig
         Option<GpuBuffer> newBuffer = gpuDevice.CreateBuffer(desc);
         if (!newBuffer)
         {
-            return RenderHandle<GpuBuffer>{ };
+            return RenderHandle<GpuBuffer>{};
         }
 
         ReadWriteLock bufferStorageLock{bufferPackage.StorageMutex};
@@ -44,7 +52,7 @@ namespace ig
         Option<GpuTexture> newTexture = gpuDevice.CreateTexture(desc);
         if (!newTexture)
         {
-            return RenderHandle<GpuTexture>{ };
+            return RenderHandle<GpuTexture>{};
         }
 
         ReadWriteLock textureStorageLock{texturePackage.StorageMutex};
@@ -62,7 +70,7 @@ namespace ig
         Option<PipelineState> newPipelineState = gpuDevice.CreateGraphicsPipelineState(desc);
         if (!newPipelineState)
         {
-            return RenderHandle<PipelineState>{ };
+            return RenderHandle<PipelineState>{};
         }
 
         ReadWriteLock pipelineStateStorageLock{pipelineStatePackage.StorageMutex};
@@ -74,7 +82,7 @@ namespace ig
         Option<PipelineState> newPipelineState = gpuDevice.CreateComputePipelineState(desc);
         if (!newPipelineState)
         {
-            return RenderHandle<PipelineState>{ };
+            return RenderHandle<PipelineState>{};
         }
 
         ReadWriteLock pipelineStateStorageLock{pipelineStatePackage.StorageMutex};
@@ -87,13 +95,13 @@ namespace ig
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestConstantBufferView(*bufferPtr);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ConstantBufferView);
@@ -106,13 +114,13 @@ namespace ig
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestConstantBufferView(*bufferPtr, offset, sizeInBytes);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ConstantBufferView);
@@ -125,13 +133,13 @@ namespace ig
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestShaderResourceView(*bufferPtr);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ShaderResourceView);
@@ -144,13 +152,13 @@ namespace ig
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*bufferPtr);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::UnorderedAccessView);
@@ -163,13 +171,13 @@ namespace ig
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestShaderResourceView(*texturePtr, srvDesc, desireViewFormat);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::ShaderResourceView);
@@ -182,13 +190,13 @@ namespace ig
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*texturePtr, uavDesc, desireViewFormat);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::UnorderedAccessView);
@@ -201,13 +209,13 @@ namespace ig
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestRenderTargetView(*texturePtr, rtvDesc, desireViewFormat);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::RenderTargetView);
@@ -220,13 +228,13 @@ namespace ig
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         const GpuView newView = gpuViewManager.RequestDepthStencilView(*texturePtr, dsvDesc, desireViewFormat);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::DepthStencilView);
@@ -239,7 +247,7 @@ namespace ig
         const GpuView newView = gpuViewManager.RequestSampler(desc);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type == EGpuViewType::Sampler);
@@ -253,7 +261,7 @@ namespace ig
         const GpuView newView = gpuViewManager.Allocate(type);
         if (!newView)
         {
-            return RenderHandle<GpuView>{ };
+            return RenderHandle<GpuView>{};
         }
 
         IG_CHECK(newView.Type != EGpuViewType::Unknown);
@@ -264,8 +272,8 @@ namespace ig
     {
         if (buffer)
         {
-            ScopedLock packageLock{bufferPackage.StorageMutex, bufferPackage.DeferredDestroyPendingListMutex.Resources[lastLocalFrameIdx]};
-            bufferPackage.DeferredDestroyPendingList.Resources[lastLocalFrameIdx].emplace_back(buffer);
+            ScopedLock packageLock{bufferPackage.StorageMutex, bufferPackage.DeferredDestroyPendingListMutex.Resources[currentLocalFrameIdx]};
+            bufferPackage.DeferredDestroyPendingList.Resources[currentLocalFrameIdx].emplace_back(buffer);
             bufferPackage.Storage.MarkAsDestroy(buffer);
         }
     }
@@ -274,8 +282,8 @@ namespace ig
     {
         if (texture)
         {
-            ScopedLock packageLock{texturePackage.StorageMutex, texturePackage.DeferredDestroyPendingListMutex.Resources[lastLocalFrameIdx]};
-            texturePackage.DeferredDestroyPendingList.Resources[lastLocalFrameIdx].emplace_back(texture);
+            ScopedLock packageLock{texturePackage.StorageMutex, texturePackage.DeferredDestroyPendingListMutex.Resources[currentLocalFrameIdx]};
+            texturePackage.DeferredDestroyPendingList.Resources[currentLocalFrameIdx].emplace_back(texture);
             texturePackage.Storage.MarkAsDestroy(texture);
         }
     }
@@ -284,8 +292,8 @@ namespace ig
     {
         if (state)
         {
-            ScopedLock packageLock{pipelineStatePackage.StorageMutex, pipelineStatePackage.DeferredDestroyPendingListMutex.Resources[lastLocalFrameIdx]};
-            pipelineStatePackage.DeferredDestroyPendingList.Resources[lastLocalFrameIdx].emplace_back(state);
+            ScopedLock packageLock{pipelineStatePackage.StorageMutex, pipelineStatePackage.DeferredDestroyPendingListMutex.Resources[currentLocalFrameIdx]};
+            pipelineStatePackage.DeferredDestroyPendingList.Resources[currentLocalFrameIdx].emplace_back(state);
             pipelineStatePackage.Storage.MarkAsDestroy(state);
         }
     }
@@ -294,8 +302,8 @@ namespace ig
     {
         if (view)
         {
-            ScopedLock packageLock{gpuViewPackage.StorageMutex, gpuViewPackage.DeferredDestroyPendingListMutex.Resources[lastLocalFrameIdx]};
-            gpuViewPackage.DeferredDestroyPendingList.Resources[lastLocalFrameIdx].emplace_back(view);
+            ScopedLock packageLock{gpuViewPackage.StorageMutex, gpuViewPackage.DeferredDestroyPendingListMutex.Resources[currentLocalFrameIdx]};
+            gpuViewPackage.DeferredDestroyPendingList.Resources[currentLocalFrameIdx].emplace_back(view);
             gpuViewPackage.Storage.MarkAsDestroy(view);
         }
     }
@@ -350,16 +358,21 @@ namespace ig
 
     void RenderContext::FlushQueues()
     {
-        mainGfxQueue.MakeSyncPointWithSignal().WaitOnCpu();
-        asyncComputeQueue.MakeSyncPointWithSignal().WaitOnCpu();
-        asyncCopyQueue.MakeSyncPointWithSignal().WaitOnCpu();
+        for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
+        {
+            mainGfxQueue.MakeSyncPointWithSignal(*mainGfxFence.Resources[localFrameIdx]).WaitOnCpu();
+            asyncComputeQueue.MakeSyncPointWithSignal(*asyncComputeFence.Resources[localFrameIdx]).WaitOnCpu();
+            asyncCopyQueue.MakeSyncPointWithSignal(*asyncCopyFence.Resources[localFrameIdx]).WaitOnCpu();
+        }
     }
 
     void RenderContext::PreRender(const LocalFrameIndex localFrameIdx)
     {
-        this->lastLocalFrameIdx = localFrameIdx;
+        this->currentLocalFrameIdx = localFrameIdx;
         mainGfxCmdCtxPool.PreRender(localFrameIdx);
         asyncComputeCmdCtxPool.PreRender(localFrameIdx);
+        asyncCopyCmdCtxPool.PreRender(localFrameIdx);
+        gpuUploader.PreRender(localFrameIdx);
 
         /* Flush Buffer Package [local frame] pending destroy */
         {

@@ -231,6 +231,6 @@ namespace fe
 
         ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)renderCmdCtx};
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
-        return mainGfxQueue.MakeSyncPointWithSignal();
+        return mainGfxQueue.MakeSyncPointWithSignal(renderContext.GetMainGfxFence());
     }
 } // namespace fe

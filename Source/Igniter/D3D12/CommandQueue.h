@@ -30,12 +30,11 @@ namespace ig
 
         void         ExecuteContexts(const std::span<CommandContext*> cmdCtxs);
         bool         Signal(GpuSyncPoint& syncPoint);
-        GpuSyncPoint MakeSyncPointWithSignal(GpuFence& externalFence);
-        GpuSyncPoint MakeSyncPointWithSignal();
+        GpuSyncPoint MakeSyncPointWithSignal(GpuFence& fence);
         void         SyncWith(GpuSyncPoint& syncPoint);
 
     private:
-        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, GpuFence internalFence);
+        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);
 
     private:
         static constexpr size_t RecommendedMinNumCommandContexts = 16;
@@ -43,7 +42,5 @@ namespace ig
     private:
         ComPtr<ID3D12CommandQueue> native;
         const EQueueType           type;
-
-        GpuFence internalFence;
     };
 } // namespace ig

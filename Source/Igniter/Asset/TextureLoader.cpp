@@ -159,6 +159,7 @@ namespace ig
         texUploadSync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+        GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
         auto          cmdCtx       = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
         {
             cmdCtx->Begin();
@@ -171,7 +172,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal()};
+        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
         const RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -265,6 +266,7 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+        GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
         auto          cmdCtx       = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
             cmdCtx->Begin();
@@ -277,7 +279,7 @@ namespace ig
         }
         CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal()};
+        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
         RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -366,6 +368,7 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
+        GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
         auto          cmdCtx       = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
             cmdCtx->Begin();
@@ -379,7 +382,7 @@ namespace ig
 
         CommandContext* cmdCtxs[1]{(CommandContext*)cmdCtx};
         mainGfxQueue.ExecuteContexts(cmdCtxs);
-        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal()};
+        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
         const RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,

@@ -13,6 +13,11 @@ namespace ig
         gpuDevice(gpuDevice),
         copyQueue(MakePtr<CommandQueue>(gpuDevice.CreateCommandQueue("GpuUploader_CopyQueue", EQueueType::Copy).value()))
     {
+        for (LocalFrameIndex frameIdx = 0; frameIdx < NumFramesInFlight; ++frameIdx)
+        {
+            copyFence.Resources[frameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("GpuUploaderFence{}", frameIdx)));
+        }
+
         ResizeUnsafe(InitialBufferCapacity);
         for (size_t idx = 0; idx < RequestCapacity; ++idx)
         {
@@ -65,7 +70,7 @@ namespace ig
             newRequest->OffsetInBytes  = bufferHead;
             newRequest->SizeInBytes    = alignedRequestSize;
             newRequest->PaddingInBytes = 0;
-            newRequest->Sync           = { };
+            newRequest->Sync           = {};
 
             bufferHead = (bufferHead + alignedRequestSize) % bufferCapacity;
             bufferUsedSizeInBytes += alignedRequestSize;
@@ -80,7 +85,7 @@ namespace ig
                 newRequest->OffsetInBytes  = 0;
                 newRequest->SizeInBytes    = alignedRequestSize;
                 newRequest->PaddingInBytes = padding;
-                newRequest->Sync           = { };
+                newRequest->Sync           = {};
 
                 bufferHead = alignedRequestSize;
                 bufferUsedSizeInBytes += (alignedRequestSize + padding);
@@ -97,7 +102,7 @@ namespace ig
                     newRequest->OffsetInBytes  = 0;
                     newRequest->SizeInBytes    = alignedRequestSize;
                     newRequest->PaddingInBytes = padding;
-                    newRequest->Sync           = { };
+                    newRequest->Sync           = {};
 
                     bufferHead = alignedRequestSize;
                     bufferUsedSizeInBytes += (alignedRequestSize + padding);
@@ -113,7 +118,7 @@ namespace ig
                     newRequest->OffsetInBytes  = 0;
                     newRequest->SizeInBytes    = alignedRequestSize;
                     newRequest->PaddingInBytes = 0;
-                    newRequest->Sync           = { };
+                    newRequest->Sync           = {};
 
                     bufferHead            = alignedRequestSize;
                     bufferUsedSizeInBytes = alignedRequestSize;
@@ -142,13 +147,13 @@ namespace ig
         if (reservedThreadID.load(std::memory_order::acquire) != tuid)
         {
             IG_CHECK_NO_ENTRY();
-            return { };
+            return {};
         }
 
         if (!context.IsValid())
         {
             IG_CHECK_NO_ENTRY();
-            return { };
+            return {};
         }
 
         details::UploadRequest& request = context.GetRequest();
@@ -156,7 +161,7 @@ namespace ig
 
         CommandContext* cmdCtxPtrs[] = {request.CmdCtx.get()};
         copyQueue->ExecuteContexts(cmdCtxPtrs);
-        request.Sync = copyQueue->MakeSyncPointWithSignal();
+        request.Sync = copyQueue->MakeSyncPointWithSignal(*copyFence.Resources[currentLocalFrameIdx]);
         IG_CHECK(request.Sync.IsValid());
         context.Reset();
         reservedThreadID.store(InvalidThreadID, std::memory_order::release);
@@ -209,7 +214,7 @@ namespace ig
             }
 
             static const auto UploadBufferName = String("Async Upload Buffer");
-            GpuBufferDesc     bufferDesc{ };
+            GpuBufferDesc     bufferDesc{};
             bufferDesc.AsUploadBuffer(static_cast<uint32_t>(alignedNewSize));
             bufferDesc.DebugName = UploadBufferName;
             buffer               = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(bufferDesc).value());
@@ -230,12 +235,15 @@ namespace ig
 
     void GpuUploader::FlushQueue()
     {
-        GpuSyncPoint copyQueueFlushSync = copyQueue->MakeSyncPointWithSignal();
-        copyQueueFlushSync.WaitOnCpu();
+        for (Ptr<GpuFence>& fence : copyFence.Resources)
+        {
+            GpuSyncPoint copyQueueFlushSync = copyQueue->MakeSyncPointWithSignal(*fence);
+            copyQueueFlushSync.WaitOnCpu();
+        }
     }
 
     void UploadContext::WriteData(
-        const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes)
+            const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes)
     {
         IG_CHECK(uploadBuffer != nullptr);
         IG_CHECK(offsettedCpuAddr != nullptr);
@@ -267,7 +275,7 @@ namespace ig
     }
 
     void UploadContext::CopyTextureRegion(
-        const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+            const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
     {
         if (!IsValid())
         {
@@ -281,7 +289,7 @@ namespace ig
     }
 
     void UploadContext::CopyTextureSimple(
-        GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources)
+            GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources)
     {
         /* Write subresources to upload buffer */
         for (uint32_t idx = 0; idx < subresources.size(); ++idx)

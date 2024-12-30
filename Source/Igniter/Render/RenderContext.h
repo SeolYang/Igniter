@@ -4,6 +4,7 @@
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/D3D12/GpuTexture.h"
+#include "Igniter/D3D12/GpuFence.h"
 #include "Igniter/D3D12/PipelineState.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/Render/CommandContextPool.h"
@@ -40,6 +41,9 @@ namespace ig
         [[nodiscard]] CommandContextPool& GetMainGfxCommandContextPool() { return mainGfxCmdCtxPool; }
         [[nodiscard]] CommandContextPool& GetAsyncComputeCommandContextPool() { return asyncComputeCmdCtxPool; }
         [[nodiscard]] CommandContextPool& GetAsyncCopyCommandContextPool() { return asyncCopyCmdCtxPool; }
+        [[nodiscard]] GpuFence&           GetMainGfxFence() { return *mainGfxFence.Resources[currentLocalFrameIdx]; }
+        [[nodiscard]] GpuFence&           GetAsyncComputeFence() { return *asyncComputeFence.Resources[currentLocalFrameIdx]; }
+        [[nodiscard]] GpuFence&           GetAsyncCopyFence() { return *asyncCopyFence.Resources[currentLocalFrameIdx]; }
         [[nodiscard]] GpuUploader&        GetGpuUploader() { return gpuUploader; }
         [[nodiscard]] Swapchain&          GetSwapchain() { return *swapchain; }
         [[nodiscard]] const Swapchain&    GetSwapchain() const { return *swapchain; }
@@ -83,14 +87,17 @@ namespace ig
     private:
         GpuDevice gpuDevice;
 
-        LocalFrameIndex lastLocalFrameIdx{ };
+        LocalFrameIndex currentLocalFrameIdx{};
 
-        CommandQueue       mainGfxQueue;
-        CommandContextPool mainGfxCmdCtxPool;
-        CommandQueue       asyncComputeQueue;
-        CommandContextPool asyncComputeCmdCtxPool;
-        CommandQueue       asyncCopyQueue;
-        CommandContextPool asyncCopyCmdCtxPool;
+        CommandQueue                          mainGfxQueue;
+        CommandContextPool                    mainGfxCmdCtxPool;
+        InFlightFramesResource<Ptr<GpuFence>> mainGfxFence;
+        CommandQueue                          asyncComputeQueue;
+        CommandContextPool                    asyncComputeCmdCtxPool;
+        InFlightFramesResource<Ptr<GpuFence>> asyncComputeFence;
+        CommandQueue                          asyncCopyQueue;
+        CommandContextPool                    asyncCopyCmdCtxPool;
+        InFlightFramesResource<Ptr<GpuFence>> asyncCopyFence;
 
         DeferredResourceManagePackage<GpuBuffer, RenderContext>     bufferPackage;
         DeferredResourceManagePackage<GpuTexture, RenderContext>    texturePackage;

@@ -7,23 +7,24 @@
 
 namespace ig
 {
-    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType, GpuFence internalFence) :
+    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType) :
         native(std::move(newNativeQueue)),
-        type(specifiedType),
-        internalFence(std::move(internalFence)) { }
+        type(specifiedType) {}
 
     CommandQueue::CommandQueue(CommandQueue&& other) noexcept :
         native(std::move(other.native)),
-        type(other.type),
-        internalFence(std::move(other.internalFence)) { }
+        type(other.type) {}
 
-    CommandQueue::~CommandQueue() { }
+    CommandQueue::~CommandQueue() {}
 
     void CommandQueue::ExecuteContexts(const std::span<CommandContext*> cmdCtxs)
     {
         IG_CHECK(IsValid());
-        auto                                       toNative = views::all(cmdCtxs) | views::filter([](CommandContext* cmdCtx) { return cmdCtx != nullptr; }) | views::transform([](CommandContext* cmdCtx) { return &cmdCtx->GetNative(); });
-        eastl::vector<CommandContext::NativeType*> natives  = ToVector(toNative);
+        auto toNative = views::all(cmdCtxs) | views::filter([](CommandContext* cmdCtx)
+                                                            { return cmdCtx != nullptr; }) |
+                views::transform([](CommandContext* cmdCtx)
+                                 { return &cmdCtx->GetNative(); });
+        eastl::vector<CommandContext::NativeType*> natives = ToVector(toNative);
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
@@ -57,11 +58,6 @@ namespace ig
         }
 
         return syncPoint;
-    }
-
-    GpuSyncPoint CommandQueue::MakeSyncPointWithSignal()
-    {
-        return MakeSyncPointWithSignal(internalFence);
     }
 
     void CommandQueue::SyncWith(GpuSyncPoint& syncPoint)

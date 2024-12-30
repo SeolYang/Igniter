@@ -7,7 +7,8 @@
 
 namespace ig
 {
-    ImGuiRenderer::ImGuiRenderer(RenderContext& renderContext) : renderContext(renderContext) { }
+    ImGuiRenderer::ImGuiRenderer(RenderContext& renderContext) :
+        renderContext(renderContext) {}
 
     GpuSyncPoint ImGuiRenderer::Render(const LocalFrameIndex localFrameIdx)
     {
@@ -30,7 +31,8 @@ namespace ig
         }
 
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        auto              imguiCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "ImGuiCommandContext"_fs);
+        ig::GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
+        auto              imguiCmdCtx  = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "ImGuiCommandContext"_fs);
         imguiCmdCtx->Begin();
         {
             imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
@@ -74,6 +76,6 @@ namespace ig
             ImGui::RenderPlatformWindowsDefault();
         }
 
-        return mainGfxQueue.MakeSyncPointWithSignal();
+        return mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
     }
 } // namespace ig

@@ -1,6 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/D3D12/GpuSyncPoint.h"
+#include "Igniter/Render/Common.h"
 
 namespace ig
 {
@@ -8,6 +9,7 @@ namespace ig
     class CommandContext;
     class GpuTexture;
     class GpuBuffer;
+    class GpuFence;
 
     namespace details
     {
@@ -19,7 +21,7 @@ namespace ig
                 OffsetInBytes  = 0;
                 SizeInBytes    = 0;
                 PaddingInBytes = 0;
-                Sync           = { };
+                Sync           = {};
             }
 
         public:
@@ -27,7 +29,7 @@ namespace ig
             size_t                          OffsetInBytes  = 0;
             size_t                          SizeInBytes    = 0;
             size_t                          PaddingInBytes = 0;
-            GpuSyncPoint                    Sync{ };
+            GpuSyncPoint                    Sync{};
         };
     } // namespace details
 
@@ -39,9 +41,9 @@ namespace ig
         UploadContext(const UploadContext&) = delete;
 
         UploadContext(UploadContext&& other) noexcept
-            : uploadBuffer(std::exchange(other.uploadBuffer, nullptr))
-              , offsettedCpuAddr(std::exchange(other.offsettedCpuAddr, nullptr))
-              , request(std::exchange(other.request, nullptr)) { }
+            :
+            uploadBuffer(std::exchange(other.uploadBuffer, nullptr)),
+            offsettedCpuAddr(std::exchange(other.offsettedCpuAddr, nullptr)), request(std::exchange(other.request, nullptr)) {}
 
         ~UploadContext() = default;
 
@@ -63,15 +65,15 @@ namespace ig
 
         void CopyBuffer(const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes = 0);
         void CopyTextureRegion(
-            const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
+                const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
         void CopyTextureSimple(
-            GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources);
+                GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources);
 
     private:
         UploadContext();
 
-        UploadContext(GpuBuffer* uploadBuffer, uint8_t* uploadBufferCpuAddr, details::UploadRequest* request)
-            : uploadBuffer(uploadBuffer), offsettedCpuAddr(uploadBufferCpuAddr + request->OffsetInBytes), request(request)
+        UploadContext(GpuBuffer* uploadBuffer, uint8_t* uploadBufferCpuAddr, details::UploadRequest* request) :
+            uploadBuffer(uploadBuffer), offsettedCpuAddr(uploadBufferCpuAddr + request->OffsetInBytes), request(request)
         {
             IG_CHECK(uploadBuffer != nullptr);
             IG_CHECK(uploadBufferCpuAddr != nullptr);
@@ -111,6 +113,8 @@ namespace ig
         [[nodiscard]] UploadContext Reserve(const size_t requestSize);
         std::optional<GpuSyncPoint> Submit(UploadContext& context);
 
+        void PreRender(const LocalFrameIndex localFrameIdx) { this->currentLocalFrameIdx = localFrameIdx; }
+
     private:
         details::UploadRequest* AllocateRequestUnsafe();
         void                    WaitForRequestUnsafe(const size_t numWaitFor);
@@ -118,8 +122,11 @@ namespace ig
         void                    FlushQueue();
 
     private:
-        GpuDevice&        gpuDevice;
-        Ptr<CommandQueue> copyQueue;
+        GpuDevice&                            gpuDevice;
+        Ptr<CommandQueue>                     copyQueue;
+        InFlightFramesResource<Ptr<GpuFence>> copyFence;
+
+        LocalFrameIndex currentLocalFrameIdx;
 
         constexpr static uint64_t InvalidThreadID  = std::numeric_limits<uint64_t>::max();
         std::atomic_uint64_t      reservedThreadID = InvalidThreadID;

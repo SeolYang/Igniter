@@ -221,7 +221,7 @@ namespace ig
     bool GpuDevice::CreateMemoryAllcator()
     {
         IG_CHECK(device);
-        D3D12MA::ALLOCATOR_DESC desc{ };
+        D3D12MA::ALLOCATOR_DESC desc{};
         desc.pAdapter = adapter.Get();
         desc.pDevice  = device.Get();
         if (!SUCCEEDED(D3D12MA::CreateAllocator(&desc, &allocator)))
@@ -247,20 +247,12 @@ namespace ig
         if (const HRESULT result = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue)); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create command queue. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(newCmdQueue);
         SetObjectName(newCmdQueue.Get(), debugName);
-
-        Option<GpuFence> newFenceOpt = CreateFence(std::format("{} Sync Fence", debugName));
-        if (!newFenceOpt)
-        {
-            IG_LOG(GpuDevice, Error, "Failed to create queue internal fence.");
-            return { };
-        }
-
-        return CommandQueue{std::move(newCmdQueue), queueType, std::move(newFenceOpt.value())};
+        return CommandQueue{std::move(newCmdQueue), queueType};
     }
 
     Option<CommandContext> GpuDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
@@ -274,7 +266,7 @@ namespace ig
         if (const HRESULT result = device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator)); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create command allocator. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         ComPtr<ID3D12GraphicsCommandList7> newCmdList;
@@ -282,7 +274,7 @@ namespace ig
         if (const HRESULT result = device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList)); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create command list. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(newCmdAllocator);
@@ -296,19 +288,17 @@ namespace ig
         IG_CHECK(device);
         constexpr uint8_t          NumReservedConstants = 16; // 16 DWORDS / 64 DWORDS
         const D3D12_ROOT_PARAMETER rootParam{
-            .ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
-            .Constants = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},
-            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL
-        };
+                .ParameterType    = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+                .Constants        = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},
+                .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL};
 
         const D3D12_ROOT_SIGNATURE_DESC desc{
-            .NumParameters = 1,
-            .pParameters = &rootParam,
-            .NumStaticSamplers = 0,
-            .pStaticSamplers = nullptr,
-            .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED |
-            D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
-        };
+                .NumParameters     = 1,
+                .pParameters       = &rootParam,
+                .NumStaticSamplers = 0,
+                .pStaticSamplers   = nullptr,
+                .Flags             = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED |
+                        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT};
 
         ComPtr<ID3DBlob> errorBlob;
         ComPtr<ID3DBlob> rootSignatureBlob;
@@ -317,16 +307,16 @@ namespace ig
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to serialize root signature. HRESULT: {:#X}, Message: {}", result, errorBlob->GetBufferPointer());
-            return { };
+            return {};
         }
 
         ComPtr<ID3D12RootSignature> newRootSignature;
         if (const HRESULT result = device->CreateRootSignature(
-                0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
+                    0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create root signature. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(newRootSignature);
@@ -337,12 +327,12 @@ namespace ig
     {
         IG_CHECK(device);
 
-        ComPtr<ID3D12PipelineState> newPipelineState{ };
+        ComPtr<ID3D12PipelineState> newPipelineState{};
 
         if (const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState)); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create graphics pipeline state. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(newPipelineState);
@@ -354,11 +344,11 @@ namespace ig
     {
         IG_CHECK(device);
 
-        ComPtr<ID3D12PipelineState> newPipelineState{ };
+        ComPtr<ID3D12PipelineState> newPipelineState{};
         if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState)); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create compute pipeline state. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(newPipelineState);
@@ -376,34 +366,32 @@ namespace ig
         const bool bIsShaderVisibleDescriptorHeap = IsShaderVisibleDescriptorHeapType(descriptorHeapType);
 
         const D3D12_DESCRIPTOR_HEAP_DESC desc{
-            .Type = targetDescriptorHeapType,
-            .NumDescriptors = numDescriptors,
-            .Flags = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-            .NodeMask = 0
-        };
+                .Type           = targetDescriptorHeapType,
+                .NumDescriptors = numDescriptors,
+                .Flags          = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+                .NodeMask       = 0};
 
         ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
         if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap)); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create descriptor heap. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(newDescriptorHeap);
         SetObjectName(newDescriptorHeap.Get(), debugName);
         return DescriptorHeap{
-            descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
-            GetDescriptorHandleIncrementSize(descriptorHeapType)
-        };
+                descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
+                GetDescriptorHandleIncrementSize(descriptorHeapType)};
     }
 
     Option<GpuFence> GpuDevice::CreateFence(const std::string_view debugName)
     {
-        ComPtr<ID3D12Fence> newFence{ };
+        ComPtr<ID3D12Fence> newFence{};
         if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence)); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create queue sync fence. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(newFence);
@@ -434,14 +422,14 @@ namespace ig
         IG_CHECK(allocator);
 
         const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.GetAllocationDesc();
-        ComPtr<D3D12MA::Allocation>    allocation{ };
-        ComPtr<ID3D12Resource>         resource{ };
+        ComPtr<D3D12MA::Allocation>    allocation{};
+        ComPtr<ID3D12Resource>         resource{};
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &bufferDesc, D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr, 0, nullptr,
                                                               allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(allocation);
@@ -456,7 +444,7 @@ namespace ig
         IG_CHECK(allocator);
 
         const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.GetAllocationDesc();
-        Option<D3D12_CLEAR_VALUE>      clearValue{ };
+        Option<D3D12_CLEAR_VALUE>      clearValue{};
         if (textureDesc.IsRenderTargetCompatible())
         {
             clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .Color = {0.f, 0.f, 0.f, 1.f}};
@@ -466,15 +454,15 @@ namespace ig
             clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .DepthStencil = {.Depth = 1.f, .Stencil = 0}};
         }
 
-        ComPtr<D3D12MA::Allocation> allocation{ };
-        ComPtr<ID3D12Resource>      resource{ };
+        ComPtr<D3D12MA::Allocation> allocation{};
+        ComPtr<ID3D12Resource>      resource{};
         IG_CHECK(textureDesc.InitialLayout != D3D12_BARRIER_LAYOUT_UNDEFINED);
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc, textureDesc.InitialLayout,
                                                               clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create texture resource. HRESULT: {:#X}", result);
-            return { };
+            return {};
         }
 
         IG_CHECK(allocation);
@@ -492,7 +480,7 @@ namespace ig
         if (const HRESULT result = allocator->CreatePool(&desc, &customPool); !SUCCEEDED(result))
         {
             IG_LOG(GpuDevice, Error, "Failed to create custom gpu memory pool.");
-            return { };
+            return {};
         }
 
         return customPool;
@@ -500,7 +488,7 @@ namespace ig
 
     GpuCopyableFootprints GpuDevice::GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset)
     {
-        GpuCopyableFootprints footPrints{ };
+        GpuCopyableFootprints footPrints{};
         footPrints.Layouts.resize(numSubresources);
         footPrints.NumRows.resize(numSubresources);
         footPrints.RowSizesInBytes.resize(numSubresources);
@@ -540,8 +528,7 @@ namespace ig
         if (gpuView.Type == EGpuViewType::ConstantBufferView)
         {
             const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
-                .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)
-            };
+                    .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)};
             device->CreateConstantBufferView(&cbvDesc, gpuView.CPUHandle);
         }
         else
@@ -586,7 +573,7 @@ namespace ig
     }
 
     void GpuDevice::UpdateShaderResourceView(
-        const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
+            const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -605,7 +592,7 @@ namespace ig
     }
 
     void GpuDevice::UpdateUnorderedAccessView(
-        const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
+            const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -624,7 +611,7 @@ namespace ig
     }
 
     void GpuDevice::UpdateRenderTargetView(
-        const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
+            const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::RenderTargetView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
@@ -642,7 +629,7 @@ namespace ig
     }
 
     void GpuDevice::UpdateDepthStencilView(
-        const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
+            const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::DepthStencilView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
