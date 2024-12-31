@@ -17,7 +17,7 @@ namespace fe
 {
     EditorCanvas::EditorCanvas(TestApp& testApp) :
         app(testApp),
-        statisticsPanel(ig::MakePtr<StatisticsPanel>()),
+        statisticsPanel(ig::MakePtr<StatisticsPanel>(app.GetRenderer())),
         cachedStringDebugger(ig::MakePtr<CachedStringDebugger>()),
         entityList(ig::MakePtr<EntityList>()),
         entityInspector(ig::MakePtr<EntityInspector>(*entityList)),

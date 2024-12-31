@@ -34,15 +34,17 @@ namespace fe
         virtual void             PreRender(const ig::LocalFrameIndex localFrameIdx) override;
         virtual ig::GpuSyncPoint Render(const ig::LocalFrameIndex localFrameIdx) override;
 
+        [[nodiscard]] const ig::TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
+
     private:
         ig::World*         world = nullptr;
         ig::RenderContext& renderContext;
 
-        ig::Viewport                                                            mainViewport{ };
-        ig::Ptr<ig::ShaderBlob>                                                 vs;
-        ig::Ptr<ig::ShaderBlob>                                                 ps;
-        ig::Ptr<ig::RootSignature>                                              bindlessRootSignature;
-        ig::Ptr<ig::PipelineState>                                              pso;
+        ig::Viewport                                                          mainViewport{};
+        ig::Ptr<ig::ShaderBlob>                                               vs;
+        ig::Ptr<ig::ShaderBlob>                                               ps;
+        ig::Ptr<ig::RootSignature>                                            bindlessRootSignature;
+        ig::Ptr<ig::PipelineState>                                            pso;
         eastl::array<ig::RenderHandle<ig::GpuTexture>, ig::NumFramesInFlight> depthStencils;
         eastl::array<ig::RenderHandle<ig::GpuView>, ig::NumFramesInFlight>    dsvs;
 

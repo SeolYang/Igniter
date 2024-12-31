@@ -11,7 +11,8 @@ namespace ig
     struct TempConstantBuffer final
     {
     public:
-        TempConstantBuffer(const RenderHandle<GpuView> cbv, uint8_t* const mappedPtr) : cbv(cbv), mappedPtr(mappedPtr) { }
+        TempConstantBuffer(const RenderHandle<GpuView> cbv, uint8_t* const mappedPtr) :
+            cbv(cbv), mappedPtr(mappedPtr) {}
         ~TempConstantBuffer() = default;
 
         template <typename T>
@@ -26,8 +27,8 @@ namespace ig
         [[nodiscard]] RenderHandle<GpuView> GetConstantBufferView() const { return cbv; }
 
     private:
-        uint8_t*                mappedPtr{nullptr};
-        RenderHandle<GpuView> cbv{ };
+        uint8_t*              mappedPtr{nullptr};
+        RenderHandle<GpuView> cbv{};
     };
 
     class FrameManager;
@@ -51,7 +52,7 @@ namespace ig
         template <typename T>
         TempConstantBuffer Allocate(const LocalFrameIndex localFrameIdx)
         {
-            GpuBufferDesc constantBufferDesc{ };
+            GpuBufferDesc constantBufferDesc{};
             constantBufferDesc.AsConstantBuffer<T>();
             return Allocate(localFrameIdx, constantBufferDesc);
         }
@@ -61,9 +62,8 @@ namespace ig
 
         void InitBufferStateTransition(CommandContext& cmdCtx);
 
-        std::pair<size_t, size_t> GetUsedSizeInBytes() const;
-
-        size_t GetReservedSizeInBytesPerFrame() const { return reservedSizeInBytesPerFrame; }
+        [[nodiscard]] Size GetUsedSizeInBytes(const LocalFrameIndex localFrameIdx) const noexcept { return allocatedSizeInBytes[localFrameIdx]; }
+        [[nodiscard]] Size GetReservedSizeInBytesPerFrame() const noexcept { return reservedSizeInBytesPerFrame; }
 
     public:
         // 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값: 4 MB)
@@ -74,9 +74,9 @@ namespace ig
 
         size_t reservedSizeInBytesPerFrame;
 
-        mutable eastl::array<Mutex, NumFramesInFlight>                          mutexes;
+        mutable eastl::array<Mutex, NumFramesInFlight>                        mutexes;
         eastl::array<RenderHandle<GpuBuffer>, NumFramesInFlight>              buffers;
-        eastl::array<size_t, NumFramesInFlight>                                 allocatedSizeInBytes{0};
+        eastl::array<size_t, NumFramesInFlight>                               allocatedSizeInBytes{0};
         eastl::array<eastl::vector<RenderHandle<GpuView>>, NumFramesInFlight> allocatedViews;
     };
 } // namespace ig

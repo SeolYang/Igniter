@@ -3,10 +3,11 @@
 
 namespace fe
 {
+    class Renderer;
     class StatisticsPanel final
     {
     public:
-        StatisticsPanel()                           = default;
+        explicit StatisticsPanel(const Renderer* renderer);
         StatisticsPanel(const StatisticsPanel&)     = delete;
         StatisticsPanel(StatisticsPanel&&) noexcept = delete;
         ~StatisticsPanel()                          = default;
@@ -17,12 +18,9 @@ namespace fe
         void OnImGui();
 
     private:
-        bool bEnablePolling  = true;
-        int  pollingInterval = 60;
-        int  pollingStep     = pollingInterval;
-
-        double tempConstantBufferUsedSizeMB[2]{ };
-        double tempConstantBufferSizePerFrameMB{ };
-        float  tempConstantBufferOccupancy[2]{ };
+        const Renderer* renderer        = nullptr;
+        bool            bEnablePolling  = true;
+        int             pollingInterval = 60;
+        int             pollingStep     = pollingInterval;
     };
 } // namespace fe

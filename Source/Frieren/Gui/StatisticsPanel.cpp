@@ -3,10 +3,17 @@
 #include "Igniter/Core/Memory.h"
 #include "Igniter/Core/Timer.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
+#include "Frieren/Render/Renderer.h"
 #include "Frieren/Gui/StatisticsPanel.h"
 
 namespace fe
 {
+
+    StatisticsPanel::StatisticsPanel(const Renderer* renderer) :
+        renderer(renderer)
+    {
+    }
+
     void StatisticsPanel::OnImGui()
     {
         if (bEnablePolling && pollingStep >= pollingInterval)
@@ -36,13 +43,29 @@ namespace fe
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNodeEx("Temp Constant Buffer Occupancy", ImGuiTreeNodeFlags_Framed))
+        if (ImGui::TreeNodeEx("Temporary Constant Buffer Allocator Status", ImGuiTreeNodeFlags_Framed))
         {
-            constexpr std::string_view FormatTemplate = "Local Frame#%d Used: %lf MB/%.01lf MB";
-            ImGui::Text(FormatTemplate.data(), 0, tempConstantBufferUsedSizeMB[0], tempConstantBufferSizePerFrameMB);
-            ImGui::ProgressBar(tempConstantBufferOccupancy[0], ImVec2(0, 0));
-            ImGui::Text(FormatTemplate.data(), 1, tempConstantBufferUsedSizeMB[1], tempConstantBufferSizePerFrameMB);
-            ImGui::ProgressBar(tempConstantBufferOccupancy[1], ImVec2(0, 0));
+            if (renderer != nullptr)
+            {
+                constexpr std::string_view FormatTemplate = "Local Frame#%d Used: %lf MB/%.01lf MB";
+
+                const ig::TempConstantBufferAllocator* allocator = renderer->GetTempConstantBufferAllocator();
+                IG_CHECK(allocator != nullptr);
+
+                const double tempConstantBufferSizePerFrameInMB = ig::BytesToMegaBytes(allocator->GetReservedSizeInBytesPerFrame());
+                for (ig::LocalFrameIndex localFrameIdx = 0; localFrameIdx < ig::NumFramesInFlight; ++localFrameIdx)
+                {
+                    const double tempConstantBufferUsedSizeInMB = ig::BytesToMegaBytes(allocator->GetUsedSizeInBytes(localFrameIdx));
+                    const float  tempConstantBufferOccupancy    = static_cast<float>(tempConstantBufferUsedSizeInMB / tempConstantBufferSizePerFrameInMB);
+                    ImGui::Text(FormatTemplate.data(), localFrameIdx, tempConstantBufferUsedSizeInMB, tempConstantBufferSizePerFrameInMB);
+                    ImGui::ProgressBar(tempConstantBufferOccupancy, ImVec2(0, 0));
+                }
+            }
+            else
+            {
+                ImGui::Text("Invalid");
+            }
+
             ImGui::TreePop();
         }
         ++pollingStep;

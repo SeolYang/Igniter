@@ -19,11 +19,11 @@ namespace fe
         explicit TestApp(const ig::AppDesc& desc);
         ~TestApp() override;
 
-        void PreUpdate(const float) override { }
+        void PreUpdate(const float) override {}
 
         void Update(const float deltaTime) override;
 
-        void PostUpdate(const float) override { }
+        void PostUpdate(const float) override {}
 
         void             PreRender(const ig::LocalFrameIndex localFrameIdx) override;
         ig::GpuSyncPoint Render(const ig::LocalFrameIndex localFrameIdx) override;
@@ -33,6 +33,11 @@ namespace fe
 
         [[nodiscard]] ig::World*       GetActiveWorld() { return world.get(); }
         [[nodiscard]] const ig::World* GetActiveWorld() const { return world.get(); }
+
+        [[nodiscard]] const Renderer* GetRenderer() const
+        {
+            return renderer.get();
+        }
 
     private:
         tf::Executor* taskExecutor;

@@ -83,9 +83,4 @@ namespace ig
         }
         cmdCtx.FlushBarriers();
     }
-
-    std::pair<size_t, size_t> TempConstantBufferAllocator::GetUsedSizeInBytes() const
-    {
-        return std::make_pair(allocatedSizeInBytes[0], allocatedSizeInBytes[1]);
-    }
 } // namespace ig

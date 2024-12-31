@@ -126,6 +126,7 @@
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
     <ClInclude Include="Render\RenderPass.h" />
+    <ClInclude Include="Render\SceneProxy.h" />
     <ClInclude Include="Render\Swapchain.h" />
     <ClInclude Include="Render\TempConstantBufferAllocator.h" />
     <ClInclude Include="Render\Utils.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="Render\MeshStorage.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
     <ClCompile Include="Render\RenderPass.cpp" />
+    <ClCompile Include="Render\SceneProxy.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />
     <ClCompile Include="Render\TempConstantBufferAllocator.cpp" />
   </ItemGroup>

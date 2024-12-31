@@ -408,6 +408,9 @@
     <ClInclude Include="Render\MeshStorage.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\SceneProxy.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -591,6 +594,9 @@
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Render\MeshStorage.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\SceneProxy.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
