@@ -119,12 +119,14 @@ namespace ig
             ReadOnlyLock storageMutex{staticMeshVertexSpacePackage.StorageMutex};
             stats.StaticMeshVertexStorageUsage = staticMeshVertexGpuStorage.GetAllocatedSize();
             stats.StaticMeshVertexStorageSize  = staticMeshVertexGpuStorage.GetBufferSize();
+            stats.NumStaticMeshVertices        = staticMeshVertexGpuStorage.GetNumAllocatedElements();
         }
 
         {
             ReadOnlyLock storageMutex{vertexIndexSpacePackage.StorageMutex};
             stats.VertexIndexStorageUsage = vertexIndexGpuStorage.GetAllocatedSize();
             stats.VertexIndexStorageSize  = vertexIndexGpuStorage.GetBufferSize();
+            stats.NumVertexIndices        = vertexIndexGpuStorage.GetNumAllocatedElements();
         }
 
         return stats;

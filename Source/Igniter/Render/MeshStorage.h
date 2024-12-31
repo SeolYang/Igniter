@@ -25,8 +25,10 @@ namespace ig
         {
             Size StaticMeshVertexStorageUsage;
             Size StaticMeshVertexStorageSize;
+            Size NumStaticMeshVertices;
             Size VertexIndexStorageUsage;
             Size VertexIndexStorageSize;
+            Size NumVertexIndices;
         };
 
     public:

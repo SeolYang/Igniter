@@ -12,7 +12,7 @@ namespace ig
     // 주의: 렌더링 로직 내에서 Allocation/Deallocation을 지양할 것!
     // 해당 저장 공간(버퍼) 대한 작업 시, 반드시 Storage Fence를 사용해서 올바르게
     // 버퍼 접근에 대한 동기화가 올바르게 일어 날 수 있도록 하여야한다.
-    // 
+    //
     // 개선 희망 사항: 만약 할당 정보를 항상 핸들을 사용해서 접근 할 수 있게 만들면 내부적으로 Defragmentation
     // 알고리즘을 구현 할 수도 있을 것 같음.
     class GpuStorage final
@@ -22,11 +22,11 @@ namespace ig
         {
         public:
             [[nodiscard]] bool IsValid() const noexcept { return VirtualAllocation.AllocHandle != 0 && AllocSize > 0 && BlockIndex != InvalidIndex; }
-            static Allocation  Invalid() { return Allocation{ }; }
+            static Allocation  Invalid() { return Allocation{}; }
 
         public:
             Index                      BlockIndex = InvalidIndex;
-            D3D12MA::VirtualAllocation VirtualAllocation{ };
+            D3D12MA::VirtualAllocation VirtualAllocation{};
 
             Size Offset      = 0;
             Size OffsetIndex = 0;
@@ -55,6 +55,7 @@ namespace ig
 
         [[nodiscard]] Size      GetAllocatedSize() const noexcept { return allocatedSize; }
         [[nodiscard]] Size      GetBufferSize() const noexcept { return bufferSize; }
+        [[nodiscard]] Size      GetNumAllocatedElements() const noexcept { return allocatedSize / elementSize; }
         [[nodiscard]] GpuFence& GetStorageFence() noexcept { return fence; }
 
         [[nodiscard]] RenderHandle<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
@@ -85,9 +86,9 @@ namespace ig
         GpuFence fence;
 
         RenderHandle<GpuBuffer> gpuBuffer;
-        eastl::vector<Block>      blocks;
+        eastl::vector<Block>    blocks;
 
         RenderHandle<GpuView> srv;
         RenderHandle<GpuView> uav;
     };
-}
+} // namespace ig
