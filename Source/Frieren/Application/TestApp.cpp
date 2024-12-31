@@ -14,10 +14,9 @@
 namespace fe
 {
     TestApp::TestApp(const ig::AppDesc& desc) :
-        taskExecutor(&ig::Engine::GetTaskExecutor())
-        , renderer(ig::MakePtr<fe::Renderer>(
-            ig::Engine::GetWindow(), ig::Engine::GetRenderContext()))
-        , Application(desc)
+        taskExecutor(&ig::Engine::GetTaskExecutor()),
+        renderer(ig::MakePtr<fe::Renderer>(ig::Engine::GetWindow(), ig::Engine::GetRenderContext())),
+        Application(desc)
     {
         /* #sy_test 입력 매니저 테스트 */
         ig::InputManager& inputManager = ig::Engine::GetInputManager();
@@ -153,10 +152,7 @@ namespace fe
         /************************************/
 
         /* #sy_test Game Mode 타입 메타 정보 테스트 */
-        gameSystem =
-                std::move(
-                    *entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({ }).try_cast<ig::Ptr
-                        <ig::GameSystem>>());
+        gameSystem = std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>());
         /************************************/
 
         // Json dumpedWorld{};
@@ -164,12 +160,11 @@ namespace fe
         // Igniter::GetAssetManager().Import("TestMap"_fs, {.WorldToSerialize = world.get()});
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
-        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        world                          = ig::MakePtr<ig::World>(assetManager,
-                                       assetManager.Load<ig::Map>(ig::Guid{
-                                           "92d1aad6-7d75-41a4-be10-c9f8bfdb787e"
-                                       }));
-        renderer->SetWorld(world.get());
+
+        ig::AssetManager& assetManager  = ig::Engine::GetAssetManager();
+        ig::World&        worldInstance = ig::Engine::GetWorld();
+        worldInstance                   = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
+        renderer->SetWorld(&worldInstance);
 
         ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();
         imGuiRenderer.SetTargetCanvas(editorCanvas.get());
@@ -182,7 +177,7 @@ namespace fe
 
     void TestApp::Update(const float deltaTime)
     {
-        gameSystem->Update(deltaTime, *world);
+        gameSystem->Update(deltaTime, ig::Engine::GetWorld());
     }
 
     void TestApp::PreRender(const ig::LocalFrameIndex localFrameIdx)
@@ -195,7 +190,7 @@ namespace fe
         return renderer->Render(localFrameIdx);
     }
 
-    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex) { }
+    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex) {}
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)
     {

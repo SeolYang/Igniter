@@ -31,9 +31,6 @@ namespace fe
 
         void SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem);
 
-        [[nodiscard]] ig::World*       GetActiveWorld() { return world.get(); }
-        [[nodiscard]] const ig::World* GetActiveWorld() const { return world.get(); }
-
         [[nodiscard]] const Renderer* GetRenderer() const
         {
             return renderer.get();
@@ -42,7 +39,6 @@ namespace fe
     private:
         tf::Executor* taskExecutor;
 
-        ig::Ptr<ig::World>      world;
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas>   editorCanvas;
 

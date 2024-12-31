@@ -27,6 +27,7 @@ namespace ig
 
     AssetManager::~AssetManager()
     {
+        UnRegisterEngineDefault();
         /* #sy_improvements 에셋도 Load시 가장 최근 callstack 정보를 저장하도록 만드는 것도 나쁘지 않을 것 같음! */
         /* 아니면, 핸들의 핸들? */
         for (const auto& snapshot : TakeSnapshots())
@@ -79,6 +80,8 @@ namespace ig
 
     void AssetManager::RegisterEngineDefault()
     {
+        IG_LOG(AssetManager, Info, "Load and register Engine Default Assets to Asset Manager.");
+
         /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
         AssetInfo defaultTexInfo{Guid{DefaultTextureGuid}, Texture::EngineDefault, EAssetCategory::Texture, EAssetScope::Engine};
         RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
@@ -93,14 +96,20 @@ namespace ig
 
         AssetInfo defaultMatInfo{Guid{DefaultMaterialGuid}, Material::EngineDefault, EAssetCategory::Material, EAssetScope::Engine};
         RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
+
+        IG_LOG(AssetManager, Info, "Engine Default Assets have been successfully registered to Asset Manager.");
     }
 
     void AssetManager::UnRegisterEngineDefault()
     {
+        IG_LOG(AssetManager, Info, "Unload/Unregister Engine Default Assets from Asset Manager.");
+
         Delete(Guid{DefaultTextureGuid});
         Delete(Guid{DefaultWhiteTextureGuid});
         Delete(Guid{DefaultBlackTextureGuid});
         Delete(Guid{DefaultMaterialGuid});
+
+        IG_LOG(AssetManager, Info, "Engine Default Assets have been successfully unregistered from Asset Manager.");
     }
 
     Guid AssetManager::Import(const String resPath, const TextureImportDesc& config)

@@ -20,6 +20,7 @@ namespace ig
     class AssetManager;
     class ImGuiContext;
     class ImGuiRenderer;
+    class World;
 
     class Engine final
     {
@@ -43,9 +44,10 @@ namespace ig
         [[nodiscard]] static AssetManager&  GetAssetManager();
         [[nodiscard]] static ImGuiContext&  GetImGuiContext();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
+        [[nodiscard]] static World&         GetWorld();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
-        bool static        IsInitialized() { return instance != nullptr && instance->bInitialized; }
+        bool static IsInitialized() { return instance != nullptr && instance->bInitialized; }
 
         static void Stop();
 
@@ -57,11 +59,11 @@ namespace ig
         bool           bInitialized = false;
         bool           bShouldExit  = false;
 
-        eastl::array<GpuSyncPoint, NumFramesInFlight> localFrameSyncs{ };
+        eastl::array<GpuSyncPoint, NumFramesInFlight> localFrameSyncs{};
 
         /* L# stands for Dependency Level */
         //////////////////////// L0 ////////////////////////
-        tf::Executor      taskExecutor{ };
+        tf::Executor      taskExecutor{};
         Ptr<Timer>        timer;
         Ptr<Window>       window;
         Ptr<InputManager> inputManager;
@@ -79,6 +81,10 @@ namespace ig
         Ptr<AssetManager>  assetManager;
         Ptr<ImGuiContext>  imguiContext;
         Ptr<ImGuiRenderer> imguiRenderer;
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L4 ////////////////////////
+        Ptr<World> world;
         ////////////////////////////////////////////////////
     };
 } // namespace ig

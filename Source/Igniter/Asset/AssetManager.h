@@ -51,8 +51,8 @@ namespace ig
             bool IsCached() const { return RefCount > 0 || Info.GetScope() == EAssetScope::Static || Info.GetScope() == EAssetScope::Engine; }
 
         public:
-            AssetInfo Info{ };
-            uint32_t  RefCount{ };
+            AssetInfo Info{};
+            uint32_t  RefCount{};
         };
 
     public:
@@ -63,9 +63,6 @@ namespace ig
 
         AssetManager& operator=(const AssetManager&)     = delete;
         AssetManager& operator=(AssetManager&&) noexcept = delete;
-
-        void RegisterEngineDefault();
-        void UnRegisterEngineDefault();
 
         /*
          * #sy_note 에셋 매니저를 사용한 리소스의 로드/언로드
@@ -320,7 +317,7 @@ namespace ig
             if (!assetMonitor->Contains(guid))
             {
                 IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
-                return ManagedAsset<T>{ };
+                return ManagedAsset<T>{};
             }
 
             AssetLock               assetLock{GetAssetMutex(guid)};
@@ -334,7 +331,7 @@ namespace ig
                 {
                     IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
                            desc.Info.GetVirtualPath(), guid);
-                    return ManagedAsset<T>{ };
+                    return ManagedAsset<T>{};
                 }
 
                 assetCache.Cache(guid, result.Take());
@@ -421,6 +418,9 @@ namespace ig
             IG_CHECK(!assetCache.IsCached(guid));
             assetCache.Cache(guid, std::move(asset));
         }
+
+        void RegisterEngineDefault();
+        void UnRegisterEngineDefault();
 
     private:
         Ptr<details::AssetMonitor>                    assetMonitor;

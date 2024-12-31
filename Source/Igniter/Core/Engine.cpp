@@ -14,6 +14,7 @@
 #include "Igniter/ImGui/ImGuiContext.h"
 #include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Igniter/Application/Application.h"
+#include "Igniter/Gameplay/World.h"
 
 IG_DEFINE_LOG_CATEGORY(Engine);
 
@@ -48,12 +49,16 @@ namespace ig
 
         //////////////////////// L3 ////////////////////////
         assetManager = MakePtr<AssetManager>(*renderContext);
-//        assetManager->RegisterEngineDefault();
         IG_LOG(Engine, Info, "Asset Manager Initialized.");
         imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
         IG_LOG(Engine, Info, "ImGui Context Initialized.");
         imguiRenderer = MakePtr<ImGuiRenderer>(*renderContext);
         IG_LOG(Engine, Info, "ImGui Renderer Initialized.");
+        ////////////////////////////////////////////////////
+
+        //////////////////////// L4 ////////////////////////
+        world = MakePtr<World>();
+        IG_LOG(Engine, Info, "Empty World Initialized.");
         ////////////////////////////////////////////////////
         bInitialized = true;
 
@@ -64,31 +69,39 @@ namespace ig
     {
         IG_LOG(Engine, Info, "Extinguishing Engine Runtime.");
 
+        //////////////////////// L4 ////////////////////////
+        world.reset();
+        IG_LOG(Engine, Info, "World Deinitialized.");
+        ////////////////////////////////////////////////////
+
         //////////////////////// L3 ////////////////////////
         imguiContext.reset();
-        assetManager->UnRegisterEngineDefault();
+        IG_LOG(Engine, Info, "ImGui Context Deinitialized.");
         assetManager.reset();
+        IG_LOG(Engine, Info, "Asset Manager Deinitialized.");
         ////////////////////////////////////////////////////
 
         //////////////////////// L2 ////////////////////////
         meshStorage.reset();
+        IG_LOG(Engine, Info, "Mesh Storage Deinitialized.");
         ////////////////////////////////////////////////////
 
         //////////////////////// L1 ////////////////////////
         renderContext.reset();
+        IG_LOG(Engine, Info, "Render Context Deinitialized.");
         ////////////////////////////////////////////////////
 
         //////////////////////// L0 ////////////////////////
         inputManager.reset();
+        IG_LOG(Engine, Info, "Input Manager Deinitialized.");
         window.reset();
+        IG_LOG(Engine, Info, "Window Instance Deinitialized.");
         timer.reset();
         ////////////////////////////////////////////////////
 
         IG_LOG(Engine, Info, "Engine Runtime Extinguished");
-        if (instance == this)
-        {
-            instance = nullptr;
-        }
+        IG_CHECK(instance == this);
+        instance = nullptr;
     }
 
     int Engine::Execute(Application& application)
@@ -223,4 +236,11 @@ namespace ig
         IG_CHECK(instance != nullptr);
         return *instance->imguiRenderer;
     }
+
+    World& Engine::GetWorld()
+    {
+        IG_CHECK(instance != nullptr);
+        return *instance->world;
+    }
+
 } // namespace ig

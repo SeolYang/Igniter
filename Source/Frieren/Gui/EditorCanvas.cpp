@@ -52,10 +52,10 @@ namespace fe
                 if (ImGui::MenuItem("Entities"))
                 {
                     bEntityListOpend = !bEntityListOpend;
-                    entityList->SetActiveWorld(app.GetActiveWorld());
+                    entityList->SetActiveWorld(&ig::Engine::GetWorld());
 
                     bEntityInspectorOpend = !bEntityInspectorOpend;
-                    entityInspector->SetActiveWorld(app.GetActiveWorld());
+                    entityInspector->SetActiveWorld(&ig::Engine::GetWorld());
                 }
 
                 if (ImGui::MenuItem("Editor Camera", nullptr, nullptr, false)) { }
