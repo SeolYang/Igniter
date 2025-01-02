@@ -21,7 +21,8 @@ namespace ig
         World& operator=(const World&)     = delete;
         World& operator=(World&&) noexcept = default;
 
-        Registry& GetRegistry() { return registry; }
+        [[nodiscard]] Registry& GetRegistry() noexcept { return registry; }
+        [[nodiscard]] const Registry& GetRegistry() const noexcept { return registry; }
 
         /* #sy_todo 프로토타이핑 했던 거에 기반해서 구현(런타임 메타 데이타 참고) */
         Json&       Serialize(Json& archive) const;

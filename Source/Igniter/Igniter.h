@@ -148,6 +148,11 @@ using namespace entt::literals;
 
 #pragma warning(push)
 #pragma warning(disable : 4456)
+#pragma warning(disable : 28182)
+#pragma warning(disable : 26437)
+#pragma warning(disable : 26495)
+#pragma warning(disable : 26439)
+#pragma warning(disable : 6387)
 #include <taskflow/taskflow.hpp>
 #pragma warning(pop)
 
@@ -161,7 +166,11 @@ using namespace entt::literals;
 #include <fmod/fmod_output.h>
 #pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 6385)
+#pragma warning(disable : 26437)
 #include <Jolt/Jolt.h>
+#pragma warning(pop)
 
 #include "Igniter/Core/Assert.h"
 #include "Igniter/Core/Types.h"

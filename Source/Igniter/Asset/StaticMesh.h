@@ -7,10 +7,6 @@
 
 namespace ig
 {
-    class StaticMesh;
-    template <>
-    constexpr inline auto AssetCategoryOf<StaticMesh> = EAssetCategory::StaticMesh;
-
     struct StaticMeshImportDesc
     {
     public:
@@ -51,7 +47,6 @@ namespace ig
     class Material;
     class RenderContext;
     class AssetManager;
-
     class StaticMesh final
     {
     public:

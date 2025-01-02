@@ -21,7 +21,7 @@ namespace ig::details
         virtual bool                   IsEmpty() const = 0;
     };
 
-    template <Asset T>
+    template <typename T>
     class AssetDescMap : public TypelessAssetDescMap
     {
     public:
@@ -98,14 +98,14 @@ namespace ig::details
         [[nodiscard]] AssetInfo GetAssetInfo(const Guid& guid) const;
         [[nodiscard]] AssetInfo GetAssetInfo(const EAssetCategory assetType, const String virtualPath) const;
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] T::LoadDesc GetLoadDesc(const Guid& guid) const
         {
             ReadOnlyLock lock{mutex};
             return GetLoadDescUnsafe<T>(guid);
         }
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] T::LoadDesc GetLoadDesc(const String virtualPath) const
         {
             ReadOnlyLock lock{mutex};
@@ -113,14 +113,14 @@ namespace ig::details
             return GetLoadDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath));
         }
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] void UpdateLoadDesc(const Guid& guid, const typename T::LoadDesc& loadDesc)
         {
             ReadWriteLock rwLock{mutex};
             UpdateLoadDescUnsafe<T>(guid, loadDesc);
         }
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] void UpdateLoadDesc(const String virtualPath, const typename T::LoadDesc& loadDesc)
         {
             ReadWriteLock rwLock{mutex};
@@ -128,14 +128,14 @@ namespace ig::details
             UpdateLoadDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath), loadDesc);
         }
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] T::Desc GetDesc(const Guid& guid) const
         {
             ReadOnlyLock lock{mutex};
             return GetDescUnsafe<T>(guid);
         }
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] T::Desc GetDesc(const String virtualPath) const
         {
             ReadOnlyLock lock{mutex};
@@ -143,7 +143,7 @@ namespace ig::details
             return GetDescUnsafe<T>(GetGuidUnsafe(AssetCategoryOf<T>, virtualPath));
         }
 
-        template <Asset T>
+        template <typename T>
         void Create(const AssetInfo& newInfo, const typename T::LoadDesc& loadDesc)
         {
             ReadWriteLock rwLock{mutex};
@@ -176,13 +176,13 @@ namespace ig::details
         VirtualPathGuidTable&       GetVirtualPathGuidTable(const EAssetCategory assetType);
         const VirtualPathGuidTable& GetVirtualPathGuidTable(const EAssetCategory assetType) const;
 
-        template <Asset T>
+        template <typename T>
         AssetDescMap<T>& GetDescMap()
         {
             return static_cast<AssetDescMap<T>&>(GetDescMap(AssetCategoryOf<T>));
         }
 
-        template <Asset T>
+        template <typename T>
         const AssetDescMap<T>& GetDescMap() const
         {
             return static_cast<const AssetDescMap<T>&>(GetDescMap(AssetCategoryOf<T>));
@@ -197,7 +197,7 @@ namespace ig::details
         [[nodiscard]] Guid      GetGuidUnsafe(const EAssetCategory assetType, const String virtualPath) const;
         [[nodiscard]] AssetInfo GetAssetInfoUnsafe(const Guid& guid) const;
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] T::LoadDesc GetLoadDescUnsafe(const Guid& guid) const
         {
             IG_CHECK(ContainsUnsafe(guid));
@@ -205,7 +205,7 @@ namespace ig::details
             return assetDescTable.GetDesc(guid).LoadDescriptor;
         }
 
-        template <Asset T>
+        template <typename T>
         void UpdateLoadDescUnsafe(const Guid& guid, const typename T::LoadDesc& loadDesc)
         {
             IG_CHECK(ContainsUnsafe(guid));
@@ -213,7 +213,7 @@ namespace ig::details
             assetDescTable.Update(guid, loadDesc);
         }
 
-        template <Asset T>
+        template <typename T>
         [[nodiscard]] T::Desc GetDescUnsafe(const Guid& guid) const
         {
             IG_CHECK(ContainsUnsafe(guid));

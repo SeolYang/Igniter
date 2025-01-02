@@ -7,10 +7,6 @@
 
 namespace ig
 {
-    class Texture;
-    template <>
-    constexpr inline EAssetCategory AssetCategoryOf<Texture> = EAssetCategory::Texture;
-
     enum class ETextureCompressionMode
     {
         None,

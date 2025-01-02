@@ -6,10 +6,6 @@
 
 namespace ig
 {
-    class Material;
-    template <>
-    constexpr inline EAssetCategory AssetCategoryOf<Material> = EAssetCategory::Material;
-
     struct MaterialAssetCreateDesc final
     {
     public:

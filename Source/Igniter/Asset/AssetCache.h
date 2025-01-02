@@ -25,7 +25,7 @@ namespace ig::details
         virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
     };
 
-    template <Asset T>
+    template <typename T>
     class AssetCache final : public TypelessAssetCache
     {
     public:

@@ -46,6 +46,8 @@ namespace ig
     using UnorderedMap = ankerl::unordered_dense::map<Key, T>;
     template <typename Key>
     using UnorderedSet = ankerl::unordered_dense::set<Key>;
+    template <typename T>
+    using Vector = eastl::vector<T>;
 
     using Entity              = entt::entity;
     constexpr auto NullEntity = entt::null;

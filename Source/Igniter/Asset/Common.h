@@ -36,6 +36,17 @@ namespace ig
         Material,
         Map,
     };
+    template <typename T>
+    inline constexpr EAssetCategory AssetCategoryOf = EAssetCategory::Unknown;
+
+    template <>
+    constexpr inline EAssetCategory AssetCategoryOf<class Material> = EAssetCategory::Material;
+    template <>
+    constexpr inline EAssetCategory AssetCategoryOf<class Map> = EAssetCategory::Map;
+    template <>
+    constexpr inline EAssetCategory AssetCategoryOf<class StaticMesh> = EAssetCategory::StaticMesh;
+    template <>
+    constexpr inline EAssetCategory AssetCategoryOf<class Texture> = EAssetCategory::Texture;
 
     struct ResourceInfo
     {
@@ -98,10 +109,6 @@ namespace ig
     };
 
     template <typename T>
-    inline constexpr EAssetCategory AssetCategoryOf = EAssetCategory::Unknown;
-
-    template <typename T>
-        requires(AssetCategoryOf<T> != EAssetCategory::Unknown)
     struct AssetDesc
     {
         AssetInfo   Info;
@@ -109,25 +116,6 @@ namespace ig
     };
 
     template <typename T>
-    concept Asset =
-            requires(T asset)
-            {
-                typename T::ImportDesc;
-                typename T::LoadDesc;
-                typename T::Desc;
-                {
-                    asset.GetSnapshot()
-                } -> std::same_as<const typename T::Desc&>;
-            } && std::is_move_constructible_v<T> && std::is_move_assignable_v<T> && std::is_same_v<typename T::Desc, AssetDesc<T>> &&
-            AssetCategoryOf<T> != EAssetCategory::Unknown;
-
-    template <typename T>
-    inline constexpr bool IsAsset = false;
-
-    template <Asset T>
-    inline constexpr bool IsAsset<T> = true;
-
-    template <Asset T>
     using ManagedAsset = Handle<T, class AssetManager>;
 
     /* Refer to {ResourcePath}.metadata */

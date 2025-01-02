@@ -12,7 +12,11 @@ namespace ig
     struct InFlightFramesResource
     {
     public:
-        eastl::array<Ty, NumFramesInFlight> Resources{ };
+        [[nodiscard]] Ty&       operator[](const LocalFrameIndex localFrameIdx) noexcept { return Resources[localFrameIdx]; }
+        [[nodiscard]] const Ty& operator[](const LocalFrameIndex localFrameIdx) const noexcept { return Resources[localFrameIdx]; }
+
+    public:
+        eastl::array<Ty, NumFramesInFlight> Resources{};
     };
 
     // 각 타입에 정의하고, 각 타입에 대해 Create/Destroy에서 rw lock, Lookup 에선 read only lock
@@ -22,9 +26,9 @@ namespace ig
     struct DeferredResourceManagePackage
     {
     public:
-        mutable SharedMutex StorageMutex;
-        HandleStorage<Ty, Dependency> Storage;
-        InFlightFramesResource<Mutex> DeferredDestroyPendingListMutex;
+        mutable SharedMutex                                           StorageMutex;
+        HandleStorage<Ty, Dependency>                                 Storage;
+        InFlightFramesResource<Mutex>                                 DeferredDestroyPendingListMutex;
         InFlightFramesResource<eastl::vector<Handle<Ty, Dependency>>> DeferredDestroyPendingList;
     };
 } // namespace ig

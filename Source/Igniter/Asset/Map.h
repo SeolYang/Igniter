@@ -3,10 +3,6 @@
 
 namespace ig
 {
-    class Map;
-    template <>
-    constexpr inline EAssetCategory AssetCategoryOf<Map> = EAssetCategory::Map;
-
     class World;
 
     struct MapCreateDesc final

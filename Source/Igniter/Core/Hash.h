@@ -9,7 +9,6 @@ namespace ig
     template <typename Ty>
     inline U32 HashInstance(const Ty& instance)
     {
-        constexpr Size SizeOfInstance       = sizeof(Ty);
         constexpr Size NumDwordChunks       = sizeof(Ty) / 4u;
         constexpr Size NumRemainingBytes    = sizeof(Ty) % 4u;
         constexpr Size RemainingBytesOffset = sizeof(Ty) - NumRemainingBytes;
