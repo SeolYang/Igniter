@@ -53,6 +53,8 @@ namespace ig
         Allocation Allocate(const Size numElements);
         void       Deallocate(const Allocation& allocation);
 
+        void ForceReset();
+
         [[nodiscard]] Size      GetAllocatedSize() const noexcept { return allocatedSize; }
         [[nodiscard]] Size      GetBufferSize() const noexcept { return bufferSize; }
         [[nodiscard]] Size      GetNumAllocatedElements() const noexcept { return allocatedSize / elementSize; }

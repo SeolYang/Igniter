@@ -17,12 +17,12 @@ namespace ig
     {
         IG_CHECK(initialNumElements > 0);
         IG_CHECK(elementSize > 0);
-        GpuBufferDesc bufferDesc{ };
+        GpuBufferDesc bufferDesc{};
         bufferDesc.DebugName = debugName;
         bufferDesc.AsStructuredBuffer(elementSize, initialNumElements, bIsShaderReadWritable);
 
         gpuBuffer = renderContext.CreateBuffer(bufferDesc);
-        srv       = renderContext.CreateShaderResourceView(gpuBuffer);
+        srv = renderContext.CreateShaderResourceView(gpuBuffer);
 
         if (bIsShaderReadWritable)
         {
@@ -30,8 +30,8 @@ namespace ig
         }
 
         const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSize};
-        D3D12MA::VirtualBlock*            newVirtualBlock{nullptr};
-        [[maybe_unused]] const HRESULT    hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
+        D3D12MA::VirtualBlock* newVirtualBlock{nullptr};
+        [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
         // 여기서 Virtual Block 할당 실패를 핸들 해야하나? 로그에 남겨야 하나?
         blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = 0});
     }
@@ -73,7 +73,7 @@ namespace ig
         }
 
         const Size allocSize = numElements * elementSize;
-        Allocation newAllocation{ };
+        Allocation newAllocation{};
         for (Index blockIdx = 0; blockIdx < blocks.size(); ++blockIdx)
         {
             if (AllocateWithBlock(allocSize, blockIdx, newAllocation))
@@ -109,12 +109,32 @@ namespace ig
         allocatedSize -= allocation.AllocSize;
     }
 
+    void GpuStorage::ForceReset()
+    {
+        allocatedSize = 0;
+
+        for (const Block& block : blocks)
+        {
+            if (block.VirtualBlock != nullptr)
+            {
+                block.VirtualBlock->Clear();
+                block.VirtualBlock->Release();
+            }
+        }
+        blocks.clear();
+
+        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSize};
+        D3D12MA::VirtualBlock* newVirtualBlock{nullptr};
+        [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
+        blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = 0});
+    }
+
     bool GpuStorage::AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation)
     {
         IG_CHECK(blockIdx < blocks.size());
         const D3D12MA::VIRTUAL_ALLOCATION_DESC allocDesc{.Size = allocSize};
-        D3D12MA::VirtualAllocation             virtualAllocation{ };
-        Size                                   allocOffset = 0;
+        D3D12MA::VirtualAllocation virtualAllocation{};
+        Size allocOffset = 0;
 
         Block& block = blocks[blockIdx];
         IG_CHECK(block.VirtualBlock != nullptr);
@@ -122,15 +142,13 @@ namespace ig
         {
             const Size storageOffset = block.Offset + allocOffset;
             allocatedSize += allocSize;
-            allocation = Allocation
-            {
+            allocation = Allocation{
                 .BlockIndex = blockIdx,
                 .VirtualAllocation = virtualAllocation,
                 .Offset = storageOffset,
                 .OffsetIndex = storageOffset / elementSize,
                 .AllocSize = allocSize,
-                .NumElements = allocSize / elementSize
-            };
+                .NumElements = allocSize / elementSize};
 
             return true;
         }
@@ -150,7 +168,7 @@ namespace ig
         IG_CHECK(newBufferSize > 0);
         IG_CHECK((newBufferSize - bufferSize) > 0);
 
-        GpuBufferDesc newGpuBufferDesc{ };
+        GpuBufferDesc newGpuBufferDesc{};
         newGpuBufferDesc.DebugName = debugName;
         newGpuBufferDesc.AsStructuredBuffer(elementSize, static_cast<U32>(newBufferSize / elementSize), bIsShaderReadWritable);
         RenderHandle<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(newGpuBufferDesc);
@@ -159,14 +177,14 @@ namespace ig
             return false;
         }
 
-        GpuBuffer* gpuBufferPtr    = renderContext.Lookup(gpuBuffer);
+        GpuBuffer* gpuBufferPtr = renderContext.Lookup(gpuBuffer);
         GpuBuffer* newGpuBufferPtr = renderContext.Lookup(newGpuBuffer);
         IG_CHECK(gpuBufferPtr != nullptr);
         IG_CHECK(newGpuBufferPtr != nullptr);
 
-        CommandQueue&       asyncCopyQueue = renderContext.GetAsyncCopyQueue();
-        CommandContextPool& contextPool    = renderContext.GetAsyncCopyCommandContextPool();
-        auto                copyCmdCtx     = contextPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
+        CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
+        CommandContextPool& contextPool = renderContext.GetAsyncCopyCommandContextPool();
+        auto copyCmdCtx = contextPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
         copyCmdCtx->Begin();
         {
             copyCmdCtx->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
@@ -201,16 +219,16 @@ namespace ig
         }
 
         gpuBuffer = newGpuBuffer;
-        srv       = renderContext.CreateShaderResourceView(gpuBuffer);
+        srv = renderContext.CreateShaderResourceView(gpuBuffer);
         if (bIsShaderReadWritable)
         {
             uav = renderContext.CreateUnorderedAccessView(gpuBuffer);
         }
 
-        const Size                        bufferSizeDiff = newBufferSize - bufferSize;
+        const Size bufferSizeDiff = newBufferSize - bufferSize;
         const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSizeDiff};
-        D3D12MA::VirtualBlock*            newVirtualBlock{nullptr};
-        [[maybe_unused]] const HRESULT    hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
+        D3D12MA::VirtualBlock* newVirtualBlock{nullptr};
+        [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
         // 여기서 Virtual Block 할당 실패를 핸들 해야하나? 로그에 남겨야 하나?
         blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = bufferSize});
 
@@ -220,4 +238,4 @@ namespace ig
         newSyncPoint.WaitOnCpu();
         return true;
     }
-}
+} // namespace ig

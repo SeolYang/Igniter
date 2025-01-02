@@ -41,7 +41,7 @@ namespace fe
         ig::Matrix LocalToWorld{ };
     };
 
-    Renderer::Renderer(ig::Window& window, ig::RenderContext& renderContext) :\
+    Renderer::Renderer(ig::Window& window, ig::RenderContext& renderContext) :
         renderContext(renderContext),
         mainViewport(window.GetViewport()),
         tempConstantBufferAllocator(ig::MakePtr<ig::TempConstantBufferAllocator>(renderContext))
