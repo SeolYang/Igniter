@@ -10,6 +10,7 @@
 #include "Igniter/Input/InputManager.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/MeshStorage.h"
+#include "Igniter/Render/SceneProxy.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/ImGui/ImGuiContext.h"
 #include "Igniter/ImGui/ImGuiRenderer.h"
@@ -24,10 +25,12 @@ namespace ig
 
     Engine::Engine(const IgniterDesc& desc)
     {
+        IG_CHECK(instance == nullptr);
+
         instance = this;
-        CoInitializeUnique();
         IG_LOG(Engine, Info, "Igniter Engine Version {}", version::Version);
         IG_LOG(Engine, Info, "Igniting Engine Runtime!");
+        CoInitializeUnique();
         //////////////////////// L0 ////////////////////////
         timer = MakePtr<Timer>();
         IG_LOG(Engine, Info, "Timer Initialized.");
@@ -59,6 +62,8 @@ namespace ig
         //////////////////////// L4 ////////////////////////
         world = MakePtr<World>();
         IG_LOG(Engine, Info, "Empty World Initialized.");
+        sceneProxy = MakePtr<SceneProxy>(*renderContext, *assetManager);
+        IG_LOG(Engine, Info, "Scene Proxy Initialized.");
         ////////////////////////////////////////////////////
         bInitialized = true;
 
@@ -70,6 +75,8 @@ namespace ig
         IG_LOG(Engine, Info, "Extinguishing Engine Runtime.");
 
         //////////////////////// L4 ////////////////////////
+        sceneProxy.reset();
+        IG_LOG(Engine, Info, "Scene Proxy Deinitialized.");
         world.reset();
         IG_LOG(Engine, Info, "World Deinitialized.");
         ////////////////////////////////////////////////////
@@ -152,6 +159,7 @@ namespace ig
             {
                 renderContext->PreRender(localFrameIdx);
                 meshStorage->PreRender(localFrameIdx);
+                sceneProxy->Replicate(localFrameIdx, *world);
                 application.PreRender(localFrameIdx);
             }
 
@@ -241,6 +249,12 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->world;
+    }
+
+    SceneProxy& Engine::GetSceneProxy()
+    {
+        IG_CHECK(instance != nullptr);
+        return *instance->sceneProxy;
     }
 
 } // namespace ig

@@ -21,6 +21,7 @@ namespace ig
     class ImGuiContext;
     class ImGuiRenderer;
     class World;
+    class SceneProxy;
 
     class Engine final
     {
@@ -45,6 +46,7 @@ namespace ig
         [[nodiscard]] static ImGuiContext&  GetImGuiContext();
         [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
         [[nodiscard]] static World&         GetWorld();
+        [[nodiscard]] static SceneProxy&    GetSceneProxy();
 
         [[nodiscard]] bool IsValid() const { return this == instance; }
         bool static IsInitialized() { return instance != nullptr && instance->bInitialized; }
@@ -85,6 +87,7 @@ namespace ig
 
         //////////////////////// L4 ////////////////////////
         Ptr<World> world;
+        Ptr<SceneProxy> sceneProxy;
         ////////////////////////////////////////////////////
     };
 } // namespace ig
