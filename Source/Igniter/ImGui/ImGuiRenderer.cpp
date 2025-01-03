@@ -67,7 +67,7 @@ namespace ig
         imguiCmdCtx->End();
 
         ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)imguiCmdCtx};
-        mainGfxQueue.SyncWith(mainPipelineSyncPoint);
+        mainGfxQueue.Wait(mainPipelineSyncPoint);
         mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
 
         if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

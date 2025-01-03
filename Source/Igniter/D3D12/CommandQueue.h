@@ -31,7 +31,7 @@ namespace ig
         void         ExecuteContexts(const std::span<CommandContext*> cmdCtxs);
         bool         Signal(GpuSyncPoint& syncPoint);
         GpuSyncPoint MakeSyncPointWithSignal(GpuFence& fence);
-        void         SyncWith(GpuSyncPoint& syncPoint);
+        void         Wait(GpuSyncPoint& syncPoint);
 
     private:
         CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);

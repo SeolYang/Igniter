@@ -198,7 +198,7 @@ namespace ig
             // 만약 버퍼에 대한 비동기 쓰기를 지원한다면 Write-After-Read Hazard 발생 가능성이 있음
             // 방지하기 위해선 GpuStorage가 별도의 Fence를 가지고 이를 사용해
             // ExecuteCommandLists 간의 명시적 동기화가 필요할것으로 보임
-            asyncCopyQueue.SyncWith(prevSyncPoint);
+            asyncCopyQueue.Wait(prevSyncPoint);
         }
 
         ig::CommandContext* copyCmdCtxs[] = {(ig::CommandContext*)copyCmdCtx};

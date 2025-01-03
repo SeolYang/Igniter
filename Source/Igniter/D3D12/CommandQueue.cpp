@@ -60,7 +60,7 @@ namespace ig
         return syncPoint;
     }
 
-    void CommandQueue::SyncWith(GpuSyncPoint& syncPoint)
+    void CommandQueue::Wait(GpuSyncPoint& syncPoint)
     {
         IG_CHECK(native);
         ID3D12Fence& nativeFence = syncPoint.GetFence();
