@@ -404,7 +404,7 @@ namespace ig
         // CopyBuffer(srcOffset, copySize, storageBuffer, dstOffset)
         // srcOffset += copySize, copySize = 0, dstOffset = dstOffset = UploadInfos[currentIdx + 1].StorageSpaceRef.Offset
 
-        cmdList.Begin();
+        cmdList.Open();
         // <1>.
         if (!proxyPackage.PendingReplications.empty())
         {
@@ -472,7 +472,7 @@ namespace ig
             proxyPackage.PendingReplications.clear();
         }
 
-        cmdList.End();
+        cmdList.Close();
     }
 
     void SceneProxy::ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
@@ -513,8 +513,8 @@ namespace ig
         IG_CHECK(replicationSize == (sizeof(U32) * numMaxRenderables[localFrameIdx]));
         std::memcpy(mappedBuffer, renderableIndices.data(), replicationSize);
 
-        cmdList.Begin();
+        cmdList.Open();
         cmdList.CopyBuffer(*stagingBufferPtr, stagingBufferOffset, replicationSize, *renderableIndicesBufferPtr, 0);
-        cmdList.End();
+        cmdList.Close();
     }
 } // namespace ig

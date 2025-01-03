@@ -137,7 +137,7 @@ namespace ig
         IG_CHECK(requestHead < RequestCapacity);
         IG_CHECK(bufferCpuAddr != nullptr);
 
-        newRequest->CmdList->Begin();
+        newRequest->CmdList->Open();
         return UploadContext{buffer.get(), bufferCpuAddr, newRequest};
     }
 
@@ -157,7 +157,7 @@ namespace ig
         }
 
         details::UploadRequest& request = context.GetRequest();
-        request.CmdList->End();
+        request.CmdList->Close();
 
         CommandList* cmdListPtrs[] = {request.CmdList.get()};
         copyQueue->ExecuteContexts(cmdListPtrs);

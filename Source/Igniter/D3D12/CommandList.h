@@ -32,10 +32,9 @@ namespace ig
         operator bool() const { return IsValid(); }
         bool IsReadyToExecute() const { return pendingGlobalBarriers.empty() && pendingTextureBarriers.empty() && pendingBufferBarriers.empty(); }
 
-        // Equivalent to Reset
-        void Begin(PipelineState* const initState = nullptr);
-        // Equivalent to Close
-        void End();
+        // 기록된 커맨드들은 다시 Open을 호출하지 않는 이상 그대로 유지된다.
+        void Open(PipelineState* const initState = nullptr);
+        void Close();
 
         // https://microsoft.github.io/DirectX-Specs/d3d/D3D12EnhancedBarriers.html#equivalent-d3d12_barrier_sync-bit-for-each-d3d12_resource_states-bit
         void AddPendingTextureBarrier(GpuTexture& targetTexture,

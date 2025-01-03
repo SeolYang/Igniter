@@ -185,11 +185,11 @@ namespace ig
         CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
         CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
         auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
-        copyCmdList->Begin();
+        copyCmdList->Open();
         {
             copyCmdList->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
         }
-        copyCmdList->End();
+        copyCmdList->Close();
 
         GpuSyncPoint newSyncPoint = fence.MakeSyncPoint();
         if (GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();

@@ -74,7 +74,7 @@ namespace fe
         depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
 
         auto initialCmdList = renderContext.GetMainGfxCommandListPool().Request(0, "Initial Transition"_fs);
-        initialCmdList->Begin();
+        initialCmdList->Open();
         {
             for (const ig::LocalFrameIndex localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
             {
@@ -89,7 +89,7 @@ namespace fe
 
             initialCmdList->FlushBarriers();
         }
-        initialCmdList->End();
+        initialCmdList->Close();
 
         ig::CommandList* cmdLists[1]{(ig::CommandList*)initialCmdList};
         ig::CommandQueue&   mainGfxQueue{renderContext.GetMainGfxQueue()};
@@ -158,7 +158,7 @@ namespace fe
             bRenderable = true;
         }
 
-        renderCmdList->Begin(pso.get());
+        renderCmdList->Open(pso.get());
         {
             auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
             renderCmdList->SetDescriptorHeaps(bindlessDescHeaps);
@@ -227,7 +227,7 @@ namespace fe
                                                    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
             renderCmdList->FlushBarriers();
         }
-        renderCmdList->End();
+        renderCmdList->Close();
 
         ig::CommandList* renderCmdListPtrs[] = {(ig::CommandList*)renderCmdList};
         mainGfxQueue.ExecuteContexts(renderCmdListPtrs);

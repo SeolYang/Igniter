@@ -162,13 +162,13 @@ namespace ig
         GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
         auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
         {
-            cmdList->Begin();
+            cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
-            cmdList->End();
+            cmdList->Close();
         }
         CommandList* cmdLists[1] = {(CommandList*)cmdList};
         mainGfxQueue.ExecuteContexts(cmdLists);
@@ -269,13 +269,13 @@ namespace ig
         GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
         auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
-            cmdList->Begin();
+            cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
-            cmdList->End();
+            cmdList->Close();
         }
         CommandList* cmdLists[1] = {(CommandList*)cmdList};
         mainGfxQueue.ExecuteContexts(cmdLists);
@@ -371,13 +371,13 @@ namespace ig
         GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
         auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
-            cmdList->Begin();
+            cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
-            cmdList->End();
+            cmdList->Close();
         }
 
         CommandList* cmdLists[1]{(CommandList*)cmdList};

@@ -33,7 +33,7 @@ namespace ig
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         ig::GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
         auto              imguiCmdList  = renderContext.GetMainGfxCommandListPool().Request(localFrameIdx, "ImGuiCommandList"_fs);
-        imguiCmdList->Begin();
+        imguiCmdList->Open();
         {
             imguiCmdList->AddPendingTextureBarrier(*backBufferPtr,
                                                   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
@@ -64,7 +64,7 @@ namespace ig
                                                   D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
             imguiCmdList->FlushBarriers();
         }
-        imguiCmdList->End();
+        imguiCmdList->Close();
 
         ig::CommandList* renderCmdListPtrs[] = {(ig::CommandList*)imguiCmdList};
         mainGfxQueue.Wait(mainPipelineSyncPoint);

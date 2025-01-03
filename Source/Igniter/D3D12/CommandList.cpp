@@ -37,7 +37,7 @@ namespace ig
         return *this;
     }
 
-    void CommandList::Begin(PipelineState* const initStatePtr)
+    void CommandList::Open(PipelineState* const initStatePtr)
     {
         IG_VERIFY(cmdAllocator.Get() != nullptr);
         IG_VERIFY(cmdList.Get() != nullptr);
@@ -48,7 +48,7 @@ namespace ig
         cmdList->Reset(cmdAllocator.Get(), nativeInitStatePtr);
     }
 
-    void CommandList::End()
+    void CommandList::Close()
     {
         IG_CHECK(pendingGlobalBarriers.empty());
         IG_CHECK(pendingTextureBarriers.empty());
