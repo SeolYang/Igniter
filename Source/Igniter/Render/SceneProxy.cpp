@@ -94,8 +94,17 @@ namespace ig
         IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();
 
-        UpdateTransformProxy(localFrameIdx, registry);
-        UpdateMaterialProxy(localFrameIdx, registry);
+        std::future<void> updateTransformFuture = std::async(
+            std::launch::async, [this, localFrameIdx, &registry]
+            { UpdateTransformProxy(localFrameIdx, registry); });
+
+        std::future<void> updateMaterialFuture = std::async(
+            std::launch::async, [this, localFrameIdx, &registry]
+            { UpdateMaterialProxy(localFrameIdx, registry); });
+
+        updateTransformFuture.get();
+        updateMaterialFuture.get();
+
         UpdateRenderableProxy(localFrameIdx, registry);
 
         // warning Copy시 Alignment 문제 발생 가능!
@@ -138,19 +147,37 @@ namespace ig
         auto renderableCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableProxyReplication"_fs);
         auto renderableIndicesCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableIndicesReplication"_fs);
 
-        ReplicatePrxoyData(localFrameIdx, transformProxyPackage, *transformCopyCmdList, transformStagingOffset, transformReplicationSize);
-        ReplicatePrxoyData(localFrameIdx, materialProxyPackage, *materialCopyCmdList, materialStagingOffset, materialReplicationSize);
-        ReplicatePrxoyData(localFrameIdx, renderableProxyPackage, *renderableCopyCmdList, renderableStagingOffset, renderableReplicationSize);
+        std::future<void> transformRepFuture = std::async(
+            std::launch::async,
+            [this, localFrameIdx, &transformCopyCmdList, transformStagingOffset, transformReplicationSize]
+            { ReplicatePrxoyData(localFrameIdx, transformProxyPackage, *transformCopyCmdList, transformStagingOffset, transformReplicationSize); });
 
+        std::future<void> materialRepFuture = std::async(
+            std::launch::async,
+            [this, localFrameIdx, &materialCopyCmdList, materialStagingOffset, materialReplicationSize]
+            { ReplicatePrxoyData(localFrameIdx, materialProxyPackage, *materialCopyCmdList, materialStagingOffset, materialReplicationSize); });
+
+        std::future<void> renderableRepFuture = std::async(
+            std::launch::async,
+            [this, localFrameIdx, &renderableCopyCmdList, renderableStagingOffset, renderableReplicationSize]
+            { ReplicatePrxoyData(localFrameIdx, renderableProxyPackage, *renderableCopyCmdList, renderableStagingOffset, renderableReplicationSize); });
+
+        
         // 현재 프레임에서 존재 할 수 있는 Renderable/Light의 수를 카운트(numCurrentRenderables/numCurrentLights) 해서
         // 만약 각 인덱스 버퍼의 최대 수용 가능 인덱스 수(numMaxRenderables/numMaxLights)를 초과하면, GpuBuffer의
         // 크기를 재조정 해야한다. (ex. max(numMaxRenderables, numCurrentRenderables * 2))
-        ReplicateRenderableIndices(localFrameIdx, *renderableIndicesCopyCmdList, renderableIndicesStagingOffset, renderableIndicesSize);
+        std::future<void> renderableIndicesRepFuture = std::async(
+            std::launch::async,
+            [this, localFrameIdx, &renderableIndicesCopyCmdList, renderableIndicesStagingOffset, renderableIndicesSize]
+            { ReplicateRenderableIndices(localFrameIdx, *renderableIndicesCopyCmdList, renderableIndicesStagingOffset, renderableIndicesSize); });
+
+        transformRepFuture.get();
+        materialRepFuture.get();
+        renderableRepFuture.get();
+        renderableIndicesRepFuture.get();
 
         // test code!
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
-        CommandList* cmdLists[]{transformCopyCmdList, materialCopyCmdList, renderableCopyCmdList};
-        asyncCopyQueue.ExecuteContexts(cmdLists);
         GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal(renderContext->GetAsyncCopyFence());
         syncPoint.WaitOnCpu(); // 이상적으로는 렌더링 파이프라인 진입 전 각 커맨드 큐에 해당 동기화 지점과 적절히 동기화 하여야함.
         return syncPoint;
@@ -404,7 +431,6 @@ namespace ig
         // CopyBuffer(srcOffset, copySize, storageBuffer, dstOffset)
         // srcOffset += copySize, copySize = 0, dstOffset = dstOffset = UploadInfos[currentIdx + 1].StorageSpaceRef.Offset
 
-        cmdList.Open();
         // <1>.
         if (!proxyPackage.PendingReplications.empty())
         {
@@ -445,6 +471,7 @@ namespace ig
             Size copySize = 0;
             Size dstOffset = uploadInfos[0].StorageSpaceRef.get().Offset;
 
+            cmdList.Open();
             for (Size idx = 0; idx < uploadInfos.size(); ++idx)
             {
                 copySize += Proxy::kDataSize;
@@ -468,11 +495,14 @@ namespace ig
                     dstOffset = uploadInfos[idx + 1].StorageSpaceRef.get().Offset;
                 }
             }
+            cmdList.Close();
+
+            CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+            CommandList* cmdLists[]{&cmdList};
+            asyncCopyQueue.ExecuteContexts(cmdLists);
 
             proxyPackage.PendingReplications.clear();
         }
-
-        cmdList.Close();
     }
 
     void SceneProxy::ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
@@ -516,5 +546,9 @@ namespace ig
         cmdList.Open();
         cmdList.CopyBuffer(*stagingBufferPtr, stagingBufferOffset, replicationSize, *renderableIndicesBufferPtr, 0);
         cmdList.Close();
+
+        CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+        CommandList* cmdLists[]{&cmdList};
+        asyncCopyQueue.ExecuteContexts(cmdLists);
     }
 } // namespace ig
