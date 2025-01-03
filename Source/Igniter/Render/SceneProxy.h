@@ -86,6 +86,8 @@ namespace ig
         void UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
         void UpdateLightProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
+        void PrepareStagingBuffer(const LocalFrameIndex localFrameIdx, const Size requiredSize);
+
         template <typename Proxy, typename Owner>
         void ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage,
                                 CommandList& cmdList,

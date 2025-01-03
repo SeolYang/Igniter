@@ -94,6 +94,7 @@ namespace ig
         IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();
 
+        // todo Taskflow 사용?
         std::future<void> updateTransformFuture = std::async(
             std::launch::async, [this, localFrameIdx, &registry]
             { UpdateTransformProxy(localFrameIdx, registry); });
@@ -118,25 +119,7 @@ namespace ig
         const Size renderableIndicesStagingOffset = renderableStagingOffset + renderableReplicationSize;
 
         const Size requiredStagingBufferSize = renderableIndicesStagingOffset + renderableIndicesSize;
-        if (stagingBufferSize[localFrameIdx] < requiredStagingBufferSize)
-        {
-            if (stagingBuffer[localFrameIdx])
-            {
-                GpuBuffer* oldStagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
-                oldStagingBufferPtr->Unmap();
-                mappedStagingBuffer[localFrameIdx] = nullptr;
-                renderContext->DestroyBuffer(stagingBuffer[localFrameIdx]);
-            }
-
-            GpuBufferDesc stagingBufferDesc{};
-            stagingBufferDesc.AsUploadBuffer((U32)requiredStagingBufferSize);
-            stagingBufferDesc.DebugName = String(std::format("SceneProxyStagingBuffer.{}", localFrameIdx));
-            stagingBuffer[localFrameIdx] = renderContext->CreateBuffer(stagingBufferDesc);
-            stagingBufferSize[localFrameIdx] = requiredStagingBufferSize;
-
-            GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
-            mappedStagingBuffer[localFrameIdx] = stagingBufferPtr->Map(0);
-        }
+        PrepareStagingBuffer(localFrameIdx, requiredStagingBufferSize);
         IG_CHECK(stagingBuffer[localFrameIdx]);
 
         CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
@@ -150,26 +133,44 @@ namespace ig
         std::future<void> transformRepFuture = std::async(
             std::launch::async,
             [this, localFrameIdx, &transformCopyCmdList, transformStagingOffset, transformReplicationSize]
-            { ReplicatePrxoyData(localFrameIdx, transformProxyPackage, *transformCopyCmdList, transformStagingOffset, transformReplicationSize); });
+            {
+                ReplicatePrxoyData(localFrameIdx,
+                                   transformProxyPackage,
+                                   *transformCopyCmdList,
+                                   transformStagingOffset, transformReplicationSize);
+            });
 
         std::future<void> materialRepFuture = std::async(
             std::launch::async,
             [this, localFrameIdx, &materialCopyCmdList, materialStagingOffset, materialReplicationSize]
-            { ReplicatePrxoyData(localFrameIdx, materialProxyPackage, *materialCopyCmdList, materialStagingOffset, materialReplicationSize); });
+            {
+                ReplicatePrxoyData(localFrameIdx,
+                                   materialProxyPackage,
+                                   *materialCopyCmdList,
+                                   materialStagingOffset, materialReplicationSize);
+            });
 
         std::future<void> renderableRepFuture = std::async(
             std::launch::async,
             [this, localFrameIdx, &renderableCopyCmdList, renderableStagingOffset, renderableReplicationSize]
-            { ReplicatePrxoyData(localFrameIdx, renderableProxyPackage, *renderableCopyCmdList, renderableStagingOffset, renderableReplicationSize); });
+            {
+                ReplicatePrxoyData(localFrameIdx,
+                                   renderableProxyPackage,
+                                   *renderableCopyCmdList,
+                                   renderableStagingOffset, renderableReplicationSize);
+            });
 
-        
         // 현재 프레임에서 존재 할 수 있는 Renderable/Light의 수를 카운트(numCurrentRenderables/numCurrentLights) 해서
         // 만약 각 인덱스 버퍼의 최대 수용 가능 인덱스 수(numMaxRenderables/numMaxLights)를 초과하면, GpuBuffer의
         // 크기를 재조정 해야한다. (ex. max(numMaxRenderables, numCurrentRenderables * 2))
         std::future<void> renderableIndicesRepFuture = std::async(
             std::launch::async,
             [this, localFrameIdx, &renderableIndicesCopyCmdList, renderableIndicesStagingOffset, renderableIndicesSize]
-            { ReplicateRenderableIndices(localFrameIdx, *renderableIndicesCopyCmdList, renderableIndicesStagingOffset, renderableIndicesSize); });
+            {
+                ReplicateRenderableIndices(localFrameIdx,
+                                           *renderableIndicesCopyCmdList,
+                                           renderableIndicesStagingOffset, renderableIndicesSize);
+            });
 
         transformRepFuture.get();
         materialRepFuture.get();
@@ -406,6 +407,30 @@ namespace ig
             storage.Deallocate(extractedElement->second.StorageSpace);
         }
         renderableProxyPackage.PendingDestructions.clear();
+    }
+
+    void SceneProxy::PrepareStagingBuffer(const LocalFrameIndex localFrameIdx, const Size requiredSize)
+    {
+        if (stagingBufferSize[localFrameIdx] < requiredSize)
+        {
+            if (stagingBuffer[localFrameIdx])
+            {
+                GpuBuffer* oldStagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+                oldStagingBufferPtr->Unmap();
+                mappedStagingBuffer[localFrameIdx] = nullptr;
+                renderContext->DestroyBuffer(stagingBuffer[localFrameIdx]);
+            }
+
+            const Size newStagingBufferSize = std::max(stagingBufferSize[localFrameIdx] * 2, requiredSize);
+            GpuBufferDesc stagingBufferDesc{};
+            stagingBufferDesc.AsUploadBuffer((U32)newStagingBufferSize);
+            stagingBufferDesc.DebugName = String(std::format("SceneProxyStagingBuffer.{}", localFrameIdx));
+            stagingBuffer[localFrameIdx] = renderContext->CreateBuffer(stagingBufferDesc);
+            stagingBufferSize[localFrameIdx] = newStagingBufferSize;
+
+            GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+            mappedStagingBuffer[localFrameIdx] = stagingBufferPtr->Map(0);
+        }
     }
 
     template <typename Proxy, typename Owner>
