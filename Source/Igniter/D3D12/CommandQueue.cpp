@@ -1,7 +1,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/ContainerUtils.h"
 #include "Igniter/D3D12/CommandQueue.h"
-#include "Igniter/D3D12/CommandContext.h"
+#include "Igniter/D3D12/CommandList.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/GpuFence.h"
 
@@ -17,14 +17,14 @@ namespace ig
 
     CommandQueue::~CommandQueue() {}
 
-    void CommandQueue::ExecuteContexts(const std::span<CommandContext*> cmdCtxs)
+    void CommandQueue::ExecuteContexts(const std::span<CommandList*> cmdLists)
     {
         IG_CHECK(IsValid());
-        auto toNative = views::all(cmdCtxs) | views::filter([](CommandContext* cmdCtx)
-                                                            { return cmdCtx != nullptr; }) |
-                views::transform([](CommandContext* cmdCtx)
-                                 { return &cmdCtx->GetNative(); });
-        eastl::vector<CommandContext::NativeType*> natives = ToVector(toNative);
+        auto toNative = views::all(cmdLists) | views::filter([](CommandList* cmdList)
+                                                            { return cmdList != nullptr; }) |
+                views::transform([](CommandList* cmdList)
+                                 { return &cmdList->GetNative(); });
+        eastl::vector<CommandList::NativeType*> natives = ToVector(toNative);
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 

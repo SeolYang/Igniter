@@ -73,27 +73,27 @@ namespace fe
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
         depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
 
-        auto initialCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(0, "Initial Transition"_fs);
-        initialCmdCtx->Begin();
+        auto initialCmdList = renderContext.GetMainGfxCommandListPool().Request(0, "Initial Transition"_fs);
+        initialCmdList->Begin();
         {
             for (const ig::LocalFrameIndex localFrameIdx : ig::views::iota(0Ui8, ig::NumFramesInFlight))
             {
                 depthStencils[localFrameIdx] = renderContext.CreateTexture(depthStencilDesc);
                 dsvs[localFrameIdx]          = renderContext.CreateDepthStencilView(depthStencils[localFrameIdx], D3D12_TEX2D_DSV{.MipSlice = 0});
 
-                initialCmdCtx->AddPendingTextureBarrier(*renderContext.Lookup(depthStencils[localFrameIdx]),
+                initialCmdList->AddPendingTextureBarrier(*renderContext.Lookup(depthStencils[localFrameIdx]),
                                                         D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                                         D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                                         D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
             }
 
-            initialCmdCtx->FlushBarriers();
+            initialCmdList->FlushBarriers();
         }
-        initialCmdCtx->End();
+        initialCmdList->End();
 
-        ig::CommandContext* cmdCtxs[1]{(ig::CommandContext*)initialCmdCtx};
+        ig::CommandList* cmdLists[1]{(ig::CommandList*)initialCmdList};
         ig::CommandQueue&   mainGfxQueue{renderContext.GetMainGfxQueue()};
-        mainGfxQueue.ExecuteContexts(cmdCtxs);
+        mainGfxQueue.ExecuteContexts(cmdLists);
     }
 
     Renderer::~Renderer()
@@ -134,7 +134,7 @@ namespace fe
         ig::GpuBuffer*                        vertexIndexStorageBufferPtr   = renderContext.Lookup(vertexIndexStorageBuffer);
 
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        auto              renderCmdCtx = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "MainGfx"_fs);
+        auto              renderCmdList = renderContext.GetMainGfxCommandListPool().Request(localFrameIdx, "MainGfx"_fs);
 
         bool bRenderable = false;
         for (auto [entity, camera, transformData] : cameraView.each())
@@ -158,27 +158,27 @@ namespace fe
             bRenderable = true;
         }
 
-        renderCmdCtx->Begin(pso.get());
+        renderCmdList->Begin(pso.get());
         {
             auto bindlessDescHeaps = renderContext.GetBindlessDescriptorHeaps();
-            renderCmdCtx->SetDescriptorHeaps(bindlessDescHeaps);
-            renderCmdCtx->SetRootSignature(*bindlessRootSignature);
+            renderCmdList->SetDescriptorHeaps(bindlessDescHeaps);
+            renderCmdList->SetRootSignature(*bindlessRootSignature);
 
-            renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
+            renderCmdList->AddPendingTextureBarrier(*backBufferPtr,
                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
                                                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
                                                    D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-            renderCmdCtx->FlushBarriers();
+            renderCmdList->FlushBarriers();
 
-            renderCmdCtx->ClearRenderTarget(*backBufferRtvPtr);
+            renderCmdList->ClearRenderTarget(*backBufferRtvPtr);
             ig::GpuView& dsv = *renderContext.Lookup(dsvs[localFrameIdx]);
-            renderCmdCtx->ClearDepth(dsv);
-            renderCmdCtx->SetRenderTarget(*backBufferRtvPtr, dsv);
-            renderCmdCtx->SetViewport(mainViewport);
-            renderCmdCtx->SetScissorRect(mainViewport);
-            renderCmdCtx->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            renderCmdList->ClearDepth(dsv);
+            renderCmdList->SetRenderTarget(*backBufferRtvPtr, dsv);
+            renderCmdList->SetViewport(mainViewport);
+            renderCmdList->SetScissorRect(mainViewport);
+            renderCmdList->SetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            renderCmdCtx->SetIndexBuffer(*vertexIndexStorageBufferPtr);
+            renderCmdList->SetIndexBuffer(*vertexIndexStorageBufferPtr);
 
             if (bRenderable)
             {
@@ -213,24 +213,24 @@ namespace fe
                                 .VertexStorageOffset = static_cast<ig::U32>(vertexSpace->Allocation.OffsetIndex)
                             };
 
-                            renderCmdCtx->SetRoot32BitConstants(0, params, 0);
+                            renderCmdList->SetRoot32BitConstants(0, params, 0);
                         }
 
-                        renderCmdCtx->DrawIndexed((ig::U32)vertexIndexSpace->Allocation.NumElements, (ig::U32)vertexIndexSpace->Allocation.OffsetIndex);
+                        renderCmdList->DrawIndexed((ig::U32)vertexIndexSpace->Allocation.NumElements, (ig::U32)vertexIndexSpace->Allocation.OffsetIndex);
                     }
                 }
             }
 
-            renderCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
+            renderCmdList->AddPendingTextureBarrier(*backBufferPtr,
                                                    D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
                                                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                                    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
-            renderCmdCtx->FlushBarriers();
+            renderCmdList->FlushBarriers();
         }
-        renderCmdCtx->End();
+        renderCmdList->End();
 
-        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)renderCmdCtx};
-        mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
+        ig::CommandList* renderCmdListPtrs[] = {(ig::CommandList*)renderCmdList};
+        mainGfxQueue.ExecuteContexts(renderCmdListPtrs);
         return mainGfxQueue.MakeSyncPointWithSignal(renderContext.GetMainGfxFence());
     }
 } // namespace fe

@@ -6,7 +6,7 @@
 namespace ig
 {
     class CommandQueue;
-    class CommandContext;
+    class CommandList;
     class GpuTexture;
     class GpuBuffer;
     class GpuFence;
@@ -25,7 +25,7 @@ namespace ig
             }
 
         public:
-            std::unique_ptr<CommandContext> CmdCtx;
+            std::unique_ptr<CommandList> CmdList;
             size_t OffsetInBytes = 0;
             size_t SizeInBytes = 0;
             size_t PaddingInBytes = 0;

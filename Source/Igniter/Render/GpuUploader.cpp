@@ -1,7 +1,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/ThreadUIDGenerator.h"
 #include "Igniter/D3D12/CommandQueue.h"
-#include "Igniter/D3D12/CommandContext.h"
+#include "Igniter/D3D12/CommandList.h"
 #include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/D3D12/GpuTexture.h"
 #include "Igniter/D3D12/GpuDevice.h"
@@ -22,8 +22,8 @@ namespace ig
         for (size_t idx = 0; idx < RequestCapacity; ++idx)
         {
             uploadRequests[idx].Reset();
-            uploadRequests[idx].CmdCtx =
-                    MakePtr<CommandContext>(gpuDevice.CreateCommandContext(std::format("Gpu Uploader CmdCtx{}", idx), EQueueType::Copy).value());
+            uploadRequests[idx].CmdList =
+                    MakePtr<CommandList>(gpuDevice.CreateCommandList(std::format("Gpu Uploader CmdList{}", idx), EQueueType::Copy).value());
         }
     }
 
@@ -137,7 +137,7 @@ namespace ig
         IG_CHECK(requestHead < RequestCapacity);
         IG_CHECK(bufferCpuAddr != nullptr);
 
-        newRequest->CmdCtx->Begin();
+        newRequest->CmdList->Begin();
         return UploadContext{buffer.get(), bufferCpuAddr, newRequest};
     }
 
@@ -157,10 +157,10 @@ namespace ig
         }
 
         details::UploadRequest& request = context.GetRequest();
-        request.CmdCtx->End();
+        request.CmdList->End();
 
-        CommandContext* cmdCtxPtrs[] = {request.CmdCtx.get()};
-        copyQueue->ExecuteContexts(cmdCtxPtrs);
+        CommandList* cmdListPtrs[] = {request.CmdList.get()};
+        copyQueue->ExecuteContexts(cmdListPtrs);
         request.Sync = copyQueue->MakeSyncPointWithSignal(*copyFence.Resources[currentLocalFrameIdx]);
         IG_CHECK(request.Sync.IsValid());
         context.Reset();
@@ -269,9 +269,9 @@ namespace ig
 
         IG_CHECK((request->OffsetInBytes + srcOffsetInBytes + numBytes) <= uploadBuffer->GetDesc().GetSizeAsBytes());
         IG_CHECK((dstOffsetInBytes + numBytes) <= dst.GetDesc().GetSizeAsBytes());
-        IG_CHECK(request->CmdCtx != nullptr);
-        CommandContext& cmdCtx = *request->CmdCtx;
-        cmdCtx.CopyBuffer(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, numBytes, dst, dstOffsetInBytes);
+        IG_CHECK(request->CmdList != nullptr);
+        CommandList& cmdList = *request->CmdList;
+        cmdList.CopyBuffer(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, numBytes, dst, dstOffsetInBytes);
     }
 
     void UploadContext::CopyTextureRegion(
@@ -283,9 +283,9 @@ namespace ig
             return;
         }
 
-        IG_CHECK(request->CmdCtx != nullptr);
-        CommandContext& cmdCtx = *request->CmdCtx;
-        cmdCtx.CopyTextureRegion(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, dst, subresourceIdx, layout);
+        IG_CHECK(request->CmdList != nullptr);
+        CommandList& cmdList = *request->CmdList;
+        cmdList.CopyTextureRegion(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, dst, subresourceIdx, layout);
     }
 
     void UploadContext::CopyTextureSimple(

@@ -3,7 +3,7 @@
 #include "Igniter/Core/Log.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/CommandQueue.h"
-#include "Igniter/D3D12/CommandContext.h"
+#include "Igniter/D3D12/CommandList.h"
 #include "Igniter/D3D12/PipelineState.h"
 #include "Igniter/D3D12/PipelineStateDesc.h"
 #include "Igniter/D3D12/RootSignature.h"
@@ -255,7 +255,7 @@ namespace ig
         return CommandQueue{std::move(newCmdQueue), queueType};
     }
 
-    Option<CommandContext> GpuDevice::CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType)
+    Option<CommandList> GpuDevice::CreateCommandList(const std::string_view debugName, const EQueueType targetQueueType)
     {
         IG_CHECK(device);
 
@@ -280,7 +280,7 @@ namespace ig
         IG_CHECK(newCmdAllocator);
         IG_CHECK(newCmdList);
         SetObjectName(newCmdList.Get(), debugName);
-        return CommandContext{std::move(newCmdAllocator), std::move(newCmdList), targetQueueType};
+        return CommandList{std::move(newCmdAllocator), std::move(newCmdList), targetQueueType};
     }
 
     Option<RootSignature> GpuDevice::CreateBindlessRootSignature()

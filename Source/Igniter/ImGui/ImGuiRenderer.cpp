@@ -32,14 +32,14 @@ namespace ig
 
         ig::CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         ig::GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
-        auto              imguiCmdCtx  = renderContext.GetMainGfxCommandContextPool().Request(localFrameIdx, "ImGuiCommandContext"_fs);
-        imguiCmdCtx->Begin();
+        auto              imguiCmdList  = renderContext.GetMainGfxCommandListPool().Request(localFrameIdx, "ImGuiCommandList"_fs);
+        imguiCmdList->Begin();
         {
-            imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
+            imguiCmdList->AddPendingTextureBarrier(*backBufferPtr,
                                                   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                                   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                                   D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-            imguiCmdCtx->FlushBarriers();
+            imguiCmdList->FlushBarriers();
 
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
@@ -54,21 +54,21 @@ namespace ig
 
             ImGui::Render();
 
-            imguiCmdCtx->SetRenderTarget(*backBufferRtvPtr);
-            imguiCmdCtx->SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
-            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &imguiCmdCtx->GetNative());
+            imguiCmdList->SetRenderTarget(*backBufferRtvPtr);
+            imguiCmdList->SetDescriptorHeap(renderContext.GetCbvSrvUavDescriptorHeap());
+            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &imguiCmdList->GetNative());
 
-            imguiCmdCtx->AddPendingTextureBarrier(*backBufferPtr,
+            imguiCmdList->AddPendingTextureBarrier(*backBufferPtr,
                                                   D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
                                                   D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                                   D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
-            imguiCmdCtx->FlushBarriers();
+            imguiCmdList->FlushBarriers();
         }
-        imguiCmdCtx->End();
+        imguiCmdList->End();
 
-        ig::CommandContext* renderCmdCtxPtrs[] = {(ig::CommandContext*)imguiCmdCtx};
+        ig::CommandList* renderCmdListPtrs[] = {(ig::CommandList*)imguiCmdList};
         mainGfxQueue.Wait(mainPipelineSyncPoint);
-        mainGfxQueue.ExecuteContexts(renderCmdCtxPtrs);
+        mainGfxQueue.ExecuteContexts(renderCmdListPtrs);
 
         if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {

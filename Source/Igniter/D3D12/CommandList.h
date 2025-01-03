@@ -11,7 +11,7 @@ namespace ig
     class RootSignature;
     class PipelineState;
 
-    class CommandContext final
+    class CommandList final
     {
         friend class GpuDevice;
 
@@ -19,12 +19,12 @@ namespace ig
         using NativeType = ID3D12GraphicsCommandList7;
 
     public:
-        CommandContext(const CommandContext&) = delete;
-        CommandContext(CommandContext&& other) noexcept;
-        ~CommandContext() = default;
+        CommandList(const CommandList&) = delete;
+        CommandList(CommandList&& other) noexcept;
+        ~CommandList() = default;
 
-        CommandContext& operator=(const CommandContext&) = delete;
-        CommandContext& operator=(CommandContext&& other) noexcept;
+        CommandList& operator=(const CommandList&) = delete;
+        CommandList& operator=(CommandList&& other) noexcept;
 
         auto& GetNative() { return *cmdList.Get(); }
 
@@ -84,7 +84,7 @@ namespace ig
         }
 
     private:
-        CommandContext(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList, const EQueueType targetQueueType);
+        CommandList(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList, const EQueueType targetQueueType);
 
     private:
         ComPtr<ID3D12CommandAllocator> cmdAllocator;

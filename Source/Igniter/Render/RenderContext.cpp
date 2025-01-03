@@ -6,11 +6,11 @@ namespace ig
 {
     RenderContext::RenderContext(const Window& window) :
         mainGfxQueue(*gpuDevice.CreateCommandQueue("MainGfx", EQueueType::Graphics)),
-        mainGfxCmdCtxPool(gpuDevice, EQueueType::Graphics),
+        mainGfxCmdListPool(gpuDevice, EQueueType::Graphics),
         asyncComputeQueue(*gpuDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute)),
-        asyncComputeCmdCtxPool(gpuDevice, EQueueType::Compute),
+        asyncComputeCmdListPool(gpuDevice, EQueueType::Compute),
         asyncCopyQueue(*gpuDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy)),
-        asyncCopyCmdCtxPool(gpuDevice, EQueueType::Copy),
+        asyncCopyCmdListPool(gpuDevice, EQueueType::Copy),
         gpuViewManager(gpuDevice),
         gpuUploader(gpuDevice),
         swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight))
@@ -369,9 +369,9 @@ namespace ig
     void RenderContext::PreRender(const LocalFrameIndex localFrameIdx)
     {
         this->currentLocalFrameIdx = localFrameIdx;
-        mainGfxCmdCtxPool.PreRender(localFrameIdx);
-        asyncComputeCmdCtxPool.PreRender(localFrameIdx);
-        asyncCopyCmdCtxPool.PreRender(localFrameIdx);
+        mainGfxCmdListPool.PreRender(localFrameIdx);
+        asyncComputeCmdListPool.PreRender(localFrameIdx);
+        asyncCopyCmdListPool.PreRender(localFrameIdx);
         gpuUploader.PreRender(localFrameIdx);
 
         /* Flush Buffer Package [local frame] pending destroy */

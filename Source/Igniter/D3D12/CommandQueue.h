@@ -7,7 +7,7 @@
 namespace ig
 {
     class GpuDevice;
-    class CommandContext;
+    class CommandList;
     class GpuFence;
 
     class CommandQueue final
@@ -28,7 +28,7 @@ namespace ig
         auto&      GetNative() { return *native.Get(); }
         EQueueType GetType() const { return type; }
 
-        void         ExecuteContexts(const std::span<CommandContext*> cmdCtxs);
+        void         ExecuteContexts(const std::span<CommandList*> cmdLists);
         bool         Signal(GpuSyncPoint& syncPoint);
         GpuSyncPoint MakeSyncPointWithSignal(GpuFence& fence);
         void         Wait(GpuSyncPoint& syncPoint);
@@ -37,7 +37,7 @@ namespace ig
         CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);
 
     private:
-        static constexpr size_t RecommendedMinNumCommandContexts = 16;
+        static constexpr size_t RecommendedMinNumCommandLists = 16;
 
     private:
         ComPtr<ID3D12CommandQueue> native;

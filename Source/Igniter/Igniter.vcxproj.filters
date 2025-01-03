@@ -222,7 +222,7 @@
     <ClInclude Include="Core\Serialization.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="D3D12\CommandContext.h">
+    <ClInclude Include="D3D12\CommandList.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="D3D12\CommandQueue.h">
@@ -291,7 +291,7 @@
     <ClInclude Include="Input\InputManager.h">
       <Filter>Source\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Render\CommandContextPool.h">
+    <ClInclude Include="Render\CommandListPool.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\GpuUploader.h">
@@ -494,7 +494,7 @@
     <ClCompile Include="Core\String.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="D3D12\CommandContext.cpp">
+    <ClCompile Include="D3D12\CommandList.cpp">
       <Filter>Source\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="D3D12\CommandQueue.cpp">
@@ -551,7 +551,7 @@
     <ClCompile Include="Input\InputManager.cpp">
       <Filter>Source\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Render\CommandContextPool.cpp">
+    <ClCompile Include="Render\CommandListPool.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Render\GpuUploader.cpp">

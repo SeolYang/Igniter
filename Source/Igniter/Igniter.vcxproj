@@ -88,7 +88,7 @@
     <ClInclude Include="Core\Types.h" />
     <ClInclude Include="Core\Version.h" />
     <ClInclude Include="Core\Window.h" />
-    <ClInclude Include="D3D12\CommandContext.h" />
+    <ClInclude Include="D3D12\CommandList.h" />
     <ClInclude Include="D3D12\CommandQueue.h" />
     <ClInclude Include="D3D12\Common.h" />
     <ClInclude Include="D3D12\DescriptorHeap.h" />
@@ -117,7 +117,7 @@
     <ClInclude Include="ImGui\ImGuiRenderer.h" />
     <ClInclude Include="ImGui\TextureView.h" />
     <ClInclude Include="Input\InputManager.h" />
-    <ClInclude Include="Render\CommandContextPool.h" />
+    <ClInclude Include="Render\CommandListPool.h" />
     <ClInclude Include="Render\GpuStorage.h" />
     <ClInclude Include="Render\GpuUploader.h" />
     <ClInclude Include="Render\GpuViewManager.h" />
@@ -172,7 +172,7 @@
     <ClCompile Include="Core\String.cpp" />
     <ClCompile Include="Core\ThreadUIDGenerator.cpp" />
     <ClCompile Include="Core\Window.cpp" />
-    <ClCompile Include="D3D12\CommandContext.cpp" />
+    <ClCompile Include="D3D12\CommandList.cpp" />
     <ClCompile Include="D3D12\CommandQueue.cpp" />
     <ClCompile Include="D3D12\D3D12Common.cpp" />
     <ClCompile Include="D3D12\DescriptorHeap.cpp" />
@@ -200,7 +200,7 @@
     <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
-    <ClCompile Include="Render\CommandContextPool.cpp" />
+    <ClCompile Include="Render\CommandListPool.cpp" />
     <ClCompile Include="Render\GpuStorage.cpp" />
     <ClCompile Include="Render\GpuUploader.cpp" />
     <ClCompile Include="Render\GpuViewManager.cpp" />

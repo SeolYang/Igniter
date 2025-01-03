@@ -7,7 +7,7 @@
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/GpuTexture.h"
 #include "Igniter/D3D12/GpuView.h"
-#include "Igniter/D3D12/CommandContext.h"
+#include "Igniter/D3D12/CommandList.h"
 #include "Igniter/Render/GpuUploader.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Asset/TextureLoader.h"
@@ -160,18 +160,18 @@ namespace ig
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
         GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
-        auto          cmdCtx       = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
+        auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
         {
-            cmdCtx->Begin();
-            cmdCtx->AddPendingTextureBarrier(*newTexturePtr,
+            cmdList->Begin();
+            cmdList->AddPendingTextureBarrier(*newTexturePtr,
                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
-            cmdCtx->FlushBarriers();
-            cmdCtx->End();
+            cmdList->FlushBarriers();
+            cmdList->End();
         }
-        CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
-        mainGfxQueue.ExecuteContexts(cmdCtxs);
+        CommandList* cmdLists[1] = {(CommandList*)cmdList};
+        mainGfxQueue.ExecuteContexts(cmdLists);
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
@@ -267,18 +267,18 @@ namespace ig
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
         GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
-        auto          cmdCtx       = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
+        auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
-            cmdCtx->Begin();
-            cmdCtx->AddPendingTextureBarrier(*newTexturePtr,
+            cmdList->Begin();
+            cmdList->AddPendingTextureBarrier(*newTexturePtr,
                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
-            cmdCtx->FlushBarriers();
-            cmdCtx->End();
+            cmdList->FlushBarriers();
+            cmdList->End();
         }
-        CommandContext* cmdCtxs[1] = {(CommandContext*)cmdCtx};
-        mainGfxQueue.ExecuteContexts(cmdCtxs);
+        CommandList* cmdLists[1] = {(CommandList*)cmdList};
+        mainGfxQueue.ExecuteContexts(cmdLists);
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
@@ -369,19 +369,19 @@ namespace ig
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
         GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
-        auto          cmdCtx       = renderContext.GetMainGfxCommandContextPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
+        auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
-            cmdCtx->Begin();
-            cmdCtx->AddPendingTextureBarrier(*newTexturePtr,
+            cmdList->Begin();
+            cmdList->AddPendingTextureBarrier(*newTexturePtr,
                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
-            cmdCtx->FlushBarriers();
-            cmdCtx->End();
+            cmdList->FlushBarriers();
+            cmdList->End();
         }
 
-        CommandContext* cmdCtxs[1]{(CommandContext*)cmdCtx};
-        mainGfxQueue.ExecuteContexts(cmdCtxs);
+        CommandList* cmdLists[1]{(CommandList*)cmdList};
+        mainGfxQueue.ExecuteContexts(cmdLists);
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 

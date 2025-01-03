@@ -183,13 +183,13 @@ namespace ig
         IG_CHECK(newGpuBufferPtr != nullptr);
 
         CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
-        CommandContextPool& contextPool = renderContext.GetAsyncCopyCommandContextPool();
-        auto copyCmdCtx = contextPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
-        copyCmdCtx->Begin();
+        CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
+        auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
+        copyCmdList->Begin();
         {
-            copyCmdCtx->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
+            copyCmdList->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
         }
-        copyCmdCtx->End();
+        copyCmdList->End();
 
         GpuSyncPoint newSyncPoint = fence.MakeSyncPoint();
         if (GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
@@ -201,8 +201,8 @@ namespace ig
             asyncCopyQueue.Wait(prevSyncPoint);
         }
 
-        ig::CommandContext* copyCmdCtxs[] = {(ig::CommandContext*)copyCmdCtx};
-        asyncCopyQueue.ExecuteContexts(copyCmdCtxs);
+        ig::CommandList* copyCmdLists[] = {(ig::CommandList*)copyCmdList};
+        asyncCopyQueue.ExecuteContexts(copyCmdLists);
         asyncCopyQueue.Signal(newSyncPoint);
 
         if (srv)

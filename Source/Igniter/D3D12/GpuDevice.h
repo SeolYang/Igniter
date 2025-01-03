@@ -4,7 +4,7 @@
 namespace ig
 {
     class CommandQueue;
-    class CommandContext;
+    class CommandList;
     class DescriptorHeap;
     class GpuView;
     class GpuBufferDesc;
@@ -33,7 +33,7 @@ namespace ig
         uint32_t            GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
 
         Option<CommandQueue>   CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
-        Option<CommandContext> CreateCommandContext(const std::string_view debugName, const EQueueType targetQueueType);
+        Option<CommandList> CreateCommandList(const std::string_view debugName, const EQueueType targetQueueType);
 
         Option<RootSignature> CreateBindlessRootSignature();
         Option<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
