@@ -62,7 +62,7 @@ namespace ig
         //////////////////////// L4 ////////////////////////
         world = MakePtr<World>();
         IG_LOG(Engine, Info, "Empty World Initialized.");
-        sceneProxy = MakePtr<SceneProxy>(*renderContext, *assetManager);
+        sceneProxy = MakePtr<SceneProxy>(*renderContext, *meshStorage, *assetManager);
         IG_LOG(Engine, Info, "Scene Proxy Initialized.");
         ////////////////////////////////////////////////////
         bInitialized = true;

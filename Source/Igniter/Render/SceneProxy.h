@@ -69,7 +69,7 @@ namespace ig
         };
 
     public:
-        explicit SceneProxy(RenderContext& renderContext, AssetManager& assetManager);
+        explicit SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, const AssetManager& assetManager);
         SceneProxy(const SceneProxy&) = delete;
         SceneProxy(SceneProxy&&) noexcept = delete;
         ~SceneProxy();
@@ -89,9 +89,13 @@ namespace ig
         template <typename Proxy, typename Owner>
         void ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
 
+        void UpdateRenderableIndicesBuffer(const LocalFrameIndex localFrameIdx);
+        void UpdateLightIndicesBuffer(const LocalFrameIndex localFrameIdx);
+
     private:
         RenderContext* renderContext = nullptr;
         const AssetManager* assetManager = nullptr;
+        const MeshStorage* meshStorage = nullptr;
 
         constexpr static U32 kNumInitTransformElements = 1024u;
         ProxyPackage<TransformProxy> transformProxyPackage;
@@ -107,13 +111,17 @@ namespace ig
 
         /* 현재 버퍼가 수용 할 수 있는 최대 수, 만약 부족하다면 새로 할당 필요! */
         constexpr static U32 kNumInitRenderableIndices = kNumInitRenderableElements;
+        InFlightFramesResource<U32> renderableIndicesBufferSize;
         InFlightFramesResource<U32> numMaxRenderables;
-        InFlightFramesResource<U32> numCurrentRenderables;
         InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesBuffer;
+        InFlightFramesResource<RenderHandle<GpuView>> renderableIndicesBufferSrv;
+        Vector<U32> renderableIndices;
 
         constexpr static U32 kNumInitLightIndices = 2048u;
+        InFlightFramesResource<U32> lightIndicesBufferSize;
         InFlightFramesResource<U32> numMaxLights;
-        InFlightFramesResource<U32> numCurrentLights;
         InFlightFramesResource<RenderHandle<GpuBuffer>> lightIndicesBuffer;
+        InFlightFramesResource<RenderHandle<GpuView>> lightIndicesBufferSrv;
+        Vector<U32> lightIndices;
     };
 } // namespace ig

@@ -13,8 +13,9 @@
 
 namespace ig
 {
-    SceneProxy::SceneProxy(RenderContext& renderContext, AssetManager& assetManager) :
+    SceneProxy::SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, const AssetManager& assetManager) :
         renderContext(&renderContext),
+        meshStorage(&meshStorage),
         assetManager(&assetManager)
     {
         GpuBufferDesc renderableIndicesBufferDesc;
@@ -53,14 +54,19 @@ namespace ig
                     LightProxy::kDataSize,
                     kNumInitLightElements);
 
-            numMaxRenderables[localFrameIdx] = kNumInitRenderableIndices;
+            renderableIndicesBufferSize[localFrameIdx] = kNumInitRenderableIndices;
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
             renderableIndicesBuffer[localFrameIdx] = renderContext.CreateBuffer(renderableIndicesBufferDesc);
+            renderableIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(renderableIndicesBuffer[localFrameIdx]);
 
-            numMaxLights[localFrameIdx] = kNumInitLightIndices;
+            lightIndicesBufferSize[localFrameIdx] = kNumInitLightIndices;
             lightIndicesBufferDesc.DebugName = String(std::format("LightIndicesBuffer{}", localFrameIdx));
             lightIndicesBuffer[localFrameIdx] = renderContext.CreateBuffer(lightIndicesBufferDesc);
+            lightIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(lightIndicesBuffer[localFrameIdx]);
         }
+
+        renderableIndices.reserve(kNumInitRenderableIndices);
+        lightIndices.reserve(kNumInitLightIndices);
     }
 
     SceneProxy::~SceneProxy()
@@ -72,6 +78,9 @@ namespace ig
             renderableProxyPackage.Storage[localFrameIdx]->ForceReset();
             lightProxyPackage.Storage[localFrameIdx]->ForceReset();
 
+            renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
+            renderContext->DestroyGpuView(lightIndicesBufferSrv[localFrameIdx]);
+
             renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
             renderContext->DestroyBuffer(lightIndicesBuffer[localFrameIdx]);
         }
@@ -80,6 +89,7 @@ namespace ig
     void SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
     {
         IG_CHECK(renderContext != nullptr);
+        IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();
 
         UpdateTransformProxy(localFrameIdx, registry);
@@ -88,25 +98,20 @@ namespace ig
         UpdateMaterialProxy(localFrameIdx, registry);
         ReplicatePrxoyData(localFrameIdx, materialProxyPackage);
 
-        for (auto& [entity, renderableProxy] : renderableProxyPackage.ProxyMap[localFrameIdx])
-        {
-            renderableProxy.bMightBeDestroyed = true;
-        }
-
-        numCurrentLights[localFrameIdx] = 0;
-
-        for (auto& [entity, lightProxy] : lightProxyPackage.ProxyMap[localFrameIdx])
-        {
-            lightProxy.bMightBeDestroyed = true;
-        }
+        UpdateRenderableProxy(localFrameIdx, registry);
+        ReplicatePrxoyData(localFrameIdx, renderableProxyPackage);
 
         // 현재 프레임에서 존재 할 수 있는 Renderable/Light의 수를 카운트(numCurrentRenderables/numCurrentLights) 해서
         // 만약 각 인덱스 버퍼의 최대 수용 가능 인덱스 수(numMaxRenderables/numMaxLights)를 초과하면, GpuBuffer의
         // 크기를 재조정 해야한다. (ex. max(numMaxRenderables * 2, numCurrentRenderables))
+        UpdateRenderableIndicesBuffer(localFrameIdx);
     }
 
     void SceneProxy::UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
+        IG_CHECK(transformProxyPackage.PendingReplications.empty());
+        IG_CHECK(transformProxyPackage.PendingDestructions.empty());
+
         auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
 
@@ -115,7 +120,6 @@ namespace ig
             proxy.bMightBeDestroyed = true;
         }
 
-        IG_CHECK(transformProxyPackage.PendingReplications.empty());
         auto staticMeshEntityView = registry.view<const TransformComponent, const StaticMeshComponent>();
         for (const auto& [entity, transformComponent, staticMeshComponent] : staticMeshEntityView.each())
         {
@@ -136,6 +140,7 @@ namespace ig
             }
         }
 
+        // Proxy Map이 element deletion에 stable 하지 않기 때문에 별도로 처리
         for (auto& [entity, proxy] : entityProxyMap)
         {
             if (proxy.bMightBeDestroyed)
@@ -151,14 +156,16 @@ namespace ig
             IG_CHECK(extractedElement->second.StorageSpace.IsValid());
             storage.Deallocate(extractedElement->second.StorageSpace);
         }
-
         transformProxyPackage.PendingDestructions.clear();
     }
 
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
-        IG_CHECK(assetManager != nullptr);
+        IG_CHECK(materialProxyPackage.PendingReplications.empty());
+        IG_CHECK(materialProxyPackage.PendingDestructions.empty());
+
         auto& proxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
+        auto& storage = *materialProxyPackage.Storage[localFrameIdx];
 
         for (auto& [material, proxy] : proxyMap)
         {
@@ -211,8 +218,7 @@ namespace ig
             }
         };
 
-        // TODO 가능한 모든 종류의 renderable object(material을 소유한)로 부터 material 핸들 수집.
-        IG_CHECK(materialProxyPackage.PendingReplications.empty());
+        // TODO 가능한 모든 종류의 renderable object(material을 소유한)로 부터 material 핸들 수집
         auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
         for (const auto& [entity, staticMeshComponent] : staticMeshEntityView.each())
         {
@@ -227,6 +233,103 @@ namespace ig
                               materialProxyPackage, localFrameIdx,
                               staticMeshPtr->GetMaterial());
         }
+
+        for (auto& [material, proxy] : proxyMap)
+        {
+            if (proxy.bMightBeDestroyed)
+            {
+                materialProxyPackage.PendingDestructions.emplace_back(material);
+            }
+        }
+
+        for (const ManagedAsset<Material> material : materialProxyPackage.PendingDestructions)
+        {
+            const auto extractedElement = materialProxyPackage.ProxyMap[localFrameIdx].extract(material);
+            IG_CHECK(extractedElement.has_value());
+            IG_CHECK(extractedElement->second.StorageSpace.IsValid());
+            storage.Deallocate(extractedElement->second.StorageSpace);
+        }
+        materialProxyPackage.PendingDestructions.clear();
+    }
+
+    void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
+    {
+        IG_CHECK(renderableProxyPackage.PendingReplications.empty());
+        IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
+
+        auto& proxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
+        auto& storage = *renderableProxyPackage.Storage[localFrameIdx];
+        const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
+        const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
+
+        for (auto& [entity, proxy] : proxyMap)
+        {
+            IG_CHECK(entity != NullEntity);
+            proxy.bMightBeDestroyed = true;
+        }
+
+        // TODO 가능한 모든 종류의 renderable object(material을 소유한)로 부터 데이터 수집
+        renderableIndices.clear();
+        auto staticMeshEntityView = registry.view<const TransformComponent, const StaticMeshComponent>();
+        for (const auto& [entity, transformComponent, staticMeshComponent] : staticMeshEntityView.each())
+        {
+            if (!staticMeshComponent.Mesh)
+            {
+                continue;
+            }
+
+            const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
+            IG_CHECK(staticMeshPtr != nullptr);
+            IG_CHECK(transformProxyMap.contains(entity));
+            IG_CHECK(staticMeshPtr->GetMaterial());
+
+            if (!proxyMap.contains(entity))
+            {
+                proxyMap[entity] = RenderableProxy{.StorageSpace = storage.Allocate(1)};
+            }
+
+            RenderableProxy& proxy = proxyMap[entity];
+            proxy.bMightBeDestroyed = false;
+            renderableIndices.emplace_back((U32)proxy.StorageSpace.OffsetIndex);
+
+            if (const U32 currentDataHashValue = HashInstance(*staticMeshPtr);
+                proxy.DataHashValue != currentDataHashValue)
+            {
+                const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
+                const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
+                const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
+                const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
+
+                const RenderableGpuData newData{
+                    .TransformStorageIndex = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex,
+                    .MaterialStorageIndex = (U32)materialProxyMap.at(staticMeshPtr->GetMaterial()).StorageSpace.OffsetIndex,
+                    .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
+                    .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
+                    .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
+                    .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0)};
+
+                proxy.GpuData = newData;
+                proxy.DataHashValue = currentDataHashValue;
+                renderableProxyPackage.PendingReplications.emplace_back(entity);
+            }
+        }
+
+        for (auto& [entity, proxy] : proxyMap)
+        {
+            if (proxy.bMightBeDestroyed)
+            {
+                renderableProxyPackage.PendingDestructions.emplace_back(entity);
+            }
+        }
+
+        for (const Entity entity : renderableProxyPackage.PendingDestructions)
+        {
+            const auto extractedElement = proxyMap.extract(entity);
+            IG_CHECK(extractedElement.has_value());
+            IG_CHECK(extractedElement->second.StorageSpace.IsValid());
+            storage.Deallocate(extractedElement->second.StorageSpace);
+        }
+        renderableProxyPackage.PendingDestructions.clear();
     }
 
     template <typename Proxy, typename Owner>
@@ -318,5 +421,43 @@ namespace ig
             proxyPackage.PendingReplications.clear();
             uploader.Submit(uploadContext)->WaitOnCpu();
         }
+    }
+
+    void SceneProxy::UpdateRenderableIndicesBuffer(const LocalFrameIndex localFrameIdx)
+    {
+        numMaxRenderables[localFrameIdx] = (U32)renderableIndices.size();
+
+        if (numMaxRenderables[localFrameIdx] == 0)
+        {
+            return;
+        }
+
+        if (renderableIndicesBufferSize[localFrameIdx] < numMaxRenderables[localFrameIdx])
+        {
+            renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
+            renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
+
+            GpuBufferDesc renderableIndicesBufferDesc;
+            renderableIndicesBufferDesc.AsStructuredBuffer<U32>(numMaxRenderables[localFrameIdx]);
+            renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
+            renderableIndicesBuffer[localFrameIdx] = renderContext->CreateBuffer(renderableIndicesBufferDesc);
+            renderableIndicesBufferSrv[localFrameIdx] = renderContext->CreateShaderResourceView(renderableIndicesBuffer[localFrameIdx]);
+
+            renderableIndicesBufferSize[localFrameIdx] = numMaxRenderables[localFrameIdx];
+        }
+
+        IG_CHECK(renderableIndicesBuffer[localFrameIdx]);
+        GpuBuffer* renderableIndicesBufferPtr = renderContext->Lookup(renderableIndicesBuffer[localFrameIdx]);
+        IG_CHECK(renderableIndicesBufferPtr != nullptr);
+
+        const Size copySize = sizeof(U32) * numMaxRenderables[localFrameIdx];
+        GpuUploader& gpuUploader = renderContext->GetGpuUploader();
+        UploadContext uploadContext = gpuUploader.Reserve(copySize);
+        auto* mappedBuffer = reinterpret_cast<U32*>(uploadContext.GetOffsettedCpuAddress());
+        IG_CHECK(mappedBuffer != nullptr);
+        std::memcpy(mappedBuffer, renderableIndices.data(), copySize);
+
+        uploadContext.CopyBuffer(0, copySize, *renderableIndicesBufferPtr);
+        gpuUploader.Submit(uploadContext)->WaitOnCpu();
     }
 } // namespace ig
