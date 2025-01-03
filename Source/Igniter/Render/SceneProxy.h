@@ -78,7 +78,7 @@ namespace ig
         SceneProxy& operator=(SceneProxy&&) noexcept = delete;
 
         // 여기서 렌더링 전 필요한 Scene 정보를 모두 모으고, GPU 메모리에 변경점 들을 반영해주어야 한다
-        void Replicate(const LocalFrameIndex localFrameIdx, const World& world);
+        GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
 
     private:
         void UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
@@ -87,15 +87,23 @@ namespace ig
         void UpdateLightProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
         template <typename Proxy, typename Owner>
-        void ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
+        void ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage,
+                                CommandList& cmdList,
+                                const Size stagingBufferOffset, const Size replicationSize);
 
-        void UpdateRenderableIndicesBuffer(const LocalFrameIndex localFrameIdx);
+        void ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
+                                        CommandList& cmdList,
+                                        const Size stagingBufferOffset, const Size replicationSize);
         void UpdateLightIndicesBuffer(const LocalFrameIndex localFrameIdx);
 
     private:
         RenderContext* renderContext = nullptr;
         const AssetManager* assetManager = nullptr;
         const MeshStorage* meshStorage = nullptr;
+
+        InFlightFramesResource<RenderHandle<GpuBuffer>> stagingBuffer;
+        InFlightFramesResource<U8*> mappedStagingBuffer;
+        InFlightFramesResource<Size> stagingBufferSize;
 
         constexpr static U32 kNumInitTransformElements = 1024u;
         ProxyPackage<TransformProxy> transformProxyPackage;

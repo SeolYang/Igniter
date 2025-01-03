@@ -14,7 +14,7 @@ namespace ig
         preservedCmdLists.reserve(numReservedCtx);
         for (const auto idx : views::iota(0Ui64, numReservedCtx))
         {
-            cmdLists.push_back(new CommandList(gpuDevice.CreateCommandList(std::format("{}_Pool-{}", cmdListType, idx), cmdListType).value()));
+            cmdLists.push_back(new CommandList(gpuDevice.CreateCommandList(std::format("Pooled{}CommandList.{}", cmdListType, idx), cmdListType).value()));
             preservedCmdLists.push_back(cmdLists.back());
         }
     }
@@ -39,6 +39,7 @@ namespace ig
         ScopedLock lock{poolMutex, pendingListMutex};
         for (CommandList* cmdList : pendingCmdLists[localFrameIdx])
         {
+            SetObjectName(&cmdList->GetNative(), std::format("Pooled{}CommandList.{}", cmdQueueType, cmdLists.size()));
             cmdLists.emplace_back(cmdList);
         }
         pendingCmdLists[localFrameIdx].clear();

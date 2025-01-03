@@ -44,8 +44,8 @@ namespace ig
 
         auto* const nativeInitStatePtr = initStatePtr != nullptr ? &initStatePtr->GetNative() : nullptr;
         IG_VERIFY(initStatePtr == nullptr || (initStatePtr != nullptr && nativeInitStatePtr != nullptr));
-        IG_VERIFY_SUCCEEDED(cmdAllocator->Reset());
-        IG_VERIFY_SUCCEEDED(cmdList->Reset(cmdAllocator.Get(), nativeInitStatePtr));
+        cmdAllocator->Reset();
+        cmdList->Reset(cmdAllocator.Get(), nativeInitStatePtr);
     }
 
     void CommandList::End()

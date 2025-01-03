@@ -83,28 +83,77 @@ namespace ig
 
             renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
             renderContext->DestroyBuffer(lightIndicesBuffer[localFrameIdx]);
+
+            renderContext->DestroyBuffer(stagingBuffer[localFrameIdx]);
         }
     }
 
-    void SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
+    GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
     {
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();
 
         UpdateTransformProxy(localFrameIdx, registry);
-        ReplicatePrxoyData(localFrameIdx, transformProxyPackage);
-
         UpdateMaterialProxy(localFrameIdx, registry);
-        ReplicatePrxoyData(localFrameIdx, materialProxyPackage);
-
         UpdateRenderableProxy(localFrameIdx, registry);
-        ReplicatePrxoyData(localFrameIdx, renderableProxyPackage);
+
+        // warning Copy시 Alignment 문제 발생 가능!
+        const Size transformReplicationSize = TransformProxy::kDataSize * transformProxyPackage.PendingReplications.size();
+        const Size transformStagingOffset = 0;
+        const Size materialReplicationSize = MaterialProxy::kDataSize * materialProxyPackage.PendingReplications.size();
+        const Size materialStagingOffset = transformReplicationSize;
+        const Size renderableReplicationSize = RenderableProxy::kDataSize * renderableProxyPackage.PendingReplications.size();
+        const Size renderableStagingOffset = materialStagingOffset + materialReplicationSize;
+        const Size renderableIndicesSize = sizeof(U32) * renderableIndices.size();
+        const Size renderableIndicesStagingOffset = renderableStagingOffset + renderableReplicationSize;
+
+        const Size requiredStagingBufferSize = renderableIndicesStagingOffset + renderableIndicesSize;
+        if (stagingBufferSize[localFrameIdx] < requiredStagingBufferSize)
+        {
+            if (stagingBuffer[localFrameIdx])
+            {
+                GpuBuffer* oldStagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+                oldStagingBufferPtr->Unmap();
+                mappedStagingBuffer[localFrameIdx] = nullptr;
+                renderContext->DestroyBuffer(stagingBuffer[localFrameIdx]);
+            }
+
+            GpuBufferDesc stagingBufferDesc{};
+            stagingBufferDesc.AsUploadBuffer((U32)requiredStagingBufferSize);
+            stagingBufferDesc.DebugName = String(std::format("SceneProxyStagingBuffer.{}", localFrameIdx));
+            stagingBuffer[localFrameIdx] = renderContext->CreateBuffer(stagingBufferDesc);
+            stagingBufferSize[localFrameIdx] = requiredStagingBufferSize;
+
+            GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+            mappedStagingBuffer[localFrameIdx] = stagingBufferPtr->Map(0);
+        }
+        IG_CHECK(stagingBuffer[localFrameIdx]);
+
+        CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
+
+        // TODO Replication/Upload는 모두 병렬적으로 실행 가능
+        auto transformCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "TransformProxyReplication"_fs);
+        auto materialCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "MaterialProxyReplication"_fs);
+        auto renderableCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableProxyReplication"_fs);
+        auto renderableIndicesCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableIndicesReplication"_fs);
+
+        ReplicatePrxoyData(localFrameIdx, transformProxyPackage, *transformCopyCmdList, transformStagingOffset, transformReplicationSize);
+        ReplicatePrxoyData(localFrameIdx, materialProxyPackage, *materialCopyCmdList, materialStagingOffset, materialReplicationSize);
+        ReplicatePrxoyData(localFrameIdx, renderableProxyPackage, *renderableCopyCmdList, renderableStagingOffset, renderableReplicationSize);
 
         // 현재 프레임에서 존재 할 수 있는 Renderable/Light의 수를 카운트(numCurrentRenderables/numCurrentLights) 해서
         // 만약 각 인덱스 버퍼의 최대 수용 가능 인덱스 수(numMaxRenderables/numMaxLights)를 초과하면, GpuBuffer의
-        // 크기를 재조정 해야한다. (ex. max(numMaxRenderables * 2, numCurrentRenderables))
-        UpdateRenderableIndicesBuffer(localFrameIdx);
+        // 크기를 재조정 해야한다. (ex. max(numMaxRenderables, numCurrentRenderables * 2))
+        ReplicateRenderableIndices(localFrameIdx, *renderableIndicesCopyCmdList, renderableIndicesStagingOffset, renderableIndicesSize);
+
+        // test code!
+        CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+        CommandList* cmdLists[]{transformCopyCmdList, materialCopyCmdList, renderableCopyCmdList};
+        asyncCopyQueue.ExecuteContexts(cmdLists);
+        GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal(renderContext->GetAsyncCopyFence());
+        syncPoint.WaitOnCpu(); // 이상적으로는 렌더링 파이프라인 진입 전 각 커맨드 큐에 해당 동기화 지점과 적절히 동기화 하여야함.
+        return syncPoint;
     }
 
     void SceneProxy::UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
@@ -333,7 +382,9 @@ namespace ig
     }
 
     template <typename Proxy, typename Owner>
-    void SceneProxy::ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage)
+    void SceneProxy::ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage,
+                                        CommandList& cmdList,
+                                        const Size stagingBufferOffset, const Size replicationSize)
     {
         // <1>. UploadInfo = GpuStorageAllocation, GpuData에 대한 참조를 수집
         //
@@ -353,6 +404,7 @@ namespace ig
         // CopyBuffer(srcOffset, copySize, storageBuffer, dstOffset)
         // srcOffset += copySize, copySize = 0, dstOffset = dstOffset = UploadInfos[currentIdx + 1].StorageSpaceRef.Offset
 
+        cmdList.Begin();
         // <1>.
         if (!proxyPackage.PendingReplications.empty())
         {
@@ -368,6 +420,7 @@ namespace ig
                         .StorageSpaceRef = CRef{proxy.StorageSpace},
                         .GpuDataRef = CRef{proxy.GpuData}});
             }
+            IG_CHECK(!uploadInfos.empty());
 
             // <2>.
             std::sort(uploadInfos.begin(), uploadInfos.end(),
@@ -377,24 +430,21 @@ namespace ig
                       });
 
             // <3>.
-            GpuUploader& uploader = renderContext->GetGpuUploader();
-            const Size requiredUploadBufferSize = Proxy::kDataSize * uploadInfos.size();
-            IG_CHECK(requiredUploadBufferSize > 0);
-            UploadContext uploadContext = uploader.Reserve(requiredUploadBufferSize);
+            IG_CHECK(replicationSize > 0 && replicationSize == Proxy::kDataSize * uploadInfos.size());
+            GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+            IG_CHECK(stagingBufferPtr != nullptr);
 
             // <4 ~ 5>.
             const RenderHandle<GpuBuffer> storageBuffer = proxyPackage.Storage[localFrameIdx]->GetGpuBuffer();
-            IG_CHECK(storageBuffer);
             GpuBuffer* storageBufferPtr = renderContext->Lookup(storageBuffer);
             IG_CHECK(storageBufferPtr != nullptr);
 
-            auto* mappedUploadBuffer =
-                reinterpret_cast<Proxy::GpuData_t*>(uploadContext.GetOffsettedCpuAddress());
-
-            IG_CHECK(!uploadInfos.empty());
-            Size srcOffset = 0;
+            IG_CHECK(mappedStagingBuffer[localFrameIdx] != nullptr);
+            auto* mappedUploadBuffer = reinterpret_cast<Proxy::GpuData_t*>(mappedStagingBuffer[localFrameIdx] + stagingBufferOffset);
+            Size srcOffset = stagingBufferOffset;
             Size copySize = 0;
             Size dstOffset = uploadInfos[0].StorageSpaceRef.get().Offset;
+
             for (Size idx = 0; idx < uploadInfos.size(); ++idx)
             {
                 copySize += Proxy::kDataSize;
@@ -406,7 +456,7 @@ namespace ig
                     ((uploadInfos[idx].StorageSpaceRef.get().OffsetIndex + 1) != uploadInfos[idx + 1].StorageSpaceRef.get().OffsetIndex);
                 if (bPendingCopyCommand)
                 {
-                    uploadContext.CopyBuffer(srcOffset, copySize, *storageBufferPtr, dstOffset);
+                    cmdList.CopyBuffer(*stagingBufferPtr, srcOffset, copySize, *storageBufferPtr, dstOffset);
                 }
 
                 const bool bPendingNextBatching = bHasNextUploadInfo && bPendingCopyCommand;
@@ -418,12 +468,16 @@ namespace ig
                     dstOffset = uploadInfos[idx + 1].StorageSpaceRef.get().Offset;
                 }
             }
+
             proxyPackage.PendingReplications.clear();
-            uploader.Submit(uploadContext)->WaitOnCpu();
         }
+
+        cmdList.End();
     }
 
-    void SceneProxy::UpdateRenderableIndicesBuffer(const LocalFrameIndex localFrameIdx)
+    void SceneProxy::ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
+                                                CommandList& cmdList,
+                                                const Size stagingBufferOffset, const Size replicationSize)
     {
         numMaxRenderables[localFrameIdx] = (U32)renderableIndices.size();
 
@@ -437,27 +491,30 @@ namespace ig
             renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
             renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
 
+            const U32 newBufferSize = std::max(numMaxRenderables[localFrameIdx], renderableIndicesBufferSize[localFrameIdx] * 2);
             GpuBufferDesc renderableIndicesBufferDesc;
-            renderableIndicesBufferDesc.AsStructuredBuffer<U32>(numMaxRenderables[localFrameIdx]);
+            renderableIndicesBufferDesc.AsStructuredBuffer<U32>(newBufferSize);
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
             renderableIndicesBuffer[localFrameIdx] = renderContext->CreateBuffer(renderableIndicesBufferDesc);
             renderableIndicesBufferSrv[localFrameIdx] = renderContext->CreateShaderResourceView(renderableIndicesBuffer[localFrameIdx]);
 
-            renderableIndicesBufferSize[localFrameIdx] = numMaxRenderables[localFrameIdx];
+            renderableIndicesBufferSize[localFrameIdx] = newBufferSize;
         }
 
-        IG_CHECK(renderableIndicesBuffer[localFrameIdx]);
         GpuBuffer* renderableIndicesBufferPtr = renderContext->Lookup(renderableIndicesBuffer[localFrameIdx]);
         IG_CHECK(renderableIndicesBufferPtr != nullptr);
 
-        const Size copySize = sizeof(U32) * numMaxRenderables[localFrameIdx];
-        GpuUploader& gpuUploader = renderContext->GetGpuUploader();
-        UploadContext uploadContext = gpuUploader.Reserve(copySize);
-        auto* mappedBuffer = reinterpret_cast<U32*>(uploadContext.GetOffsettedCpuAddress());
-        IG_CHECK(mappedBuffer != nullptr);
-        std::memcpy(mappedBuffer, renderableIndices.data(), copySize);
+        GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+        IG_CHECK(stagingBufferPtr != nullptr);
 
-        uploadContext.CopyBuffer(0, copySize, *renderableIndicesBufferPtr);
-        gpuUploader.Submit(uploadContext)->WaitOnCpu();
+        IG_CHECK(mappedStagingBuffer[localFrameIdx] != nullptr);
+        auto* mappedBuffer = reinterpret_cast<U32*>(mappedStagingBuffer[localFrameIdx] + stagingBufferOffset);
+
+        IG_CHECK(replicationSize == (sizeof(U32) * numMaxRenderables[localFrameIdx]));
+        std::memcpy(mappedBuffer, renderableIndices.data(), replicationSize);
+
+        cmdList.Begin();
+        cmdList.CopyBuffer(*stagingBufferPtr, stagingBufferOffset, replicationSize, *renderableIndicesBufferPtr, 0);
+        cmdList.End();
     }
 } // namespace ig
