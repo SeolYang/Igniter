@@ -55,7 +55,7 @@ namespace ig
         return type == EDescriptorHeapType::CBV_SRV_UAV || type == EDescriptorHeapType::Sampler;
     }
 
-    enum class EGpuViewType
+    enum class EGpuViewType : U8
     {
         ConstantBufferView,
         ShaderResourceView,
@@ -80,10 +80,10 @@ namespace ig
     struct GpuCopyableFootprints final
     {
     public:
-        size_t                                          RequiredSize = 0;
-        std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{ };
-        std::vector<uint32_t>                           NumRows{ };
-        std::vector<size_t>                             RowSizesInBytes{ };
+        size_t RequiredSize = 0;
+        std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
+        std::vector<uint32_t> NumRows{};
+        std::vector<size_t> RowSizesInBytes{};
     };
 
     constexpr inline bool IsGreyScaleFormat(const DXGI_FORMAT format)

@@ -60,7 +60,7 @@ namespace ig
     {
     public:
         void AsConstantBuffer(const uint32_t sizeOfBufferInBytes);
-        void AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie = false);
+        void AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false);
         void AsUploadBuffer(const uint32_t sizeOfBufferInBytes);
         void AsReadbackBuffer(const uint32_t sizeOfBufferInBytes);
 
@@ -71,9 +71,9 @@ namespace ig
         }
 
         template <typename T>
-        void AsStructuredBuffer(const uint32_t numOfElements, const bool bEnableShaderReadWrtie = false)
+        void AsStructuredBuffer(const uint32_t numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false)
         {
-            AsStructuredBuffer(sizeof(T), numOfElements, bEnableShaderReadWrtie);
+            AsStructuredBuffer(sizeof(T), numOfElements, bShouldEnableShaderReadWrite, bShouldEnableUavCounter);
         }
 
         template <typename T>
@@ -109,15 +109,20 @@ namespace ig
             }
         }
 
-        [[nodiscard]] bool           IsCpuAccessible() const noexcept { return bIsCpuAccessible; }
+        [[nodiscard]] bool IsCpuAccessible() const noexcept { return bIsCpuAccessible; }
+        [[nodiscard]] bool IsUavCounterEnabled() const noexcept { return bIsUavCounterEnabled; }
         [[nodiscard]] EGpuBufferType GetBufferType() const noexcept { return bufferType; }
-        [[nodiscard]] uint32_t       GetStructureByteStride() const noexcept { return structureByteStride; }
-        [[nodiscard]] uint32_t       GetNumElements() const noexcept { return numElements; }
-        [[nodiscard]] uint64_t       GetSizeAsBytes() const noexcept { return Width; }
+        [[nodiscard]] uint32_t GetStructureByteStride() const noexcept { return structureByteStride; }
+        [[nodiscard]] uint32_t GetNumElements() const noexcept { return numElements; }
+        [[nodiscard]] uint64_t GetSizeAsBytes() const noexcept { return Width; }
+        [[nodiscard]] Size GetUavCounterOffset() const noexcept
+        {
+            return bIsUavCounterEnabled ? (Width - kUavCounterSize) : 0Ui64;
+        }
 
-        [[nodiscard]] D3D12MA::ALLOCATION_DESC                        GetAllocationDesc() const;
-        [[nodiscard]] std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC>  ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
-        [[nodiscard]] std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC>  ToShaderResourceViewDesc() const;
+        [[nodiscard]] D3D12MA::ALLOCATION_DESC GetAllocationDesc() const;
+        [[nodiscard]] std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> ToConstantBufferViewDesc(const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation) const;
+        [[nodiscard]] std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ToShaderResourceViewDesc() const;
         [[nodiscard]] std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ToUnorderedAccessViewDesc() const;
 
         void From(const D3D12_RESOURCE_DESC& desc);
@@ -127,14 +132,17 @@ namespace ig
         void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
 
     public:
+        using UavCounter = U32;
+        constexpr static Size kUavCounterSize = sizeof(UavCounter);
         String DebugName = String{"Unknown Buffer"};
 
     private:
-        uint32_t       structureByteStride   = 1;
-        uint32_t       numElements           = 1;
-        EGpuBufferType bufferType            = EGpuBufferType::Unknown;
-        bool           bIsShaderReadWritable = false;
-        bool           bIsCpuAccessible      = false;
-        D3D12MA::Pool* customPool            = nullptr;
+        uint32_t structureByteStride = 1;
+        uint32_t numElements = 1;
+        EGpuBufferType bufferType = EGpuBufferType::Unknown;
+        bool bIsShaderReadWritable = false;
+        bool bIsCpuAccessible = false;
+        bool bIsUavCounterEnabled = false;
+        D3D12MA::Pool* customPool = nullptr;
     };
 } // namespace ig

@@ -8,6 +8,8 @@
 #include "Igniter/D3D12/ShaderBlob.h"
 #include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/D3D12/GpuTexture.h"
+#include "Igniter/D3D12/CommandSignature.h"
+#include "Igniter/D3D12/CommandSignatureDesc.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/Utils.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
@@ -24,21 +26,23 @@ IG_DEFINE_LOG_CATEGORY(RendererLog);
 
 namespace ig
 {
-    struct BasicRenderResources
+    struct DrawRenderableCommand
     {
-        uint32_t VertexBufferIdx;
-        uint32_t PerFrameBufferIdx;
-        uint32_t PerObjectBufferIdx;
-        uint32_t DiffuseTexIdx;
-        uint32_t DiffuseTexSamplerIdx;
-        uint32_t VertexStorageOffset;
+        U32 PerFrameConstantBuffer = IG_NUMERIC_MAX_OF(PerFrameConstantBuffer);
+        U32 RenderableIndex = IG_NUMERIC_MAX_OF(RenderableIndex);
+        D3D12_INDEX_BUFFER_VIEW IndexBufferView; // 64bit inter = uint2
+        D3D12_DRAW_INDEXED_ARGUMENTS DrawIndexedArguments;
     };
 
     struct PerFrameBuffer
     {
         Matrix ViewProj{};
+        Vector3 CameraPosition{};
+        float Padding0;
+        Vector3 CameraForward{};
+        float Padding1;
+
         U32 StaticMeshVertexStorage = IG_NUMERIC_MAX_OF(StaticMeshVertexStorage);
-        // U32 VertexIndexStorage = IG_NUMERIC_MAX_OF(VertexIndexStorage);
         U32 TransformStorage = IG_NUMERIC_MAX_OF(TransformStorage);
         U32 MaterialStorage = IG_NUMERIC_MAX_OF(MaterialStorage);
         U32 RenderableStorage = IG_NUMERIC_MAX_OF(RenderableStorage);
@@ -47,16 +51,20 @@ namespace ig
 
         U32 PerFrameConstantBuffer = IG_NUMERIC_MAX_OF(PerFrameConstantBuffer);
 
+        U64 IndexBufferLocation = IG_NUMERIC_MAX_OF(IndexBufferLocation);
+        U32 IndexBufferSize = IG_NUMERIC_MAX_OF(IndexBufferSize);
+        U32 IndexBufferFormat = IG_NUMERIC_MAX_OF(IndexBufferFormat);
         // TODO Light Sttorage/Indices/NumMaxLights
     };
 
+    struct ComputeCullingConstants
+    {
+        U32 PerFrameConstantBuffer;
+        U32 DrawCommandStorageUav;
+    };
+
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy) :
-        window(&window),
-        renderContext(&renderContext),
-        meshStorage(&meshStorage),
-        sceneProxy(&sceneProxy),
-        mainViewport(window.GetViewport()),
-        tempConstantBufferAllocator(MakePtr<TempConstantBufferAllocator>(renderContext))
+        window(&window), renderContext(&renderContext), meshStorage(&meshStorage), sceneProxy(&sceneProxy), mainViewport(window.GetViewport()), tempConstantBufferAllocator(MakePtr<TempConstantBufferAllocator>(renderContext))
     {
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         bindlessRootSignature = MakePtr<RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
@@ -105,6 +113,42 @@ namespace ig
         CommandList* cmdLists[]{initialCmdList};
         CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
         mainGfxQueue.ExecuteContexts(cmdLists);
+
+        GpuBufferDesc uavCounterResetBufferDesc{};
+        uavCounterResetBufferDesc.AsUploadBuffer(GpuBufferDesc::kUavCounterSize);
+        uavCounterResetBufferDesc.DebugName = "UavCounterResetBuffer"_fs;
+        uavCounterResetBuffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(uavCounterResetBufferDesc).value());
+        auto const mappedUavCounterResetBuffer = reinterpret_cast<GpuBufferDesc::UavCounter*>(uavCounterResetBuffer->Map());
+        ZeroMemory(mappedUavCounterResetBuffer, sizeof(GpuBufferDesc::kUavCounterSize));
+        uavCounterResetBuffer->Unmap();
+
+        const ShaderCompileDesc computeCullingShaderDesc{.SourcePath = "Assets/Shaders/ComputeCulling.hlsl"_fs, .Type = EShaderType::Compute};
+        computeCullingShader = MakePtr<ShaderBlob>(computeCullingShaderDesc);
+
+        ComputePipelineStateDesc computePipelineStateDesc{};
+        computePipelineStateDesc.SetComputeShader(*computeCullingShader);
+        computePipelineStateDesc.SetRootSignature(*bindlessRootSignature);
+        computePipelineStateDesc.Name = "ComputeCullingPipelineState"_fs;
+        computeCullingPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(computePipelineStateDesc).value());
+        IG_CHECK(computeCullingPso->IsCompute());
+
+        CommandSignatureDesc commandSignatureDesc{};
+        commandSignatureDesc.AddConstant(0, 0, 2)
+            .AddIndexBufferView()
+            .AddDrawIndexedArgument()
+            .SetCommandByteStride<DrawRenderableCommand>();
+        commandSignature = MakePtr<CommandSignature>(gpuDevice.CreateCommandSignature("IndirectCommandSignature", commandSignatureDesc, *bindlessRootSignature).value());
+
+        for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
+        {
+            drawCmdStorage[localFrameIdx] = MakePtr<GpuStorage>(
+                renderContext,
+                String(std::format("DrawRenderableCmdBuffer.{}", localFrameIdx)),
+                (U32)sizeof(DrawRenderableCommand),
+                kInitNumDrawCommands,
+                true, true, true);
+        }
+
         mainGfxQueue.MakeSyncPointWithSignal(renderContext.GetMainGfxFence()).WaitOnCpu();
     }
 
@@ -112,6 +156,7 @@ namespace ig
     {
         for (const auto localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
+            drawCmdStorage[localFrameIdx]->ForceReset();
             renderContext->DestroyGpuView(dsvs[localFrameIdx]);
             renderContext->DestroyTexture(depthStencils[localFrameIdx]);
         }
@@ -120,6 +165,16 @@ namespace ig
     void Renderer::PreRender(const LocalFrameIndex localFrameIdx)
     {
         tempConstantBufferAllocator->Reset(localFrameIdx);
+
+        if (drawCmdSpace[localFrameIdx].IsValid())
+        {
+            drawCmdStorage[localFrameIdx]->Deallocate(drawCmdSpace[localFrameIdx]);
+            // 블럭을 합쳐서 fragmentation 최소화
+            drawCmdStorage[localFrameIdx]->ForceReset();
+        }
+
+        drawCmdSpace[localFrameIdx] =
+            drawCmdStorage[localFrameIdx]->Allocate(sceneProxy->GetNumMaxRenderables(localFrameIdx));
     }
 
     GpuSyncPoint Renderer::Render([[maybe_unused]] const LocalFrameIndex localFrameIdx)
@@ -241,7 +296,7 @@ namespace ig
         // return mainGfxQueue.MakeSyncPointWithSignal(renderContext->GetMainGfxFence());
     }
 
-    GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint)
+    GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, const World& world, [[maybe_unused]] GpuSyncPoint sceneProxyRepSyncPoint)
     {
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(meshStorage != nullptr);
@@ -280,43 +335,41 @@ namespace ig
             return GpuSyncPoint::Invalid();
         }
 
-        const RenderHandle<GpuView> staticMeshVertexStorageSrv = meshStorage->GetStaticMeshVertexStorageShaderResourceView();
-        const GpuView* staticMeshVertexStorageSrvPtr = renderContext->Lookup(staticMeshVertexStorageSrv);
-        const RenderHandle<GpuBuffer> vertexIndexStorageBuffer = meshStorage->GetVertexIndexStorageBuffer();
-        IG_CHECK(staticMeshVertexStorageSrvPtr != nullptr && staticMeshVertexStorageSrvPtr->IsValid());
-        perFrameBuffer.StaticMeshVertexStorage = staticMeshVertexStorageSrvPtr->Index;
+        const GpuView* staticMeshVertexStorageSrv = renderContext->Lookup(meshStorage->GetStaticMeshVertexStorageShaderResourceView());
+        IG_CHECK(staticMeshVertexStorageSrv != nullptr && staticMeshVertexStorageSrv->IsValid());
+        perFrameBuffer.StaticMeshVertexStorage = staticMeshVertexStorageSrv->Index;
 
-        const RenderHandle<GpuView> transformStorageSrv = sceneProxy->GetTransformStorageShaderResourceView(localFrameIdx);
-        const GpuView* transformStorageSrvPtr = renderContext->Lookup(transformStorageSrv);
-        IG_CHECK(transformStorageSrvPtr != nullptr && transformStorageSrvPtr->IsValid());
-        perFrameBuffer.TransformStorage = transformStorageSrvPtr->Index;
+        const GpuView* transformStorageSrv = renderContext->Lookup(sceneProxy->GetTransformStorageShaderResourceView(localFrameIdx));
+        IG_CHECK(transformStorageSrv != nullptr && transformStorageSrv->IsValid());
+        perFrameBuffer.TransformStorage = transformStorageSrv->Index;
 
-        const RenderHandle<GpuView> materiaslStorageSrv = sceneProxy->GetMaterialStorageShaderResourceView(localFrameIdx);
-        const GpuView* materialStorageSrvPtr = renderContext->Lookup(materiaslStorageSrv);
-        IG_CHECK(materialStorageSrvPtr != nullptr && materialStorageSrvPtr->IsValid());
-        perFrameBuffer.MaterialStorage = materialStorageSrvPtr->Index;
+        const GpuView* materialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialStorageShaderResourceView(localFrameIdx));
+        IG_CHECK(materialStorageSrv != nullptr && materialStorageSrv->IsValid());
+        perFrameBuffer.MaterialStorage = materialStorageSrv->Index;
 
-        const RenderHandle<GpuView> renderableStorageSrv = sceneProxy->GetRenderableStorageShaderResourceView(localFrameIdx);
-        const GpuView* renderableStorageSrvPtr = renderContext->Lookup(renderableStorageSrv);
-        IG_CHECK(renderableStorageSrvPtr != nullptr && renderableStorageSrvPtr->IsValid());
-        perFrameBuffer.RenderableStorage = renderableStorageSrvPtr->Index;
+        const GpuView* renderableStorageSrv = renderContext->Lookup(sceneProxy->GetRenderableStorageShaderResourceView(localFrameIdx));
+        IG_CHECK(renderableStorageSrv != nullptr && renderableStorageSrv->IsValid());
+        perFrameBuffer.RenderableStorage = renderableStorageSrv->Index;
 
-        const RenderHandle<GpuView> renderableIndicesBufferSrv = sceneProxy->GetRenderableIndicesBufferShaderResourceView(localFrameIdx);
-        const GpuView* renderableIndicesBufferSrvPtr = renderContext->Lookup(renderableIndicesBufferSrv);
-        IG_CHECK(renderableIndicesBufferSrvPtr != nullptr && renderableIndicesBufferSrvPtr->IsValid());
-        perFrameBuffer.RenderableIndices = renderableIndicesBufferSrvPtr->Index;
+        const GpuView* renderableIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetRenderableIndicesBufferShaderResourceView(localFrameIdx));
+        IG_CHECK(renderableIndicesBufferSrv != nullptr && renderableIndicesBufferSrv->IsValid());
+        perFrameBuffer.RenderableIndices = renderableIndicesBufferSrv->Index;
         perFrameBuffer.NumMaxRenderables = sceneProxy->GetNumMaxRenderables(localFrameIdx);
 
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
-        const RenderHandle<GpuView> perFrameBufferCbv = perFrameConstantBuffer.GetConstantBufferView();
-        const GpuView* perFrameBufferCbvPtr = renderContext->Lookup(perFrameBufferCbv);
-        IG_CHECK(perFrameBufferCbvPtr != nullptr && perFrameBufferCbvPtr->IsValid());
-        perFrameBuffer.PerFrameConstantBuffer = perFrameBufferCbvPtr->Index;
+        const GpuView* perFrameBufferCbv = renderContext->Lookup(perFrameConstantBuffer.GetConstantBufferView());
+        IG_CHECK(perFrameBufferCbv != nullptr && perFrameBufferCbv->IsValid());
+        perFrameBuffer.PerFrameConstantBuffer = perFrameBufferCbv->Index;
+
+        GpuBuffer* vertexIndexStorageBuffer = renderContext->Lookup(meshStorage->GetVertexIndexStorageBuffer());
+        IG_CHECK(vertexIndexStorageBuffer != nullptr);
+        const std::optional<D3D12_INDEX_BUFFER_VIEW> ibView = vertexIndexStorageBuffer->GetIndexBufferView();
+        IG_CHECK(ibView);
+        perFrameBuffer.IndexBufferLocation = ibView->BufferLocation;
+        perFrameBuffer.IndexBufferSize = ibView->SizeInBytes;
+        perFrameBuffer.IndexBufferFormat = (U32)ibView->Format;
 
         perFrameConstantBuffer.Write(perFrameBuffer);
-
-        GpuBuffer* vertexIndexStorageBufferPtr = renderContext->Lookup(vertexIndexStorageBuffer);
-        IG_CHECK(vertexIndexStorageBufferPtr != nullptr);
 
         // 여기서 부터 시작!: Compute Shader 에서 indirect command buffer를 채우고
         // ExecuteIndirect로 간단한 렌더링 까지
@@ -324,14 +377,55 @@ namespace ig
         // 선행 작업: Indirect Command Signature 생성, Indirect Command Buffer 생성(UAV)
         // GpuBufferDesc를 통해서 UAV Counter 사용 가능하도록 만들기
         CommandQueue& asyncComputeQueue{renderContext->GetAsyncComputeQueue()};
-        CommandListPool& asyncComputeCmdListPool{renderContext->GetAsyncCopyCommandListPool()};
+        {
+            CommandListPool& asyncComputeCmdListPool{renderContext->GetAsyncComputeCommandListPool()};
+            auto computeCullingCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "ComputeCullingCmdList"_fs);
+            computeCullingCmdList->Open(computeCullingPso.get());
+            auto bindlessDescHeaps = renderContext->GetBindlessDescriptorHeaps();
+            computeCullingCmdList->SetDescriptorHeaps(bindlessDescHeaps);
+            computeCullingCmdList->SetRootSignature(*bindlessRootSignature);
 
-        Swapchain& swapchain = renderContext->GetSwapchain();
-        GpuTexture* backBufferPtr = renderContext->Lookup(swapchain.GetBackBuffer());
-        const GpuView* backBufferRtvPtr = renderContext->Lookup(swapchain.GetRenderTargetView());
+            GpuBuffer* drawStorageBuffer = renderContext->Lookup(drawCmdStorage[localFrameIdx]->GetGpuBuffer());
+            IG_CHECK(drawStorageBuffer != nullptr && drawStorageBuffer->IsValid());
+            const GpuBufferDesc& drawStorageBufferDesc = drawStorageBuffer->GetDesc();
+            IG_CHECK(drawStorageBufferDesc.IsUavCounterEnabled());
+            computeCullingCmdList->CopyBuffer(
+                *uavCounterResetBuffer, 0, GpuBufferDesc::kUavCounterSize,
+                *drawStorageBuffer, drawStorageBufferDesc.GetUavCounterOffset());
 
-        CommandQueue& mainGfxQueue{renderContext->GetMainGfxQueue()};
-        auto renderCmdList = renderContext->GetMainGfxCommandListPool().Request(localFrameIdx, "MainGfx"_fs);
+            computeCullingCmdList->AddPendingBufferBarrier(
+                *drawStorageBuffer,
+                D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
+                D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
+            computeCullingCmdList->FlushBarriers();
+
+            const GpuView* drawCmdStorageUav = renderContext->Lookup(drawCmdStorage[localFrameIdx]->GetUnorderedResourceView());
+            IG_CHECK(drawCmdStorageUav != nullptr && drawCmdStorageUav->IsValid());
+            const ComputeCullingConstants computeCullingConstants{
+                .PerFrameConstantBuffer = perFrameBuffer.PerFrameConstantBuffer,
+                .DrawCommandStorageUav = drawCmdStorageUav->Index};
+            computeCullingCmdList->SetRoot32BitConstants(0, computeCullingConstants, 0);
+
+            // todo Compute Shader 내부적으로 numthreads를 정하고, numElements%numThreads만큼의
+            // 작업은 discard 하도록 하기   
+            constexpr U32 kNumThreads = 16;
+            [[maybe_unused]] const U32 numThreadGroup = ((U32)drawCmdSpace[localFrameIdx].NumElements - 1) / kNumThreads + 1;
+            computeCullingCmdList->Dispatch(numThreadGroup, 1, 1);
+            computeCullingCmdList->Close();
+            asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
+
+            CommandList* cmdLists[]{computeCullingCmdList};
+            asyncComputeQueue.ExecuteContexts(cmdLists);
+        }
+        GpuSyncPoint computeCullingSync = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
+
+        [[maybe_unused]] Swapchain& swapchain = renderContext->GetSwapchain();
+        [[maybe_unused]] GpuTexture* backBufferPtr = renderContext->Lookup(swapchain.GetBackBuffer());
+        [[maybe_unused]] const GpuView* backBufferRtvPtr = renderContext->Lookup(swapchain.GetRenderTargetView());
+
+        [[maybe_unused]] CommandQueue& mainGfxQueue{renderContext->GetMainGfxQueue()};
+        [[maybe_unused]] auto renderCmdList = renderContext->GetMainGfxCommandListPool().Request(localFrameIdx, "MainGfx"_fs);
+
+        return computeCullingSync;
     }
-
 } // namespace ig

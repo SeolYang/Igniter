@@ -19,19 +19,20 @@ namespace ig
         CommandQueue(CommandQueue&& other) noexcept;
         ~CommandQueue();
 
-        CommandQueue& operator=(const CommandQueue&)     = delete;
+        CommandQueue& operator=(const CommandQueue&) = delete;
         CommandQueue& operator=(CommandQueue&&) noexcept = delete;
 
-        bool IsValid() const { return native; }
-        operator bool() const { return IsValid(); }
+        [[nodiscard]] bool IsValid() const noexcept { return native; }
+        [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
-        auto&      GetNative() { return *native.Get(); }
+        auto& GetNative() { return *native.Get(); }
+        const auto& GetNative() const { return *native.Get(); }
         EQueueType GetType() const { return type; }
 
-        void         ExecuteContexts(const std::span<CommandList*> cmdLists);
-        bool         Signal(GpuSyncPoint& syncPoint);
+        void ExecuteContexts(const std::span<CommandList*> cmdLists);
+        bool Signal(GpuSyncPoint& syncPoint);
         GpuSyncPoint MakeSyncPointWithSignal(GpuFence& fence);
-        void         Wait(GpuSyncPoint& syncPoint);
+        void Wait(GpuSyncPoint& syncPoint);
 
     private:
         CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);
@@ -41,6 +42,6 @@ namespace ig
 
     private:
         ComPtr<ID3D12CommandQueue> native;
-        const EQueueType           type;
+        const EQueueType type;
     };
 } // namespace ig

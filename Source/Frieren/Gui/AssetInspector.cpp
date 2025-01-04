@@ -298,8 +298,8 @@ namespace fe
         IG_CHECK(previewTextureSrv);
         ig::GpuView* previewTextureSrvPtr = renderContext.Lookup(previewTextureSrv);
         IG_CHECK(previewTextureSrvPtr != nullptr);
-        IG_CHECK(previewTextureSrvPtr->HasValidGPUHandle());
-        ImGui::Image(previewTextureSrvPtr->GPUHandle.ptr, ImVec2{256.f, 256.f});
+        IG_CHECK(previewTextureSrvPtr->HasValidGpuHandle());
+        ImGui::Image(previewTextureSrvPtr->GpuHandle.ptr, ImVec2{256.f, 256.f});
     }
 
     void AssetInspector::RenderMaterialEdit(const ig::AssetInfo& assetInfo)

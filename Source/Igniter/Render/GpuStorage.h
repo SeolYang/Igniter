@@ -1,8 +1,9 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/String.h"
-#include "Igniter/Render/Common.h"
+#include "Igniter/D3D12/GpuBufferDesc.h"
 #include "Igniter/D3D12/GpuFence.h"
+#include "Igniter/Render/Common.h"
 
 namespace ig
 {
@@ -22,15 +23,15 @@ namespace ig
         {
         public:
             [[nodiscard]] bool IsValid() const noexcept { return VirtualAllocation.AllocHandle != 0 && AllocSize > 0 && BlockIndex != InvalidIndex; }
-            static Allocation  Invalid() { return Allocation{}; }
+            static Allocation Invalid() { return Allocation{}; }
 
         public:
-            Index                      BlockIndex = InvalidIndex;
+            Index BlockIndex = InvalidIndex;
             D3D12MA::VirtualAllocation VirtualAllocation{};
 
-            Size Offset      = 0;
+            Size Offset = 0;
             Size OffsetIndex = 0;
-            Size AllocSize   = 0;
+            Size AllocSize = 0;
             Size NumElements = 0;
         };
 
@@ -38,33 +39,35 @@ namespace ig
         struct Block
         {
             D3D12MA::VirtualBlock* VirtualBlock = nullptr;
-            Size                   Offset       = 0;
+            Size Offset = 0;
         };
 
     public:
-        GpuStorage(RenderContext& renderContext, const String debugName, const U32 elementSize, const U32 initialNumElements, const bool bIsShaderReadWritable = false);
-        GpuStorage(const GpuStorage&)     = delete;
+        GpuStorage(RenderContext& renderContext, const String debugName, const U32 elementSize, const U32 initialNumElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false, const bool bShouldEnableLinearAllocation = false);
+        GpuStorage(const GpuStorage&) = delete;
         GpuStorage(GpuStorage&&) noexcept = delete;
         ~GpuStorage();
 
-        GpuStorage& operator=(const GpuStorage&)     = delete;
+        GpuStorage& operator=(const GpuStorage&) = delete;
         GpuStorage& operator=(GpuStorage&&) noexcept = delete;
 
         Allocation Allocate(const Size numElements);
-        void       Deallocate(const Allocation& allocation);
+        void Deallocate(const Allocation& allocation);
 
         void ForceReset();
 
-        [[nodiscard]] Size      GetAllocatedSize() const noexcept { return allocatedSize; }
-        [[nodiscard]] Size      GetBufferSize() const noexcept { return bufferSize; }
-        [[nodiscard]] Size      GetNumAllocatedElements() const noexcept { return allocatedSize / elementSize; }
+        [[nodiscard]] Size GetAllocatedSize() const noexcept { return allocatedSize; }
+        [[nodiscard]] Size GetBufferSize() const noexcept { return bufferSize; }
+        [[nodiscard]] Size GetNumAllocatedElements() const noexcept { return allocatedSize / elementSize; }
         [[nodiscard]] GpuFence& GetStorageFence() noexcept { return fence; }
 
         [[nodiscard]] RenderHandle<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
-        [[nodiscard]] RenderHandle<GpuView>   GetShaderResourceView() const noexcept { return srv; }
-        [[nodiscard]] RenderHandle<GpuView>   GetUnorderedResourceView() const noexcept { return uav; }
+        [[nodiscard]] RenderHandle<GpuView> GetShaderResourceView() const noexcept { return srv; }
+        [[nodiscard]] RenderHandle<GpuView> GetUnorderedResourceView() const noexcept { return uav; }
 
     private:
+        [[nodiscard]] GpuBufferDesc CreateBufferDesc(const U32 numElements) const noexcept;
+
         bool AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation);
         bool Grow(const Size newAllocSize);
 
@@ -74,21 +77,23 @@ namespace ig
         // 내부적으로 fragmentation이 발생 할 가능성이 있음.
         // ex. 버퍼의 크기를 키운다고 해도, 할당 알고리즘 상 이전 버퍼 범위와 이후 추가된 버퍼 범위가
         // 물리적으로 연속적일지 언정, 논리적으로 불연속적인 별도의 공간으로 취급되기 때문이다.
-        constexpr static Size GrowthMultiplier = 2;
+        constexpr static Size kGrowthMultiplier = 2;
 
         RenderContext& renderContext;
 
         String debugName;
 
-        U32  elementSize           = 1;
-        Size allocatedSize         = 0;
-        Size bufferSize            = 0;
+        U32 elementSize = 1;
+        Size allocatedSize = 0;
+        Size bufferSize = 0;
         bool bIsShaderReadWritable = false;
+        bool bIsUavCounterEnabled = false;
+        bool bIsLinearAllocEnabled = false;
 
         GpuFence fence;
 
         RenderHandle<GpuBuffer> gpuBuffer;
-        eastl::vector<Block>    blocks;
+        eastl::vector<Block> blocks;
 
         RenderHandle<GpuView> srv;
         RenderHandle<GpuView> uav;

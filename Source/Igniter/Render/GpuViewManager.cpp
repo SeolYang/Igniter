@@ -150,31 +150,25 @@ namespace ig
     {
         IG_CHECK(cbvSrvUavHeap != nullptr && samplerHeap != nullptr && rtvHeap != nullptr && dsvHeap != nullptr);
 
-        /* #sy_todo DescriptorHeap.h:30 해결 후 바로 Allocate 반환 하는 방식으로 변경 할 것 */
-        std::optional<GpuView> allocatedView{ };
         switch (type)
         {
         case EGpuViewType::ConstantBufferView:
-            allocatedView = cbvSrvUavHeap->Allocate(type);
-            break;
         case EGpuViewType::ShaderResourceView:
-            allocatedView = cbvSrvUavHeap->Allocate(type);
-            break;
         case EGpuViewType::UnorderedAccessView:
-            allocatedView = cbvSrvUavHeap->Allocate(type);
-            break;
+            return cbvSrvUavHeap->Allocate(type);
+            
         case EGpuViewType::Sampler:
-            allocatedView = samplerHeap->Allocate(type);
-            break;
+            return samplerHeap->Allocate(type);
+            
         case EGpuViewType::RenderTargetView:
-            allocatedView = rtvHeap->Allocate(type);
-            break;
+            return rtvHeap->Allocate(type);
+            
         case EGpuViewType::DepthStencilView:
-            allocatedView = dsvHeap->Allocate(type);
-            break;
+            return dsvHeap->Allocate(type);
+            
+        default:
+            return GpuView{};
         }
-
-        return allocatedView ? *allocatedView : GpuView{ };
     }
 
     void GpuViewManager::Deallocate(const GpuView& gpuView)

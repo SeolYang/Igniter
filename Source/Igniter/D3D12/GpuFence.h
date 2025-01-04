@@ -12,9 +12,9 @@ namespace ig
     public:
         GpuFence(const GpuFence& other) = delete;
 
-        GpuFence(GpuFence&& other) noexcept :
-            counter(other.counter.exchange(1)),
-            fence(std::move(other.fence)) { }
+        GpuFence(GpuFence&& other) noexcept
+            : counter(other.counter.exchange(1))
+            , fence(std::move(other.fence)) {}
 
         ~GpuFence() = default;
 
@@ -23,11 +23,12 @@ namespace ig
         GpuFence& operator=(GpuFence&& other) noexcept
         {
             this->counter = other.counter.exchange(1);
-            this->fence   = std::move(other.fence);
+            this->fence = std::move(other.fence);
             return *this;
         }
 
-        ID3D12Fence&       GetNative() { return *fence.Get(); }
+        [[nodiscard]] ID3D12Fence& GetNative() { return *fence.Get(); }
+        [[nodiscard]] const ID3D12Fence& GetNative() const { return *fence.Get(); }
         [[nodiscard]] bool IsValid() const noexcept { return fence; }
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
@@ -39,11 +40,11 @@ namespace ig
         }
 
     private:
-        GpuFence(ComPtr<ID3D12Fence> fence) :
-            fence(std::move(fence)) { }
+        GpuFence(ComPtr<ID3D12Fence> fence)
+            : fence(std::move(fence)) {}
 
     private:
         std::atomic_uint64_t counter{1};
-        ComPtr<ID3D12Fence>  fence;
+        ComPtr<ID3D12Fence> fence;
     };
 }

@@ -147,15 +147,16 @@ namespace ig
             }
 
             /*********** Pre-Render ***********/
+            GpuSyncPoint replicationSyncPoint;
             {
                 renderContext->PreRender(localFrameIdx);
                 meshStorage->PreRender(localFrameIdx);
-                sceneProxy->Replicate(localFrameIdx, *world);
+                replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
                 renderer->PreRender(localFrameIdx);
             }
 
             {
-                GpuSyncPoint mainRenderPipelineSyncPoint = renderer->Render(localFrameIdx);
+                const GpuSyncPoint mainRenderPipelineSyncPoint = renderer->Render(localFrameIdx, *world, replicationSyncPoint);
                 imguiRenderer->SetMainPipelineSyncPoint(mainRenderPipelineSyncPoint);
                 localFrameSyncs[localFrameIdx] = imguiRenderer->Render(localFrameIdx);
             }
@@ -252,5 +253,4 @@ namespace ig
         IG_CHECK(instance != nullptr);
         return *instance->renderer;
     }
-
 } // namespace ig

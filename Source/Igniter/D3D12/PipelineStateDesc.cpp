@@ -70,4 +70,10 @@ namespace ig
         IG_CHECK(nativeBlob.GetBufferSize() > 0);
         this->CS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
     }
+
+    void ComputePipelineStateDesc::SetRootSignature(RootSignature& rootSignature)
+    {
+        IG_CHECK(rootSignature);
+        this->pRootSignature = &rootSignature.GetNative();
+    }
 } // namespace ig

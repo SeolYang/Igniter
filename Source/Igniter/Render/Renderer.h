@@ -1,18 +1,22 @@
 #pragma once
 #include "Igniter/D3D12/GpuSyncPoint.h"
 #include "Igniter/Render/Common.h"
+#include "Igniter/Render/GpuStorage.h"
 
 namespace ig
 {
-    class Window;
-    class RenderContext;
-    class SceneProxy;
     class ShaderBlob;
     class RootSignature;
     class PipelineState;
     class GpuTexture;
     class GpuView;
+    class Window;
+    class RenderContext;
+    class MeshStorage;
+    class SceneProxy;
     class TempConstantBufferAllocator;
+    class World;
+
     class Renderer final
     {
     public:
@@ -43,6 +47,16 @@ namespace ig
         Ptr<PipelineState> pso;
         eastl::array<RenderHandle<GpuTexture>, NumFramesInFlight> depthStencils;
         eastl::array<RenderHandle<GpuView>, NumFramesInFlight> dsvs;
+
+        Ptr<GpuBuffer> uavCounterResetBuffer;
+        
+        Ptr<ShaderBlob> computeCullingShader;
+        Ptr<PipelineState> computeCullingPso;
+        constexpr static U32 kInitNumDrawCommands = 16;
+        InFlightFramesResource<Ptr<GpuStorage>> drawCmdStorage;
+        InFlightFramesResource<GpuStorage::Allocation> drawCmdSpace;
+
+        Ptr<CommandSignature> commandSignature;
 
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
     };

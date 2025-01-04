@@ -145,7 +145,7 @@ namespace ig
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
         const float rgba[4] = {r, g, b, a};
-        cmdList->ClearRenderTargetView(rtv.CPUHandle, rgba, 0, nullptr);
+        cmdList->ClearRenderTargetView(rtv.CpuHandle, rgba, 0, nullptr);
     }
 
     void CommandList::ClearDepthStencil(const GpuView& dsv, float depth /*= 1.f*/, uint8_t stencil /*= 0*/)
@@ -154,7 +154,7 @@ namespace ig
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
-        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
+        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CpuHandle;
         cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil, 0, nullptr);
     }
 
@@ -164,7 +164,7 @@ namespace ig
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
-        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
+        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CpuHandle;
         cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
     }
 
@@ -174,7 +174,7 @@ namespace ig
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(dsv && (dsv.Type == EGpuViewType::DepthStencilView));
 
-        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CPUHandle;
+        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv.CpuHandle;
         cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, nullptr);
     }
 
@@ -281,8 +281,8 @@ namespace ig
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
         IG_CHECK(!dsv || (dsv->get() && (dsv->get().Type == EGpuViewType::DepthStencilView)));
 
-        const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = rtv.CPUHandle;
-        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv ? dsv->get().CPUHandle : D3D12_CPU_DESCRIPTOR_HANDLE{};
+        const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = rtv.CpuHandle;
+        const D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = dsv ? dsv->get().CpuHandle : D3D12_CPU_DESCRIPTOR_HANDLE{};
 
         cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, dsv ? &dsvCpuHandle : nullptr);
     }
@@ -325,6 +325,12 @@ namespace ig
     {
         IG_CHECK(IsValid());
         cmdList->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
+    }
+
+    void CommandList::Dispatch(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ)
+    {
+        IG_CHECK(IsValid());
+        cmdList->Dispatch(threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ);
     }
 
     void CommandList::SetRoot32BitConstants(const uint32_t registerSlot,

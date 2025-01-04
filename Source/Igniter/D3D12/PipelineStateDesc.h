@@ -63,7 +63,8 @@ namespace ig
         }
 
         void SetComputeShader(ShaderBlob& computeShader);
-
+        void SetRootSignature(RootSignature& rootSignature);
+        
     public:
         String Name;
     };

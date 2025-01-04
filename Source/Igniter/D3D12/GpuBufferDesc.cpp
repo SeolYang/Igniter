@@ -7,90 +7,95 @@ namespace ig
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible      = true;
-        bufferType            = EGpuBufferType::ConstantBuffer;
+        bIsCpuAccessible = true;
+        bufferType = EGpuBufferType::ConstantBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
-        numElements         = 1;
+        numElements = 1;
 
-        Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
-        Alignment        = 0;
-        Width            = AdjustSizeForConstantBuffer(sizeOfBufferInBytes);
-        Height           = 1;
+        Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        Alignment = 0;
+        Width = AdjustSizeForConstantBuffer(sizeOfBufferInBytes);
+        Height = 1;
         DepthOrArraySize = 1;
-        MipLevels        = 1;
-        SampleDesc       = {.Count = 1, .Quality = 0};
-        Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        Flags            = D3D12_RESOURCE_FLAG_NONE;
-        Format           = DXGI_FORMAT_UNKNOWN;
+        MipLevels = 1;
+        SampleDesc = {.Count = 1, .Quality = 0};
+        Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        Flags = D3D12_RESOURCE_FLAG_NONE;
+        Format = DXGI_FORMAT_UNKNOWN;
     }
 
-    void GpuBufferDesc::AsStructuredBuffer(
-        const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bEnableShaderReadWrtie /*= false*/)
+    void GpuBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bShouldEnableShaderReadWrite /*= false*/, const bool bShouldEnableUavCounter /*= false*/)
     {
         IG_VERIFY(sizeOfElementInBytes > 0);
         IG_VERIFY(numOfElements > 0);
-        bIsShaderReadWritable = bEnableShaderReadWrtie;
-        bIsCpuAccessible      = false;
-        bufferType            = EGpuBufferType::StructuredBuffer;
+        bIsShaderReadWritable = bShouldEnableShaderReadWrite;
+        bIsUavCounterEnabled = bShouldEnableUavCounter;
+        bIsCpuAccessible = false;
+        bufferType = EGpuBufferType::StructuredBuffer;
 
         structureByteStride = sizeOfElementInBytes;
-        numElements         = numOfElements;
+        numElements = numOfElements;
 
-        Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
-        Alignment        = 0;
-        Width            = sizeOfElementInBytes * numOfElements;
-        Height           = 1;
+        Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        Alignment = 0;
+        Width = (Size)sizeOfElementInBytes * numOfElements;
+        if (bShouldEnableUavCounter)
+        {
+            Width = kUavCounterSize + (((U32)Width + (D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1));
+        }
+
+        Height = 1;
         DepthOrArraySize = 1;
-        MipLevels        = 1;
-        SampleDesc       = {.Count = 1, .Quality = 0};
-        Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        Flags            = bIsShaderReadWritable ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
-        Format           = DXGI_FORMAT_UNKNOWN;
+        MipLevels = 1;
+        SampleDesc = {.Count = 1, .Quality = 0};
+        Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        Flags = bIsShaderReadWritable ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+        Format = DXGI_FORMAT_UNKNOWN;
     }
 
     void GpuBufferDesc::AsUploadBuffer(const uint32_t sizeOfBufferInBytes)
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible      = true;
-        bufferType            = EGpuBufferType::UploadBuffer;
+        bIsCpuAccessible = true;
+        bufferType = EGpuBufferType::UploadBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
-        numElements         = 1;
+        numElements = 1;
 
-        Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
-        Alignment        = 0;
-        Width            = sizeOfBufferInBytes;
-        Height           = 1;
+        Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        Alignment = 0;
+        Width = sizeOfBufferInBytes;
+        Height = 1;
         DepthOrArraySize = 1;
-        MipLevels        = 1;
-        SampleDesc       = {.Count = 1, .Quality = 0};
-        Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        Flags            = D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
-        Format           = DXGI_FORMAT_UNKNOWN;
+        MipLevels = 1;
+        SampleDesc = {.Count = 1, .Quality = 0};
+        Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        Flags = D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
+        Format = DXGI_FORMAT_UNKNOWN;
     }
 
     void GpuBufferDesc::AsReadbackBuffer(const uint32_t sizeOfBufferInBytes)
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible      = true;
-        bufferType            = EGpuBufferType::ReadbackBuffer;
+        bIsCpuAccessible = true;
+        bufferType = EGpuBufferType::ReadbackBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
-        numElements         = 1;
+        numElements = 1;
 
-        Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
-        Alignment        = 0;
-        Width            = sizeOfBufferInBytes;
-        Height           = 1;
+        Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        Alignment = 0;
+        Width = sizeOfBufferInBytes;
+        Height = 1;
         DepthOrArraySize = 1;
-        MipLevels        = 1;
-        SampleDesc       = {.Count = 1, .Quality = 0};
-        Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        Flags            = D3D12_RESOURCE_FLAG_NONE;
-        Format           = DXGI_FORMAT_UNKNOWN;
+        MipLevels = 1;
+        SampleDesc = {.Count = 1, .Quality = 0};
+        Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        Flags = D3D12_RESOURCE_FLAG_NONE;
+        Format = DXGI_FORMAT_UNKNOWN;
     }
 
     void GpuBufferDesc::AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices)
@@ -98,21 +103,21 @@ namespace ig
         IG_VERIFY(sizeOfVertexInBytes > 0);
         IG_VERIFY(numVertices > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible      = false;
-        bufferType            = EGpuBufferType::VertexBuffer;
+        bIsCpuAccessible = false;
+        bufferType = EGpuBufferType::VertexBuffer;
 
         structureByteStride = sizeOfVertexInBytes;
-        numElements         = numVertices;
+        numElements = numVertices;
 
-        Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
-        Alignment        = 0;
-        Width            = static_cast<Size>(sizeOfVertexInBytes) * numVertices;
-        Height           = 1;
+        Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        Alignment = 0;
+        Width = static_cast<Size>(sizeOfVertexInBytes) * numVertices;
+        Height = 1;
         DepthOrArraySize = 1;
-        MipLevels        = 1;
-        SampleDesc       = {.Count = 1, .Quality = 0};
-        Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        Flags            = D3D12_RESOURCE_FLAG_NONE;
+        MipLevels = 1;
+        SampleDesc = {.Count = 1, .Quality = 0};
+        Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        Flags = D3D12_RESOURCE_FLAG_NONE;
     }
 
     void GpuBufferDesc::AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices)
@@ -120,21 +125,21 @@ namespace ig
         IG_VERIFY(sizeOfIndexInBytes > 0);
         IG_VERIFY(numIndices > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible      = false;
-        bufferType            = EGpuBufferType::IndexBuffer;
+        bIsCpuAccessible = false;
+        bufferType = EGpuBufferType::IndexBuffer;
 
         structureByteStride = sizeOfIndexInBytes;
-        numElements         = numIndices;
+        numElements = numIndices;
 
-        Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
-        Alignment        = 0;
-        Width            = static_cast<Size>(sizeOfIndexInBytes) * numIndices;
-        Height           = 1;
+        Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        Alignment = 0;
+        Width = static_cast<Size>(sizeOfIndexInBytes) * numIndices;
+        Height = 1;
         DepthOrArraySize = 1;
-        MipLevels        = 1;
-        SampleDesc       = {.Count = 1, .Quality = 0};
-        Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        Flags            = D3D12_RESOURCE_FLAG_NONE;
+        MipLevels = 1;
+        SampleDesc = {.Count = 1, .Quality = 0};
+        Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        Flags = D3D12_RESOURCE_FLAG_NONE;
     }
 
     D3D12MA::ALLOCATION_DESC GpuBufferDesc::GetAllocationDesc() const
@@ -163,7 +168,7 @@ namespace ig
     {
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
-        std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{ };
+        std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{};
         if (IsConstantBufferViewCompatible(bufferType))
         {
             desc = D3D12_CONSTANT_BUFFER_VIEW_DESC{.BufferLocation = bufferLocation, .SizeInBytes = static_cast<uint32_t>(Width)};
@@ -176,7 +181,7 @@ namespace ig
     {
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
-        std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> desc{ };
+        std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> desc{};
         if (IsShaderResourceViewCompatible(bufferType))
         {
             desc = D3D12_SHADER_RESOURCE_VIEW_DESC{
@@ -194,13 +199,20 @@ namespace ig
     {
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
 
-        std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> desc{ };
+        std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> desc{};
         if (IsUnorderedAccessViewCompatible(bufferType) && bIsShaderReadWritable)
         {
             desc = D3D12_UNORDERED_ACCESS_VIEW_DESC{
                 .Format = DXGI_FORMAT_UNKNOWN,
                 .ViewDimension = D3D12_UAV_DIMENSION_BUFFER,
-                .Buffer = {.FirstElement = 0, .NumElements = numElements, .StructureByteStride = structureByteStride, .Flags = D3D12_BUFFER_UAV_FLAG_NONE}
+                .Buffer =
+                {
+                    .FirstElement = 0,
+                    .NumElements = numElements,
+                    .StructureByteStride = structureByteStride,
+                    .CounterOffsetInBytes = GetUavCounterOffset(),
+                    .Flags = D3D12_BUFFER_UAV_FLAG_NONE
+                }
             };
         }
 
@@ -210,16 +222,16 @@ namespace ig
     void GpuBufferDesc::From(const D3D12_RESOURCE_DESC& desc)
     {
         IG_VERIFY(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
-        Dimension                = desc.Dimension;
-        Alignment                = desc.Alignment;
-        Width                    = desc.Width;
-        Height                   = desc.Height;
-        DepthOrArraySize         = desc.DepthOrArraySize;
-        MipLevels                = desc.MipLevels;
-        Format                   = desc.Format;
-        SampleDesc               = desc.SampleDesc;
-        Layout                   = desc.Layout;
-        Flags                    = desc.Flags;
-        SamplerFeedbackMipRegion = { };
+        Dimension = desc.Dimension;
+        Alignment = desc.Alignment;
+        Width = desc.Width;
+        Height = desc.Height;
+        DepthOrArraySize = desc.DepthOrArraySize;
+        MipLevels = desc.MipLevels;
+        Format = desc.Format;
+        SampleDesc = desc.SampleDesc;
+        Layout = desc.Layout;
+        Flags = desc.Flags;
+        SamplerFeedbackMipRegion = {};
     }
 } // namespace ig

@@ -90,6 +90,8 @@
     <ClInclude Include="Core\Window.h" />
     <ClInclude Include="D3D12\CommandList.h" />
     <ClInclude Include="D3D12\CommandQueue.h" />
+    <ClInclude Include="D3D12\CommandSignature.h" />
+    <ClInclude Include="D3D12\CommandSignatureDesc.h" />
     <ClInclude Include="D3D12\Common.h" />
     <ClInclude Include="D3D12\DescriptorHeap.h" />
     <ClInclude Include="D3D12\GpuFence.h" />
@@ -133,6 +135,12 @@
     <ClInclude Include="Render\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\..\Assets\Shaders\ComputeCulling.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
@@ -200,13 +208,89 @@
     <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
-    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Render\CommandListPool.cpp" />
     <ClCompile Include="Render\GpuStorage.cpp" />
     <ClCompile Include="Render\GpuUploader.cpp" />
     <ClCompile Include="Render\GpuViewManager.cpp" />
     <ClCompile Include="Render\MeshStorage.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
+    <ClCompile Include="Render\Renderer.cpp">
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>true</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>false</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\</ModuleDependenciesFile>
+      <ModuleOutputFile>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>D:\Repository\Igniter\Binaries\x64_Debug\Igniter.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\Igniter.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\Igniter.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <XMLDocumentationFileName>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Debug\</XMLDocumentationFileName>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <BuildStlModules>false</BuildStlModules>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>DO_CHECK;_DEBUG;_CONSOLE;_UNICODE;UNICODE;;NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\Repository\Igniter\Source;D:\Repository\Igniter\Thirdparty\AgilitySDK\include;D:\Repository\Igniter\Thirdparty\SimpleMath;D:\Repository\Igniter\Thirdparty\D3D12MemAlloc;D:\Repository\Igniter\Thirdparty\DirectXTex\include;D:\Repository\Igniter\Thirdparty\DirectXCompiler\include;D:\Repository\Igniter\Thirdparty\WinPixEventRuntime\include;D:\Repository\Igniter\Thirdparty\fmod\include;;D:\Repository\Igniter\Thirdparty\VcpkgInstalled\x64-windows\include</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <LibCompiled>true</LibCompiled>
+    </ClCompile>
     <ClCompile Include="Render\RenderPass.cpp" />
     <ClCompile Include="Render\SceneProxy.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />
@@ -221,6 +305,20 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\..\Thirdparty\EASTL\EASTL.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\..\Assets\Shaders\BasicPixelShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\BasicVertexShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

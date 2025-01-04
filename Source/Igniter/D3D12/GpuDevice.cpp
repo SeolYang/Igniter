@@ -1,5 +1,4 @@
 #include "Igniter/Igniter.h"
-#include "Igniter/Core/Engine.h"
 #include "Igniter/Core/Log.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/CommandQueue.h"
@@ -14,37 +13,41 @@
 #include "Igniter/D3D12/GPUTextureDesc.h"
 #include "Igniter/D3D12/GPUTexture.h"
 #include "Igniter/D3D12/GpuFence.h"
+#include "Igniter/D3D12/CommandSignature.h"
+#include "Igniter/D3D12/CommandSignatureDesc.h"
 
-IG_DEFINE_LOG_CATEGORY(GpuDevice);
+IG_DEFINE_LOG_CATEGORY(GpuDeviceLog);
 
 namespace ig
 {
     GpuDevice::GpuDevice()
     {
-        const bool bIsAcquiredAdapter = AcquireAdapterFromFactory();
-        if (bIsAcquiredAdapter)
+        if (!AcquireAdapterFromFactory())
         {
-            LogAdapterInformations();
-
-            if (CreateDevice())
-            {
-                SetObjectName(device.Get(), "Device");
-                SetSeverityLevel();
-
-                CheckSupportedFeatures();
-
-                if (CreateMemoryAllcator())
-                {
-                    CacheDescriptorHandleIncrementSize();
-                }
-            }
+            IG_LOG(GpuDeviceLog, Error, "Failed to acquire adapter from factory.");
+            return;
         }
+        LogAdapterInformation();
+
+        if (!CreateDevice())
+        {
+            IG_LOG(GpuDeviceLog, Error, "Failed to create D3D12 device.");
+            return;
+        }
+        SetObjectName(device.Get(), "Device");
+        SetSeverityLevel();
+        CheckSupportedFeatures();
+
+        if (!CreateMemoryAllocator())
+        {
+            IG_LOG(GpuDeviceLog, Error, "Failed to create D3D12 memory allocator.");
+        }
+        CacheDescriptorHandleIncrementSize();
     }
 
     GpuDevice::~GpuDevice()
     {
         allocator->Release();
-
         device.Reset();
         adapter.Reset();
 
@@ -52,7 +55,8 @@ namespace ig
         ComPtr<IDXGIDebug1> dxgiDebug;
         if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
         {
-            dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+            [[maybe_unused]] const HRESULT result =
+                dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, (DXGI_DEBUG_RLO_FLAGS)(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
         }
 #endif
     }
@@ -65,7 +69,7 @@ namespace ig
         case EDescriptorHeapType::CBV_SRV_UAV:
             return cbvSrvUavDescriptorHandleIncrementSize;
         case EDescriptorHeapType::Sampler:
-            return samplerDescritorHandleIncrementSize;
+            return samplerDescriptorHandleIncrementSize;
         case EDescriptorHeapType::DSV:
             return dsvDescriptorHandleIncrementSize;
         case EDescriptorHeapType::RTV:
@@ -80,52 +84,52 @@ namespace ig
 #if defined(DEBUG) || defined(_DEBUG)
             factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
             ComPtr<ID3D12Debug5> debugController;
-            const bool           bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
+            const bool bDebugControllerAcquired = SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
             if (!bDebugControllerAcquired)
             {
-                IG_LOG(GpuDevice, Warning, "Failed to get debug controller.");
+                IG_LOG(GpuDeviceLog, Warning, "Failed to get debug controller.");
             }
             if (bDebugControllerAcquired)
             {
                 debugController->EnableDebugLayer();
-                IG_LOG(GpuDevice, Info, "D3D12 Debug Layer Enabled.");
+                IG_LOG(GpuDeviceLog, Info, "D3D12 Debug Layer Enabled.");
                 debugController->SetEnableGPUBasedValidation(true);
-                IG_LOG(GpuDevice, Info, "D3D12 GPU Based Validation Enabled.");
+                IG_LOG(GpuDeviceLog, Info, "D3D12 GPU Based Validation Enabled.");
             }
 #endif
         }
 
         ComPtr<IDXGIFactory6> factory;
-        const bool            bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
+        const bool bFactoryCreated = SUCCEEDED(CreateDXGIFactory2(factoryCreationFlags, IID_PPV_ARGS(&factory)));
         if (!bFactoryCreated)
         {
-            IG_LOG(GpuDevice, Fatal, "Failed to create factory.");
+            IG_LOG(GpuDeviceLog, Fatal, "Failed to create factory.");
             return false;
         }
 
         const bool bIsAdapterAcquired =
-                SUCCEEDED(factory->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)));
+            SUCCEEDED(factory->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)));
         if (!bIsAdapterAcquired)
         {
-            IG_LOG(GpuDevice, Fatal, "Failed to acquire adapter from factory.");
+            IG_LOG(GpuDeviceLog, Fatal, "Failed to acquire adapter from factory.");
             return false;
         }
 
         return true;
     }
 
-    void GpuDevice::LogAdapterInformations()
+    void GpuDevice::LogAdapterInformation() const
     {
         IG_CHECK(adapter);
         DXGI_ADAPTER_DESC adapterDesc;
         adapter->GetDesc(&adapterDesc);
-        IG_LOG(GpuDevice, Info, "----------- The GPU Infos -----------");
-        IG_LOG(GpuDevice, Info, "{}", Narrower(adapterDesc.Description));
-        IG_LOG(GpuDevice, Info, "Vendor ID: {}", adapterDesc.VendorId);
-        IG_LOG(GpuDevice, Info, "Dedicated Video Memory: {}", adapterDesc.DedicatedVideoMemory);
-        IG_LOG(GpuDevice, Info, "Dedicated System Memory: {}", adapterDesc.DedicatedSystemMemory);
-        IG_LOG(GpuDevice, Info, "Shared System Memory: {}", adapterDesc.SharedSystemMemory);
-        IG_LOG(GpuDevice, Info, "-------------------------------------");
+        IG_LOG(GpuDeviceLog, Info, "----------- The GPU Infos -----------");
+        IG_LOG(GpuDeviceLog, Info, "{}", Narrower(adapterDesc.Description));
+        IG_LOG(GpuDeviceLog, Info, "Vendor ID: {}", adapterDesc.VendorId);
+        IG_LOG(GpuDeviceLog, Info, "Dedicated Video Memory: {}", adapterDesc.DedicatedVideoMemory);
+        IG_LOG(GpuDeviceLog, Info, "Dedicated System Memory: {}", adapterDesc.DedicatedSystemMemory);
+        IG_LOG(GpuDeviceLog, Info, "Shared System Memory: {}", adapterDesc.SharedSystemMemory);
+        IG_LOG(GpuDeviceLog, Info, "-------------------------------------");
     }
 
     bool GpuDevice::CreateDevice()
@@ -134,7 +138,7 @@ namespace ig
         constexpr D3D_FEATURE_LEVEL MinimumFeatureLevel = D3D_FEATURE_LEVEL_12_2;
         if (!SUCCEEDED(D3D12CreateDevice(adapter.Get(), MinimumFeatureLevel, IID_PPV_ARGS(&device))))
         {
-            IG_LOG(GpuDevice, Fatal, "Failed to create the device from the adapter.");
+            IG_LOG(GpuDeviceLog, Fatal, "Failed to create the device from the adapter.");
             return false;
         }
 
@@ -155,7 +159,7 @@ namespace ig
         }
         else
         {
-            IG_LOG(GpuDevice, Warning, "Failed to query a info queue from the device.");
+            IG_LOG(GpuDeviceLog, Warning, "Failed to query a info queue from the device.");
         }
 #endif
     }
@@ -180,9 +184,11 @@ namespace ig
         case D3D12_RAYTRACING_TIER_1_1:
             bRaytracing11Supported = true;
             break;
+        default:
+            break;
         }
 
-        bRaytracing10Supported  = bRaytracing11Supported ? true : bRaytracing10Supported;
+        bRaytracing10Supported = bRaytracing11Supported ? true : bRaytracing10Supported;
         bShaderModel66Supported = features.HighestShaderModel() >= D3D_SHADER_MODEL_6_6;
 
         /**
@@ -213,20 +219,20 @@ namespace ig
     void GpuDevice::CacheDescriptorHandleIncrementSize()
     {
         cbvSrvUavDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-        samplerDescritorHandleIncrementSize    = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-        dsvDescriptorHandleIncrementSize       = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-        rtvDescriptorHandleIncrementSize       = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        samplerDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+        dsvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+        rtvDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
 
-    bool GpuDevice::CreateMemoryAllcator()
+    bool GpuDevice::CreateMemoryAllocator()
     {
         IG_CHECK(device);
         D3D12MA::ALLOCATOR_DESC desc{};
         desc.pAdapter = adapter.Get();
-        desc.pDevice  = device.Get();
+        desc.pDevice = device.Get();
         if (!SUCCEEDED(D3D12MA::CreateAllocator(&desc, &allocator)))
         {
-            IG_LOG(GpuDevice, Fatal, "Failed to create D3D12MA::Allocator.");
+            IG_LOG(GpuDeviceLog, Fatal, "Failed to create D3D12MA::Allocator.");
             return false;
         }
 
@@ -246,7 +252,7 @@ namespace ig
         ComPtr<ID3D12CommandQueue> newCmdQueue;
         if (const HRESULT result = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&newCmdQueue)); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create command queue. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create command queue. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -265,15 +271,15 @@ namespace ig
         ComPtr<ID3D12CommandAllocator> newCmdAllocator;
         if (const HRESULT result = device->CreateCommandAllocator(cmdListType, IID_PPV_ARGS(&newCmdAllocator)); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create command allocator. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create command allocator. HRESULT: {:#X}", result);
             return {};
         }
 
         ComPtr<ID3D12GraphicsCommandList7> newCmdList;
-        const D3D12_COMMAND_LIST_FLAGS     flags = D3D12_COMMAND_LIST_FLAG_NONE;
+        const D3D12_COMMAND_LIST_FLAGS flags = D3D12_COMMAND_LIST_FLAG_NONE;
         if (const HRESULT result = device->CreateCommandList1(0, cmdListType, flags, IID_PPV_ARGS(&newCmdList)); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create command list. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create command list. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -286,36 +292,38 @@ namespace ig
     Option<RootSignature> GpuDevice::CreateBindlessRootSignature()
     {
         IG_CHECK(device);
-        constexpr uint8_t          NumReservedConstants = 16; // 16 DWORDS / 64 DWORDS
+        constexpr uint8_t NumReservedConstants = 16; // 16 DWORDS / 64 DWORDS
         const D3D12_ROOT_PARAMETER rootParam{
-                .ParameterType    = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
-                .Constants        = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},
-                .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL};
+            .ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+            .Constants = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},
+            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL
+        };
 
         const D3D12_ROOT_SIGNATURE_DESC desc{
-                .NumParameters     = 1,
-                .pParameters       = &rootParam,
-                .NumStaticSamplers = 0,
-                .pStaticSamplers   = nullptr,
-                .Flags             = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED |
-                        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT};
+            .NumParameters = 1,
+            .pParameters = &rootParam,
+            .NumStaticSamplers = 0,
+            .pStaticSamplers = nullptr,
+            .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED |
+            D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+        };
 
         ComPtr<ID3DBlob> errorBlob;
         ComPtr<ID3DBlob> rootSignatureBlob;
         if (const HRESULT result =
-                    D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
+                D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
             !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to serialize root signature. HRESULT: {:#X}, Message: {}", result, errorBlob->GetBufferPointer());
+            IG_LOG(GpuDeviceLog, Error, "Failed to serialize root signature. HRESULT: {:#X}, Message: {}", result, errorBlob->GetBufferPointer());
             return {};
         }
 
         ComPtr<ID3D12RootSignature> newRootSignature;
         if (const HRESULT result = device->CreateRootSignature(
-                    0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
+                0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&newRootSignature));
             !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create root signature. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create root signature. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -331,7 +339,7 @@ namespace ig
 
         if (const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState)); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create graphics pipeline state. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create graphics pipeline state. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -347,7 +355,7 @@ namespace ig
         ComPtr<ID3D12PipelineState> newPipelineState{};
         if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState)); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create compute pipeline state. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create compute pipeline state. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -366,23 +374,25 @@ namespace ig
         const bool bIsShaderVisibleDescriptorHeap = IsShaderVisibleDescriptorHeapType(descriptorHeapType);
 
         const D3D12_DESCRIPTOR_HEAP_DESC desc{
-                .Type           = targetDescriptorHeapType,
-                .NumDescriptors = numDescriptors,
-                .Flags          = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-                .NodeMask       = 0};
+            .Type = targetDescriptorHeapType,
+            .NumDescriptors = numDescriptors,
+            .Flags = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+            .NodeMask = 0
+        };
 
         ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
         if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap)); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create descriptor heap. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create descriptor heap. HRESULT: {:#X}", result);
             return {};
         }
 
         IG_CHECK(newDescriptorHeap);
         SetObjectName(newDescriptorHeap.Get(), debugName);
         return DescriptorHeap{
-                descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
-                GetDescriptorHandleIncrementSize(descriptorHeapType)};
+            descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
+            GetDescriptorHandleIncrementSize(descriptorHeapType)
+        };
     }
 
     Option<GpuFence> GpuDevice::CreateFence(const std::string_view debugName)
@@ -390,7 +400,7 @@ namespace ig
         ComPtr<ID3D12Fence> newFence{};
         if (const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&newFence)); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create queue sync fence. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create queue sync fence. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -399,21 +409,35 @@ namespace ig
         return GpuFence{std::move(newFence)};
     }
 
+    Option<CommandSignature> GpuDevice::CreateCommandSignature(const std::string_view debugName, const CommandSignatureDesc& desc, const Option<Ref<RootSignature>> rootSignatureOpt)
+    {
+        ComPtr<ID3D12CommandSignature> newCommandSignature{};
+
+        const Option<D3D12_COMMAND_SIGNATURE_DESC> cmdSignatureDescOpt = desc.ToCommandSignatureDesc();
+        if (!cmdSignatureDescOpt.has_value())
+        {
+            IG_LOG(GpuDeviceLog, Error, "Failed to create Command Signature Desc.");
+            return None<CommandSignature>();
+        }
+
+        ID3D12RootSignature* const nativeRootSignature = rootSignatureOpt ? &rootSignatureOpt->get().GetNative() : nullptr;
+        if (const HRESULT result = device->CreateCommandSignature(&cmdSignatureDescOpt.value(), nativeRootSignature, IID_PPV_ARGS(&newCommandSignature));
+            !SUCCEEDED(result))
+        {
+            IG_LOG(GpuDeviceLog, Error, "Failed to create Command Signature. HRESULT: {:#X}", result);
+            return None<CommandSignature>();
+        }
+
+        IG_CHECK(newCommandSignature);
+        SetObjectName(newCommandSignature.Get(), debugName);
+        return CommandSignature{std::move(newCommandSignature)};
+    }
+
     void GpuDevice::CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView)
     {
-        if (!device)
-        {
-            IG_CHECK_NO_ENTRY();
-            return;
-        }
-
-        if (!gpuView.HasValidCPUHandle())
-        {
-            IG_CHECK_NO_ENTRY();
-            return;
-        }
-
-        device->CreateSampler(&samplerDesc, gpuView.CPUHandle);
+        IG_CHECK(device);
+        IG_CHECK(gpuView.HasValidCpuHandle());
+        device->CreateSampler(&samplerDesc, gpuView.CpuHandle);
     }
 
     Option<GpuBuffer> GpuDevice::CreateBuffer(const GpuBufferDesc& bufferDesc)
@@ -422,13 +446,13 @@ namespace ig
         IG_CHECK(allocator);
 
         const D3D12MA::ALLOCATION_DESC allocationDesc = bufferDesc.GetAllocationDesc();
-        ComPtr<D3D12MA::Allocation>    allocation{};
-        ComPtr<ID3D12Resource>         resource{};
+        ComPtr<D3D12MA::Allocation> allocation{};
+        ComPtr<ID3D12Resource> resource{};
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &bufferDesc, D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr, 0, nullptr,
-                                                              allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+                allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -444,7 +468,7 @@ namespace ig
         IG_CHECK(allocator);
 
         const D3D12MA::ALLOCATION_DESC allocationDesc = textureDesc.GetAllocationDesc();
-        Option<D3D12_CLEAR_VALUE>      clearValue{};
+        Option<D3D12_CLEAR_VALUE> clearValue{};
         if (textureDesc.IsRenderTargetCompatible())
         {
             clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .Color = {0.f, 0.f, 0.f, 1.f}};
@@ -455,13 +479,13 @@ namespace ig
         }
 
         ComPtr<D3D12MA::Allocation> allocation{};
-        ComPtr<ID3D12Resource>      resource{};
+        ComPtr<ID3D12Resource> resource{};
         IG_CHECK(textureDesc.InitialLayout != D3D12_BARRIER_LAYOUT_UNDEFINED);
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc, textureDesc.InitialLayout,
-                                                              clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+                clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create texture resource. HRESULT: {:#X}", result);
+            IG_LOG(GpuDeviceLog, Error, "Failed to create texture resource. HRESULT: {:#X}", result);
             return {};
         }
 
@@ -479,22 +503,26 @@ namespace ig
         ComPtr<D3D12MA::Pool> customPool;
         if (const HRESULT result = allocator->CreatePool(&desc, &customPool); !SUCCEEDED(result))
         {
-            IG_LOG(GpuDevice, Error, "Failed to create custom gpu memory pool.");
+            IG_LOG(GpuDeviceLog, Error, "Failed to create custom gpu memory pool.");
             return {};
         }
 
         return customPool;
     }
 
-    GpuCopyableFootprints GpuDevice::GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset)
+    GpuCopyableFootprints GpuDevice::GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset) const
     {
         GpuCopyableFootprints footPrints{};
         footPrints.Layouts.resize(numSubresources);
         footPrints.NumRows.resize(numSubresources);
         footPrints.RowSizesInBytes.resize(numSubresources);
 
-        device->GetCopyableFootprints1(&resDesc, firstSubresource, numSubresources, baseOffset, footPrints.Layouts.data(), footPrints.NumRows.data(),
-                                       footPrints.RowSizesInBytes.data(), &footPrints.RequiredSize);
+        device->GetCopyableFootprints1(
+            &resDesc,
+            firstSubresource, numSubresources,
+            baseOffset,
+            footPrints.Layouts.data(), footPrints.NumRows.data(), footPrints.RowSizesInBytes.data(),
+            &footPrints.RequiredSize);
 
         IG_CHECK(footPrints.RequiredSize > 0);
         IG_CHECK(!footPrints.Layouts.empty());
@@ -506,30 +534,26 @@ namespace ig
     void GpuDevice::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::ConstantBufferView);
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
-        const GpuBufferDesc&                    desc    = buffer.GetDesc();
-        Option<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
-        if (cbvDesc)
-        {
-            device->CreateConstantBufferView(&cbvDesc.value(), gpuView.CPUHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+        const GpuBufferDesc& desc = buffer.GetDesc();
+        const Option<D3D12_CONSTANT_BUFFER_VIEW_DESC> cbvDesc = desc.ToConstantBufferViewDesc(buffer.GetNative().GetGPUVirtualAddress());
+        IG_CHECK(cbvDesc);
+
+        device->CreateConstantBufferView(&cbvDesc.value(), gpuView.CpuHandle);
     }
 
     void GpuDevice::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
     {
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
         IG_CHECK((offset + sizeInBytes) < buffer.GetDesc().GetSizeAsBytes());
         if (gpuView.Type == EGpuViewType::ConstantBufferView)
         {
             const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
-                    .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)};
-            device->CreateConstantBufferView(&cbvDesc, gpuView.CPUHandle);
+                .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)
+            };
+            device->CreateConstantBufferView(&cbvDesc, gpuView.CpuHandle);
         }
         else
         {
@@ -540,110 +564,78 @@ namespace ig
     void GpuDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
-        const GpuBufferDesc&                    desc    = buffer.GetDesc();
-        Option<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
-        if (srvDesc)
-        {
-            device->CreateShaderResourceView(&buffer.GetNative(), &srvDesc.value(), gpuView.CPUHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+        const GpuBufferDesc& desc = buffer.GetDesc();
+        const Option<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
+        IG_CHECK(srvDesc);
+
+        device->CreateShaderResourceView(&buffer.GetNative(), &srvDesc.value(), gpuView.CpuHandle);
     }
 
     void GpuDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
-        const GpuBufferDesc&                     desc    = buffer.GetDesc();
-        Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
+        const GpuBufferDesc& desc = buffer.GetDesc();
+        const Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
+        IG_CHECK(uavDesc);
+        IG_CHECK(!desc.IsUavCounterEnabled() || uavDesc->Buffer.CounterOffsetInBytes != 0);
 
-        if (uavDesc)
-        {
-            device->CreateUnorderedAccessView(&buffer.GetNative(), nullptr, &uavDesc.value(), gpuView.CPUHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+        ID3D12Resource& nativeBuffer = buffer.GetNative();
+        device->CreateUnorderedAccessView(
+            &nativeBuffer,
+            desc.IsUavCounterEnabled() ? &nativeBuffer : nullptr,
+            &uavDesc.value(),
+            gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateShaderResourceView(
-            const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
-        const GpuTextureDesc&                   desc       = texture.GetDesc();
-        Option<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvDesc, desireViewFormat);
+        const GpuTextureDesc& desc = texture.GetDesc();
+        const Option<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvDesc, desireViewFormat);
+        IG_CHECK(nativeDesc);
 
-        if (nativeDesc)
-        {
-            device->CreateShaderResourceView(&texture.GetNative(), &nativeDesc.value(), gpuView.CPUHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+        device->CreateShaderResourceView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateUnorderedAccessView(
-            const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
-        const GpuTextureDesc&                    desc       = texture.GetDesc();
-        Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavDesc, desireViewFormat);
+        const GpuTextureDesc& desc = texture.GetDesc();
+        const Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavDesc, desireViewFormat);
+        IG_CHECK(nativeDesc);
 
-        if (nativeDesc)
-        {
-            device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &nativeDesc.value(), gpuView.CPUHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+        device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateRenderTargetView(
-            const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::RenderTargetView);
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
-        const GpuTextureDesc&                 desc       = texture.GetDesc();
-        Option<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvDesc, desireViewFormat);
-        if (nativeDesc)
-        {
-            device->CreateRenderTargetView(&texture.GetNative(), &nativeDesc.value(), gpuView.CPUHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+        const GpuTextureDesc& desc = texture.GetDesc();
+        const Option<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvDesc, desireViewFormat);
+        IG_CHECK(nativeDesc);
+
+        device->CreateRenderTargetView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateDepthStencilView(
-            const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::DepthStencilView);
-        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCPUHandle());
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
-        const GpuTextureDesc&                 desc       = texture.GetDesc();
-        Option<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvDesc, desireViewFormat);
+        const GpuTextureDesc& desc = texture.GetDesc();
+        const Option<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvDesc, desireViewFormat);
+        IG_CHECK(nativeDesc);
 
-        if (nativeDesc)
-        {
-            device->CreateDepthStencilView(&texture.GetNative(), &nativeDesc.value(), gpuView.CPUHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+        device->CreateDepthStencilView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
     }
 } // namespace ig

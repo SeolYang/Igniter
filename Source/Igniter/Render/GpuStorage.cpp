@@ -7,24 +7,23 @@
 
 namespace ig
 {
-    GpuStorage::GpuStorage(RenderContext& renderContext, const String debugName, const U32 elementSize, const U32 initialNumElements, const bool bIsShaderReadWritable /*= false*/) :
-        renderContext(renderContext),
-        debugName(debugName),
-        elementSize(elementSize),
-        bufferSize(initialNumElements * elementSize),
-        bIsShaderReadWritable(bIsShaderReadWritable),
-        fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
+    GpuStorage::GpuStorage(RenderContext& renderContext, const String debugName, const U32 elementSize, const U32 initialNumElements, const bool bShouldEnableShaderReadWrite /*= false*/, const bool bShouldEnableUavCounter, const bool bShouldEnableLinearAllocation)
+        : renderContext(renderContext)
+        , debugName(debugName)
+        , elementSize(elementSize)
+        , bufferSize((U64)initialNumElements * elementSize)
+        , bIsShaderReadWritable(bShouldEnableShaderReadWrite)
+        , bIsUavCounterEnabled(bShouldEnableUavCounter)
+        , bIsLinearAllocEnabled(bShouldEnableLinearAllocation)
+        , fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
     {
         IG_CHECK(initialNumElements > 0);
         IG_CHECK(elementSize > 0);
-        GpuBufferDesc bufferDesc{};
-        bufferDesc.DebugName = debugName;
-        bufferDesc.AsStructuredBuffer(elementSize, initialNumElements, bIsShaderReadWritable);
 
-        gpuBuffer = renderContext.CreateBuffer(bufferDesc);
+        gpuBuffer = renderContext.CreateBuffer(CreateBufferDesc(initialNumElements));
         srv = renderContext.CreateShaderResourceView(gpuBuffer);
 
-        if (bIsShaderReadWritable)
+        if (bShouldEnableShaderReadWrite)
         {
             uav = renderContext.CreateUnorderedAccessView(gpuBuffer);
         }
@@ -67,6 +66,7 @@ namespace ig
     {
         IG_CHECK(numElements > 0);
         IG_CHECK(blocks.size() > 0);
+        IG_CHECK(!bIsLinearAllocEnabled || allocatedSize == 0);
         if (gpuBuffer.IsNull())
         {
             return Allocation::Invalid();
@@ -129,6 +129,14 @@ namespace ig
         blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = 0});
     }
 
+    GpuBufferDesc GpuStorage::CreateBufferDesc(const U32 numElements) const noexcept
+    {
+        GpuBufferDesc bufferDesc{};
+        bufferDesc.DebugName = debugName;
+        bufferDesc.AsStructuredBuffer(elementSize, numElements, bIsShaderReadWritable, bIsUavCounterEnabled);
+        return bufferDesc;
+    }
+
     bool GpuStorage::AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation)
     {
         IG_CHECK(blockIdx < blocks.size());
@@ -148,7 +156,8 @@ namespace ig
                 .Offset = storageOffset,
                 .OffsetIndex = storageOffset / elementSize,
                 .AllocSize = allocSize,
-                .NumElements = allocSize / elementSize};
+                .NumElements = allocSize / elementSize
+            };
 
             return true;
         }
@@ -164,14 +173,11 @@ namespace ig
         IG_CHECK((newAllocSize % elementSize) == 0);
         IG_CHECK((bufferSize % elementSize) == 0);
 
-        const Size newBufferSize = std::max(bufferSize * GrowthMultiplier, bufferSize + newAllocSize);
+        const Size newBufferSize = std::max(bufferSize * kGrowthMultiplier, bufferSize + newAllocSize);
         IG_CHECK(newBufferSize > 0);
         IG_CHECK((newBufferSize - bufferSize) > 0);
 
-        GpuBufferDesc newGpuBufferDesc{};
-        newGpuBufferDesc.DebugName = debugName;
-        newGpuBufferDesc.AsStructuredBuffer(elementSize, static_cast<U32>(newBufferSize / elementSize), bIsShaderReadWritable);
-        RenderHandle<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(newGpuBufferDesc);
+        const RenderHandle<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(CreateBufferDesc((U32)newBufferSize / elementSize));
         if (!newGpuBuffer)
         {
             return false;
@@ -182,28 +188,32 @@ namespace ig
         IG_CHECK(gpuBufferPtr != nullptr);
         IG_CHECK(newGpuBufferPtr != nullptr);
 
-        CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
-        CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
-        auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
-        copyCmdList->Open();
+        GpuSyncPoint newSyncPoint{};
+        if (!bIsLinearAllocEnabled)
         {
-            copyCmdList->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
-        }
-        copyCmdList->Close();
+            CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
+            CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
+            auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
+            copyCmdList->Open();
+            {
+                copyCmdList->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
+            }
+            copyCmdList->Close();
 
-        GpuSyncPoint newSyncPoint = fence.MakeSyncPoint();
-        if (GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
-            prevSyncPoint)
-        {
-            // 만약 버퍼에 대한 비동기 쓰기를 지원한다면 Write-After-Read Hazard 발생 가능성이 있음
-            // 방지하기 위해선 GpuStorage가 별도의 Fence를 가지고 이를 사용해
-            // ExecuteCommandLists 간의 명시적 동기화가 필요할것으로 보임
-            asyncCopyQueue.Wait(prevSyncPoint);
-        }
+            newSyncPoint = fence.MakeSyncPoint();
+            if (GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
+                prevSyncPoint)
+            {
+                // 만약 버퍼에 대한 비동기 쓰기를 지원한다면 Write-After-Read Hazard 발생 가능성이 있음
+                // 방지하기 위해선 GpuStorage가 별도의 Fence를 가지고 이를 사용해
+                // ExecuteCommandLists 간의 명시적 동기화가 필요할것으로 보임
+                asyncCopyQueue.Wait(prevSyncPoint);
+            }
 
-        ig::CommandList* copyCmdLists[] = {(ig::CommandList*)copyCmdList};
-        asyncCopyQueue.ExecuteContexts(copyCmdLists);
-        asyncCopyQueue.Signal(newSyncPoint);
+            ig::CommandList* copyCmdLists[] = {(ig::CommandList*)copyCmdList};
+            asyncCopyQueue.ExecuteContexts(copyCmdLists);
+            asyncCopyQueue.Signal(newSyncPoint);
+        }
 
         if (srv)
         {
