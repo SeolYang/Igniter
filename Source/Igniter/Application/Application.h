@@ -29,10 +29,6 @@ namespace ig
         virtual void Update(const float deltaTime) = 0;
         virtual void PostUpdate(const float deltaTime) = 0;
 
-        virtual void         PreRender(const LocalFrameIndex localFrameIdx) = 0;
-        virtual GpuSyncPoint Render(const LocalFrameIndex localFrameIdx) = 0;
-        virtual void         PostRender(const LocalFrameIndex localFrameIdx) = 0;
-
     protected:
         Application(const AppDesc& desc);
 

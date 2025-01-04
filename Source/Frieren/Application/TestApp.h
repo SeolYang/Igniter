@@ -25,23 +25,10 @@ namespace fe
 
         void PostUpdate(const float) override {}
 
-        void             PreRender(const ig::LocalFrameIndex localFrameIdx) override;
-        ig::GpuSyncPoint Render(const ig::LocalFrameIndex localFrameIdx) override;
-        void             PostRender(const ig::LocalFrameIndex localFrameIdx) override;
-
         void SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem);
 
-        [[nodiscard]] const Renderer* GetRenderer() const
-        {
-            return renderer.get();
-        }
-
     private:
-        tf::Executor* taskExecutor;
-
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas>   editorCanvas;
-
-        ig::Ptr<Renderer> renderer;
     };
 } // namespace fe

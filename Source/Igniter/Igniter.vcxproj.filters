@@ -599,6 +599,9 @@
     <ClCompile Include="Render\SceneProxy.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">

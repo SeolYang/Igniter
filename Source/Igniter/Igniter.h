@@ -134,6 +134,7 @@ using namespace entt::literals;
 #pragma warning(push)
 #pragma warning(disable : 26800)
 #pragma warning(disable : 26498)
+#pragma warning(disable : 26437)
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
@@ -168,6 +169,7 @@ using namespace entt::literals;
 
 #pragma warning(push)
 #pragma warning(disable : 6385)
+#pragma warning(disable : 6386)
 #pragma warning(disable : 26437)
 #include <Jolt/Jolt.h>
 #pragma warning(pop)

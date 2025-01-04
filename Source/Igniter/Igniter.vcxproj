@@ -200,6 +200,7 @@
     <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Render\CommandListPool.cpp" />
     <ClCompile Include="Render\GpuStorage.cpp" />
     <ClCompile Include="Render\GpuUploader.cpp" />

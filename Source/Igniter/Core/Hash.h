@@ -9,12 +9,12 @@ namespace ig
     template <typename Ty>
     inline U32 HashInstance(const Ty& instance)
     {
-        constexpr Size NumDwordChunks       = sizeof(Ty) / 4u;
-        constexpr Size NumRemainingBytes    = sizeof(Ty) % 4u;
+        constexpr Size NumDwordChunks = sizeof(Ty) / 4u;
+        constexpr Size NumRemainingBytes = sizeof(Ty) % 4u;
         constexpr Size RemainingBytesOffset = sizeof(Ty) - NumRemainingBytes;
 
         const U32* const instanceDwordsPtr = reinterpret_cast<const U32*>(&instance);
-        const U8* const  instanceBytesPtr  = reinterpret_cast<const U8*>(&instance) + RemainingBytesOffset;
+        const U8* const instanceBytesPtr = reinterpret_cast<const U8*>(&instance) + RemainingBytesOffset;
 
 #if ENABLE_SSE_CRC32
         U32 hash = 0xFFFFFFFFu;
@@ -28,7 +28,7 @@ namespace ig
             hash = _mm_crc32_u32(hash, instanceBytesPtr[byteIdx]);
         }
 #else
-        constexpr U32 FnvPrime       = 16777619u;
+        constexpr U32 FnvPrime = 16777619u;
         constexpr U32 FnvOffsetBasis = 2166136261u;
 
         U32 hash = FnvOffsetBasis;
@@ -48,8 +48,8 @@ namespace ig
     inline uint64_t HashRange(const uint32_t* const begin, const uint32_t* const end, uint64_t hash)
     {
 #if ENABLE_SSE_CRC32
-        const uint64_t*       iter64 = (const uint64_t*)AlignUp(begin, 8);
-        const uint64_t* const end64  = (const uint64_t* const)AlignDown(end, 8);
+        const uint64_t* iter64 = (const uint64_t*)AlignUp(begin, 8);
+        const uint64_t* const end64 = (const uint64_t* const)AlignDown(end, 8);
 
         if ((uint32_t*)iter64 > begin)
         {

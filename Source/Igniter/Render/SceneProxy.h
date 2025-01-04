@@ -78,7 +78,32 @@ namespace ig
         SceneProxy& operator=(SceneProxy&&) noexcept = delete;
 
         // 여기서 렌더링 전 필요한 Scene 정보를 모두 모으고, GPU 메모리에 변경점 들을 반영해주어야 한다
-        GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
+        [[nodiscard]] GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
+
+        [[nodiscard]] RenderHandle<GpuView> GetTransformStorageShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        {
+            return transformProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+        }
+
+        [[nodiscard]] RenderHandle<GpuView> GetMaterialStorageShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        {
+            return materialProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+        }
+
+        [[nodiscard]] RenderHandle<GpuView> GetRenderableStorageShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        {
+            return renderableProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+        }
+
+        [[nodiscard]] RenderHandle<GpuView> GetRenderableIndicesBufferShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        {
+            return renderableIndicesBufferSrv[localFrameIdx];
+        }
+
+        [[nodiscard]] U32 GetNumMaxRenderables(const LocalFrameIndex localFrameIdx) const noexcept
+        {
+            return numMaxRenderables[localFrameIdx];
+        }
 
     private:
         void UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);

@@ -27,7 +27,7 @@ namespace ig
 
         HWND GetNative() const { return windowHandle; }
 
-        [[nodiscard]] Viewport GetViewport() const { return viewport; }
+        [[nodiscard]] Viewport GetViewport() const noexcept { return viewport; }
 
         void ClipCursor(const std::optional<RECT> clipRect = std::nullopt);
         void UnclipCursor();

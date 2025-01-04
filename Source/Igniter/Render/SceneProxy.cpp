@@ -94,7 +94,7 @@ namespace ig
         IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();
 
-        // todo Taskflow 사용?
+        // #sy_todo Taskflow를 사용한 작업 흐름 구성?
         std::future<void> updateTransformFuture = std::async(
             std::launch::async, [this, localFrameIdx, &registry]
             { UpdateTransformProxy(localFrameIdx, registry); });
@@ -108,7 +108,7 @@ namespace ig
 
         UpdateRenderableProxy(localFrameIdx, registry);
 
-        // warning Copy시 Alignment 문제 발생 가능!
+        // #sy_warn Copy시 Alignment 문제 발생 가능!
         const Size transformReplicationSize = TransformProxy::kDataSize * transformProxyPackage.PendingReplications.size();
         const Size transformStagingOffset = 0;
         const Size materialReplicationSize = MaterialProxy::kDataSize * materialProxyPackage.PendingReplications.size();
@@ -124,7 +124,6 @@ namespace ig
 
         CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
 
-        // TODO Replication/Upload는 모두 병렬적으로 실행 가능
         auto transformCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "TransformProxyReplication"_fs);
         auto materialCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "MaterialProxyReplication"_fs);
         auto renderableCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableProxyReplication"_fs);
@@ -177,10 +176,10 @@ namespace ig
         renderableRepFuture.get();
         renderableIndicesRepFuture.get();
 
-        // test code!
+        // TODO 메인 렌더링 파이프라인과 동기화 (CPU 상에서 기다리는 것이 아니라)
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
         GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal(renderContext->GetAsyncCopyFence());
-        syncPoint.WaitOnCpu(); // 이상적으로는 렌더링 파이프라인 진입 전 각 커맨드 큐에 해당 동기화 지점과 적절히 동기화 하여야함.
+        syncPoint.WaitOnCpu();
         return syncPoint;
     }
 

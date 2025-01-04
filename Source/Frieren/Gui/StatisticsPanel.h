@@ -7,7 +7,7 @@ namespace fe
     class StatisticsPanel final
     {
     public:
-        explicit StatisticsPanel(const Renderer* renderer);
+        explicit StatisticsPanel();
         StatisticsPanel(const StatisticsPanel&)     = delete;
         StatisticsPanel(StatisticsPanel&&) noexcept = delete;
         ~StatisticsPanel()                          = default;
@@ -18,7 +18,6 @@ namespace fe
         void OnImGui();
 
     private:
-        const Renderer* renderer        = nullptr;
         bool            bEnablePolling  = true;
         int             pollingInterval = 60;
         int             pollingStep     = pollingInterval;

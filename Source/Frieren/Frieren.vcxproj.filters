@@ -48,9 +48,6 @@
     <ClCompile Include="Game\System\JustSpinningSystem.cpp">
       <Filter>Source\Game\System</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Renderer.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Gui\AssetInspector.cpp">
       <Filter>Source\GUI</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     </ClInclude>
     <ClInclude Include="Game\System\JustSpinningSystem.h">
       <Filter>Source\Game\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Renderer.h">
-      <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\EditorCamera.h">
       <Filter>Source\Render</Filter>

@@ -70,7 +70,7 @@ namespace ig
         static constexpr size_t DefaultReservedBufferSizeInBytes = 4194304;
 
     private:
-        RenderContext& renderContext;
+        RenderContext* renderContext;
 
         size_t reservedSizeInBytesPerFrame;
 

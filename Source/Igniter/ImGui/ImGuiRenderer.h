@@ -6,13 +6,13 @@ namespace ig
     class RenderContext;
     class ImGuiCanvas;
 
-    class ImGuiRenderer : public Renderer
+    class ImGuiRenderer
     {
     public:
         ImGuiRenderer(RenderContext& renderContext);
-        virtual ~ImGuiRenderer() = default;
+        ~ImGuiRenderer() = default;
 
-        virtual GpuSyncPoint Render(const LocalFrameIndex localFrameIdx) override;
+        GpuSyncPoint Render(const LocalFrameIndex localFrameIdx);
 
         void SetTargetCanvas(ImGuiCanvas* canvasToRender = nullptr) { this->targetCanvas = canvasToRender; }
         void SetMainPipelineSyncPoint(GpuSyncPoint syncPoint) { mainPipelineSyncPoint = syncPoint; }

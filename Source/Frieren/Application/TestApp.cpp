@@ -6,7 +6,6 @@
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Igniter/ImGui/ImGuiRenderer.h"
-#include "Frieren/Render/Renderer.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/Gui/EditorCanvas.h"
 #include "Frieren/Application/TestApp.h"
@@ -14,8 +13,6 @@
 namespace fe
 {
     TestApp::TestApp(const ig::AppDesc& desc) :
-        taskExecutor(&ig::Engine::GetTaskExecutor()),
-        renderer(ig::MakePtr<fe::Renderer>(ig::Engine::GetWindow(), ig::Engine::GetRenderContext())),
         Application(desc)
     {
         /* #sy_test 입력 매니저 테스트 */
@@ -161,10 +158,9 @@ namespace fe
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
 
-        ig::AssetManager& assetManager  = ig::Engine::GetAssetManager();
-        ig::World&        worldInstance = ig::Engine::GetWorld();
-        worldInstance                   = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
-        renderer->SetWorld(&worldInstance);
+        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+        ig::World& worldInstance = ig::Engine::GetWorld();
+        worldInstance = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
 
         ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();
         imGuiRenderer.SetTargetCanvas(editorCanvas.get());
@@ -179,18 +175,6 @@ namespace fe
     {
         gameSystem->Update(deltaTime, ig::Engine::GetWorld());
     }
-
-    void TestApp::PreRender(const ig::LocalFrameIndex localFrameIdx)
-    {
-        renderer->PreRender(localFrameIdx);
-    }
-
-    ig::GpuSyncPoint TestApp::Render(const ig::LocalFrameIndex localFrameIdx)
-    {
-        return renderer->Render(localFrameIdx);
-    }
-
-    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex) {}
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)
     {
