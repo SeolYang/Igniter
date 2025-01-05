@@ -25,9 +25,27 @@ namespace ig
 
     Material::~Material()
     {
+        Destroy();
+    }
+
+    void Material::Destroy()
+    {
         if (assetManager != nullptr)
         {
             assetManager->Unload(diffuse);
         }
+
+        diffuse = {};
+    }
+
+    Material& Material::operator=(Material&& rhs) noexcept
+    {
+        Destroy();
+
+        assetManager = std::exchange(rhs.assetManager, nullptr);
+        snapshot = rhs.snapshot;
+        diffuse = std::exchange(rhs.diffuse, {});
+
+        return *this;
     }
 } // namespace ig

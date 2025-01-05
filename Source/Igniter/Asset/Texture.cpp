@@ -19,7 +19,7 @@ namespace ig
 
     const Json& TextureImportDesc::Deserialize(const Json& archive)
     {
-        *this = { };
+        *this = {};
         IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureImportDesc, archive, CompressionMode, ETextureCompressionMode::None);
         IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureImportDesc, archive, bGenerateMips, false);
         IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureImportDesc, archive, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -47,7 +47,7 @@ namespace ig
 
     const Json& TextureLoadDesc::Deserialize(const Json& archive)
     {
-        *this = { };
+        *this = {};
         IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, Format, DXGI_FORMAT_UNKNOWN);
         IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, Dimension, ETextureDimension::Tex2D);
         IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureLoadDesc, archive, Width, 0);
@@ -62,8 +62,8 @@ namespace ig
         return archive;
     }
 
-    Texture::Texture(RenderContext& renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv, const RenderHandle<GpuView> sampler)
-        : renderContext(&renderContext), snapshot(snapshot), gpuTexture(gpuTexture), srv(srv), sampler(sampler)
+    Texture::Texture(RenderContext& renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv, const RenderHandle<GpuView> sampler) :
+        renderContext(&renderContext), snapshot(snapshot), gpuTexture(gpuTexture), srv(srv), sampler(sampler)
     {
         IG_CHECK(gpuTexture);
         IG_CHECK(srv);
@@ -72,12 +72,35 @@ namespace ig
 
     Texture::~Texture()
     {
+        Destroy();
+    }
+
+    Texture& Texture::operator=(Texture&& rhs) noexcept
+    {
+        Destroy();
+
+        renderContext = std::exchange(rhs.renderContext, nullptr);
+        snapshot = rhs.snapshot;
+        gpuTexture = std::exchange(rhs.gpuTexture, {});
+        srv = std::exchange(rhs.srv, {});
+        sampler = std::exchange(rhs.sampler, {});
+
+        return *this;
+    }
+
+    void Texture::Destroy()
+    {
         if (renderContext != nullptr)
         {
             renderContext->DestroyTexture(gpuTexture);
             renderContext->DestroyGpuView(srv);
             renderContext->DestroyGpuView(sampler);
         }
+
+        renderContext = nullptr;
+        gpuTexture = {};
+        srv = {};
+        sampler = {};
     }
 } // namespace ig
 

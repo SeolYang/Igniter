@@ -62,12 +62,15 @@ namespace ig
         ~StaticMesh();
 
         StaticMesh& operator=(const StaticMesh&) = delete;
-        StaticMesh& operator=(StaticMesh&&) noexcept = default;
+        StaticMesh& operator=(StaticMesh&& rhs) noexcept;
 
         [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
         [[nodiscard]] MeshStorage::Handle<VertexSM> GetVertexSpace() const noexcept { return vertexSpace; }
         [[nodiscard]] MeshStorage::Handle<U32> GetVertexIndexSpace() const noexcept { return vertexIndexSpace; }
         [[nodiscard]] ManagedAsset<Material> GetMaterial() const noexcept { return material; }
+
+    private:
+        void Destroy();
 
     private:
         RenderContext* renderContext{nullptr};

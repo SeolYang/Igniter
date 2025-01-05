@@ -26,14 +26,14 @@ namespace ig
     struct TextureImportDesc
     {
     public:
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
     public:
         ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
-        bool                    bGenerateMips   = false;
+        bool bGenerateMips = false;
 
-        D3D12_FILTER               Filter       = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+        D3D12_FILTER Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
@@ -42,21 +42,21 @@ namespace ig
     struct TextureLoadDesc
     {
     public:
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
         [[nodiscard]] bool IsArray() const { return Dimension != ETextureDimension::Tex3D && DepthOrArrayLength > 1; }
 
     public:
-        DXGI_FORMAT       Format             = DXGI_FORMAT_UNKNOWN;
-        ETextureDimension Dimension          = ETextureDimension::Tex2D;
-        uint32_t          Width              = 1;
-        uint32_t          Height             = 1;
-        uint16_t          DepthOrArrayLength = 1;
-        uint16_t          Mips               = 1;
-        bool              bIsCubemap         = false;
+        DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
+        ETextureDimension Dimension = ETextureDimension::Tex2D;
+        uint32_t Width = 1;
+        uint32_t Height = 1;
+        uint16_t DepthOrArrayLength = 1;
+        uint16_t Mips = 1;
+        bool bIsCubemap = false;
 
-        D3D12_FILTER               Filter       = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+        D3D12_FILTER Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         D3D12_TEXTURE_ADDRESS_MODE AddressModeW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
@@ -70,36 +70,39 @@ namespace ig
     {
     public:
         using ImportDesc = TextureImportDesc;
-        using LoadDesc   = TextureLoadDesc;
-        using Desc       = AssetDesc<Texture>;
+        using LoadDesc = TextureLoadDesc;
+        using Desc = AssetDesc<Texture>;
 
     public:
-        Texture(RenderContext&                renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv,
+        Texture(RenderContext& renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv,
                 const RenderHandle<GpuView> sampler);
-        Texture(const Texture&)     = delete;
+        Texture(const Texture&) = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();
 
-        Texture& operator=(const Texture&)     = delete;
-        Texture& operator=(Texture&&) noexcept = default;
+        Texture& operator=(const Texture&) = delete;
+        Texture& operator=(Texture&& rhs) noexcept;
 
-        const Desc&                GetSnapshot() const { return snapshot; }
-        RenderHandle<GpuTexture> GetGpuTexture() const { return gpuTexture; }
-        RenderHandle<GpuView>    GetShaderResourceView() const { return srv; }
-        RenderHandle<GpuView>    GetSampler() const { return sampler; }
+        [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
+        [[nodiscard]] RenderHandle<GpuTexture> GetGpuTexture() const { return gpuTexture; }
+        [[nodiscard]] RenderHandle<GpuView> GetShaderResourceView() const { return srv; }
+        [[nodiscard]] RenderHandle<GpuView> GetSampler() const { return sampler; }
+
+    private:
+        void Destroy();
 
     public:
         /* #sy_wip Common으로 이동 */
-        static constexpr std::string_view EngineDefault      = "Engine\\Default";
+        static constexpr std::string_view EngineDefault = "Engine\\Default";
         static constexpr std::string_view EngineDefaultWhite = "Engine\\White";
         static constexpr std::string_view EngineDefaultBlack = "Engine\\Black";
 
     private:
-        RenderContext*             renderContext{nullptr};
-        Desc                       snapshot{ };
-        RenderHandle<GpuTexture> gpuTexture{ };
-        RenderHandle<GpuView>    srv{ };
-        RenderHandle<GpuView>    sampler{ };
+        RenderContext* renderContext{nullptr};
+        Desc snapshot{};
+        RenderHandle<GpuTexture> gpuTexture{};
+        RenderHandle<GpuView> srv{};
+        RenderHandle<GpuView> sampler{};
     };
 } // namespace ig
 

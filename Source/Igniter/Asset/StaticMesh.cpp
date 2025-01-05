@@ -74,6 +74,11 @@ namespace ig
 
     StaticMesh::~StaticMesh()
     {
+        Destroy();
+    }
+
+    void StaticMesh::Destroy()
+    {
         if (assetManager != nullptr)
         {
             assetManager->Unload(material);
@@ -82,5 +87,26 @@ namespace ig
         MeshStorage& meshStorage = Engine::GetMeshStorage();
         meshStorage.Destroy(vertexSpace);
         meshStorage.Destroy(vertexIndexSpace);
+
+        renderContext = nullptr;
+        assetManager = nullptr;
+        material = {};
+        vertexSpace = {};
+        vertexIndexSpace = {};
     }
+
+    StaticMesh& StaticMesh::operator=(StaticMesh&& rhs) noexcept
+    {
+        Destroy();
+
+        this->renderContext = std::exchange(rhs.renderContext, nullptr);
+        this->assetManager = std::exchange(rhs.assetManager, nullptr);
+        this->snapshot = rhs.snapshot;
+        this->vertexSpace = std::exchange(rhs.vertexSpace, {});
+        this->vertexIndexSpace = std::exchange(rhs.vertexIndexSpace, {});
+        this->material = std::exchange(rhs.material, {});
+
+        return *this;
+    }
+
 } // namespace ig

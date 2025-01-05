@@ -9,13 +9,13 @@ namespace ig
     struct MaterialAssetCreateDesc final
     {
     public:
-        String DiffuseVirtualPath{ };
+        String DiffuseVirtualPath{};
     };
 
     struct MaterialAssetLoadDesc final
     {
     public:
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
     public:
@@ -28,30 +28,33 @@ namespace ig
     {
     public:
         using ImportDesc = MaterialAssetCreateDesc;
-        using LoadDesc   = MaterialAssetLoadDesc;
-        using Desc       = AssetDesc<Material>;
+        using LoadDesc = MaterialAssetLoadDesc;
+        using Desc = AssetDesc<Material>;
 
         friend class AssetManager;
 
     public:
         Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
-        Material(const Material&)     = delete;
+        Material(const Material&) = delete;
         Material(Material&&) noexcept = default;
         ~Material();
 
-        Material& operator=(const Material&)     = delete;
-        Material& operator=(Material&&) noexcept = default;
+        Material& operator=(const Material&) = delete;
+        Material& operator=(Material&& rhs) noexcept;
 
-        const Desc&           GetSnapshot() const { return snapshot; }
-        ManagedAsset<Texture> GetDiffuse() const { return diffuse; }
+        [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
+        [[nodiscard]] ManagedAsset<Texture> GetDiffuse() const { return diffuse; }
+
+    private:
+        void Destroy();
 
     public:
         /* #sy_wip Common 헤더로 이동 */
         static constexpr std::string_view EngineDefault{"Engine\\Default"};
 
     private:
-        AssetManager*         assetManager{nullptr};
-        Desc                  snapshot{ };
-        ManagedAsset<Texture> diffuse{ };
+        AssetManager* assetManager{nullptr};
+        Desc snapshot{};
+        ManagedAsset<Texture> diffuse{};
     };
 } // namespace ig
