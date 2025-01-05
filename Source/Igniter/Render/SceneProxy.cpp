@@ -1,6 +1,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/MeshStorage.h"
+#include "Igniter/Render/Utils.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Asset/Material.h"
 #include "Igniter/Asset/StaticMesh.h"
@@ -137,6 +138,11 @@ namespace ig
         const Size renderableIndicesStagingOffset = renderableStagingOffset + renderableReplicationSize;
 
         const Size requiredStagingBufferSize = renderableIndicesStagingOffset + renderableIndicesSize;
+        if (requiredStagingBufferSize == 0)
+        {
+            return GpuSyncPoint::Invalid();
+        }
+
         PrepareStagingBuffer(localFrameIdx, requiredStagingBufferSize);
         IG_CHECK(stagingBuffer[localFrameIdx]);
 
@@ -268,7 +274,7 @@ namespace ig
             if (const U32 currentDataHashValue = HashInstance(transformComponent);
                 transformProxy.DataHashValue != currentDataHashValue)
             {
-                transformProxy.GpuData = transformComponent.CreateTransformation();
+                transformProxy.GpuData = ConvertToShaderSuitableForm(transformComponent.CreateTransformation());
                 transformProxy.DataHashValue = currentDataHashValue;
                 transformProxyPackage.PendingReplications.emplace_back(entity);
             }
@@ -480,7 +486,11 @@ namespace ig
         for (const auto& [entity, _, __] : staticMeshEntityView.each())
         {
             IG_CHECK(transformProxyPackage.ProxyMap[localFrameIdx].contains(entity));
-            IG_CHECK(staticMeshProxyMap.contains(entity));
+            if (!staticMeshProxyMap.contains(entity))
+            {
+                // 조건에 해당하는 Entity는 있으나 아직 준비 되지 않음 (ex. Static Mesh 미설정)
+                continue;
+            }
 
             if (!proxyMap.contains(entity))
             {

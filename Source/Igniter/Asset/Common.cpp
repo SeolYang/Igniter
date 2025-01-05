@@ -14,7 +14,7 @@ namespace ig
 
     const Json& ResourceInfo::Deserialize(const Json& archive)
     {
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Category, EAssetCategory::Unknown);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(ResourceInfo, archive, Category, EAssetCategory::Unknown);
         return archive;
     }
 

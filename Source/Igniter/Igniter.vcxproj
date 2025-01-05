@@ -65,6 +65,7 @@
     <ClInclude Include="Component\NameComponent.h" />
     <ClInclude Include="Component\StaticMeshComponent.h" />
     <ClInclude Include="Component\TransformComponent.h" />
+    <ClInclude Include="Core\BoundingVolume.h" />
     <ClInclude Include="Core\Assert.h" />
     <ClInclude Include="Core\ComInitializer.h" />
     <ClInclude Include="Core\ContainerUtils.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="Component\NameComponent.cpp" />
     <ClCompile Include="Component\StaticMeshComponent.cpp" />
     <ClCompile Include="Component\TransformComponent.cpp" />
+    <ClCompile Include="Core\BoundingVolume.cpp" />
     <ClCompile Include="Core\ComInitializer.cpp" />
     <ClCompile Include="Core\DebugTools.cpp" />
     <ClCompile Include="Core\Engine.cpp" />

@@ -38,20 +38,20 @@ namespace ig
     const Json& TransformComponent::Deserialize(const Json& archive)
     {
         /* Position */
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Position.x, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Position.y, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Position.z, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Position.x, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Position.y, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Position.z, 0.f);
 
         /* Scale */
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Scale.x, 1.f);
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Scale.y, 1.f);
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Scale.z, 1.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Scale.x, 1.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Scale.y, 1.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Scale.z, 1.f);
 
         /* Rotation */
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Rotation.w, 1.f);
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Rotation.x, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Rotation.y, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(TransformComponent, archive, Rotation.z, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Rotation.w, 1.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Rotation.x, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Rotation.y, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TransformComponent, archive, Rotation.z, 0.f);
 
         return archive;
     }

@@ -36,20 +36,20 @@ namespace ig
     const Json& CameraComponent::Deserialize(const Json& archive)
     {
         /* Viewport */
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.x, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.y, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.width, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.height, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.minDepth, 0.f);
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, CameraViewport.maxDepth, 1.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, CameraViewport.x, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, CameraViewport.y, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, CameraViewport.width, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, CameraViewport.height, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, CameraViewport.minDepth, 0.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, CameraViewport.maxDepth, 1.f);
 
         /* Perspective */
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, NearZ, 0.1f);
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, FarZ, 1000.f);
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, Fov, 45.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, NearZ, 0.1f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, FarZ, 1000.f);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, Fov, 45.f);
 
         /* Miscs */
-        IG_DESERIALIZE_JSON_SIMPLE(CameraComponent, archive, bIsMainCamera, false);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(CameraComponent, archive, bIsMainCamera, false);
 
         return archive;
     }

@@ -417,6 +417,9 @@
     <ClInclude Include="D3D12\CommandSignature.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Core\BoundingVolume.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -607,6 +610,9 @@
     </ClCompile>
     <ClCompile Include="Render\Renderer.cpp">
       <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\BoundingVolume.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

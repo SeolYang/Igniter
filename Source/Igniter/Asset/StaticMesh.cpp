@@ -25,17 +25,17 @@ namespace ig
 
     const Json& StaticMeshImportDesc::Deserialize(const Json& archive)
     {
-        *this = { };
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bMakeLeftHanded, bMakeLeftHanded);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipUVs, bFlipUVs);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipWindingOrder, bFlipWindingOrder);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateNormals, bGenerateNormals);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bSplitLargeMeshes, bSplitLargeMeshes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bPreTransformVertices, bPreTransformVertices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImproveCacheLocality, bImproveCacheLocality);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateUVCoords, bGenerateUVCoords);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateBoundingBoxes, bGenerateBoundingBoxes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImportMaterials, bImportMaterials);
+        *this = {};
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bMakeLeftHanded);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipUVs);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipWindingOrder);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateNormals);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bSplitLargeMeshes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bPreTransformVertices);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImproveCacheLocality);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateUVCoords);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateBoundingBoxes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImportMaterials);
         return archive;
     }
 
@@ -46,25 +46,31 @@ namespace ig
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, MaterialGuid);
+
+        IG_SERIALIZE_JSON_OBJECT(StaticMeshLoadDesc, archive, AABB);
+
         return archive;
     }
 
     const Json& StaticMeshLoadDesc::Deserialize(const Json& archive)
     {
-        *this = { };
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices, NumVertices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices, NumIndices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes, CompressedVerticesSizeInBytes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes, CompressedIndicesSizeInBytes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, MaterialGuid, MaterialGuid);
+        *this = {};
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
+        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, MaterialGuid);
+
+        IG_DESERIALIZE_JSON_OBJECT(StaticMeshLoadDesc, archive, AABB);
+
         return archive;
     }
 
-    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material)
-        : renderContext(&renderContext), assetManager(&assetManager),
-          snapshot(snapshot),
-          vertexSpace(vertexSpace), vertexIndexSpace(vertexIndexSpace),
-          material(material) { }
+    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material) :
+        renderContext(&renderContext), assetManager(&assetManager),
+        snapshot(snapshot),
+        vertexSpace(vertexSpace), vertexIndexSpace(vertexIndexSpace),
+        material(material) {}
 
     StaticMesh::~StaticMesh()
     {

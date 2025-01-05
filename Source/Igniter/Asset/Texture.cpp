@@ -20,12 +20,12 @@ namespace ig
     const Json& TextureImportDesc::Deserialize(const Json& archive)
     {
         *this = { };
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, CompressionMode, ETextureCompressionMode::None);
-        IG_DESERIALIZE_JSON_SIMPLE(TextureImportDesc, archive, bGenerateMips, false);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureImportDesc, archive, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureImportDesc, archive, CompressionMode, ETextureCompressionMode::None);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureImportDesc, archive, bGenerateMips, false);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureImportDesc, archive, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureImportDesc, archive, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureImportDesc, archive, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureImportDesc, archive, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         return archive;
     }
 
@@ -48,17 +48,17 @@ namespace ig
     const Json& TextureLoadDesc::Deserialize(const Json& archive)
     {
         *this = { };
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Format, DXGI_FORMAT_UNKNOWN);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Dimension, ETextureDimension::Tex2D);
-        IG_DESERIALIZE_JSON_SIMPLE(TextureLoadDesc, archive, Width, 0);
-        IG_DESERIALIZE_JSON_SIMPLE(TextureLoadDesc, archive, Height, 0);
-        IG_DESERIALIZE_JSON_SIMPLE(TextureLoadDesc, archive, DepthOrArrayLength, 0);
-        IG_DESERIALIZE_JSON_SIMPLE(TextureLoadDesc, archive, Mips, 0);
-        IG_DESERIALIZE_JSON_SIMPLE(TextureLoadDesc, archive, bIsCubemap, false);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-        IG_DESERIALIZE_ENUM_JSON_SIMPLE(TextureLoadDesc, archive, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, Format, DXGI_FORMAT_UNKNOWN);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, Dimension, ETextureDimension::Tex2D);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureLoadDesc, archive, Width, 0);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureLoadDesc, archive, Height, 0);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureLoadDesc, archive, DepthOrArrayLength, 0);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureLoadDesc, archive, Mips, 0);
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(TextureLoadDesc, archive, bIsCubemap, false);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, Filter, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, AddressModeU, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, AddressModeV, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(TextureLoadDesc, archive, AddressModeW, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
         return archive;
     }
 

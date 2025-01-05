@@ -174,8 +174,12 @@ namespace ig
             drawOpaqueStaticMeshCmdStorage[localFrameIdx]->ForceReset();
         }
 
-        drawCmdSpace[localFrameIdx] =
-            drawOpaqueStaticMeshCmdStorage[localFrameIdx]->Allocate(sceneProxy->GetNumMaxRenderables(localFrameIdx));
+        const Size numRequiredCmds = sceneProxy->GetNumMaxRenderables(localFrameIdx);
+        if (numRequiredCmds > 0)
+        {
+            drawCmdSpace[localFrameIdx] =
+                drawOpaqueStaticMeshCmdStorage[localFrameIdx]->Allocate(sceneProxy->GetNumMaxRenderables(localFrameIdx));
+        }
     }
 
     GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, const World& world, [[maybe_unused]] GpuSyncPoint sceneProxyRepSyncPoint)
@@ -185,7 +189,6 @@ namespace ig
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(meshStorage != nullptr);
         IG_CHECK(sceneProxy != nullptr);
-        IG_CHECK(sceneProxyRepSyncPoint);
 
         // 프레임 마다 업데이트 되는 버퍼 데이터 업데이트
         PerFrameBuffer perFrameBuffer{};

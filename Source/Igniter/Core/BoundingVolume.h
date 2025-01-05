@@ -6,12 +6,20 @@ namespace ig
     struct AxisAlignedBoundingBox
     {
     public:
+        Json& Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
+
+    public:
         Vector3 Min{};
         Vector3 Max{};
     };
 
     struct BoundingSphere
     {
+    public:
+        Json& Serialize(Json& archive) const;
+        const Json& Deserialize(const Json& archive);
+
     public:
         Vector3 Centroid{};
         float Radius = 0.f;

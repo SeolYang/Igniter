@@ -20,7 +20,7 @@ namespace ig
 
     const ig::Json& NameComponent::Deserialize(const Json& archive)
     {
-        IG_DESERIALIZE_JSON_SIMPLE(NameComponent, archive, Name, String{});
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(NameComponent, archive, Name, String{});
         return archive;
     }
 

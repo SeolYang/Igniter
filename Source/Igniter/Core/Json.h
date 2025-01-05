@@ -1,4 +1,6 @@
 #pragma once
+// #sy_todo Json Serialization API 완전히 리팩토링 하기
+
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Log.h"
 
@@ -11,7 +13,7 @@ namespace ig::details
     {
         if (!archive.contains(containerKey))
         {
-            archive[containerKey] = nlohmann::json{ };
+            archive[containerKey] = nlohmann::json{};
         }
 
         IG_CHECK(!archive[containerKey].is_discarded());
@@ -43,11 +45,11 @@ namespace ig::details
 
     template <typename T>
     concept ConvertibleJsonInternalSigned =
-            !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_signed_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
+        !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_signed_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
 
     template <typename T>
     concept ConvertibleJsonInternalUnsigned =
-            !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
+        !std::is_floating_point_v<T> && !std::is_same_v<T, bool> && std::is_unsigned_v<T> && std::is_convertible_v<T, Json::number_unsigned_t>;
 
     template <typename T>
     concept ConvertibleJsonInternalFloat = std::is_floating_point_v<T> && std::is_convertible_v<T, Json::number_float_t>;
@@ -113,6 +115,13 @@ namespace ig::details
 #define IG_SERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) IG_SERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
 
 #define IG_SERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
+
+#define IG_SERIALIZE_JSON_OBJECT(DATA_TYPE, JSON_ARCHIVE, VAR) \
+    {                                                          \
+        Json newArchive{};                                     \
+        VAR.Serialize(newArchive);                             \
+        JSON_ARCHIVE[#DATA_TYPE][#VAR] = newArchive;           \
+    }
 
 /*
  * #sy_note Deserialize 하고 싶은 Json Archive 내부에 원하는 값이 없을 수도 있다. 그에 대해선 아래와 같이 대응 하기로 결정.
@@ -181,10 +190,33 @@ namespace ig::details
         },                                                                                                          \
         FALLBACK)
 
-#define IG_DESERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
+#define IG_DESERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
+    IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, VAR)
 
-#define IG_DESERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
+#define IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
+    IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
+
+#define IG_DESERIALIZE_JSON_GUID_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
+    IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, VAR)
+
+#define IG_DESERIALIZE_JSON_GUID_SIMPLE_FALLBACK(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
     IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
 
-#define IG_DESERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
+#define IG_DESERIALIZE_JSON_ENUM_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
+    IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, VAR)
+
+#define IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
     IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
+
+#define IG_DESERIALIZE_JSON_OBJECT(DATA_TYPE, JSON_ARCHIVE, VAR)                                             \
+    {                                                                                                        \
+        if (!JSON_ARCHIVE[#DATA_TYPE].contains(#VAR))                                                        \
+        {                                                                                                    \
+            IG_LOG(JsonDeserializer, Warning, "{}::{} does not found in json container.", #DATA_TYPE, #VAR); \
+        }                                                                                                    \
+        else                                                                                                 \
+        {                                                                                                    \
+            const Json objectArchive{JSON_ARCHIVE[#DATA_TYPE][#VAR]};                                        \
+            VAR.Deserialize(objectArchive);                                                                  \
+        }                                                                                                    \
+    }
