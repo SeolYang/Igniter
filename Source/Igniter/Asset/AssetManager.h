@@ -132,6 +132,7 @@ namespace ig
             }
         }
 
+        // Reload는 항상 메모리 상에 로드 되어 있는(디스크 상 파일이 아닌)데이터(asset info/description)를 기준으로 한다.
         template <typename T>
         bool Reload(const Guid& guid)
         {
@@ -300,6 +301,14 @@ namespace ig
                 fs::rename(currentAssetPath, oldAssetPath);
                 fs::rename(currentAssetMetadataPath, oldAssetMetadataPath);
 
+                // @@@@@@@@@@@@@@@@@@@@@@@@@@ 여기 부터!!
+                // 1. 이전 데이터들을 일단 저장 전 까지 temp 폴더로 옮겨둔다
+                // 2. currentAssetPath만 oldAssetPath로 재명명 시켜주고, current asset metadata path를 삭제한다
+                // 완전 새롭게 만들어지는 경우 의미가 있지만, 이미 import 되었던 에셋을 다시 import 할 때, 해당 파일은 유효하지 않다
+                // 3. SaveAllChanges 호출 시 temp 폴더를 제거한다
+                // 4. 만약 AssetManager가 종료되는 시점에 temp 폴더가 남아있다면,
+                // temp 폴더 에셋과 메타데이터를 원복시킨다.
+
                 assetInfo.SetGuid(oldAssetInfo.GetGuid());
                 bShouldReload = true;
             }
@@ -373,7 +382,7 @@ namespace ig
                 return false;
             }
 
-            ManagedAsset<T> cachedAsset{assetCache.Load(guid)};
+            ManagedAsset<T> cachedAsset{assetCache.Load(guid, false)};
             if (cachedAsset)
             {
                 T* cachedAssetPtr = assetCache.Lookup(cachedAsset);

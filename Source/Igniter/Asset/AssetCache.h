@@ -12,16 +12,16 @@ namespace ig::details
     public:
         struct Snapshot
         {
-            const Guid     Guid{ };
-            const uint32_t RefCount{ };
+            const Guid Guid{};
+            const uint32_t RefCount{};
         };
 
     public:
         virtual ~TypelessAssetCache() = default;
 
-        virtual EAssetCategory                      GetAssetType() const = 0;
-        virtual void                                Invalidate(const Guid& guid) = 0;
-        virtual [[nodiscard]] bool                  IsCached(const Guid& guid) const = 0;
+        virtual EAssetCategory GetAssetType() const = 0;
+        virtual void Invalidate(const Guid& guid) = 0;
+        virtual [[nodiscard]] bool IsCached(const Guid& guid) const = 0;
         virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
     };
 
@@ -29,12 +29,12 @@ namespace ig::details
     class AssetCache final : public TypelessAssetCache
     {
     public:
-        AssetCache()                      = default;
-        AssetCache(const AssetCache&)     = delete;
+        AssetCache() = default;
+        AssetCache(const AssetCache&) = delete;
         AssetCache(AssetCache&&) noexcept = delete;
-        ~AssetCache() override            = default;
+        ~AssetCache() override = default;
 
-        AssetCache& operator=(const AssetCache&)     = delete;
+        AssetCache& operator=(const AssetCache&) = delete;
         AssetCache& operator=(AssetCache&&) noexcept = delete;
 
         EAssetCategory GetAssetType() const override { return AssetType; }
@@ -46,7 +46,7 @@ namespace ig::details
             ReadWriteLock rwLock{mutex};
             IG_CHECK(!cachedAssets.contains(guid));
             IG_CHECK(!refCounterTable.contains(guid));
-            cachedAssets[guid]    = registry.Create(std::move(asset));
+            cachedAssets[guid] = registry.Create(std::move(asset));
             refCounterTable[guid] = 0;
         }
 
@@ -56,10 +56,10 @@ namespace ig::details
             InvalidateUnsafe(guid);
         }
 
-        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid)
+        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid, const bool bShouldIncreaseRefCounter = true)
         {
             ReadWriteLock rwLock{mutex};
-            return LoadUnsafe(guid);
+            return LoadUnsafe(guid, bShouldIncreaseRefCounter);
         }
 
         [[nodiscard]] bool IsCached(const Guid& guid) const override
@@ -82,7 +82,7 @@ namespace ig::details
 
         void Unload(const AssetInfo& assetInfo)
         {
-            const Guid&   guid = assetInfo.GetGuid();
+            const Guid& guid = assetInfo.GetGuid();
             ReadWriteLock rwLock{mutex};
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
@@ -98,8 +98,8 @@ namespace ig::details
 
         [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const override
         {
-            ReadOnlyLock          lock{mutex};
-            std::vector<Snapshot> refCounterSnapshots{ };
+            ReadOnlyLock lock{mutex};
+            std::vector<Snapshot> refCounterSnapshots{};
             refCounterSnapshots.reserve(refCounterTable.size());
             for (const auto& guidRefCounter : refCounterTable)
             {
@@ -116,13 +116,17 @@ namespace ig::details
             return cachedAssets.contains(guid) && refCounterTable.contains(guid);
         }
 
-        [[nodiscard]] ManagedAsset<T> LoadUnsafe(const Guid& guid)
+        [[nodiscard]] ManagedAsset<T> LoadUnsafe(const Guid& guid, const bool bShouldIncreaseRefCounter = true)
         {
             IG_CHECK(guid.isValid());
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
 
-            ++refCounterTable[guid];
+            if (bShouldIncreaseRefCounter)
+            {
+                ++refCounterTable[guid];
+            }
+
             return cachedAssets[guid];
         }
 
@@ -141,9 +145,9 @@ namespace ig::details
         constexpr static EAssetCategory AssetType = AssetCategoryOf<T>;
 
     private:
-        mutable SharedMutex                  mutex;
+        mutable SharedMutex mutex;
         HandleStorage<T, class AssetManager> registry;
-        UnorderedMap<Guid, ManagedAsset<T>>  cachedAssets{ };
-        UnorderedMap<Guid, uint32_t>         refCounterTable{ };
+        UnorderedMap<Guid, ManagedAsset<T>> cachedAssets{};
+        UnorderedMap<Guid, uint32_t> refCounterTable{};
     };
 } // namespace ig::details
