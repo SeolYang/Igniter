@@ -170,6 +170,7 @@ namespace ig
         if (drawCmdSpace[localFrameIdx].IsValid())
         {
             drawOpaqueStaticMeshCmdStorage[localFrameIdx]->Deallocate(drawCmdSpace[localFrameIdx]);
+            drawCmdSpace[localFrameIdx] = {};
             // 블럭을 합쳐서 fragmentation 최소화
             drawOpaqueStaticMeshCmdStorage[localFrameIdx]->ForceReset();
         }
@@ -222,6 +223,37 @@ namespace ig
         if (!bMainCameraExists)
         {
             return GpuSyncPoint::Invalid();
+        }
+
+        Swapchain& swapchain = renderContext->GetSwapchain();
+        GpuTexture* backBuffer = renderContext->Lookup(swapchain.GetBackBuffer());
+        const GpuView* backBufferRtv = renderContext->Lookup(swapchain.GetRenderTargetView());
+
+        CommandQueue& mainGfxQueue{renderContext->GetMainGfxQueue()};
+        auto renderCmdList = renderContext->GetMainGfxCommandListPool().Request(localFrameIdx, "MainGfx"_fs);
+        if (sceneProxy->GetNumMaxRenderables(localFrameIdx) == 0)
+        {
+            renderCmdList->Open(pso.get());
+
+            renderCmdList->AddPendingTextureBarrier(*backBuffer,
+                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                                                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+                                                    D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            renderCmdList->FlushBarriers();
+
+            renderCmdList->ClearRenderTarget(*backBufferRtv);
+            GpuView* dsv = renderContext->Lookup(dsvs[localFrameIdx]);
+            renderCmdList->ClearDepth(*dsv);
+            renderCmdList->AddPendingTextureBarrier(*backBuffer,
+                                                    D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                                                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                                    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            renderCmdList->FlushBarriers();
+
+            renderCmdList->Close();
+            CommandList* renderCmdLists[]{renderCmdList};
+            mainGfxQueue.ExecuteContexts(renderCmdLists);
+            return mainGfxQueue.MakeSyncPointWithSignal(renderContext->GetMainGfxFence());
         }
 
         const GpuView* staticMeshVertexStorageSrv = renderContext->Lookup(meshStorage->GetStaticMeshVertexStorageShaderResourceView());
@@ -302,12 +334,7 @@ namespace ig
         GpuSyncPoint computeCullingSync = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
 
         // Culling이 완료되면 Command Buffer를 가지고 ExecuteIndirect!
-        Swapchain& swapchain = renderContext->GetSwapchain();
-        GpuTexture* backBuffer = renderContext->Lookup(swapchain.GetBackBuffer());
-        const GpuView* backBufferRtv = renderContext->Lookup(swapchain.GetRenderTargetView());
 
-        CommandQueue& mainGfxQueue{renderContext->GetMainGfxQueue()};
-        auto renderCmdList = renderContext->GetMainGfxCommandListPool().Request(localFrameIdx, "MainGfx"_fs);
         renderCmdList->Open(pso.get());
         renderCmdList->SetDescriptorHeaps(bindlessDescHeaps);
         renderCmdList->SetRootSignature(*bindlessRootSignature);
