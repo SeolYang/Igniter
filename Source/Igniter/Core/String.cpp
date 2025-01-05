@@ -159,7 +159,7 @@ namespace ig
     {
         if (this->hashOfString == other.hashOfString)
         {
-            return true;
+            return 0;
         }
 
         return this->ToStringView().compare(other.ToStringView());
