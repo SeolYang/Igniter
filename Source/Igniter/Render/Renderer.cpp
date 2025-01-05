@@ -287,10 +287,8 @@ namespace ig
                 .DrawOpaqueStaticMeshCmdBufferUav = drawOpaqueStaticMeshCmd->Index};
             computeCullingCmdList->SetRoot32BitConstants(0, computeCullingConstants, 0);
 
-            // todo Compute Shader 내부적으로 numthreads를 정하고, numElements%numThreads만큼의
-            // 작업은 discard 하도록 하기
             constexpr U32 kNumThreads = 16;
-            [[maybe_unused]] const U32 numThreadGroup = ((U32)drawCmdSpace[localFrameIdx].NumElements - 1) / kNumThreads + 1;
+            const U32 numThreadGroup = ((U32)drawCmdSpace[localFrameIdx].NumElements - 1) / kNumThreads + 1;
             computeCullingCmdList->Dispatch(numThreadGroup, 1, 1);
             computeCullingCmdList->Close();
             asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
