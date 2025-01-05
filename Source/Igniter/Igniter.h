@@ -114,7 +114,7 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARA
 using namespace entt::literals;
 #pragma warning(pop)
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if defined(DEBUG) || defined(_DEBUG) || defined(REL_WITH_DEBINFO)
 #define TRACY_ENABLE
 #else
 #endif

@@ -90,6 +90,8 @@ namespace ig
 
     GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
     {
+        ZoneScoped;
+
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();

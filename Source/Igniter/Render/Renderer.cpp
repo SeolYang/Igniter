@@ -177,6 +177,8 @@ namespace ig
 
     GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, const World& world, [[maybe_unused]] GpuSyncPoint sceneProxyRepSyncPoint)
     {
+        ZoneScoped;
+
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(meshStorage != nullptr);
         IG_CHECK(sceneProxy != nullptr);

@@ -17,6 +17,10 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
@@ -140,18 +144,21 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Application\Application.cpp" />
     <ClCompile Include="Asset\AssetManager.cpp" />
@@ -202,6 +209,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ImGui\AssetSelectModalPopup.cpp" />
     <ClCompile Include="ImGui\ImGuiContext.cpp" />
@@ -236,12 +244,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\BasicVertexShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -286,6 +296,15 @@
     <EnableASAN>false</EnableASAN>
     <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -303,6 +322,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Binaries\$(Platform)_$(Configuration)\</OutDir>
@@ -317,6 +339,10 @@
     <IntDir>$(SolutionDir)Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Binaries\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <OutDir>$(SolutionDir)Binaries\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Binaries\Intermediate\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -337,6 +363,9 @@
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgInstalledDir>$(SolutionDir)Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Vcpkg">
+    <VcpkgInstalledDir>$(SolutionDir)Thirdparty\VcpkgInstalled</VcpkgInstalledDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -353,6 +382,8 @@
       <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
       <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
       <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -458,6 +489,47 @@ xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;$(SolutionDir)Thirdparty\fmod\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
+      <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
+      <ExceptionHandling>false</ExceptionHandling>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(TargetDir)\D3D12"
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\D3D12Core.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\AgilitySDK\bin\d3d12SDKLayers.dll" "$(TargetDir)\D3D12" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxcompiler.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\DirectXCompiler\bin\dxil.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\WinPixEventRuntime\bin\WinPixEventRuntime.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmod.dll" "$(TargetDir)" /e /r /i /y /d
+xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /d</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxgi.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;WIN32_MEAN_AND_LEAN;REL_WITH_DEBINFO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Thirdparty\AgilitySDK\include;$(SolutionDir)Thirdparty\SimpleMath;$(SolutionDir)Thirdparty\D3D12MemAlloc;$(SolutionDir)Thirdparty\DirectXTex\include;$(SolutionDir)Thirdparty\DirectXCompiler\include;$(SolutionDir)Thirdparty\WinPixEventRuntime\include;$(SolutionDir)Thirdparty\fmod\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
