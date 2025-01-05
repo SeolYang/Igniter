@@ -7,6 +7,7 @@
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Frieren/Game/System/TestGameSystem.h"
+#include "Frieren/Game/Component/FpsCameraArchetype.h"
 #include "Frieren/Gui/EditorCanvas.h"
 #include "Frieren/Application/TestApp.h"
 
@@ -159,7 +160,8 @@ namespace fe
         // world->Deserialize(dumpedWorld);
 
         //ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        //ig::World& worldInstance = ig::Engine::GetWorld();
+        ig::World& worldInstance = ig::Engine::GetWorld();
+        FpsCmaeraArchetype::Create(worldInstance.GetRegistry(), true);
         //worldInstance = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
 
         ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();

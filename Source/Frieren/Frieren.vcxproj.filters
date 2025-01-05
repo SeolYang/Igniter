@@ -16,9 +16,6 @@
     <Filter Include="Source\Application">
       <UniqueIdentifier>{1f86ff7d-4bd4-431b-ae53-9a95e2421af6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Render">
-      <UniqueIdentifier>{ccad7419-62f6-4763-8acd-d15b50adf1fa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\GUI">
       <UniqueIdentifier>{e07b64ff-aa45-4891-8b15-a93434d14b93}</UniqueIdentifier>
     </Filter>
@@ -95,9 +92,6 @@
     <ClInclude Include="Game\System\JustSpinningSystem.h">
       <Filter>Source\Game\System</Filter>
     </ClInclude>
-    <ClInclude Include="Render\EditorCamera.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Gui\AssetInspector.h">
       <Filter>Source\GUI</Filter>
     </ClInclude>
@@ -121,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="Gui\TextureImportPanel.h">
       <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Component\FpsCameraArchetype.h">
+      <Filter>Source\Game\Component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

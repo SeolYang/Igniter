@@ -49,6 +49,7 @@
   <ItemGroup>
     <ClInclude Include="Application\TestApp.h" />
     <ClInclude Include="Frieren.h" />
+    <ClInclude Include="Game\Component\FpsCameraArchetype.h" />
     <ClInclude Include="Game\Component\FpsCameraController.h" />
     <ClInclude Include="Game\System\CameraPossessSystem.h" />
     <ClInclude Include="Game\System\FpsCameraControllSystem.h" />
@@ -62,7 +63,6 @@
     <ClInclude Include="Gui\StaticMeshImportPanel.h" />
     <ClInclude Include="Gui\StatisticsPanel.h" />
     <ClInclude Include="Gui\TextureImportPanel.h" />
-    <ClInclude Include="Render\EditorCamera.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
