@@ -15,28 +15,12 @@ namespace fe
 {
     AssetInspector::AssetInspector()
     {
-        ig::AssetManager&                assetManager{ig::Engine::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         ig::AssetManager::ModifiedEvent& modifiedEvent{assetManager.GetModifiedEvent()};
         modifiedEvent.Subscribe("AssetInspector"_fs,
-                                [this](const ig::CRef<ig::AssetManager> assetManagerRef)
+                                [this]([[maybe_unused]] const ig::CRef<ig::AssetManager> assetManagerRef)
                                 {
-                                    ig::RecursiveLock       lock{mutex};
-                                    const ig::AssetManager& assetManager{assetManagerRef.get()};
-
-                                    const ig::Guid lastSelectedGuid{mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : ig::Guid{}};
-                                    snapshots            = assetManager.TakeSnapshots();
-                                    bDirty               = true;
-                                    mainTableSelectedIdx = -1;
-                                    if (lastSelectedGuid.isValid())
-                                    {
-                                        const auto foundItr = std::find_if(snapshots.cbegin(), snapshots.cend(),
-                                                                           [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot)
-                                                                           { return snapshot.Info.GetGuid() == lastSelectedGuid; });
-
-                                        mainTableSelectedIdx = foundItr != snapshots.cend() ? static_cast<int>(foundItr - snapshots.cbegin()) : -1;
-                                    }
-
-                                    lastUpdated = ig::chrono::system_clock::now();
+                                    bIsModifyOccured = true;
                                 });
 
         snapshots = assetManager.TakeSnapshots();
@@ -53,6 +37,27 @@ namespace fe
 
     void AssetInspector::OnImGui()
     {
+        if (bIsModifyOccured.exchange(false))
+        {
+            const ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
+
+            const ig::Guid lastSelectedGuid{mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : ig::Guid{}};
+            snapshots = assetManager.TakeSnapshots();
+            bDirty = true;
+            mainTableSelectedIdx = -1;
+            if (lastSelectedGuid.isValid())
+            {
+                const auto foundItr = std::find_if(snapshots.cbegin(), snapshots.cend(),
+                                                   [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot)
+                                                   { return snapshot.Info.GetGuid() == lastSelectedGuid; });
+
+                mainTableSelectedIdx = foundItr != snapshots.cend() ? static_cast<int>(foundItr - snapshots.cbegin()) : -1;
+            }
+
+            lastUpdated = ig::chrono::system_clock::now();
+        }
+
+
         RenderMenuBar();
         RenderMainFrame();
     }
@@ -71,7 +76,7 @@ namespace fe
         if (ImGui::BeginMenu("Filters"))
         {
             std::optional<ig::EAssetCategory> selectedFilter =
-                    ig::ImGuiX::EnumMenuItems<ig::EAssetCategory>(mainTableAssetFilter, ig::EAssetCategory::Unknown);
+                ig::ImGuiX::EnumMenuItems<ig::EAssetCategory>(mainTableAssetFilter, ig::EAssetCategory::Unknown);
             if (ImGui::MenuItem("No Filters") && !selectedFilter)
             {
                 mainTableAssetFilter = ig::EAssetCategory::Unknown;
@@ -89,9 +94,8 @@ namespace fe
     {
         RenderAssetStats();
 
-        ig::RecursiveLock lock{mutex};
-        constexpr float   MainTableRatio = 0.6f;
-        constexpr float   InspectorRatio = 1.f - MainTableRatio;
+        constexpr float MainTableRatio = 0.6f;
+        constexpr float InspectorRatio = 1.f - MainTableRatio;
 
         const float width{ImGui::GetContentRegionAvail().x};
 
@@ -125,9 +129,9 @@ namespace fe
             };
 
             ImGui::Text(
-                    std::format("#Imported {}: {}\t#Cached {}: {}", mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
-                                mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
-                            .c_str());
+                std::format("#Imported {}: {}\t#Cached {}: {}", mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
+                            mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
+                    .c_str());
         }
         else
         {
@@ -135,17 +139,17 @@ namespace fe
             { return snapshot.IsCached(); };
 
             ImGui::Text(
-                    std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(), std::count_if(snapshots.begin(), snapshots.end(), IsCached))
-                            .c_str());
+                std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(), std::count_if(snapshots.begin(), snapshots.end(), IsCached))
+                    .c_str());
         }
     }
 
     void AssetInspector::RenderAssetTable(const ig::EAssetCategory assetCategoryFilter, int& selectedIdx, bool* bSelectionDirtyFlagPtr)
     {
         constexpr ImGuiTableFlags TableFlags =
-                ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable | ImGuiTableFlags_RowBg |
-                ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX |
-                ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_HighlightHoveredColumn;
+            ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable | ImGuiTableFlags_RowBg |
+            ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX |
+            ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_HighlightHoveredColumn;
 
         constexpr uint8_t NumColumns{5};
 
@@ -165,8 +169,8 @@ namespace fe
             {
                 IG_CHECK(sortSpecs->SpecsCount > 0);
                 const ImGuiSortDirection sortDirection{sortSpecs->Specs[0].SortDirection};
-                const int16_t            selectedColumn{sortSpecs->Specs[0].ColumnIndex};
-                const bool               bAscendingRequired{sortDirection == ImGuiSortDirection_Ascending};
+                const int16_t selectedColumn{sortSpecs->Specs[0].ColumnIndex};
+                const bool bAscendingRequired{sortDirection == ImGuiSortDirection_Ascending};
                 std::sort(snapshots.begin(), snapshots.end(),
                           [selectedColumn, bAscendingRequired](const ig::AssetManager::Snapshot& lhs, const ig::AssetManager::Snapshot& rhs)
                           {
@@ -194,14 +198,14 @@ namespace fe
                           });
 
                 sortSpecs->SpecsDirty = false;
-                bDirty                = false;
+                bDirty = false;
             }
 
             // Type // GUID // VIRTUAL PATH // Scope // REF COUNT
             for (int idx = 0; idx < snapshots.size(); ++idx)
             {
                 const ig::AssetManager::Snapshot& snapshot{snapshots[idx]};
-                const ig::EAssetCategory          assetCategory{snapshot.Info.GetCategory()};
+                const ig::EAssetCategory assetCategory{snapshot.Info.GetCategory()};
                 if (assetCategoryFilter == ig::EAssetCategory::Unknown || assetCategoryFilter == assetCategory)
                 {
                     ImGui::TableNextRow();
@@ -236,7 +240,7 @@ namespace fe
         if (mainTableSelectedIdx != -1)
         {
             ig::AssetManager::Snapshot selectedSnapshot{snapshots[mainTableSelectedIdx]};
-            const ig::AssetInfo&       assetInfo{selectedSnapshot.Info};
+            const ig::AssetInfo& assetInfo{selectedSnapshot.Info};
             RenderAssetInfo(assetInfo);
             RenderEdit(assetInfo);
             RenderPreview(assetInfo);
@@ -277,7 +281,7 @@ namespace fe
     void AssetInspector::RenderTexturePreview(const ig::AssetInfo& assetInfo)
     {
         ig::RenderContext& renderContext{ig::Engine::GetRenderContext()};
-        ig::AssetManager&  assetManager{ig::Engine::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
 
         if (bIsMainSelectionDirty)
         {
@@ -304,7 +308,7 @@ namespace fe
 
     void AssetInspector::RenderMaterialEdit(const ig::AssetInfo& assetInfo)
     {
-        ig::AssetManager&                          assetManager{ig::Engine::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         std::optional<ig::Material::LoadDesc> loadDescOpt{assetManager.GetLoadDesc<ig::Material>(assetInfo.GetGuid())};
         ig::ImGuiX::SeparatorText("Material");
         if (!loadDescOpt)
@@ -329,7 +333,7 @@ namespace fe
 
     void AssetInspector::RenderStaticMeshEdit(const ig::AssetInfo& assetInfo)
     {
-        ig::AssetManager&                       assetManager{ig::Engine::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         std::optional<ig::StaticMesh::LoadDesc> loadDescOpt{assetManager.GetLoadDesc<ig::StaticMesh>(assetInfo.GetGuid())};
         ig::ImGuiX::SeparatorText("Static Mesh");
         if (!loadDescOpt)
@@ -368,7 +372,7 @@ namespace fe
             return;
         }
 
-        ig::AssetManager&            assetManager{ig::Engine::GetAssetManager()};
+        ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         std::optional<ig::AssetInfo> assetInfoOpt{assetManager.GetAssetInfo(guid)};
         if (!assetInfoOpt)
         {

@@ -8,11 +8,11 @@ namespace fe
     {
     public:
         AssetInspector();
-        AssetInspector(const AssetInspector&)     = delete;
+        AssetInspector(const AssetInspector&) = delete;
         AssetInspector(AssetInspector&&) noexcept = delete;
         ~AssetInspector();
 
-        AssetInspector& operator=(const AssetInspector&)     = delete;
+        AssetInspector& operator=(const AssetInspector&) = delete;
         AssetInspector& operator=(AssetInspector&&) noexcept = delete;
 
         void OnImGui();
@@ -31,21 +31,21 @@ namespace fe
         void RenderTexturePreview(const ig::AssetInfo& assetInfo);
         void RenderAssetInfo(const ig::AssetInfo& assetInfo);
         void RenderSelector(const char* label, const ig::Guid guid);
-        int  RenderSelectorPopup(const ig::EAssetCategory selectAssetType);
+        int RenderSelectorPopup(const ig::EAssetCategory selectAssetType);
 
     private:
-        ig::RecursiveMutex                      mutex{ };
-        std::vector<ig::AssetManager::Snapshot> snapshots{ };
-        bool                                    bDirty{true};
-        ig::chrono::system_clock::time_point    lastUpdated{ig::chrono::system_clock::now()};
+        std::atomic_bool bIsModifyOccured = true;
+        std::vector<ig::AssetManager::Snapshot> snapshots{};
+        bool bDirty{true};
+        ig::chrono::system_clock::time_point lastUpdated{ig::chrono::system_clock::now()};
 
         ig::EAssetCategory mainTableAssetFilter{ig::EAssetCategory::Unknown};
-        int                mainTableSelectedIdx{-1};
-        bool               bIsMainSelectionDirty = false;
+        int mainTableSelectedIdx{-1};
+        bool bIsMainSelectionDirty = false;
 
-        ig::ManagedAsset<ig::Texture> previewTexture{ };
+        ig::ManagedAsset<ig::Texture> previewTexture{};
 
-        int  selectorTableSelectedIdx{-1};
+        int selectorTableSelectedIdx{-1};
         bool bOpenSelectorPopup = false;
     };
 } // namespace fe
