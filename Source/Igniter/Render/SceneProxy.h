@@ -11,6 +11,14 @@ namespace ig
     class Material;
     class SceneProxy
     {
+        enum class ERenderableType : U32
+        {
+            StaticMesh,
+            SkeletalMesh, // Reserved for future!
+            VolumetricFog,
+            ParticleEmitter,
+        };
+
         // 애초에 GpuProxy, 즉 Entity-Proxy Map을 두개로 관리하면?
         template <typename GpuDataType>
         struct GpuProxy
@@ -27,10 +35,10 @@ namespace ig
         public:
             constexpr static U32 kDataSize = (U32)sizeof(GpuDataType);
 
-            GpuStorage::Allocation StorageSpace{}; // 아마 2개.. 일듯..? 서로다른 local frame 의 gpu storage 로 부터 받았기때문에
+            GpuStorage::Allocation StorageSpace{};
             U32 DataHashValue = IG_NUMERIC_MAX_OF(DataHashValue);
-            GpuDataType GpuData{}; // 얘도 아마 2개로 유지해야할수도
-            bool bMightBeDestroyed = false;
+            GpuDataType GpuData{};
+            bool bMightBeDestroyed = true;
         };
 
         struct MaterialGpuData
@@ -39,7 +47,7 @@ namespace ig
             U32 DiffuseTextureSampler = IG_NUMERIC_MAX_OF(DiffuseTextureSampler);
         };
 
-        struct RenderableGpuData
+        struct StaticMeshGpuData
         {
             U32 TransformStorageIndex = IG_NUMERIC_MAX_OF(TransformStorageIndex);
             U32 MaterialStorageIndex = IG_NUMERIC_MAX_OF(MaterialStorageIndex);
@@ -49,12 +57,19 @@ namespace ig
             U32 NumIndices = 0u;
         };
 
+        struct RenderableGpuData
+        {
+            ERenderableType Type;
+            U32 DataIdx;
+        };
+
         struct LightGpuData
         {
         };
 
         using TransformProxy = GpuProxy<Matrix>;
         using MaterialProxy = GpuProxy<MaterialGpuData>;
+        using StaticMeshProxy = GpuProxy<StaticMeshGpuData>;
         using RenderableProxy = GpuProxy<RenderableGpuData>;
         using LightProxy = GpuProxy<LightGpuData>;
 
@@ -91,6 +106,11 @@ namespace ig
             return materialProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
         }
 
+        [[nodiscard]] RenderHandle<GpuView> GetStaticMeshStorageSrv(const LocalFrameIndex localFrameIdx) const
+        {
+            return staticMeshProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+        }
+
         [[nodiscard]] RenderHandle<GpuView> GetRenderableStorageShaderResourceView(const LocalFrameIndex localFrameIdx) const
         {
             return renderableProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
@@ -108,9 +128,17 @@ namespace ig
 
     private:
         void UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+        // TODO 좀 더 나은 이름을 생각해봐야 할 듯
+        template <typename RenderableComponent>
+        void SubUpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+
+        void UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+
         void UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
-        void UpdateLightProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+
+        void UpdateLightEntityProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
         void PrepareStagingBuffer(const LocalFrameIndex localFrameIdx, const Size requiredSize);
 
@@ -122,7 +150,7 @@ namespace ig
         void ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
                                         CommandList& cmdList,
                                         const Size stagingBufferOffset, const Size replicationSize);
-        void UpdateLightIndicesBuffer(const LocalFrameIndex localFrameIdx);
+        void ReplicateLightIndicesBuffer(const LocalFrameIndex localFrameIdx);
 
     private:
         RenderContext* renderContext = nullptr;
@@ -139,7 +167,10 @@ namespace ig
         constexpr static U32 kNumInitMaterialElements = 128u;
         ProxyPackage<MaterialProxy, ManagedAsset<Material>> materialProxyPackage;
 
-        constexpr static U32 kNumInitRenderableElements = kNumInitTransformElements;
+        constexpr static U32 kNumInitStaticMeshElements = 256u;
+        ProxyPackage<StaticMeshProxy> staticMeshProxyPackage;
+
+        constexpr static U32 kNumInitRenderableElements = 2048u;
         ProxyPackage<RenderableProxy> renderableProxyPackage;
 
         constexpr static U32 kNumInitLightElements = 512u;

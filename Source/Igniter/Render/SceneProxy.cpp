@@ -40,6 +40,13 @@ namespace ig
                     MaterialProxy::kDataSize,
                     kNumInitMaterialElements);
 
+            staticMeshProxyPackage.Storage[localFrameIdx] =
+                MakePtr<GpuStorage>(
+                    renderContext,
+                    String(std::format("StaticMeshDataStorage{}", localFrameIdx)),
+                    StaticMeshProxy::kDataSize,
+                    kNumInitStaticMeshElements);
+
             renderableProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
@@ -75,6 +82,7 @@ namespace ig
         {
             transformProxyPackage.Storage[localFrameIdx]->ForceReset();
             materialProxyPackage.Storage[localFrameIdx]->ForceReset();
+            staticMeshProxyPackage.Storage[localFrameIdx]->ForceReset();
             renderableProxyPackage.Storage[localFrameIdx]->ForceReset();
             lightProxyPackage.Storage[localFrameIdx]->ForceReset();
 
@@ -108,15 +116,23 @@ namespace ig
         updateTransformFuture.get();
         updateMaterialFuture.get();
 
+        UpdateStaticMeshProxy(localFrameIdx, registry);
+
         UpdateRenderableProxy(localFrameIdx, registry);
 
         // #sy_warn Copy시 Alignment 문제 발생 가능!
         const Size transformReplicationSize = TransformProxy::kDataSize * transformProxyPackage.PendingReplications.size();
         const Size transformStagingOffset = 0;
+
         const Size materialReplicationSize = MaterialProxy::kDataSize * materialProxyPackage.PendingReplications.size();
         const Size materialStagingOffset = transformReplicationSize;
+
+        const Size staticMeshReplicationSize = StaticMeshProxy::kDataSize * staticMeshProxyPackage.PendingReplications.size();
+        const Size staticMeshStagingOffset = materialStagingOffset + materialReplicationSize;
+
         const Size renderableReplicationSize = RenderableProxy::kDataSize * renderableProxyPackage.PendingReplications.size();
-        const Size renderableStagingOffset = materialStagingOffset + materialReplicationSize;
+        const Size renderableStagingOffset = staticMeshStagingOffset + staticMeshReplicationSize;
+
         const Size renderableIndicesSize = sizeof(U32) * renderableIndices.size();
         const Size renderableIndicesStagingOffset = renderableStagingOffset + renderableReplicationSize;
 
@@ -128,6 +144,7 @@ namespace ig
 
         auto transformCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "TransformProxyReplication"_fs);
         auto materialCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "MaterialProxyReplication"_fs);
+        auto staticMeshCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "StaticMeshProxyReplication"_fs);
         auto renderableCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableProxyReplication"_fs);
         auto renderableIndicesCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableIndicesReplication"_fs);
 
@@ -149,6 +166,16 @@ namespace ig
                                    materialProxyPackage,
                                    *materialCopyCmdList,
                                    materialStagingOffset);
+            });
+
+        std::future<void> staticMeshRepFuture = std::async(
+            std::launch::async,
+            [this, localFrameIdx, &staticMeshCopyCmdList, staticMeshStagingOffset]
+            {
+                ReplicatePrxoyData(localFrameIdx,
+                                   staticMeshProxyPackage,
+                                   *staticMeshCopyCmdList,
+                                   staticMeshStagingOffset);
             });
 
         std::future<void> renderableRepFuture = std::async(
@@ -175,6 +202,7 @@ namespace ig
 
         transformRepFuture.get();
         materialRepFuture.get();
+        staticMeshRepFuture.get();
         renderableRepFuture.get();
         renderableIndicesRepFuture.get();
 
@@ -198,25 +226,7 @@ namespace ig
             proxy.bMightBeDestroyed = true;
         }
 
-        auto staticMeshEntityView = registry.view<const TransformComponent, const StaticMeshComponent>();
-        for (const auto& [entity, transformComponent, staticMeshComponent] : staticMeshEntityView.each())
-        {
-            if (!entityProxyMap.contains(entity))
-            {
-                entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
-            }
-
-            TransformProxy& transformProxy = entityProxyMap.at(entity);
-            transformProxy.bMightBeDestroyed = false;
-
-            if (const U32 currentDataHashValue = HashInstance(transformComponent);
-                transformProxy.DataHashValue != currentDataHashValue)
-            {
-                transformProxy.GpuData = transformComponent.CreateTransformation();
-                transformProxy.DataHashValue = currentDataHashValue;
-                transformProxyPackage.PendingReplications.emplace_back(entity);
-            }
-        }
+        SubUpdateTransformProxy<StaticMeshComponent>(localFrameIdx, registry);
 
         // Proxy Map이 element deletion에 stable 하지 않기 때문에 별도로 처리
         for (auto& [entity, proxy] : entityProxyMap)
@@ -235,6 +245,34 @@ namespace ig
             storage.Deallocate(extractedElement->second.StorageSpace);
         }
         transformProxyPackage.PendingDestructions.clear();
+    }
+
+    template <typename RenderableComponent>
+    void SceneProxy::SubUpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
+    {
+        auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
+        auto& storage = *transformProxyPackage.Storage[localFrameIdx];
+
+        auto renderableComponentEntityView = registry.view<const TransformComponent, const RenderableComponent>();
+        for (const auto& [entity, transformComponent, _] : renderableComponentEntityView.each())
+        {
+            if (!entityProxyMap.contains(entity))
+            {
+                entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
+            }
+
+            TransformProxy& transformProxy = entityProxyMap.at(entity);
+            IG_CHECK(transformProxy.bMightBeDestroyed);
+            transformProxy.bMightBeDestroyed = false;
+
+            if (const U32 currentDataHashValue = HashInstance(transformComponent);
+                transformProxy.DataHashValue != currentDataHashValue)
+            {
+                transformProxy.GpuData = transformComponent.CreateTransformation();
+                transformProxy.DataHashValue = currentDataHashValue;
+                transformProxyPackage.PendingReplications.emplace_back(entity);
+            }
+        }
     }
 
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
@@ -271,27 +309,32 @@ namespace ig
             }
 
             MaterialProxy& proxy = proxyMap[material];
+            if (!proxy.bMightBeDestroyed)
+            {
+                // Material의 경우 중복으로 소유 될 수 있기 때문에 정확히 한번만 처리하도록 한다.
+                return;
+            }
             proxy.bMightBeDestroyed = false;
 
             const Material* materialPtr = assetManager->Lookup(material);
             IG_CHECK(materialPtr != nullptr);
-            if (const U32 currentDataHashValue = HashInstance(*materialPtr);
+
+            MaterialGpuData newData{};
+            const Texture* diffuseTexturePtr = assetManager->Lookup(materialPtr->GetDiffuse());
+            if (diffuseTexturePtr != nullptr)
+            {
+                const GpuView* srvPtr = renderContext->Lookup(diffuseTexturePtr->GetShaderResourceView());
+                IG_CHECK(srvPtr != nullptr);
+                newData.DiffuseTextureSrv = srvPtr->Index;
+
+                const GpuView* sampler = renderContext->Lookup(diffuseTexturePtr->GetSampler());
+                IG_CHECK(sampler != nullptr);
+                newData.DiffuseTextureSampler = sampler->Index;
+            }
+
+            if (const U32 currentDataHashValue = HashInstance(newData);
                 proxy.DataHashValue != currentDataHashValue)
             {
-                MaterialGpuData newData{};
-
-                const Texture* diffuseTexturePtr = assetManager->Lookup(materialPtr->GetDiffuse());
-                if (diffuseTexturePtr != nullptr)
-                {
-                    const GpuView* srvPtr = renderContext->Lookup(diffuseTexturePtr->GetShaderResourceView());
-                    IG_CHECK(srvPtr != nullptr);
-                    newData.DiffuseTextureSrv = srvPtr->Index;
-
-                    const GpuView* sampler = renderContext->Lookup(diffuseTexturePtr->GetSampler());
-                    IG_CHECK(sampler != nullptr);
-                    newData.DiffuseTextureSampler = sampler->Index;
-                }
-
                 proxy.GpuData = newData;
                 proxy.DataHashValue = currentDataHashValue;
                 proxyPackage.PendingReplications.emplace_back(material);
@@ -332,13 +375,13 @@ namespace ig
         materialProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
-        IG_CHECK(renderableProxyPackage.PendingReplications.empty());
-        IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
+        IG_CHECK(staticMeshProxyPackage.PendingReplications.empty());
+        IG_CHECK(staticMeshProxyPackage.PendingDestructions.empty());
 
-        auto& proxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
-        auto& storage = *renderableProxyPackage.Storage[localFrameIdx];
+        auto& proxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
+        auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
         const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
         const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
 
@@ -348,8 +391,6 @@ namespace ig
             proxy.bMightBeDestroyed = true;
         }
 
-        // TODO 가능한 모든 종류의 renderable object(material을 소유한)로 부터 데이터 수집
-        renderableIndices.clear();
         auto staticMeshEntityView = registry.view<const TransformComponent, const StaticMeshComponent>();
         for (const auto& [entity, transformComponent, staticMeshComponent] : staticMeshEntityView.each())
         {
@@ -361,37 +402,106 @@ namespace ig
             const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
             IG_CHECK(staticMeshPtr != nullptr);
             IG_CHECK(transformProxyMap.contains(entity));
-            IG_CHECK(staticMeshPtr->GetMaterial());
+            IG_CHECK(staticMeshPtr->GetMaterial() && materialProxyMap.contains(staticMeshPtr->GetMaterial()));
 
             if (!proxyMap.contains(entity))
             {
-                proxyMap[entity] = RenderableProxy{.StorageSpace = storage.Allocate(1)};
+                proxyMap[entity] = StaticMeshProxy{.StorageSpace = storage.Allocate(1)};
+            }
+
+            StaticMeshProxy& proxy = proxyMap[entity];
+            IG_CHECK(proxy.bMightBeDestroyed);
+            proxy.bMightBeDestroyed = false;
+
+            const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
+            const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
+            const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
+            const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
+
+            const StaticMeshGpuData newData{
+                .TransformStorageIndex = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex,
+                .MaterialStorageIndex = (U32)materialProxyMap.at(staticMeshPtr->GetMaterial()).StorageSpace.OffsetIndex,
+                .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
+                .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
+                .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
+                .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0)};
+
+            if (const U32 currentDataHashValue = HashInstance(newData);
+                proxy.DataHashValue != currentDataHashValue)
+            {
+                proxy.GpuData = newData;
+                proxy.DataHashValue = currentDataHashValue;
+                staticMeshProxyPackage.PendingReplications.emplace_back(entity);
+            }
+        }
+
+        for (auto& [entity, proxy] : proxyMap)
+        {
+            if (proxy.bMightBeDestroyed)
+            {
+                staticMeshProxyPackage.PendingDestructions.emplace_back(entity);
+            }
+        }
+
+        for (const Entity entity : staticMeshProxyPackage.PendingDestructions)
+        {
+            const auto extractedElement = proxyMap.extract(entity);
+            IG_CHECK(extractedElement.has_value());
+            IG_CHECK(extractedElement->second.StorageSpace.IsValid());
+            storage.Deallocate(extractedElement->second.StorageSpace);
+        }
+        staticMeshProxyPackage.PendingDestructions.clear();
+    }
+
+    void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
+    {
+        IG_CHECK(renderableProxyPackage.PendingReplications.empty());
+        IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
+
+        auto& proxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
+        auto& storage = *renderableProxyPackage.Storage[localFrameIdx];
+        const auto& staticMeshProxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
+
+        for (auto& [entity, proxy] : proxyMap)
+        {
+            IG_CHECK(entity != NullEntity);
+            proxy.bMightBeDestroyed = true;
+        }
+
+        renderableIndices.clear();
+
+        // 만약 Renderable Component를 한 개의 Entity가 여러개 가지고 있더라도
+        // renderable로 반영 되는 건 딱 첫 번째로 인식 되는 컴포넌트다.
+        // TODO 이런 경우 처리를 따로 해야할까?
+        // 가능한 방안은 같은 타입의 Renderable이 아니라면 bMightBeDestroyed를 false로 변경하지 않도록 한다.
+        // 그렇게 하면 가장 먼저 업로드된 정보가 Expired 되어도 정상적으로 해당 Renderable에 대한 Destroy 알고리즘이
+        // 작동하게 되고, 다음 프레임 부터는 정상적으로 새로운 Renderable이 할당되게 된다.
+        auto staticMeshEntityView = registry.view<const TransformComponent, const StaticMeshComponent>();
+        for (const auto& [entity, _, __] : staticMeshEntityView.each())
+        {
+            IG_CHECK(transformProxyPackage.ProxyMap[localFrameIdx].contains(entity));
+            IG_CHECK(staticMeshProxyMap.contains(entity));
+
+            if (!proxyMap.contains(entity))
+            {
+                proxyMap[entity] = RenderableProxy{
+                    .StorageSpace = storage.Allocate(1),
+                    .GpuData = RenderableGpuData{
+                        .Type = ERenderableType::StaticMesh,
+                        .DataIdx = (U32)staticMeshProxyMap.at(entity).StorageSpace.OffsetIndex}};
+
+                renderableProxyPackage.PendingReplications.emplace_back(entity);
             }
 
             RenderableProxy& proxy = proxyMap[entity];
+            if (proxy.GpuData.Type != ERenderableType::StaticMesh)
+            {
+                continue;
+            }
+
+            IG_CHECK(proxy.bMightBeDestroyed);
             proxy.bMightBeDestroyed = false;
             renderableIndices.emplace_back((U32)proxy.StorageSpace.OffsetIndex);
-
-            if (const U32 currentDataHashValue = HashInstance(*staticMeshPtr);
-                proxy.DataHashValue != currentDataHashValue)
-            {
-                const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
-                const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
-                const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
-                const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
-
-                const RenderableGpuData newData{
-                    .TransformStorageIndex = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex,
-                    .MaterialStorageIndex = (U32)materialProxyMap.at(staticMeshPtr->GetMaterial()).StorageSpace.OffsetIndex,
-                    .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
-                    .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
-                    .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
-                    .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0)};
-
-                proxy.GpuData = newData;
-                proxy.DataHashValue = currentDataHashValue;
-                renderableProxyPackage.PendingReplications.emplace_back(entity);
-            }
         }
 
         for (auto& [entity, proxy] : proxyMap)

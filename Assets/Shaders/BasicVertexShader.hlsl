@@ -9,6 +9,9 @@ struct PerFrameData
 
     uint TransformStorageSrv;
     uint MaterialStorageSrv;
+
+    uint StaticMeshStorageSrv;
+
     uint RenderableStorageSrv;
 
     uint RenderableIndicesBufferSrv;
@@ -27,15 +30,15 @@ struct Vertex
 struct PerDrawData
 {
     uint PerFrameDataCbv;
-    uint RenderableIdx;
+    uint StaticMeshDataIdx;
 };
 
-struct RenderableData
+struct StaticMeshData
 {
     uint TransformIdx;
     uint MaterialIdx;
-    uint VertexOffset; // deprecated
-    uint NumVertices; // deprecated
+    uint VertexOffset;
+    uint NumVertices;
     uint IndexOffset;
     uint NumIndices;
 };
@@ -53,15 +56,15 @@ VertexShaderOutput main(uint vertexID : SV_VertexID)
     ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[perDrawData.PerFrameDataCbv];
     StructuredBuffer<Vertex> vertexStorage = ResourceDescriptorHeap[perFrameData.StaticMeshVertexStorageSrv];
     StructuredBuffer<uint> vertexIndexStorage = ResourceDescriptorHeap[perFrameData.VertexIndexStorageSrv];
-    StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
+    StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
     StructuredBuffer<float4x4> transformStorage = ResourceDescriptorHeap[perFrameData.TransformStorageSrv];
 
-    RenderableData renderableData = renderableStorage[perDrawData.RenderableIdx];
-    float4x4 worldMat = transformStorage[renderableData.TransformIdx];
+    StaticMeshData staticMeshData = staticMeshStorage[perDrawData.StaticMeshDataIdx];
+    float4x4 worldMat = transformStorage[staticMeshData.TransformIdx];
     float4x4 worldViewProj = mul(worldMat, perFrameData.ViewProj);
 
-    uint vertexOffset = renderableData.VertexOffset;
-    uint vertexIndexOffset = renderableData.IndexOffset;
+    uint vertexOffset = staticMeshData.VertexOffset;
+    uint vertexIndexOffset = staticMeshData.IndexOffset;
     Vertex vertex = vertexStorage[vertexOffset + vertexIndexStorage[vertexIndexOffset + vertexID]];
 
     VertexShaderOutput output;

@@ -9,6 +9,9 @@ struct PerFrameData
 
     uint TransformStorageSrv;
     uint MaterialStorageSrv;
+
+    uint StaticMeshStorageSrv;
+
     uint RenderableStorageSrv;
 
     uint RenderableIndicesBufferSrv;
@@ -20,7 +23,7 @@ struct PerFrameData
 struct PerDrawData
 {
     uint PerFrameDataCbv;
-    uint RenderableIdx;
+    uint StaticMeshDataIdx;
 };
 
 struct MaterialData
@@ -29,12 +32,12 @@ struct MaterialData
     uint DiffuseTexSampler;
 };
 
-struct RenderableData
+struct StaticMeshData
 {
     uint TransformIdx;
     uint MaterialIdx;
-    uint VertexOffset; // deprecated
-    uint NumVertices; // deprecated
+    uint VertexOffset;
+    uint NumVertices;
     uint IndexOffset;
     uint NumIndices;
 };
@@ -50,11 +53,11 @@ struct PixelShaderInput
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[perDrawData.PerFrameDataCbv];
-    StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
-    RenderableData renderableData = renderableStorage[perDrawData.RenderableIdx];
+    StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
+    StaticMeshData staticMeshData = staticMeshStorage[perDrawData.StaticMeshDataIdx];
 
     StructuredBuffer<MaterialData> materialStorage = ResourceDescriptorHeap[perFrameData.MaterialStorageSrv];
-    MaterialData materialData = materialStorage[renderableData.MaterialIdx];
+    MaterialData materialData = materialStorage[staticMeshData.MaterialIdx];
 
     Texture2D    texture      = ResourceDescriptorHeap[materialData.DiffuseTexSrv];
     SamplerState samplerState = SamplerDescriptorHeap[materialData.DiffuseTexSampler]; // test code material에 sampler도 넣어야함

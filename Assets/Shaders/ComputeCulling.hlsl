@@ -1,7 +1,7 @@
 struct ComputeCullingConstants
 {
     uint PerFrameDataCbv;
-    uint DrawCommandStorageUav;
+    uint DrawOpaqueStaticMeshCmdBufferUav;
 };
 
 struct PerFrameData
@@ -15,6 +15,9 @@ struct PerFrameData
 
     uint TransformStorageSrv;
     uint MaterialStorageSrv;
+
+    uint StaticMeshStorageSrv;
+
     uint RenderableStorageSrv;
 
     uint RenderableIndicesBufferSrv;
@@ -23,20 +26,26 @@ struct PerFrameData
     uint PerFrameDataCbv;
 };
 
-struct RenderableData
+struct StaticMeshData
 {
     uint TransformIdx;
     uint MaterialIdx;
-    uint VertexOffset; // deprecated
-    uint NumVertices; // deprecated
+    uint VertexOffset;
+    uint NumVertices;
     uint IndexOffset;
     uint NumIndices;
 };
 
-struct DrawRenderableCommand
+struct RenderableData
+{
+    uint Type;
+    uint DataIdx;
+};
+
+struct DrawOpaqueStaticMesh
 {
     uint PerFrameDataCbv;
-    uint RenderableIndex;
+    uint StaticMeshDataIdx;
 
     uint VertexCountPerInstance;
     uint InstanceCount;
@@ -59,17 +68,22 @@ void main(uint3 DTid : SV_DispatchThreadID)
     StructuredBuffer<uint> renderableIndices = ResourceDescriptorHeap[perFrameData.RenderableIndicesBufferSrv];
     uint renderableIdx = renderableIndices[DTid.x];
     StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
-
-    DrawRenderableCommand newDrawCmd;
-    newDrawCmd.PerFrameDataCbv = perFrameData.PerFrameDataCbv;
-    newDrawCmd.RenderableIndex = renderableIdx;
-
     RenderableData renderableData = renderableStorage[renderableIdx];
-    newDrawCmd.VertexCountPerInstance = renderableData.NumIndices;
-    newDrawCmd.InstanceCount = 1;
-    newDrawCmd.StartVertexLocation = 0;
-    newDrawCmd.StartInstanceLocation = 0;
+    
+    if (renderableData.Type == 0) // 하드코딩된 Static Mesh Type Enumerator
+    {
+        DrawOpaqueStaticMesh newDrawCmd;
+        newDrawCmd.PerFrameDataCbv = perFrameData.PerFrameDataCbv;
+        newDrawCmd.StaticMeshDataIdx = renderableData.DataIdx;
 
-    AppendStructuredBuffer<DrawRenderableCommand> drawCmdStorage = ResourceDescriptorHeap[gComputeCullingConstantsBuffer.DrawCommandStorageUav];
-    drawCmdStorage.Append(newDrawCmd);
+        StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
+        StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
+        newDrawCmd.VertexCountPerInstance = staticMeshData.NumIndices;
+        newDrawCmd.InstanceCount = 1;
+        newDrawCmd.StartVertexLocation = 0;
+        newDrawCmd.StartInstanceLocation = 0;
+
+        AppendStructuredBuffer<DrawOpaqueStaticMesh> drawCmdBuffer = ResourceDescriptorHeap[gComputeCullingConstantsBuffer.DrawOpaqueStaticMeshCmdBufferUav];
+        drawCmdBuffer.Append(newDrawCmd);
+    }
 }
