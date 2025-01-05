@@ -35,7 +35,8 @@ namespace ig
 
         struct MaterialGpuData
         {
-            U32 DiffuseTextureShaderResourceViewSlot = IG_NUMERIC_MAX_OF(DiffuseTextureShaderResourceViewSlot);
+            U32 DiffuseTextureSrv = IG_NUMERIC_MAX_OF(DiffuseTextureSrv);
+            U32 DiffuseTextureSampler = IG_NUMERIC_MAX_OF(DiffuseTextureSampler);
         };
 
         struct RenderableGpuData
@@ -116,7 +117,7 @@ namespace ig
         template <typename Proxy, typename Owner>
         void ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage,
                                 CommandList& cmdList,
-                                const Size stagingBufferOffset, const Size replicationSize);
+                                const Size stagingBufferOffset);
 
         void ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
                                         CommandList& cmdList,

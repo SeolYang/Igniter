@@ -9,6 +9,7 @@ namespace ig
     class GpuBuffer;
     class GpuView;
     class RootSignature;
+    class CommandSignature;
     class PipelineState;
 
     class CommandList final
@@ -86,6 +87,8 @@ namespace ig
         void DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset = 0, const uint32_t vertexOffset = 0);
 
         void Dispatch(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ);
+
+        void ExecuteIndirect(CommandSignature& cmdSignature, GpuBuffer& cmdBuffer);
 
     private:
         CommandList(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList, const EQueueType targetQueueType);

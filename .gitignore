@@ -368,7 +368,8 @@ Contents/
 Thirdparty/VcpkgInstalled
 log.txt
 imgui.ini
-Assets/
+Assets/*
+!Assets/Shaders
 Resources/
 Fonts/
 .idea/

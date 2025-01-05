@@ -10,6 +10,7 @@
 #include "Igniter/D3D12/PipelineState.h"
 #include "Igniter/D3D12/DescriptorHeap.h"
 #include "Igniter/D3D12/RootSignature.h"
+#include "Igniter/D3D12/CommandSignature.h"
 
 namespace ig
 {
@@ -331,6 +332,18 @@ namespace ig
     {
         IG_CHECK(IsValid());
         cmdList->Dispatch(threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ);
+    }
+
+    void CommandList::ExecuteIndirect(CommandSignature& cmdSignature, GpuBuffer& cmdBuffer)
+    {
+        IG_CHECK(IsValid());
+        const GpuBufferDesc& cmdBufferDesc = cmdBuffer.GetDesc();
+        IG_CHECK(cmdBufferDesc.IsUavCounterEnabled());
+        ID3D12CommandSignature& nativeCmdSignature = cmdSignature.GetNative();
+        ID3D12Resource& nativeCmdBuffer = cmdBuffer.GetNative();
+        cmdList->ExecuteIndirect(&nativeCmdSignature,
+                                 cmdBufferDesc.GetNumElements(), &nativeCmdBuffer, 0,
+                                 &nativeCmdBuffer, cmdBufferDesc.GetUavCounterOffset());
     }
 
     void CommandList::SetRoot32BitConstants(const uint32_t registerSlot,

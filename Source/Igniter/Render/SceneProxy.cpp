@@ -131,32 +131,32 @@ namespace ig
 
         std::future<void> transformRepFuture = std::async(
             std::launch::async,
-            [this, localFrameIdx, &transformCopyCmdList, transformStagingOffset, transformReplicationSize]
+            [this, localFrameIdx, &transformCopyCmdList, transformStagingOffset]
             {
                 ReplicatePrxoyData(localFrameIdx,
                                    transformProxyPackage,
                                    *transformCopyCmdList,
-                                   transformStagingOffset, transformReplicationSize);
+                                   transformStagingOffset);
             });
 
         std::future<void> materialRepFuture = std::async(
             std::launch::async,
-            [this, localFrameIdx, &materialCopyCmdList, materialStagingOffset, materialReplicationSize]
+            [this, localFrameIdx, &materialCopyCmdList, materialStagingOffset]
             {
                 ReplicatePrxoyData(localFrameIdx,
                                    materialProxyPackage,
                                    *materialCopyCmdList,
-                                   materialStagingOffset, materialReplicationSize);
+                                   materialStagingOffset);
             });
 
         std::future<void> renderableRepFuture = std::async(
             std::launch::async,
-            [this, localFrameIdx, &renderableCopyCmdList, renderableStagingOffset, renderableReplicationSize]
+            [this, localFrameIdx, &renderableCopyCmdList, renderableStagingOffset]
             {
                 ReplicatePrxoyData(localFrameIdx,
                                    renderableProxyPackage,
                                    *renderableCopyCmdList,
-                                   renderableStagingOffset, renderableReplicationSize);
+                                   renderableStagingOffset);
             });
 
         // 현재 프레임에서 존재 할 수 있는 Renderable/Light의 수를 카운트(numCurrentRenderables/numCurrentLights) 해서
@@ -282,10 +282,12 @@ namespace ig
                 if (diffuseTexturePtr != nullptr)
                 {
                     const GpuView* srvPtr = renderContext->Lookup(diffuseTexturePtr->GetShaderResourceView());
-                    if (srvPtr != nullptr)
-                    {
-                        newData.DiffuseTextureShaderResourceViewSlot = srvPtr->Index;
-                    }
+                    IG_CHECK(srvPtr != nullptr);
+                    newData.DiffuseTextureSrv = srvPtr->Index;
+
+                    const GpuView* sampler = renderContext->Lookup(diffuseTexturePtr->GetSampler());
+                    IG_CHECK(sampler != nullptr);
+                    newData.DiffuseTextureSampler = sampler->Index;
                 }
 
                 proxy.GpuData = newData;
@@ -435,7 +437,7 @@ namespace ig
     template <typename Proxy, typename Owner>
     void SceneProxy::ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage,
                                         CommandList& cmdList,
-                                        const Size stagingBufferOffset, const Size replicationSize)
+                                        const Size stagingBufferOffset)
     {
         // <1>. UploadInfo = GpuStorageAllocation, GpuData에 대한 참조를 수집
         //
@@ -480,7 +482,6 @@ namespace ig
                       });
 
             // <3>.
-            IG_CHECK(replicationSize > 0 && replicationSize == Proxy::kDataSize * uploadInfos.size());
             GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
             IG_CHECK(stagingBufferPtr != nullptr);
 
