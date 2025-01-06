@@ -212,15 +212,14 @@ namespace ig
         renderableRepFuture.get();
         renderableIndicesRepFuture.get();
 
-        // TODO 메인 렌더링 파이프라인과 동기화 (CPU 상에서 기다리는 것이 아니라)
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
         GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal(renderContext->GetAsyncCopyFence());
-        syncPoint.WaitOnCpu();
         return syncPoint;
     }
 
     void SceneProxy::UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
+        ZoneScoped;
         IG_CHECK(transformProxyPackage.PendingReplications.empty());
         IG_CHECK(transformProxyPackage.PendingDestructions.empty());
 
@@ -283,6 +282,7 @@ namespace ig
 
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
+        ZoneScoped;
         IG_CHECK(materialProxyPackage.PendingReplications.empty());
         IG_CHECK(materialProxyPackage.PendingDestructions.empty());
 
@@ -383,6 +383,7 @@ namespace ig
 
     void SceneProxy::UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
+        ZoneScoped;
         IG_CHECK(staticMeshProxyPackage.PendingReplications.empty());
         IG_CHECK(staticMeshProxyPackage.PendingDestructions.empty());
 
@@ -461,6 +462,7 @@ namespace ig
 
     void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
+        ZoneScoped;
         IG_CHECK(renderableProxyPackage.PendingReplications.empty());
         IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
 
@@ -534,6 +536,7 @@ namespace ig
 
     void SceneProxy::PrepareStagingBuffer(const LocalFrameIndex localFrameIdx, const Size requiredSize)
     {
+        ZoneScoped;
         if (stagingBufferSize[localFrameIdx] < requiredSize)
         {
             if (stagingBuffer[localFrameIdx])

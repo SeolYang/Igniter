@@ -207,6 +207,8 @@ namespace fe
 
     void TestApp::Update(const float deltaTime)
     {
+        ZoneScoped;
+
         ig::World& world = ig::Engine::GetWorld();
         gameSystem->Update(deltaTime, world);
 
