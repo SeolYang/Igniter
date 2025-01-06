@@ -1,10 +1,13 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Memory.h"
+#include "Igniter/Core/Log.h"
 #include "Igniter/Core/Handle.h"
 #ifdef IG_TRACK_LEAKED_HANDLE
 #include "Igniter/Core/DebugTools.h"
 #endif
+
+IG_DEFINE_LOG_CATEGORY(HandleStorageLog);
 
 namespace ig::details
 {
@@ -28,18 +31,19 @@ namespace ig
     class HandleStorage final
     {
     private:
-        using SlotType    = uint32_t;
+        using SlotType = uint32_t;
         using VersionType = uint32_t;
 
     public:
         HandleStorage() { GrowChunks(); }
-        HandleStorage(const HandleStorage&)     = delete;
+        HandleStorage(const HandleStorage&) = delete;
         HandleStorage(HandleStorage&&) noexcept = delete;
 
         ~HandleStorage()
         {
             if (freeSlots.size() != slotCapacity)
             {
+                IG_LOG(HandleStorageLog, Fatal, "{} handles are leaked!!!", (slotCapacity - freeSlots.size()));
                 for (const auto slot : views::iota(0Ui32, slotCapacity))
                 {
                     if (!IsMarkedAsFreeSlot(slot))
@@ -66,7 +70,7 @@ namespace ig
             }
         }
 
-        HandleStorage& operator=(const HandleStorage&)     = delete;
+        HandleStorage& operator=(const HandleStorage&) = delete;
         HandleStorage& operator=(HandleStorage&&) noexcept = delete;
 
         [[nodiscard]] size_t GetCapacity() const { return slotCapacity; }
@@ -77,17 +81,17 @@ namespace ig
         {
             if (freeSlots.empty() && !GrowChunks())
             {
-                return Handle<Ty, Dependency>{ };
+                return Handle<Ty, Dependency>{};
             }
             IG_CHECK(!freeSlots.empty());
 
             Handle<Ty, Dependency> newHandle{0};
-            const SlotType         newSlot = freeSlots.back();
+            const SlotType newSlot = freeSlots.back();
             freeSlots.pop_back();
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
 
             Ty* const slotElementPtr = CalcAddressOfSlot(newSlot);
-            ::new(slotElementPtr) Ty(std::forward<Args>(args)...);
+            ::new (slotElementPtr) Ty(std::forward<Args>(args)...);
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
@@ -166,7 +170,7 @@ namespace ig
              * 만약 2^{VersionBits} 만큼 할당-해제가 발생해 버전 값에 오버플로우가 일어나는 것은, 실제로 맨 처음 할당 되었던 핸들 객체가
              * 더 이상 존재하지 않아서 충돌이 일어나기 힘든 조건이라고 가정.
              */
-            slotVersions[slot]           = (slotVersions[slot] + 1) % MaxVersion;
+            slotVersions[slot] = (slotVersions[slot] + 1) % MaxVersion;
             reservedToDestroyFlags[slot] = false;
 
             Ty* slotElementPtr = CalcAddressOfSlot(slot);
@@ -272,7 +276,7 @@ namespace ig
             }
 
             const uint32_t oldSlotCapacity = slotCapacity;
-            slotCapacity                   = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
+            slotCapacity = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
             freeSlots.reserve(slotCapacity);
             slotVersions.resize(slotCapacity);
             reservedToDestroyFlags.resize(slotCapacity);
@@ -325,7 +329,7 @@ namespace ig
         void MarkAsFreeSlot(const uint32_t slot)
         {
             IG_CHECK(IsSlotInRange(slot));
-            using MagicNumberType              = std::decay_t<decltype(FreeSlotMagicNumber)>;
+            using MagicNumberType = std::decay_t<decltype(FreeSlotMagicNumber)>;
             auto* const freeSlotMagicNumberPtr = reinterpret_cast<MagicNumberType*>(CalcAddressOfSlot(slot));
             IG_CHECK(freeSlotMagicNumberPtr != nullptr);
             *freeSlotMagicNumberPtr = FreeSlotMagicNumber;
@@ -334,7 +338,7 @@ namespace ig
         [[nodiscard]] bool IsMarkedAsFreeSlot(const uint32_t slot) const
         {
             IG_CHECK(IsSlotInRange(slot));
-            using MagicNumberType                    = std::decay_t<decltype(FreeSlotMagicNumber)>;
+            using MagicNumberType = std::decay_t<decltype(FreeSlotMagicNumber)>;
             const auto* const freeSlotMagicNumberPtr = reinterpret_cast<const MagicNumberType*>(CalcAddressOfSlot(slot));
             IG_CHECK(freeSlotMagicNumberPtr != nullptr);
             return *freeSlotMagicNumberPtr == FreeSlotMagicNumber;
@@ -348,27 +352,27 @@ namespace ig
          * LSB 29~61    <32 bits>  : Version Bits
          * LSB 62~63    <2  bits>  : Reserved for future
          */
-        constexpr static size_t SlotSizeInBits    = 30;
-        constexpr static size_t VersionOffset     = SlotSizeInBits;
+        constexpr static size_t SlotSizeInBits = 30;
+        constexpr static size_t VersionOffset = SlotSizeInBits;
         constexpr static size_t VersionSizeInBits = 32;
-        constexpr static size_t ReservedBits      = 2;
+        constexpr static size_t ReservedBits = 2;
         static_assert(VersionOffset + VersionSizeInBits + ReservedBits == 64);
-        constexpr static size_t      SizeOfElement    = sizeof(Ty);
-        constexpr static size_t      MaxNumSlots      = Pow<size_t>(2, SlotSizeInBits);
-        constexpr static VersionType MaxVersion       = Pow<VersionType>(2, VersionSizeInBits) - 1;
-        constexpr static size_t      NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
+        constexpr static size_t SizeOfElement = sizeof(Ty);
+        constexpr static size_t MaxNumSlots = Pow<size_t>(2, SlotSizeInBits);
+        constexpr static VersionType MaxVersion = Pow<VersionType>(2, VersionSizeInBits) - 1;
+        constexpr static size_t NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
         static_assert(NumSlotsPerChunk <= MaxNumSlots);
         constexpr static size_t MaxNumChunks = MaxNumSlots / NumSlotsPerChunk;
 
         constexpr static uint32_t FreeSlotMagicNumber = 0xF3EE6102u;
 
         constexpr static size_t InitialNumChunks = 4;
-        eastl::vector<uint8_t*> chunks{ };
+        eastl::vector<uint8_t*> chunks{};
 
-        uint32_t                   slotCapacity = 0;
-        eastl::vector<SlotType>    freeSlots{ };
-        eastl::vector<VersionType> slotVersions{ };
-        eastl::bitvector<>         reservedToDestroyFlags{ };
+        uint32_t slotCapacity = 0;
+        eastl::vector<SlotType> freeSlots{};
+        eastl::vector<VersionType> slotVersions{};
+        eastl::bitvector<> reservedToDestroyFlags{};
 
 #ifdef IG_TRACK_LEAKED_HANDLE
         eastl::vector<DWORD> lastCallStackTable{};

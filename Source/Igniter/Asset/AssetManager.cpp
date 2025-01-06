@@ -37,7 +37,7 @@ namespace ig
             if (snapshot.IsCached())
             {
                 IG_LOG(AssetManagerLog,
-                       Warning,
+                       Fatal,
                        "Asset {} still cached(alived) with ref count: {}. Please Checks Load-Unload call pair.", snapshot.Info,
                        snapshot.RefCount);
             }
