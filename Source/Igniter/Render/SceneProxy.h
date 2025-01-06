@@ -36,7 +36,7 @@ namespace ig
             constexpr static U32 kDataSize = (U32)sizeof(GpuDataType);
 
             GpuStorage::Allocation StorageSpace{};
-            U32 DataHashValue = IG_NUMERIC_MAX_OF(DataHashValue);
+            U64 DataHashValue = IG_NUMERIC_MAX_OF(DataHashValue);
             GpuDataType GpuData{};
             bool bMightBeDestroyed = true;
         };
@@ -49,6 +49,7 @@ namespace ig
 
         struct StaticMeshGpuData
         {
+            // 애초에 Transform Storage Index는? StaticMesh 자체 데이터와는 무관
             U32 TransformStorageIndex = IG_NUMERIC_MAX_OF(TransformStorageIndex);
             U32 MaterialStorageIndex = IG_NUMERIC_MAX_OF(MaterialStorageIndex);
             U32 VertexOffset = 0u;
@@ -128,9 +129,6 @@ namespace ig
 
     private:
         void UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
-        // TODO 좀 더 나은 이름을 생각해봐야 할 듯
-        template <typename RenderableComponent>
-        void SubUpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
