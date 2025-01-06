@@ -85,7 +85,7 @@ namespace ig
         };
 
     public:
-        explicit SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, const AssetManager& assetManager);
+        explicit SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager);
         SceneProxy(const SceneProxy&) = delete;
         SceneProxy(SceneProxy&&) noexcept = delete;
         ~SceneProxy();
@@ -127,9 +127,9 @@ namespace ig
         }
 
     private:
-        void UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
 
-        void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
         void UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
@@ -151,7 +151,7 @@ namespace ig
 
     private:
         RenderContext* renderContext = nullptr;
-        const AssetManager* assetManager = nullptr;
+        AssetManager* assetManager = nullptr;
         const MeshStorage* meshStorage = nullptr;
 
         InFlightFramesResource<RenderHandle<GpuBuffer>> stagingBuffer;

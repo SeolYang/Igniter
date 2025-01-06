@@ -14,7 +14,7 @@
 
 namespace ig
 {
-    SceneProxy::SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, const AssetManager& assetManager) :
+    SceneProxy::SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager) :
         renderContext(&renderContext),
         meshStorage(&meshStorage),
         assetManager(&assetManager)
@@ -107,7 +107,7 @@ namespace ig
 
         std::future<void> updateMaterialFuture = std::async(
             std::launch::async, [this, localFrameIdx, &registry]
-            { UpdateMaterialProxy(localFrameIdx, registry); });
+            { UpdateMaterialProxy(localFrameIdx); });
 
         // #sy_todo Taskflow를 사용한 작업 흐름 구성?
         std::future<void> updateTransformFuture = std::async(
@@ -264,7 +264,7 @@ namespace ig
         transformProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(materialProxyPackage.PendingReplications.empty());
@@ -279,34 +279,32 @@ namespace ig
             proxy.bMightBeDestroyed = true;
         }
 
-        const auto materialProcedure = [](const RenderContext* renderContext,
-                                          const AssetManager* assetManager,
-                                          ProxyPackage<MaterialProxy, ManagedAsset<Material>>& proxyPackage,
-                                          const LocalFrameIndex localFrameIdx,
-                                          const ManagedAsset<Material> material)
+        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots()};
+        for (const AssetManager::Snapshot& snapshot : snapshots)
         {
-            auto& proxyMap = proxyPackage.ProxyMap[localFrameIdx];
-            auto& storage = *proxyPackage.Storage[localFrameIdx];
-
-            if (!material)
+            if (snapshot.Info.GetCategory() != EAssetCategory::Material)
             {
-                return;
+                continue;
             }
 
-            if (!proxyMap.contains(material))
+            if (!snapshot.IsCached())
             {
-                proxyMap[material] = MaterialProxy{.StorageSpace = storage.Allocate(1)};
+                continue;
             }
 
-            MaterialProxy& proxy = proxyMap[material];
-            if (!proxy.bMightBeDestroyed)
+            ManagedAsset<Material> cachedMaterial = assetManager->LoadMaterial(snapshot.Info.GetGuid());
+            IG_CHECK(cachedMaterial);
+
+            if (!proxyMap.contains(cachedMaterial))
             {
-                // Material의 경우 중복으로 소유 될 수 있기 때문에 정확히 한번만 처리하도록 한다.
-                return;
+                proxyMap[cachedMaterial] = MaterialProxy{.StorageSpace = storage.Allocate(1)};
             }
+
+            MaterialProxy& proxy = proxyMap[cachedMaterial];
+            IG_CHECK(proxy.bMightBeDestroyed);
             proxy.bMightBeDestroyed = false;
 
-            const Material* materialPtr = assetManager->Lookup(material);
+            const Material* materialPtr = assetManager->Lookup(cachedMaterial);
             IG_CHECK(materialPtr != nullptr);
 
             MaterialGpuData newData{};
@@ -327,24 +325,10 @@ namespace ig
             {
                 proxy.GpuData = newData;
                 proxy.DataHashValue = currentDataHashValue;
-                proxyPackage.PendingReplications.emplace_back(material);
-            }
-        };
-
-        // TODO 가능한 모든 종류의 renderable object(material을 소유한)로 부터 material 핸들 수집
-        auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
-        for (const auto& [entity, staticMeshComponent] : staticMeshEntityView.each())
-        {
-            if (!staticMeshComponent.Mesh)
-            {
-                continue;
+                materialProxyPackage.PendingReplications.emplace_back(cachedMaterial);
             }
 
-            const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
-            IG_CHECK(staticMeshPtr != nullptr);
-            materialProcedure(renderContext, assetManager,
-                              materialProxyPackage, localFrameIdx,
-                              staticMeshPtr->GetMaterial());
+            assetManager->Unload(cachedMaterial);
         }
 
         for (auto& [material, proxy] : proxyMap)
@@ -402,11 +386,11 @@ namespace ig
             // Reimport/Reload로 인해서 실제 참조 할 데이터는 변경 될 수 있기 때문에
             const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
             IG_CHECK(staticMeshPtr != nullptr);
-            IG_CHECK(staticMeshPtr->GetMaterial() && materialProxyMap.contains(staticMeshPtr->GetMaterial()));
 
             // Mesh Storage에서 각 핸들은 고유하고, 해제 되기 전까지 해당 핸들에 대한 내부 값은 절대 바뀌지 않는다.
             const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
             const ManagedAsset<Material> material = staticMeshPtr->GetMaterial();
+            IG_CHECK(materialProxyMap.contains(material));
             if (const U64 currentDataHashValue = vertexIndexSpace.Value ^ material.Value;
                 proxy.DataHashValue != currentDataHashValue)
             {
