@@ -51,6 +51,7 @@
     <ClInclude Include="Frieren.h" />
     <ClInclude Include="Game\Component\FpsCameraArchetype.h" />
     <ClInclude Include="Game\Component\FpsCameraController.h" />
+    <ClInclude Include="Game\Component\RandMovementComponent.h" />
     <ClInclude Include="Game\System\CameraPossessSystem.h" />
     <ClInclude Include="Game\System\FpsCameraControllSystem.h" />
     <ClInclude Include="Game\System\JustSpinningSystem.h" />

@@ -6,8 +6,11 @@
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Igniter/ImGui/ImGuiRenderer.h"
+#include "Igniter/Component/StaticMeshComponent.h"
+#include "Igniter/Component/NameComponent.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/Game/Component/FpsCameraArchetype.h"
+#include "Frieren/Game/Component/RandMovementComponent.h"
 #include "Frieren/Gui/EditorCanvas.h"
 #include "Frieren/Application/TestApp.h"
 
@@ -159,10 +162,39 @@ namespace fe
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
 
-        //ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         ig::World& worldInstance = ig::Engine::GetWorld();
-        FpsCmaeraArchetype::Create(worldInstance.GetRegistry(), true);
-        //worldInstance = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
+        ig::Registry& registry = worldInstance.GetRegistry();
+        FpsCmaeraArchetype::Create(registry, true);
+
+        for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
+        {
+            for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)
+            {
+                for (ig::U32 axeGridZ = 0; axeGridZ < kAxeGridSizeZ; ++axeGridZ)
+                {
+                    ig::Entity newAxeEentity = registry.create();
+                    ig::TransformComponent& transform = registry.emplace<ig::TransformComponent>(newAxeEentity);
+                    transform.Position = kAxeOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)axeGridX, (ig::F32)axeGridY, (ig::F32)axeGridZ});
+                    ig::StaticMeshComponent& staticMeshComponent = registry.emplace<ig::StaticMeshComponent>(newAxeEentity);
+                    staticMeshComponent.Mesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);
+                    ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEentity);
+                    nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
+                    RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEentity);
+                    randComp.MoveDirection = ig::Vector3{
+                        ig::Random(-1.f, 1.f),
+                        ig::Random(-1.f, 1.f),
+                        ig::Random(-1.f, 1.f)};
+                    randComp.MoveDirection.Normalize();
+                    randComp.MoveSpeed = ig::Random(0.f, 5.f);
+
+                    randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
+                    randComp.RotateSpeed = ig::Random(0.f, 15.f);
+                }
+            }
+        }
+
+        // worldInstance = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
 
         ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();
         imGuiRenderer.SetTargetCanvas(editorCanvas.get());
@@ -175,7 +207,17 @@ namespace fe
 
     void TestApp::Update(const float deltaTime)
     {
-        gameSystem->Update(deltaTime, ig::Engine::GetWorld());
+        ig::World& world = ig::Engine::GetWorld();
+        gameSystem->Update(deltaTime, world);
+
+        ig::Registry& registry = world.GetRegistry();
+        registry.view<ig::TransformComponent, RandMovementComponent>()
+            .each(
+                [deltaTime]([[maybe_unused]] const ig::Entity entity, ig::TransformComponent& transform, RandMovementComponent& randMove)
+                {
+                    transform.Position += (deltaTime * randMove.MoveDirection * randMove.MoveSpeed);
+                    transform.Rotation *= ig::Quaternion::CreateFromYawPitchRoll(deltaTime * randMove.Rotation * randMove.RotateSpeed);
+                });
     }
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)

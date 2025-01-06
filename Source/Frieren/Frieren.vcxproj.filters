@@ -119,5 +119,8 @@
     <ClInclude Include="Game\Component\FpsCameraArchetype.h">
       <Filter>Source\Game\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Component\RandMovementComponent.h">
+      <Filter>Source\Game\Component</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -35,7 +35,15 @@ namespace ig
         return std::uniform_int_distribution<T>{min, max}(generator);
     }
 
-    inline constexpr float Pi32        = std::numbers::pi_v<float>;
+    template <typename T>
+        requires std::floating_point<T>
+    T Random(const T min, const T max)
+    {
+        static thread_local std::mt19937_64 generator;
+        return std::uniform_real_distribution<T>{min, max}(generator);
+    }
+
+    inline constexpr float Pi32 = std::numbers::pi_v<float>;
     inline constexpr float InversePi32 = 1.f / Pi32;
 
     inline constexpr float Rad2Deg(const float radians)
