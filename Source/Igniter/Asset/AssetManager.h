@@ -14,7 +14,7 @@
 #include "Igniter/Asset/Map.h"
 #include "Igniter/Asset/MapLoader.h"
 
-IG_DEFINE_LOG_CATEGORY(AssetManager);
+IG_DEFINE_LOG_CATEGORY(AssetManagerLog);
 
 namespace ig::details
 {
@@ -138,7 +138,7 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
+                IG_LOG(AssetManagerLog, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
                 return false;
             }
 
@@ -163,7 +163,7 @@ namespace ig
             else
             {
                 IG_CHECK_NO_ENTRY();
-                IG_LOG(AssetManager, Error, "Reload Unsupported Asset Type {}.", AssetCategoryOf<T>);
+                IG_LOG(AssetManagerLog, Error, "Reload Unsupported Asset Type {}.", AssetCategoryOf<T>);
             }
 
             if (bSuceeded)
@@ -212,7 +212,7 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid);
+                IG_LOG(AssetManagerLog, Error, "\"{}\" is invisible to asset manager.", guid);
                 return std::nullopt;
             }
 
@@ -224,7 +224,7 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid);
+                IG_LOG(AssetManagerLog, Error, "\"{}\" is invisible to asset manager.", guid);
                 return;
             }
 
@@ -259,7 +259,7 @@ namespace ig
             constexpr auto AssetType{AssetCategoryOf<T>};
             if (!result.HasOwnership())
             {
-                IG_LOG(AssetManager, Error, "{}: Failed({}) to import \"{}\".", AssetType, result.GetStatus(), resPath);
+                IG_LOG(AssetManagerLog, Error, "{}: Failed({}) to import \"{}\".", AssetType, result.GetStatus(), resPath);
 
                 return std::nullopt;
             }
@@ -279,7 +279,7 @@ namespace ig
                 IG_CHECK(oldAssetInfo.IsValid());
                 if (oldAssetInfo.GetScope() == EAssetScope::Engine)
                 {
-                    IG_LOG(AssetManager, Error, "{}: Failed to import \"{}\". Given virtual path {} was reserved by engine.", AssetType, resPath,
+                    IG_LOG(AssetManagerLog, Error, "{}: Failed to import \"{}\". Given virtual path {} was reserved by engine.", AssetType, resPath,
                            virtualPath);
 
                     return std::nullopt;
@@ -287,34 +287,38 @@ namespace ig
 
                 assetMonitor->Remove(oldAssetInfo.GetGuid(), false);
 
+                const Path tempAssetDirPath = GetTempAssetDirectoryPath(AssetType);
+                if (!fs::exists(tempAssetDirPath))
+                {
+                    fs::create_directory(tempAssetDirPath);
+                }
+
                 const Path oldAssetPath{MakeAssetPath(AssetType, oldAssetInfo.GetGuid())};
                 const Path oldAssetMetadataPath{MakeAssetMetadataPath(AssetType, oldAssetInfo.GetGuid())};
-                const Path currentAssetPath{MakeAssetPath(AssetType, assetInfo.GetGuid())};
-                const Path currentAssetMetadataPath{MakeAssetMetadataPath(AssetType, assetInfo.GetGuid())};
-                IG_CHECK(fs::exists(oldAssetPath));
-                IG_CHECK(fs::exists(oldAssetMetadataPath));
-                IG_CHECK(fs::exists(currentAssetPath));
-                IG_CHECK(fs::exists(currentAssetMetadataPath));
+                const Path oldAssetTempPath{MakeTempAssetPath(AssetType, oldAssetInfo.GetGuid())};
+                const Path oldAssetMetadataTempPath{MakeTempAssetMetadataPath(AssetType, oldAssetInfo.GetGuid())};
 
+                const bool bShouldTemporalizeAsset = !fs::exists(oldAssetTempPath) && fs::exists(oldAssetPath);
+                const bool bShouldTemporalizeMeta = !fs::exists(oldAssetMetadataTempPath) && fs::exists(oldAssetMetadataPath);
+                if (bShouldTemporalizeAsset && bShouldTemporalizeMeta)
+                {
+                    fs::copy(oldAssetPath, oldAssetTempPath);
+                    fs::copy(oldAssetMetadataPath, oldAssetMetadataTempPath);
+                }
                 fs::remove(oldAssetPath);
                 fs::remove(oldAssetMetadataPath);
-                fs::rename(currentAssetPath, oldAssetPath);
-                fs::rename(currentAssetMetadataPath, oldAssetMetadataPath);
 
-                // @@@@@@@@@@@@@@@@@@@@@@@@@@ 여기 부터!!
-                // 1. 이전 데이터들을 일단 저장 전 까지 temp 폴더로 옮겨둔다
-                // 2. currentAssetPath만 oldAssetPath로 재명명 시켜주고, current asset metadata path를 삭제한다
-                // 완전 새롭게 만들어지는 경우 의미가 있지만, 이미 import 되었던 에셋을 다시 import 할 때, 해당 파일은 유효하지 않다
-                // 3. SaveAllChanges 호출 시 temp 폴더를 제거한다
-                // 4. 만약 AssetManager가 종료되는 시점에 temp 폴더가 남아있다면,
-                // temp 폴더 에셋과 메타데이터를 원복시킨다.
+                const Path newAssetPath{MakeAssetPath(AssetType, assetInfo.GetGuid())};
+                const Path newAssetMetadataPath{MakeAssetMetadataPath(AssetType, assetInfo.GetGuid())};
+                fs::rename(newAssetPath, oldAssetPath);
+                fs::rename(newAssetMetadataPath, oldAssetMetadataPath);
 
                 assetInfo.SetGuid(oldAssetInfo.GetGuid());
                 bShouldReload = true;
             }
 
             assetMonitor->Create<T>(assetInfo, desc.LoadDescriptor);
-            IG_LOG(AssetManager, Info, "{}: \"{}\" imported as {} ({}).", AssetType, resPath, virtualPath, assetInfo.GetGuid());
+            IG_LOG(AssetManagerLog, Info, "{}: \"{}\" imported as {} ({}).", AssetType, resPath, virtualPath, assetInfo.GetGuid());
 
             if (bShouldReload)
             {
@@ -329,7 +333,7 @@ namespace ig
         {
             if (!assetMonitor->Contains(guid))
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
+                IG_LOG(AssetManagerLog, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
                 return ManagedAsset<T>{};
             }
 
@@ -342,16 +346,16 @@ namespace ig
                 auto result{loader.Load(desc)};
                 if (!result.HasOwnership())
                 {
-                    IG_LOG(AssetManager, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
+                    IG_LOG(AssetManagerLog, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
                            desc.Info.GetVirtualPath(), guid);
                     return ManagedAsset<T>{};
                 }
 
                 assetCache.Cache(guid, result.Take());
-                IG_LOG(AssetManager, Info, "{} asset {} ({}) cached.", AssetCategoryOf<T>, desc.Info.GetVirtualPath(), guid);
+                IG_LOG(AssetManagerLog, Info, "{} asset {} ({}) cached.", AssetCategoryOf<T>, desc.Info.GetVirtualPath(), guid);
             }
 
-            IG_LOG(AssetManager, Info, "Cache Hit! {} asset {} loaded.", AssetCategoryOf<T>, guid);
+            IG_LOG(AssetManagerLog, Info, "Cache Hit! {} asset {} loaded.", AssetCategoryOf<T>, guid);
             bIsDirty = true;
             return assetCache.Load(guid);
         }
@@ -378,7 +382,7 @@ namespace ig
             auto result{loader.Load(desc)};
             if (!result.HasOwnership())
             {
-                IG_LOG(AssetManager, Error, "{} asset \"{}\" failed to reload.", AssetCategoryOf<T>, guid);
+                IG_LOG(AssetManagerLog, Error, "{} asset \"{}\" failed to reload.", AssetCategoryOf<T>, guid);
                 return false;
             }
 
@@ -406,7 +410,7 @@ namespace ig
         {
             if (!assetResult.HasOwnership())
             {
-                IG_LOG(AssetManager, Error, "{}: Failed({}) to create engine default asset {}.", AssetCategoryOf<T>, assetResult.GetStatus(),
+                IG_LOG(AssetManagerLog, Error, "{}: Failed({}) to create engine default asset {}.", AssetCategoryOf<T>, assetResult.GetStatus(),
                        requiredVirtualPath);
                 return;
             }
@@ -434,6 +438,9 @@ namespace ig
 
         void RegisterEngineDefault();
         void UnRegisterEngineDefault();
+
+        void ClearTempAssets();
+        void RestoreTempAssets();
 
     private:
         Ptr<details::AssetMonitor> assetMonitor;

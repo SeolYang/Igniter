@@ -6,17 +6,17 @@
 
 namespace ig::details
 {
-    inline constexpr std::string_view VirtualPathSeparator      = "\\";
-    inline constexpr std::string_view MetadataExt               = ".metadata";
-    inline constexpr std::string_view ResourceRootPath          = "Resources";
-    inline constexpr std::string_view AssetRootPath             = "Assets";
-    inline constexpr std::string_view TextureAssetRootPath      = "Assets\\Textures";
-    inline constexpr std::string_view StaticMeshAssetRootPath   = "Assets\\StaticMeshes";
+    inline constexpr std::string_view VirtualPathSeparator = "\\";
+    inline constexpr std::string_view MetadataExt = ".metadata";
+    inline constexpr std::string_view ResourceRootPath = "Resources";
+    inline constexpr std::string_view AssetRootPath = "Assets";
+    inline constexpr std::string_view TextureAssetRootPath = "Assets\\Textures";
+    inline constexpr std::string_view StaticMeshAssetRootPath = "Assets\\StaticMeshes";
     inline constexpr std::string_view SkeletalMeshAssetRootPath = "Assets\\SkeletalMeshes";
-    inline constexpr std::string_view AudioAssetRootPath        = "Assets\\Audios";
-    inline constexpr std::string_view ScriptAssetRootPath       = "Assets\\Scripts";
-    inline constexpr std::string_view MaterialAssetRootPath     = "Assets\\Materials";
-    inline constexpr std::string_view MapAssetRootPath          = "Assets\\Maps";
+    inline constexpr std::string_view AudioAssetRootPath = "Assets\\Audios";
+    inline constexpr std::string_view ScriptAssetRootPath = "Assets\\Scripts";
+    inline constexpr std::string_view MaterialAssetRootPath = "Assets\\Materials";
+    inline constexpr std::string_view MapAssetRootPath = "Assets\\Maps";
 } // namespace ig::details
 
 namespace ig
@@ -51,7 +51,7 @@ namespace ig
     struct ResourceInfo
     {
     public:
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
     public:
@@ -71,24 +71,24 @@ namespace ig
         friend class AssetManager;
 
     public:
-        AssetInfo()                     = default;
-        AssetInfo(const AssetInfo&)     = default;
+        AssetInfo() = default;
+        AssetInfo(const AssetInfo&) = default;
         AssetInfo(AssetInfo&&) noexcept = default;
         AssetInfo(const String virtualPath, const EAssetCategory category);
         ~AssetInfo() = default;
 
-        AssetInfo& operator=(const AssetInfo&)     = default;
+        AssetInfo& operator=(const AssetInfo&) = default;
         AssetInfo& operator=(AssetInfo&&) noexcept = default;
 
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
         [[nodiscard]] bool IsValid() const;
 
-        const Guid&                GetGuid() const { return guid; }
-        String                     GetVirtualPath() const { return virtualPath; }
-        EAssetCategory             GetCategory() const { return category; }
-        EAssetScope                GetScope() const { return scope; }
+        const Guid& GetGuid() const { return guid; }
+        String GetVirtualPath() const { return virtualPath; }
+        EAssetCategory GetCategory() const { return category; }
+        EAssetScope GetScope() const { return scope; }
         const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
         void SetVirtualPath(const String newVirtualPath);
@@ -100,18 +100,18 @@ namespace ig
         void SetGuid(const Guid& newGuid) { this->guid = newGuid; }
 
     private:
-        uint64_t            creationTime = 0;
-        Guid                guid{ };
-        String              virtualPath{ };
-        std::vector<String> virtualPathHierarchy{ };
-        EAssetCategory      category = EAssetCategory::Unknown;
-        EAssetScope         scope    = EAssetScope::Managed;
+        uint64_t creationTime = 0;
+        Guid guid{};
+        String virtualPath{};
+        std::vector<String> virtualPathHierarchy{};
+        EAssetCategory category = EAssetCategory::Unknown;
+        EAssetScope scope = EAssetScope::Managed;
     };
 
     template <typename T>
     struct AssetDesc
     {
-        AssetInfo   Info;
+        AssetInfo Info;
         T::LoadDesc LoadDescriptor;
     };
 
@@ -123,11 +123,20 @@ namespace ig
 
     Path GetAssetDirectoryPath(const EAssetCategory type);
 
+    // {ResourcePath}/temp
+    Path GetTempAssetDirectoryPath(const EAssetCategory type);
+
     /* Refer to ./Asset/{AssetType}/{GUID} */
     Path MakeAssetPath(const EAssetCategory type, const Guid& guid);
 
     /* Refer to ./Assets/{AssetType}/{GUID}.metadata */
     Path MakeAssetMetadataPath(const EAssetCategory type, const Guid& guid);
+    
+    /* Refer to ./Assets/{AssetType}/temp/{GUID}.metadata */
+    Path MakeTempAssetPath(const EAssetCategory type, const Guid& guid);
+
+    /* Refer to ./Assets/{AssetType}/temp/{GUID}.metadata */
+    Path MakeTempAssetMetadataPath(const EAssetCategory type, const Guid& guid);
 
     bool HasImportedBefore(const Path& resPath);
 

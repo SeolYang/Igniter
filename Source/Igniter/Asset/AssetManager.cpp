@@ -10,7 +10,6 @@
 namespace ig
 {
     AssetManager::AssetManager(RenderContext& renderContext) :
-        assetMonitor(MakePtr<details::AssetMonitor>()),
         textureImporter(MakePtr<TextureImporter>()),
         textureLoader(MakePtr<TextureLoader>(renderContext)),
         staticMeshImporter(MakePtr<StaticMeshImporter>(*this)),
@@ -18,6 +17,9 @@ namespace ig
         materialImporter(MakePtr<MaterialImporter>(*this)),
         materialLoader(MakePtr<MaterialLoader>(*this))
     {
+        RestoreTempAssets();
+        assetMonitor = MakePtr<details::AssetMonitor>();
+
         assetCaches.emplace_back(MakePtr<details::AssetCache<Texture>>());
         assetCaches.emplace_back(MakePtr<details::AssetCache<StaticMesh>>());
         assetCaches.emplace_back(MakePtr<details::AssetCache<Material>>());
@@ -34,12 +36,14 @@ namespace ig
         {
             if (snapshot.IsCached())
             {
-                IG_LOG(AssetManager,
+                IG_LOG(AssetManagerLog,
                        Warning,
                        "Asset {} still cached(alived) with ref count: {}. Please Checks Load-Unload call pair.", snapshot.Info,
                        snapshot.RefCount);
             }
         }
+
+        RestoreTempAssets();
     }
 
     details::TypelessAssetCache& AssetManager::GetTypelessCache(const EAssetCategory assetType)
@@ -80,7 +84,7 @@ namespace ig
 
     void AssetManager::RegisterEngineDefault()
     {
-        IG_LOG(AssetManager, Info, "Load and register Engine Default Assets to Asset Manager.");
+        IG_LOG(AssetManagerLog, Info, "Load and register Engine Default Assets to Asset Manager.");
 
         /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
         AssetInfo defaultTexInfo{Guid{DefaultTextureGuid}, Texture::EngineDefault, EAssetCategory::Texture, EAssetScope::Engine};
@@ -97,28 +101,28 @@ namespace ig
         AssetInfo defaultMatInfo{Guid{DefaultMaterialGuid}, Material::EngineDefault, EAssetCategory::Material, EAssetScope::Engine};
         RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
 
-        IG_LOG(AssetManager, Info, "Engine Default Assets have been successfully registered to Asset Manager.");
+        IG_LOG(AssetManagerLog, Info, "Engine Default Assets have been successfully registered to Asset Manager.");
     }
 
     void AssetManager::UnRegisterEngineDefault()
     {
-        IG_LOG(AssetManager, Info, "Unload/Unregister Engine Default Assets from Asset Manager.");
+        IG_LOG(AssetManagerLog, Info, "Unload/Unregister Engine Default Assets from Asset Manager.");
 
         Delete(Guid{DefaultTextureGuid});
         Delete(Guid{DefaultWhiteTextureGuid});
         Delete(Guid{DefaultBlackTextureGuid});
         Delete(Guid{DefaultMaterialGuid});
 
-        IG_LOG(AssetManager, Info, "Engine Default Assets have been successfully unregistered from Asset Manager.");
+        IG_LOG(AssetManagerLog, Info, "Engine Default Assets have been successfully unregistered from Asset Manager.");
     }
 
     Guid AssetManager::Import(const String resPath, const TextureImportDesc& config)
     {
         Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
-        const std::optional<Guid>                   guidOpt{ImportImpl<Texture>(resPath, result)};
+        const std::optional<Guid> guidOpt{ImportImpl<Texture>(resPath, result)};
         if (!guidOpt)
         {
-            return Guid{ };
+            return Guid{};
         }
 
         bIsDirty = true;
@@ -140,13 +144,13 @@ namespace ig
     {
         if (!IsValidVirtualPath(virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Load Texture: Invalid Virtual Path {}", virtualPath);
+            IG_LOG(AssetManagerLog, Error, "Load Texture: Invalid Virtual Path {}", virtualPath);
             return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
         }
 
         if (!assetMonitor->Contains(EAssetCategory::Texture, virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
+            IG_LOG(AssetManagerLog, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
             return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
         }
 
@@ -156,7 +160,7 @@ namespace ig
     std::vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(resPath, desc);
-        std::vector<Guid>                                              output;
+        std::vector<Guid> output;
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
         {
@@ -180,14 +184,14 @@ namespace ig
     {
         if (!IsValidVirtualPath(virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Load Static Mesh: Invalid Virtual Path {}", virtualPath);
-            return ManagedAsset<StaticMesh>{ };
+            IG_LOG(AssetManagerLog, Error, "Load Static Mesh: Invalid Virtual Path {}", virtualPath);
+            return ManagedAsset<StaticMesh>{};
         }
 
         if (!assetMonitor->Contains(EAssetCategory::StaticMesh, virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
-            return ManagedAsset<StaticMesh>{ };
+            IG_LOG(AssetManagerLog, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
+            return ManagedAsset<StaticMesh>{};
         }
 
         return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader);
@@ -197,15 +201,15 @@ namespace ig
     {
         if (!IsValidVirtualPath(virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Import Material: Invalid Virtual Path {}", virtualPath);
-            return Guid{ };
+            IG_LOG(AssetManagerLog, Error, "Import Material: Invalid Virtual Path {}", virtualPath);
+            return Guid{};
         }
 
         Result<Material::Desc, EMaterialAssetImportStatus> result{materialImporter->Import(AssetInfo{virtualPath, EAssetCategory::Material}, createDesc)};
-        std::optional<Guid>                           guidOpt{ImportImpl<Material>(virtualPath, result)};
+        std::optional<Guid> guidOpt{ImportImpl<Material>(virtualPath, result)};
         if (!guidOpt)
         {
-            return Guid{ };
+            return Guid{};
         }
 
         bIsDirty = true;
@@ -227,13 +231,13 @@ namespace ig
     {
         if (!IsValidVirtualPath(virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Load Material: Invalid Virtual Path {}", virtualPath);
+            IG_LOG(AssetManagerLog, Error, "Load Material: Invalid Virtual Path {}", virtualPath);
             return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
         }
 
         if (!assetMonitor->Contains(EAssetCategory::Material, virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
+            IG_LOG(AssetManagerLog, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
             return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
         }
 
@@ -244,15 +248,15 @@ namespace ig
     {
         if (!IsValidVirtualPath(virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Failed to create map: Invalid Virtual Path {}", virtualPath);
-            return Guid{ };
+            IG_LOG(AssetManagerLog, Error, "Failed to create map: Invalid Virtual Path {}", virtualPath);
+            return Guid{};
         }
 
         Result<Map::Desc, EMapCreateStatus> result{mapCreator->Import(AssetInfo{virtualPath, EAssetCategory::Map}, desc)};
-        std::optional<Guid>                 guidOpt{ImportImpl<Map>(virtualPath, result)};
+        std::optional<Guid> guidOpt{ImportImpl<Map>(virtualPath, result)};
         if (!guidOpt)
         {
-            return Guid{ };
+            return Guid{};
         }
 
         bIsDirty = true;
@@ -264,7 +268,7 @@ namespace ig
         ManagedAsset<Map> cachedMap{LoadImpl<Map>(guid, *mapLoader)};
         if (!cachedMap)
         {
-            IG_LOG(AssetManager, Error, "Failed to load map {}.", guid);
+            IG_LOG(AssetManagerLog, Error, "Failed to load map {}.", guid);
         }
 
         return cachedMap;
@@ -274,14 +278,14 @@ namespace ig
     {
         if (!IsValidVirtualPath(virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Load Map: Invalid Virtual Path {}", virtualPath);
-            return { };
+            IG_LOG(AssetManagerLog, Error, "Load Map: Invalid Virtual Path {}", virtualPath);
+            return {};
         }
 
         if (!assetMonitor->Contains(EAssetCategory::Map, virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Map \"{}\" is invisible to asset manager.", virtualPath);
-            return { };
+            IG_LOG(AssetManagerLog, Error, "Map \"{}\" is invisible to asset manager.", virtualPath);
+            return {};
         }
 
         return LoadMap(assetMonitor->GetGuid(EAssetCategory::Map, virtualPath));
@@ -291,7 +295,7 @@ namespace ig
     {
         if (!assetMonitor->Contains(guid))
         {
-            IG_LOG(AssetManager, Error, "Failed to delete asset. The asset guid (\"{}\") is invisible to asset manager or invalid.", guid.str());
+            IG_LOG(AssetManagerLog, Error, "Failed to delete asset. The asset guid (\"{}\") is invisible to asset manager or invalid.", guid.str());
             return;
         }
 
@@ -302,13 +306,13 @@ namespace ig
     {
         if (assetType == EAssetCategory::Unknown)
         {
-            IG_LOG(AssetManager, Error, "Failed to delete asset. The asset type is unknown.");
+            IG_LOG(AssetManagerLog, Error, "Failed to delete asset. The asset type is unknown.");
             return;
         }
 
         if (!assetMonitor->Contains(assetType, virtualPath))
         {
-            IG_LOG(AssetManager, Error, "Failed to delete asset. The virtual path is invisible to asset manager or invalid.");
+            IG_LOG(AssetManagerLog, Error, "Failed to delete asset. The virtual path is invisible to asset manager or invalid.");
             return;
         }
 
@@ -328,7 +332,7 @@ namespace ig
         }
         assetMonitor->Remove(guid);
 
-        IG_LOG(AssetManager, Info, "Asset \"{}\" deleted.", guid);
+        IG_LOG(AssetManagerLog, Info, "Asset \"{}\" deleted.", guid);
         bIsDirty = true;
     }
 
@@ -346,13 +350,14 @@ namespace ig
     void AssetManager::SaveAllChanges()
     {
         assetMonitor->SaveAllChanges();
+        ClearTempAssets();
     }
 
     std::optional<AssetInfo> AssetManager::GetAssetInfo(const Guid& guid) const
     {
         if (!assetMonitor->Contains(guid))
         {
-            IG_LOG(AssetManager, Error, "\"{}\" is invisible to asset manager.", guid);
+            IG_LOG(AssetManagerLog, Error, "\"{}\" is invisible to asset manager.", guid);
             return std::nullopt;
         }
 
@@ -361,8 +366,8 @@ namespace ig
 
     std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots() const
     {
-        UnorderedMap<Guid, Snapshot> intermediateSnapshots{ };
-        std::vector<AssetInfo>       assetInfoSnapshots{assetMonitor->TakeSnapshots()};
+        UnorderedMap<Guid, Snapshot> intermediateSnapshots{};
+        std::vector<AssetInfo> assetInfoSnapshots{assetMonitor->TakeSnapshots()};
         for (const AssetInfo& assetInfoSnapshot : assetInfoSnapshots)
         {
             if (assetInfoSnapshot.IsValid())
@@ -382,7 +387,7 @@ namespace ig
             }
         }
 
-        std::vector<Snapshot> snapshots{ };
+        std::vector<Snapshot> snapshots{};
         snapshots.reserve(intermediateSnapshots.size());
         for (const auto& guidSnapshot : intermediateSnapshots)
         {
@@ -399,4 +404,60 @@ namespace ig
             bIsDirty = false;
         }
     }
+
+    void AssetManager::ClearTempAssets()
+    {
+        for (auto category : magic_enum::enum_values<EAssetCategory>())
+        {
+            if (category == EAssetCategory::Unknown)
+            {
+                continue;
+            }
+
+            std::error_code errorCode{};
+            const U64 numRemovedFiles = fs::remove_all(GetTempAssetDirectoryPath(category), errorCode);
+            if (!errorCode)
+            {
+                IG_LOG(AssetManagerLog, Info, "Successfully removed {} temp {} assets.", numRemovedFiles, category);
+            }
+            else
+            {
+                IG_LOG(AssetManagerLog, Warning, "Failed to remove temp {} assets: {}", category, errorCode.message());
+            }
+        }
+    }
+
+    void AssetManager::RestoreTempAssets()
+    {
+        for (auto category : magic_enum::enum_values<EAssetCategory>())
+        {
+            if (category == EAssetCategory::Unknown)
+            {
+                continue;
+            }
+
+            const Path tempAssetDirPath = GetTempAssetDirectoryPath(category);
+            if (!fs::exists(tempAssetDirPath))
+            {
+                continue;
+            }
+
+            std::error_code errorCode{};
+            fs::copy(GetTempAssetDirectoryPath(category), GetAssetDirectoryPath(category),
+                     fs::copy_options::recursive | fs::copy_options::overwrite_existing,
+                     errorCode);
+
+            if (!errorCode)
+            {
+                IG_LOG(AssetManagerLog, Info, "Successfully restored temp {} assets.", category);
+            }
+            else
+            {
+                IG_LOG(AssetManagerLog, Warning, "Failed to restore temp {} assets: {}", category, errorCode.message());
+            }
+
+            fs::remove_all(tempAssetDirPath);
+        }
+    }
+
 } // namespace ig

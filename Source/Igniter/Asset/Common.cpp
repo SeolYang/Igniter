@@ -105,6 +105,11 @@ namespace ig
         }
     }
 
+    Path GetTempAssetDirectoryPath(const EAssetCategory type)
+    {
+        return GetAssetDirectoryPath(type) / "temp";
+    }
+
     Path MakeAssetPath(const EAssetCategory type, const xg::Guid& guid)
     {
         IG_CHECK(guid.isValid() && type != EAssetCategory::Unknown);
@@ -114,6 +119,23 @@ namespace ig
     Path MakeAssetMetadataPath(const EAssetCategory type, const xg::Guid& guid)
     {
         Path newAssetPath{MakeAssetPath(type, guid)};
+        if (!newAssetPath.empty())
+        {
+            newAssetPath.replace_extension(details::MetadataExt);
+        }
+
+        return newAssetPath;
+    }
+
+    Path MakeTempAssetPath(const EAssetCategory type, const Guid& guid)
+    {
+        IG_CHECK(guid.isValid() && type != EAssetCategory::Unknown);
+        return Path{GetAssetDirectoryPath(type)} / "temp" / guid.str();
+    }
+
+    Path MakeTempAssetMetadataPath(const EAssetCategory type, const Guid& guid)
+    {
+        Path newAssetPath{MakeTempAssetPath(type, guid)};
         if (!newAssetPath.empty())
         {
             newAssetPath.replace_extension(details::MetadataExt);
