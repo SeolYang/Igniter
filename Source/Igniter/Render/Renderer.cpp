@@ -29,7 +29,7 @@ namespace ig
     struct DrawOpaqueStaticMeshCommand
     {
         U32 PerFrameDataCbv = IG_NUMERIC_MAX_OF(PerFrameDataCbv);
-        U32 StaticMeshDataIdx = IG_NUMERIC_MAX_OF(StaticMeshDataIdx);
+        U32 RenderableDataIdx = IG_NUMERIC_MAX_OF(RenderableDataIdx);
         D3D12_DRAW_ARGUMENTS DrawIndexedArguments;
     };
 

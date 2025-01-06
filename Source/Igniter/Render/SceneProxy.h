@@ -49,9 +49,7 @@ namespace ig
 
         struct StaticMeshGpuData
         {
-            // 애초에 Transform Storage Index는? StaticMesh 자체 데이터와는 무관
-            U32 TransformStorageIndex = IG_NUMERIC_MAX_OF(TransformStorageIndex);
-            U32 MaterialStorageIndex = IG_NUMERIC_MAX_OF(MaterialStorageIndex);
+            U32 MaterialDataIdx = IG_NUMERIC_MAX_OF(MaterialDataIdx);
             U32 VertexOffset = 0u;
             U32 NumVertices = 0u;
             U32 IndexOffset = 0u;
@@ -62,6 +60,7 @@ namespace ig
         {
             ERenderableType Type;
             U32 DataIdx;
+            U32 TransformDataIdx = IG_NUMERIC_MAX_OF(TransformDataIdx);
         };
 
         struct LightGpuData
@@ -134,7 +133,7 @@ namespace ig
 
         void UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
-        void UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateRenderableProxy(const LocalFrameIndex localFrameIdx);
 
         void UpdateLightEntityProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 

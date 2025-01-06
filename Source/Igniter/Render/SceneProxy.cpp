@@ -105,18 +105,27 @@ namespace ig
         IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();
 
+        std::future<void> updateMaterialFuture = std::async(
+            std::launch::async, [this, localFrameIdx, &registry]
+            { UpdateMaterialProxy(localFrameIdx, registry); });
+
         // #sy_todo Taskflow를 사용한 작업 흐름 구성?
         std::future<void> updateTransformFuture = std::async(
             std::launch::async, [this, localFrameIdx, &registry]
             { UpdateTransformProxy(localFrameIdx, registry); });
 
-        UpdateMaterialProxy(localFrameIdx, registry);
+        std::future<void> updateStaticMeshFuture = std::async(
+            std::launch::async,
+            [this, localFrameIdx, &registry, &updateMaterialFuture]
+            {
+                updateMaterialFuture.wait();
+                UpdateStaticMeshProxy(localFrameIdx, registry);
+            });
 
         updateTransformFuture.get();
+        updateStaticMeshFuture.get();
 
-        UpdateStaticMeshProxy(localFrameIdx, registry);
-
-        UpdateRenderableProxy(localFrameIdx, registry);
+        UpdateRenderableProxy(localFrameIdx);
 
         // #sy_warn Copy시 Alignment 문제 발생 가능!
         const Size transformReplicationSize = TransformProxy::kDataSize * transformProxyPackage.PendingReplications.size();
@@ -151,33 +160,22 @@ namespace ig
         auto renderableCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableProxyReplication"_fs);
         auto renderableIndicesCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "RenderableIndicesReplication"_fs);
 
-        std::future<void> materialRepFuture = std::async(
+        // 상대적으로 업로드 시간이 작을 가능성이 높은 데이터를 묶는다
+        std::future<void> lightWeightRepFuture = std::async(
             std::launch::async,
-            [this, localFrameIdx, &materialCopyCmdList, materialStagingOffset]
+            [this, localFrameIdx, &materialCopyCmdList, materialStagingOffset, &staticMeshCopyCmdList, staticMeshStagingOffset, &renderableCopyCmdList, renderableStagingOffset]
             {
-                ZoneScopedN("MaterialRep");
+                ZoneScopedN("LightWeightDataRep");
                 ReplicatePrxoyData(localFrameIdx,
                                    materialProxyPackage,
                                    *materialCopyCmdList,
                                    materialStagingOffset);
-            });
 
-        std::future<void> staticMeshRepFuture = std::async(
-            std::launch::async,
-            [this, localFrameIdx, &staticMeshCopyCmdList, staticMeshStagingOffset]
-            {
-                ZoneScopedN("StaticMeshRep");
                 ReplicatePrxoyData(localFrameIdx,
                                    staticMeshProxyPackage,
                                    *staticMeshCopyCmdList,
                                    staticMeshStagingOffset);
-            });
 
-        std::future<void> renderableRepFuture = std::async(
-            std::launch::async,
-            [this, localFrameIdx, &renderableCopyCmdList, renderableStagingOffset]
-            {
-                ZoneScopedN("RenderableRep");
                 ReplicatePrxoyData(localFrameIdx,
                                    renderableProxyPackage,
                                    *renderableCopyCmdList,
@@ -205,9 +203,7 @@ namespace ig
                                transformStagingOffset);
         }
 
-        materialRepFuture.get();
-        staticMeshRepFuture.get();
-        renderableRepFuture.get();
+        lightWeightRepFuture.get();
         renderableIndicesRepFuture.get();
 
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
@@ -243,7 +239,7 @@ namespace ig
             if (const U64 currentDataHashValue = HashInstance(transformComponent);
                 transformProxy.DataHashValue != currentDataHashValue)
             {
-                transformProxy.GpuData = ConvertToShaderSuitableForm(transformComponent.CreateTransformation());
+                transformProxy.GpuData = transformComponent.CreateTransformation();
                 transformProxy.DataHashValue = currentDataHashValue;
                 transformProxyPackage.PendingReplications.emplace_back(entity);
             }
@@ -377,7 +373,6 @@ namespace ig
 
         auto& proxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
-        const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
         const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
 
         for (auto& [entity, proxy] : proxyMap)
@@ -407,7 +402,6 @@ namespace ig
             // Reimport/Reload로 인해서 실제 참조 할 데이터는 변경 될 수 있기 때문에
             const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
             IG_CHECK(staticMeshPtr != nullptr);
-            IG_CHECK(transformProxyMap.contains(entity));
             IG_CHECK(staticMeshPtr->GetMaterial() && materialProxyMap.contains(staticMeshPtr->GetMaterial()));
 
             // Mesh Storage에서 각 핸들은 고유하고, 해제 되기 전까지 해당 핸들에 대한 내부 값은 절대 바뀌지 않는다.
@@ -421,8 +415,7 @@ namespace ig
                 const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
 
                 proxy.GpuData = StaticMeshGpuData{
-                    .TransformStorageIndex = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex,
-                    .MaterialStorageIndex = (U32)materialProxyMap.at(material).StorageSpace.OffsetIndex,
+                    .MaterialDataIdx = (U32)materialProxyMap.at(material).StorageSpace.OffsetIndex,
                     .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
                     .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
                     .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
@@ -451,17 +444,18 @@ namespace ig
         staticMeshProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderableProxyPackage.PendingReplications.empty());
         IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
 
-        auto& proxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
-        auto& storage = *renderableProxyPackage.Storage[localFrameIdx];
+        auto& renderableProxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
+        auto& renderableStorage = *renderableProxyPackage.Storage[localFrameIdx];
         const auto& staticMeshProxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
+        const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
 
-        for (auto& [entity, proxy] : proxyMap)
+        for (auto& [entity, proxy] : renderableProxyMap)
         {
             IG_CHECK(entity != NullEntity);
             proxy.bMightBeDestroyed = true;
@@ -475,28 +469,23 @@ namespace ig
         // 가능한 방안은 같은 타입의 Renderable이 아니라면 bMightBeDestroyed를 false로 변경하지 않도록 한다.
         // 그렇게 하면 가장 먼저 업로드된 정보가 Expired 되어도 정상적으로 해당 Renderable에 대한 Destroy 알고리즘이
         // 작동하게 되고, 다음 프레임 부터는 정상적으로 새로운 Renderable이 할당되게 된다.
-        auto staticMeshEntityView = registry.view<const TransformComponent, const StaticMeshComponent>();
-        for (const auto& [entity, _, __] : staticMeshEntityView.each())
+        for (const auto& [entity, _] : staticMeshProxyMap.values())
         {
-            IG_CHECK(transformProxyPackage.ProxyMap[localFrameIdx].contains(entity));
-            if (!staticMeshProxyMap.contains(entity))
-            {
-                // 조건에 해당하는 Entity는 있으나 아직 준비 되지 않음 (ex. Static Mesh 미설정)
-                continue;
-            }
+            IG_CHECK(transformProxyMap.contains(entity));
 
-            if (!proxyMap.contains(entity))
+            if (!renderableProxyMap.contains(entity))
             {
-                proxyMap[entity] = RenderableProxy{
-                    .StorageSpace = storage.Allocate(1),
+                renderableProxyMap[entity] = RenderableProxy{
+                    .StorageSpace = renderableStorage.Allocate(1),
                     .GpuData = RenderableGpuData{
                         .Type = ERenderableType::StaticMesh,
-                        .DataIdx = (U32)staticMeshProxyMap.at(entity).StorageSpace.OffsetIndex}};
+                        .DataIdx = (U32)staticMeshProxyMap.at(entity).StorageSpace.OffsetIndex,
+                        .TransformDataIdx = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex}};
 
                 renderableProxyPackage.PendingReplications.emplace_back(entity);
             }
 
-            RenderableProxy& proxy = proxyMap[entity];
+            RenderableProxy& proxy = renderableProxyMap[entity];
             if (proxy.GpuData.Type != ERenderableType::StaticMesh)
             {
                 continue;
@@ -507,7 +496,7 @@ namespace ig
             renderableIndices.emplace_back((U32)proxy.StorageSpace.OffsetIndex);
         }
 
-        for (auto& [entity, proxy] : proxyMap)
+        for (auto& [entity, proxy] : renderableProxyMap)
         {
             if (proxy.bMightBeDestroyed)
             {
@@ -517,10 +506,10 @@ namespace ig
 
         for (const Entity entity : renderableProxyPackage.PendingDestructions)
         {
-            const auto extractedElement = proxyMap.extract(entity);
+            const auto extractedElement = renderableProxyMap.extract(entity);
             IG_CHECK(extractedElement.has_value());
             IG_CHECK(extractedElement->second.StorageSpace.IsValid());
-            storage.Deallocate(extractedElement->second.StorageSpace);
+            renderableStorage.Deallocate(extractedElement->second.StorageSpace);
         }
         renderableProxyPackage.PendingDestructions.clear();
     }

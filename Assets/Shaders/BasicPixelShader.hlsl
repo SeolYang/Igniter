@@ -23,7 +23,7 @@ struct PerFrameData
 struct PerDrawData
 {
     uint PerFrameDataCbv;
-    uint StaticMeshDataIdx;
+    uint RenderableDataIdx;
 };
 
 struct MaterialData
@@ -32,9 +32,15 @@ struct MaterialData
     uint DiffuseTexSampler;
 };
 
+struct RenderableData
+{
+    uint Type;
+    uint DataIdx;
+    uint TransformIdx;
+};
+
 struct StaticMeshData
 {
-    uint TransformIdx;
     uint MaterialIdx;
     uint VertexOffset;
     uint NumVertices;
@@ -53,8 +59,10 @@ struct PixelShaderInput
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[perDrawData.PerFrameDataCbv];
+    StructuredBuffer<RenderableData> renderableDataStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
     StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
-    StaticMeshData staticMeshData = staticMeshStorage[perDrawData.StaticMeshDataIdx];
+    RenderableData renderableData = renderableDataStorage[perDrawData.RenderableDataIdx];
+    StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
 
     StructuredBuffer<MaterialData> materialStorage = ResourceDescriptorHeap[perFrameData.MaterialStorageSrv];
     MaterialData materialData = materialStorage[staticMeshData.MaterialIdx];

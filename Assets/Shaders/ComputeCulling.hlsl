@@ -28,7 +28,6 @@ struct PerFrameData
 
 struct StaticMeshData
 {
-    uint TransformIdx;
     uint MaterialIdx;
     uint VertexOffset;
     uint NumVertices;
@@ -40,12 +39,13 @@ struct RenderableData
 {
     uint Type;
     uint DataIdx;
+    uint TransformIdx;
 };
 
 struct DrawOpaqueStaticMesh
 {
     uint PerFrameDataCbv;
-    uint StaticMeshDataIdx;
+    uint RenderableDataIdx;
 
     uint VertexCountPerInstance;
     uint InstanceCount;
@@ -74,7 +74,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     {
         DrawOpaqueStaticMesh newDrawCmd;
         newDrawCmd.PerFrameDataCbv = perFrameData.PerFrameDataCbv;
-        newDrawCmd.StaticMeshDataIdx = renderableData.DataIdx;
+        newDrawCmd.RenderableDataIdx = renderableIdx;
 
         StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
         StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
