@@ -22,6 +22,7 @@
 #include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Render/Renderer.h"
 
+IG_DECLARE_LOG_CATEGORY(RendererLog);
 IG_DEFINE_LOG_CATEGORY(RendererLog);
 
 namespace ig

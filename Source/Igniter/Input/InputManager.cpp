@@ -2,7 +2,8 @@
 #include "Igniter/Core/Log.h"
 #include "Igniter/Input/InputManager.h"
 
-IG_DEFINE_LOG_CATEGORY(InputManager);
+IG_DECLARE_LOG_CATEGORY(InputManagerLog);
+IG_DEFINE_LOG_CATEGORY(InputManagerLog);
 
 namespace ig
 {
@@ -76,7 +77,7 @@ namespace ig
                 HWND window = CreateWindowEx(0, TEXT("Message"), NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
                 if (window == NULL)
                 {
-                    IG_LOG(InputManager, Fatal, "Failed to create raw input message window. {:#X}", GetLastError());
+                    IG_LOG(InputManagerLog, Fatal, "Failed to create raw input message window. {:#X}", GetLastError());
                     return;
                 }
 
@@ -87,7 +88,7 @@ namespace ig
                 rawMouse.hwndTarget  = window;
                 if (RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse)) == FALSE)
                 {
-                    IG_LOG(InputManager, Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
+                    IG_LOG(InputManagerLog, Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
                     DestroyWindow(window);
                     return;
                 }
@@ -142,19 +143,19 @@ namespace ig
     {
         if (!name.IsValid() || name.IsEmpty())
         {
-            IG_LOG(InputManager, Error, "The Name string has invalid or empty value.");
+            IG_LOG(InputManagerLog, Error, "The Name string has invalid or empty value.");
             return;
         }
 
         if (input == EInput::None)
         {
-            IG_LOG(InputManager, Error, "Action {} cannot mapped with 'None'.", name);
+            IG_LOG(InputManagerLog, Error, "Action {} cannot mapped with 'None'.", name);
             return;
         }
 
         if (nameActionTable.contains(name))
         {
-            IG_LOG(InputManager, Error, "The Map action ignored due to duplication of {} mapping.");
+            IG_LOG(InputManagerLog, Error, "The Map action ignored due to duplication of {} mapping.");
             return;
         }
 
@@ -162,14 +163,14 @@ namespace ig
         nameActionTable[name]                        = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
         IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
         actionSets[ToUnderlying(input)].insert(newHandle);
-        IG_LOG(InputManager, Info, "Action {} mapped to '{}'", name, input);
+        IG_LOG(InputManagerLog, Info, "Action {} mapped to '{}'", name, input);
     }
 
     void InputManager::UnmapAction(const String name)
     {
         if (!nameActionTable.contains(name))
         {
-            IG_LOG(InputManager, Error, "Action {} does not exists.", name);
+            IG_LOG(InputManagerLog, Error, "Action {} does not exists.", name);
             return;
         }
 
@@ -177,26 +178,26 @@ namespace ig
         IG_CHECK(actionSets[ToUnderlying(mappedInput)].contains(handle));
         actionSets[ToUnderlying(mappedInput)].erase(handle);
         actionRegistry.Destroy(handle);
-        IG_LOG(InputManager, Info, "Action {} unmapped from '{}'.", name, mappedInput);
+        IG_LOG(InputManagerLog, Info, "Action {} unmapped from '{}'.", name, mappedInput);
     }
 
     void InputManager::MapAxis(const String name, const EInput input, const float scale)
     {
         if (!name.IsValid() || name.IsEmpty())
         {
-            IG_LOG(InputManager, Error, "The Name string has invalid or empty value.");
+            IG_LOG(InputManagerLog, Error, "The Name string has invalid or empty value.");
             return;
         }
 
         if (input == EInput::None)
         {
-            IG_LOG(InputManager, Error, "Axis {} cannot mapped with 'None'.", name);
+            IG_LOG(InputManagerLog, Error, "Axis {} cannot mapped with 'None'.", name);
             return;
         }
 
         if (nameActionTable.contains(name))
         {
-            IG_LOG(InputManager, Error, "The Map axis ignored due to duplication of {} mapping.");
+            IG_LOG(InputManagerLog, Error, "The Map axis ignored due to duplication of {} mapping.");
             return;
         }
 
@@ -204,14 +205,14 @@ namespace ig
         nameAxisTable[name]                        = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
         IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
         axisSets[ToUnderlying(input)].insert(newHandle);
-        IG_LOG(InputManager, Info, "Axis {} mapped to '{}'", name, input);
+        IG_LOG(InputManagerLog, Info, "Axis {} mapped to '{}'", name, input);
     }
 
     void InputManager::UnmapAxis(const String name)
     {
         if (!nameAxisTable.contains(name))
         {
-            IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
+            IG_LOG(InputManagerLog, Error, "Axis {} does not exists.", name);
             return;
         }
 
@@ -219,14 +220,14 @@ namespace ig
         IG_CHECK(axisSets[ToUnderlying(mappedInput)].contains(handle));
         axisSets[ToUnderlying(mappedInput)].erase(handle);
         axisRegistry.Destroy(handle);
-        IG_LOG(InputManager, Info, "Axis {} unmapped from '{}'.", name, mappedInput);
+        IG_LOG(InputManagerLog, Info, "Axis {} unmapped from '{}'.", name, mappedInput);
     }
 
     void InputManager::SetScale(const String name, const float newScale)
     {
         if (!nameAxisTable.contains(name))
         {
-            IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
+            IG_LOG(InputManagerLog, Error, "Axis {} does not exists.", name);
             return;
         }
 
@@ -243,7 +244,7 @@ namespace ig
             return mappingItr->second.ActionHandle;
         }
 
-        IG_LOG(InputManager, Error, "Action {} does not exists.", name);
+        IG_LOG(InputManagerLog, Error, "Action {} does not exists.", name);
         return Handle<Action, InputManager>{ };
     }
 
@@ -255,7 +256,7 @@ namespace ig
             return mappingItr->second.AxisHandle;
         }
 
-        IG_LOG(InputManager, Error, "Axis {} does not exists.", name);
+        IG_LOG(InputManagerLog, Error, "Axis {} does not exists.", name);
         return Handle<Axis, InputManager>{ };
     }
 
@@ -264,7 +265,7 @@ namespace ig
         const Action* actionPtr = actionRegistry.Lookup(action);
         if (actionPtr == nullptr)
         {
-            IG_LOG(InputManager, Error, "The action handle is not valid.");
+            IG_LOG(InputManagerLog, Error, "The action handle is not valid.");
             return Action{ };
         }
 
@@ -276,7 +277,7 @@ namespace ig
         const Axis* axisPtr = axisRegistry.Lookup(axis);
         if (axisPtr == nullptr)
         {
-            IG_LOG(InputManager, Error, "The action handle is not valid.");
+            IG_LOG(InputManagerLog, Error, "The action handle is not valid.");
             return Axis{ };
         }
 

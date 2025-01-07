@@ -7,7 +7,8 @@
 #include "Igniter/Asset/Map.h"
 #include "Igniter/Asset/AssetMonitor.h"
 
-IG_DEFINE_LOG_CATEGORY(AssetMonitor);
+IG_DECLARE_LOG_CATEGORY(AssetMonitorLog);
+IG_DEFINE_LOG_CATEGORY(AssetMonitorLog);
 
 namespace ig::details
 {
@@ -58,7 +59,7 @@ namespace ig::details
             VirtualPathGuidTable&  virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
             fs::directory_iterator directoryItr{GetAssetDirectoryPath(assetType)};
 
-            IG_LOG(AssetMonitor, Debug, "* Parsing {} type root dir ({})...", assetType, GetAssetDirectoryPath(assetType).string());
+            IG_LOG(AssetMonitorLog, Debug, "* Parsing {} type root dir ({})...", assetType, GetAssetDirectoryPath(assetType).string());
             while (directoryItr != fs::end(directoryItr))
             {
                 const fs::directory_entry& entry = *directoryItr;
@@ -68,8 +69,7 @@ namespace ig::details
                     const Guid guidFromPath{entry.path().filename().string()};
                     if (!guidFromPath.isValid())
                     {
-                        IG_LOG(
-                            AssetMonitor, Error, "Asset {} ignored. {} is not valid guid.", entry.path().string(), entry.path().filename().string());
+                        IG_LOG(AssetMonitorLog, Error, "Asset {} ignored. {} is not valid guid.", entry.path().string(), entry.path().filename().string());
                         ++directoryItr;
                         continue;
                     }
@@ -78,7 +78,7 @@ namespace ig::details
                     metadataPath.replace_extension(details::MetadataExt);
                     if (!fs::exists(metadataPath))
                     {
-                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The metadata does not exists.", entry.path().string());
+                        IG_LOG(AssetMonitorLog, Error, "Asset {} ignored. The metadata does not exists.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
@@ -92,14 +92,14 @@ namespace ig::details
 
                     if (!assetInfo.IsValid())
                     {
-                        IG_LOG(AssetMonitor, Error, "Asset {} ignored. The asset info is invalid.", entry.path().string());
+                        IG_LOG(AssetMonitorLog, Error, "Asset {} ignored. The asset info is invalid.", entry.path().string());
                         ++directoryItr;
                         continue;
                     }
 
                     if (guidFromPath != guid)
                     {
-                        IG_LOG(AssetMonitor, Error,
+                        IG_LOG(AssetMonitorLog, Error,
                                "{}: Asset {} ignored. The guid from filename does not match asset info guid."
                                " Which was {}.",
                                assetInfo.GetCategory(), entry.path().string(), guid);
@@ -109,7 +109,7 @@ namespace ig::details
 
                     if (virtualPathGuidTable.contains(virtualPath))
                     {
-                        IG_LOG(AssetMonitor, Error, "{}: Asset {} ({}) ignored. Which has duplicated virtual path.", assetInfo.GetCategory(),
+                        IG_LOG(AssetMonitorLog, Error, "{}: Asset {} ({}) ignored. Which has duplicated virtual path.", assetInfo.GetCategory(),
                                virtualPath, guid);
                         ++directoryItr;
                         continue;
@@ -117,14 +117,14 @@ namespace ig::details
 
                     if (assetInfo.GetScope() == EAssetScope::Engine)
                     {
-                        IG_LOG(AssetMonitor, Warning, "{}: Found invalid asset scope Asset {} ({}). Assumes as Managed.", assetInfo.GetCategory(),
+                        IG_LOG(AssetMonitorLog, Warning, "{}: Found invalid asset scope Asset {} ({}). Assumes as Managed.", assetInfo.GetCategory(),
                                virtualPath, guid);
                         assetInfo.SetScope(EAssetScope::Managed);
                         serializedMetadata << assetInfo;
                     }
 
                     virtualPathGuidTable[virtualPath] = guid;
-                    IG_LOG(AssetMonitor, Debug, "VirtualPath: {}, Guid: {}", virtualPath, guid);
+                    IG_LOG(AssetMonitorLog, Debug, "VirtualPath: {}, Guid: {}", virtualPath, guid);
                     IG_CHECK(!Contains(guid));
                     TypelessAssetDescMap& descTable{GetDescMap(assetInfo.GetCategory())};
                     descTable.Insert(serializedMetadata);
@@ -335,7 +335,7 @@ namespace ig::details
                 IG_ENSURE(fs::remove(assetPath));
             }
 
-            IG_LOG(AssetMonitor, Debug, "{} Asset Expired: {} ({})", expiredAssetInfo.GetCategory(), expiredVirtualPath, expiredGuid);
+            IG_LOG(AssetMonitorLog, Debug, "{} Asset Expired: {} ({})", expiredAssetInfo.GetCategory(), expiredVirtualPath, expiredGuid);
         }
 
         expiredAssetInfos.clear();
@@ -361,7 +361,7 @@ namespace ig::details
 
                     const Path metadataPath{MakeAssetMetadataPath(assetInfo.GetCategory(), guid)};
                     IG_ENSURE(SaveJsonToFile(metadataPath, serializedDesc));
-                    IG_LOG(AssetMonitor, Debug, "{} Asset metadata Saved: {} ({})", assetInfo.GetCategory(), virtualPath, guid);
+                    IG_LOG(AssetMonitorLog, Debug, "{} Asset metadata Saved: {} ({})", assetInfo.GetCategory(), virtualPath, guid);
                 }
             }
         }
@@ -407,21 +407,21 @@ namespace ig::details
 
         for (const Path& orphanFilePath : orphanFiles)
         {
-            IG_LOG(AssetMonitor, Info, "Removing unreferenced(orphan) file: {}...", orphanFilePath.string());
+            IG_LOG(AssetMonitorLog, Info, "Removing unreferenced(orphan) file: {}...", orphanFilePath.string());
             fs::remove(orphanFilePath);
         }
     }
 
     void AssetMonitor::SaveAllChanges()
     {
-        IG_LOG(AssetMonitor, Info, "Save all info chages...");
+        IG_LOG(AssetMonitorLog, Info, "Save all info chages...");
         {
             ReadWriteLock rwLock{mutex};
             ReflectExpiredToFilesUnsafe();
             ReflectRemainedToFilesUnsafe();
             CleanupOrphanFiles();
         }
-        IG_LOG(AssetMonitor, Info, "All info changes saved.");
+        IG_LOG(AssetMonitorLog, Info, "All info changes saved.");
     }
 
     std::vector<AssetInfo> AssetMonitor::TakeSnapshots() const

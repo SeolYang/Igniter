@@ -7,14 +7,15 @@
 #include "Frieren/Game/System/CameraPossessSystem.h"
 #include "Frieren/Game/System/FpsCameraControllSystem.h"
 
-IG_DEFINE_LOG_CATEGORY(CameraPossessSystem);
+IG_DECLARE_LOG_CATEGORY(CameraPossessSystemLog);
+IG_DEFINE_LOG_CATEGORY(CameraPossessSystemLog);
 
 namespace fe
 {
-    CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
-        : window(ig::Engine::GetWindow()), fpsCamControllSystem(fpsCamControllSystem)
+    CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem) :
+        window(ig::Engine::GetWindow()), fpsCamControllSystem(fpsCamControllSystem)
     {
-        const auto& inputManager    = ig::Engine::GetInputManager();
+        const auto& inputManager = ig::Engine::GetInputManager();
         togglePossessToCameraHandle = inputManager.QueryAction(ig::String("TogglePossessCamera"));
         Configure();
     }
@@ -34,7 +35,7 @@ namespace fe
         ig::ImGuiContext& imguiContext = ig::Engine::GetImGuiContext();
         if (bEnabled)
         {
-            IG_LOG(CameraPossessSystem, Debug, "Possess to Camera.");
+            IG_LOG(CameraPossessSystemLog, Debug, "Possess to Camera.");
             fpsCamControllSystem.SetIgnoreInput(false);
             window.SetCursorVisibility(false);
             window.ClipCursor();
@@ -42,7 +43,7 @@ namespace fe
         }
         else
         {
-            IG_LOG(CameraPossessSystem, Debug, "Unposess from Camera.");
+            IG_LOG(CameraPossessSystemLog, Debug, "Unposess from Camera.");
             fpsCamControllSystem.SetIgnoreInput(true);
             window.SetCursorVisibility(true);
             window.UnclipCursor();

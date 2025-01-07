@@ -6,7 +6,7 @@
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Asset/StaticMeshImporter.h"
 
-IG_DEFINE_LOG_CATEGORY(StaticMeshImporter);
+IG_DECLARE_LOG_CATEGORY(StaticMeshImporter);
 
 namespace ig
 {

@@ -4,7 +4,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Log.h"
 
-IG_DEFINE_LOG_CATEGORY(JsonDeserializer);
+IG_DECLARE_LOG_CATEGORY(JsonDeserializer);
 
 namespace ig::details
 {

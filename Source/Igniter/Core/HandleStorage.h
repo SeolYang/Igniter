@@ -7,7 +7,7 @@
 #include "Igniter/Core/DebugTools.h"
 #endif
 
-IG_DEFINE_LOG_CATEGORY(HandleStorageLog);
+IG_DECLARE_LOG_CATEGORY(HandleStorageLog);
 
 namespace ig::details
 {

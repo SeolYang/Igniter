@@ -8,7 +8,7 @@
 #include "Igniter/ImGui/ImGuiExtensions.h"
 #include "Frieren/Gui/EntityList.h"
 
-IG_DEFINE_LOG_CATEGORY(EditorEntityList);
+IG_DECLARE_LOG_CATEGORY(EditorEntityList);
 
 namespace fe
 {

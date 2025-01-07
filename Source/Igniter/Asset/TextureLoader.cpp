@@ -12,7 +12,7 @@
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Asset/TextureLoader.h"
 
-IG_DEFINE_LOG_CATEGORY(TextureLoader);
+IG_DECLARE_LOG_CATEGORY(TextureLoader);
 
 namespace ig
 {

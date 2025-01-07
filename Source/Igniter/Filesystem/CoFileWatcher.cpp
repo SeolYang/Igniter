@@ -2,7 +2,8 @@
 #include "Igniter/Filesystem/CoFileWatcher.h"
 #include "Igniter/Core/Log.h"
 
-IG_DEFINE_LOG_CATEGORY(CoFileWatcher)
+IG_DECLARE_LOG_CATEGORY(CoFileWatcherLog);
+IG_DEFINE_LOG_CATEGORY(CoFileWatcherLog);
 
 namespace ig
 {
@@ -114,7 +115,7 @@ namespace ig
             }
             else
             {
-                IG_LOG(CoFileWatcher, Warning, "Failed to request read directory changes.");
+                IG_LOG(CoFileWatcherLog, Warning, "Failed to request read directory changes.");
             }
 
             CloseHandle(overlapped.hEvent);

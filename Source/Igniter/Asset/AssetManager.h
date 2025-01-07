@@ -14,7 +14,7 @@
 #include "Igniter/Asset/Map.h"
 #include "Igniter/Asset/MapLoader.h"
 
-IG_DEFINE_LOG_CATEGORY(AssetManagerLog);
+IG_DECLARE_LOG_CATEGORY(AssetManagerLog);
 
 namespace ig::details
 {

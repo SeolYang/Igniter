@@ -16,6 +16,7 @@
 #include "Igniter/D3D12/CommandSignature.h"
 #include "Igniter/D3D12/CommandSignatureDesc.h"
 
+IG_DECLARE_LOG_CATEGORY(GpuDeviceLog);
 IG_DEFINE_LOG_CATEGORY(GpuDeviceLog);
 
 namespace ig

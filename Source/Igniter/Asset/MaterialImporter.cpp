@@ -5,7 +5,7 @@
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Asset/MaterialImporter.h"
 
-IG_DEFINE_LOG_CATEGORY(MaterialImporter);
+IG_DECLARE_LOG_CATEGORY(MaterialImporter);
 
 namespace ig
 {

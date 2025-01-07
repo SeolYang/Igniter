@@ -6,7 +6,7 @@
 #include "Igniter/ImGui/ImGuiContext.h"
 #include "Igniter/Core/Window.h"
 
-IG_DEFINE_LOG_CATEGORY(Window);
+IG_DECLARE_LOG_CATEGORY(Window);
 
 namespace ig
 {

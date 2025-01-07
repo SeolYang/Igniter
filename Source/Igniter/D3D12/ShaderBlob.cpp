@@ -2,7 +2,7 @@
 #include "Igniter/Core/Log.h"
 #include "Igniter/D3D12/ShaderBlob.h"
 
-IG_DEFINE_LOG_CATEGORY(ShaderBlob);
+IG_DECLARE_LOG_CATEGORY(ShaderBlob);
 
 namespace ig
 {

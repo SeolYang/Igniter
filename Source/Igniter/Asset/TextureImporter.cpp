@@ -6,7 +6,7 @@
 #include "Igniter/Filesystem/Utils.h"
 #include "Igniter/Asset/TextureImporter.h"
 
-IG_DEFINE_LOG_CATEGORY(TextureImporter);
+IG_DECLARE_LOG_CATEGORY(TextureImporter);
 
 namespace ig
 {

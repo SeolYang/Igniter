@@ -7,7 +7,7 @@
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/World.h"
 
-IG_DEFINE_LOG_CATEGORY(World);
+IG_DECLARE_LOG_CATEGORY(World);
 
 namespace ig
 {

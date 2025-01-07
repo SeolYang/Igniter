@@ -7,6 +7,8 @@
 #include "Igniter/Asset/MapCreator.h"
 #include "Igniter/Asset/AssetManager.h"
 
+IG_DEFINE_LOG_CATEGORY(AssetManagerLog);
+
 namespace ig
 {
     AssetManager::AssetManager(RenderContext& renderContext) :

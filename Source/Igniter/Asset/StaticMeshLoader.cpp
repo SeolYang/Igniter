@@ -10,7 +10,7 @@
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Asset/StaticMeshLoader.h"
 
-IG_DEFINE_LOG_CATEGORY(StaticMeshLoader);
+IG_DECLARE_LOG_CATEGORY(StaticMeshLoader);
 
 namespace ig
 {
