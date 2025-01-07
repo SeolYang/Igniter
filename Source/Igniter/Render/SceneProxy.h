@@ -82,6 +82,9 @@ namespace ig
             InFlightFramesResource<ProxyMapType> ProxyMap;
             Vector<Owner> PendingReplications;
             Vector<Owner> PendingDestructions;
+
+            Vector<Vector<Owner>> PendingRepsPerThread;
+            Vector<Vector<Owner>> PendingDestsPerThread;
         };
 
     public:

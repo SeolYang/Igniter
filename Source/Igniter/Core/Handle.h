@@ -34,7 +34,7 @@ namespace ig
 } // namespace ig
 
 template <typename Ty, typename Tag>
-struct std::hash<ig::Handle<Ty, Tag>> final
+struct std::hash<ig::Handle<Ty, Tag>>
 {
 public:
     size_t operator()(const ig::Handle<Ty, Tag>& handle) const noexcept { return handle.Value; }

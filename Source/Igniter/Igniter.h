@@ -34,6 +34,7 @@
 #include <coroutine>
 #include <regex>
 #include <numbers>
+#include <execution>
 
 #ifndef UTF_CPP_CPLUSPLUS
 #define UTF_CPP_CPLUSPLUS 201703L

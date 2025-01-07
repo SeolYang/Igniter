@@ -34,6 +34,9 @@ namespace ig
                     TransformProxy::kDataSize,
                     kNumInitTransformElements);
 
+            transformProxyPackage.PendingRepsPerThread.resize(std::thread::hardware_concurrency());
+            transformProxyPackage.PendingDestsPerThread.resize(std::thread::hardware_concurrency());
+
             materialProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
@@ -110,10 +113,6 @@ namespace ig
             { UpdateMaterialProxy(localFrameIdx); });
 
         // #sy_todo Taskflow를 사용한 작업 흐름 구성?
-        std::future<void> updateTransformFuture = std::async(
-            std::launch::async, [this, localFrameIdx, &registry]
-            { UpdateTransformProxy(localFrameIdx, registry); });
-
         std::future<void> updateStaticMeshFuture = std::async(
             std::launch::async,
             [this, localFrameIdx, &registry, &updateMaterialFuture]
@@ -122,7 +121,7 @@ namespace ig
                 UpdateStaticMeshProxy(localFrameIdx, registry);
             });
 
-        updateTransformFuture.get();
+        UpdateTransformProxy(localFrameIdx, registry);
         updateStaticMeshFuture.get();
 
         UpdateRenderableProxy(localFrameIdx);
@@ -220,29 +219,86 @@ namespace ig
         auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
 
-        for (auto& [entity, proxy] : entityProxyMap)
-        {
-            proxy.bMightBeDestroyed = true;
-        }
+        std::for_each(std::execution::par_unseq,
+                      entityProxyMap.begin(), entityProxyMap.end(),
+                      [](auto& keyValuePair)
+                      {
+                          keyValuePair.second.bMightBeDestroyed = true;
+                      });
 
-        for (const auto& [entity, transformComponent] : registry.view<const TransformComponent>().each())
+        const auto transformView = registry.view<const TransformComponent>();
+        for (const auto& [entity, transform] : transformView.each())
         {
             if (!entityProxyMap.contains(entity))
             {
                 entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
             }
+        }
 
-            TransformProxy& transformProxy = entityProxyMap.at(entity);
-            IG_CHECK(transformProxy.bMightBeDestroyed);
-            transformProxy.bMightBeDestroyed = false;
+        const U32 numConcurrentThreads = std::thread::hardware_concurrency();
+        const Size numWorksPerThread = transformView.size() / numConcurrentThreads;
+        const Size numRemainedWorks = transformView.size() % numConcurrentThreads;
 
-            if (const U64 currentDataHashValue = HashInstance(transformComponent);
-                transformProxy.DataHashValue != currentDataHashValue)
+        Vector<std::future<void>> threadFutures{};
+        threadFutures.reserve(numConcurrentThreads);
+
+        Size workElementOffset = 0;
+        Vector<std::pair<Size, Size>> threadWorkRange{};
+        threadWorkRange.reserve(numConcurrentThreads);
+
+        for (U32 threadIdx = 0; threadIdx < numConcurrentThreads; ++threadIdx)
+        {
+            const Size numWorkElements = numWorksPerThread + (threadIdx == 0 ? numRemainedWorks : 0);
+            threadWorkRange.emplace_back(workElementOffset, numWorkElements);
+            workElementOffset += numWorkElements;
+        }
+        IG_CHECK(workElementOffset == transformView.size());
+
+        for (U32 threadIdx = 0; threadIdx < numConcurrentThreads; ++threadIdx)
+        {
+            std::future<void> threadFuture = std::async(
+                std::launch::async,
+                [this, localFrameIdx, &transformView, &registry](const U32 threadIdx, const Size workElementOffset, const Size numWorkElements)
+                {
+                    ZoneScopedN("UpdateTransformPerThread");
+                    for (Size elementIdx = 0; elementIdx < numWorkElements; ++elementIdx)
+                    {
+                        auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
+
+                        const Entity entity = *(transformView.begin() + workElementOffset + elementIdx);
+                        TransformProxy& proxy = entityProxyMap[entity];
+                        IG_CHECK(proxy.bMightBeDestroyed);
+                        proxy.bMightBeDestroyed = false;
+
+                        const TransformComponent& transformComponent = registry.get<TransformComponent>(entity);
+                        if (const U64 currentDataHashValue = HashInstance(transformComponent);
+                            proxy.DataHashValue != currentDataHashValue)
+                        {
+                            proxy.GpuData = transformComponent.CreateTransformation();
+                            proxy.DataHashValue = currentDataHashValue;
+
+                            transformProxyPackage.PendingRepsPerThread[threadIdx].emplace_back(entity);
+                        }
+                    }
+                },
+                threadIdx,
+                threadWorkRange[threadIdx].first, threadWorkRange[threadIdx].second);
+
+            threadFutures.emplace_back(std::move(threadFuture));
+        }
+
+        for (std::future<void>& threadFuture : threadFutures)
+        {
+            threadFuture.get();
+        }
+
+        for (U32 threadIdx = 0; threadIdx < numConcurrentThreads; ++threadIdx)
+        {
+            for (const Entity entity : transformProxyPackage.PendingRepsPerThread[threadIdx])
             {
-                transformProxy.GpuData = transformComponent.CreateTransformation();
-                transformProxy.DataHashValue = currentDataHashValue;
                 transformProxyPackage.PendingReplications.emplace_back(entity);
             }
+            transformProxyPackage.PendingRepsPerThread[threadIdx].clear();
         }
 
         // Proxy Map이 element deletion에 stable 하지 않기 때문에 별도로 처리
@@ -292,6 +348,7 @@ namespace ig
                 continue;
             }
 
+            // !!!! 여기서 Load 때문에 log가 계속 무한히 찍힘;
             ManagedAsset<Material> cachedMaterial = assetManager->LoadMaterial(snapshot.Info.GetGuid());
             IG_CHECK(cachedMaterial);
 
@@ -422,7 +479,6 @@ namespace ig
         {
             const auto extractedElement = proxyMap.extract(entity);
             IG_CHECK(extractedElement.has_value());
-            IG_CHECK(extractedElement->second.StorageSpace.IsValid());
             storage.Deallocate(extractedElement->second.StorageSpace);
         }
         staticMeshProxyPackage.PendingDestructions.clear();
@@ -453,7 +509,7 @@ namespace ig
         // 가능한 방안은 같은 타입의 Renderable이 아니라면 bMightBeDestroyed를 false로 변경하지 않도록 한다.
         // 그렇게 하면 가장 먼저 업로드된 정보가 Expired 되어도 정상적으로 해당 Renderable에 대한 Destroy 알고리즘이
         // 작동하게 되고, 다음 프레임 부터는 정상적으로 새로운 Renderable이 할당되게 된다.
-        for (const auto& [entity, _] : staticMeshProxyMap.values())
+        for (const auto& [entity, _] : staticMeshProxyMap)
         {
             IG_CHECK(transformProxyMap.contains(entity));
 
@@ -491,8 +547,6 @@ namespace ig
         for (const Entity entity : renderableProxyPackage.PendingDestructions)
         {
             const auto extractedElement = renderableProxyMap.extract(entity);
-            IG_CHECK(extractedElement.has_value());
-            IG_CHECK(extractedElement->second.StorageSpace.IsValid());
             renderableStorage.Deallocate(extractedElement->second.StorageSpace);
         }
         renderableProxyPackage.PendingDestructions.clear();

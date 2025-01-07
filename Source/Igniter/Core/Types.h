@@ -38,14 +38,18 @@ namespace ig
 
     using Path = std::filesystem::path;
 
+    // Iterators = not stable, references & pointers = stable
     template <typename Key, typename T>
     using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;
     template <typename Key>
     using StableUnorderedSet = robin_hood::unordered_node_set<Key>;
+
+    // Iterators and references are not stable on insert or erase.
     template <typename Key, typename T>
     using UnorderedMap = ankerl::unordered_dense::map<Key, T>;
     template <typename Key>
     using UnorderedSet = ankerl::unordered_dense::set<Key>;
+
     template <typename T>
     using Vector = eastl::vector<T>;
     template <typename T, Size N = 1Ui64>
