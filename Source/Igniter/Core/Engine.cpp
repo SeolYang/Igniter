@@ -7,6 +7,7 @@
 #include "Igniter/Core/Timer.h"
 #include "Igniter/Core/Window.h"
 #include "Igniter/Core/ComInitializer.h"
+#include "Igniter/Core/Thread.h"
 #include "Igniter/Input/InputManager.h"
 #include "Igniter/D3D12/GpuSyncPoint.h"
 #include "Igniter/Render/RenderContext.h"
@@ -34,6 +35,8 @@ namespace ig
         IG_LOG(EngineLog, Info, "Igniter Engine Version {}", version::Version);
         IG_LOG(EngineLog, Info, "Igniting Engine Runtime!");
         CoInitializeUnique();
+        // 엔진 인스턴스가 생성된 스레드를 메인 스레드로 가정
+        ThreadInfo::RegisterMainThreadID();
 
         timer = MakePtr<Timer>();
         IG_LOG(EngineLog, Info, "Timer Initialized.");

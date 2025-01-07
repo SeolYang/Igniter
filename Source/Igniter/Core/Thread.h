@@ -8,4 +8,12 @@ namespace ig
     public:
         static size_t GetUID();
     };
+
+    class ThreadInfo final
+    {
+    public:
+        static void RegisterMainThreadID();
+        static bool IsMainThread();
+
+    };
 } // namespace ig

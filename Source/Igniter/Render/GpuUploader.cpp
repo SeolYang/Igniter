@@ -1,5 +1,5 @@
 #include "Igniter/Igniter.h"
-#include "Igniter/Core/ThreadUIDGenerator.h"
+#include "Igniter/Core/Thread.h"
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/CommandList.h"
 #include "Igniter/D3D12/GpuBuffer.h"

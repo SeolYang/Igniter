@@ -144,7 +144,7 @@
     <ClInclude Include="Core\String.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\ThreadUIDGenerator.h">
+    <ClInclude Include="Core\Thread.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Timer.h">
@@ -479,7 +479,7 @@
     <ClCompile Include="Component\TransformComponent.cpp">
       <Filter>Source\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Core\ThreadUIDGenerator.cpp">
+    <ClCompile Include="Core\Thread.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Window.cpp">

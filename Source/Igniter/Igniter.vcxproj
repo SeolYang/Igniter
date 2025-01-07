@@ -88,7 +88,7 @@
     <ClInclude Include="Core\Result.h" />
     <ClInclude Include="Core\Serialization.h" />
     <ClInclude Include="Core\String.h" />
-    <ClInclude Include="Core\ThreadUIDGenerator.h" />
+    <ClInclude Include="Core\Thread.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Types.h" />
     <ClInclude Include="Core\Version.h" />
@@ -187,7 +187,7 @@
     <ClCompile Include="Core\Log.cpp" />
     <ClCompile Include="Core\Regex.cpp" />
     <ClCompile Include="Core\String.cpp" />
-    <ClCompile Include="Core\ThreadUIDGenerator.cpp" />
+    <ClCompile Include="Core\Thread.cpp" />
     <ClCompile Include="Core\Window.cpp" />
     <ClCompile Include="D3D12\CommandList.cpp" />
     <ClCompile Include="D3D12\CommandQueue.cpp" />

@@ -108,6 +108,7 @@ namespace ig
         IG_CHECK(assetManager != nullptr);
         const Registry& registry = world.GetRegistry();
 
+        Logger::GetInstance().SuppressLog();
         std::future<void> updateMaterialFuture = std::async(
             std::launch::async, [this, localFrameIdx, &registry]
             { UpdateMaterialProxy(localFrameIdx); });
@@ -123,6 +124,7 @@ namespace ig
 
         UpdateTransformProxy(localFrameIdx, registry);
         updateStaticMeshFuture.get();
+        Logger::GetInstance().UnsuppressLog();
 
         UpdateRenderableProxy(localFrameIdx);
 
@@ -348,7 +350,6 @@ namespace ig
                 continue;
             }
 
-            // !!!! 여기서 Load 때문에 log가 계속 무한히 찍힘;
             ManagedAsset<Material> cachedMaterial = assetManager->LoadMaterial(snapshot.Info.GetGuid());
             IG_CHECK(cachedMaterial);
 
