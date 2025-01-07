@@ -389,8 +389,10 @@ namespace ig
             {
                 for (const AssetInfo& assetInfo : assetInfoSnapshots)
                 {
+                    const details::TypelessAssetCache::Snapshot cacheSnapshot = assetCachePtr->TakeSnapshot(assetInfo.GetGuid());
                     snapshots.emplace_back(assetInfo,
-                                           assetCachePtr->TakeSnapshot(assetInfo.GetGuid()).RefCount);
+                                           cacheSnapshot.RefCount,
+                                           cacheSnapshot.HandleHash);
                 }
             }
         }
@@ -402,8 +404,10 @@ namespace ig
                 {
                     if (assetInfo.GetCategory() == assetCache->GetAssetType())
                     {
+                        const details::TypelessAssetCache::Snapshot cacheSnapshot = assetCache->TakeSnapshot(assetInfo.GetGuid());
                         snapshots.emplace_back(assetInfo,
-                                               assetCache->TakeSnapshot(assetInfo.GetGuid()).RefCount);
+                                               cacheSnapshot.RefCount,
+                                               cacheSnapshot.HandleHash);
                         break;
                     }
                 }

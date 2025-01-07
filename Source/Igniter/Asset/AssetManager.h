@@ -53,6 +53,7 @@ namespace ig
         public:
             AssetInfo Info{};
             uint32_t RefCount{};
+            Size HandleHash{IG_NUMERIC_MAX_OF(HandleHash)};
         };
 
     public:
@@ -176,6 +177,24 @@ namespace ig
 
         void Delete(const Guid& guid);
         void Delete(const EAssetCategory assetType, const String virtualPath);
+
+        template <typename T>
+        ManagedAsset<T> Clone(const ManagedAsset<T> handle)
+        {
+            if (!handle)
+            {
+                return handle;
+            }
+
+            details::AssetCache<T>& cache = GetCache<T>();
+            const T* asset = cache.Lookup(handle);
+            if (asset == nullptr)
+            {
+                return handle;
+            }
+
+            return cache.Load(asset->GetSnapshot().Info.GetGuid());
+        }
 
         template <typename T>
         T* Lookup(const ManagedAsset<T> handle)

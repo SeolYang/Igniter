@@ -14,16 +14,43 @@ namespace ig
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(StaticMeshComponent);
     }
 
-    StaticMeshComponent::~StaticMeshComponent()
+    StaticMeshComponent::StaticMeshComponent(const StaticMeshComponent& other)
     {
         AssetManager& assetManager = Engine::GetAssetManager();
-        assetManager.Unload(Mesh);
+        Mesh = assetManager.Clone(other.Mesh);
+        IG_CHECK(Mesh == other.Mesh);
+    }
+
+    StaticMeshComponent::StaticMeshComponent(StaticMeshComponent&& other) noexcept :
+        Mesh(std::exchange(other.Mesh, {}))
+    {
+    }
+
+    StaticMeshComponent::~StaticMeshComponent()
+    {
+        Destroy();
+    }
+
+    StaticMeshComponent& StaticMeshComponent::operator=(const StaticMeshComponent& rhs)
+    {
+        this->Destroy();
+        AssetManager& assetManager = Engine::GetAssetManager();
+        Mesh = assetManager.Clone(rhs.Mesh);
+        IG_CHECK(Mesh == rhs.Mesh);
+        return *this;
+    }
+
+    StaticMeshComponent& StaticMeshComponent::operator=(StaticMeshComponent&& rhs) noexcept
+    {
+        this->Destroy();
+        Mesh = std::exchange(rhs.Mesh, {});
+        return *this;
     }
 
     Json& StaticMeshComponent::Serialize(Json& archive) const
     {
         AssetManager& assetManager = Engine::GetAssetManager();
-        StaticMesh*   mesh         = assetManager.Lookup(Mesh);
+        StaticMesh* mesh = assetManager.Lookup(Mesh);
         if (mesh != nullptr)
         {
             IG_SERIALIZE_GUID_JSON(archive, mesh->GetSnapshot().Info.GetGuid(), ContainerKey, MeshGuidKey);
@@ -34,12 +61,12 @@ namespace ig
 
     const Json& StaticMeshComponent::Deserialize(const Json& archive)
     {
-        Guid staticMeshGuid{ };
+        Guid staticMeshGuid{};
         IG_DESERIALIZE_GUID_JSON(archive, staticMeshGuid, ContainerKey, MeshGuidKey, Guid{});
         if (staticMeshGuid.isValid())
         {
             AssetManager& assetManager = Engine::GetAssetManager();
-            Mesh                       = assetManager.Load<StaticMesh>(staticMeshGuid);
+            Mesh = assetManager.Load<StaticMesh>(staticMeshGuid);
         }
 
         return archive;
@@ -48,7 +75,7 @@ namespace ig
     void StaticMeshComponent::OnInspector(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
-        AssetManager&        assetManager        = Engine::GetAssetManager();
+        AssetManager& assetManager = Engine::GetAssetManager();
         StaticMeshComponent& staticMeshComponent = registry->get<StaticMeshComponent>(entity);
 
         if (staticMeshComponent.Mesh)
@@ -58,7 +85,7 @@ namespace ig
             const StaticMesh::Desc& staticMeshSnapshot{staticMeshPtr->GetSnapshot()};
             ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
 
-            const Material*       materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
+            const Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
             const Material::Desc& materialSnapshot{materialPtr->GetSnapshot()};
             ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
         }
@@ -91,6 +118,14 @@ namespace ig
             }
             staticMeshSelectModalPopup.End();
         }
+    }
+
+    void StaticMeshComponent::Destroy()
+    {
+        AssetManager& assetManager = Engine::GetAssetManager();
+        assetManager.Unload(Mesh);
+
+        Mesh = {};
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(StaticMeshComponent);

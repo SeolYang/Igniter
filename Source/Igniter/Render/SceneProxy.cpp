@@ -116,28 +116,53 @@ namespace ig
         tf::Task updateTransformTask = rootTaskFlow.emplace(
             [this, localFrameIdx, &registry](tf::Subflow& subflow)
             {
-                ZoneScopedN("UpdateTransform");
+                ZoneScopedN("UpdateTransformProxy");
                 UpdateTransformProxy(subflow, localFrameIdx, registry);
                 subflow.join();
             });
 
-        Logger::GetInstance().SuppressLog();
-        std::future<void> updateMaterialFuture = std::async(
-            std::launch::async, [this, localFrameIdx, &registry]
-            { UpdateMaterialProxy(localFrameIdx); });
-
-        // #sy_todo Taskflow를 사용한 작업 흐름 구성?
-        std::future<void> updateStaticMeshFuture = std::async(
-            std::launch::async,
-            [this, localFrameIdx, &registry, &updateMaterialFuture]
+        tf::Task updateMaterialTask = rootTaskFlow.emplace(
+            [this, localFrameIdx]()
             {
-                updateMaterialFuture.wait();
-                UpdateStaticMeshProxy(localFrameIdx, registry);
+                // Material의 경우 분산 처리하기에는 상대적으로 그 수가 매우 작을 수 있기 때문에
+                // 별도의 분산처리는 하지 않는다.
+                ZoneScopedN("UpdateMaterialProxy");
+
+                // 현재 스레드의 로그를 잠시 막을 수 있지만, 만약 work stealing이 일어난다면
+                // 다른 부분에서 발생하는 로그가 기록되지 않는 현상이 일어 날 수도 있음.
+                Logger::GetInstance().SuppressLogInCurrentThread();
+                UpdateMaterialProxy(localFrameIdx);
+                Logger::GetInstance().UnsuppressLogInCurrentThread();
             });
 
+        tf::Task updateStaticMeshTask = rootTaskFlow.emplace(
+            [this, localFrameIdx, &registry](tf::Subflow& subflow)
+            {
+                ZoneScopedN("UpdateStaticMeshProxy");
+                UpdateStaticMeshProxy(subflow, localFrameIdx, registry);
+                subflow.join();
+            });
+
+        // tf::Task updateRenderableTask = rootTaskFlow.emplace([]() {});
+
+        updateStaticMeshTask.succeed(updateMaterialTask);
+        // updateRenderableTask.succeed(updateTransformTask, updateStaticMeshTask);
+
+        //// replicate가 각 update 이후에 바로 이뤄지게 하기 위해서는 staging buffer의 독립이 1순위
+        // tf::Task replicateTransformData = rootTaskFlow.emplace([]() {});
+        // tf::Task replicateMaterialData = rootTaskFlow.emplace([]() {});
+        // tf::Task replicateStaticMeshData = rootTaskFlow.emplace([]() {});
+        // tf::Task replicateRenderableData = rootTaskFlow.emplace([]() {});
+        // tf::Task replicateRenderableIndices = rootTaskFlow.emplace([]() {});
+
+        // replicateTransformData.succeed(updateTransformTask);
+        // replicateMaterialData.succeed(updateMaterialTask);
+        // replicateStaticMeshData.succeed(updateStaticMeshTask);
+        //// 이하 두개 태스크는 추후 렌더러블로 다뤄질 수 있는 종류가 많아 질수록 종속성을 추가해야함.
+        // replicateRenderableData.succeed(updateRenderableTask);
+        // replicateRenderableIndices.succeed(updateRenderableTask);
+
         executor.run(rootTaskFlow).wait();
-        updateStaticMeshFuture.get();
-        Logger::GetInstance().UnsuppressLog();
 
         UpdateRenderableProxy(localFrameIdx);
 
@@ -260,11 +285,12 @@ namespace ig
             [this, &registry, &entityProxyMap, numWorksPerGroup, numRemainedWorks, transformView](const Size groupIdx)
             {
                 ZoneScopedN("UpdateTransformPerWorkGruop");
-                const Size numWorks = numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
+                const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
                 const Size viewOffset = (groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
                 for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
                 {
                     const Entity entity = *(transformView.begin() + viewOffset + viewIdx);
+
                     TransformProxy& proxy = entityProxyMap[entity];
                     IG_CHECK(proxy.bMightBeDestroyed);
                     proxy.bMightBeDestroyed = false;
@@ -404,42 +430,6 @@ namespace ig
         materialProxyPackage.PendingDestructions.clear();
     }
 
-   /* void SceneProxy::UpdateMaterialProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
-    {
-        IG_CHECK(materialProxyPackage.PendingReplications.empty());
-        IG_CHECK(materialProxyPackage.PendingDestructions.empty());
-
-        auto& entityProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
-        auto invalidateProxyTask = subflow.for_each(entityProxyMap.begin(), entityProxyMap.end(),
-                                                    [](auto& keyValuePair)
-                                                    {
-                                                        keyValuePair.second.bMightBeDestroyed = true;
-                                                    });
-
-        auto& storage = *materialProxyPackage.Storage[localFrameIdx];
-
-        const auto staticMeshView = registry.view<const StaticMeshComponent>();
-        auto createNewProxyFromStaticMeshTask = subflow.emplace(
-            [&registry, &entityProxyMap, &storage, staticMeshView]()
-            {
-                ZoneScopedN("CreateNewMaterialProxyFromStaticMesh");
-                for (const auto& [entity, staticMesh] : staticMeshView.each())
-                {
-                    if (!staticMesh.Mesh)
-                    {
-                        continue;
-                    }
-
-
-                    if (!entityProxyMap.contains(entity))
-                    {
-                        entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
-                    }
-                }
-            });
-
-    }*/
-
     void SceneProxy::UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
         ZoneScoped;
@@ -516,6 +506,148 @@ namespace ig
             storage.Deallocate(extractedElement->second.StorageSpace);
         }
         staticMeshProxyPackage.PendingDestructions.clear();
+    }
+
+    void SceneProxy::UpdateStaticMeshProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    {
+        IG_CHECK(staticMeshProxyPackage.PendingReplications.empty());
+        IG_CHECK(staticMeshProxyPackage.PendingDestructions.empty());
+
+        const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
+
+        auto& entityProxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
+        tf::Task invalidateProxyTask = subflow.for_each(entityProxyMap.begin(), entityProxyMap.end(),
+                                                        [](auto& keyValuePair)
+                                                        {
+                                                            keyValuePair.second.bMightBeDestroyed = true;
+                                                        });
+
+        auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
+        const auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
+        tf::Task createNewProxyTask = subflow.emplace(
+            [&registry, &entityProxyMap, &storage, staticMeshEntityView]()
+            {
+                for (const auto& [entity, staticMeshComponent] : staticMeshEntityView.each())
+                {
+                    // 간혹 Static Mesh가 아직 선택되지 않은 경우엔 Proxy 미생성
+                    if (!staticMeshComponent.Mesh)
+                    {
+                        continue;
+                    }
+
+                    if (!entityProxyMap.contains(entity))
+                    {
+                        entityProxyMap[entity] = StaticMeshProxy{.StorageSpace = storage.Allocate(1)};
+                    }
+                }
+            });
+
+        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
+        const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
+        const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
+
+        tf::Task updateProxyTask = subflow.for_each_index(
+            0, numWorkGroups, 1,
+            [this, &registry, &entityProxyMap, &materialProxyMap, numWorksPerGroup, numRemainedWorks, staticMeshEntityView](const Size groupIdx)
+            {
+                ZoneScopedN("UpdateStaticMeshPerWorkGruop");
+
+                // 에셋 매니저에서 미리 material 처럼 가져온 다음에
+                // static mesh handle - static mesh ptr 맵을 만들고 참조하기 (read만하기)
+                std::vector<AssetManager::Snapshot> staticMeshSnapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh)};
+                UnorderedMap<ManagedAsset<StaticMesh>, const StaticMesh*> staticMeshTable{};
+                for (const AssetManager::Snapshot& staticMeshSnapshot : staticMeshSnapshots)
+                {
+                    if (staticMeshSnapshot.IsCached())
+                    {
+                        // 조금 꼼수긴 하지만, 여전히 valid 한 방식이라고 생각한다.
+                        // 잘못된 핸들은 애초에 Lookup이 불가능하고. 애초에 핸들 자체가 소유권을 가질 핸들 만 제대로
+                        // 이해하고 해제 해준다면 문제 없기 때문.
+                        // 성능면에선 실제로 렌더링 될 메시보다 유효한 에셋의 수가 더 적을 것이라고 예측되고
+                        // Lookup에 의한 mutex-lock의 횟수 또한 현저히 적거나 거의 없을 것이라고 생각된다.
+                        const ManagedAsset<StaticMesh> reconstructedHandle{staticMeshSnapshot.HandleHash};
+                        staticMeshTable[reconstructedHandle] = assetManager->Lookup(reconstructedHandle);
+                    }
+                }
+
+                const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
+                const Size viewOffset = (groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
+                {
+                    const Entity entity = *(staticMeshEntityView.begin() + viewOffset + viewIdx);
+
+                    StaticMeshProxy& proxy = entityProxyMap[entity];
+                    IG_CHECK(proxy.bMightBeDestroyed);
+                    proxy.bMightBeDestroyed = false;
+
+                    const StaticMeshComponent& staticMeshComponent = registry.get<StaticMeshComponent>(entity);
+                    const StaticMesh* staticMeshPtr = staticMeshTable[staticMeshComponent.Mesh];
+                    //const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
+                    IG_CHECK(staticMeshPtr != nullptr);
+
+                    // Mesh Storage에서 각 핸들은 고유하고, 해제 되기 전까지 해당 핸들에 대한 내부 값은 절대 바뀌지 않는다.
+                    const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
+                    const ManagedAsset<Material> material = staticMeshPtr->GetMaterial();
+                    IG_CHECK(materialProxyMap.contains(material));
+                    if (const U64 currentDataHashValue = vertexIndexSpace.Value ^ material.Value;
+                        proxy.DataHashValue != currentDataHashValue)
+                    {
+                        const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
+                        const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
+                        const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
+
+                        proxy.GpuData = StaticMeshGpuData{
+                            .MaterialDataIdx = (U32)materialProxyMap.at(material).StorageSpace.OffsetIndex,
+                            .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
+                            .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
+                            .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
+                            .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0)};
+                        proxy.DataHashValue = currentDataHashValue;
+
+                        staticMeshProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
+                    }
+                }
+            });
+
+        tf::Task commitReplications = subflow.emplace(
+            [this, numWorkGroups]()
+            {
+                ZoneScopedN("CommitStaticMeshReplication");
+                for (int groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                {
+                    for (const Entity entity : staticMeshProxyPackage.PendingReplicationGroups[groupIdx])
+                    {
+                        staticMeshProxyPackage.PendingReplications.emplace_back(entity);
+                    }
+                    staticMeshProxyPackage.PendingReplicationGroups[groupIdx].clear();
+                }
+            });
+
+        tf::Task commitDestructions = subflow.emplace(
+            [this, &entityProxyMap, &storage, localFrameIdx]()
+            {
+                ZoneScopedN("CommitStaticMeshDestructions");
+                for (auto& [entity, proxy] : entityProxyMap)
+                {
+                    if (proxy.bMightBeDestroyed)
+                    {
+                        staticMeshProxyPackage.PendingDestructions.emplace_back(entity);
+                    }
+                }
+
+                for (const Entity entity : staticMeshProxyPackage.PendingDestructions)
+                {
+                    const auto extractedElement = entityProxyMap.extract(entity);
+                    IG_CHECK(extractedElement.has_value());
+                    IG_CHECK(extractedElement->second.StorageSpace.IsValid());
+                    storage.Deallocate(extractedElement->second.StorageSpace);
+                }
+                staticMeshProxyPackage.PendingDestructions.clear();
+            });
+
+        invalidateProxyTask.precede(createNewProxyTask);
+        createNewProxyTask.precede(updateProxyTask);
+        updateProxyTask.precede(commitReplications, commitDestructions);
     }
 
     void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx)

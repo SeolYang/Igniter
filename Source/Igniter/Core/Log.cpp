@@ -19,4 +19,20 @@ namespace ig
             delete loggerPtr;
         }
     }
+
+    thread_local bool gThreadLogSuppressed = false;
+    void Logger::SuppressLogInCurrentThread()
+    {
+        gThreadLogSuppressed = true;
+    }
+
+    void Logger::UnsuppressLogInCurrentThread()
+    {
+        gThreadLogSuppressed = false;
+    }
+
+    bool Logger::IsLogSuppressedInCurrentThread()
+    {
+        return gThreadLogSuppressed;
+    }
 } // namespace ig

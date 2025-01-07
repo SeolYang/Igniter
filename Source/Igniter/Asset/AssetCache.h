@@ -12,7 +12,7 @@ namespace ig::details
     public:
         struct Snapshot
         {
-            const Guid Guid{};
+            const U64 HandleHash{IG_NUMERIC_MAX_OF(HandleHash)};
             const uint32_t RefCount{};
         };
 
@@ -104,7 +104,7 @@ namespace ig::details
             refCounterSnapshots.reserve(refCounterTable.size());
             for (const auto& guidRefCounter : refCounterTable)
             {
-                refCounterSnapshots.emplace_back(Snapshot{.Guid = guidRefCounter.first, .RefCount = guidRefCounter.second});
+                refCounterSnapshots.emplace_back(Snapshot{.HandleHash = cachedAssets.at(guidRefCounter.first).GetHash(), .RefCount = guidRefCounter.second});
             }
 
             return refCounterSnapshots;
@@ -115,7 +115,7 @@ namespace ig::details
             ReadOnlyLock lock{mutex};
             const auto refCounterItr = refCounterTable.find(guid);
             return refCounterItr != refCounterTable.cend() ?
-                Snapshot{.Guid = guid, .RefCount = refCounterItr->second} :
+                Snapshot{.HandleHash = cachedAssets.at(guid).GetHash(), .RefCount = refCounterItr->second} :
                 Snapshot{};
         }
 

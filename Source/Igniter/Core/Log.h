@@ -29,7 +29,7 @@ namespace ig
         template <typename Category, ELogVerbosity Verbosity, typename... Args>
         void Log(const std::string_view logMessage, Args&&... args)
         {
-            if (bIsLogSuppressed)
+            if (IsLogSuppressedInCurrentThread())
             {
                 return;
             }
@@ -87,19 +87,9 @@ namespace ig
             }
         }
 
-        void SuppressLog()
-        {
-            IG_CHECK(!bIsLogSuppressed);
-            IG_CHECK(ThreadInfo::IsMainThread());
-            bIsLogSuppressed = true;
-        }
-
-        void UnsuppressLog()
-        {
-            IG_CHECK(bIsLogSuppressed);
-            IG_CHECK(ThreadInfo::IsMainThread());
-            bIsLogSuppressed = false;
-        }
+        static void SuppressLogInCurrentThread();
+        static void UnsuppressLogInCurrentThread();
+        static bool IsLogSuppressedInCurrentThread();
 
     private:
         Logger();
@@ -123,7 +113,6 @@ namespace ig
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
         std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
         Vector<std::pair<U64, spdlog::logger*>> categories;
-        bool bIsLogSuppressed = false;
 
     private:
         static constexpr std::string_view FileName = "Log";

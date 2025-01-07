@@ -75,7 +75,7 @@ namespace ig
     private:
         RenderContext* renderContext{nullptr};
         AssetManager* assetManager{nullptr};
-        Desc snapshot{};
+        Desc snapshot{}; // desc snapshot
         MeshStorage::Handle<VertexSM> vertexSpace{};
         MeshStorage::Handle<U32> vertexIndexSpace{};
         ManagedAsset<Material> material{};
