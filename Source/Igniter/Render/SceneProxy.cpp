@@ -1,4 +1,5 @@
 #include "Igniter/Igniter.h"
+#include "Igniter/Core/Engine.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/Utils.h"
@@ -33,9 +34,7 @@ namespace ig
                     String(std::format("TransformStorage{}", localFrameIdx)),
                     TransformProxy::kDataSize,
                     kNumInitTransformElements);
-
-            transformProxyPackage.PendingRepsPerThread.resize(std::thread::hardware_concurrency());
-            transformProxyPackage.PendingDestsPerThread.resize(std::thread::hardware_concurrency());
+            transformProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             materialProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -43,6 +42,7 @@ namespace ig
                     String(std::format("MaterialDataStorage{}", localFrameIdx)),
                     MaterialProxy::kDataSize,
                     kNumInitMaterialElements);
+            materialProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             staticMeshProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -50,6 +50,7 @@ namespace ig
                     String(std::format("StaticMeshDataStorage{}", localFrameIdx)),
                     StaticMeshProxy::kDataSize,
                     kNumInitStaticMeshElements);
+            staticMeshProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             renderableProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -57,6 +58,7 @@ namespace ig
                     String(std::format("RenderableStorage{}", localFrameIdx)),
                     RenderableProxy::kDataSize,
                     kNumInitRenderableElements);
+            renderableProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             lightProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -64,6 +66,7 @@ namespace ig
                     String(std::format("LightDataStorage{}", localFrameIdx)),
                     LightProxy::kDataSize,
                     kNumInitLightElements);
+            lightProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             renderableIndicesBufferSize[localFrameIdx] = kNumInitRenderableIndices;
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
@@ -102,11 +105,20 @@ namespace ig
 
     GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
     {
-        ZoneScoped;
-
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(assetManager != nullptr);
+        ZoneScoped;
+
         const Registry& registry = world.GetRegistry();
+
+        tf::Executor& executor = Engine::GetTaskExecutor();
+        tf::Taskflow rootTaskFlow{};
+        auto updateTransformTask = rootTaskFlow.emplace(
+            [this, localFrameIdx, &registry](tf::Subflow& subflow)
+            {
+                ScheduleUpdateTransformProxy(subflow, localFrameIdx, registry);
+                subflow.join();
+            });
 
         Logger::GetInstance().SuppressLog();
         std::future<void> updateMaterialFuture = std::async(
@@ -122,7 +134,7 @@ namespace ig
                 UpdateStaticMeshProxy(localFrameIdx, registry);
             });
 
-        UpdateTransformProxy(localFrameIdx, registry);
+        executor.run(rootTaskFlow).wait();
         updateStaticMeshFuture.get();
         Logger::GetInstance().UnsuppressLog();
 
@@ -206,120 +218,104 @@ namespace ig
 
         lightWeightRepFuture.get();
         renderableIndicesRepFuture.get();
-
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
         GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal(renderContext->GetAsyncCopyFence());
         return syncPoint;
     }
 
-    void SceneProxy::UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::ScheduleUpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
-        ZoneScoped;
-        IG_CHECK(transformProxyPackage.PendingReplications.empty());
-        IG_CHECK(transformProxyPackage.PendingDestructions.empty());
+        IG_CHECK(materialProxyPackage.PendingReplications.empty());
+        IG_CHECK(materialProxyPackage.PendingDestructions.empty());
 
         auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
+        auto invalidateProxyTask = subflow.for_each(entityProxyMap.begin(), entityProxyMap.end(),
+                                                    [](auto& keyValuePair)
+                                                    {
+                                                        keyValuePair.second.bMightBeDestroyed = true;
+                                                    });
+
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
-
-        std::for_each(std::execution::par_unseq,
-                      entityProxyMap.begin(), entityProxyMap.end(),
-                      [](auto& keyValuePair)
-                      {
-                          keyValuePair.second.bMightBeDestroyed = true;
-                      });
-
         const auto transformView = registry.view<const TransformComponent>();
-        for (const auto& [entity, transform] : transformView.each())
-        {
-            if (!entityProxyMap.contains(entity))
+        auto createNewProxyTask = subflow.emplace(
+            [&registry, &entityProxyMap, &storage, transformView]()
             {
-                entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
-            }
-        }
-
-        const U32 numConcurrentThreads = std::thread::hardware_concurrency();
-        const Size numWorksPerThread = transformView.size() / numConcurrentThreads;
-        const Size numRemainedWorks = transformView.size() % numConcurrentThreads;
-
-        Vector<std::future<void>> threadFutures{};
-        threadFutures.reserve(numConcurrentThreads);
-
-        Size workElementOffset = 0;
-        Vector<std::pair<Size, Size>> threadWorkRange{};
-        threadWorkRange.reserve(numConcurrentThreads);
-
-        for (U32 threadIdx = 0; threadIdx < numConcurrentThreads; ++threadIdx)
-        {
-            const Size numWorkElements = numWorksPerThread + (threadIdx == 0 ? numRemainedWorks : 0);
-            threadWorkRange.emplace_back(workElementOffset, numWorkElements);
-            workElementOffset += numWorkElements;
-        }
-        IG_CHECK(workElementOffset == transformView.size());
-
-        for (U32 threadIdx = 0; threadIdx < numConcurrentThreads; ++threadIdx)
-        {
-            std::future<void> threadFuture = std::async(
-                std::launch::async,
-                [this, localFrameIdx, &transformView, &registry](const U32 threadIdx, const Size workElementOffset, const Size numWorkElements)
+                for (const auto& [entity, transform] : transformView.each())
                 {
-                    ZoneScopedN("UpdateTransformPerThread");
-                    for (Size elementIdx = 0; elementIdx < numWorkElements; ++elementIdx)
+                    if (!entityProxyMap.contains(entity))
                     {
-                        auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
-
-                        const Entity entity = *(transformView.begin() + workElementOffset + elementIdx);
-                        TransformProxy& proxy = entityProxyMap[entity];
-                        IG_CHECK(proxy.bMightBeDestroyed);
-                        proxy.bMightBeDestroyed = false;
-
-                        const TransformComponent& transformComponent = registry.get<TransformComponent>(entity);
-                        if (const U64 currentDataHashValue = HashInstance(transformComponent);
-                            proxy.DataHashValue != currentDataHashValue)
-                        {
-                            proxy.GpuData = transformComponent.CreateTransformation();
-                            proxy.DataHashValue = currentDataHashValue;
-
-                            transformProxyPackage.PendingRepsPerThread[threadIdx].emplace_back(entity);
-                        }
+                        entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
                     }
-                },
-                threadIdx,
-                threadWorkRange[threadIdx].first, threadWorkRange[threadIdx].second);
+                }
+            });
 
-            threadFutures.emplace_back(std::move(threadFuture));
-        }
+        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
+        const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
+        const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
 
-        for (std::future<void>& threadFuture : threadFutures)
-        {
-            threadFuture.get();
-        }
-
-        for (U32 threadIdx = 0; threadIdx < numConcurrentThreads; ++threadIdx)
-        {
-            for (const Entity entity : transformProxyPackage.PendingRepsPerThread[threadIdx])
+        auto updateProxyTask = subflow.for_each_index(
+            0, numWorkGroups, 1,
+            [this, &registry, &entityProxyMap, numWorksPerGroup, numRemainedWorks, transformView](const Size groupIdx)
             {
-                transformProxyPackage.PendingReplications.emplace_back(entity);
-            }
-            transformProxyPackage.PendingRepsPerThread[threadIdx].clear();
-        }
+                ZoneScopedN("UpdateTransformPerWorkGruop");
+                const Size numWorks = numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
+                const Size viewOffset = (groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
+                {
+                    const Entity entity = *(transformView.begin() + viewOffset + viewIdx);
+                    TransformProxy& proxy = entityProxyMap[entity];
+                    IG_CHECK(proxy.bMightBeDestroyed);
+                    proxy.bMightBeDestroyed = false;
 
-        // Proxy Map이 element deletion에 stable 하지 않기 때문에 별도로 처리
-        for (auto& [entity, proxy] : entityProxyMap)
-        {
-            if (proxy.bMightBeDestroyed)
+                    const TransformComponent& transformComponent = registry.get<TransformComponent>(entity);
+                    if (const U64 currentDataHashValue = HashInstance(transformComponent);
+                        proxy.DataHashValue != currentDataHashValue)
+                    {
+                        proxy.GpuData = transformComponent.CreateTransformation();
+                        proxy.DataHashValue = currentDataHashValue;
+
+                        transformProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
+                    }
+                }
+            });
+
+        auto commitReplications = subflow.emplace(
+            [this, numWorkGroups]()
             {
-                transformProxyPackage.PendingDestructions.emplace_back(entity);
-            }
-        }
+                for (int groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                {
+                    for (const Entity entity : transformProxyPackage.PendingReplicationGroups[groupIdx])
+                    {
+                        transformProxyPackage.PendingReplications.emplace_back(entity);
+                    }
+                    transformProxyPackage.PendingReplicationGroups[groupIdx].clear();
+                }
+            });
 
-        for (const Entity entity : transformProxyPackage.PendingDestructions)
-        {
-            const auto extractedElement = transformProxyPackage.ProxyMap[localFrameIdx].extract(entity);
-            IG_CHECK(extractedElement.has_value());
-            IG_CHECK(extractedElement->second.StorageSpace.IsValid());
-            storage.Deallocate(extractedElement->second.StorageSpace);
-        }
-        transformProxyPackage.PendingDestructions.clear();
+        auto commitDestructions = subflow.emplace(
+            [this, &entityProxyMap, &storage, localFrameIdx]()
+            {
+                for (auto& [entity, proxy] : entityProxyMap)
+                {
+                    if (proxy.bMightBeDestroyed)
+                    {
+                        transformProxyPackage.PendingDestructions.emplace_back(entity);
+                    }
+                }
+
+                for (const Entity entity : transformProxyPackage.PendingDestructions)
+                {
+                    const auto extractedElement = transformProxyPackage.ProxyMap[localFrameIdx].extract(entity);
+                    IG_CHECK(extractedElement.has_value());
+                    IG_CHECK(extractedElement->second.StorageSpace.IsValid());
+                    storage.Deallocate(extractedElement->second.StorageSpace);
+                }
+                transformProxyPackage.PendingDestructions.clear();
+            });
+
+        invalidateProxyTask.precede(createNewProxyTask);
+        createNewProxyTask.precede(updateProxyTask);
+        updateProxyTask.precede(commitReplications, commitDestructions);
     }
 
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx)

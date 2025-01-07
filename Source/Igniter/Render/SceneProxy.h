@@ -83,8 +83,8 @@ namespace ig
             Vector<Owner> PendingReplications;
             Vector<Owner> PendingDestructions;
 
-            Vector<Vector<Owner>> PendingRepsPerThread;
-            Vector<Vector<Owner>> PendingDestsPerThread;
+            // PendingRepsPerThread->PendingReplicationGroups?
+            Vector<Vector<Owner>> PendingReplicationGroups;
         };
 
     public:
@@ -132,7 +132,7 @@ namespace ig
     private:
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
 
-        void UpdateTransformProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void ScheduleUpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
 
         void UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 

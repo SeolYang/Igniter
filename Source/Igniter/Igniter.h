@@ -155,7 +155,9 @@ using namespace entt::literals;
 #pragma warning(disable : 26495)
 #pragma warning(disable : 26439)
 #pragma warning(disable : 6387)
+#pragma warning(disable : 5046)
 #include <taskflow/taskflow.hpp>
+#include <taskflow/algorithm/for_each.hpp>
 #pragma warning(pop)
 
 #pragma warning(push)
