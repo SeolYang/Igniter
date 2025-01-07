@@ -5,17 +5,17 @@
 
 namespace ig::meta
 {
-    using Type         = entt::meta_type;
-    using Property     = entt::meta_prop;
-    using Function     = entt::meta_func;
+    using Type = entt::meta_type;
+    using Property = entt::meta_prop;
+    using Function = entt::meta_func;
     using HashedString = entt::hashed_string;
 
-    constexpr inline entt::hashed_string NameProperty          = "Name"_hs;
+    constexpr inline entt::hashed_string NameProperty = "Name"_hs;
     constexpr inline entt::hashed_string TitleCaseNameProperty = "TitleCaseName"_hs;
-    constexpr inline entt::hashed_string DescriptionProperty   = "Description"_hs;
-    constexpr inline entt::hashed_string ComponentProperty     = "Component"_hs;
-    constexpr inline entt::hashed_string AddComponentFunc      = "AddComponent"_hs;
-    constexpr inline entt::hashed_string RemoveComponentFunc   = "RemoveComponent"_hs;
+    constexpr inline entt::hashed_string DescriptionProperty = "Description"_hs;
+    constexpr inline entt::hashed_string ComponentProperty = "Component"_hs;
+    constexpr inline entt::hashed_string AddComponentFunc = "AddComponent"_hs;
+    constexpr inline entt::hashed_string RemoveComponentFunc = "RemoveComponent"_hs;
     // Signature:OnInspectorFunc(Registry*, Entity); // #sy_todo -> Ref<Registry>로 변경 할 것
     constexpr inline entt::hashed_string OnInspectorFunc = "OnInspectorFunc"_hs;
     constexpr inline entt::hashed_string StartupAppClass = "StartupClass"_hs;
@@ -27,7 +27,7 @@ namespace ig::meta
 
     [[nodiscard]] inline bool IsReflectedType(const ig::meta::Type& type)
     {
-        const auto bOwningNameProperty          = static_cast<bool>(type.prop(NameProperty));
+        const auto bOwningNameProperty = static_cast<bool>(type.prop(NameProperty));
         const auto bOwningTitleCaseNameProperty = static_cast<bool>(type.prop(TitleCaseNameProperty));
         return bOwningNameProperty && bOwningTitleCaseNameProperty;
     }
@@ -41,10 +41,10 @@ namespace ig::meta
 
     [[nodiscard]] inline bool IsComponent(const ig::meta::Type& type)
     {
-        const auto bOwningComponentProperty   = static_cast<bool>(type.prop(ComponentProperty));
-        const auto bOwningAddComponentFunc    = static_cast<bool>(type.func(AddComponentFunc));
+        const auto bOwningComponentProperty = static_cast<bool>(type.prop(ComponentProperty));
+        const auto bOwningAddComponentFunc = static_cast<bool>(type.func(AddComponentFunc));
         const auto bOwningRemoveComponentFunc = static_cast<bool>(type.func(RemoveComponentFunc));
-        const bool bHasComponentIdentity      = bOwningComponentProperty && bOwningAddComponentFunc && bOwningRemoveComponentFunc;
+        const bool bHasComponentIdentity = bOwningComponentProperty && bOwningAddComponentFunc && bOwningRemoveComponentFunc;
         return IsReflectedType(type) && bHasComponentIdentity;
     }
 
@@ -71,7 +71,7 @@ namespace ig::meta
     template <typename T, typename... Args>
     bool Invoke(const entt::hashed_string functionIdentifier, Args&&... args)
     {
-        using Ty                  = std::decay_t<T>;
+        using Ty = std::decay_t<T>;
         const ig::meta::Type type = entt::resolve<Ty>();
         if (!type)
         {

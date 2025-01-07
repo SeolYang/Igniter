@@ -23,7 +23,7 @@ namespace ig
 
     bool ThreadInfo::IsMainThread()
     {
-        IG_CHECK(mainThreadUid == std::numeric_limits<Size>::max() && "Main thread does not registered.");
+        IG_CHECK(mainThreadUid != std::numeric_limits<Size>::max() && "Main thread does not registered.");
         return ThreadUIDGenerator::GetUID() == mainThreadUid;
     }
 
