@@ -132,7 +132,8 @@ namespace ig
     private:
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
 
-        void ScheduleUpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateMaterialProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
 
         void UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 

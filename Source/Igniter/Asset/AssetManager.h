@@ -231,7 +231,8 @@ namespace ig
             assetMonitor->UpdateLoadDesc<T>(guid, newLoadDesc);
         }
 
-        [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const;
+        // Unknown == no filter
+        [[nodiscard]] std::vector<Snapshot> TakeSnapshots(const EAssetCategory filter = EAssetCategory::Unknown) const;
 
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 

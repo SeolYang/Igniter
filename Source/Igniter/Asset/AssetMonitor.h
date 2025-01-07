@@ -166,7 +166,7 @@ namespace ig::details
         void Remove(const Guid& guid, const bool bShouldExpired = true);
         void SaveAllChanges();
 
-        [[nodiscard]] std::vector<AssetInfo> TakeSnapshots() const;
+        [[nodiscard]] std::vector<AssetInfo> TakeSnapshots(const EAssetCategory filter) const;
 
     private:
         void InitAssetDescTables();

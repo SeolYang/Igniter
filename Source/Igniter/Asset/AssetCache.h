@@ -23,6 +23,7 @@ namespace ig::details
         virtual void Invalidate(const Guid& guid) = 0;
         virtual [[nodiscard]] bool IsCached(const Guid& guid) const = 0;
         virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
+        [[nodiscard]] virtual Snapshot TakeSnapshot(const Guid& guid) const = 0;
     };
 
     template <typename T>
@@ -107,6 +108,15 @@ namespace ig::details
             }
 
             return refCounterSnapshots;
+        }
+
+        [[nodiscard]] Snapshot TakeSnapshot(const Guid& guid) const override
+        {
+            ReadOnlyLock lock{mutex};
+            const auto refCounterItr = refCounterTable.find(guid);
+            return refCounterItr != refCounterTable.cend() ?
+                Snapshot{.Guid = guid, .RefCount = refCounterItr->second} :
+                Snapshot{};
         }
 
     private:

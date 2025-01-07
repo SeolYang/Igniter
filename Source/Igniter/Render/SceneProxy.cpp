@@ -113,10 +113,11 @@ namespace ig
 
         tf::Executor& executor = Engine::GetTaskExecutor();
         tf::Taskflow rootTaskFlow{};
-        auto updateTransformTask = rootTaskFlow.emplace(
+        tf::Task updateTransformTask = rootTaskFlow.emplace(
             [this, localFrameIdx, &registry](tf::Subflow& subflow)
             {
-                ScheduleUpdateTransformProxy(subflow, localFrameIdx, registry);
+                ZoneScopedN("UpdateTransform");
+                UpdateTransformProxy(subflow, localFrameIdx, registry);
                 subflow.join();
             });
 
@@ -223,10 +224,10 @@ namespace ig
         return syncPoint;
     }
 
-    void SceneProxy::ScheduleUpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
-        IG_CHECK(materialProxyPackage.PendingReplications.empty());
-        IG_CHECK(materialProxyPackage.PendingDestructions.empty());
+        IG_CHECK(transformProxyPackage.PendingReplications.empty());
+        IG_CHECK(transformProxyPackage.PendingDestructions.empty());
 
         auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
         auto invalidateProxyTask = subflow.for_each(entityProxyMap.begin(), entityProxyMap.end(),
@@ -240,6 +241,7 @@ namespace ig
         auto createNewProxyTask = subflow.emplace(
             [&registry, &entityProxyMap, &storage, transformView]()
             {
+                ZoneScopedN("CreateNewTransformProxy");
                 for (const auto& [entity, transform] : transformView.each())
                 {
                     if (!entityProxyMap.contains(entity))
@@ -282,6 +284,7 @@ namespace ig
         auto commitReplications = subflow.emplace(
             [this, numWorkGroups]()
             {
+                ZoneScopedN("CommitTransformReplications");
                 for (int groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
                 {
                     for (const Entity entity : transformProxyPackage.PendingReplicationGroups[groupIdx])
@@ -295,6 +298,7 @@ namespace ig
         auto commitDestructions = subflow.emplace(
             [this, &entityProxyMap, &storage, localFrameIdx]()
             {
+                ZoneScopedN("CommitTransformDestructions");
                 for (auto& [entity, proxy] : entityProxyMap)
                 {
                     if (proxy.bMightBeDestroyed)
@@ -333,13 +337,10 @@ namespace ig
             proxy.bMightBeDestroyed = true;
         }
 
-        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots()};
+        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::Material)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
         {
-            if (snapshot.Info.GetCategory() != EAssetCategory::Material)
-            {
-                continue;
-            }
+            IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::Material);
 
             if (!snapshot.IsCached())
             {
@@ -402,6 +403,42 @@ namespace ig
         }
         materialProxyPackage.PendingDestructions.clear();
     }
+
+   /* void SceneProxy::UpdateMaterialProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    {
+        IG_CHECK(materialProxyPackage.PendingReplications.empty());
+        IG_CHECK(materialProxyPackage.PendingDestructions.empty());
+
+        auto& entityProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
+        auto invalidateProxyTask = subflow.for_each(entityProxyMap.begin(), entityProxyMap.end(),
+                                                    [](auto& keyValuePair)
+                                                    {
+                                                        keyValuePair.second.bMightBeDestroyed = true;
+                                                    });
+
+        auto& storage = *materialProxyPackage.Storage[localFrameIdx];
+
+        const auto staticMeshView = registry.view<const StaticMeshComponent>();
+        auto createNewProxyFromStaticMeshTask = subflow.emplace(
+            [&registry, &entityProxyMap, &storage, staticMeshView]()
+            {
+                ZoneScopedN("CreateNewMaterialProxyFromStaticMesh");
+                for (const auto& [entity, staticMesh] : staticMeshView.each())
+                {
+                    if (!staticMesh.Mesh)
+                    {
+                        continue;
+                    }
+
+
+                    if (!entityProxyMap.contains(entity))
+                    {
+                        entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
+                    }
+                }
+            });
+
+    }*/
 
     void SceneProxy::UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
