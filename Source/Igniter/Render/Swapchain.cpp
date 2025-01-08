@@ -1,9 +1,13 @@
 #include "Igniter/Igniter.h"
+#include "Igniter/Core/Log.h"
 #include "Igniter/Core/Window.h"
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/GpuTexture.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/Swapchain.h"
+
+IG_DECLARE_LOG_CATEGORY(SwapchainLog);
+IG_DEFINE_LOG_CATEGORY(SwapchainLog);
 
 namespace ig
 {
@@ -84,6 +88,10 @@ namespace ig
     {
         const uint32_t syncInterval = bVSyncEnabled ? 1 : 0;
         const uint32_t presentFlags = bTearingEnabled && !bVSyncEnabled ? DXGI_PRESENT_ALLOW_TEARING : 0;
-        IG_VERIFY_SUCCEEDED(swapchain->Present(syncInterval, presentFlags));
+        const HRESULT result = swapchain->Present(syncInterval, presentFlags);
+        if (result == DXGI_ERROR_DEVICE_REMOVED || result == DXGI_ERROR_DEVICE_RESET)
+        {
+            IG_LOG(SwapchainLog, Fatal, "Present Failed: Device removed({:#X})", result);
+        }
     }
 } // namespace ig
