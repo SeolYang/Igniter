@@ -7,7 +7,7 @@
 
 namespace ig
 {
-    Swapchain::Swapchain(const Window& window, RenderContext& renderContext, const bool bEnableVSync /*= true*/)
+    Swapchain::Swapchain(const Window& window, RenderContext& renderContext, const bool bEnableVSync /*= false*/)
         : renderContext(renderContext), bVSyncEnabled(bEnableVSync)
     {
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();

@@ -13,7 +13,7 @@ namespace ig
         asyncCopyCmdListPool(gpuDevice, EQueueType::Copy),
         gpuViewManager(gpuDevice),
         gpuUploader(gpuDevice),
-        swapchain(MakePtr<Swapchain>(window, *this, NumFramesInFlight))
+        swapchain(MakePtr<Swapchain>(window, *this))
     {
         for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
