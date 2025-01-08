@@ -118,7 +118,7 @@ namespace ig
             renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
             renderContext->DestroyBuffer(lightIndicesBuffer[localFrameIdx]);
 
-            renderContext->DestroyBuffer(stagingBuffer[localFrameIdx]);
+            renderContext->DestroyBuffer(renderableIndicesStagingBuffer[localFrameIdx]);
         }
     }
 
@@ -857,27 +857,27 @@ namespace ig
             return;
         }
 
-        if (stagingBufferSize[localFrameIdx] < requiredStagingBufferSize)
+        if (renderableIndicesStagingBufferSize[localFrameIdx] < requiredStagingBufferSize)
         {
-            if (stagingBuffer[localFrameIdx])
+            if (renderableIndicesStagingBuffer[localFrameIdx])
             {
-                GpuBuffer* oldStagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+                GpuBuffer* oldStagingBufferPtr = renderContext->Lookup(renderableIndicesStagingBuffer[localFrameIdx]);
                 oldStagingBufferPtr->Unmap();
-                mappedStagingBuffer[localFrameIdx] = nullptr;
-                renderContext->DestroyBuffer(stagingBuffer[localFrameIdx]);
+                mappedRenderableIndicesStagingBuffer[localFrameIdx] = nullptr;
+                renderContext->DestroyBuffer(renderableIndicesStagingBuffer[localFrameIdx]);
             }
 
-            const Size newStagingBufferSize = std::max(stagingBufferSize[localFrameIdx] * 2, requiredStagingBufferSize);
+            const Size newStagingBufferSize = std::max(renderableIndicesStagingBufferSize[localFrameIdx] * 2, requiredStagingBufferSize);
             GpuBufferDesc stagingBufferDesc{};
             stagingBufferDesc.AsUploadBuffer((U32)newStagingBufferSize);
             stagingBufferDesc.DebugName = String(std::format("RenderableIndicesStagingBuffer.{}", localFrameIdx));
-            stagingBuffer[localFrameIdx] = renderContext->CreateBuffer(stagingBufferDesc);
-            stagingBufferSize[localFrameIdx] = newStagingBufferSize;
+            renderableIndicesStagingBuffer[localFrameIdx] = renderContext->CreateBuffer(stagingBufferDesc);
+            renderableIndicesStagingBufferSize[localFrameIdx] = newStagingBufferSize;
 
-            GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
-            mappedStagingBuffer[localFrameIdx] = stagingBufferPtr->Map(0);
+            GpuBuffer* stagingBufferPtr = renderContext->Lookup(renderableIndicesStagingBuffer[localFrameIdx]);
+            mappedRenderableIndicesStagingBuffer[localFrameIdx] = stagingBufferPtr->Map(0);
         }
-        IG_CHECK(stagingBuffer[localFrameIdx]);
+        IG_CHECK(renderableIndicesStagingBuffer[localFrameIdx]);
 
         numMaxRenderables[localFrameIdx] = (U32)renderableIndices.size();
         if (numMaxRenderables[localFrameIdx] == 0)
@@ -903,11 +903,11 @@ namespace ig
         GpuBuffer* renderableIndicesBufferPtr = renderContext->Lookup(renderableIndicesBuffer[localFrameIdx]);
         IG_CHECK(renderableIndicesBufferPtr != nullptr);
 
-        GpuBuffer* stagingBufferPtr = renderContext->Lookup(stagingBuffer[localFrameIdx]);
+        GpuBuffer* stagingBufferPtr = renderContext->Lookup(renderableIndicesStagingBuffer[localFrameIdx]);
         IG_CHECK(stagingBufferPtr != nullptr);
 
-        IG_CHECK(mappedStagingBuffer[localFrameIdx] != nullptr);
-        auto* mappedBuffer = mappedStagingBuffer[localFrameIdx];
+        IG_CHECK(mappedRenderableIndicesStagingBuffer[localFrameIdx] != nullptr);
+        auto* mappedBuffer = mappedRenderableIndicesStagingBuffer[localFrameIdx];
 
         const U32 replicationSize = (U32)requiredStagingBufferSize;
         IG_CHECK(replicationSize == (sizeof(U32) * numMaxRenderables[localFrameIdx]));

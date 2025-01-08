@@ -146,8 +146,6 @@ namespace ig
 
         void UpdateLightEntityProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
-        void PrepareStagingBuffer(const LocalFrameIndex localFrameIdx, const Size requiredSize);
-
         template <typename Proxy, typename Owner>
         void ReplicateProxyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
 
@@ -158,10 +156,6 @@ namespace ig
         RenderContext* renderContext = nullptr;
         AssetManager* assetManager = nullptr;
         const MeshStorage* meshStorage = nullptr;
-
-        InFlightFramesResource<RenderHandle<GpuBuffer>> stagingBuffer;
-        InFlightFramesResource<U8*> mappedStagingBuffer;
-        InFlightFramesResource<Size> stagingBufferSize;
 
         constexpr static U32 kNumInitTransformElements = 1024u;
         ProxyPackage<TransformProxy> transformProxyPackage;
@@ -186,6 +180,11 @@ namespace ig
         InFlightFramesResource<RenderHandle<GpuView>> renderableIndicesBufferSrv;
         Vector<Vector<U32>> renderableIndicesGroups;
         Vector<U32> renderableIndices;
+        // #sy_todo 나중에 StagingBuffer로 묶어서 간략하게 리팩토링하기
+        InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesStagingBuffer;
+        InFlightFramesResource<U8*> mappedRenderableIndicesStagingBuffer;
+        InFlightFramesResource<Size> renderableIndicesStagingBufferSize;
+
 
         constexpr static U32 kNumInitLightIndices = 2048u;
         InFlightFramesResource<U32> lightIndicesBufferSize;
