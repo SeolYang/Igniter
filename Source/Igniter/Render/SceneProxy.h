@@ -80,11 +80,12 @@ namespace ig
 
             InFlightFramesResource<Ptr<GpuStorage>> Storage;
             InFlightFramesResource<ProxyMapType> ProxyMap;
-            Vector<Owner> PendingReplications;
-            Vector<Owner> PendingDestructions;
+            Vector<Owner> PendingReplications; // Deprecated
+            Vector<Owner> PendingDestructions; // Deprecated
 
-            // PendingRepsPerThread->PendingReplicationGroups?
+            Vector<Vector<std::pair<Owner, Proxy>>> PendingProxyGroups;
             Vector<Vector<Owner>> PendingReplicationGroups;
+            Vector<Vector<Owner>> PendingDestructionGroups;
         };
 
     public:
@@ -131,13 +132,9 @@ namespace ig
 
     private:
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
-
         void UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
         void UpdateStaticMeshProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
-
-        void UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
-
-        void UpdateRenderableProxy(const LocalFrameIndex localFrameIdx);
+        void UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx);
 
         void UpdateLightEntityProxy(const LocalFrameIndex localFrameIdx, const Registry& registry);
 
@@ -183,6 +180,7 @@ namespace ig
         InFlightFramesResource<U32> numMaxRenderables;
         InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesBuffer;
         InFlightFramesResource<RenderHandle<GpuView>> renderableIndicesBufferSrv;
+        Vector<Vector<U32>> renderableIndicesGroups;
         Vector<U32> renderableIndices;
 
         constexpr static U32 kNumInitLightIndices = 2048u;

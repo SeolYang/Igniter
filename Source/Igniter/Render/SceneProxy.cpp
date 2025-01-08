@@ -34,7 +34,6 @@ namespace ig
                     String(std::format("TransformStorage{}", localFrameIdx)),
                     TransformProxy::kDataSize,
                     kNumInitTransformElements);
-            transformProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             materialProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -42,7 +41,6 @@ namespace ig
                     String(std::format("MaterialDataStorage{}", localFrameIdx)),
                     MaterialProxy::kDataSize,
                     kNumInitMaterialElements);
-            materialProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             staticMeshProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -50,7 +48,6 @@ namespace ig
                     String(std::format("StaticMeshDataStorage{}", localFrameIdx)),
                     StaticMeshProxy::kDataSize,
                     kNumInitStaticMeshElements);
-            staticMeshProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             renderableProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -58,7 +55,6 @@ namespace ig
                     String(std::format("RenderableStorage{}", localFrameIdx)),
                     RenderableProxy::kDataSize,
                     kNumInitRenderableElements);
-            renderableProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             lightProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
@@ -66,7 +62,6 @@ namespace ig
                     String(std::format("LightDataStorage{}", localFrameIdx)),
                     LightProxy::kDataSize,
                     kNumInitLightElements);
-            lightProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
 
             renderableIndicesBufferSize[localFrameIdx] = kNumInitRenderableIndices;
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
@@ -78,6 +73,17 @@ namespace ig
             lightIndicesBuffer[localFrameIdx] = renderContext.CreateBuffer(lightIndicesBufferDesc);
             lightIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(lightIndicesBuffer[localFrameIdx]);
         }
+
+        transformProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
+        transformProxyPackage.PendingProxyGroups.resize(std::thread::hardware_concurrency());
+
+        staticMeshProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
+        staticMeshProxyPackage.PendingProxyGroups.resize(std::thread::hardware_concurrency());
+
+        lightProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
+        renderableProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
+        renderableProxyPackage.PendingProxyGroups.resize(std::thread::hardware_concurrency());
+        renderableIndicesGroups.resize(std::thread::hardware_concurrency());
 
         renderableIndices.reserve(kNumInitRenderableIndices);
         lightIndices.reserve(kNumInitLightIndices);
@@ -143,10 +149,16 @@ namespace ig
                 subflow.join();
             });
 
-        // tf::Task updateRenderableTask = rootTaskFlow.emplace([]() {});
+        tf::Task updateRenderableTask = rootTaskFlow.emplace(
+            [this, localFrameIdx](tf::Subflow& subflow)
+            {
+                ZoneScopedN("UpdateRenderableTask");
+                UpdateRenderableProxy(subflow, localFrameIdx);
+                subflow.join();
+            });
 
         updateStaticMeshTask.succeed(updateMaterialTask);
-        // updateRenderableTask.succeed(updateTransformTask, updateStaticMeshTask);
+        updateRenderableTask.succeed(updateTransformTask, updateStaticMeshTask);
 
         //// replicate가 각 update 이후에 바로 이뤄지게 하기 위해서는 staging buffer의 독립이 1순위
         // tf::Task replicateTransformData = rootTaskFlow.emplace([]() {});
@@ -163,8 +175,6 @@ namespace ig
         // replicateRenderableIndices.succeed(updateRenderableTask);
 
         executor.run(rootTaskFlow).wait();
-
-        UpdateRenderableProxy(localFrameIdx);
 
         // #sy_warn Copy시 Alignment 문제 발생 가능!
         const Size transformReplicationSize = TransformProxy::kDataSize * transformProxyPackage.PendingReplications.size();
@@ -263,28 +273,47 @@ namespace ig
 
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
         const auto transformView = registry.view<const TransformComponent>();
-        auto createNewProxyTask = subflow.emplace(
-            [&registry, &entityProxyMap, &storage, transformView]()
-            {
-                ZoneScopedN("CreateNewTransformProxy");
-                for (const auto& [entity, transform] : transformView.each())
-                {
-                    if (!entityProxyMap.contains(entity))
-                    {
-                        entityProxyMap[entity] = TransformProxy{.StorageSpace = storage.Allocate(1)};
-                    }
-                }
-            });
-
         const auto numWorkGroups = (int)std::thread::hardware_concurrency();
         const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
         const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
 
-        auto updateProxyTask = subflow.for_each_index(
+        tf::Task createNewProxyTask = subflow.for_each_index(
+            0, numWorkGroups, 1,
+            [this, &registry, &entityProxyMap, transformView, numWorksPerGroup, numRemainedWorks](const int groupIdx)
+            {
+                ZoneScopedN("CreateNewPendingTransformProxyWorkGroup");
+                const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
+                const Size viewOffset = (Size)(groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
+                {
+                    const Entity entity = *(transformView.begin() + viewOffset + viewIdx);
+                    if (!entityProxyMap.contains(entity))
+                    {
+                        transformProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, TransformProxy{});
+                    }
+                }
+            });
+
+        tf::Task commitPendingProxyTask = subflow.emplace(
+            [this, &entityProxyMap, &storage, numWorkGroups]()
+            {
+                ZoneScopedN("CommitPendingTransformProxy");
+                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                {
+                    for (auto& [pendingEntity, pendingProxy] : transformProxyPackage.PendingProxyGroups[groupIdx])
+                    {
+                        pendingProxy.StorageSpace = storage.Allocate(1);
+                        entityProxyMap[pendingEntity] = pendingProxy;
+                    }
+                    transformProxyPackage.PendingProxyGroups[groupIdx].clear();
+                }
+            });
+
+        tf::Task updateProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
             [this, &registry, &entityProxyMap, numWorksPerGroup, numRemainedWorks, transformView](const Size groupIdx)
             {
-                ZoneScopedN("UpdateTransformPerWorkGruop");
+                ZoneScopedN("UpdateTransformWorkGruop");
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
                 const Size viewOffset = (groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
                 for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
@@ -307,7 +336,7 @@ namespace ig
                 }
             });
 
-        auto commitReplications = subflow.emplace(
+        tf::Task commitReplications = subflow.emplace(
             [this, numWorkGroups]()
             {
                 ZoneScopedN("CommitTransformReplications");
@@ -321,7 +350,7 @@ namespace ig
                 }
             });
 
-        auto commitDestructions = subflow.emplace(
+        tf::Task commitDestructions = subflow.emplace(
             [this, &entityProxyMap, &storage, localFrameIdx]()
             {
                 ZoneScopedN("CommitTransformDestructions");
@@ -344,13 +373,13 @@ namespace ig
             });
 
         invalidateProxyTask.precede(createNewProxyTask);
-        createNewProxyTask.precede(updateProxyTask);
+        createNewProxyTask.precede(commitPendingProxyTask);
+        commitPendingProxyTask.precede(updateProxyTask);
         updateProxyTask.precede(commitReplications, commitDestructions);
     }
 
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx)
     {
-        ZoneScoped;
         IG_CHECK(materialProxyPackage.PendingReplications.empty());
         IG_CHECK(materialProxyPackage.PendingDestructions.empty());
 
@@ -430,84 +459,6 @@ namespace ig
         materialProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateStaticMeshProxy(const LocalFrameIndex localFrameIdx, const Registry& registry)
-    {
-        ZoneScoped;
-        IG_CHECK(staticMeshProxyPackage.PendingReplications.empty());
-        IG_CHECK(staticMeshProxyPackage.PendingDestructions.empty());
-
-        auto& proxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
-        auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
-        const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
-
-        for (auto& [entity, proxy] : proxyMap)
-        {
-            IG_CHECK(entity != NullEntity);
-            proxy.bMightBeDestroyed = true;
-        }
-
-        auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
-        for (const auto& [entity, staticMeshComponent] : staticMeshEntityView.each())
-        {
-            if (!staticMeshComponent.Mesh)
-            {
-                continue;
-            }
-
-            if (!proxyMap.contains(entity))
-            {
-                proxyMap[entity] = StaticMeshProxy{.StorageSpace = storage.Allocate(1)};
-            }
-
-            StaticMeshProxy& proxy = proxyMap[entity];
-            IG_CHECK(proxy.bMightBeDestroyed);
-            proxy.bMightBeDestroyed = false;
-
-            // Static Mesh Component의 경우, 에셋에 대한 핸들을 저장하고 핸들은 바뀌지 않더라도
-            // Reimport/Reload로 인해서 실제 참조 할 데이터는 변경 될 수 있기 때문에
-            const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
-            IG_CHECK(staticMeshPtr != nullptr);
-
-            // Mesh Storage에서 각 핸들은 고유하고, 해제 되기 전까지 해당 핸들에 대한 내부 값은 절대 바뀌지 않는다.
-            const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
-            const ManagedAsset<Material> material = staticMeshPtr->GetMaterial();
-            IG_CHECK(materialProxyMap.contains(material));
-            if (const U64 currentDataHashValue = vertexIndexSpace.Value ^ material.Value;
-                proxy.DataHashValue != currentDataHashValue)
-            {
-                const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
-                const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
-                const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
-
-                proxy.GpuData = StaticMeshGpuData{
-                    .MaterialDataIdx = (U32)materialProxyMap.at(material).StorageSpace.OffsetIndex,
-                    .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
-                    .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
-                    .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
-                    .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0)};
-                proxy.DataHashValue = currentDataHashValue;
-
-                staticMeshProxyPackage.PendingReplications.emplace_back(entity);
-            }
-        }
-
-        for (auto& [entity, proxy] : proxyMap)
-        {
-            if (proxy.bMightBeDestroyed)
-            {
-                staticMeshProxyPackage.PendingDestructions.emplace_back(entity);
-            }
-        }
-
-        for (const Entity entity : staticMeshProxyPackage.PendingDestructions)
-        {
-            const auto extractedElement = proxyMap.extract(entity);
-            IG_CHECK(extractedElement.has_value());
-            storage.Deallocate(extractedElement->second.StorageSpace);
-        }
-        staticMeshProxyPackage.PendingDestructions.clear();
-    }
-
     void SceneProxy::UpdateStaticMeshProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
         IG_CHECK(staticMeshProxyPackage.PendingReplications.empty());
@@ -524,27 +475,47 @@ namespace ig
 
         auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
         const auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
-        tf::Task createNewProxyTask = subflow.emplace(
-            [&registry, &entityProxyMap, &storage, staticMeshEntityView]()
-            {
-                for (const auto& [entity, staticMeshComponent] : staticMeshEntityView.each())
-                {
-                    // 간혹 Static Mesh가 아직 선택되지 않은 경우엔 Proxy 미생성
-                    if (!staticMeshComponent.Mesh)
-                    {
-                        continue;
-                    }
+        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
+        const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
+        const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
 
+        tf::Task createNewProxyTask = subflow.for_each_index(
+            0, numWorkGroups, 1,
+            [this, &registry, &entityProxyMap, staticMeshEntityView, numWorksPerGroup, numRemainedWorks](const int groupIdx)
+            {
+                ZoneScopedN("CreateNewPendingStaticMeshProxy");
+                const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
+                const Size viewOffset = (Size)(groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
+                {
+                    const Entity entity = *(staticMeshEntityView.begin() + viewOffset + viewIdx);
                     if (!entityProxyMap.contains(entity))
                     {
-                        entityProxyMap[entity] = StaticMeshProxy{.StorageSpace = storage.Allocate(1)};
+                        const StaticMeshComponent& staticMeshComponent = staticMeshEntityView.get<const StaticMeshComponent>(entity);
+                        if (!staticMeshComponent.Mesh)
+                        {
+                            continue;
+                        }
+
+                        staticMeshProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, StaticMeshProxy{});
                     }
                 }
             });
 
-        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
-        const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
-        const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
+        tf::Task commitPendingProxyTask = subflow.emplace(
+            [this, &entityProxyMap, &storage, numWorkGroups]()
+            {
+                ZoneScopedN("CommitPendingStaticMeshProxy");
+                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                {
+                    for (auto& [pendingEntity, pendingProxy] : staticMeshProxyPackage.PendingProxyGroups[groupIdx])
+                    {
+                        pendingProxy.StorageSpace = storage.Allocate(1);
+                        entityProxyMap[pendingEntity] = pendingProxy;
+                    }
+                    staticMeshProxyPackage.PendingProxyGroups[groupIdx].clear();
+                }
+            });
 
         tf::Task updateProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
@@ -582,7 +553,6 @@ namespace ig
 
                     const StaticMeshComponent& staticMeshComponent = registry.get<StaticMeshComponent>(entity);
                     const StaticMesh* staticMeshPtr = staticMeshTable[staticMeshComponent.Mesh];
-                    //const StaticMesh* staticMeshPtr = assetManager->Lookup(staticMeshComponent.Mesh);
                     IG_CHECK(staticMeshPtr != nullptr);
 
                     // Mesh Storage에서 각 핸들은 고유하고, 해제 되기 전까지 해당 핸들에 대한 내부 값은 절대 바뀌지 않는다.
@@ -646,13 +616,13 @@ namespace ig
             });
 
         invalidateProxyTask.precede(createNewProxyTask);
-        createNewProxyTask.precede(updateProxyTask);
+        createNewProxyTask.precede(commitPendingProxyTask);
+        commitPendingProxyTask.precede(updateProxyTask);
         updateProxyTask.precede(commitReplications, commitDestructions);
     }
 
-    void SceneProxy::UpdateRenderableProxy(const LocalFrameIndex localFrameIdx)
+    void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx)
     {
-        ZoneScoped;
         IG_CHECK(renderableProxyPackage.PendingReplications.empty());
         IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
 
@@ -661,13 +631,11 @@ namespace ig
         const auto& staticMeshProxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
         const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
 
-        for (auto& [entity, proxy] : renderableProxyMap)
-        {
-            IG_CHECK(entity != NullEntity);
-            proxy.bMightBeDestroyed = true;
-        }
-
-        renderableIndices.clear();
+        tf::Task invalidateProxyTask = subflow.for_each(renderableProxyMap.begin(), renderableProxyMap.end(),
+                                                        [](auto& keyValuePair)
+                                                        {
+                                                            keyValuePair.second.bMightBeDestroyed = true;
+                                                        });
 
         // 만약 Renderable Component를 한 개의 Entity가 여러개 가지고 있더라도
         // renderable로 반영 되는 건 딱 첫 번째로 인식 되는 컴포넌트다.
@@ -675,47 +643,133 @@ namespace ig
         // 가능한 방안은 같은 타입의 Renderable이 아니라면 bMightBeDestroyed를 false로 변경하지 않도록 한다.
         // 그렇게 하면 가장 먼저 업로드된 정보가 Expired 되어도 정상적으로 해당 Renderable에 대한 Destroy 알고리즘이
         // 작동하게 되고, 다음 프레임 부터는 정상적으로 새로운 Renderable이 할당되게 된다.
-        for (const auto& [entity, _] : staticMeshProxyMap)
-        {
-            IG_CHECK(transformProxyMap.contains(entity));
+        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
 
-            if (!renderableProxyMap.contains(entity))
+        // 확장시 2가지 선택 가능한 선택지.
+        // 1. 한번에 하나의 타입에 대해서 순차적 처리 => 이 방식을 선제 구현 후 프로파일링 후 추가 조치 할 것!
+        // 2. 각각 개별적인 pending list를 가져서 전부 개별적으로 동시적으로 처리
+        // (ex. pendingStaticMeshRenderableProxy, pendingSkeletalMeshRenderableProxy, ...etc)
+        // Static Mesh
+        const auto numStaticMeshWorksPerGroup = (int)staticMeshProxyMap.size() / numWorkGroups;
+        const auto numStaticMeshRemainedWorks = (int)staticMeshProxyMap.size() % numWorkGroups;
+        tf::Task createRenderableStaticMeshTask = subflow.for_each_index(
+            0, numWorkGroups, 1,
+            [this, numStaticMeshWorksPerGroup, numStaticMeshRemainedWorks, &renderableProxyMap, &staticMeshProxyMap, &transformProxyMap](const int groupIdx)
             {
-                renderableProxyMap[entity] = RenderableProxy{
-                    .StorageSpace = renderableStorage.Allocate(1),
-                    .GpuData = RenderableGpuData{
-                        .Type = ERenderableType::StaticMesh,
-                        .DataIdx = (U32)staticMeshProxyMap.at(entity).StorageSpace.OffsetIndex,
-                        .TransformDataIdx = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex}};
+                const Size numWorks = (Size)numStaticMeshWorksPerGroup + (groupIdx == 0 ? numStaticMeshRemainedWorks : 0);
+                const Size viewOffset = (Size)(groupIdx * numStaticMeshWorksPerGroup) + (groupIdx != 0 ? numStaticMeshRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
+                {
+                    const Entity entity = (staticMeshProxyMap.cbegin() + viewOffset + viewIdx)->first;
+                    IG_CHECK(transformProxyMap.contains(entity));
+                    if (!renderableProxyMap.contains(entity))
+                    {
+                        renderableProxyPackage.PendingProxyGroups[groupIdx].emplace_back(
+                            entity,
+                            RenderableProxy{
+                                .StorageSpace = {},
+                                .GpuData = RenderableGpuData{
+                                    .Type = ERenderableType::StaticMesh,
+                                    .DataIdx = (U32)staticMeshProxyMap.at(entity).StorageSpace.OffsetIndex,
+                                    .TransformDataIdx = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex}});
 
-                renderableProxyPackage.PendingReplications.emplace_back(entity);
-            }
+                        renderableProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
+                    }
+                }
+            });
 
-            RenderableProxy& proxy = renderableProxyMap[entity];
-            if (proxy.GpuData.Type != ERenderableType::StaticMesh)
+        // 모든 종류의 Renderable에 대한 Proxy가 만들어 진 이후
+        tf::Task commitPendingRenderableTask = subflow.emplace(
+            [this, numWorkGroups, &renderableProxyMap, &renderableStorage]()
             {
-                continue;
-            }
+                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                {
+                    // Commit Pending Renderables
+                    for (auto& pendingRenderable : renderableProxyPackage.PendingProxyGroups[groupIdx])
+                    {
+                        pendingRenderable.second.StorageSpace = renderableStorage.Allocate(1);
+                        renderableProxyMap[pendingRenderable.first] = pendingRenderable.second;
+                    }
+                    renderableProxyPackage.PendingProxyGroups[groupIdx].clear();
+                }
+            });
 
-            IG_CHECK(proxy.bMightBeDestroyed);
-            proxy.bMightBeDestroyed = false;
-            renderableIndices.emplace_back((U32)proxy.StorageSpace.OffsetIndex);
-        }
-
-        for (auto& [entity, proxy] : renderableProxyMap)
-        {
-            if (proxy.bMightBeDestroyed)
+        // Storage 할당이 끝나면 각 종류의 Renderable들에 대한 proxy 유효성(수명) 평가와 renderable indices 구성
+        tf::Task constructStaticMeshRenderableIndicesTask = subflow.for_each_index(
+            0, numWorkGroups, 1,
+            [this, numStaticMeshWorksPerGroup, numStaticMeshRemainedWorks, &renderableProxyMap, &staticMeshProxyMap](const int groupIdx)
             {
-                renderableProxyPackage.PendingDestructions.emplace_back(entity);
-            }
-        }
+                const Size numWorks = (Size)numStaticMeshWorksPerGroup + (groupIdx == 0 ? numStaticMeshRemainedWorks : 0);
+                const Size viewOffset = (Size)(groupIdx * numStaticMeshWorksPerGroup) + (groupIdx != 0 ? numStaticMeshRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
+                {
+                    const Entity entity = (staticMeshProxyMap.begin() + viewOffset + viewIdx)->first;
+                    RenderableProxy& proxy = renderableProxyMap[entity];
+                    if (proxy.GpuData.Type != ERenderableType::StaticMesh)
+                    {
+                        continue;
+                    }
 
-        for (const Entity entity : renderableProxyPackage.PendingDestructions)
-        {
-            const auto extractedElement = renderableProxyMap.extract(entity);
-            renderableStorage.Deallocate(extractedElement->second.StorageSpace);
-        }
-        renderableProxyPackage.PendingDestructions.clear();
+                    IG_CHECK(proxy.bMightBeDestroyed);
+                    proxy.bMightBeDestroyed = false;
+                    renderableIndicesGroups[groupIdx].emplace_back((U32)proxy.StorageSpace.OffsetIndex);
+                }
+            });
+
+        tf::Task commitPendingRenderableIndicesTask = subflow.emplace(
+            [this, numWorkGroups]()
+            {
+                renderableIndices.clear();
+                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                {
+                    for (const U32 renderableIdx : renderableIndicesGroups[groupIdx])
+                    {
+                        renderableIndices.emplace_back(renderableIdx);
+                    }
+                    renderableIndicesGroups[groupIdx].clear();
+                }
+            });
+
+        tf::Task commitPendingReplicationsTask = subflow.emplace(
+            [this, numWorkGroups, &renderableProxyMap, &renderableStorage]()
+            {
+                renderableProxyPackage.PendingReplications.clear();
+                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                {
+                    // Commit Replications
+                    for (const Entity pendingReplicationEntity : renderableProxyPackage.PendingReplicationGroups[groupIdx])
+                    {
+                        renderableProxyPackage.PendingReplications.emplace_back(pendingReplicationEntity);
+                    }
+                    renderableProxyPackage.PendingReplicationGroups[groupIdx].clear();
+                }
+            });
+
+        tf::Task commitPendingDestructionsTask = subflow.emplace(
+            [this, &renderableProxyMap, &renderableStorage]()
+            {
+                for (auto& [entity, proxy] : renderableProxyMap)
+                {
+                    if (proxy.bMightBeDestroyed)
+                    {
+                        renderableProxyPackage.PendingDestructions.emplace_back(entity);
+                    }
+                }
+
+                for (const Entity entity : renderableProxyPackage.PendingDestructions)
+                {
+                    const auto extractedElement = renderableProxyMap.extract(entity);
+                    renderableStorage.Deallocate(extractedElement->second.StorageSpace);
+                }
+                renderableProxyPackage.PendingDestructions.clear();
+            });
+
+        invalidateProxyTask.precede(createRenderableStaticMeshTask);
+        createRenderableStaticMeshTask.precede(commitPendingRenderableTask);
+        commitPendingRenderableTask.precede(constructStaticMeshRenderableIndicesTask);
+        constructStaticMeshRenderableIndicesTask.precede(commitPendingRenderableIndicesTask,
+                                                         commitPendingReplicationsTask,
+                                                         commitPendingDestructionsTask);
     }
 
     void SceneProxy::PrepareStagingBuffer(const LocalFrameIndex localFrameIdx, const Size requiredSize)
