@@ -405,7 +405,7 @@ namespace ig
                 continue;
             }
 
-            ManagedAsset<Material> cachedMaterial = assetManager->LoadMaterial(snapshot.Info.GetGuid());
+            ManagedAsset<Material> cachedMaterial = assetManager->LoadMaterial(snapshot.Info.GetGuid(), true);
             IG_CHECK(cachedMaterial);
 
             if (!proxyMap.contains(cachedMaterial))
@@ -441,7 +441,7 @@ namespace ig
                 materialProxyPackage.PendingReplications.emplace_back(cachedMaterial);
             }
 
-            assetManager->Unload(cachedMaterial);
+            assetManager->Unload(cachedMaterial, true);
         }
 
         for (auto& [material, proxy] : proxyMap)

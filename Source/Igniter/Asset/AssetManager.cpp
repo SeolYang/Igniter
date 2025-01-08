@@ -118,71 +118,70 @@ namespace ig
         IG_LOG(AssetManagerLog, Info, "Engine Default Assets have been successfully unregistered from Asset Manager.");
     }
 
-    Guid AssetManager::Import(const String resPath, const TextureImportDesc& config)
+    Guid AssetManager::Import(const String resPath, const TextureImportDesc& config, const bool bShouldSuppressDirty)
     {
         Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
-        const std::optional<Guid> guidOpt{ImportImpl<Texture>(resPath, result)};
+        const std::optional<Guid> guidOpt{ImportImpl<Texture>(resPath, result, bShouldSuppressDirty)};
         if (!guidOpt)
         {
             return Guid{};
         }
 
-        bIsDirty = true;
+
         return *guidOpt;
     }
 
-    ManagedAsset<Texture> AssetManager::LoadTexture(const Guid& guid)
+    ManagedAsset<Texture> AssetManager::LoadTexture(const Guid& guid, const bool bShouldSuppressDirty)
     {
-        ManagedAsset<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader)};
+        ManagedAsset<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader, bShouldSuppressDirty)};
         if (!cachedTex)
         {
-            return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
+            return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader, bShouldSuppressDirty);
         }
 
         return cachedTex;
     }
 
-    ManagedAsset<Texture> AssetManager::LoadTexture(const String virtualPath)
+    ManagedAsset<Texture> AssetManager::LoadTexture(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManagerLog, Error, "Load Texture: Invalid Virtual Path {}", virtualPath);
-            return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
+            return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader, bShouldSuppressDirty);
         }
 
         if (!assetMonitor->Contains(EAssetCategory::Texture, virtualPath))
         {
             IG_LOG(AssetManagerLog, Error, "Texture \"{}\" is invisible to asset manager.", virtualPath);
-            return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader);
+            return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader, bShouldSuppressDirty);
         }
 
         return LoadTexture(assetMonitor->GetGuid(EAssetCategory::Texture, virtualPath));
     }
 
-    std::vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc)
+    std::vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty)
     {
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(resPath, desc);
         std::vector<Guid> output;
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
         {
-            std::optional<Guid> guidOpt{ImportImpl<StaticMesh>(resPath, result)};
+            std::optional<Guid> guidOpt{ImportImpl<StaticMesh>(resPath, result, bShouldSuppressDirty)};
             if (guidOpt)
             {
                 output.emplace_back(*guidOpt);
             }
         }
 
-        bIsDirty = true;
         return output;
     }
 
-    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid)
+    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty)
     {
-        return LoadImpl<StaticMesh>(guid, *staticMeshLoader);
+        return LoadImpl<StaticMesh>(guid, *staticMeshLoader, bShouldSuppressDirty);
     }
 
-    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath)
+    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -196,10 +195,10 @@ namespace ig
             return ManagedAsset<StaticMesh>{};
         }
 
-        return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader);
+        return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader, bShouldSuppressDirty);
     }
 
-    Guid AssetManager::Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc)
+    Guid AssetManager::Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -208,45 +207,44 @@ namespace ig
         }
 
         Result<Material::Desc, EMaterialAssetImportStatus> result{materialImporter->Import(AssetInfo{virtualPath, EAssetCategory::Material}, createDesc)};
-        std::optional<Guid> guidOpt{ImportImpl<Material>(virtualPath, result)};
+        std::optional<Guid> guidOpt{ImportImpl<Material>(virtualPath, result, bShouldSuppressDirty)};
         if (!guidOpt)
         {
             return Guid{};
         }
 
-        bIsDirty = true;
         return *guidOpt;
     }
 
-    ManagedAsset<Material> AssetManager::LoadMaterial(const Guid& guid)
+    ManagedAsset<Material> AssetManager::LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty)
     {
-        ManagedAsset<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader)};
+        ManagedAsset<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader, bShouldSuppressDirty)};
         if (!cachedMat)
         {
-            return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
+            return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader, bShouldSuppressDirty);
         }
 
         return cachedMat;
     }
 
-    ManagedAsset<Material> AssetManager::LoadMaterial(const String virtualPath)
+    ManagedAsset<Material> AssetManager::LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManagerLog, Error, "Load Material: Invalid Virtual Path {}", virtualPath);
-            return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
+            return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader, bShouldSuppressDirty);
         }
 
         if (!assetMonitor->Contains(EAssetCategory::Material, virtualPath))
         {
             IG_LOG(AssetManagerLog, Error, "Material \"{}\" is invisible to asset manager.", virtualPath);
-            return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader);
+            return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader, bShouldSuppressDirty);
         }
 
         return LoadMaterial(assetMonitor->GetGuid(EAssetCategory::Material, virtualPath));
     }
 
-    Guid AssetManager::Import(const String virtualPath, const MapCreateDesc& desc)
+    Guid AssetManager::Import(const String virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -255,19 +253,18 @@ namespace ig
         }
 
         Result<Map::Desc, EMapCreateStatus> result{mapCreator->Import(AssetInfo{virtualPath, EAssetCategory::Map}, desc)};
-        std::optional<Guid> guidOpt{ImportImpl<Map>(virtualPath, result)};
+        std::optional<Guid> guidOpt{ImportImpl<Map>(virtualPath, result, bShouldSuppressDirty)};
         if (!guidOpt)
         {
             return Guid{};
         }
 
-        bIsDirty = true;
         return *guidOpt;
     }
 
-    ManagedAsset<Map> AssetManager::LoadMap(const Guid& guid)
+    ManagedAsset<Map> AssetManager::LoadMap(const Guid& guid, const bool bShouldSuppressDirty)
     {
-        ManagedAsset<Map> cachedMap{LoadImpl<Map>(guid, *mapLoader)};
+        ManagedAsset<Map> cachedMap{LoadImpl<Map>(guid, *mapLoader, bShouldSuppressDirty)};
         if (!cachedMap)
         {
             IG_LOG(AssetManagerLog, Error, "Failed to load map {}.", guid);
@@ -276,7 +273,7 @@ namespace ig
         return cachedMap;
     }
 
-    ManagedAsset<Map> AssetManager::LoadMap(const String virtualPath)
+    ManagedAsset<Map> AssetManager::LoadMap(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -290,10 +287,10 @@ namespace ig
             return {};
         }
 
-        return LoadMap(assetMonitor->GetGuid(EAssetCategory::Map, virtualPath));
+        return LoadMap(assetMonitor->GetGuid(EAssetCategory::Map, virtualPath), bShouldSuppressDirty);
     }
 
-    void AssetManager::Delete(const Guid& guid)
+    void AssetManager::Delete(const Guid& guid, const bool bShouldSuppressDirty)
     {
         if (!assetMonitor->Contains(guid))
         {
@@ -301,10 +298,10 @@ namespace ig
             return;
         }
 
-        DeleteImpl(assetMonitor->GetAssetInfo(guid).GetCategory(), guid);
+        DeleteImpl(assetMonitor->GetAssetInfo(guid).GetCategory(), guid, bShouldSuppressDirty);
     }
 
-    void AssetManager::Delete(const EAssetCategory assetType, const String virtualPath)
+    void AssetManager::Delete(const EAssetCategory assetType, const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (assetType == EAssetCategory::Unknown)
         {
@@ -318,10 +315,10 @@ namespace ig
             return;
         }
 
-        DeleteImpl(assetType, assetMonitor->GetGuid(assetType, virtualPath));
+        DeleteImpl(assetType, assetMonitor->GetGuid(assetType, virtualPath), bShouldSuppressDirty);
     }
 
-    void AssetManager::DeleteImpl(const EAssetCategory assetType, const Guid& guid)
+    void AssetManager::DeleteImpl(const EAssetCategory assetType, const Guid& guid, const bool bShouldSuppressDirty)
     {
         UniqueLock assetLock{GetAssetMutex(guid)};
         IG_CHECK(assetType != EAssetCategory::Unknown);
@@ -335,7 +332,11 @@ namespace ig
         assetMonitor->Remove(guid);
 
         IG_LOG(AssetManagerLog, Info, "Asset \"{}\" deleted.", guid);
-        bIsDirty = true;
+
+        if (!bShouldSuppressDirty)
+        {
+            bIsDirty = true;
+        }
     }
 
     AssetManager::AssetMutex& AssetManager::GetAssetMutex(const Guid& guid)
@@ -419,10 +420,9 @@ namespace ig
 
     void AssetManager::DispatchEvent()
     {
-        if (bIsDirty)
+        if (bIsDirty.exchange(false))
         {
             assetModifiedEvent.Notify(*this);
-            bIsDirty = false;
         }
     }
 

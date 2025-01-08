@@ -35,6 +35,8 @@ namespace ig
     class MapCreator;
     class MapLoader;
 
+    // #sy_todo bIsSuppress 같은걸 flag로 관리 하기
+    // ex. EAssetManagerOptionFlag, SuppressLog, SuppressDirty etc..
     class AssetManager final
     {
     private:
@@ -71,40 +73,40 @@ namespace ig
          * 에셋의 레퍼런스 카운트가 증가함. 즉 반드시 1번의 로드에 최소 1번의 언로드를 매칭 시켜주어야 함.
          */
 
-        Guid Import(const String resPath, const TextureImportDesc& desc);
-        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const Guid& guid);
-        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const String virtualPath);
+        Guid Import(const String resPath, const TextureImportDesc& desc, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const String virtualPath, const bool bShouldSuppressDirty = false);
 
-        std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc);
-        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const Guid& guid);
-        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const String virtualPath);
+        std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty = false);
 
-        Guid Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc);
-        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const Guid& guid);
-        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const String virtualPath);
+        Guid Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty = false);
 
-        Guid Import(const String virtualPath, const MapCreateDesc& desc);
-        [[nodiscard]] ManagedAsset<Map> LoadMap(const Guid& guid);
-        [[nodiscard]] ManagedAsset<Map> LoadMap(const String virtualPath);
+        Guid Import(const String virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<Map> LoadMap(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] ManagedAsset<Map> LoadMap(const String virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
-        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid)
+        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid, const bool bShouldSuppressDirty = false)
         {
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
-                return LoadTexture(guid);
+                return LoadTexture(guid, bShouldSuppressDirty);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::StaticMesh)
             {
-                return LoadStaticMesh(guid);
+                return LoadStaticMesh(guid, bShouldSuppressDirty);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
             {
-                return LoadMaterial(guid);
+                return LoadMaterial(guid, bShouldSuppressDirty);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
             {
-                return LoadMap(guid);
+                return LoadMap(guid, bShouldSuppressDirty);
             }
             else
             {
@@ -113,11 +115,11 @@ namespace ig
         }
 
         template <typename T>
-        [[nodiscard]] ManagedAsset<T> Load(const String virtualPath)
+        [[nodiscard]] ManagedAsset<T> Load(const String virtualPath, const bool bShouldSuppressDirty = false)
         {
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
-                return LoadTexture(virtualPath);
+                return LoadTexture(virtualPath, bShouldSuppressDirty);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::StaticMesh)
             {
@@ -135,7 +137,7 @@ namespace ig
 
         // Reload는 항상 메모리 상에 로드 되어 있는(디스크 상 파일이 아닌)데이터(asset info/description)를 기준으로 한다.
         template <typename T>
-        bool Reload(const Guid& guid)
+        bool Reload(const Guid& guid, const bool bShouldSuppressDirty = false)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -147,19 +149,19 @@ namespace ig
             const typename T::Desc desc{assetMonitor->GetDesc<T>(guid)};
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
-                bSuceeded = ReloadImpl<Texture>(guid, desc, *textureLoader);
+                bSuceeded = ReloadImpl<Texture>(guid, desc, *textureLoader, bShouldSuppressDirty);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::StaticMesh)
             {
-                bSuceeded = ReloadImpl<StaticMesh>(guid, desc, *staticMeshLoader);
+                bSuceeded = ReloadImpl<StaticMesh>(guid, desc, *staticMeshLoader, bShouldSuppressDirty);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Material)
             {
-                bSuceeded = ReloadImpl<Material>(guid, desc, *materialLoader);
+                bSuceeded = ReloadImpl<Material>(guid, desc, *materialLoader, bShouldSuppressDirty);
             }
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
             {
-                bSuceeded = ReloadImpl<Map>(guid, desc, *mapLoader);
+                bSuceeded = ReloadImpl<Map>(guid, desc, *mapLoader, bShouldSuppressDirty);
             }
             else
             {
@@ -167,19 +169,14 @@ namespace ig
                 IG_LOG(AssetManagerLog, Error, "Reload Unsupported Asset Type {}.", AssetCategoryOf<T>);
             }
 
-            if (bSuceeded)
-            {
-                bIsDirty = true;
-            }
-
             return bSuceeded;
         }
 
-        void Delete(const Guid& guid);
-        void Delete(const EAssetCategory assetType, const String virtualPath);
+        void Delete(const Guid& guid, const bool bShouldSuppressDirty = false);
+        void Delete(const EAssetCategory assetType, const String virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
-        ManagedAsset<T> Clone(const ManagedAsset<T> handle)
+        ManagedAsset<T> Clone(const ManagedAsset<T> handle, const bool bShouldSuppressDirty = false)
         {
             if (!handle)
             {
@@ -191,6 +188,11 @@ namespace ig
             if (asset == nullptr)
             {
                 return handle;
+            }
+
+            if (!bShouldSuppressDirty)
+            {
+                bIsDirty = true;
             }
 
             return cache.Load(asset->GetSnapshot().Info.GetGuid());
@@ -209,7 +211,7 @@ namespace ig
         }
 
         template <typename T>
-        void Unload(const ManagedAsset<T> handle)
+        void Unload(const ManagedAsset<T> handle, const bool bShouldSuppressDirty = false)
         {
             /* #sy_todo not thread safe... make it safe! */
             details::AssetCache<T>& cache = GetCache<T>();
@@ -219,6 +221,11 @@ namespace ig
                 const T::Desc& desc = ptr->GetSnapshot();
                 AssetLock assetLock{GetAssetMutex(desc.Info.GetGuid())};
                 cache.Unload(desc.Info);
+
+                if (!bShouldSuppressDirty)
+                {
+                    bIsDirty = true;
+                }
             }
         }
 
@@ -239,7 +246,7 @@ namespace ig
         }
 
         template <typename T>
-        void UpdateLoadDesc(const Guid& guid, const typename T::LoadDesc& newLoadDesc)
+        void UpdateLoadDesc(const Guid& guid, const typename T::LoadDesc& newLoadDesc, const bool bShouldSuppressDirty = false)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -248,6 +255,10 @@ namespace ig
             }
 
             assetMonitor->UpdateLoadDesc<T>(guid, newLoadDesc);
+            if (bShouldSuppressDirty)
+            {
+                bIsDirty = true;
+            }
         }
 
         // Unknown == no filter
@@ -274,7 +285,7 @@ namespace ig
         const details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType) const;
 
         template <typename T, ResultStatus ImportStatus>
-        std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result)
+        std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result, const bool bShouldSuppressDirty)
         {
             constexpr auto AssetType{AssetCategoryOf<T>};
             if (!result.HasOwnership())
@@ -345,11 +356,16 @@ namespace ig
                 Reload<T>(assetInfo.GetGuid());
             }
 
+            if (!bShouldSuppressDirty)
+            {
+                bIsDirty = true;
+            }
+
             return assetInfo.GetGuid();
         }
 
         template <typename T, typename AssetLoader>
-        [[nodiscard]] ManagedAsset<T> LoadImpl(const Guid& guid, AssetLoader& loader)
+        [[nodiscard]] ManagedAsset<T> LoadImpl(const Guid& guid, AssetLoader& loader, const bool bShouldSuppressDirty)
         {
             if (!assetMonitor->Contains(guid))
             {
@@ -376,12 +392,15 @@ namespace ig
             }
 
             IG_LOG(AssetManagerLog, Info, "Cache Hit! {} asset {} loaded.", AssetCategoryOf<T>, guid);
-            bIsDirty = true;
+            if (!bShouldSuppressDirty)
+            {
+                bIsDirty = true;
+            }
             return assetCache.Load(guid);
         }
 
         template <typename T, typename AssetLoader>
-        bool ReloadImpl(const Guid& guid, const typename T::Desc& desc, AssetLoader& loader)
+        bool ReloadImpl(const Guid& guid, const typename T::Desc& desc, AssetLoader& loader, const bool bShouldSuppressDirty)
         {
             /* #sy_note
              * 현재 구현은 핸들이 가르키는 메모리 공간의 인스턴스를 replace 하는 방식으로 구현
@@ -418,10 +437,15 @@ namespace ig
                 assetCache.Cache(guid, result.Take());
             }
 
+            if (!bShouldSuppressDirty)
+            {
+                bIsDirty = true;
+            }
+
             return true;
         }
 
-        void DeleteImpl(const EAssetCategory assetType, const Guid& guid);
+        void DeleteImpl(const EAssetCategory assetType, const Guid& guid, const bool bShouldSuppressDirty);
 
         [[nodiscard]] AssetMutex& GetAssetMutex(const Guid& guid);
 
@@ -445,7 +469,7 @@ namespace ig
             /* #sy_note GUID를 고정으로 할지 말지.. 일단 Virtual Path는 고정적이고, Import 되고난 이후엔 Virtual Path로 접근 가능하니 유동적으로 */
             Result<typename T::Desc, details::EDefaultDummyStatus> dummyResult{MakeSuccess<typename T::Desc, details::EDefaultDummyStatus>(desc)};
             IG_CHECK(dummyResult.HasOwnership());
-            std::optional<Guid> guidOpt{ImportImpl<T>(assetInfo.GetVirtualPath(), dummyResult)};
+            std::optional<Guid> guidOpt{ImportImpl<T>(assetInfo.GetVirtualPath(), dummyResult, false)};
             IG_CHECK(guidOpt);
 
             const Guid& guid{*guidOpt};
@@ -481,7 +505,7 @@ namespace ig
         Ptr<MapCreator> mapCreator;
         Ptr<MapLoader> mapLoader;
 
-        bool bIsDirty = false;
+        std::atomic_bool bIsDirty{false};
         ModifiedEvent assetModifiedEvent;
     };
 } // namespace ig

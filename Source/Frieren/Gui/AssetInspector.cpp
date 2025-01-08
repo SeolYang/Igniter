@@ -37,7 +37,7 @@ namespace fe
 
     void AssetInspector::OnImGui()
     {
-        if (bIsModifyOccured.exchange(false))
+        if (bIsModifyOccured)
         {
             const ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
 
@@ -55,8 +55,8 @@ namespace fe
             }
 
             lastUpdated = ig::chrono::system_clock::now();
+            bIsModifyOccured = false;
         }
-
 
         RenderMenuBar();
         RenderMainFrame();
