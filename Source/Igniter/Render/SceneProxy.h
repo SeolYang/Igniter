@@ -80,15 +80,20 @@ namespace ig
 
             InFlightFramesResource<Ptr<GpuStorage>> Storage;
             InFlightFramesResource<ProxyMapType> ProxyMap;
-            Vector<Owner> PendingReplications; // Deprecated
             Vector<Owner> PendingDestructions; // Deprecated
 
             InFlightFramesResource<Ptr<GpuBuffer>> StagingBuffer;
+            InFlightFramesResource<U8*> MappedStagingBuffer;
             InFlightFramesResource<Size> StagingBufferSize;
 
             Vector<Vector<std::pair<Owner, Proxy>>> PendingProxyGroups;
             Vector<Vector<Owner>> PendingReplicationGroups;
-            Vector<Vector<Owner>> PendingDestructionGroups;
+            //Vector<Vector<Owner>> PendingDestructionGroups;
+
+            // Temporary per replication!
+            Vector<std::pair<Size, Size>> WorkGroupStagingBufferRanges; // <Offset, Size>
+            Vector<CommandList*> WorkGroupCmdLists;
+            Size NumValidWorkGroupCmdList{0};
         };
 
     public:
@@ -144,16 +149,9 @@ namespace ig
         void PrepareStagingBuffer(const LocalFrameIndex localFrameIdx, const Size requiredSize);
 
         template <typename Proxy, typename Owner>
-        void ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage,
-                                CommandList& cmdList,
-                                const Size stagingBufferOffset);
+        void ReplicateProxyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
 
-        template <typename Proxy, typename Owner>
-        void ReplicatePrxoyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
-
-        void ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
-                                        CommandList& cmdList,
-                                        const Size stagingBufferOffset, const Size replicationSize);
+        void ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx);
         void ReplicateLightIndicesBuffer(const LocalFrameIndex localFrameIdx);
 
     private:
