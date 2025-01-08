@@ -20,7 +20,7 @@ namespace fe
         modifiedEvent.Subscribe("AssetInspector"_fs,
                                 [this]([[maybe_unused]] const ig::CRef<ig::AssetManager> assetManagerRef)
                                 {
-                                    bIsModifyOccured = true;
+                                    bIsDirty = true;
                                 });
 
         snapshots = assetManager.TakeSnapshots();
@@ -37,25 +37,11 @@ namespace fe
 
     void AssetInspector::OnImGui()
     {
-        if (bIsModifyOccured)
+        if (bIsDirty)
         {
             const ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
-
-            const ig::Guid lastSelectedGuid{mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : ig::Guid{}};
             snapshots = assetManager.TakeSnapshots();
-            bDirty = true;
-            mainTableSelectedIdx = -1;
-            if (lastSelectedGuid.isValid())
-            {
-                const auto foundItr = std::find_if(snapshots.cbegin(), snapshots.cend(),
-                                                   [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot)
-                                                   { return snapshot.Info.GetGuid() == lastSelectedGuid; });
-
-                mainTableSelectedIdx = foundItr != snapshots.cend() ? static_cast<int>(foundItr - snapshots.cbegin()) : -1;
-            }
-
             lastUpdated = ig::chrono::system_clock::now();
-            bIsModifyOccured = false;
         }
 
         RenderMenuBar();
@@ -165,7 +151,7 @@ namespace fe
             ImGui::TableHeadersRow();
 
             ImGuiTableSortSpecs* sortSpecs{ImGui::TableGetSortSpecs()};
-            if (sortSpecs->SpecsDirty || bDirty)
+            if (sortSpecs->SpecsDirty || bIsDirty)
             {
                 IG_CHECK(sortSpecs->SpecsCount > 0);
                 const ImGuiSortDirection sortDirection{sortSpecs->Specs[0].SortDirection};
@@ -197,8 +183,19 @@ namespace fe
                               };
                           });
 
+                const ig::Guid lastSelectedGuid{mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : ig::Guid{}};
+                mainTableSelectedIdx = -1;
+                if (lastSelectedGuid.isValid())
+                {
+                    const auto foundItr = std::find_if(snapshots.cbegin(), snapshots.cend(),
+                                                       [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot)
+                                                       { return snapshot.Info.GetGuid() == lastSelectedGuid; });
+
+                    mainTableSelectedIdx = foundItr != snapshots.cend() ? static_cast<int>(foundItr - snapshots.cbegin()) : -1;
+                }
+
                 sortSpecs->SpecsDirty = false;
-                bDirty = false;
+                bIsDirty = false;
             }
 
             // Type // GUID // VIRTUAL PATH // Scope // REF COUNT
