@@ -156,7 +156,6 @@ namespace ig
         RenderContext* renderContext = nullptr;
         AssetManager* assetManager = nullptr;
         const MeshStorage* meshStorage = nullptr;
-        tf::Executor* taskExecutor = nullptr;
 
         U32 numWorker{1};
 

@@ -19,8 +19,7 @@ namespace ig
         renderContext(&renderContext),
         meshStorage(&meshStorage),
         assetManager(&assetManager),
-        taskExecutor(&Engine::GetTaskExecutor()),
-        numWorker((U32)taskExecutor->num_workers())
+        numWorker((U32)Engine::GetTaskExecutor().num_workers())
     {
         GpuBufferDesc renderableIndicesBufferDesc;
         renderableIndicesBufferDesc.AsStructuredBuffer<U32>(kNumInitRenderableIndices);
@@ -244,15 +243,21 @@ namespace ig
         const auto numWorkGroups = (int)numWorker;
 
         tf::Task createNewProxyTask = subflow.for_each_index(
-            0, (int)transformView.size(), 1,
-            [this, &registry, &entityProxyMap, transformView, numWorkGroups](const int idx)
+            0, numWorkGroups, 1,
+            [this, &registry, &entityProxyMap, transformView, numWorkGroups](const int groupIdx)
             {
-                const Entity entity = *(transformView.begin() + idx);
-                if (!entityProxyMap.contains(entity))
+                IG_CHECK(transformProxyPackage.PendingProxyGroups[groupIdx].empty());
+                const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
+                const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
+                const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
+                const Size viewOffset = (Size)(groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
                 {
-                    const int groupIdx = taskExecutor->this_worker_id();
-                    IG_CHECK(groupIdx != -1);
-                    transformProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, TransformProxy{});
+                    const Entity entity = *(transformView.begin() + viewOffset + viewIdx);
+                    if (!entityProxyMap.contains(entity))
+                    {
+                        transformProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, TransformProxy{});
+                    }
                 }
             });
 
@@ -271,25 +276,31 @@ namespace ig
             });
 
         tf::Task updateProxyTask = subflow.for_each_index(
-            0, (int)transformView.size(), 1,
-            [this, &registry, &entityProxyMap, transformView, numWorkGroups](const int idx)
+            0, numWorkGroups, 1,
+            [this, &registry, &entityProxyMap, transformView, numWorkGroups](const Size groupIdx)
             {
-                const Entity entity = *(transformView.begin() + idx);
-
-                TransformProxy& proxy = entityProxyMap[entity];
-                IG_CHECK(proxy.bMightBeDestroyed);
-                proxy.bMightBeDestroyed = false;
-
-                const TransformComponent& transformComponent = registry.get<TransformComponent>(entity);
-                if (const U64 currentDataHashValue = HashInstance(transformComponent);
-                    proxy.DataHashValue != currentDataHashValue)
+                IG_CHECK(transformProxyPackage.PendingReplicationGroups[groupIdx].empty());
+                const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
+                const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
+                const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
+                const Size viewOffset = (groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
+                for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
                 {
-                    proxy.GpuData = transformComponent.CreateTransformation();
-                    proxy.DataHashValue = currentDataHashValue;
+                    const Entity entity = *(transformView.begin() + viewOffset + viewIdx);
 
-                    const int groupIdx = taskExecutor->this_worker_id();
-                    IG_CHECK(groupIdx != -1);
-                    transformProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
+                    TransformProxy& proxy = entityProxyMap[entity];
+                    IG_CHECK(proxy.bMightBeDestroyed);
+                    proxy.bMightBeDestroyed = false;
+
+                    const TransformComponent& transformComponent = registry.get<TransformComponent>(entity);
+                    if (const U64 currentDataHashValue = HashInstance(transformComponent);
+                        proxy.DataHashValue != currentDataHashValue)
+                    {
+                        proxy.GpuData = transformComponent.CreateTransformation();
+                        proxy.DataHashValue = currentDataHashValue;
+
+                        transformProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
+                    }
                 }
             });
 
@@ -442,7 +453,7 @@ namespace ig
                         staticMeshProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, StaticMeshProxy{});
                     }
                 }
-            });
+            }, tf::GuidedPartitioner(8));
 
         tf::Task commitPendingProxyTask = subflow.emplace(
             [this, &entityProxyMap, &storage, numWorkGroups]()
@@ -520,7 +531,8 @@ namespace ig
                         staticMeshProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
                     }
                 }
-            });
+            },
+            tf::GuidedPartitioner(8));
 
         tf::Task commitDestructions = subflow.emplace(
             [this, &entityProxyMap, &storage, localFrameIdx]()

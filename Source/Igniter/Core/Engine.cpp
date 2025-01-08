@@ -29,7 +29,7 @@ namespace ig
 
     Engine::Engine(const IgniterDesc& desc) :
 #if defined(DEBUG) || defined(_DEBUG)
-        taskExecutor(2) // Static Partitioning 사용 시 2개에서 가장 최적.. 추가 연구 필요
+        taskExecutor(2)
 #else
         taskExecutor(std::thread::hardware_concurrency())
 #endif
