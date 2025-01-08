@@ -157,6 +157,8 @@ namespace ig
         AssetManager* assetManager = nullptr;
         const MeshStorage* meshStorage = nullptr;
 
+        U32 numWorker{1};
+
         constexpr static U32 kNumInitTransformElements = 1024u;
         ProxyPackage<TransformProxy> transformProxyPackage;
 

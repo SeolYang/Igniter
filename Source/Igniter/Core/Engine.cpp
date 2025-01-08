@@ -27,7 +27,12 @@ namespace ig
 {
     Engine* Engine::instance = nullptr;
 
-    Engine::Engine(const IgniterDesc& desc)
+    Engine::Engine(const IgniterDesc& desc) :
+#if defined(DEBUG) || defined(_DEBUG)
+        taskExecutor(2)
+#else
+        taskExecutor(std::thread::hardware_concurrency())
+#endif
     {
         IG_CHECK(instance == nullptr);
 

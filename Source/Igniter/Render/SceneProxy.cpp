@@ -18,7 +18,8 @@ namespace ig
     SceneProxy::SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager) :
         renderContext(&renderContext),
         meshStorage(&meshStorage),
-        assetManager(&assetManager)
+        assetManager(&assetManager),
+        numWorker((U32)Engine::GetTaskExecutor().num_workers())
     {
         GpuBufferDesc renderableIndicesBufferDesc;
         renderableIndicesBufferDesc.AsStructuredBuffer<U32>(kNumInitRenderableIndices);
@@ -74,30 +75,28 @@ namespace ig
             lightIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(lightIndicesBuffer[localFrameIdx]);
         }
 
-        const U32 numThreads = std::thread::hardware_concurrency();
+        materialProxyPackage.PendingReplicationGroups.resize(numWorker);
+        materialProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
+        materialProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
-        materialProxyPackage.PendingReplicationGroups.resize(numThreads);
-        materialProxyPackage.WorkGroupStagingBufferRanges.resize(numThreads);
-        materialProxyPackage.WorkGroupCmdLists.resize(numThreads);
+        transformProxyPackage.PendingReplicationGroups.resize(numWorker);
+        transformProxyPackage.PendingProxyGroups.resize(numWorker);
+        transformProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
+        transformProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
-        transformProxyPackage.PendingReplicationGroups.resize(numThreads);
-        transformProxyPackage.PendingProxyGroups.resize(numThreads);
-        transformProxyPackage.WorkGroupStagingBufferRanges.resize(numThreads);
-        transformProxyPackage.WorkGroupCmdLists.resize(numThreads);
+        staticMeshProxyPackage.PendingReplicationGroups.resize(numWorker);
+        staticMeshProxyPackage.PendingProxyGroups.resize(numWorker);
+        staticMeshProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
+        staticMeshProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
-        staticMeshProxyPackage.PendingReplicationGroups.resize(numThreads);
-        staticMeshProxyPackage.PendingProxyGroups.resize(numThreads);
-        staticMeshProxyPackage.WorkGroupStagingBufferRanges.resize(numThreads);
-        staticMeshProxyPackage.WorkGroupCmdLists.resize(numThreads);
+        lightProxyPackage.PendingReplicationGroups.resize(numWorker);
 
-        lightProxyPackage.PendingReplicationGroups.resize(numThreads);
+        renderableProxyPackage.PendingReplicationGroups.resize(numWorker);
+        renderableProxyPackage.PendingProxyGroups.resize(numWorker);
+        renderableProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
+        renderableProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
-        renderableProxyPackage.PendingReplicationGroups.resize(numThreads);
-        renderableProxyPackage.PendingProxyGroups.resize(numThreads);
-        renderableProxyPackage.WorkGroupStagingBufferRanges.resize(numThreads);
-        renderableProxyPackage.WorkGroupCmdLists.resize(numThreads);
-
-        renderableIndicesGroups.resize(numThreads);
+        renderableIndicesGroups.resize(numWorker);
         renderableIndices.reserve(kNumInitRenderableIndices);
         lightIndices.reserve(kNumInitLightIndices);
     }
@@ -241,7 +240,7 @@ namespace ig
 
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
         const auto transformView = registry.view<const TransformComponent>();
-        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
+        const auto numWorkGroups = (int)numWorker;
 
         tf::Task createNewProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
@@ -429,7 +428,7 @@ namespace ig
 
         auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
         const auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
-        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
+        const auto numWorkGroups = (int)numWorker;
 
         tf::Task createNewProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
@@ -454,7 +453,7 @@ namespace ig
                         staticMeshProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, StaticMeshProxy{});
                     }
                 }
-            });
+            }, tf::GuidedPartitioner(8));
 
         tf::Task commitPendingProxyTask = subflow.emplace(
             [this, &entityProxyMap, &storage, numWorkGroups]()
@@ -532,7 +531,8 @@ namespace ig
                         staticMeshProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
                     }
                 }
-            });
+            },
+            tf::GuidedPartitioner(8));
 
         tf::Task commitDestructions = subflow.emplace(
             [this, &entityProxyMap, &storage, localFrameIdx]()
@@ -583,7 +583,7 @@ namespace ig
         // 가능한 방안은 같은 타입의 Renderable이 아니라면 bMightBeDestroyed를 false로 변경하지 않도록 한다.
         // 그렇게 하면 가장 먼저 업로드된 정보가 Expired 되어도 정상적으로 해당 Renderable에 대한 Destroy 알고리즘이
         // 작동하게 되고, 다음 프레임 부터는 정상적으로 새로운 Renderable이 할당되게 된다.
-        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
+        const auto numWorkGroups = (int)numWorker;
 
         // 확장시 2가지 선택 가능한 선택지.
         // 1. 한번에 하나의 타입에 대해서 순차적 처리 => 이 방식을 선제 구현 후 프로파일링 후 추가 조치 할 것!
@@ -703,7 +703,7 @@ namespace ig
     template <typename Proxy, typename Owner>
     void SceneProxy::ReplicateProxyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage)
     {
-        const auto numWorkGroups = (int)std::thread::hardware_concurrency();
+        const auto numWorkGroups = (int)numWorker;
         IG_CHECK(proxyPackage.PendingReplicationGroups.size() == numWorkGroups);
         // 이미 그룹 별로 데이터가 균등 분배 되어있는 상황
         // 필요한 Staging Buffer 크기 == (sum(pendingRepsGroups[0..N].size()) * kDataSize))
