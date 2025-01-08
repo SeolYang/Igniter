@@ -118,6 +118,7 @@ namespace ig
 
             /************* Event Handle/Proccess/Dispatch *************/
             {
+                ZoneScopedN("Engine: Proccess Events");
                 window->PumpMessage();
                 if (bShouldExit)
                 {
@@ -131,28 +132,33 @@ namespace ig
             const float deltaTime = timer->GetDeltaTime();
             /*********** Pre-Update **********/
             {
+                ZoneScopedN("Engine: PreUpdate");
                 application.PreUpdate(deltaTime);
             }
 
             /************* Update ************/
             {
+                ZoneScopedN("Engine: Update");
                 application.Update(deltaTime);
             }
 
             /*********** Post-Update **********/
             {
+                ZoneScopedN("Engine: PostUpdate");
                 inputManager->PostUpdate();
                 application.PostUpdate(deltaTime);
             }
 
             /* Rendering: Wait for GPU */
             {
+                ZoneScopedN("Engine: WaitForLocalFrame");
                 localFrameSyncs[localFrameIdx].WaitOnCpu();
             }
 
             /*********** Pre-Render ***********/
             GpuSyncPoint replicationSyncPoint;
             {
+                ZoneScopedN("Engine: PreRender");
                 renderContext->PreRender(localFrameIdx);
                 meshStorage->PreRender(localFrameIdx);
                 replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
@@ -160,6 +166,7 @@ namespace ig
             }
 
             {
+                ZoneScopedN("Engine: Render");
                 const GpuSyncPoint mainRenderPipelineSyncPoint = renderer->Render(localFrameIdx, *world, replicationSyncPoint);
                 imguiRenderer->SetMainPipelineSyncPoint(mainRenderPipelineSyncPoint);
                 localFrameSyncs[localFrameIdx] = imguiRenderer->Render(localFrameIdx);
@@ -167,6 +174,7 @@ namespace ig
 
             /*********** Post-Render ***********/
             {
+                ZoneScopedN("Engine: PostRender");
                 renderContext->PostRender(localFrameIdx);
             }
 
