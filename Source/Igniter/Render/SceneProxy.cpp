@@ -229,7 +229,6 @@ namespace ig
 
     void SceneProxy::UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
-        IG_CHECK(transformProxyPackage.PendingReplications.empty());
         IG_CHECK(transformProxyPackage.PendingDestructions.empty());
 
         auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
@@ -248,6 +247,7 @@ namespace ig
             0, numWorkGroups, 1,
             [this, &registry, &entityProxyMap, transformView, numWorkGroups](const int groupIdx)
             {
+                IG_CHECK(transformProxyPackage.PendingProxyGroups[groupIdx].empty());
                 const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
                 const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
@@ -280,6 +280,7 @@ namespace ig
             0, numWorkGroups, 1,
             [this, &registry, &entityProxyMap, transformView, numWorkGroups](const Size groupIdx)
             {
+                IG_CHECK(transformProxyPackage.PendingReplicationGroups[groupIdx].empty());
                 const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
                 const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
@@ -333,7 +334,7 @@ namespace ig
 
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx)
     {
-        IG_CHECK(materialProxyPackage.PendingReplications.empty());
+        IG_CHECK(materialProxyPackage.PendingReplicationGroups[0].empty());
         IG_CHECK(materialProxyPackage.PendingDestructions.empty());
 
         auto& proxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
@@ -414,7 +415,6 @@ namespace ig
 
     void SceneProxy::UpdateStaticMeshProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
-        IG_CHECK(staticMeshProxyPackage.PendingReplications.empty());
         IG_CHECK(staticMeshProxyPackage.PendingDestructions.empty());
 
         const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
@@ -435,6 +435,7 @@ namespace ig
             0, numWorkGroups, 1,
             [this, &registry, &entityProxyMap, staticMeshEntityView, numWorkGroups](const int groupIdx)
             {
+                IG_CHECK(staticMeshProxyPackage.PendingProxyGroups[groupIdx].empty());
                 const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
                 const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
@@ -473,6 +474,7 @@ namespace ig
             0, numWorkGroups, 1,
             [this, &registry, &entityProxyMap, &materialProxyMap, staticMeshEntityView, numWorkGroups](const Size groupIdx)
             {
+                IG_CHECK(staticMeshProxyPackage.PendingReplicationGroups[groupIdx].empty());
                 const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
                 const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
 
@@ -561,7 +563,6 @@ namespace ig
 
     void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx)
     {
-        IG_CHECK(renderableProxyPackage.PendingReplications.empty());
         IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
 
         auto& renderableProxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
@@ -593,6 +594,8 @@ namespace ig
             0, numWorkGroups, 1,
             [this, &renderableProxyMap, &staticMeshProxyMap, &transformProxyMap, numWorkGroups](const int groupIdx)
             {
+                IG_CHECK(renderableProxyPackage.PendingProxyGroups[groupIdx].empty());
+                IG_CHECK(renderableProxyPackage.PendingReplicationGroups[groupIdx].empty());
                 const auto numStaticMeshWorksPerGroup = (int)staticMeshProxyMap.size() / numWorkGroups;
                 const auto numStaticMeshRemainedWorks = (int)staticMeshProxyMap.size() % numWorkGroups;
                 const Size numWorks = (Size)numStaticMeshWorksPerGroup + (groupIdx == 0 ? numStaticMeshRemainedWorks : 0);
