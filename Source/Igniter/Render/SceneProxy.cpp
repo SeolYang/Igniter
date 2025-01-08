@@ -453,7 +453,7 @@ namespace ig
                         staticMeshProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, StaticMeshProxy{});
                     }
                 }
-            }, tf::GuidedPartitioner(8));
+            });
 
         tf::Task commitPendingProxyTask = subflow.emplace(
             [this, &entityProxyMap, &storage, numWorkGroups]()
@@ -531,8 +531,7 @@ namespace ig
                         staticMeshProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
                     }
                 }
-            },
-            tf::GuidedPartitioner(8));
+            });
 
         tf::Task commitDestructions = subflow.emplace(
             [this, &entityProxyMap, &storage, localFrameIdx]()
