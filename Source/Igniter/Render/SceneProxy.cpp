@@ -74,16 +74,17 @@ namespace ig
             lightIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(lightIndicesBuffer[localFrameIdx]);
         }
 
-        transformProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
-        transformProxyPackage.PendingProxyGroups.resize(std::thread::hardware_concurrency());
+        const U32 numThreads = std::thread::hardware_concurrency();
+        transformProxyPackage.PendingReplicationGroups.resize(numThreads);
+        transformProxyPackage.PendingProxyGroups.resize(numThreads);
 
-        staticMeshProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
-        staticMeshProxyPackage.PendingProxyGroups.resize(std::thread::hardware_concurrency());
+        staticMeshProxyPackage.PendingReplicationGroups.resize(numThreads);
+        staticMeshProxyPackage.PendingProxyGroups.resize(numThreads);
 
-        lightProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
-        renderableProxyPackage.PendingReplicationGroups.resize(std::thread::hardware_concurrency());
-        renderableProxyPackage.PendingProxyGroups.resize(std::thread::hardware_concurrency());
-        renderableIndicesGroups.resize(std::thread::hardware_concurrency());
+        lightProxyPackage.PendingReplicationGroups.resize(numThreads);
+        renderableProxyPackage.PendingReplicationGroups.resize(numThreads);
+        renderableProxyPackage.PendingProxyGroups.resize(numThreads);
+        renderableIndicesGroups.resize(numThreads);
 
         renderableIndices.reserve(kNumInitRenderableIndices);
         lightIndices.reserve(kNumInitLightIndices);
@@ -274,14 +275,14 @@ namespace ig
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
         const auto transformView = registry.view<const TransformComponent>();
         const auto numWorkGroups = (int)std::thread::hardware_concurrency();
-        const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
-        const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
 
         tf::Task createNewProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
-            [this, &registry, &entityProxyMap, transformView, numWorksPerGroup, numRemainedWorks](const int groupIdx)
+            [this, &registry, &entityProxyMap, transformView, numWorkGroups](const int groupIdx)
             {
                 ZoneScopedN("CreateNewPendingTransformProxyWorkGroup");
+                const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
+                const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
                 const Size viewOffset = (Size)(groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
                 for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
@@ -311,9 +312,11 @@ namespace ig
 
         tf::Task updateProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
-            [this, &registry, &entityProxyMap, numWorksPerGroup, numRemainedWorks, transformView](const Size groupIdx)
+            [this, &registry, &entityProxyMap, transformView, numWorkGroups](const Size groupIdx)
             {
                 ZoneScopedN("UpdateTransformWorkGruop");
+                const auto numWorksPerGroup = (int)transformView.size() / numWorkGroups;
+                const auto numRemainedWorks = (int)transformView.size() % numWorkGroups;
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
                 const Size viewOffset = (groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
                 for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
@@ -476,14 +479,14 @@ namespace ig
         auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
         const auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
         const auto numWorkGroups = (int)std::thread::hardware_concurrency();
-        const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
-        const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
 
         tf::Task createNewProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
-            [this, &registry, &entityProxyMap, staticMeshEntityView, numWorksPerGroup, numRemainedWorks](const int groupIdx)
+            [this, &registry, &entityProxyMap, staticMeshEntityView, numWorkGroups](const int groupIdx)
             {
                 ZoneScopedN("CreateNewPendingStaticMeshProxy");
+                const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
+                const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);
                 const Size viewOffset = (Size)(groupIdx * numWorksPerGroup) + (groupIdx != 0 ? numRemainedWorks : 0);
                 for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
@@ -519,9 +522,11 @@ namespace ig
 
         tf::Task updateProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
-            [this, &registry, &entityProxyMap, &materialProxyMap, numWorksPerGroup, numRemainedWorks, staticMeshEntityView](const Size groupIdx)
+            [this, &registry, &entityProxyMap, &materialProxyMap, staticMeshEntityView, numWorkGroups](const Size groupIdx)
             {
                 ZoneScopedN("UpdateStaticMeshPerWorkGruop");
+                const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
+                const auto numRemainedWorks = (int)staticMeshEntityView.size() % numWorkGroups;
 
                 // 에셋 매니저에서 미리 material 처럼 가져온 다음에
                 // static mesh handle - static mesh ptr 맵을 만들고 참조하기 (read만하기)
@@ -650,12 +655,12 @@ namespace ig
         // 2. 각각 개별적인 pending list를 가져서 전부 개별적으로 동시적으로 처리
         // (ex. pendingStaticMeshRenderableProxy, pendingSkeletalMeshRenderableProxy, ...etc)
         // Static Mesh
-        const auto numStaticMeshWorksPerGroup = (int)staticMeshProxyMap.size() / numWorkGroups;
-        const auto numStaticMeshRemainedWorks = (int)staticMeshProxyMap.size() % numWorkGroups;
         tf::Task createRenderableStaticMeshTask = subflow.for_each_index(
             0, numWorkGroups, 1,
-            [this, numStaticMeshWorksPerGroup, numStaticMeshRemainedWorks, &renderableProxyMap, &staticMeshProxyMap, &transformProxyMap](const int groupIdx)
+            [this, &renderableProxyMap, &staticMeshProxyMap, &transformProxyMap, numWorkGroups](const int groupIdx)
             {
+                const auto numStaticMeshWorksPerGroup = (int)staticMeshProxyMap.size() / numWorkGroups;
+                const auto numStaticMeshRemainedWorks = (int)staticMeshProxyMap.size() % numWorkGroups;
                 const Size numWorks = (Size)numStaticMeshWorksPerGroup + (groupIdx == 0 ? numStaticMeshRemainedWorks : 0);
                 const Size viewOffset = (Size)(groupIdx * numStaticMeshWorksPerGroup) + (groupIdx != 0 ? numStaticMeshRemainedWorks : 0);
                 for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)
@@ -697,8 +702,10 @@ namespace ig
         // Storage 할당이 끝나면 각 종류의 Renderable들에 대한 proxy 유효성(수명) 평가와 renderable indices 구성
         tf::Task constructStaticMeshRenderableIndicesTask = subflow.for_each_index(
             0, numWorkGroups, 1,
-            [this, numStaticMeshWorksPerGroup, numStaticMeshRemainedWorks, &renderableProxyMap, &staticMeshProxyMap](const int groupIdx)
+            [this, &renderableProxyMap, &staticMeshProxyMap, numWorkGroups](const int groupIdx)
             {
+                const auto numStaticMeshWorksPerGroup = (int)staticMeshProxyMap.size() / numWorkGroups;
+                const auto numStaticMeshRemainedWorks = (int)staticMeshProxyMap.size() % numWorkGroups;
                 const Size numWorks = (Size)numStaticMeshWorksPerGroup + (groupIdx == 0 ? numStaticMeshRemainedWorks : 0);
                 const Size viewOffset = (Size)(groupIdx * numStaticMeshWorksPerGroup) + (groupIdx != 0 ? numStaticMeshRemainedWorks : 0);
                 for (Size viewIdx = 0; viewIdx < numWorks; ++viewIdx)

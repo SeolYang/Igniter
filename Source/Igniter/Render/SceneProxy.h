@@ -83,6 +83,9 @@ namespace ig
             Vector<Owner> PendingReplications; // Deprecated
             Vector<Owner> PendingDestructions; // Deprecated
 
+            InFlightFramesResource<Ptr<GpuBuffer>> StagingBuffer;
+            InFlightFramesResource<Size> StagingBufferSize;
+
             Vector<Vector<std::pair<Owner, Proxy>>> PendingProxyGroups;
             Vector<Vector<Owner>> PendingReplicationGroups;
             Vector<Vector<Owner>> PendingDestructionGroups;
@@ -144,6 +147,9 @@ namespace ig
         void ReplicatePrxoyData(const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage,
                                 CommandList& cmdList,
                                 const Size stagingBufferOffset);
+
+        template <typename Proxy, typename Owner>
+        void ReplicatePrxoyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
 
         void ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx,
                                         CommandList& cmdList,
