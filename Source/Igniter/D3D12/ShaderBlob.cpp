@@ -2,7 +2,8 @@
 #include "Igniter/Core/Log.h"
 #include "Igniter/D3D12/ShaderBlob.h"
 
-IG_DECLARE_LOG_CATEGORY(ShaderBlob);
+IG_DECLARE_LOG_CATEGORY(ShaderBlobLog);
+IG_DEFINE_LOG_CATEGORY(ShaderBlobLog);
 
 namespace ig
 {
@@ -118,7 +119,7 @@ namespace ig
         compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
         if (errors && errors->GetStringLength() > 0)
         {
-            IG_LOG(ShaderBlob, Fatal, "Failed to compile shader {}; {}", desc.SourcePath.ToStringView(), errors->GetStringPointer());
+            IG_LOG(ShaderBlobLog, Fatal, "Failed to compile shader {}; {}", desc.SourcePath.ToStringView(), errors->GetStringPointer());
         }
 
         IG_VERIFY_SUCCEEDED(compiledResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));
