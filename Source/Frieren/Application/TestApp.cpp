@@ -212,14 +212,21 @@ namespace fe
         ig::World& world = ig::Engine::GetWorld();
         gameSystem->Update(deltaTime, world);
 
+        // #sy_test Multithreaded component update
         ig::Registry& registry = world.GetRegistry();
-        registry.view<ig::TransformComponent, RandMovementComponent>()
-            .each(
-                [deltaTime]([[maybe_unused]] const ig::Entity entity, ig::TransformComponent& transform, RandMovementComponent& randMove)
-                {
-                    transform.Position += (deltaTime * randMove.MoveDirection * randMove.MoveSpeed);
-                    transform.Rotation *= ig::Quaternion::CreateFromYawPitchRoll(deltaTime * randMove.Rotation * randMove.RotateSpeed);
-                });
+        auto view = registry.view<ig::TransformComponent, const RandMovementComponent>();
+        tf::Executor& taskExecutor = ig::Engine::GetTaskExecutor();
+        tf::Taskflow rootTaskFlow;
+        rootTaskFlow.for_each(
+            view.begin(), view.end(),
+            [&view, deltaTime](const ig::Entity entity)
+            {
+                ig::TransformComponent& transform = view.get<ig::TransformComponent>(entity);
+                const RandMovementComponent& randMove = view.get<const RandMovementComponent>(entity);
+                transform.Position += (deltaTime * randMove.MoveDirection * randMove.MoveSpeed);
+                transform.Rotation *= ig::Quaternion::CreateFromYawPitchRoll(deltaTime * randMove.Rotation * randMove.RotateSpeed);
+            });
+        taskExecutor.run(rootTaskFlow).wait();
     }
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)
