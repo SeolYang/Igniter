@@ -16,7 +16,6 @@
 #include "Igniter/Render/Renderer.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/ImGui/ImGuiContext.h"
-#include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Igniter/Application/Application.h"
 #include "Igniter/Gameplay/World.h"
 
@@ -60,8 +59,6 @@ namespace ig
         IG_LOG(EngineLog, Info, "Asset Manager Initialized.");
         imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
         IG_LOG(EngineLog, Info, "ImGui Context Initialized.");
-        imguiRenderer = MakePtr<ImGuiRenderer>(*renderContext);
-        IG_LOG(EngineLog, Info, "ImGui Renderer Initialized.");
 
         sceneProxy = MakePtr<SceneProxy>(*renderContext, *meshStorage, *assetManager);
         IG_LOG(EngineLog, Info, "Scene Proxy Initialized.");
@@ -168,19 +165,19 @@ namespace ig
                 meshStorage->PreRender(localFrameIdx);
                 replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
                 renderer->PreRender(localFrameIdx);
+                application.PreRender(localFrameIdx);
             }
 
             {
                 ZoneScopedN("Engine: Render");
-                const GpuSyncPoint mainRenderPipelineSyncPoint = renderer->Render(localFrameIdx, *world, replicationSyncPoint);
-                imguiRenderer->SetMainPipelineSyncPoint(mainRenderPipelineSyncPoint);
-                localFrameSyncs[localFrameIdx] = imguiRenderer->Render(localFrameIdx);
+                localFrameSyncs[localFrameIdx] = renderer->Render(localFrameIdx, *world, replicationSyncPoint);
             }
 
             /*********** Post-Render ***********/
             {
                 ZoneScopedN("Engine: PostRender");
                 renderContext->PostRender(localFrameIdx);
+                application.PostRender(localFrameIdx);
             }
 
             /***********  End Frame  *************/
@@ -245,12 +242,6 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->imguiContext;
-    }
-
-    ImGuiRenderer& Engine::GetImGuiRenderer()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->imguiRenderer;
     }
 
     World& Engine::GetWorld()

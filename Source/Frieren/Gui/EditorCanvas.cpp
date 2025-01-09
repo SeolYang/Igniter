@@ -27,7 +27,7 @@ namespace fe
 
     EditorCanvas::~EditorCanvas() { }
 
-    void EditorCanvas::OnImGui()
+    void EditorCanvas::OnGui()
     {
         if (ImGui::BeginMainMenuBar())
         {

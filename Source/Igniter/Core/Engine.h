@@ -15,11 +15,10 @@ namespace ig
     class Timer;
     class Window;
     class RenderContext;
+    class ImGuiContext;
     class MeshStorage;
     class InputManager;
     class AssetManager;
-    class ImGuiContext;
-    class ImGuiRenderer;
     class World;
     class SceneProxy;
     class Renderer;
@@ -44,7 +43,6 @@ namespace ig
         [[nodiscard]] static MeshStorage& GetMeshStorage();
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static ImGuiContext& GetImGuiContext();
-        [[nodiscard]] static ImGuiRenderer& GetImGuiRenderer();
         [[nodiscard]] static World& GetWorld();
         [[nodiscard]] static SceneProxy& GetSceneProxy();
         [[nodiscard]] static Renderer& GetRenderer();
@@ -75,7 +73,6 @@ namespace ig
 
         Ptr<AssetManager> assetManager;
         Ptr<ImGuiContext> imguiContext;
-        Ptr<ImGuiRenderer> imguiRenderer;
 
         Ptr<SceneProxy> sceneProxy;
 

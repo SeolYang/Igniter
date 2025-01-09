@@ -5,7 +5,6 @@
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
-#include "Igniter/ImGui/ImGuiRenderer.h"
 #include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Component/NameComponent.h"
 #include "Frieren/Game/System/TestGameSystem.h"
@@ -193,11 +192,7 @@ namespace fe
                 }
             }
         }
-
         // worldInstance = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
-
-        ig::ImGuiRenderer& imGuiRenderer = ig::Engine::GetImGuiRenderer();
-        imGuiRenderer.SetTargetCanvas(editorCanvas.get());
     }
 
     TestApp::~TestApp()
@@ -227,6 +222,11 @@ namespace fe
                 transform.Rotation *= ig::Quaternion::CreateFromYawPitchRoll(deltaTime * randMove.Rotation * randMove.RotateSpeed);
             });
         taskExecutor.run(rootTaskFlow).wait();
+    }
+
+    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex localFrameIdx)
+    {
+        editorCanvas->Render();
     }
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)

@@ -17,9 +17,9 @@ namespace ig
     {
         for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
-            mainGfxFence.Resources[localFrameIdx]      = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("MainGfxFence{}", localFrameIdx)));
+            mainGfxFence.Resources[localFrameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("MainGfxFence{}", localFrameIdx)));
             asyncComputeFence.Resources[localFrameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("AsyncComputeFence{}", localFrameIdx)));
-            asyncCopyFence.Resources[localFrameIdx]    = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("AsyncCopyFence{}", localFrameIdx)));
+            asyncCopyFence.Resources[localFrameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("AsyncCopyFence{}", localFrameIdx)));
         }
     }
 
@@ -91,7 +91,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer)
     {
-        ScopedLock       StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
@@ -110,7 +110,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
     {
-        ScopedLock       StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
@@ -129,7 +129,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateShaderResourceView(const RenderHandle<GpuBuffer> buffer)
     {
-        ScopedLock       StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
@@ -148,7 +148,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateUnorderedAccessView(const RenderHandle<GpuBuffer> buffer)
     {
-        ScopedLock       StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
@@ -167,7 +167,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateShaderResourceView(RenderHandle<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        ScopedLock        StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
@@ -186,7 +186,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateUnorderedAccessView(RenderHandle<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        ScopedLock        StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
@@ -205,7 +205,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateRenderTargetView(RenderHandle<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        ScopedLock        StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
@@ -224,7 +224,7 @@ namespace ig
 
     RenderHandle<GpuView> RenderContext::CreateDepthStencilView(RenderHandle<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
-        ScopedLock        StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
         if (texturePtr == nullptr)
         {
@@ -409,7 +409,8 @@ namespace ig
             ScopedLock gpuViewPackageLock{gpuViewPackage.StorageMutex, gpuViewPackage.DeferredDestroyPendingListMutex.Resources[localFrameIdx]};
             for (const auto handle : gpuViewPackage.DeferredDestroyPendingList.Resources[localFrameIdx])
             {
-                gpuViewManager.Deallocate(*gpuViewPackage.Storage.LookupUnsafe(handle));
+                const GpuView& gpuView = *gpuViewPackage.Storage.LookupUnsafe(handle);
+                gpuViewManager.Deallocate(gpuView);
                 gpuViewPackage.Storage.Destroy(handle);
             }
             gpuViewPackage.DeferredDestroyPendingList.Resources[localFrameIdx].clear();
@@ -418,6 +419,6 @@ namespace ig
 
     void RenderContext::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
-        swapchain->Present();
+       // swapchain->Present();
     }
 } // namespace ig

@@ -121,7 +121,6 @@
     <ClInclude Include="ImGui\ImGuiCanvas.h" />
     <ClInclude Include="ImGui\ImGuiContext.h" />
     <ClInclude Include="ImGui\ImGuiExtensions.h" />
-    <ClInclude Include="ImGui\ImGuiRenderer.h" />
     <ClInclude Include="ImGui\TextureView.h" />
     <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="Render\CommandListPool.h" />
@@ -214,9 +213,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ImGui\AssetSelectModalPopup.cpp" />
+    <ClCompile Include="ImGui\ImGuiCanvas.cpp" />
     <ClCompile Include="ImGui\ImGuiContext.cpp" />
     <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
-    <ClCompile Include="ImGui\ImGuiRenderer.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="Render\CommandListPool.cpp" />
     <ClCompile Include="Render\GpuStorage.cpp" />

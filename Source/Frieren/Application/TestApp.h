@@ -19,11 +19,8 @@ namespace fe
         explicit TestApp(const ig::AppDesc& desc);
         ~TestApp() override;
 
-        void PreUpdate(const float) override {}
-
         void Update(const float deltaTime) override;
-
-        void PostUpdate(const float) override {}
+        void PostRender(const ig::LocalFrameIndex localFrameIdx) override;
 
         void SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem);
 
@@ -32,8 +29,8 @@ namespace fe
         ig::Ptr<EditorCanvas> editorCanvas;
 
         constexpr static ig::U32 kAxeGridSizeX = 100;
-        constexpr static ig::U32 kAxeGridSizeY = 10;
-        constexpr static ig::U32 kAxeGridSizeZ = 100;
+        constexpr static ig::U32 kAxeGridSizeY = 100;
+        constexpr static ig::U32 kAxeGridSizeZ = 10;
         constexpr static ig::U32 kNumAxes = kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ;
         constexpr static ig::F32 kAxeSpaceInterval = 3.5f;
         constexpr static ig::Vector3 kAxeOffset{-kAxeSpaceInterval * kAxeGridSizeX / 2.f, -kAxeSpaceInterval* kAxeGridSizeY / 2.f, -kAxeSpaceInterval* kAxeGridSizeZ / 2.f};

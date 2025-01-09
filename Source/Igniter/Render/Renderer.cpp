@@ -231,7 +231,8 @@ namespace ig
         const GpuView* backBufferRtv = renderContext->Lookup(swapchain.GetRenderTargetView());
 
         CommandQueue& mainGfxQueue{renderContext->GetMainGfxQueue()};
-        auto renderCmdList = renderContext->GetMainGfxCommandListPool().Request(localFrameIdx, "MainGfx"_fs);
+        CommandListPool& mainGfxCmdListPool = renderContext->GetMainGfxCommandListPool();
+        auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
         if (sceneProxy->GetNumMaxRenderables(localFrameIdx) == 0)
         {
             renderCmdList->Open(pso.get());
@@ -337,34 +338,67 @@ namespace ig
         // Culling이 완료되면 Command Buffer를 가지고 ExecuteIndirect!
 
         renderCmdList->Open(pso.get());
-        renderCmdList->SetDescriptorHeaps(bindlessDescHeaps);
-        renderCmdList->SetRootSignature(*bindlessRootSignature);
+        {
+            renderCmdList->SetDescriptorHeaps(bindlessDescHeaps);
+            renderCmdList->SetRootSignature(*bindlessRootSignature);
 
-        renderCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-                                                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-                                                D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-        renderCmdList->FlushBarriers();
+            renderCmdList->AddPendingTextureBarrier(*backBuffer,
+                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                                                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+                                                    D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            renderCmdList->FlushBarriers();
 
-        renderCmdList->ClearRenderTarget(*backBufferRtv);
-        GpuView* dsv = renderContext->Lookup(dsvs[localFrameIdx]);
-        renderCmdList->ClearDepth(*dsv);
-        renderCmdList->SetRenderTarget(*backBufferRtv, *dsv);
-        renderCmdList->SetViewport(mainViewport);
-        renderCmdList->SetScissorRect(mainViewport);
-        renderCmdList->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        renderCmdList->ExecuteIndirect(*commandSignature, *drawOpaqueStaticMeshCmdBuffer);
+            renderCmdList->ClearRenderTarget(*backBufferRtv);
+            GpuView* dsv = renderContext->Lookup(dsvs[localFrameIdx]);
+            renderCmdList->ClearDepth(*dsv);
+            renderCmdList->SetRenderTarget(*backBufferRtv, *dsv);
+            renderCmdList->SetViewport(mainViewport);
+            renderCmdList->SetScissorRect(mainViewport);
+            renderCmdList->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            renderCmdList->ExecuteIndirect(*commandSignature, *drawOpaqueStaticMeshCmdBuffer);
 
-        renderCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
-                                                D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                                D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
-        renderCmdList->FlushBarriers();
-
+            renderCmdList->AddPendingTextureBarrier(*backBuffer,
+                                                    D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                                                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                                    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            renderCmdList->FlushBarriers();
+        }
         renderCmdList->Close();
-        CommandList* renderCmdLists[]{renderCmdList};
+        CommandList* mainPassCmdLists[]{renderCmdList};
         mainGfxQueue.Wait(computeCullingSync);
-        mainGfxQueue.ExecuteContexts(renderCmdLists);
+        mainGfxQueue.ExecuteContexts(mainPassCmdLists);
+
+        ImDrawData* imGuiDrawData = ImGui::GetDrawData();
+        if (imGuiDrawData != nullptr)
+        {
+            auto imguiCmdList = mainGfxCmdListPool.Request(localFrameIdx, "RenderImGui"_fs);
+            imguiCmdList->Open();
+            {
+                imguiCmdList->AddPendingTextureBarrier(*backBuffer,
+                                                       D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                                                       D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+                                                       D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+                imguiCmdList->FlushBarriers();
+
+                imguiCmdList->SetRenderTarget(*backBufferRtv);
+                imguiCmdList->SetDescriptorHeap(renderContext->GetCbvSrvUavDescriptorHeap());
+                ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &imguiCmdList->GetNative());
+
+                imguiCmdList->AddPendingTextureBarrier(*backBuffer,
+                                                       D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                                                       D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                                       D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+                imguiCmdList->FlushBarriers();
+            }
+            imguiCmdList->Close();
+
+            GpuSyncPoint mainPassSync = mainGfxQueue.MakeSyncPointWithSignal(renderContext->GetMainGfxFence());
+            mainGfxQueue.Wait(mainPassSync);
+            CommandList* imguiPassCmdLists[]{imguiCmdList};
+            mainGfxQueue.ExecuteContexts(imguiPassCmdLists);
+        }
+
+        swapchain.Present();
         return mainGfxQueue.MakeSyncPointWithSignal(renderContext->GetMainGfxFence());
     }
 } // namespace ig
