@@ -48,7 +48,7 @@ namespace ig
         [[nodiscard]] Swapchain& GetSwapchain() { return *swapchain; }
         [[nodiscard]] const Swapchain& GetSwapchain() const { return *swapchain; }
         [[nodiscard]] auto& GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
-        [[nodiscard]] auto GetBindlessDescriptorHeaps() { return eastl::array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()}; }
+        [[nodiscard]] auto GetBindlessDescriptorHeaps() { return Array<DescriptorHeap*, 2>{&gpuViewManager.GetCbvSrvUavDescHeap(), &gpuViewManager.GetSamplerDescHeap()}; }
 
         RenderHandle<GpuBuffer> CreateBuffer(const GpuBufferDesc& desc);
         RenderHandle<GpuTexture> CreateTexture(const GpuTextureDesc& desc);

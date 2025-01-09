@@ -531,7 +531,7 @@ namespace ig
         return footPrints;
     }
 
-    void GpuDevice::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
+    void GpuDevice::CreateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::ConstantBufferView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
@@ -543,7 +543,7 @@ namespace ig
         device->CreateConstantBufferView(&cbvDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
+    void GpuDevice::CreateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
     {
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
@@ -561,7 +561,7 @@ namespace ig
         }
     }
 
-    void GpuDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
+    void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
@@ -573,7 +573,7 @@ namespace ig
         device->CreateShaderResourceView(&buffer.GetNative(), &srvDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
+    void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
@@ -591,7 +591,7 @@ namespace ig
             gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
@@ -603,7 +603,7 @@ namespace ig
         device->CreateShaderResourceView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
@@ -615,7 +615,7 @@ namespace ig
         device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::RenderTargetView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
@@ -627,7 +627,7 @@ namespace ig
         device->CreateRenderTargetView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::UpdateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(gpuView.Type == EGpuViewType::DepthStencilView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());

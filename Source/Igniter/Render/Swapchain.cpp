@@ -91,7 +91,10 @@ namespace ig
         const HRESULT result = swapchain->Present(syncInterval, presentFlags);
         if (result == DXGI_ERROR_DEVICE_REMOVED || result == DXGI_ERROR_DEVICE_RESET)
         {
-            IG_LOG(SwapchainLog, Fatal, "Present Failed: Device removed({:#X})", result);
+            char buff[64] = {};
+            sprintf_s(buff, "Device Lost on Present: Reason code 0x%08X\n",
+                      static_cast<unsigned int>((result == DXGI_ERROR_DEVICE_REMOVED) ? renderContext.GetGpuDevice().GetDeviceRemovedReason() : result));
+            IG_LOG(SwapchainLog, Fatal, "Present Failed: Device removed({})", buff);
         }
     }
 } // namespace ig

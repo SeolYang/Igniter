@@ -27,7 +27,7 @@ namespace ig
         if (newCBV)
         {
             IG_CHECK(newCBV.Type == EGpuViewType::ConstantBufferView);
-            gpuDevice.UpdateConstantBufferView(newCBV, gpuBuffer);
+            gpuDevice.CreateConstantBufferView(newCBV, gpuBuffer);
         }
 
         return newCBV;
@@ -43,7 +43,7 @@ namespace ig
         if (newCBV)
         {
             IG_CHECK(newCBV.Type == EGpuViewType::ConstantBufferView);
-            gpuDevice.UpdateConstantBufferView(newCBV, gpuBuffer, offset, sizeInBytes);
+            gpuDevice.CreateConstantBufferView(newCBV, gpuBuffer, offset, sizeInBytes);
         }
 
         return newCBV;
@@ -55,7 +55,7 @@ namespace ig
         if (newSRV)
         {
             IG_CHECK(newSRV.Type == EGpuViewType::ShaderResourceView);
-            gpuDevice.UpdateShaderResourceView(newSRV, gpuBuffer);
+            gpuDevice.CreateShaderResourceView(newSRV, gpuBuffer);
         }
 
         return newSRV;
@@ -67,7 +67,7 @@ namespace ig
         if (newUAV)
         {
             IG_CHECK(newUAV.Type == EGpuViewType::UnorderedAccessView);
-            gpuDevice.UpdateUnorderedAccessView(newUAV, gpuBuffer);
+            gpuDevice.CreateUnorderedAccessView(newUAV, gpuBuffer);
         }
 
         return newUAV;
@@ -80,7 +80,7 @@ namespace ig
         if (newSRV)
         {
             IG_CHECK(newSRV.Type == EGpuViewType::ShaderResourceView);
-            gpuDevice.UpdateShaderResourceView(newSRV, gpuTexture, srvDesc, desireViewFormat);
+            gpuDevice.CreateShaderResourceView(newSRV, gpuTexture, srvDesc, desireViewFormat);
         }
 
         return newSRV;
@@ -93,7 +93,7 @@ namespace ig
         if (newUAV)
         {
             IG_CHECK(newUAV.Type == EGpuViewType::UnorderedAccessView);
-            gpuDevice.UpdateUnorderedAccessView(newUAV, gpuTexture, uavDesc, desireViewFormat);
+            gpuDevice.CreateUnorderedAccessView(newUAV, gpuTexture, uavDesc, desireViewFormat);
         }
 
         return newUAV;
@@ -106,7 +106,7 @@ namespace ig
         if (newRTV)
         {
             IG_CHECK(newRTV.Type == EGpuViewType::RenderTargetView);
-            gpuDevice.UpdateRenderTargetView(newRTV, gpuTexture, rtvDesc, desireViewFormat);
+            gpuDevice.CreateRenderTargetView(newRTV, gpuTexture, rtvDesc, desireViewFormat);
         }
 
         return newRTV;
@@ -119,7 +119,7 @@ namespace ig
         if (newDSV)
         {
             IG_CHECK(newDSV.Type == EGpuViewType::DepthStencilView);
-            gpuDevice.UpdateDepthStencilView(newDSV, gpuTexture, dsvDesc, desireViewFormat);
+            gpuDevice.CreateDepthStencilView(newDSV, gpuTexture, dsvDesc, desireViewFormat);
         }
 
         return newDSV;
