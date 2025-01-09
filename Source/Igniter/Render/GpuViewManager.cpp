@@ -17,6 +17,7 @@ namespace ig
     {
         for (const auto& [_, samplerView] : cachedSamplerView)
         {
+            gpuDevice.DestroySampler(samplerView);
             samplerHeap->Deallocate(samplerView);
         }
     }
@@ -177,18 +178,23 @@ namespace ig
         switch (gpuView.Type)
         {
         case EGpuViewType::ConstantBufferView:
+            gpuDevice.DestroyConstantBufferView(gpuView);
             cbvSrvUavHeap->Deallocate(gpuView);
             break;
         case EGpuViewType::ShaderResourceView:
+            gpuDevice.DestroyShaderResourceView(gpuView);
             cbvSrvUavHeap->Deallocate(gpuView);
             break;
         case EGpuViewType::UnorderedAccessView:
+            gpuDevice.DestroyUnorderedAccessView(gpuView);
             cbvSrvUavHeap->Deallocate(gpuView);
             break;
         case EGpuViewType::RenderTargetView:
+            gpuDevice.DestroyRenderTargetView(gpuView);
             rtvHeap->Deallocate(gpuView);
             break;
         case EGpuViewType::DepthStencilView:
+            gpuDevice.DestroyDepthStencilView(gpuView);
             dsvHeap->Deallocate(gpuView);
             break;
         case EGpuViewType::Sampler:

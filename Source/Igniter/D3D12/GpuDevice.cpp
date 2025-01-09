@@ -297,16 +297,14 @@ namespace ig
         const D3D12_ROOT_PARAMETER rootParam{
             .ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
             .Constants = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},
-            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL
-        };
+            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL};
 
         const D3D12_ROOT_SIGNATURE_DESC desc{
             .NumParameters = 1,
             .pParameters = &rootParam,
             .NumStaticSamplers = 0,
             .pStaticSamplers = nullptr,
-            .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED
-        };
+            .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED};
 
         ComPtr<ID3DBlob> errorBlob;
         ComPtr<ID3DBlob> rootSignatureBlob;
@@ -377,8 +375,7 @@ namespace ig
             .Type = targetDescriptorHeapType,
             .NumDescriptors = numDescriptors,
             .Flags = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-            .NodeMask = 0
-        };
+            .NodeMask = 0};
 
         ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
         if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap)); !SUCCEEDED(result))
@@ -391,8 +388,7 @@ namespace ig
         SetObjectName(newDescriptorHeap.Get(), debugName);
         return DescriptorHeap{
             descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
-            GetDescriptorHandleIncrementSize(descriptorHeapType)
-        };
+            GetDescriptorHandleIncrementSize(descriptorHeapType)};
     }
 
     Option<GpuFence> GpuDevice::CreateFence(const std::string_view debugName)
@@ -433,13 +429,6 @@ namespace ig
         return CommandSignature{std::move(newCommandSignature)};
     }
 
-    void GpuDevice::CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView)
-    {
-        IG_CHECK(device);
-        IG_CHECK(gpuView.HasValidCpuHandle());
-        device->CreateSampler(&samplerDesc, gpuView.CpuHandle);
-    }
-
     Option<GpuBuffer> GpuDevice::CreateBuffer(const GpuBufferDesc& bufferDesc)
     {
         IG_CHECK(device);
@@ -449,7 +438,7 @@ namespace ig
         ComPtr<D3D12MA::Allocation> allocation{};
         ComPtr<ID3D12Resource> resource{};
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &bufferDesc, D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr, 0, nullptr,
-                allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+                                                              allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDeviceLog, Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
@@ -482,7 +471,7 @@ namespace ig
         ComPtr<ID3D12Resource> resource{};
         IG_CHECK(textureDesc.InitialLayout != D3D12_BARRIER_LAYOUT_UNDEFINED);
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc, textureDesc.InitialLayout,
-                clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+                                                              clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDeviceLog, Error, "Failed to create texture resource. HRESULT: {:#X}", result);
@@ -531,8 +520,30 @@ namespace ig
         return footPrints;
     }
 
+    void GpuDevice::CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView)
+    {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
+        IG_CHECK(gpuView.Type == EGpuViewType::Sampler);
+        device->CreateSampler(&samplerDesc, gpuView.CpuHandle);
+    }
+
+    void GpuDevice::DestroySampler(const GpuView& gpuView)
+    {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
+        IG_CHECK(gpuView.Type == EGpuViewType::Sampler);
+        D3D12_SAMPLER_DESC samplerDesc = {};
+        samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        device->CreateSampler(&samplerDesc, gpuView.CpuHandle);
+    }
+
     void GpuDevice::CreateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer)
     {
+        IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::ConstantBufferView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
@@ -545,24 +556,21 @@ namespace ig
 
     void GpuDevice::CreateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes)
     {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.Type == EGpuViewType::ConstantBufferView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
         IG_CHECK((offset + sizeInBytes) < buffer.GetDesc().GetSizeAsBytes());
-        if (gpuView.Type == EGpuViewType::ConstantBufferView)
-        {
-            const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
-                .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)
-            };
-            device->CreateConstantBufferView(&cbvDesc, gpuView.CpuHandle);
-        }
-        else
-        {
-            IG_CHECK_NO_ENTRY();
-        }
+
+        const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
+            .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)};
+
+        device->CreateConstantBufferView(&cbvDesc, gpuView.CpuHandle);
     }
 
     void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
     {
+        IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
@@ -575,6 +583,7 @@ namespace ig
 
     void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
     {
+        IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
@@ -593,6 +602,7 @@ namespace ig
 
     void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
     {
+        IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
@@ -605,6 +615,7 @@ namespace ig
 
     void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
     {
+        IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
@@ -617,6 +628,7 @@ namespace ig
 
     void GpuDevice::CreateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
     {
+        IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::RenderTargetView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
@@ -629,6 +641,7 @@ namespace ig
 
     void GpuDevice::CreateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
     {
+        IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::DepthStencilView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
@@ -637,5 +650,54 @@ namespace ig
         IG_CHECK(nativeDesc);
 
         device->CreateDepthStencilView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
+    }
+
+    void GpuDevice::DestroyConstantBufferView(const GpuView& gpuView)
+    {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
+        IG_CHECK(gpuView.Type == EGpuViewType::ConstantBufferView);
+        constexpr D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {.BufferLocation = 0, .SizeInBytes = 256};
+        device->CreateConstantBufferView(&cbvDesc, gpuView.CpuHandle);
+    }
+
+    void GpuDevice::DestroyShaderResourceView(const GpuView& gpuView)
+    {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
+        IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
+        constexpr D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {
+            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            .ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
+            .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+            .Texture2D = {.MipLevels = 1}};
+        device->CreateShaderResourceView(nullptr, &srvDesc, gpuView.CpuHandle);
+    }
+
+    void GpuDevice::DestroyUnorderedAccessView(const GpuView& gpuView)
+    {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
+        IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
+        constexpr D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {.Format = DXGI_FORMAT_R8G8B8A8_UNORM, .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D};
+        device->CreateUnorderedAccessView(nullptr, nullptr, &uavDesc, gpuView.CpuHandle);
+    }
+
+    void GpuDevice::DestroyRenderTargetView(const GpuView& gpuView)
+    {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
+        IG_CHECK(gpuView.Type == EGpuViewType::RenderTargetView);
+        constexpr D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {.Format = DXGI_FORMAT_R8G8B8A8_UNORM, .ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D};
+        device->CreateRenderTargetView(nullptr, &rtvDesc, gpuView.CpuHandle);
+    }
+
+    void GpuDevice::DestroyDepthStencilView(const GpuView& gpuView)
+    {
+        IG_CHECK(device);
+        IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
+        IG_CHECK(gpuView.Type == EGpuViewType::DepthStencilView);
+        constexpr D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {.Format = DXGI_FORMAT_D32_FLOAT, .ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D};
+        device->CreateDepthStencilView(nullptr, &dsvDesc, gpuView.CpuHandle);
     }
 } // namespace ig

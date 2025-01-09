@@ -52,6 +52,7 @@ namespace ig
         [[nodiscard]] Option<CommandSignature> CreateCommandSignature(const std::string_view debugName, const CommandSignatureDesc& desc, const Option<Ref<RootSignature>> rootSignatureOpt);
 
         void CreateSampler(const D3D12_SAMPLER_DESC& samplerDesc, const GpuView& gpuView);
+        void DestroySampler(const GpuView& gpuView);
 
         void CreateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer);
         void CreateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
@@ -62,6 +63,12 @@ namespace ig
         void CreateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         void CreateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         void CreateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+
+        void DestroyConstantBufferView(const GpuView& gpuView);
+        void DestroyShaderResourceView(const GpuView& gpuView);
+        void DestroyUnorderedAccessView(const GpuView& gpuView);
+        void DestroyRenderTargetView(const GpuView& gpuView);
+        void DestroyDepthStencilView(const GpuView& gpuView);
 
         [[nodiscard]] ComPtr<D3D12MA::Pool> CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc);
 
