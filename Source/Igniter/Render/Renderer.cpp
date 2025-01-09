@@ -115,7 +115,7 @@ namespace ig
 
         CommandList* cmdLists[]{initialCmdList};
         CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        mainGfxQueue.ExecuteContexts(cmdLists);
+        mainGfxQueue.ExecuteCommandLists(cmdLists);
 
         GpuBufferDesc uavCounterResetBufferDesc{};
         uavCounterResetBufferDesc.AsUploadBuffer(GpuBufferDesc::kUavCounterSize);
@@ -254,7 +254,7 @@ namespace ig
 
             renderCmdList->Close();
             CommandList* renderCmdLists[]{renderCmdList};
-            mainGfxQueue.ExecuteContexts(renderCmdLists);
+            mainGfxQueue.ExecuteCommandLists(renderCmdLists);
             return mainGfxQueue.MakeSyncPointWithSignal(renderContext->GetMainGfxFence());
         }
 
@@ -331,7 +331,7 @@ namespace ig
             asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
 
             CommandList* cmdLists[]{computeCullingCmdList};
-            asyncComputeQueue.ExecuteContexts(cmdLists);
+            asyncComputeQueue.ExecuteCommandLists(cmdLists);
         }
         GpuSyncPoint computeCullingSync = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
 
@@ -366,7 +366,7 @@ namespace ig
         renderCmdList->Close();
         CommandList* mainPassCmdLists[]{renderCmdList};
         mainGfxQueue.Wait(computeCullingSync);
-        mainGfxQueue.ExecuteContexts(mainPassCmdLists);
+        mainGfxQueue.ExecuteCommandLists(mainPassCmdLists);
 
         ImDrawData* imGuiDrawData = ImGui::GetDrawData();
         if (imGuiDrawData != nullptr)
@@ -395,7 +395,7 @@ namespace ig
             GpuSyncPoint mainPassSync = mainGfxQueue.MakeSyncPointWithSignal(renderContext->GetMainGfxFence());
             mainGfxQueue.Wait(mainPassSync);
             CommandList* imguiPassCmdLists[]{imguiCmdList};
-            mainGfxQueue.ExecuteContexts(imguiPassCmdLists);
+            mainGfxQueue.ExecuteCommandLists(imguiPassCmdLists);
         }
 
         swapchain.Present();

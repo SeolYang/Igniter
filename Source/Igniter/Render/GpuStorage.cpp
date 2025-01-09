@@ -211,7 +211,7 @@ namespace ig
             }
 
             ig::CommandList* copyCmdLists[] = {(ig::CommandList*)copyCmdList};
-            asyncCopyQueue.ExecuteContexts(copyCmdLists);
+            asyncCopyQueue.ExecuteCommandLists(copyCmdLists);
             asyncCopyQueue.Signal(newSyncPoint);
         }
 

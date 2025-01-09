@@ -171,7 +171,7 @@ namespace ig
             cmdList->Close();
         }
         CommandList* cmdLists[1] = {(CommandList*)cmdList};
-        mainGfxQueue.ExecuteContexts(cmdLists);
+        mainGfxQueue.ExecuteCommandLists(cmdLists);
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
@@ -278,7 +278,7 @@ namespace ig
             cmdList->Close();
         }
         CommandList* cmdLists[1] = {(CommandList*)cmdList};
-        mainGfxQueue.ExecuteContexts(cmdLists);
+        mainGfxQueue.ExecuteCommandLists(cmdLists);
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
@@ -381,7 +381,7 @@ namespace ig
         }
 
         CommandList* cmdLists[1]{(CommandList*)cmdList};
-        mainGfxQueue.ExecuteContexts(cmdLists);
+        mainGfxQueue.ExecuteCommandLists(cmdLists);
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 

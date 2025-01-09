@@ -843,7 +843,7 @@ namespace ig
 
                 CommandQueue& cmdQueue = renderContext->GetAsyncCopyQueue();
                 IG_CHECK(cmdQueue.GetType() == EQueueType::Copy);
-                cmdQueue.ExecuteContexts(std::span{proxyPackage.WorkGroupCmdLists.data(),
+                cmdQueue.ExecuteCommandLists(std::span{proxyPackage.WorkGroupCmdLists.data(),
                                                    proxyPackage.NumValidWorkGroupCmdList});
             });
 
@@ -923,6 +923,6 @@ namespace ig
 
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
         CommandList* cmdLists[]{cmdList};
-        asyncCopyQueue.ExecuteContexts(cmdLists);
+        asyncCopyQueue.ExecuteCommandLists(cmdLists);
     }
 } // namespace ig

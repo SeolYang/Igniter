@@ -29,7 +29,7 @@ namespace ig
         const auto& GetNative() const { return *native.Get(); }
         EQueueType GetType() const { return type; }
 
-        void ExecuteContexts(const std::span<CommandList*> cmdLists);
+        void ExecuteCommandLists(const std::span<CommandList*> cmdLists);
         bool Signal(GpuSyncPoint& syncPoint);
         GpuSyncPoint MakeSyncPointWithSignal(GpuFence& fence);
         void Wait(GpuSyncPoint& syncPoint);

@@ -160,7 +160,7 @@ namespace ig
         request.CmdList->Close();
 
         CommandList* cmdListPtrs[] = {request.CmdList.get()};
-        copyQueue->ExecuteContexts(cmdListPtrs);
+        copyQueue->ExecuteCommandLists(cmdListPtrs);
         request.Sync = copyQueue->MakeSyncPointWithSignal(*copyFence.Resources[currentLocalFrameIdx]);
         IG_CHECK(request.Sync.IsValid());
         context.Reset();
