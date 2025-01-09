@@ -307,6 +307,13 @@ namespace ig
 
             const GpuBufferDesc& drawOpaqueStaticMeshCmdBufferDesc = drawOpaqueStaticMeshCmdBuffer->GetDesc();
             IG_CHECK(drawOpaqueStaticMeshCmdBufferDesc.IsUavCounterEnabled());
+
+            computeCullingCmdList->AddPendingBufferBarrier(
+                *drawOpaqueStaticMeshCmdBuffer,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+            computeCullingCmdList->FlushBarriers();
+
             computeCullingCmdList->CopyBuffer(
                 *uavCounterResetBuffer, 0, GpuBufferDesc::kUavCounterSize,
                 *drawOpaqueStaticMeshCmdBuffer, drawOpaqueStaticMeshCmdBufferDesc.GetUavCounterOffset());
@@ -346,6 +353,9 @@ namespace ig
                                                     D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
                                                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
                                                     D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            renderCmdList->AddPendingBufferBarrier(*drawOpaqueStaticMeshCmdBuffer,
+                                                   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_EXECUTE_INDIRECT,
+                                                   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT);
             renderCmdList->FlushBarriers();
 
             renderCmdList->ClearRenderTarget(*backBufferRtv);
@@ -361,6 +371,9 @@ namespace ig
                                                     D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
                                                     D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
                                                     D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            renderCmdList->AddPendingBufferBarrier(*drawOpaqueStaticMeshCmdBuffer,
+                                                   D3D12_BARRIER_SYNC_EXECUTE_INDIRECT, D3D12_BARRIER_SYNC_NONE,
+                                                   D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT, D3D12_BARRIER_ACCESS_NO_ACCESS);
             renderCmdList->FlushBarriers();
         }
         renderCmdList->Close();

@@ -20,11 +20,13 @@ namespace ig
     void CommandQueue::ExecuteCommandLists(const std::span<CommandList*> cmdLists)
     {
         IG_CHECK(IsValid());
-        auto toNative = views::all(cmdLists) | views::filter([](CommandList* cmdList)
-                                                            { return cmdList != nullptr; }) |
-                views::transform([](CommandList* cmdList)
-                                 { return &cmdList->GetNative(); });
-        eastl::vector<CommandList::NativeType*> natives = ToVector(toNative);
+        auto toNative = views::all(cmdLists) |
+            views::filter([](CommandList* cmdList)
+                          { return cmdList != nullptr; }) |
+            views::transform([](CommandList* cmdList)
+                             { return &cmdList->GetNative(); });
+
+        Vector<CommandList::NativeType*> natives = ToVector(toNative);
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
