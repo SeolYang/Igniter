@@ -67,6 +67,8 @@ namespace ig
 
         [[nodiscard]] GpuCopyableFootprints GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset) const;
 
+        [[nodiscard]] HRESULT GetDeviceRemovedReason() const { return device->GetDeviceRemovedReason(); }
+
     private:
         bool AcquireAdapterFromFactory();
         void LogAdapterInformation() const;
