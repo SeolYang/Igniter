@@ -351,15 +351,11 @@ namespace ig
             proxy.bMightBeDestroyed = true;
         }
 
-        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::Material)};
+        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::Material, true)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
         {
             IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::Material);
-
-            if (!snapshot.IsCached())
-            {
-                continue;
-            }
+            IG_CHECK(snapshot.IsCached());
 
             ManagedAsset<Material> cachedMaterial = assetManager->LoadMaterial(snapshot.Info.GetGuid(), true);
             IG_CHECK(cachedMaterial);
@@ -485,20 +481,18 @@ namespace ig
 
                 // 에셋 매니저에서 미리 material 처럼 가져온 다음에
                 // static mesh handle - static mesh ptr 맵을 만들고 참조하기 (read만하기)
-                std::vector<AssetManager::Snapshot> staticMeshSnapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh)};
+                std::vector<AssetManager::Snapshot> staticMeshSnapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh, true)};
                 UnorderedMap<ManagedAsset<StaticMesh>, const StaticMesh*> staticMeshTable{};
                 for (const AssetManager::Snapshot& staticMeshSnapshot : staticMeshSnapshots)
                 {
-                    if (staticMeshSnapshot.IsCached())
-                    {
-                        // 조금 꼼수긴 하지만, 여전히 valid 한 방식이라고 생각한다.
-                        // 잘못된 핸들은 애초에 Lookup이 불가능하고. 애초에 핸들 자체가 소유권을 가질 핸들 만 제대로
-                        // 이해하고 해제 해준다면 문제 없기 때문.
-                        // 성능면에선 실제로 렌더링 될 메시보다 유효한 에셋의 수가 더 적을 것이라고 예측되고
-                        // Lookup에 의한 mutex-lock의 횟수 또한 현저히 적거나 거의 없을 것이라고 생각된다.
-                        const ManagedAsset<StaticMesh> reconstructedHandle{staticMeshSnapshot.HandleHash};
-                        staticMeshTable[reconstructedHandle] = assetManager->Lookup(reconstructedHandle);
-                    }
+                    IG_CHECK(staticMeshSnapshot.IsCached());
+                    // 조금 꼼수긴 하지만, 여전히 valid 한 방식이라고 생각한다.
+                    // 잘못된 핸들은 애초에 Lookup이 불가능하고. 애초에 핸들 자체가 소유권을 가질 핸들 만 제대로
+                    // 이해하고 해제 해준다면 문제 없기 때문.
+                    // 성능면에선 실제로 렌더링 될 메시보다 유효한 에셋의 수가 더 적을 것이라고 예측되고
+                    // Lookup에 의한 mutex-lock의 횟수 또한 현저히 적거나 거의 없을 것이라고 생각된다.
+                    const ManagedAsset<StaticMesh> reconstructedHandle{staticMeshSnapshot.HandleHash};
+                    staticMeshTable[reconstructedHandle] = assetManager->Lookup(reconstructedHandle);
                 }
 
                 const Size numWorks = (Size)numWorksPerGroup + (groupIdx == 0 ? numRemainedWorks : 0);

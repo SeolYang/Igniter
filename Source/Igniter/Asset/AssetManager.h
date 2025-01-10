@@ -262,7 +262,7 @@ namespace ig
         }
 
         // Unknown == no filter
-        [[nodiscard]] std::vector<Snapshot> TakeSnapshots(const EAssetCategory filter = EAssetCategory::Unknown) const;
+        [[nodiscard]] std::vector<Snapshot> TakeSnapshots(const EAssetCategory filter = EAssetCategory::Unknown, const bool bOnlyTakeCached = false) const;
 
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 

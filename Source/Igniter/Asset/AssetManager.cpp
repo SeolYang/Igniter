@@ -127,7 +127,6 @@ namespace ig
             return Guid{};
         }
 
-
         return *guidOpt;
     }
 
@@ -367,7 +366,7 @@ namespace ig
         return assetMonitor->GetAssetInfo(guid);
     }
 
-    std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots(const EAssetCategory filter) const
+    std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots(const EAssetCategory filter, const bool bOnlyTakeCached) const
     {
         std::vector<Snapshot> snapshots;
         std::vector<AssetInfo> assetInfoSnapshots{assetMonitor->TakeSnapshots(filter)};
@@ -391,9 +390,14 @@ namespace ig
                 for (const AssetInfo& assetInfo : assetInfoSnapshots)
                 {
                     const details::TypelessAssetCache::Snapshot cacheSnapshot = assetCachePtr->TakeSnapshot(assetInfo.GetGuid());
-                    snapshots.emplace_back(assetInfo,
-                                           cacheSnapshot.RefCount,
-                                           cacheSnapshot.HandleHash);
+                    const Snapshot snapshot{assetInfo,
+                                            cacheSnapshot.RefCount,
+                                            cacheSnapshot.HandleHash};
+
+                    if (!bOnlyTakeCached || snapshot.IsCached())
+                    {
+                        snapshots.emplace_back(snapshot);
+                    }
                 }
             }
         }
