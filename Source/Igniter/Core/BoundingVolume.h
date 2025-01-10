@@ -25,7 +25,7 @@ namespace ig
         float Radius = 0.f;
     };
 
-    inline BoundingSphere AxisAlignedBoundingBoxToSphere(const AxisAlignedBoundingBox& aabb) noexcept
+    inline BoundingSphere ToBoundingSphere(const AxisAlignedBoundingBox& aabb) noexcept
     {
         return BoundingSphere{(aabb.Min + aabb.Max) * 0.5f, Vector3::Distance(aabb.Min, aabb.Max) * 0.5f};
     }

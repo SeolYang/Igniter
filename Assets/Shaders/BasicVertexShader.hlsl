@@ -47,6 +47,9 @@ struct StaticMeshData
     uint NumVertices;
     uint IndexOffset;
     uint NumIndices;
+
+    float3 BsCentroid;
+    float BsRadius;
 };
 
 struct VertexShaderOutput

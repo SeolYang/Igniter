@@ -1,5 +1,6 @@
 #pragma once
 #include "Igniter/Igniter.h"
+#include "Igniter/Core/BoundingVolume.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/Render/GpuStorage.h"
 #include "Igniter/Asset/Common.h"
@@ -60,6 +61,8 @@ namespace ig
             U32 NumVertices = 0u;
             U32 IndexOffset = 0u;
             U32 NumIndices = 0u;
+
+            BoundingSphere BoundingVolume;
         };
 
         struct RenderableGpuData

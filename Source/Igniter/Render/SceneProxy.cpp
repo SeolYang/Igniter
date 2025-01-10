@@ -515,23 +515,23 @@ namespace ig
                     const StaticMesh* staticMeshPtr = staticMeshTable[staticMeshComponent.Mesh];
                     IG_CHECK(staticMeshPtr != nullptr);
 
-                    // Mesh Storage에서 각 핸들은 고유하고, 해제 되기 전까지 해당 핸들에 대한 내부 값은 절대 바뀌지 않는다.
-                    const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
-                    const ManagedAsset<Material> material = staticMeshPtr->GetMaterial();
-                    IG_CHECK(materialProxyMap.contains(material));
-                    if (const U64 currentDataHashValue = vertexIndexSpace.Value ^ material.Value;
+                    if (const U64 currentDataHashValue = HashInstance(*staticMeshPtr);
                         proxy.DataHashValue != currentDataHashValue)
                     {
+                        const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
                         const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
                         const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
                         const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
+                        const ManagedAsset<Material> material = staticMeshPtr->GetMaterial();
+                        IG_CHECK(materialProxyMap.contains(material));
 
                         proxy.GpuData = StaticMeshGpuData{
                             .MaterialDataIdx = (U32)materialProxyMap.at(material).StorageSpace.OffsetIndex,
                             .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
                             .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
                             .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
-                            .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0)};
+                            .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0),
+                            .BoundingVolume = ToBoundingSphere(staticMeshPtr->GetSnapshot().LoadDescriptor.AABB)};
                         proxy.DataHashValue = currentDataHashValue;
 
                         staticMeshProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
