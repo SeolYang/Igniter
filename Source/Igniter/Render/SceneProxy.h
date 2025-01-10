@@ -41,6 +41,12 @@ namespace ig
             bool bMightBeDestroyed = true;
         };
 
+        struct TransformGpuData
+        {
+            // HLSL에선 Row-Vector로 받아들이기 때문에 해당 벡터로 행렬을 만들고 전치 해주어야 한다.
+            Vector4 Cols[3];
+        };
+
         struct MaterialGpuData
         {
             U32 DiffuseTextureSrv = IG_NUMERIC_MAX_OF(DiffuseTextureSrv);
@@ -67,7 +73,7 @@ namespace ig
         {
         };
 
-        using TransformProxy = GpuProxy<Matrix>;
+        using TransformProxy = GpuProxy<TransformGpuData>;
         using MaterialProxy = GpuProxy<MaterialGpuData>;
         using StaticMeshProxy = GpuProxy<StaticMeshGpuData>;
         using RenderableProxy = GpuProxy<RenderableGpuData>;

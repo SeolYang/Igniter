@@ -296,7 +296,13 @@ namespace ig
                     if (const U64 currentDataHashValue = HashInstance(transformComponent);
                         proxy.DataHashValue != currentDataHashValue)
                     {
-                        proxy.GpuData = transformComponent.CreateTransformation();
+                        const Matrix transformMat{transformComponent.CreateTransformation()};
+                        proxy.GpuData = TransformGpuData{
+                            .Cols{
+                                {transformMat.m[0][0], transformMat.m[1][0], transformMat.m[2][0], transformMat.m[3][0]},
+                                {transformMat.m[0][1], transformMat.m[1][1], transformMat.m[2][1], transformMat.m[3][1]},
+                                {transformMat.m[0][2], transformMat.m[1][2], transformMat.m[2][2], transformMat.m[3][2]},
+                            }};
                         proxy.DataHashValue = currentDataHashValue;
 
                         transformProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);
@@ -844,7 +850,7 @@ namespace ig
                 CommandQueue& cmdQueue = renderContext->GetAsyncCopyQueue();
                 IG_CHECK(cmdQueue.GetType() == EQueueType::Copy);
                 cmdQueue.ExecuteCommandLists(std::span{proxyPackage.WorkGroupCmdLists.data(),
-                                                   proxyPackage.NumValidWorkGroupCmdList});
+                                                       proxyPackage.NumValidWorkGroupCmdList});
             });
 
         prepareReplication.precede(recordReplicateDataCmd);
