@@ -192,7 +192,6 @@ namespace ig
 
         constexpr static U32 kNumInitStaticMeshElements = 256u;
         ProxyPackage<StaticMeshProxy> staticMeshProxyPackage;
-        UnorderedMap<ManagedAsset<StaticMesh>, const StaticMesh*> staticMeshTable{};
 
         constexpr static U32 kNumInitRenderableElements = 2048u;
         ProxyPackage<RenderableProxy> renderableProxyPackage;

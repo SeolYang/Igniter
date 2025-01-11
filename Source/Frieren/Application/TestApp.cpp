@@ -178,6 +178,7 @@ namespace fe
                     transform.Position = kAxeOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)axeGridX, (ig::F32)axeGridY, (ig::F32)axeGridZ});
                     ig::StaticMeshComponent& staticMeshComponent = registry.emplace<ig::StaticMeshComponent>(newAxeEentity);
                     staticMeshComponent.Mesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);
+                    registry.emplace<ig::MaterialComponent>(newAxeEentity);
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEentity);
                     nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
                     RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEentity);
