@@ -267,11 +267,11 @@ namespace ig
         IG_CHECK(vertexIndexStorageSrv != nullptr && vertexIndexStorageSrv->IsValid());
         perFrameBuffer.VertexIndexStorageSrv = vertexIndexStorageSrv->Index;
 
-        const GpuView* transformStorageSrv = renderContext->Lookup(sceneProxy->GetTransformStorageShaderResourceView(localFrameIdx));
+        const GpuView* transformStorageSrv = renderContext->Lookup(sceneProxy->GetTransformProxyStorageSrv(localFrameIdx));
         IG_CHECK(transformStorageSrv != nullptr && transformStorageSrv->IsValid());
         perFrameBuffer.TransformStorageSrv = transformStorageSrv->Index;
 
-        const GpuView* materialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialStorageShaderResourceView(localFrameIdx));
+        const GpuView* materialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv(localFrameIdx));
         IG_CHECK(materialStorageSrv != nullptr && materialStorageSrv->IsValid());
         perFrameBuffer.MaterialStorageSrv = materialStorageSrv->Index;
 
@@ -279,15 +279,15 @@ namespace ig
         IG_CHECK(meshProxyStorageSrv != nullptr && meshProxyStorageSrv->IsValid());
         perFrameBuffer.MeshStorageSrv = meshProxyStorageSrv->Index;
 
-        const GpuView* staticMeshStorageSrv = renderContext->Lookup(sceneProxy->GetStaticMeshStorageSrv(localFrameIdx));
+        const GpuView* staticMeshStorageSrv = renderContext->Lookup(sceneProxy->GetStaticMeshProxySrv(localFrameIdx));
         IG_CHECK(staticMeshStorageSrv != nullptr && staticMeshStorageSrv->IsValid());
         perFrameBuffer.StaticMeshStorageSrv = staticMeshStorageSrv->Index;
 
-        const GpuView* renderableStorageSrv = renderContext->Lookup(sceneProxy->GetRenderableStorageShaderResourceView(localFrameIdx));
+        const GpuView* renderableStorageSrv = renderContext->Lookup(sceneProxy->GetRenderableProxyStorageSrv(localFrameIdx));
         IG_CHECK(renderableStorageSrv != nullptr && renderableStorageSrv->IsValid());
         perFrameBuffer.RenderableStorageSrv = renderableStorageSrv->Index;
 
-        const GpuView* renderableIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetRenderableIndicesBufferShaderResourceView(localFrameIdx));
+        const GpuView* renderableIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetRenderableIndicesSrv(localFrameIdx));
         IG_CHECK(renderableIndicesBufferSrv != nullptr && renderableIndicesBufferSrv->IsValid());
         perFrameBuffer.RenderableIndicesBufferSrv = renderableIndicesBufferSrv->Index;
         perFrameBuffer.NumMaxRenderables = sceneProxy->GetNumMaxRenderables(localFrameIdx);
