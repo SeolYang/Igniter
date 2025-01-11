@@ -9,6 +9,7 @@
 #include "Frieren/Gui/EntityList.h"
 
 IG_DECLARE_LOG_CATEGORY(EditorEntityList);
+IG_DEFINE_LOG_CATEGORY(EditorEntityList);
 
 namespace fe
 {
