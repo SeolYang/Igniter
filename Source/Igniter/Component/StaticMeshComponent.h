@@ -5,7 +5,6 @@
 namespace ig
 {
     class StaticMesh;
-
     struct StaticMeshComponent
     {
     public:

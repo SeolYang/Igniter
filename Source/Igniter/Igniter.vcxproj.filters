@@ -414,6 +414,9 @@
     <ClInclude Include="Core\BoundingVolume.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Component\MaterialComponent.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -607,6 +610,9 @@
     </ClCompile>
     <ClCompile Include="ImGui\ImGuiCanvas.cpp">
       <Filter>Source\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\MaterialComponent.cpp">
+      <Filter>Source\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

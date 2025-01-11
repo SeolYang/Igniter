@@ -7,6 +7,7 @@
 #include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Component/NameComponent.h"
+#include "Igniter/Component/MaterialComponent.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/Game/Component/FpsCameraArchetype.h"
 #include "Frieren/Game/Component/RandMovementComponent.h"

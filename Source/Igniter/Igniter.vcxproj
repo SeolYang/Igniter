@@ -62,6 +62,7 @@
     <ClInclude Include="Asset\TextureLoader.h" />
     <ClInclude Include="Component\CameraArchetype.h" />
     <ClInclude Include="Component\CameraComponent.h" />
+    <ClInclude Include="Component\MaterialComponent.h" />
     <ClInclude Include="Component\NameComponent.h" />
     <ClInclude Include="Component\StaticMeshComponent.h" />
     <ClInclude Include="Component\TransformComponent.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="Asset\TextureImporter.cpp" />
     <ClCompile Include="Asset\TextureLoader.cpp" />
     <ClCompile Include="Component\CameraComponent.cpp" />
+    <ClCompile Include="Component\MaterialComponent.cpp" />
     <ClCompile Include="Component\NameComponent.cpp" />
     <ClCompile Include="Component\StaticMeshComponent.cpp" />
     <ClCompile Include="Component\TransformComponent.cpp" />

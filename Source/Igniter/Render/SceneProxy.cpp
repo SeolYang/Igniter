@@ -270,7 +270,6 @@ namespace ig
 
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
         const auto transformView = registry.view<const TransformComponent>();
-        const auto numWorkGroups = (int)numWorker;
 
         tf::Task createNewProxyTask = subflow.for_each(
             transformView.begin(), transformView.end(),
@@ -283,9 +282,9 @@ namespace ig
             });
 
         tf::Task commitPendingProxyTask = subflow.emplace(
-            [this, &entityProxyMap, &storage, numWorkGroups]()
+            [this, &entityProxyMap, &storage]()
             {
-                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                for (Index groupIdx = 0; groupIdx < numWorker; ++groupIdx)
                 {
                     for (auto& [pendingEntity, pendingProxy] : transformProxyPackage.PendingProxyGroups[groupIdx])
                     {
@@ -298,7 +297,7 @@ namespace ig
 
         tf::Task updateProxyTask = subflow.for_each(
             transformView.begin(), transformView.end(),
-            [this, &registry, &entityProxyMap, transformView, numWorkGroups](const Entity entity)
+            [this, &registry, &entityProxyMap, transformView](const Entity entity)
             {
                 TransformProxy& proxy = entityProxyMap[entity];
                 IG_CHECK(proxy.bMightBeDestroyed);
@@ -514,8 +513,7 @@ namespace ig
             });
 
         auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
-        const auto staticMeshEntityView = registry.view<const StaticMeshComponent>();
-        const auto numWorkGroups = (int)numWorker;
+        const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const TransformComponent>();
 
         tf::Task createNewProxyTask = subflow.for_each(
             staticMeshEntityView.begin(), staticMeshEntityView.end(),
@@ -535,9 +533,9 @@ namespace ig
             });
 
         tf::Task commitPendingProxyTask = subflow.emplace(
-            [this, &entityProxyMap, &storage, numWorkGroups]()
+            [this, &entityProxyMap, &storage]()
             {
-                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                for (Index groupIdx = 0; groupIdx < numWorker; ++groupIdx)
                 {
                     for (auto& [pendingEntity, pendingProxy] : staticMeshProxyPackage.PendingProxyGroups[groupIdx])
                     {
@@ -566,7 +564,7 @@ namespace ig
 
         tf::Task updateProxyTask = subflow.for_each(
             staticMeshEntityView.begin(), staticMeshEntityView.end(),
-            [this, &registry, &entityProxyMap, &meshProxyMap, &materialProxyMap, staticMeshEntityView, numWorkGroups](const Entity entity)
+            [this, &registry, &entityProxyMap, &meshProxyMap, &materialProxyMap, staticMeshEntityView](const Entity entity)
             {
                 StaticMeshProxy& proxy = entityProxyMap[entity];
                 IG_CHECK(proxy.bMightBeDestroyed);
@@ -640,8 +638,6 @@ namespace ig
         // 가능한 방안은 같은 타입의 Renderable이 아니라면 bMightBeDestroyed를 false로 변경하지 않도록 한다.
         // 그렇게 하면 가장 먼저 업로드된 정보가 Expired 되어도 정상적으로 해당 Renderable에 대한 Destroy 알고리즘이
         // 작동하게 되고, 다음 프레임 부터는 정상적으로 새로운 Renderable이 할당되게 된다.
-        const auto numWorkGroups = (int)numWorker;
-
         // 확장시 2가지 선택 가능한 선택지.
         // 1. 한번에 하나의 타입에 대해서 순차적 처리 => 이 방식을 선제 구현 후 프로파일링 후 추가 조치 할 것!
         // 2. 각각 개별적인 pending list를 가져서 전부 개별적으로 동시적으로 처리
@@ -649,7 +645,7 @@ namespace ig
         // Static Mesh
         tf::Task createRenderableStaticMeshTask = subflow.for_each(
             staticMeshProxyMap.cbegin(), staticMeshProxyMap.cend(),
-            [this, &renderableProxyMap, &staticMeshProxyMap, &transformProxyMap, numWorkGroups](const auto& entityProxyPair)
+            [this, &renderableProxyMap, &staticMeshProxyMap, &transformProxyMap](const auto& entityProxyPair)
             {
                 const Entity entity = entityProxyPair.first;
                 IG_CHECK(transformProxyMap.contains(entity));
@@ -670,9 +666,9 @@ namespace ig
 
         // 모든 종류의 Renderable에 대한 Proxy가 만들어 진 이후
         tf::Task commitPendingRenderableTask = subflow.emplace(
-            [this, numWorkGroups, &renderableProxyMap, &renderableStorage]()
+            [this, &renderableProxyMap, &renderableStorage]()
             {
-                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                for (Index groupIdx = 0; groupIdx < numWorker; ++groupIdx)
                 {
                     // Commit Pending Renderables
                     for (auto& pendingRenderable : renderableProxyPackage.PendingProxyGroups[groupIdx])
@@ -687,7 +683,7 @@ namespace ig
         // Storage 할당이 끝나면 각 종류의 Renderable들에 대한 proxy 유효성(수명) 평가와 renderable indices 구성
         tf::Task constructStaticMeshRenderableIndicesTask = subflow.for_each(
             staticMeshProxyMap.cbegin(), staticMeshProxyMap.cend(),
-            [this, &renderableProxyMap, &staticMeshProxyMap, numWorkGroups](const auto& entityProxyPair)
+            [this, &renderableProxyMap, &staticMeshProxyMap](const auto& entityProxyPair)
             {
                 const Entity entity = entityProxyPair.first;
                 RenderableProxy& proxy = renderableProxyMap[entity];
@@ -702,10 +698,10 @@ namespace ig
             });
 
         tf::Task commitPendingRenderableIndicesTask = subflow.emplace(
-            [this, numWorkGroups]()
+            [this]()
             {
                 renderableIndices.clear();
-                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                for (Index groupIdx = 0; groupIdx < numWorker; ++groupIdx)
                 {
                     for (const U32 renderableIdx : renderableIndicesGroups[groupIdx])
                     {
@@ -744,16 +740,15 @@ namespace ig
     template <typename Proxy, typename Owner>
     void SceneProxy::ReplicateProxyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage)
     {
-        const auto numWorkGroups = (int)numWorker;
-        IG_CHECK(proxyPackage.PendingReplicationGroups.size() == numWorkGroups);
+        IG_CHECK(proxyPackage.PendingReplicationGroups.size() == numWorker);
         // 이미 그룹 별로 데이터가 균등 분배 되어있는 상황
         // 필요한 Staging Buffer 크기 == (sum(pendingRepsGroups[0..N].size()) * kDataSize))
 
         tf::Task prepareReplication = subflow.emplace(
-            [this, &proxyPackage, numWorkGroups, localFrameIdx]()
+            [this, &proxyPackage, localFrameIdx]()
             {
                 Size currentOffset = 0;
-                for (Index groupIdx = 0; groupIdx < numWorkGroups; ++groupIdx)
+                for (Index groupIdx = 0; groupIdx < numWorker; ++groupIdx)
                 {
                     const Size workGroupDataSize = Proxy::kDataSize * proxyPackage.PendingReplicationGroups[groupIdx].size();
                     proxyPackage.WorkGroupStagingBufferRanges[groupIdx] = std::make_pair(currentOffset, workGroupDataSize);
@@ -796,8 +791,8 @@ namespace ig
         GpuBuffer* storageBufferPtr = renderContext->Lookup(storageBuffer);
         IG_CHECK(storageBufferPtr != nullptr);
         tf::Task recordReplicateDataCmd = subflow.for_each_index(
-            0, numWorkGroups, 1,
-            [this, &proxyPackage, numWorkGroups, storageBufferPtr, localFrameIdx](int groupIdx)
+            0, (I32)numWorker, 1,
+            [this, &proxyPackage, storageBufferPtr, localFrameIdx](int groupIdx)
             {
                 Vector<Owner>& pendingReplications = proxyPackage.PendingReplicationGroups[groupIdx];
                 if (pendingReplications.empty())

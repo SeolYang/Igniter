@@ -2,8 +2,8 @@
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Core/Json.h"
 #include "Igniter/Asset/AssetManager.h"
-#include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/ImGui/AssetSelectModalPopup.h"
+#include "Igniter/Component/StaticMeshComponent.h"
 
 namespace ig
 {
@@ -124,7 +124,6 @@ namespace ig
     {
         AssetManager& assetManager = Engine::GetAssetManager();
         assetManager.Unload(Mesh);
-
         Mesh = {};
     }
 
