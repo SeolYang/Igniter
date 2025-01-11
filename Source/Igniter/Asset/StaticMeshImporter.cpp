@@ -62,7 +62,7 @@ namespace ig
     }
 
     static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveStaticMeshAsset(const String resPathStr, const std::string_view meshName,
-                                                                                 const Guid materialGuid, const std::vector<VertexSM>& vertices, const std::vector<uint32_t>& indices,
+                                                                                 const std::vector<VertexSM>& vertices, const std::vector<uint32_t>& indices,
                                                                                  const AxisAlignedBoundingBox& aabb)
     {
         IG_CHECK(!vertices.empty());
@@ -160,7 +160,6 @@ namespace ig
             .NumIndices = (U32)remappedIndices.size(),
             .CompressedVerticesSizeInBytes = encodedVertices.size(),
             .CompressedIndicesSizeInBytes = encodedIndices.size(),
-            .MaterialGuid = materialGuid,
             .AABB = aabb};
 
         const Path newMetaPath = MakeAssetMetadataPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
@@ -262,7 +261,7 @@ namespace ig
                 const Guid materialGuid = desc.bImportMaterials ? materialGuidTable[mesh.mMaterialIndex] : Guid{DefaultMaterialGuid};
                 const std::string meshName = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
                 // TODO SaveStaticMeshAsset에서 aabb 같이 넣기
-                results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, materialGuid, vertices, indices, aabb));
+                results.emplace_back(SaveStaticMeshAsset(resPathStr, meshName, vertices, indices, aabb));
             }
         }
         importer.FreeScene();

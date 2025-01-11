@@ -338,19 +338,16 @@ namespace fe
             ImGui::Text("Invalid Static Mesh!");
             return;
         }
+        ImGui::Text("Num Vertices: %u", loadDescOpt->NumVertices);
+        ImGui::Text("Num Indices: %u", loadDescOpt->NumIndices);
 
-        ig::StaticMesh::LoadDesc loadDesc{*loadDescOpt};
-        RenderSelector("Material", loadDesc.MaterialGuid);
-        int newMaterialIdx{RenderSelectorPopup(ig::EAssetCategory::Material)};
-        if (newMaterialIdx != -1)
-        {
-            const ig::AssetInfo& newMatInfo{snapshots[newMaterialIdx].Info};
-            IG_CHECK(newMatInfo.IsValid());
-            IG_CHECK(newMatInfo.GetCategory() == ig::EAssetCategory::Material);
-            loadDesc.MaterialGuid = newMatInfo.GetGuid();
-            assetManager.UpdateLoadDesc<ig::StaticMesh>(assetInfo.GetGuid(), loadDesc);
-            assetManager.Reload<ig::StaticMesh>(assetInfo.GetGuid());
-        }
+        ig::AxisAlignedBoundingBox aabb = loadDescOpt->AABB;
+        ImGui::Text("AABB(Min) ");
+        ImGui::SameLine();
+        ig::ImGuiX::EditVector3("AABB(Min)", aabb.Min, 0.f, "%.4f", true);
+        ImGui::Text("AABB(Max) ");
+        ImGui::SameLine();
+        ig::ImGuiX::EditVector3("AABB(Max)", aabb.Max, 0.f, "%.4f", true);
     }
 
     void AssetInspector::RenderAssetInfo(const ig::AssetInfo& assetInfo)

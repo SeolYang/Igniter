@@ -39,7 +39,6 @@ namespace ig
         uint32_t NumIndices{0};
         size_t CompressedVerticesSizeInBytes{0};
         size_t CompressedIndicesSizeInBytes{0};
-        Guid MaterialGuid{DefaultMaterialGuid};
         AxisAlignedBoundingBox AABB{};
     };
 
@@ -56,7 +55,9 @@ namespace ig
         using Desc = AssetDesc<StaticMesh>;
 
     public:
-        StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material);
+        StaticMesh(RenderContext& renderContext, AssetManager& assetManager,
+                   const Desc& snapshot,
+                   const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace);
         StaticMesh(const StaticMesh&) = delete;
         StaticMesh(StaticMesh&&) noexcept = default;
         ~StaticMesh();
@@ -67,7 +68,6 @@ namespace ig
         [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
         [[nodiscard]] MeshStorage::Handle<VertexSM> GetVertexSpace() const noexcept { return vertexSpace; }
         [[nodiscard]] MeshStorage::Handle<U32> GetVertexIndexSpace() const noexcept { return vertexIndexSpace; }
-        [[nodiscard]] ManagedAsset<Material> GetMaterial() const noexcept { return material; }
 
     private:
         void Destroy();
@@ -78,6 +78,5 @@ namespace ig
         Desc snapshot{}; // desc snapshot
         MeshStorage::Handle<VertexSM> vertexSpace{};
         MeshStorage::Handle<U32> vertexIndexSpace{};
-        ManagedAsset<Material> material{};
     };
 } // namespace ig

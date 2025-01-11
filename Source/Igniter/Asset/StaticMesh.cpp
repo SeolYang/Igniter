@@ -45,7 +45,6 @@ namespace ig
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices);
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
         IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, MaterialGuid);
 
         IG_SERIALIZE_JSON_OBJECT(StaticMeshLoadDesc, archive, AABB);
 
@@ -59,18 +58,19 @@ namespace ig
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
         IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, MaterialGuid);
 
         IG_DESERIALIZE_JSON_OBJECT(StaticMeshLoadDesc, archive, AABB);
 
         return archive;
     }
 
-    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager, const Desc& snapshot, const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace, const ManagedAsset<Material> material) :
-        renderContext(&renderContext), assetManager(&assetManager),
+    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager,
+                           const Desc& snapshot,
+                           const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace) :
+        renderContext(&renderContext),
+        assetManager(&assetManager),
         snapshot(snapshot),
-        vertexSpace(vertexSpace), vertexIndexSpace(vertexIndexSpace),
-        material(material) {}
+        vertexSpace(vertexSpace), vertexIndexSpace(vertexIndexSpace) {}
 
     StaticMesh::~StaticMesh()
     {
@@ -79,18 +79,12 @@ namespace ig
 
     void StaticMesh::Destroy()
     {
-        if (assetManager != nullptr)
-        {
-            assetManager->Unload(material);
-        }
-
         MeshStorage& meshStorage = Engine::GetMeshStorage();
         meshStorage.Destroy(vertexSpace);
         meshStorage.Destroy(vertexIndexSpace);
 
         renderContext = nullptr;
         assetManager = nullptr;
-        material = {};
         vertexSpace = {};
         vertexIndexSpace = {};
     }
@@ -104,7 +98,6 @@ namespace ig
         this->snapshot = rhs.snapshot;
         this->vertexSpace = std::exchange(rhs.vertexSpace, {});
         this->vertexIndexSpace = std::exchange(rhs.vertexIndexSpace, {});
-        this->material = std::exchange(rhs.material, {});
 
         return *this;
     }

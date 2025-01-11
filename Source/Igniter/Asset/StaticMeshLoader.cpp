@@ -119,9 +119,6 @@ namespace ig
         std::optional<GpuSyncPoint> indicesUploadSync = gpuUploader.Submit(indicesUploadCtx);
         IG_CHECK(indicesUploadSync);
 
-        const ManagedAsset<Material> material{assetManager.Load<Material>(loadDesc.MaterialGuid)};
-        IG_CHECK(material);
-
         verticesUploadSync->WaitOnCpu();
         indicesUploadSync->WaitOnCpu();
 
@@ -136,6 +133,6 @@ namespace ig
         }
 
         return MakeSuccess<StaticMesh, EStaticMeshLoadStatus>(
-            StaticMesh{renderContext, assetManager, desc, vertexSpace, vertexIndexSpace, material});
+            StaticMesh{renderContext, assetManager, desc, vertexSpace, vertexIndexSpace});
     }
 } // namespace ig

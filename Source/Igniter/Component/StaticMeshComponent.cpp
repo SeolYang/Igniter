@@ -84,10 +84,6 @@ namespace ig
 
             const StaticMesh::Desc& staticMeshSnapshot{staticMeshPtr->GetSnapshot()};
             ImGui::Text(std::format("{}", staticMeshSnapshot.Info).c_str());
-
-            const Material* materialPtr = assetManager.Lookup(staticMeshPtr->GetMaterial());
-            const Material::Desc& materialSnapshot{materialPtr->GetSnapshot()};
-            ImGui::Text(std::format("{}", materialSnapshot.Info).c_str());
         }
         else
         {
