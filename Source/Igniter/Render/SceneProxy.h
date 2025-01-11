@@ -107,7 +107,6 @@ namespace ig
             // Temporary per replication!
             Vector<std::pair<Size, Size>> WorkGroupStagingBufferRanges; // <Offset, Size>
             Vector<CommandList*> WorkGroupCmdLists;
-            Size NumValidWorkGroupCmdList{0};
         };
 
     public:
@@ -193,6 +192,7 @@ namespace ig
 
         constexpr static U32 kNumInitStaticMeshElements = 256u;
         ProxyPackage<StaticMeshProxy> staticMeshProxyPackage;
+        UnorderedMap<ManagedAsset<StaticMesh>, const StaticMesh*> staticMeshTable{};
 
         constexpr static U32 kNumInitRenderableElements = 2048u;
         ProxyPackage<RenderableProxy> renderableProxyPackage;
