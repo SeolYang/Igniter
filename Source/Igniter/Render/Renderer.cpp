@@ -47,6 +47,7 @@ namespace ig
 
         U32 TransformStorageSrv = IG_NUMERIC_MAX_OF(TransformStorageSrv);
         U32 MaterialStorageSrv = IG_NUMERIC_MAX_OF(MaterialStorageSrv);
+        U32 MeshStorageSrv = IG_NUMERIC_MAX_OF(MeshStorageSrv);
 
         U32 StaticMeshStorageSrv = IG_NUMERIC_MAX_OF(StaticMeshStorageSrv);
 
@@ -273,6 +274,10 @@ namespace ig
         const GpuView* materialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialStorageShaderResourceView(localFrameIdx));
         IG_CHECK(materialStorageSrv != nullptr && materialStorageSrv->IsValid());
         perFrameBuffer.MaterialStorageSrv = materialStorageSrv->Index;
+
+        const GpuView* meshProxyStorageSrv = renderContext->Lookup(sceneProxy->GetMeshProxySrv(localFrameIdx));
+        IG_CHECK(meshProxyStorageSrv != nullptr && meshProxyStorageSrv->IsValid());
+        perFrameBuffer.MeshStorageSrv = meshProxyStorageSrv->Index;
 
         const GpuView* staticMeshStorageSrv = renderContext->Lookup(sceneProxy->GetStaticMeshStorageSrv(localFrameIdx));
         IG_CHECK(staticMeshStorageSrv != nullptr && staticMeshStorageSrv->IsValid());

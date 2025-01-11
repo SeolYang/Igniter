@@ -54,15 +54,19 @@ namespace ig
             U32 DiffuseTextureSampler = IG_NUMERIC_MAX_OF(DiffuseTextureSampler);
         };
 
-        struct StaticMeshGpuData
+        struct MeshGpuData
         {
-            U32 MaterialDataIdx = IG_NUMERIC_MAX_OF(MaterialDataIdx);
             U32 VertexOffset = 0u;
             U32 NumVertices = 0u;
             U32 IndexOffset = 0u;
             U32 NumIndices = 0u;
-
             BoundingSphere BoundingVolume;
+        };
+
+        struct StaticMeshGpuData
+        {
+            U32 MaterialDataIdx = IG_NUMERIC_MAX_OF(MaterialDataIdx);
+            U32 MeshDataIdx = IG_NUMERIC_MAX_OF(MeshDataIdx);
         };
 
         struct RenderableGpuData
@@ -78,6 +82,7 @@ namespace ig
 
         using TransformProxy = GpuProxy<TransformGpuData>;
         using MaterialProxy = GpuProxy<MaterialGpuData>;
+        using MeshProxy = GpuProxy<MeshGpuData>;
         using StaticMeshProxy = GpuProxy<StaticMeshGpuData>;
         using RenderableProxy = GpuProxy<RenderableGpuData>;
         using LightProxy = GpuProxy<LightGpuData>;
@@ -97,7 +102,7 @@ namespace ig
 
             Vector<Vector<std::pair<Owner, Proxy>>> PendingProxyGroups;
             Vector<Vector<Owner>> PendingReplicationGroups;
-            //Vector<Vector<Owner>> PendingDestructionGroups;
+            // Vector<Vector<Owner>> PendingDestructionGroups;
 
             // Temporary per replication!
             Vector<std::pair<Size, Size>> WorkGroupStagingBufferRanges; // <Offset, Size>
@@ -117,27 +122,32 @@ namespace ig
         // 여기서 렌더링 전 필요한 Scene 정보를 모두 모으고, GPU 메모리에 변경점 들을 반영해주어야 한다
         [[nodiscard]] GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
 
-        [[nodiscard]] RenderHandle<GpuView> GetTransformStorageShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetTransformProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
         {
             return transformProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetMaterialStorageShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetMeshProxySrv(const LocalFrameIndex localFrameIdx) const
+        {
+            return meshProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+        }
+
+        [[nodiscard]] RenderHandle<GpuView> GetMaterialProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
         {
             return materialProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetStaticMeshStorageSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetStaticMeshProxySrv(const LocalFrameIndex localFrameIdx) const
         {
             return staticMeshProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetRenderableStorageShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetRenderableProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
         {
             return renderableProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetRenderableIndicesBufferShaderResourceView(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetRenderableIndicesSrv(const LocalFrameIndex localFrameIdx) const
         {
             return renderableIndicesBufferSrv[localFrameIdx];
         }
@@ -150,6 +160,10 @@ namespace ig
     private:
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
         void UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
+
+        void UpdateMeshProxy(const LocalFrameIndex localFrameIdx);
+        void BuildStaticMeshInstances();
+
         void UpdateStaticMeshProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
         void UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx);
 
@@ -174,6 +188,9 @@ namespace ig
         constexpr static U32 kNumInitMaterialElements = 128u;
         ProxyPackage<MaterialProxy, ManagedAsset<Material>> materialProxyPackage;
 
+        constexpr static U32 kNumInitMeshElements = 256u;
+        ProxyPackage<MeshProxy, ManagedAsset<StaticMesh>> meshProxyPackage;
+
         constexpr static U32 kNumInitStaticMeshElements = 256u;
         ProxyPackage<StaticMeshProxy> staticMeshProxyPackage;
 
@@ -195,7 +212,6 @@ namespace ig
         InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesStagingBuffer;
         InFlightFramesResource<U8*> mappedRenderableIndicesStagingBuffer;
         InFlightFramesResource<Size> renderableIndicesStagingBufferSize;
-
 
         constexpr static U32 kNumInitLightIndices = 2048u;
         InFlightFramesResource<U32> lightIndicesBufferSize;

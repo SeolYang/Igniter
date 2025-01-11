@@ -9,6 +9,7 @@ struct PerFrameData
 
     uint TransformStorageSrv;
     uint MaterialStorageSrv;
+    uint MeshStorageSrv;
 
     uint StaticMeshStorageSrv;
 
@@ -42,10 +43,7 @@ struct RenderableData
 struct StaticMeshData
 {
     uint MaterialIdx;
-    uint VertexOffset;
-    uint NumVertices;
-    uint IndexOffset;
-    uint NumIndices;
+    uint MeshIdx;
 };
 
 ConstantBuffer<PerDrawData> perDrawData : register(b0);

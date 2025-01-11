@@ -9,6 +9,7 @@ struct PerFrameData
 
     uint TransformStorageSrv;
     uint MaterialStorageSrv;
+    uint MeshStorageSrv;
 
     uint StaticMeshStorageSrv;
 
@@ -40,9 +41,8 @@ struct RenderableData
     uint TransformIdx;
 };
 
-struct StaticMeshData
+struct MeshData
 {
-    uint MaterialIdx;
     uint VertexOffset;
     uint NumVertices;
     uint IndexOffset;
@@ -50,6 +50,12 @@ struct StaticMeshData
 
     float3 BsCentroid;
     float BsRadius;
+};
+
+struct StaticMeshData
+{
+    uint MaterialIdx;
+    uint MeshIdx;
 };
 
 struct VertexShaderOutput
@@ -70,18 +76,20 @@ VertexShaderOutput main(uint vertexID : SV_VertexID)
     ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[perDrawData.PerFrameDataCbv];
     StructuredBuffer<Vertex> vertexStorage = ResourceDescriptorHeap[perFrameData.StaticMeshVertexStorageSrv];
     StructuredBuffer<uint> vertexIndexStorage = ResourceDescriptorHeap[perFrameData.VertexIndexStorageSrv];
+    StructuredBuffer<MeshData> meshStorage = ResourceDescriptorHeap[perFrameData.MeshStorageSrv];
     StructuredBuffer<RenderableData> renderableDataStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
     StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
     StructuredBuffer<TransformData> transformStorage = ResourceDescriptorHeap[perFrameData.TransformStorageSrv];
 
     RenderableData renderableData = renderableDataStorage[perDrawData.RenderableDataIdx];
     StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
+    MeshData meshData = meshStorage[staticMeshData.MeshIdx];
     TransformData transformData = transformStorage[renderableData.TransformIdx];
     float4x4 worldMat = transpose(float4x4(transformData.Cols[0], transformData.Cols[1], transformData.Cols[2], float4(0.f, 0.f, 0.f, 1.f)));
     float4x4 worldViewProj = mul(worldMat, perFrameData.ViewProj);
 
-    uint vertexOffset = staticMeshData.VertexOffset;
-    uint vertexIndexOffset = staticMeshData.IndexOffset;
+    uint vertexOffset = meshData.VertexOffset;
+    uint vertexIndexOffset = meshData.IndexOffset;
     Vertex vertex = vertexStorage[vertexOffset + vertexIndexStorage[vertexIndexOffset + vertexID]];
 
     VertexShaderOutput output;

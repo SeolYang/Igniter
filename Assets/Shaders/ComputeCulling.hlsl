@@ -15,6 +15,7 @@ struct PerFrameData
 
     uint TransformStorageSrv;
     uint MaterialStorageSrv;
+    uint MeshStorageSrv;
 
     uint StaticMeshStorageSrv;
 
@@ -26,9 +27,8 @@ struct PerFrameData
     uint PerFrameDataCbv;
 };
 
-struct StaticMeshData
+struct MeshData
 {
-    uint MaterialIdx;
     uint VertexOffset;
     uint NumVertices;
     uint IndexOffset;
@@ -36,6 +36,12 @@ struct StaticMeshData
 
     float3 BsCentroid;
     float BsRadius;
+};
+
+struct StaticMeshData
+{
+    uint MaterialIdx;
+    uint MeshIdx;
 };
 
 struct RenderableData
@@ -56,6 +62,8 @@ struct DrawOpaqueStaticMesh
     uint StartInstanceLocation;
 };
 
+#define RENDERABLE_TYPE_STATIC_MESH 0
+
 ConstantBuffer<ComputeCullingConstants> gComputeCullingConstantsBuffer : register(b0);
 
 [numthreads(16, 1, 1)]
@@ -73,7 +81,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
     RenderableData renderableData = renderableStorage[renderableIdx];
     
-    if (renderableData.Type == 0) // 하드코딩된 Static Mesh Type Enumerator
+    if (renderableData.Type == RENDERABLE_TYPE_STATIC_MESH)
     {
         DrawOpaqueStaticMesh newDrawCmd;
         newDrawCmd.PerFrameDataCbv = perFrameData.PerFrameDataCbv;
@@ -81,7 +89,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
         StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
         StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
-        newDrawCmd.VertexCountPerInstance = staticMeshData.NumIndices;
+
+        StructuredBuffer<MeshData> meshStorage = ResourceDescriptorHeap[perFrameData.MeshStorageSrv];
+        MeshData meshData = meshStorage[staticMeshData.MeshIdx];
+
+        newDrawCmd.VertexCountPerInstance = meshData.NumIndices;
         newDrawCmd.InstanceCount = 1;
         newDrawCmd.StartVertexLocation = 0;
         newDrawCmd.StartInstanceLocation = 0;

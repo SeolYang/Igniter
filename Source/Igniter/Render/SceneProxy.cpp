@@ -43,6 +43,13 @@ namespace ig
                     MaterialProxy::kDataSize,
                     kNumInitMaterialElements);
 
+            meshProxyPackage.Storage[localFrameIdx] =
+                MakePtr<GpuStorage>(
+                    renderContext,
+                    String(std::format("MeshDataStorage{}", localFrameIdx)),
+                    MeshProxy::kDataSize,
+                    kNumInitMeshElements);
+
             staticMeshProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
@@ -74,6 +81,10 @@ namespace ig
             lightIndicesBuffer[localFrameIdx] = renderContext.CreateBuffer(lightIndicesBufferDesc);
             lightIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(lightIndicesBuffer[localFrameIdx]);
         }
+
+        meshProxyPackage.PendingReplicationGroups.resize(numWorker);
+        meshProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
+        meshProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
         materialProxyPackage.PendingReplicationGroups.resize(numWorker);
         materialProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
@@ -107,6 +118,7 @@ namespace ig
         {
             transformProxyPackage.Storage[localFrameIdx]->ForceReset();
             materialProxyPackage.Storage[localFrameIdx]->ForceReset();
+            meshProxyPackage.Storage[localFrameIdx]->ForceReset();
             staticMeshProxyPackage.Storage[localFrameIdx]->ForceReset();
             renderableProxyPackage.Storage[localFrameIdx]->ForceReset();
             lightProxyPackage.Storage[localFrameIdx]->ForceReset();
@@ -153,6 +165,15 @@ namespace ig
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
             });
 
+        tf::Task updateMeshTask = rootTaskFlow.emplace(
+            [this, localFrameIdx]()
+            {
+                ZoneScopedN("UpdateMeshProxy");
+                Logger::GetInstance().SuppressLogInCurrentThread();
+                UpdateMeshProxy(localFrameIdx);
+                Logger::GetInstance().UnsuppressLogInCurrentThread();
+            });
+
         tf::Task updateStaticMeshTask = rootTaskFlow.emplace(
             [this, localFrameIdx, &registry](tf::Subflow& subflow)
             {
@@ -169,7 +190,7 @@ namespace ig
                 subflow.join();
             });
 
-        updateStaticMeshTask.succeed(updateMaterialTask);
+        updateStaticMeshTask.succeed(updateMaterialTask, updateMeshTask);
         updateRenderableTask.succeed(updateTransformTask, updateStaticMeshTask);
 
         tf::Task replicateTransformData = rootTaskFlow.emplace(
@@ -185,6 +206,14 @@ namespace ig
             {
                 ZoneScopedN("ReplicateMaterialData");
                 ReplicateProxyData(subflow, localFrameIdx, materialProxyPackage);
+                subflow.join();
+            });
+
+        tf::Task replicateMeshData = rootTaskFlow.emplace(
+            [this, localFrameIdx](tf::Subflow& subflow)
+            {
+                ZoneScopedN("ReplicateMeshData");
+                ReplicateProxyData(subflow, localFrameIdx, meshProxyPackage);
                 subflow.join();
             });
 
@@ -213,6 +242,7 @@ namespace ig
 
         replicateTransformData.succeed(updateTransformTask);
         replicateMaterialData.succeed(updateMaterialTask);
+        replicateMeshData.succeed(updateMeshTask);
         replicateStaticMeshData.succeed(updateStaticMeshTask);
         //// 이하 두개 태스크는 추후 렌더러블로 다뤄질 수 있는 종류가 많아 질수록 종속성을 추가해야함.
         replicateRenderableData.succeed(updateRenderableTask);
@@ -337,6 +367,79 @@ namespace ig
         updateProxyTask.precede(commitDestructions);
     }
 
+    void SceneProxy::UpdateMeshProxy(const LocalFrameIndex localFrameIdx)
+    {
+        IG_CHECK(meshProxyPackage.PendingReplicationGroups[0].empty());
+        IG_CHECK(meshProxyPackage.PendingDestructions.empty());
+
+        auto& proxyMap = meshProxyPackage.ProxyMap[localFrameIdx];
+        auto& storage = *meshProxyPackage.Storage[localFrameIdx];
+
+        for (auto& [staticMesh, proxy] : proxyMap)
+        {
+            IG_CHECK(staticMesh);
+            proxy.bMightBeDestroyed = true;
+        }
+
+        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh, true)};
+        for (const AssetManager::Snapshot& snapshot : snapshots)
+        {
+            IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::StaticMesh);
+            IG_CHECK(snapshot.IsCached());
+
+            ManagedAsset<StaticMesh> cachedStaticMesh = assetManager->LoadStaticMesh(snapshot.Info.GetGuid(), true);
+            IG_CHECK(cachedStaticMesh);
+
+            if (!proxyMap.contains(cachedStaticMesh))
+            {
+                proxyMap[cachedStaticMesh] = MeshProxy{.StorageSpace = storage.Allocate(1)};
+            }
+
+            MeshProxy& proxy = proxyMap[cachedStaticMesh];
+            IG_CHECK(proxy.bMightBeDestroyed);
+            proxy.bMightBeDestroyed = false;
+
+            const StaticMesh* staticMeshPtr = assetManager->Lookup(cachedStaticMesh);
+            IG_CHECK(staticMeshPtr != nullptr);
+
+            if (const U64 currentDataHashValue = HashInstance(*staticMeshPtr);
+                proxy.DataHashValue != currentDataHashValue)
+            {
+                const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
+                const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
+                const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
+                const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
+                proxy.GpuData = MeshGpuData{
+                    .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
+                    .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
+                    .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
+                    .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0),
+                    .BoundingVolume = ToBoundingSphere(staticMeshPtr->GetSnapshot().LoadDescriptor.AABB)};
+                proxy.DataHashValue = currentDataHashValue;
+                meshProxyPackage.PendingReplicationGroups[0].emplace_back(cachedStaticMesh);
+            }
+
+            assetManager->Unload(cachedStaticMesh, true);
+        }
+
+        for (auto& [material, proxy] : proxyMap)
+        {
+            if (proxy.bMightBeDestroyed)
+            {
+                meshProxyPackage.PendingDestructions.emplace_back(material);
+            }
+        }
+
+        for (const ManagedAsset<StaticMesh> mesh : meshProxyPackage.PendingDestructions)
+        {
+            const auto extractedElement = meshProxyPackage.ProxyMap[localFrameIdx].extract(mesh);
+            IG_CHECK(extractedElement.has_value());
+            IG_CHECK(extractedElement->second.StorageSpace.IsValid());
+            storage.Deallocate(extractedElement->second.StorageSpace);
+        }
+        materialProxyPackage.PendingDestructions.clear();
+    }
+
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(materialProxyPackage.PendingReplicationGroups[0].empty());
@@ -419,6 +522,7 @@ namespace ig
         IG_CHECK(staticMeshProxyPackage.PendingDestructions.empty());
 
         const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
+        const auto& meshProxyMap = meshProxyPackage.ProxyMap[localFrameIdx];
 
         auto& entityProxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
         tf::Task invalidateProxyTask = subflow.for_each(
@@ -473,7 +577,7 @@ namespace ig
 
         tf::Task updateProxyTask = subflow.for_each_index(
             0, numWorkGroups, 1,
-            [this, &registry, &entityProxyMap, &materialProxyMap, staticMeshEntityView, numWorkGroups](const Size groupIdx)
+            [this, &registry, &entityProxyMap, &meshProxyMap, &materialProxyMap, staticMeshEntityView, numWorkGroups](const Size groupIdx)
             {
                 IG_CHECK(staticMeshProxyPackage.PendingReplicationGroups[groupIdx].empty());
                 const auto numWorksPerGroup = (int)staticMeshEntityView.size() / numWorkGroups;
@@ -512,20 +616,12 @@ namespace ig
                     if (const U64 currentDataHashValue = HashInstance(*staticMeshPtr);
                         proxy.DataHashValue != currentDataHashValue)
                     {
-                        const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
-                        const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
-                        const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
-                        const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
                         const ManagedAsset<Material> material = staticMeshPtr->GetMaterial();
                         IG_CHECK(materialProxyMap.contains(material));
 
                         proxy.GpuData = StaticMeshGpuData{
                             .MaterialDataIdx = (U32)materialProxyMap.at(material).StorageSpace.OffsetIndex,
-                            .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
-                            .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
-                            .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
-                            .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0),
-                            .BoundingVolume = ToBoundingSphere(staticMeshPtr->GetSnapshot().LoadDescriptor.AABB)};
+                            .MeshDataIdx = (U32)meshProxyMap.at(staticMeshComponent.Mesh).StorageSpace.OffsetIndex};
                         proxy.DataHashValue = currentDataHashValue;
 
                         staticMeshProxyPackage.PendingReplicationGroups[groupIdx].emplace_back(entity);

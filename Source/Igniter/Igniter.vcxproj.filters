@@ -10,9 +10,6 @@
     <Filter Include="Thirdparty\D3D12MemAlloc">
       <UniqueIdentifier>{d6c45c0b-c442-4eac-90cf-dcc17c5d6e29}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader">
-      <UniqueIdentifier>{d0dbc9e3-27a4-412c-a6ed-51cd6c470d0a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Thirdparty\SimpleMath">
       <UniqueIdentifier>{0e94695b-79b7-4b7f-8524-6543ee102861}</UniqueIdentifier>
     </Filter>
@@ -631,16 +628,5 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\..\Thirdparty\EASTL\EASTL.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="..\..\Assets\Shaders\BasicVertexShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\BasicPixelShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\ComputeCulling.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>
