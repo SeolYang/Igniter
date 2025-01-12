@@ -108,7 +108,7 @@ namespace ig
 
             if (decodeResult == 0)
             {
-                const RenderHandle<GpuBuffer> vertexIndexStorageBuffer = meshStorage.GetVertexIndexStorageBuffer();
+                const RenderHandle<GpuBuffer> vertexIndexStorageBuffer = meshStorage.GetIndexStorageBuffer();
                 GpuBuffer* vertexIndexStorageBufferPtr = renderContext.Lookup(vertexIndexStorageBuffer);
                 IG_CHECK(vertexIndexStorageBufferPtr != nullptr);
                 indicesUploadCtx.CopyBuffer(0, vertexIndexSpacePtr->Allocation.AllocSize,

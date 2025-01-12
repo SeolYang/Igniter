@@ -1,7 +1,6 @@
 struct ComputeCullingConstants
 {
     uint PerFrameDataCbv;
-    uint DrawOpaqueStaticMeshCmdBufferUav;
 };
 
 struct PerFrameData
@@ -17,7 +16,11 @@ struct PerFrameData
     uint MaterialStorageSrv;
     uint MeshStorageSrv;
 
-    uint StaticMeshStorageSrv;
+    uint InstancingDataStorageSrv;
+    uint InstancingDataStorageUav;
+
+    uint TransformIdxStorageSrv;
+    uint TransformIdxStorageUav;
 
     uint RenderableStorageSrv;
 
@@ -38,10 +41,14 @@ struct MeshData
     float BsRadius;
 };
 
-struct StaticMeshData
+struct InstancingData
 {
-    uint MaterialIdx;
-    uint MeshIdx;
+    uint MaterialDataIdx;
+    uint MeshDataIdx;
+    uint InstanceId;
+    uint TransformOffset;
+    uint MaxNumInstances;
+    uint NumInstances;
 };
 
 struct RenderableData
@@ -51,16 +58,6 @@ struct RenderableData
     uint TransformIdx;
 };
 
-struct DrawOpaqueStaticMesh
-{
-    uint PerFrameDataCbv;
-    uint RenderableDataIdx;
-
-    uint VertexCountPerInstance;
-    uint InstanceCount;
-    uint StartVertexLocation;
-    uint StartInstanceLocation;
-};
 
 #define RENDERABLE_TYPE_STATIC_MESH 0
 
@@ -81,24 +78,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
     StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
     RenderableData renderableData = renderableStorage[renderableIdx];
     
+    // 무조건 통과한다고 일단 가정.
     if (renderableData.Type == RENDERABLE_TYPE_STATIC_MESH)
     {
-        DrawOpaqueStaticMesh newDrawCmd;
-        newDrawCmd.PerFrameDataCbv = perFrameData.PerFrameDataCbv;
-        newDrawCmd.RenderableDataIdx = renderableIdx;
-
-        StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
-        StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
-
-        StructuredBuffer<MeshData> meshStorage = ResourceDescriptorHeap[perFrameData.MeshStorageSrv];
-        MeshData meshData = meshStorage[staticMeshData.MeshIdx];
-
-        newDrawCmd.VertexCountPerInstance = meshData.NumIndices;
-        newDrawCmd.InstanceCount = 1;
-        newDrawCmd.StartVertexLocation = 0;
-        newDrawCmd.StartInstanceLocation = 0;
-
-        AppendStructuredBuffer<DrawOpaqueStaticMesh> drawCmdBuffer = ResourceDescriptorHeap[gComputeCullingConstantsBuffer.DrawOpaqueStaticMeshCmdBufferUav];
-        drawCmdBuffer.Append(newDrawCmd);
+        RWStructuredBuffer<InstancingData> instancingDataStorage = ResourceDescriptorHeap[perFrameData.InstancingDataStorageUav];
+        RWStructuredBuffer<uint> transformIdxStorage = ResourceDescriptorHeap[perFrameData.TransformIdxStorageUav];
+        uint transformIdx = 0;
+        InterlockedAdd(instancingDataStorage[renderableData.DataIdx].NumInstances, 1, transformIdx);
+        transformIdxStorage[instancingDataStorage[renderableData.DataIdx].TransformOffset + transformIdx] = renderableData.TransformIdx;
     }
 }

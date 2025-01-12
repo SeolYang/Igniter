@@ -70,6 +70,9 @@
     <Filter Include="Thirdparty\fmod">
       <UniqueIdentifier>{3702722f-128f-4e55-8655-413f7608b2a7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Shaders">
+      <UniqueIdentifier>{fad9bc78-c629-4d3b-9c86-12403966d4c5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h">
@@ -634,5 +637,19 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\..\Thirdparty\EASTL\EASTL.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\..\Assets\Shaders\BasicVertexShader.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\ComputeCulling.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\GenDrawCommands.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\BasicPixelShader.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

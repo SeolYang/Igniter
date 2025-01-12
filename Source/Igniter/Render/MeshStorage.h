@@ -52,11 +52,11 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx);
 
         [[nodiscard]] RenderHandle<GpuBuffer> GetStaticMeshVertexStorageBuffer() const noexcept { return staticMeshVertexGpuStorage.GetGpuBuffer(); }
-        [[nodiscard]] RenderHandle<GpuView> GetStaticMeshVertexStorageShaderResourceView() const noexcept { return staticMeshVertexGpuStorage.GetShaderResourceView(); }
+        [[nodiscard]] RenderHandle<GpuView> GetStaticMeshVertexStorageSrv() const noexcept { return staticMeshVertexGpuStorage.GetShaderResourceView(); }
         [[nodiscard]] GpuFence& GetStaticMeshVertexStorageFence() noexcept { return staticMeshVertexGpuStorage.GetStorageFence(); }
-        [[nodiscard]] RenderHandle<GpuBuffer> GetVertexIndexStorageBuffer() const noexcept { return vertexIndexGpuStorage.GetGpuBuffer(); }
-        [[nodiscard]] RenderHandle<GpuView> GetVertexIndexStorageShaderResourceView() const noexcept { return vertexIndexGpuStorage.GetShaderResourceView(); }
-        [[nodiscard]] GpuFence& GetVertexIndexStorageFence() noexcept { return vertexIndexGpuStorage.GetStorageFence(); }
+        [[nodiscard]] RenderHandle<GpuBuffer> GetIndexStorageBuffer() const noexcept { return vertexIndexGpuStorage.GetGpuBuffer(); }
+        [[nodiscard]] RenderHandle<GpuView> GetIndexStorageSrv() const noexcept { return vertexIndexGpuStorage.GetShaderResourceView(); }
+        [[nodiscard]] GpuFence& GetIndexStorageFence() noexcept { return vertexIndexGpuStorage.GetStorageFence(); }
 
         [[nodiscard]] Statistics GetStatistics() const;
 

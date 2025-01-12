@@ -60,7 +60,7 @@ namespace ig
         imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
         IG_LOG(EngineLog, Info, "ImGui Context Initialized.");
 
-        sceneProxy = MakePtr<SceneProxy>(*renderContext, *meshStorage, *assetManager);
+        sceneProxy = MakePtr<SceneProxy>(taskExecutor, *renderContext, *meshStorage, *assetManager);
         IG_LOG(EngineLog, Info, "Scene Proxy Initialized.");
 
         renderer = MakePtr<Renderer>(*window, *renderContext, *meshStorage, *sceneProxy);

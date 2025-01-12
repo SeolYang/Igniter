@@ -7,28 +7,28 @@
 
 namespace ig
 {
-    GpuStorage::GpuStorage(RenderContext& renderContext, const String debugName, const U32 elementSize, const U32 initialNumElements, const bool bShouldEnableShaderReadWrite /*= false*/, const bool bShouldEnableUavCounter, const bool bShouldEnableLinearAllocation)
-        : renderContext(renderContext)
-        , debugName(debugName)
-        , elementSize(elementSize)
-        , bufferSize((U64)initialNumElements * elementSize)
-        , bIsShaderReadWritable(bShouldEnableShaderReadWrite)
-        , bIsUavCounterEnabled(bShouldEnableUavCounter)
-        , bIsLinearAllocEnabled(bShouldEnableLinearAllocation)
-        , fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
+    GpuStorage::GpuStorage(RenderContext& renderContext, const GpuStorageDesc& desc) :
+        renderContext(renderContext),
+        debugName(desc.DebugName),
+        elementSize(desc.ElementSize),
+        bufferSize((U64)desc.NumInitElements * desc.ElementSize),
+        bIsShaderReadWritable(ContainsFlags(desc.Flags, EGpuStorageFlags::ShaderReadWrite)),
+        bIsUavCounterEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableUavCounter)),
+        bIsLinearAllocEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableLinearAllocation)),
+        fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
     {
-        IG_CHECK(initialNumElements > 0);
+        IG_CHECK(desc.NumInitElements > 0);
         IG_CHECK(elementSize > 0);
 
-        gpuBuffer = renderContext.CreateBuffer(CreateBufferDesc(initialNumElements));
+        gpuBuffer = renderContext.CreateBuffer(CreateBufferDesc(desc.NumInitElements));
         srv = renderContext.CreateShaderResourceView(gpuBuffer);
 
-        if (bShouldEnableShaderReadWrite)
+        if (bIsShaderReadWritable)
         {
             uav = renderContext.CreateUnorderedAccessView(gpuBuffer);
         }
 
-        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSize};
+        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Flags = bIsLinearAllocEnabled ? D3D12MA::VIRTUAL_BLOCK_FLAG_ALGORITHM_LINEAR : D3D12MA::VIRTUAL_BLOCK_FLAG_NONE, .Size = bufferSize};
         D3D12MA::VirtualBlock* newVirtualBlock{nullptr};
         [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
         // 여기서 Virtual Block 할당 실패를 핸들 해야하나? 로그에 남겨야 하나?
@@ -37,6 +37,11 @@ namespace ig
 
     GpuStorage::~GpuStorage()
     {
+        if (bIsLinearAllocEnabled)
+        {
+            ForceReset();
+        }
+
         IG_CHECK(allocatedSize == 0);
         if (srv)
         {
@@ -72,6 +77,11 @@ namespace ig
             return Allocation::Invalid();
         }
 
+        if (bIsLinearAllocEnabled)
+        {
+            this->ForceReset();
+        }
+
         const Size allocSize = numElements * elementSize;
         Allocation newAllocation{};
         for (Index blockIdx = 0; blockIdx < blocks.size(); ++blockIdx)
@@ -100,6 +110,7 @@ namespace ig
 
     void GpuStorage::Deallocate(const Allocation& allocation)
     {
+        IG_CHECK(!bIsLinearAllocEnabled);
         IG_CHECK(allocation.IsValid());
         IG_CHECK(allocation.BlockIndex < blocks.size());
         Block& block = blocks[allocation.BlockIndex];
@@ -111,7 +122,14 @@ namespace ig
 
     void GpuStorage::ForceReset()
     {
+        IG_CHECK(bufferSize > 0);
         allocatedSize = 0;
+
+        if (blocks.size() == 1)
+        {
+            blocks[0].VirtualBlock->Clear();
+            return;
+        }
 
         for (const Block& block : blocks)
         {
@@ -123,7 +141,7 @@ namespace ig
         }
         blocks.clear();
 
-        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSize};
+        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Flags = bIsLinearAllocEnabled ? D3D12MA::VIRTUAL_BLOCK_FLAG_ALGORITHM_LINEAR : D3D12MA::VIRTUAL_BLOCK_FLAG_NONE, .Size = bufferSize};
         D3D12MA::VirtualBlock* newVirtualBlock{nullptr};
         [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
         blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = 0});
@@ -140,7 +158,7 @@ namespace ig
     bool GpuStorage::AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation)
     {
         IG_CHECK(blockIdx < blocks.size());
-        const D3D12MA::VIRTUAL_ALLOCATION_DESC allocDesc{.Size = allocSize};
+        const D3D12MA::VIRTUAL_ALLOCATION_DESC allocDesc{.Flags = bIsLinearAllocEnabled ? D3D12MA::VIRTUAL_ALLOCATION_FLAG_UPPER_ADDRESS : D3D12MA::VIRTUAL_ALLOCATION_FLAG_NONE, .Size = allocSize};
         D3D12MA::VirtualAllocation virtualAllocation{};
         Size allocOffset = 0;
 
@@ -156,8 +174,7 @@ namespace ig
                 .Offset = storageOffset,
                 .OffsetIndex = storageOffset / elementSize,
                 .AllocSize = allocSize,
-                .NumElements = allocSize / elementSize
-            };
+                .NumElements = allocSize / elementSize};
 
             return true;
         }
@@ -236,7 +253,7 @@ namespace ig
         }
 
         const Size bufferSizeDiff = newBufferSize - bufferSize;
-        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Size = bufferSizeDiff};
+        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Flags = bIsLinearAllocEnabled ? D3D12MA::VIRTUAL_BLOCK_FLAG_ALGORITHM_LINEAR : D3D12MA::VIRTUAL_BLOCK_FLAG_NONE, .Size = bufferSizeDiff};
         D3D12MA::VirtualBlock* newVirtualBlock{nullptr};
         [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
         // 여기서 Virtual Block 할당 실패를 핸들 해야하나? 로그에 남겨야 하나?

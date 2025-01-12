@@ -11,7 +11,11 @@ struct PerFrameData
     uint MaterialStorageSrv;
     uint MeshStorageSrv;
 
-    uint StaticMeshStorageSrv;
+    uint InstancingDataStorageSrv;
+    uint InstancingDataStorageUav;
+
+    uint TransformIdxStorageSrv;
+    uint TransformIdxStorageUav;
 
     uint RenderableStorageSrv;
 
@@ -31,7 +35,21 @@ struct Vertex
 struct PerDrawData
 {
     uint PerFrameDataCbv;
-    uint RenderableDataIdx;
+    uint InstancingId;
+    uint MaterialIdx;
+    uint VertexOffset;
+    uint VertexIdxStorageOffset;
+    uint TransformIdxStorageOffset;
+};
+
+struct InstancingData
+{
+    uint MaterialDataIdx;
+    uint MeshDataIdx;
+    uint InstanceId;
+    uint TransformOffset;
+    uint MaxNumInstances;
+    uint NumInstances;
 };
 
 struct RenderableData
@@ -52,12 +70,6 @@ struct MeshData
     float BsRadius;
 };
 
-struct StaticMeshData
-{
-    uint MaterialIdx;
-    uint MeshIdx;
-};
-
 struct VertexShaderOutput
 {
     float4 aPos : SV_POSITION;
@@ -71,27 +83,20 @@ struct TransformData
 
 ConstantBuffer<PerDrawData> perDrawData : register(b0);
 
-VertexShaderOutput main(uint vertexID : SV_VertexID)
+VertexShaderOutput main(uint vertexID : SV_VertexID, uint instanceId : SV_InstanceID)
 {
     ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[perDrawData.PerFrameDataCbv];
     StructuredBuffer<Vertex> vertexStorage = ResourceDescriptorHeap[perFrameData.StaticMeshVertexStorageSrv];
     StructuredBuffer<uint> vertexIndexStorage = ResourceDescriptorHeap[perFrameData.VertexIndexStorageSrv];
-    StructuredBuffer<MeshData> meshStorage = ResourceDescriptorHeap[perFrameData.MeshStorageSrv];
-    StructuredBuffer<RenderableData> renderableDataStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
-    StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
+    StructuredBuffer<uint> transformIdxStorage = ResourceDescriptorHeap[perFrameData.TransformIdxStorageSrv];
     StructuredBuffer<TransformData> transformStorage = ResourceDescriptorHeap[perFrameData.TransformStorageSrv];
 
-    RenderableData renderableData = renderableDataStorage[perDrawData.RenderableDataIdx];
-    StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
-    MeshData meshData = meshStorage[staticMeshData.MeshIdx];
-    TransformData transformData = transformStorage[renderableData.TransformIdx];
+    uint transformIdx =  transformIdxStorage[perDrawData.TransformIdxStorageOffset + instanceId];
+    TransformData transformData = transformStorage[transformIdx];
     float4x4 worldMat = transpose(float4x4(transformData.Cols[0], transformData.Cols[1], transformData.Cols[2], float4(0.f, 0.f, 0.f, 1.f)));
     float4x4 worldViewProj = mul(worldMat, perFrameData.ViewProj);
 
-    uint vertexOffset = meshData.VertexOffset;
-    uint vertexIndexOffset = meshData.IndexOffset;
-    Vertex vertex = vertexStorage[vertexOffset + vertexIndexStorage[vertexIndexOffset + vertexID]];
-
+    Vertex vertex = vertexStorage[perDrawData.VertexOffset + vertexIndexStorage[perDrawData.VertexIdxStorageOffset + vertexID]];
     VertexShaderOutput output;
     output.aPos = mul(float4(vertex.aPos.xyz, 1.f), worldViewProj);
     output.aUv  = vertex.aUv;

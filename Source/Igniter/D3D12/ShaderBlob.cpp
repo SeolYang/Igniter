@@ -8,7 +8,8 @@ IG_DEFINE_LOG_CATEGORY(ShaderBlobLog);
 namespace ig
 {
     // #sy_todo 셰이더 컴파일 후 파일로 저장/캐싱 -> 셰이더 에셋
-    ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc) : type(desc.Type)
+    ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc) :
+        type(desc.Type)
     {
         std::vector<const wchar_t*> arguments;
         arguments.push_back(TEXT("-E"));
@@ -46,7 +47,6 @@ namespace ig
             break;
         }
 
-        arguments.push_back(TEXT("-Qstrip_debug"));
         arguments.push_back(TEXT("-Qstrip_reflect"));
 
         if (desc.bPackMarticesInRowMajor)
@@ -83,7 +83,7 @@ namespace ig
             arguments.push_back(TEXT("-WX"));
         }
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if defined(DEBUG) || defined(_DEBUG) || defined(REL_WITH_DEBINFO)
         const bool bEnableDebugInfo = true;
 #else
         const bool bEnableDebugInfo = desc.bForceEnableDebugInformation;
@@ -91,6 +91,11 @@ namespace ig
         if (bEnableDebugInfo)
         {
             arguments.push_back(TEXT("-Zi"));
+            arguments.push_back(TEXT("-Qembed_debug"));
+        }
+        else
+        {
+            arguments.push_back(TEXT("-Qstrip_debug"));
         }
 
         ComPtr<IDxcUtils> utils;
@@ -102,8 +107,8 @@ namespace ig
         ComPtr<IDxcLibrary> library;
         IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
 
-        uint32_t                 codePage       = CP_UTF8;
-        const std::wstring       wideSourcePath = desc.SourcePath.ToWideString();
+        uint32_t codePage = CP_UTF8;
+        const std::wstring wideSourcePath = desc.SourcePath.ToWideString();
         ComPtr<IDxcBlobEncoding> sourceBlob;
         IG_VERIFY_SUCCEEDED(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
 
@@ -113,7 +118,7 @@ namespace ig
         const DxcBuffer buffer{.Ptr = sourceBlob->GetBufferPointer(), .Size = sourceBlob->GetBufferSize(), .Encoding = codePage};
 
         IG_VERIFY_SUCCEEDED(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
-            IID_PPV_ARGS(compiledResult.GetAddressOf())));
+                                              IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
         ComPtr<IDxcBlobUtf8> errors;
         compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);

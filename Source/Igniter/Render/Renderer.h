@@ -52,6 +52,9 @@ namespace ig
         
         Ptr<ShaderBlob> computeCullingShader;
         Ptr<PipelineState> computeCullingPso;
+
+        Ptr<ShaderBlob> genDrawCmdsShader;
+        Ptr<PipelineState> genDrawCmdsPso;
         constexpr static U32 kInitNumDrawCommands = 16;
         InFlightFramesResource<Ptr<GpuStorage>> drawOpaqueStaticMeshCmdStorage;
         InFlightFramesResource<GpuStorage::Allocation> drawCmdSpace;

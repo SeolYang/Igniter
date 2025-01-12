@@ -7,6 +7,23 @@
 
 namespace ig
 {
+    enum class EGpuStorageFlags
+    {
+        None = 0,
+        ShaderReadWrite = 1 << 0,
+        EnableUavCounter = 1 << 1,
+        EnableLinearAllocation = 1 << 2
+    };
+    IG_ENUM_FLAGS(EGpuStorageFlags);
+
+    struct GpuStorageDesc
+    {
+        String DebugName = "UnknownStorage"_fs;
+        U32 ElementSize = 0;
+        U32 NumInitElements = 0;
+        EGpuStorageFlags Flags = EGpuStorageFlags::None;
+    };
+
     class RenderContext;
     class GpuBuffer;
     class GpuView;
@@ -43,7 +60,7 @@ namespace ig
         };
 
     public:
-        GpuStorage(RenderContext& renderContext, const String debugName, const U32 elementSize, const U32 initialNumElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false, const bool bShouldEnableLinearAllocation = false);
+        GpuStorage(RenderContext& renderContext, const GpuStorageDesc& desc);
         GpuStorage(const GpuStorage&) = delete;
         GpuStorage(GpuStorage&&) noexcept = delete;
         ~GpuStorage();

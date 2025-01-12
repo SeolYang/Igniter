@@ -16,11 +16,12 @@
 
 namespace ig
 {
-    SceneProxy::SceneProxy(RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager) :
+    SceneProxy::SceneProxy(tf::Executor& taskExecutor, RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager) :
+        taskExecutor(&taskExecutor),
         renderContext(&renderContext),
         meshStorage(&meshStorage),
         assetManager(&assetManager),
-        numWorker((U32)Engine::GetTaskExecutor().num_workers())
+        numWorker((U32)taskExecutor.num_workers())
     {
         GpuBufferDesc renderableIndicesBufferDesc;
         renderableIndicesBufferDesc.AsStructuredBuffer<U32>(kNumInitRenderableIndices);
@@ -33,44 +34,60 @@ namespace ig
             transformProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
-                    String(std::format("TransformStorage{}", localFrameIdx)),
-                    TransformProxy::kDataSize,
-                    kNumInitTransformElements);
+                    GpuStorageDesc{
+                        String(std::format("TransformStorage{}", localFrameIdx)),
+                        TransformProxy::kDataSize,
+                        kNumInitTransformElements});
 
             materialProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
-                    String(std::format("MaterialDataStorage{}", localFrameIdx)),
-                    MaterialProxy::kDataSize,
-                    kNumInitMaterialElements);
+                    GpuStorageDesc{
+                        String(std::format("MaterialDataStorage{}", localFrameIdx)),
+                        MaterialProxy::kDataSize,
+                        kNumInitMaterialElements});
 
             meshProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
-                    String(std::format("MeshDataStorage{}", localFrameIdx)),
-                    MeshProxy::kDataSize,
-                    kNumInitMeshElements);
+                    GpuStorageDesc{
+                        String(std::format("MeshDataStorage{}", localFrameIdx)),
+                        MeshProxy::kDataSize,
+                        kNumInitMeshElements});
 
-            staticMeshProxyPackage.Storage[localFrameIdx] =
+            instancingPackage.InstancingDataStorage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
-                    String(std::format("StaticMeshDataStorage{}", localFrameIdx)),
-                    StaticMeshProxy::kDataSize,
-                    kNumInitStaticMeshElements);
+                    GpuStorageDesc{
+                        String(std::format("SM_InstanceDataStorage{}", localFrameIdx)),
+                        (U32)sizeof(InstancingGpuData),
+                        kNumInitStaticMeshInstances,
+                        EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
+
+            instancingPackage.TransformIndexStorage[localFrameIdx] =
+                MakePtr<GpuStorage>(
+                    renderContext,
+                    GpuStorageDesc{
+                        String(std::format("SM_TransformIdxStorage{}", localFrameIdx)),
+                        (U32)sizeof(U32),
+                        kNumInitStaticMeshInstances,
+                        EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
 
             renderableProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
-                    String(std::format("RenderableStorage{}", localFrameIdx)),
-                    RenderableProxy::kDataSize,
-                    kNumInitRenderableElements);
+                    GpuStorageDesc{
+                        String(std::format("RenderableStorage{}", localFrameIdx)),
+                        RenderableProxy::kDataSize,
+                        kNumInitRenderableElements});
 
             lightProxyPackage.Storage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
-                    String(std::format("LightDataStorage{}", localFrameIdx)),
-                    LightProxy::kDataSize,
-                    kNumInitLightElements);
+                    GpuStorageDesc{
+                        String(std::format("LightDataStorage{}", localFrameIdx)),
+                        LightProxy::kDataSize,
+                        kNumInitLightElements});
 
             renderableIndicesBufferSize[localFrameIdx] = kNumInitRenderableIndices;
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
@@ -96,10 +113,7 @@ namespace ig
         transformProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
         transformProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
-        staticMeshProxyPackage.PendingReplicationGroups.resize(numWorker);
-        staticMeshProxyPackage.PendingProxyGroups.resize(numWorker);
-        staticMeshProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
-        staticMeshProxyPackage.WorkGroupCmdLists.resize(numWorker);
+        instancingPackage.ThreadLocalInstancingMaps.resize(numWorker);
 
         lightProxyPackage.PendingReplicationGroups.resize(numWorker);
 
@@ -120,7 +134,6 @@ namespace ig
             transformProxyPackage.Storage[localFrameIdx]->ForceReset();
             materialProxyPackage.Storage[localFrameIdx]->ForceReset();
             meshProxyPackage.Storage[localFrameIdx]->ForceReset();
-            staticMeshProxyPackage.Storage[localFrameIdx]->ForceReset();
             renderableProxyPackage.Storage[localFrameIdx]->ForceReset();
             lightProxyPackage.Storage[localFrameIdx]->ForceReset();
 
@@ -136,13 +149,13 @@ namespace ig
 
     GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
     {
+        IG_CHECK(taskExecutor != nullptr);
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(assetManager != nullptr);
         ZoneScoped;
 
         const Registry& registry = world.GetRegistry();
 
-        tf::Executor& executor = Engine::GetTaskExecutor();
         tf::Taskflow rootTaskFlow{};
         tf::Task updateTransformTask = rootTaskFlow.emplace(
             [this, localFrameIdx, &registry](tf::Subflow& subflow)
@@ -175,24 +188,24 @@ namespace ig
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
             });
 
-        tf::Task updateStaticMeshTask = rootTaskFlow.emplace(
+        tf::Task buildInstancingData = rootTaskFlow.emplace(
             [this, localFrameIdx, &registry](tf::Subflow& subflow)
             {
-                ZoneScopedN("UpdateStaticMeshProxy");
-                UpdateStaticMeshProxy(subflow, localFrameIdx, registry);
+                ZoneScopedN("BuildInstancingData");
+                BuildInstancingData(subflow, localFrameIdx, registry);
                 subflow.join();
             });
 
         tf::Task updateRenderableTask = rootTaskFlow.emplace(
-            [this, localFrameIdx](tf::Subflow& subflow)
+            [this, localFrameIdx, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("UpdateRenderableTask");
-                UpdateRenderableProxy(subflow, localFrameIdx);
+                UpdateRenderableProxy(subflow, localFrameIdx, registry);
                 subflow.join();
             });
 
-        updateStaticMeshTask.succeed(updateMaterialTask, updateMeshTask);
-        updateRenderableTask.succeed(updateTransformTask, updateStaticMeshTask);
+        buildInstancingData.succeed(updateMaterialTask, updateMeshTask);
+        updateRenderableTask.succeed(updateTransformTask, buildInstancingData);
 
         tf::Task replicateTransformData = rootTaskFlow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
@@ -218,12 +231,11 @@ namespace ig
                 subflow.join();
             });
 
-        tf::Task replicateStaticMeshData = rootTaskFlow.emplace(
-            [this, localFrameIdx](tf::Subflow& subflow)
+        tf::Task replicateInstancingData = rootTaskFlow.emplace(
+            [this, localFrameIdx]()
             {
-                ZoneScopedN("ReplicateStaticMeshData");
-                ReplicateProxyData(subflow, localFrameIdx, staticMeshProxyPackage);
-                subflow.join();
+                ZoneScopedN("ReplicateInstancingData");
+                ReplicateInstancingData(localFrameIdx);
             });
 
         tf::Task replicateRenderableData = rootTaskFlow.emplace(
@@ -244,12 +256,12 @@ namespace ig
         replicateTransformData.succeed(updateTransformTask);
         replicateMaterialData.succeed(updateMaterialTask);
         replicateMeshData.succeed(updateMeshTask);
-        replicateStaticMeshData.succeed(updateStaticMeshTask);
+        replicateInstancingData.succeed(buildInstancingData);
         //// 이하 두개 태스크는 추후 렌더러블로 다뤄질 수 있는 종류가 많아 질수록 종속성을 추가해야함.
         replicateRenderableData.succeed(updateRenderableTask);
         replicateRenderableIndices.succeed(updateRenderableTask);
 
-        executor.run(rootTaskFlow).wait();
+        taskExecutor->run(rootTaskFlow).wait();
 
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
         IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
@@ -272,13 +284,38 @@ namespace ig
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
         const auto transformView = registry.view<const TransformComponent>();
 
-        tf::Task createNewProxyTask = subflow.for_each(
+        tf::Task updateTransformProxy = subflow.for_each(
             transformView.begin(), transformView.end(),
             [this, &registry, &entityProxyMap, transformView](const Entity entity)
             {
-                if (!entityProxyMap.contains(entity))
+                const auto transformFoundItr = entityProxyMap.find(entity);
+
+                const Index workerId = taskExecutor->this_worker_id();
+                if (transformFoundItr == entityProxyMap.end())
                 {
-                    transformProxyPackage.PendingProxyGroups[Engine::GetTaskExecutor().this_worker_id()].emplace_back(entity, TransformProxy{});
+                    transformProxyPackage.PendingProxyGroups[workerId].emplace_back(entity, TransformProxy{});
+                    transformProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
+                }
+                else
+                {
+                    TransformProxy& proxy = transformFoundItr->second;
+                    IG_CHECK(proxy.bMightBeDestroyed);
+                    proxy.bMightBeDestroyed = false;
+
+                    const TransformComponent& transformComponent = registry.get<TransformComponent>(entity);
+                    if (const U64 currentDataHashValue = HashInstance(transformComponent);
+                        proxy.DataHashValue != currentDataHashValue)
+                    {
+                        const Matrix transformMat{transformComponent.CreateTransformation()};
+                        proxy.GpuData = TransformGpuData{
+                            .Cols{
+                                {transformMat.m[0][0], transformMat.m[1][0], transformMat.m[2][0], transformMat.m[3][0]},
+                                {transformMat.m[0][1], transformMat.m[1][1], transformMat.m[2][1], transformMat.m[3][1]},
+                                {transformMat.m[0][2], transformMat.m[1][2], transformMat.m[2][2], transformMat.m[3][2]},
+                            }};
+                        proxy.DataHashValue = currentDataHashValue;
+                        transformProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
+                    }
                 }
             });
 
@@ -293,31 +330,6 @@ namespace ig
                         entityProxyMap[pendingEntity] = pendingProxy;
                     }
                     transformProxyPackage.PendingProxyGroups[groupIdx].clear();
-                }
-            });
-
-        tf::Task updateProxyTask = subflow.for_each(
-            transformView.begin(), transformView.end(),
-            [this, &registry, &entityProxyMap, transformView](const Entity entity)
-            {
-                TransformProxy& proxy = entityProxyMap[entity];
-                IG_CHECK(proxy.bMightBeDestroyed);
-                proxy.bMightBeDestroyed = false;
-
-                const TransformComponent& transformComponent = registry.get<TransformComponent>(entity);
-                if (const U64 currentDataHashValue = HashInstance(transformComponent);
-                    proxy.DataHashValue != currentDataHashValue)
-                {
-                    const Matrix transformMat{transformComponent.CreateTransformation()};
-                    proxy.GpuData = TransformGpuData{
-                        .Cols{
-                            {transformMat.m[0][0], transformMat.m[1][0], transformMat.m[2][0], transformMat.m[3][0]},
-                            {transformMat.m[0][1], transformMat.m[1][1], transformMat.m[2][1], transformMat.m[3][1]},
-                            {transformMat.m[0][2], transformMat.m[1][2], transformMat.m[2][2], transformMat.m[3][2]},
-                        }};
-                    proxy.DataHashValue = currentDataHashValue;
-
-                    transformProxyPackage.PendingReplicationGroups[Engine::GetTaskExecutor().this_worker_id()].emplace_back(entity);
                 }
             });
 
@@ -342,10 +354,123 @@ namespace ig
                 transformProxyPackage.PendingDestructions.clear();
             });
 
-        invalidateProxyTask.precede(createNewProxyTask);
-        createNewProxyTask.precede(commitPendingProxyTask);
-        commitPendingProxyTask.precede(updateProxyTask);
-        updateProxyTask.precede(commitDestructions);
+        invalidateProxyTask.precede(updateTransformProxy);
+        updateTransformProxy.precede(commitPendingProxyTask);
+        commitPendingProxyTask.precede(commitDestructions);
+    }
+
+    void SceneProxy::BuildInstancingData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    {
+        tf::Task cleanupTask = subflow.emplace(
+            [this, localFrameIdx]()
+            {
+                instancingPackage.InstancingDataStorage[localFrameIdx]->ForceReset();
+                instancingPackage.TransformIndexStorage[localFrameIdx]->ForceReset();
+                for (InstancingMap& threadLocalMap : instancingPackage.ThreadLocalInstancingMaps)
+                {
+                    threadLocalMap.clear();
+                }
+                instancingPackage.GlobalInstancingMap.clear();
+                instancingPackage.SumNumInstances = 0;
+            });
+
+        const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
+        tf::Task buildLocalInstancingDataMaps = subflow.for_each(
+            staticMeshEntityView.begin(), staticMeshEntityView.end(),
+            [this, localFrameIdx, staticMeshEntityView](const Entity entity)
+            {
+                IG_CHECK(entity != NullEntity);
+                const StaticMeshComponent& staticMeshComponent = staticMeshEntityView.get<const StaticMeshComponent>(entity);
+                if (!staticMeshComponent.Mesh)
+                {
+                    return;
+                }
+                const MaterialComponent& materialComponent = staticMeshEntityView.get<const MaterialComponent>(entity);
+                if (!materialComponent.Instance)
+                {
+                    return;
+                }
+
+                const Index workerId = taskExecutor->this_worker_id();
+                IG_CHECK(workerId < instancingPackage.ThreadLocalInstancingMaps.size());
+                InstancingMap& threadLocalMap = instancingPackage.ThreadLocalInstancingMaps[workerId];
+
+                const MaterialProxy& materialProxy = materialProxyPackage.ProxyMap[localFrameIdx].at(materialComponent.Instance);
+                const MeshProxy& staticMeshProxy = meshProxyPackage.ProxyMap[localFrameIdx].at(staticMeshComponent.Mesh);
+                const U64 instancingKey = InstancingPackage::MakeInstancingMapKey(staticMeshProxy, materialProxy);
+                auto foundItr = threadLocalMap.find(instancingKey);
+                if (foundItr == threadLocalMap.end())
+                {
+                    const auto materialDataIdx = (U32)materialProxy.StorageSpace.OffsetIndex;
+                    const auto meshDataIdx = (U32)staticMeshProxy.StorageSpace.OffsetIndex;
+                    foundItr = threadLocalMap.emplace(instancingKey, InstancingGpuData{materialDataIdx, meshDataIdx}).first;
+                }
+                IG_CHECK(foundItr != threadLocalMap.end());
+
+                ++foundItr->second.NumInstances;
+            });
+
+        tf::Task buildGlobalInstancingDataMap = subflow.emplace(
+            [this, localFrameIdx]()
+            {
+                OrderedInstancingMap& globalInstanceMap = instancingPackage.GlobalInstancingMap;
+                for (InstancingMap& localInstanceMap : instancingPackage.ThreadLocalInstancingMaps)
+                {
+                    for (const auto& [instanceKey, data] : localInstanceMap)
+                    {
+                        auto foundItr = globalInstanceMap.find(instanceKey);
+                        if (foundItr == globalInstanceMap.end())
+                        {
+                            globalInstanceMap[instanceKey] = data;
+                        }
+                        else
+                        {
+                            InstancingGpuData& globalData = foundItr->second;
+                            IG_CHECK(globalData.MeshDataIdx == data.MeshDataIdx);
+                            IG_CHECK(globalData.MaterialDataIdx == data.MaterialDataIdx);
+                            globalData.NumInstances += data.NumInstances;
+                        }
+
+                        instancingPackage.SumNumInstances += data.NumInstances;
+                    }
+
+                    localInstanceMap.clear();
+                }
+            });
+
+        tf::Task allocateSpace = subflow.emplace(
+            [this, localFrameIdx]()
+            {
+                const Size numInstancing = instancingPackage.GlobalInstancingMap.size();
+                instancingPackage.InstancingDataSpace =
+                    instancingPackage.InstancingDataStorage[localFrameIdx]->Allocate(numInstancing);
+                instancingPackage.TransformIdxSpace =
+                    instancingPackage.TransformIndexStorage[localFrameIdx]->Allocate(instancingPackage.SumNumInstances);
+            });
+
+        // 결국 transform offset을 정할려면 linear 하게 돌아야 하나?
+        tf::Task finalizeGlobalInstancingDataMap = subflow.emplace(
+            [this, localFrameIdx]()
+            {
+                U32 instanceId = 0;
+                U32 transformOffset = 0;
+                for (auto& [instanceKey, globalData] : instancingPackage.GlobalInstancingMap)
+                {
+                    globalData.InstancingId = instanceId;
+                    globalData.TransformOffset = transformOffset;
+
+                    ++instanceId;
+                    transformOffset += globalData.NumInstances;
+                }
+
+                IG_CHECK(instanceId == instancingPackage.GlobalInstancingMap.size());
+                IG_CHECK(transformOffset == instancingPackage.SumNumInstances);
+            });
+
+        cleanupTask.precede(buildLocalInstancingDataMaps);
+        buildLocalInstancingDataMaps.precede(buildGlobalInstancingDataMap);
+        buildGlobalInstancingDataMap.precede(allocateSpace);
+        allocateSpace.precede(finalizeGlobalInstancingDataMap);
     }
 
     void SceneProxy::UpdateMeshProxy(const LocalFrameIndex localFrameIdx)
@@ -377,7 +502,6 @@ namespace ig
             }
 
             MeshProxy& proxy = proxyMap[cachedStaticMesh];
-            IG_CHECK(proxy.bMightBeDestroyed);
             proxy.bMightBeDestroyed = false;
 
             const StaticMesh* staticMeshPtr = assetManager->Lookup(cachedStaticMesh);
@@ -450,7 +574,6 @@ namespace ig
             }
 
             MaterialProxy& proxy = proxyMap[cachedMaterial];
-            IG_CHECK(proxy.bMightBeDestroyed);
             proxy.bMightBeDestroyed = false;
 
             const Material* materialPtr = assetManager->Lookup(cachedMaterial);
@@ -498,119 +621,12 @@ namespace ig
         materialProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateStaticMeshProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
-    {
-        IG_CHECK(staticMeshProxyPackage.PendingDestructions.empty());
-
-        const auto& materialProxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
-        const auto& meshProxyMap = meshProxyPackage.ProxyMap[localFrameIdx];
-
-        auto& entityProxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
-        tf::Task invalidateProxyTask = subflow.for_each(
-            entityProxyMap.begin(), entityProxyMap.end(),
-            [](auto& keyValuePair)
-            {
-                keyValuePair.second.bMightBeDestroyed = true;
-            });
-
-        auto& storage = *staticMeshProxyPackage.Storage[localFrameIdx];
-        const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
-
-        tf::Task createNewProxyTask = subflow.for_each(
-            staticMeshEntityView.begin(), staticMeshEntityView.end(),
-            [this, &registry, &entityProxyMap, staticMeshEntityView](const Entity entity)
-            {
-                const Size groupIdx = Engine::GetTaskExecutor().this_worker_id();
-                if (!entityProxyMap.contains(entity))
-                {
-                    const StaticMeshComponent& staticMeshComponent = staticMeshEntityView.get<const StaticMeshComponent>(entity);
-                    if (!staticMeshComponent.Mesh)
-                    {
-                        return;
-                    }
-
-                    const MaterialComponent& materialComponent = staticMeshEntityView.get<const MaterialComponent>(entity);
-                    if (!materialComponent.Instance)
-                    {
-                        return;
-                    }
-
-                    staticMeshProxyPackage.PendingProxyGroups[groupIdx].emplace_back(entity, StaticMeshProxy{});
-                }
-            });
-
-        tf::Task commitPendingProxyTask = subflow.emplace(
-            [this, &entityProxyMap, &storage]()
-            {
-                for (Index groupIdx = 0; groupIdx < numWorker; ++groupIdx)
-                {
-                    for (auto& [pendingEntity, pendingProxy] : staticMeshProxyPackage.PendingProxyGroups[groupIdx])
-                    {
-                        pendingProxy.StorageSpace = storage.Allocate(1);
-                        entityProxyMap[pendingEntity] = pendingProxy;
-                    }
-                    staticMeshProxyPackage.PendingProxyGroups[groupIdx].clear();
-                }
-            }); // 여기엔 별도로 딱히 추가 처리는 안해줘도 될 것 같아 보임!
-
-        tf::Task updateProxyTask = subflow.for_each(
-            staticMeshEntityView.begin(), staticMeshEntityView.end(),
-            [this, &registry, &entityProxyMap, &meshProxyMap, &materialProxyMap, staticMeshEntityView](const Entity entity)
-            {
-                StaticMeshProxy& proxy = entityProxyMap[entity];
-                IG_CHECK(proxy.bMightBeDestroyed);
-                proxy.bMightBeDestroyed = false;
-
-                const StaticMeshComponent& staticMeshComponent = registry.get<StaticMeshComponent>(entity);
-                IG_CHECK(staticMeshComponent.Mesh);
-                const MaterialComponent& materialComponent = registry.get<MaterialComponent>(entity);
-                IG_CHECK(materialComponent.Instance);
-                if (const U64 currentDataHashValue = HashInstance(staticMeshComponent.Mesh) ^ HashInstance(materialComponent.Instance);
-                    proxy.DataHashValue != currentDataHashValue)
-                {
-                    proxy.GpuData = StaticMeshGpuData{
-                        .MaterialDataIdx = (U32)materialProxyMap.at(materialComponent.Instance).StorageSpace.OffsetIndex,
-                        .MeshDataIdx = (U32)meshProxyMap.at(staticMeshComponent.Mesh).StorageSpace.OffsetIndex};
-                    proxy.DataHashValue = currentDataHashValue;
-
-                    staticMeshProxyPackage.PendingReplicationGroups[Engine::GetTaskExecutor().this_worker_id()].emplace_back(entity);
-                }
-            });
-
-        tf::Task commitDestructions = subflow.emplace(
-            [this, &entityProxyMap, &storage, localFrameIdx]()
-            {
-                for (auto& [entity, proxy] : entityProxyMap)
-                {
-                    if (proxy.bMightBeDestroyed)
-                    {
-                        staticMeshProxyPackage.PendingDestructions.emplace_back(entity);
-                    }
-                }
-
-                for (const Entity entity : staticMeshProxyPackage.PendingDestructions)
-                {
-                    const auto extractedElement = entityProxyMap.extract(entity);
-                    IG_CHECK(extractedElement.has_value());
-                    IG_CHECK(extractedElement->second.StorageSpace.IsValid());
-                    storage.Deallocate(extractedElement->second.StorageSpace);
-                }
-                staticMeshProxyPackage.PendingDestructions.clear();
-            });
-
-        invalidateProxyTask.precede(createNewProxyTask);
-        createNewProxyTask.precede(commitPendingProxyTask);
-        commitPendingProxyTask.precede(updateProxyTask);
-        updateProxyTask.precede(commitDestructions);
-    }
-
-    void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx)
+    void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
         IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
 
         auto& renderableProxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
         auto& renderableStorage = *renderableProxyPackage.Storage[localFrameIdx];
-        const auto& staticMeshProxyMap = staticMeshProxyPackage.ProxyMap[localFrameIdx];
         const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
 
         tf::Task invalidateProxyTask = subflow.for_each(
@@ -620,35 +636,65 @@ namespace ig
                 keyValuePair.second.bMightBeDestroyed = true;
             });
 
-        // 만약 Renderable Component를 한 개의 Entity가 여러개 가지고 있더라도
-        // renderable로 반영 되는 건 딱 첫 번째로 인식 되는 컴포넌트다.
-        // TODO 이런 경우 처리를 따로 해야할까?
-        // 가능한 방안은 같은 타입의 Renderable이 아니라면 bMightBeDestroyed를 false로 변경하지 않도록 한다.
-        // 그렇게 하면 가장 먼저 업로드된 정보가 Expired 되어도 정상적으로 해당 Renderable에 대한 Destroy 알고리즘이
-        // 작동하게 되고, 다음 프레임 부터는 정상적으로 새로운 Renderable이 할당되게 된다.
-        // 확장시 2가지 선택 가능한 선택지.
-        // 1. 한번에 하나의 타입에 대해서 순차적 처리 => 이 방식을 선제 구현 후 프로파일링 후 추가 조치 할 것!
-        // 2. 각각 개별적인 pending list를 가져서 전부 개별적으로 동시적으로 처리
-        // (ex. pendingStaticMeshRenderableProxy, pendingSkeletalMeshRenderableProxy, ...etc)
-        // Static Mesh
-        tf::Task createRenderableStaticMeshTask = subflow.for_each(
-            staticMeshProxyMap.cbegin(), staticMeshProxyMap.cend(),
-            [this, &renderableProxyMap, &staticMeshProxyMap, &transformProxyMap](const auto& entityProxyPair)
+        const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
+        tf::Task buildStaticMeshRenderables = subflow.for_each(
+            staticMeshEntityView.begin(), staticMeshEntityView.end(),
+            [this, staticMeshEntityView, &renderableProxyMap, &transformProxyMap, localFrameIdx](const Entity entity)
             {
-                const Entity entity = entityProxyPair.first;
-                IG_CHECK(transformProxyMap.contains(entity));
-                if (!renderableProxyMap.contains(entity))
+                const StaticMeshComponent& staticMeshComponent = staticMeshEntityView.get<const StaticMeshComponent>(entity);
+                if (!staticMeshComponent.Mesh)
                 {
-                    renderableProxyPackage.PendingProxyGroups[Engine::GetTaskExecutor().this_worker_id()].emplace_back(
+                    return;
+                }
+                IG_CHECK(meshProxyPackage.ProxyMap[localFrameIdx].contains(staticMeshComponent.Mesh));
+
+                const MaterialComponent& materialComponent = staticMeshEntityView.get<const MaterialComponent>(entity);
+                if (!materialComponent.Instance)
+                {
+                    return;
+                }
+                IG_CHECK(materialProxyPackage.ProxyMap[localFrameIdx].contains(materialComponent.Instance));
+
+                const MeshProxy& meshProxy = meshProxyPackage.ProxyMap[localFrameIdx][staticMeshComponent.Mesh];
+                const MaterialProxy& materialProxy = materialProxyPackage.ProxyMap[localFrameIdx][materialComponent.Instance];
+                const U64 instancingKey = InstancingPackage::MakeInstancingMapKey(meshProxy, materialProxy);
+                //IG_CHECK(instancingPackage.GlobalInstancingMap.contains(instancingKey));
+                const U32 instancingId = instancingPackage.GlobalInstancingMap[instancingKey].InstancingId;
+                const Index workerId = taskExecutor->this_worker_id();
+
+                const auto renderableFoundItr = renderableProxyMap.find(entity);
+                if (renderableFoundItr == renderableProxyMap.end())
+                {
+                    renderableProxyPackage.PendingProxyGroups[taskExecutor->this_worker_id()].emplace_back(
                         entity,
                         RenderableProxy{
                             .StorageSpace = {},
                             .GpuData = RenderableGpuData{
                                 .Type = ERenderableType::StaticMesh,
-                                .DataIdx = (U32)staticMeshProxyMap.at(entity).StorageSpace.OffsetIndex,
-                                .TransformDataIdx = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex}});
+                                .DataIdx = instancingId,
+                                .TransformDataIdx = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex},
+                            .bMightBeDestroyed = false});
 
-                    renderableProxyPackage.PendingReplicationGroups[Engine::GetTaskExecutor().this_worker_id()].emplace_back(entity);
+                    renderableProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
+                }
+                else
+                {
+                    RenderableProxy& proxy = renderableFoundItr->second;
+                    if (proxy.GpuData.Type != ERenderableType::StaticMesh)
+                    {
+                        return;
+                    }
+
+                    IG_CHECK(proxy.bMightBeDestroyed);
+                    proxy.bMightBeDestroyed = false;
+
+                    if (instancingId != proxy.GpuData.DataIdx)
+                    {
+                        proxy.GpuData.DataIdx = instancingId;
+                        renderableProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
+                    }
+
+                    renderableIndicesGroups[workerId].emplace_back((U32)proxy.StorageSpace.OffsetIndex);
                 }
             });
 
@@ -663,26 +709,10 @@ namespace ig
                     {
                         pendingRenderable.second.StorageSpace = renderableStorage.Allocate(1);
                         renderableProxyMap[pendingRenderable.first] = pendingRenderable.second;
+                        renderableIndicesGroups[groupIdx].emplace_back((U32)pendingRenderable.second.StorageSpace.OffsetIndex);
                     }
                     renderableProxyPackage.PendingProxyGroups[groupIdx].clear();
                 }
-            });
-
-        // Storage 할당이 끝나면 각 종류의 Renderable들에 대한 proxy 유효성(수명) 평가와 renderable indices 구성
-        tf::Task constructStaticMeshRenderableIndicesTask = subflow.for_each(
-            staticMeshProxyMap.cbegin(), staticMeshProxyMap.cend(),
-            [this, &renderableProxyMap, &staticMeshProxyMap](const auto& entityProxyPair)
-            {
-                const Entity entity = entityProxyPair.first;
-                RenderableProxy& proxy = renderableProxyMap[entity];
-                if (proxy.GpuData.Type != ERenderableType::StaticMesh)
-                {
-                    return;
-                }
-
-                IG_CHECK(proxy.bMightBeDestroyed);
-                proxy.bMightBeDestroyed = false;
-                renderableIndicesGroups[Engine::GetTaskExecutor().this_worker_id()].emplace_back((U32)proxy.StorageSpace.OffsetIndex);
             });
 
         tf::Task commitPendingRenderableIndicesTask = subflow.emplace(
@@ -718,11 +748,11 @@ namespace ig
                 renderableProxyPackage.PendingDestructions.clear();
             });
 
-        invalidateProxyTask.precede(createRenderableStaticMeshTask);
-        createRenderableStaticMeshTask.precede(commitPendingRenderableTask);
-        commitPendingRenderableTask.precede(constructStaticMeshRenderableIndicesTask);
-        constructStaticMeshRenderableIndicesTask.precede(commitPendingRenderableIndicesTask,
-                                                         commitPendingDestructionsTask);
+        invalidateProxyTask.precede(buildStaticMeshRenderables);
+        buildStaticMeshRenderables.precede(commitPendingRenderableTask);
+        // commitPendingRenderableTask.precede(updateStaticMeshRenderables);
+        commitPendingRenderableTask.precede(commitPendingRenderableIndicesTask,
+                                            commitPendingDestructionsTask);
     }
 
     template <typename Proxy, typename Owner>
@@ -877,6 +907,81 @@ namespace ig
         recordReplicateDataCmd.precede(submitCmdList);
     }
 
+    void SceneProxy::ReplicateInstancingData(const LocalFrameIndex localFrameIdx)
+    {
+        const Size requiredStagingBufferSize = sizeof(InstancingGpuData) * instancingPackage.GlobalInstancingMap.size();
+        if (requiredStagingBufferSize == 0)
+        {
+            return;
+        }
+
+        if (instancingPackage.StagingBufferSize[localFrameIdx] < requiredStagingBufferSize)
+        {
+            if (instancingPackage.StagingBuffer[localFrameIdx] != nullptr)
+            {
+                instancingPackage.StagingBuffer[localFrameIdx]->Unmap();
+                instancingPackage.MappedStagingBuffer[localFrameIdx] = nullptr;
+                instancingPackage.StagingBuffer[localFrameIdx].reset();
+            }
+
+            const Size newStagingBufferSize = std::max(instancingPackage.StagingBufferSize[localFrameIdx] * 2, requiredStagingBufferSize);
+            GpuBufferDesc stagingBufferDesc{};
+            stagingBufferDesc.AsUploadBuffer((U32)newStagingBufferSize);
+            stagingBufferDesc.DebugName = String(std::format("StaticMeshInstanceStagingBuffer.{}", localFrameIdx));
+
+            GpuDevice& gpuDevice = renderContext->GetGpuDevice();
+            instancingPackage.StagingBuffer[localFrameIdx] =
+                MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(stagingBufferDesc).value());
+            instancingPackage.StagingBufferSize[localFrameIdx] = newStagingBufferSize;
+
+            instancingPackage.MappedStagingBuffer[localFrameIdx] = instancingPackage.StagingBuffer[localFrameIdx]->Map(0);
+        }
+        IG_CHECK(instancingPackage.StagingBuffer[localFrameIdx] != nullptr);
+
+        auto* mappedStagingBuffer =
+            reinterpret_cast<InstancingGpuData*>(instancingPackage.MappedStagingBuffer[localFrameIdx]);
+        IG_CHECK(mappedStagingBuffer != nullptr);
+        Index instancingIdx = 0;
+        for (const auto& [instanceKey, data] : instancingPackage.GlobalInstancingMap)
+        {
+            mappedStagingBuffer[instancingIdx] = data;
+            ++instancingIdx;
+        }
+
+        GpuBuffer* instanceStorageBuffer =
+            renderContext->Lookup(instancingPackage.InstancingDataStorage[localFrameIdx]->GetGpuBuffer());
+        IG_CHECK(instanceStorageBuffer != nullptr);
+
+        CommandListPool& copyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
+        auto cmdList = copyCmdListPool.Request(localFrameIdx, "ReplicateInstancingDataCmdList"_fs);
+        cmdList->Open();
+
+        cmdList->AddPendingBufferBarrier(*instancingPackage.StagingBuffer[localFrameIdx],
+                                         D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                                         D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
+        cmdList->AddPendingBufferBarrier(*instanceStorageBuffer,
+                                         D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                                         D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+        cmdList->FlushBarriers();
+
+        cmdList->CopyBuffer(*instancingPackage.StagingBuffer[localFrameIdx], 0, requiredStagingBufferSize,
+                            *instanceStorageBuffer, 0);
+
+        cmdList->AddPendingBufferBarrier(*instancingPackage.StagingBuffer[localFrameIdx],
+                                         D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
+                                         D3D12_BARRIER_ACCESS_COPY_SOURCE, D3D12_BARRIER_ACCESS_NO_ACCESS);
+        cmdList->AddPendingBufferBarrier(*instanceStorageBuffer,
+                                         D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
+                                         D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_NO_ACCESS);
+        cmdList->FlushBarriers();
+
+        cmdList->Close();
+
+        CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+        CommandList* cmdLists[]{cmdList};
+        asyncCopyQueue.ExecuteCommandLists(cmdLists);
+    }
+
     void SceneProxy::ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx)
     {
         const Size requiredStagingBufferSize = sizeof(U32) * renderableIndices.size();
@@ -907,18 +1012,18 @@ namespace ig
         }
         IG_CHECK(renderableIndicesStagingBuffer[localFrameIdx]);
 
-        numMaxRenderables[localFrameIdx] = (U32)renderableIndices.size();
-        if (numMaxRenderables[localFrameIdx] == 0)
+        maxNumRenderables[localFrameIdx] = (U32)renderableIndices.size();
+        if (maxNumRenderables[localFrameIdx] == 0)
         {
             return;
         }
 
-        if (renderableIndicesBufferSize[localFrameIdx] < numMaxRenderables[localFrameIdx])
+        if (renderableIndicesBufferSize[localFrameIdx] < maxNumRenderables[localFrameIdx])
         {
             renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
             renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
 
-            const U32 newBufferSize = std::max(numMaxRenderables[localFrameIdx], renderableIndicesBufferSize[localFrameIdx] * 2);
+            const U32 newBufferSize = std::max(maxNumRenderables[localFrameIdx], renderableIndicesBufferSize[localFrameIdx] * 2);
             GpuBufferDesc renderableIndicesBufferDesc;
             renderableIndicesBufferDesc.AsStructuredBuffer<U32>(newBufferSize);
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
@@ -938,7 +1043,7 @@ namespace ig
         auto* mappedBuffer = mappedRenderableIndicesStagingBuffer[localFrameIdx];
 
         const U32 replicationSize = (U32)requiredStagingBufferSize;
-        IG_CHECK(replicationSize == (sizeof(U32) * numMaxRenderables[localFrameIdx]));
+        IG_CHECK(replicationSize == (sizeof(U32) * maxNumRenderables[localFrameIdx]));
         std::memcpy(mappedBuffer, renderableIndices.data(), replicationSize);
 
         CommandListPool& copyCmdListPool = renderContext->GetAsyncCopyCommandListPool();

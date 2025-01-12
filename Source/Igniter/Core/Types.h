@@ -38,6 +38,9 @@ namespace ig
 
     using Path = std::filesystem::path;
 
+    template <typename Key, typename T>
+    using OrderedMap = eastl::map<Key, T>;
+
     // Iterators = not stable, references & pointers = stable
     template <typename Key, typename T>
     using StableUnorderedMap = robin_hood::unordered_node_map<Key, T>;
@@ -53,7 +56,7 @@ namespace ig
     template <typename T>
     using Vector = eastl::vector<T>;
     template <typename T, Size N = 1Ui64>
-    using Array = eastl::array<T, N>; 
+    using Array = eastl::array<T, N>;
 
     using Entity = entt::entity;
     constexpr auto NullEntity = entt::null;

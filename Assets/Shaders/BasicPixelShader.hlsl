@@ -11,7 +11,11 @@ struct PerFrameData
     uint MaterialStorageSrv;
     uint MeshStorageSrv;
 
-    uint StaticMeshStorageSrv;
+    uint InstancingDataStorageSrv;
+    uint InstancingDataStorageUav;
+
+    uint TransformIdxStorageSrv;
+    uint TransformIdxStorageUav;
 
     uint RenderableStorageSrv;
 
@@ -24,7 +28,11 @@ struct PerFrameData
 struct PerDrawData
 {
     uint PerFrameDataCbv;
-    uint RenderableDataIdx;
+    uint InstancingId;
+    uint MaterialIdx;
+    uint VertexOffset;
+    uint VertexIdxStorageOffset;
+    uint TransformIdxStorageOffset;
 };
 
 struct MaterialData
@@ -33,17 +41,14 @@ struct MaterialData
     uint DiffuseTexSampler;
 };
 
-struct RenderableData
+struct InstancingData
 {
-    uint Type;
-    uint DataIdx;
-    uint TransformIdx;
-};
-
-struct StaticMeshData
-{
-    uint MaterialIdx;
-    uint MeshIdx;
+    uint MaterialDataIdx;
+    uint MeshDataIdx;
+    uint InstanceId;
+    uint TransformOffset;
+    uint MaxNumInstances;
+    uint NumInstances;
 };
 
 ConstantBuffer<PerDrawData> perDrawData : register(b0);
@@ -57,13 +62,8 @@ struct PixelShaderInput
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[perDrawData.PerFrameDataCbv];
-    StructuredBuffer<RenderableData> renderableDataStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
-    StructuredBuffer<StaticMeshData> staticMeshStorage = ResourceDescriptorHeap[perFrameData.StaticMeshStorageSrv];
-    RenderableData renderableData = renderableDataStorage[perDrawData.RenderableDataIdx];
-    StaticMeshData staticMeshData = staticMeshStorage[renderableData.DataIdx];
-
     StructuredBuffer<MaterialData> materialStorage = ResourceDescriptorHeap[perFrameData.MaterialStorageSrv];
-    MaterialData materialData = materialStorage[staticMeshData.MaterialIdx];
+    MaterialData materialData = materialStorage[perDrawData.MaterialIdx];
 
     Texture2D    texture      = ResourceDescriptorHeap[materialData.DiffuseTexSrv];
     SamplerState samplerState = SamplerDescriptorHeap[materialData.DiffuseTexSampler]; // test code material에 sampler도 넣어야함

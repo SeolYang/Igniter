@@ -5,8 +5,8 @@ namespace ig
 {
     MeshStorage::MeshStorage(RenderContext& renderContext) :
         renderContext(renderContext),
-        staticMeshVertexGpuStorage(renderContext, "StaticMeshVertexStorage"_fs, static_cast<U32>(sizeof(VertexSM)), 8192u, false),
-        vertexIndexGpuStorage(renderContext, "VertexIndexStorage"_fs, static_cast<U32>(sizeof(U32)), 16u * 8192u, false) {}
+        staticMeshVertexGpuStorage(renderContext, GpuStorageDesc{"StaticMeshVertexStorage"_fs, static_cast<U32>(sizeof(VertexSM)), 8192u}),
+        vertexIndexGpuStorage(renderContext, GpuStorageDesc{"VertexIndexStorage"_fs, static_cast<U32>(sizeof(U32)), 16u * 8192u}) {}
 
     MeshStorage::~MeshStorage()
     {
@@ -118,15 +118,15 @@ namespace ig
         {
             ReadOnlyLock storageMutex{staticMeshVertexSpacePackage.StorageMutex};
             stats.StaticMeshVertexStorageUsage = staticMeshVertexGpuStorage.GetAllocatedSize();
-            stats.StaticMeshVertexStorageSize  = staticMeshVertexGpuStorage.GetBufferSize();
-            stats.NumStaticMeshVertices        = staticMeshVertexGpuStorage.GetNumAllocatedElements();
+            stats.StaticMeshVertexStorageSize = staticMeshVertexGpuStorage.GetBufferSize();
+            stats.NumStaticMeshVertices = staticMeshVertexGpuStorage.GetNumAllocatedElements();
         }
 
         {
             ReadOnlyLock storageMutex{vertexIndexSpacePackage.StorageMutex};
             stats.VertexIndexStorageUsage = vertexIndexGpuStorage.GetAllocatedSize();
-            stats.VertexIndexStorageSize  = vertexIndexGpuStorage.GetBufferSize();
-            stats.NumVertexIndices        = vertexIndexGpuStorage.GetNumAllocatedElements();
+            stats.VertexIndexStorageSize = vertexIndexGpuStorage.GetBufferSize();
+            stats.NumVertexIndices = vertexIndexGpuStorage.GetNumAllocatedElements();
         }
 
         return stats;
