@@ -97,13 +97,13 @@ namespace ig
         MSG msg;
         ZeroMemory(&msg, sizeof(msg));
 
-        if (PeekMessage(&msg, windowHandle, WM_MOUSEMOVE, WM_MOUSEMOVE, PM_REMOVE))
+        if (PeekMessage(&msg, nullptr, WM_MOUSEMOVE, WM_MOUSEMOVE, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
 
-        while (PeekMessage(&msg, windowHandle, 0, WM_MOUSEMOVE - 1, PM_REMOVE) || PeekMessage(&msg, windowHandle, WM_MOUSEMOVE + 1, 0, PM_REMOVE))
+        while (PeekMessage(&msg, nullptr, 0, WM_MOUSEMOVE - 1, PM_REMOVE) || PeekMessage(&msg, nullptr, WM_MOUSEMOVE + 1, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);

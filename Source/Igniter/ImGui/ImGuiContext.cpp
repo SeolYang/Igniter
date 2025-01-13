@@ -14,9 +14,7 @@ namespace ig
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        // @todo Host Viewport가 아닌, Secondary Viewport 에 대한 이벤트가 도저히 전달되지 않는 것 같음..
-        // 하나 걸리는 점은, Raw Input 처리로 인해서 제대로 전달이 안되는 것 같음..
-        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.Fonts->AddFontFromFileTTF("Fonts/D2Coding-ligature.ttf", 18, nullptr, io.Fonts->GetGlyphRangesKorean());
         ig::ImGuiX::SetupDefaultTheme();
         //ig::ImGuiX::SetupTransparentTheme(true, 0.75f);
