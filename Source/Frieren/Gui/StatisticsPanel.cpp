@@ -2,9 +2,10 @@
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Core/Memory.h"
 #include "Igniter/Core/Timer.h"
+#include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
-#include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/MeshStorage.h"
+#include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/Renderer.h"
 #include "Frieren/Gui/StatisticsPanel.h"
 
@@ -44,7 +45,69 @@ namespace fe
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNodeEx("Temporary Constant Buffer Allocator", ImGuiTreeNodeFlags_Framed))
+        ImGui::NewLine();
+
+        if (ImGui::TreeNodeEx("GPU Stats", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            const auto getColorFromPercentage = [](const double percentage)
+            {
+                if (percentage >= 0.9)
+                {
+                    return IM_COL32(255, 0, 0, 255);
+                }
+
+                if (percentage >= 0.5)
+                {
+                    return IM_COL32(255, 255, 0, 255);
+                }
+
+                return IM_COL32(0, 255, 0, 255);
+            };
+
+            const ig::GpuDevice::Statistics gpuStats = ig::Engine::GetRenderContext().GetGpuDevice().GetStatistics();
+            ImGui::Text("GPU: %s", gpuStats.DeviceName.ToCString());
+            ImGui::Text("GPU Type: %s", (gpuStats.bIsUma ? "Integrated GPU" : "Discrete GPU"));
+
+            ImGui::Separator();
+
+            const double dedicatedVideoMemOccupancy = gpuStats.DedicatedVideoMemUsage / (double)gpuStats.DedicatedVideoMemBudget;
+            ImGui::PushStyleColor(ImGuiCol_Text, getColorFromPercentage(dedicatedVideoMemOccupancy));
+            ImGui::Text("Dedicated Video Mem: %lf MB / %lf MB (%lf %%)",
+                        ig::BytesToMegaBytes(gpuStats.DedicatedVideoMemUsage),
+                        ig::BytesToMegaBytes(gpuStats.DedicatedVideoMemBudget),
+                        dedicatedVideoMemOccupancy);
+            ImGui::PopStyleColor(1);
+
+            ImGui::Text("Dedicated Video Mem - Blocks: %llu(%lf MB)",
+                        gpuStats.DedicatedVideoMemBlockCount,
+                        ig::BytesToMegaBytes(gpuStats.DedicatedVideoMemBlockSize));
+            ImGui::Text("Dedicated Video Mem - Allocations: %llu(%lf MB)",
+                        gpuStats.DedicatedVideoMemAllocCount,
+                        ig::BytesToMegaBytes(gpuStats.DedicatedVideoMemAllocSize));
+
+            ImGui::NewLine();
+
+            const double sharedVideoMemOccupacny = gpuStats.SharedVideoMemUsage / (double)gpuStats.SharedVideoMemBudget;
+            ImGui::PushStyleColor(ImGuiCol_Text, getColorFromPercentage(dedicatedVideoMemOccupancy));
+            ImGui::Text("Shared Video Mem: %lf MB / %lf MB (%lf %%)",
+                        ig::BytesToMegaBytes(gpuStats.SharedVideoMemUsage),
+                        ig::BytesToMegaBytes(gpuStats.SharedVideoMemBudget),
+                        sharedVideoMemOccupacny);
+            ImGui::PopStyleColor(1);
+
+            ImGui::Text("Shared Video Mem - Blocks: %llu(%lf MB)",
+                        gpuStats.SharedVideoMemBlockCount,
+                        ig::BytesToMegaBytes(gpuStats.SharedVideoMemBlockSize));
+            ImGui::Text("Shared Video Mem - Allocations: %llu(%lf MB)",
+                        gpuStats.SharedVideoMemAllocCount,
+                        ig::BytesToMegaBytes(gpuStats.SharedVideoMemAllocSize));
+
+            ImGui::TreePop();
+        }
+
+        ImGui::NewLine();
+
+        if (ImGui::TreeNodeEx("Temporary Constant Buffer Allocator", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
         {
             ig::Renderer& renderer = ig::Engine::GetRenderer();
             constexpr std::string_view FormatTemplate = "Local Frame#%d Used: %lf MB/%.01lf MB";
@@ -64,7 +127,9 @@ namespace fe
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNodeEx("Mesh Storage", ImGuiTreeNodeFlags_Framed))
+        ImGui::NewLine();
+
+        if (ImGui::TreeNodeEx("Mesh Storage", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
         {
             const ig::MeshStorage& meshStorage = ig::Engine::GetMeshStorage();
             const ig::MeshStorage::Statistics meshStorageStatistics = meshStorage.GetStatistics();
@@ -85,6 +150,9 @@ namespace fe
 
             ImGui::TreePop();
         }
+
+        ImGui::NewLine();
+
         ++pollingStep;
     }
 } // namespace fe

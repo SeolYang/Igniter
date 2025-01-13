@@ -28,7 +28,7 @@ namespace ig
             IG_LOG(GpuDeviceLog, Error, "Failed to acquire adapter from factory.");
             return;
         }
-        LogAdapterInformation();
+        AcquireAdapterInfo();
 
         if (!CreateDevice())
         {
@@ -119,17 +119,19 @@ namespace ig
         return true;
     }
 
-    void GpuDevice::LogAdapterInformation() const
+    void GpuDevice::AcquireAdapterInfo()
     {
         IG_CHECK(adapter);
         DXGI_ADAPTER_DESC adapterDesc;
         adapter->GetDesc(&adapterDesc);
+
+        name = Narrower(adapterDesc.Description);
         IG_LOG(GpuDeviceLog, Info, "----------- The GPU Infos -----------");
-        IG_LOG(GpuDeviceLog, Info, "{}", Narrower(adapterDesc.Description));
+        IG_LOG(GpuDeviceLog, Info, "{}", name);
         IG_LOG(GpuDeviceLog, Info, "Vendor ID: {}", adapterDesc.VendorId);
-        IG_LOG(GpuDeviceLog, Info, "Dedicated Video Memory: {}", adapterDesc.DedicatedVideoMemory);
-        IG_LOG(GpuDeviceLog, Info, "Dedicated System Memory: {}", adapterDesc.DedicatedSystemMemory);
-        IG_LOG(GpuDeviceLog, Info, "Shared System Memory: {}", adapterDesc.SharedSystemMemory);
+        IG_LOG(GpuDeviceLog, Info, "Dedicated Video Memory: {}", BytesToMegaBytes(adapterDesc.DedicatedVideoMemory));
+        IG_LOG(GpuDeviceLog, Info, "Dedicated System Memory: {}", BytesToMegaBytes(adapterDesc.DedicatedSystemMemory));
+        IG_LOG(GpuDeviceLog, Info, "Shared System Memory: {}", BytesToMegaBytes(adapterDesc.SharedSystemMemory));
         IG_LOG(GpuDeviceLog, Info, "-------------------------------------");
     }
 
@@ -239,6 +241,46 @@ namespace ig
 
         IG_CHECK(allocator);
         return true;
+    }
+
+    GpuDevice::Statistics GpuDevice::GetStatistics() const
+    {
+        IG_CHECK(device);
+        IG_CHECK(allocator != nullptr);
+
+        Statistics statistics{};
+        statistics.DeviceName = name;
+        statistics.bIsUma = allocator->IsUMA();
+
+        D3D12MA::Budget localBudget{};
+        D3D12MA::Budget nonLocalBudget{};
+        allocator->GetBudget(&localBudget, &nonLocalBudget);
+        if (!statistics.bIsUma)
+        {
+            statistics.DedicatedVideoMemUsage = localBudget.UsageBytes;
+            statistics.DedicatedVideoMemBudget = localBudget.BudgetBytes;
+            statistics.DedicatedVideoMemBlockCount = localBudget.Stats.BlockCount;
+            statistics.DedicatedVideoMemBlockSize = localBudget.Stats.BlockBytes;
+            statistics.DedicatedVideoMemAllocCount = localBudget.Stats.AllocationCount;
+            statistics.DedicatedVideoMemAllocSize = localBudget.Stats.AllocationBytes;
+            statistics.SharedVideoMemUsage = nonLocalBudget.UsageBytes;
+            statistics.SharedVideoMemBudget = nonLocalBudget.BudgetBytes;
+            statistics.SharedVideoMemBlockCount = nonLocalBudget.Stats.BlockCount;
+            statistics.SharedVideoMemBlockSize = nonLocalBudget.Stats.BlockBytes;
+            statistics.SharedVideoMemAllocCount = nonLocalBudget.Stats.AllocationCount;
+            statistics.SharedVideoMemAllocSize = nonLocalBudget.Stats.AllocationBytes;
+        }
+        else
+        {
+            statistics.SharedVideoMemUsage = nonLocalBudget.UsageBytes;
+            statistics.SharedVideoMemBudget = nonLocalBudget.BudgetBytes;
+            statistics.SharedVideoMemBlockCount = nonLocalBudget.Stats.BlockCount;
+            statistics.SharedVideoMemBlockSize = nonLocalBudget.Stats.BlockBytes;
+            statistics.SharedVideoMemAllocCount = nonLocalBudget.Stats.AllocationCount;
+            statistics.SharedVideoMemAllocSize = nonLocalBudget.Stats.AllocationBytes;
+        }
+
+        return statistics;
     }
 
     Option<CommandQueue> GpuDevice::CreateCommandQueue(const std::string_view debugName, const EQueueType queueType)

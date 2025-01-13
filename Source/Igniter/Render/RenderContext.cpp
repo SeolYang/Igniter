@@ -419,6 +419,5 @@ namespace ig
 
     void RenderContext::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
-       // swapchain->Present();
     }
 } // namespace ig
