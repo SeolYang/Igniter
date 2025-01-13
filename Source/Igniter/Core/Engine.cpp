@@ -50,7 +50,7 @@ namespace ig
         IG_LOG(EngineLog, Info, "Input Manager Initialized.");
 
         renderContext = MakePtr<RenderContext>(*window);
-        IG_LOG(EngineLog, Info, "Render Context Initialized.");
+        IG_LOG(EngineLog, Info, "OnImGui Context Initialized.");
 
         meshStorage = MakePtr<MeshStorage>(*renderContext);
         IG_LOG(EngineLog, Info, "Mesh Storage Initialized.");
@@ -95,7 +95,7 @@ namespace ig
         IG_LOG(EngineLog, Info, "Mesh Storage Deinitialized.");
 
         renderContext.reset();
-        IG_LOG(EngineLog, Info, "Render Context Deinitialized.");
+        IG_LOG(EngineLog, Info, "OnImGui Context Deinitialized.");
 
         inputManager.reset();
         IG_LOG(EngineLog, Info, "Input Manager Deinitialized.");
@@ -118,7 +118,6 @@ namespace ig
             const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
             timer->Begin();
 
-            /************* Event Handle/Proccess/Dispatch *************/
             {
                 ZoneScopedN("Engine: Proccess Events");
                 window->PumpMessage();
@@ -132,23 +131,25 @@ namespace ig
             }
 
             const float deltaTime = timer->GetDeltaTime();
-            /*********** Pre-Update **********/
             {
                 ZoneScopedN("Engine: PreUpdate");
                 application.PreUpdate(deltaTime);
             }
 
-            /************* Update ************/
             {
                 ZoneScopedN("Engine: Update");
                 application.Update(deltaTime);
             }
 
-            /*********** Post-Update **********/
             {
                 ZoneScopedN("Engine: PostUpdate");
                 inputManager->PostUpdate();
                 application.PostUpdate(deltaTime);
+            }
+
+            {
+                ZoneScopedN("Engine: OnImGui");
+                application.OnImGui();
             }
 
             /* Rendering: Wait for GPU */
@@ -157,7 +158,6 @@ namespace ig
                 localFrameSyncs[localFrameIdx].WaitOnCpu();
             }
 
-            /*********** Pre-Render ***********/
             GpuSyncPoint replicationSyncPoint;
             {
                 ZoneScopedN("Engine: PreRender");
@@ -173,14 +173,12 @@ namespace ig
                 localFrameSyncs[localFrameIdx] = renderer->Render(localFrameIdx, *world, replicationSyncPoint);
             }
 
-            /*********** Post-Render ***********/
             {
                 ZoneScopedN("Engine: PostRender");
                 renderContext->PostRender(localFrameIdx);
                 application.PostRender(localFrameIdx);
             }
 
-            /***********  End Frame  *************/
             timer->End();
             FrameManager::EndFrame();
         }

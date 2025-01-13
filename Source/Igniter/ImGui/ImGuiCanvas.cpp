@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    void ImGuiCanvas::Render()
+    void ImGuiCanvas::OnImGui()
     {
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();

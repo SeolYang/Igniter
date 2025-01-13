@@ -762,6 +762,7 @@ namespace ig
         // 이미 그룹 별로 데이터가 균등 분배 되어있는 상황
         // 필요한 Staging Buffer 크기 == (sum(pendingRepsGroups[0..N].size()) * kDataSize))
 
+        // #sy_todo 더 batching 잘 되도록 개선하기(한번 모은 다음에 재분배 하던가)
         tf::Task prepareReplication = subflow.emplace(
             [this, &proxyPackage, localFrameIdx]()
             {

@@ -226,9 +226,9 @@ namespace fe
         taskExecutor.run(rootTaskFlow).wait();
     }
 
-    void TestApp::PostRender([[maybe_unused]] const ig::LocalFrameIndex localFrameIdx)
+    void TestApp::OnImGui()
     {
-        editorCanvas->Render();
+        editorCanvas->OnImGui();
     }
 
     void TestApp::SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem)

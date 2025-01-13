@@ -20,7 +20,8 @@ namespace fe
         ~TestApp() override;
 
         void Update(const float deltaTime) override;
-        void PostRender(const ig::LocalFrameIndex localFrameIdx) override;
+
+        void OnImGui() override;
 
         void SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem);
 
@@ -34,8 +35,8 @@ namespace fe
         constexpr static ig::U32 kAxeGridSizeZ = 100;
 #else
         constexpr static ig::U32 kAxeGridSizeX = 1;
-        constexpr static ig::U32 kAxeGridSizeY = 100;
-        constexpr static ig::U32 kAxeGridSizeZ = 1000;
+        constexpr static ig::U32 kAxeGridSizeY = 10000;
+        constexpr static ig::U32 kAxeGridSizeZ = 10;
 #endif
 
         constexpr static ig::U32 kNumAxes = kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ;

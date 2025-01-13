@@ -226,7 +226,7 @@ namespace ig
         bool bMainCameraExists = false;
         for (auto [entity, camera, transformComponent] : cameraView.each())
         {
-            /* #sy_todo Multiple Camera, Render Target per camera */
+            /* #sy_todo Multiple Camera, OnImGui Target per camera */
             /* Column Vector: PVM; Row Vector: MVP  */
             if (!camera.bIsMainCamera)
             {

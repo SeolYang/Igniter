@@ -29,6 +29,8 @@ namespace ig
         virtual void Update(const float deltaTime) = 0;
         virtual void PostUpdate([[maybe_unused]] const float deltaTime){};
 
+        virtual void OnImGui(){};
+
         virtual void PreRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
         virtual void PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
 

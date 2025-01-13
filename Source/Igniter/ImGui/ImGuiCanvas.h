@@ -12,7 +12,7 @@ namespace ig
         ImGuiCanvas& operator=(const ImGuiCanvas&) = delete;
         ImGuiCanvas& operator=(ImGuiCanvas&&) noexcept = delete;
 
-        virtual void Render() final;
+        virtual void OnImGui() final;
 
     protected:
         virtual void OnGui() = 0;
