@@ -18,13 +18,13 @@ namespace ig
             return MakeFail<Map::Desc, EMapCreateStatus::InvalidAssetType>();
         }
 
-        Json serializedWorld{ };
+        Json serializedWorld{};
         if (desc.WorldToSerialize != nullptr)
         {
             desc.WorldToSerialize->Serialize(serializedWorld);
         }
 
-        Json serializedMeta{ };
+        Json serializedMeta{};
         serializedMeta << assetInfo;
 
         const Path metadataPath{MakeAssetMetadataPath(EAssetCategory::Map, assetInfo.GetGuid())};

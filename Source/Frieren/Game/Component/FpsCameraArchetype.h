@@ -8,7 +8,7 @@ namespace fe
 {
     struct FpsCmaeraArchetype
     {
-    public:
+      public:
         static ig::Entity Create(ig::Registry& registry, const bool bIsMainCamera)
         {
             using namespace ig::literals;

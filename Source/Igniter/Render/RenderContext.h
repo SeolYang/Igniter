@@ -24,7 +24,7 @@ namespace ig
 
     class RenderContext final
     {
-    public:
+      public:
         explicit RenderContext(const Window& window);
         ~RenderContext();
 
@@ -84,7 +84,7 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx);
         void PostRender(const LocalFrameIndex localFrameIdx);
 
-    private:
+      private:
         GpuDevice gpuDevice;
 
         LocalFrameIndex currentLocalFrameIdx{};

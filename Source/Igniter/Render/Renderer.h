@@ -19,7 +19,7 @@ namespace ig
 
     class Renderer final
     {
-    public:
+      public:
         Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy);
         Renderer(const Renderer&) = delete;
         Renderer(Renderer&&) noexcept = delete;
@@ -34,7 +34,7 @@ namespace ig
 
         [[nodiscard]] const TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
 
-    private:
+      private:
         const Window* window = nullptr;
         RenderContext* renderContext = nullptr;
         const MeshStorage* meshStorage = nullptr;
@@ -49,7 +49,7 @@ namespace ig
         eastl::array<RenderHandle<GpuView>, NumFramesInFlight> dsvs;
 
         Ptr<GpuBuffer> uavCounterResetBuffer;
-        
+
         Ptr<ShaderBlob> computeCullingShader;
         Ptr<PipelineState> computeCullingPso;
 

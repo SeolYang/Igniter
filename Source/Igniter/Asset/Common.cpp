@@ -19,10 +19,16 @@ namespace ig
     }
 
     AssetInfo::AssetInfo(const String virtualPath, const EAssetCategory category)
-        : AssetInfo(xg::newGuid(), virtualPath, category, EAssetScope::Managed) { }
+        : AssetInfo(xg::newGuid(), virtualPath, category, EAssetScope::Managed)
+    {
+    }
 
     AssetInfo::AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope)
-        : creationTime(Timer::Now()), guid(guid), virtualPath(virtualPath), category(category), scope(scope)
+        : creationTime(Timer::Now())
+        , guid(guid)
+        , virtualPath(virtualPath)
+        , category(category)
+        , scope(scope)
     {
         ConstructVirtualPathHierarchy();
     }
@@ -49,7 +55,7 @@ namespace ig
 
     const Json& AssetInfo::Deserialize(const Json& archive)
     {
-        *this = { };
+        *this = {};
         IG_DESERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime, 0);
         IG_DESERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid, xg::Guid{});
         IG_DESERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath, String{});
@@ -99,9 +105,9 @@ namespace ig
             return Path{details::MaterialAssetRootPath};
         case EAssetCategory::Map:
             return Path{details::MapAssetRootPath};
-            [[unlikely]] default:
+        [[unlikely]] default:
             IG_CHECK_NO_ENTRY();
-            return Path{ };
+            return Path{};
         }
     }
 
@@ -153,7 +159,8 @@ namespace ig
     {
         std::string extension = resPath.extension().string();
         std::transform(extension.begin(), extension.end(), extension.begin(),
-                       [](const char character) { return static_cast<char>(::tolower(static_cast<int>(character))); });
+                       [](const char character)
+                       { return static_cast<char>(::tolower(static_cast<int>(character))); });
 
         return extension == details::MetadataExt;
     }
@@ -162,7 +169,7 @@ namespace ig
     {
         if (!IsMetadataPath(path))
         {
-            return xg::Guid{ };
+            return xg::Guid{};
         }
 
         return xg::Guid{path.replace_extension().filename().string()};
@@ -183,7 +190,7 @@ namespace ig
     {
         if (!virtualPath.IsValid())
         {
-            return String{ };
+            return String{};
         }
 
         static const std::regex ReplaceWhiteSpacesRegex{R"(\s+)", std::regex_constants::optimize};

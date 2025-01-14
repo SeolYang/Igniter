@@ -11,13 +11,13 @@ IG_DEFINE_LOG_CATEGORY(AssetManagerLog);
 
 namespace ig
 {
-    AssetManager::AssetManager(RenderContext& renderContext) :
-        textureImporter(MakePtr<TextureImporter>()),
-        textureLoader(MakePtr<TextureLoader>(renderContext)),
-        staticMeshImporter(MakePtr<StaticMeshImporter>(*this)),
-        staticMeshLoader(MakePtr<StaticMeshLoader>(renderContext, *this)),
-        materialImporter(MakePtr<MaterialImporter>(*this)),
-        materialLoader(MakePtr<MaterialLoader>(*this))
+    AssetManager::AssetManager(RenderContext& renderContext)
+        : textureImporter(MakePtr<TextureImporter>())
+        , textureLoader(MakePtr<TextureLoader>(renderContext))
+        , staticMeshImporter(MakePtr<StaticMeshImporter>(*this))
+        , staticMeshLoader(MakePtr<StaticMeshLoader>(renderContext, *this))
+        , materialImporter(MakePtr<MaterialImporter>(*this))
+        , materialLoader(MakePtr<MaterialLoader>(*this))
     {
         RestoreTempAssets();
         assetMonitor = MakePtr<details::AssetMonitor>();

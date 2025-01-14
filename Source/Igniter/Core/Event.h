@@ -8,16 +8,16 @@ namespace ig
         requires(std::is_object_v<Identifier>) && (std::is_object_v<Params> && ...)
     class [[nodiscard]] Event final
     {
-        using DelegateType   = std::function<void(Params...)>;
+        using DelegateType = std::function<void(Params...)>;
         using SubscriberType = std::pair<Identifier, DelegateType>;
 
-    public:
-        Event()                 = default;
-        Event(const Event&)     = default;
+      public:
+        Event() = default;
+        Event(const Event&) = default;
         Event(Event&&) noexcept = default;
-        ~Event()                = default;
+        ~Event() = default;
 
-        Event& operator=(const Event&)     = default;
+        Event& operator=(const Event&) = default;
         Event& operator=(Event&&) noexcept = default;
 
         template <typename I, typename D>
@@ -43,7 +43,7 @@ namespace ig
 
         void Clear() { subscribeTable.clear(); }
 
-    private:
-        UnorderedMap<Identifier, DelegateType> subscribeTable{ };
+      private:
+        UnorderedMap<Identifier, DelegateType> subscribeTable{};
     };
 } // namespace ig

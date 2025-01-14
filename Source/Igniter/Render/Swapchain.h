@@ -18,7 +18,7 @@ namespace ig
 
     class Swapchain final
     {
-    public:
+      public:
         Swapchain(const Window& window, RenderContext& renderContext, const bool bEnableVSync = false);
         ~Swapchain();
 
@@ -35,10 +35,10 @@ namespace ig
 
         void Present();
 
-    private:
+      private:
         void CheckTearingSupport(ComPtr<IDXGIFactory5> factory);
 
-    private:
+      private:
         RenderContext& renderContext;
 
         ComPtr<IDXGISwapChain4> swapchain;

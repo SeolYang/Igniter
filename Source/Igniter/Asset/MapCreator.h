@@ -17,16 +17,16 @@ namespace ig
     {
         friend class AssetManager;
 
-    public:
-        MapCreator()                      = default;
-        MapCreator(const MapCreator&)     = delete;
+      public:
+        MapCreator() = default;
+        MapCreator(const MapCreator&) = delete;
         MapCreator(MapCreator&&) noexcept = delete;
-        ~MapCreator()                     = default;
+        ~MapCreator() = default;
 
-        MapCreator& operator=(const MapCreator&)     = delete;
+        MapCreator& operator=(const MapCreator&) = delete;
         MapCreator& operator=(MapCreator&&) noexcept = delete;
 
-    private:
+      private:
         Result<Map::Desc, EMapCreateStatus> Import(const AssetInfo& assetInfo, const MapCreateDesc& desc);
     };
 } // namespace ig

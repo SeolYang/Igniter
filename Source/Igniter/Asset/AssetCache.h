@@ -9,14 +9,14 @@ namespace ig::details
 {
     class TypelessAssetCache
     {
-    public:
+      public:
         struct Snapshot
         {
             const U64 HandleHash{IG_NUMERIC_MAX_OF(HandleHash)};
             const uint32_t RefCount{};
         };
 
-    public:
+      public:
         virtual ~TypelessAssetCache() = default;
 
         virtual EAssetCategory GetAssetType() const = 0;
@@ -29,7 +29,7 @@ namespace ig::details
     template <typename T>
     class AssetCache final : public TypelessAssetCache
     {
-    public:
+      public:
         AssetCache() = default;
         AssetCache(const AssetCache&) = delete;
         AssetCache(AssetCache&&) noexcept = delete;
@@ -126,12 +126,10 @@ namespace ig::details
         {
             ReadOnlyLock lock{mutex};
             const auto refCounterItr = refCounterTable.find(guid);
-            return refCounterItr != refCounterTable.cend() ?
-                Snapshot{.HandleHash = cachedAssets.at(guid).GetHash(), .RefCount = refCounterItr->second} :
-                Snapshot{};
+            return refCounterItr != refCounterTable.cend() ? Snapshot{.HandleHash = cachedAssets.at(guid).GetHash(), .RefCount = refCounterItr->second} : Snapshot{};
         }
 
-    private:
+      private:
         [[nodiscard]] bool IsCachedUnsafe(const Guid& guid) const
         {
             IG_CHECK(guid.isValid());
@@ -163,10 +161,10 @@ namespace ig::details
             refCounterTable.erase(guid);
         }
 
-    public:
+      public:
         constexpr static EAssetCategory AssetType = AssetCategoryOf<T>;
 
-    private:
+      private:
         mutable SharedMutex mutex;
         HandleStorage<T, class AssetManager> registry;
         UnorderedMap<Guid, ManagedAsset<T>> cachedAssets{};

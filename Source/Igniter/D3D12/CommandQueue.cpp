@@ -7,13 +7,17 @@
 
 namespace ig
 {
-    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType) :
-        native(std::move(newNativeQueue)),
-        type(specifiedType) {}
+    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType)
+        : native(std::move(newNativeQueue))
+        , type(specifiedType)
+    {
+    }
 
-    CommandQueue::CommandQueue(CommandQueue&& other) noexcept :
-        native(std::move(other.native)),
-        type(other.type) {}
+    CommandQueue::CommandQueue(CommandQueue&& other) noexcept
+        : native(std::move(other.native))
+        , type(other.type)
+    {
+    }
 
     CommandQueue::~CommandQueue() {}
 
@@ -21,10 +25,10 @@ namespace ig
     {
         IG_CHECK(IsValid());
         auto toNative = views::all(cmdLists) |
-            views::filter([](CommandList* cmdList)
-                          { return cmdList != nullptr; }) |
-            views::transform([](CommandList* cmdList)
-                             { return &cmdList->GetNative(); });
+                        views::filter([](CommandList* cmdList)
+                                      { return cmdList != nullptr; }) |
+                        views::transform([](CommandList* cmdList)
+                                         { return &cmdList->GetNative(); });
 
         Vector<CommandList::NativeType*> natives = ToVector(toNative);
         native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));

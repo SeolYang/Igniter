@@ -15,13 +15,17 @@ namespace ig
 
     const Json& MaterialAssetLoadDesc::Deserialize(const Json& archive)
     {
-        *this = { };
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(MaterialAssetLoadDesc, archive, DiffuseTexGuid, Guid{ DefaultTextureGuid });
+        *this = {};
+        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(MaterialAssetLoadDesc, archive, DiffuseTexGuid, Guid{DefaultTextureGuid});
         return archive;
     }
 
     Material::Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse)
-        : assetManager(&assetManager), snapshot(snapshot), diffuse(diffuse) { }
+        : assetManager(&assetManager)
+        , snapshot(snapshot)
+        , diffuse(diffuse)
+    {
+    }
 
     Material::~Material()
     {

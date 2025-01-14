@@ -39,14 +39,14 @@ namespace ig
     };
 
     // 나중에 여러 카메라에 대해 렌더링하게 되면 Per Frame은 아닐수도?
-    struct  PerFrameBuffer
+    struct PerFrameBuffer
     {
         Matrix ViewProj{};
 
         Vector3 CameraPosition{};
         float Padding0;
 
-        //Frustum CameraFrustum;
+        // Frustum CameraFrustum;
 
         U32 StaticMeshVertexStorageSrv = IG_NUMERIC_MAX_OF(StaticMeshVertexStorageSrv);
         U32 VertexIndexStorageSrv = IG_NUMERIC_MAX_OF(VertexIndexStorageSrv);
@@ -83,8 +83,13 @@ namespace ig
         U32 DrawOpaqueStaticMeshCmdBufferUav;
     };
 
-    Renderer::Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy) :
-        window(&window), renderContext(&renderContext), meshStorage(&meshStorage), sceneProxy(&sceneProxy), mainViewport(window.GetViewport()), tempConstantBufferAllocator(MakePtr<TempConstantBufferAllocator>(renderContext))
+    Renderer::Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy)
+        : window(&window)
+        , renderContext(&renderContext)
+        , meshStorage(&meshStorage)
+        , sceneProxy(&sceneProxy)
+        , mainViewport(window.GetViewport())
+        , tempConstantBufferAllocator(MakePtr<TempConstantBufferAllocator>(renderContext))
     {
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         bindlessRootSignature = MakePtr<RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
@@ -458,13 +463,15 @@ namespace ig
             renderCmdList->SetDescriptorHeaps(bindlessDescHeaps);
             renderCmdList->SetRootSignature(*bindlessRootSignature);
 
-            renderCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-                                                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-                                                    D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-            renderCmdList->AddPendingBufferBarrier(*drawOpaqueStaticMeshCmdBuffer,
-                                                   D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_EXECUTE_INDIRECT,
-                                                   D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT);
+            renderCmdList->AddPendingTextureBarrier(
+                *backBuffer,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+                D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            renderCmdList->AddPendingBufferBarrier(
+                *drawOpaqueStaticMeshCmdBuffer,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_EXECUTE_INDIRECT,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT);
             renderCmdList->FlushBarriers();
 
             renderCmdList->ClearRenderTarget(*backBufferRtv);
@@ -476,13 +483,15 @@ namespace ig
             renderCmdList->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             renderCmdList->ExecuteIndirect(*commandSignature, *drawOpaqueStaticMeshCmdBuffer);
 
-            renderCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                    D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
-                                                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                                    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
-            renderCmdList->AddPendingBufferBarrier(*drawOpaqueStaticMeshCmdBuffer,
-                                                   D3D12_BARRIER_SYNC_EXECUTE_INDIRECT, D3D12_BARRIER_SYNC_NONE,
-                                                   D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT, D3D12_BARRIER_ACCESS_NO_ACCESS);
+            renderCmdList->AddPendingTextureBarrier(
+                *backBuffer,
+                D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            renderCmdList->AddPendingBufferBarrier(
+                *drawOpaqueStaticMeshCmdBuffer,
+                D3D12_BARRIER_SYNC_EXECUTE_INDIRECT, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT, D3D12_BARRIER_ACCESS_NO_ACCESS);
             renderCmdList->FlushBarriers();
         }
         renderCmdList->Close();
@@ -496,20 +505,22 @@ namespace ig
             auto imguiCmdList = mainGfxCmdListPool.Request(localFrameIdx, "RenderImGui"_fs);
             imguiCmdList->Open();
             {
-                imguiCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                       D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-                                                       D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-                                                       D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+                imguiCmdList->AddPendingTextureBarrier(
+                    *backBuffer,
+                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+                    D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
                 imguiCmdList->FlushBarriers();
 
                 imguiCmdList->SetRenderTarget(*backBufferRtv);
                 imguiCmdList->SetDescriptorHeap(renderContext->GetCbvSrvUavDescriptorHeap());
                 ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), &imguiCmdList->GetNative());
 
-                imguiCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                       D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
-                                                       D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                                       D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+                imguiCmdList->AddPendingTextureBarrier(
+                    *backBuffer,
+                    D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
                 imguiCmdList->FlushBarriers();
             }
             imguiCmdList->Close();

@@ -22,7 +22,7 @@ namespace ig
 
     class GpuDevice final
     {
-    public:
+      public:
         struct Statistics
         {
             String DeviceName{};
@@ -43,7 +43,7 @@ namespace ig
             Size SharedVideoMemAllocSize{0};
         };
 
-    public:
+      public:
         GpuDevice();
         ~GpuDevice();
 
@@ -90,7 +90,7 @@ namespace ig
         void DestroyRenderTargetView(const GpuView& gpuView);
         void DestroyDepthStencilView(const GpuView& gpuView);
 
-    private:
+      private:
         bool AcquireAdapterFromFactory();
         void AcquireAdapterInfo();
         bool CreateDevice();
@@ -99,7 +99,7 @@ namespace ig
         void CacheDescriptorHandleIncrementSize();
         bool CreateMemoryAllocator();
 
-    private:
+      private:
         ComPtr<IDXGIAdapter> adapter;
         String name{};
 

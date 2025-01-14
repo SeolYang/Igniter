@@ -7,7 +7,7 @@ namespace ig
     std::queue<IndexType> CreateIndexQueue(const IndexType numIndices)
     {
         std::queue<IndexType> result;
-        for (IndexType index = { }; index < numIndices; ++index)
+        for (IndexType index = {}; index < numIndices; ++index)
         {
             result.push(index);
         }
@@ -17,7 +17,7 @@ namespace ig
     template <std::ranges::range R>
     auto ToVector(R&& range)
     {
-        eastl::vector<std::ranges::range_value_t<R>> newVec{ };
+        eastl::vector<std::ranges::range_value_t<R>> newVec{};
         if constexpr (std::ranges::sized_range<R>)
         {
             newVec.reserve(std::ranges::size(range));

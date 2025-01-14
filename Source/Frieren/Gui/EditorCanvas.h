@@ -17,14 +17,14 @@ namespace fe
 
     class EditorCanvas final : public ig::ImGuiCanvas
     {
-    public:
+      public:
         EditorCanvas(TestApp& testApp);
         ~EditorCanvas() override;
 
-    protected:
+      protected:
         void OnGui() override;
 
-    private:
+      private:
         TestApp& app;
         ig::Ptr<StatisticsPanel> statisticsPanel{};
         ig::Ptr<CachedStringDebugger> cachedStringDebugger{};

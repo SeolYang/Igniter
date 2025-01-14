@@ -14,7 +14,7 @@ namespace ig
     {
         friend class GpuDevice;
 
-    public:
+      public:
         CommandQueue(const CommandQueue&) = delete;
         CommandQueue(CommandQueue&& other) noexcept;
         ~CommandQueue();
@@ -34,13 +34,13 @@ namespace ig
         GpuSyncPoint MakeSyncPointWithSignal(GpuFence& fence);
         void Wait(GpuSyncPoint& syncPoint);
 
-    private:
+      private:
         CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);
 
-    private:
+      private:
         static constexpr size_t RecommendedMinNumCommandLists = 16;
 
-    private:
+      private:
         ComPtr<ID3D12CommandQueue> native;
         const EQueueType type;
     };

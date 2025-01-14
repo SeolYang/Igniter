@@ -7,7 +7,8 @@
 
 namespace ig
 {
-    ImGuiContext::ImGuiContext(Window& window, RenderContext& renderContext) : renderContext(renderContext)
+    ImGuiContext::ImGuiContext(Window& window, RenderContext& renderContext)
+        : renderContext(renderContext)
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -17,20 +18,20 @@ namespace ig
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.Fonts->AddFontFromFileTTF("Fonts/D2Coding-ligature.ttf", 18, nullptr, io.Fonts->GetGlyphRangesKorean());
         ig::ImGuiX::SetupDefaultTheme();
-        //ig::ImGuiX::SetupTransparentTheme(true, 0.75f);
+        // ig::ImGuiX::SetupTransparentTheme(true, 0.75f);
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
-            ImGuiStyle& style                 = ImGui::GetStyle();
-            style.WindowRounding              = 0.0f;
+            ImGuiStyle& style = ImGui::GetStyle();
+            style.WindowRounding = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
         ImGui_ImplWin32_Init(window.GetNative());
 
-        fontSrv                   = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
-        ig::GpuView*   fontSrvPtr = renderContext.Lookup(fontSrv);
-        ig::GpuDevice& gpuDevice  = renderContext.GetGpuDevice();
+        fontSrv = renderContext.CreateGpuView(ig::EGpuViewType::ShaderResourceView);
+        ig::GpuView* fontSrvPtr = renderContext.Lookup(fontSrv);
+        ig::GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         ImGui_ImplDX12_Init(&gpuDevice.GetNative(), ig::NumFramesInFlight, DXGI_FORMAT_R8G8B8A8_UNORM,
                             &renderContext.GetCbvSrvUavDescriptorHeap().GetNative(), fontSrvPtr->CpuHandle, fontSrvPtr->GpuHandle);
     }

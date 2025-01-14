@@ -21,7 +21,7 @@ namespace ig
             PseudoTlsfBlockHandle PrevFreeBlock{};
             PseudoTlsfBlockHandle NextFreeBlock{};
         };
-    }    // namespace details
+    } // namespace details
 
     class PseudoTlsfAllocator;
     struct PseudoTlsfAllocation
@@ -33,7 +33,7 @@ namespace ig
 
     class PseudoTlsfAllocator
     {
-    public:
+      public:
         PseudoTlsfAllocator(const size_t memoryPoolSize, const size_t secondLevelParam);
         PseudoTlsfAllocator(const PseudoTlsfAllocator&) = delete;
         PseudoTlsfAllocator(PseudoTlsfAllocator&&) noexcept = delete;
@@ -45,12 +45,12 @@ namespace ig
         PseudoTlsfAllocation Allocate(const size_t allocSize);
         void Deallocate(PseudoTlsfAllocation allocation);
 
-    private:
+      private:
         void Insert(Handle<details::PseudoTlsfBlock, PseudoTlsfAllocator> block);
         details::PseudoTlsfBlockHandle ExtractHead(const size_t firstLevelIdx, const size_t secondLevelIdx);
         void Extract(Handle<details::PseudoTlsfBlock, PseudoTlsfAllocator> block);
 
-    private:
+      private:
         HandleRegistry<details::PseudoTlsfBlock, PseudoTlsfAllocator> blockRegistry;
 
         size_t memoryPoolSize = 0;
@@ -64,4 +64,4 @@ namespace ig
         eastl::vector<uint64_t> secondLevelBitmaps;
         eastl::vector<details::PseudoTlsfBlockHandle> freeLists;
     };
-}    // namespace ig
+} // namespace ig

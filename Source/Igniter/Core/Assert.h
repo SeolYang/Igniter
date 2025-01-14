@@ -16,7 +16,7 @@
         (EXPRESSION);         \
     } while (false)
 
-#define IG_CHECK(CONDITION) ((void) 0)
+#define IG_CHECK(CONDITION) ((void)0)
 #endif
 
 #define IG_CHECK_NO_ENTRY() IG_CHECK(false)

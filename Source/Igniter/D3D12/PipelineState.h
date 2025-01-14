@@ -11,7 +11,7 @@ namespace ig
     {
         friend class GpuDevice;
 
-    public:
+      public:
         ~PipelineState();
 
         auto& GetNative() { return *native.Get(); }
@@ -19,12 +19,12 @@ namespace ig
         bool IsGraphics() const { return bIsGraphics; }
         bool IsCompute() const { return !bIsGraphics; }
 
-    private:
+      private:
         PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO);
 
-    private:
+      private:
         ComPtr<ID3D12PipelineState> native;
-        const bool                  bIsGraphics;
+        const bool bIsGraphics;
         // const size_t pipelineStateHash;
     };
 } // namespace ig

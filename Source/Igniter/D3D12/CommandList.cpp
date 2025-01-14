@@ -14,18 +14,22 @@
 
 namespace ig
 {
-    CommandList::CommandList(CommandList&& other) noexcept :
-        cmdAllocator(std::move(other.cmdAllocator)),
-        cmdList(std::move(other.cmdList)),
-        cmdListTargetQueueType(other.cmdListTargetQueueType),
-        pendingGlobalBarriers(std::move(other.pendingGlobalBarriers)),
-        pendingTextureBarriers(std::move(other.pendingTextureBarriers)),
-        pendingBufferBarriers(std::move(other.pendingBufferBarriers)) {}
+    CommandList::CommandList(CommandList&& other) noexcept
+        : cmdAllocator(std::move(other.cmdAllocator))
+        , cmdList(std::move(other.cmdList))
+        , cmdListTargetQueueType(other.cmdListTargetQueueType)
+        , pendingGlobalBarriers(std::move(other.pendingGlobalBarriers))
+        , pendingTextureBarriers(std::move(other.pendingTextureBarriers))
+        , pendingBufferBarriers(std::move(other.pendingBufferBarriers))
+    {
+    }
 
-    CommandList::CommandList(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList, const EQueueType targetQueueType) :
-        cmdAllocator(std::move(newCmdAllocator)),
-        cmdList(std::move(newCmdList)),
-        cmdListTargetQueueType(targetQueueType) {}
+    CommandList::CommandList(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList, const EQueueType targetQueueType)
+        : cmdAllocator(std::move(newCmdAllocator))
+        , cmdList(std::move(newCmdList))
+        , cmdListTargetQueueType(targetQueueType)
+    {
+    }
 
     CommandList& CommandList::operator=(CommandList&& other) noexcept
     {
@@ -243,10 +247,10 @@ namespace ig
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics || cmdListTargetQueueType == EQueueType::Compute);
         auto toNative = views::all(descriptorHeaps) |
-            views::filter([](DescriptorHeap* ptr)
-                          { return ptr != nullptr; }) |
-            views::transform([](DescriptorHeap* ptr)
-                             { return &ptr->GetNative(); });
+                        views::filter([](DescriptorHeap* ptr)
+                                      { return ptr != nullptr; }) |
+                        views::transform([](DescriptorHeap* ptr)
+                                         { return &ptr->GetNative(); });
         auto nativePtrs = ToVector(toNative);
         cmdList->SetDescriptorHeaps(static_cast<uint32_t>(nativePtrs.size()), nativePtrs.data());
     }

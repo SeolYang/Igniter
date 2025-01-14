@@ -18,7 +18,7 @@ namespace ig
     // @dependency	None
     class Logger final
     {
-    public:
+      public:
         Logger(const Logger&) = delete;
         Logger(Logger&&) noexcept = delete;
         ~Logger();
@@ -91,7 +91,7 @@ namespace ig
         static void UnsuppressLogInCurrentThread();
         static bool IsLogSuppressedInCurrentThread();
 
-    private:
+      private:
         Logger();
 
         template <typename C>
@@ -109,12 +109,12 @@ namespace ig
             return nullptr;
         }
 
-    private:
+      private:
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
         std::shared_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
         Vector<std::pair<U64, spdlog::logger*>> categories;
 
-    private:
+      private:
         static constexpr std::string_view FileName = "Log";
     };
 } // namespace ig
@@ -128,7 +128,7 @@ namespace ig
             LOG_CATEGORY_NAME();                                                 \
             static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
                                                                                  \
-        private:                                                                 \
+          private:                                                               \
             static LOG_CATEGORY_NAME _reg;                                       \
         };                                                                       \
     }

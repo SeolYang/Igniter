@@ -8,8 +8,8 @@ IG_DEFINE_LOG_CATEGORY(ShaderBlobLog);
 namespace ig
 {
     // #sy_todo 셰이더 컴파일 후 파일로 저장/캐싱 -> 셰이더 에셋
-    ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc) :
-        type(desc.Type)
+    ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)
+        : type(desc.Type)
     {
         std::vector<const wchar_t*> arguments;
         arguments.push_back(TEXT("-E"));

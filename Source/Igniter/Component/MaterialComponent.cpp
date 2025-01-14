@@ -15,23 +15,23 @@ namespace ig
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(MaterialComponent);
     }
 
-    MaterialComponent::MaterialComponent() :
-        Instance(Engine::GetAssetManager().LoadMaterial(Guid{DefaultMaterialGuid}))
+    MaterialComponent::MaterialComponent()
+        : Instance(Engine::GetAssetManager().LoadMaterial(Guid{DefaultMaterialGuid}))
     {
     }
 
-    MaterialComponent::MaterialComponent(const MaterialComponent& other) :
-        Instance(Engine::GetAssetManager().Clone(other.Instance))
+    MaterialComponent::MaterialComponent(const MaterialComponent& other)
+        : Instance(Engine::GetAssetManager().Clone(other.Instance))
     {
     }
 
-    MaterialComponent::MaterialComponent(MaterialComponent&& other) noexcept :
-        Instance(std::exchange(other.Instance, {}))
+    MaterialComponent::MaterialComponent(MaterialComponent&& other) noexcept
+        : Instance(std::exchange(other.Instance, {}))
     {
     }
 
-    MaterialComponent::MaterialComponent(const ManagedAsset<Material> ownedInstance) :
-        Instance(ownedInstance)
+    MaterialComponent::MaterialComponent(const ManagedAsset<Material> ownedInstance)
+        : Instance(ownedInstance)
     {
     }
 

@@ -12,13 +12,13 @@ namespace fe
 {
     class FpsCameraControllSystem : public ig::GameSystem
     {
-    public:
+      public:
         FpsCameraControllSystem();
 
         void Update(const float deltaTime, ig::World& world) override;
         void SetIgnoreInput(const bool bEnable) { this->bIgnoreInput = bEnable; }
 
-    private:
+      private:
         bool bIgnoreInput = false;
 
         ig::Handle<ig::Action, ig::InputManager> moveLeftActionHandle;

@@ -9,13 +9,13 @@ namespace ig
 
     class ImGuiContext final
     {
-    public:
+      public:
         ImGuiContext(Window& window, RenderContext& renderContext);
-        ImGuiContext(const ImGuiContext&)     = delete;
+        ImGuiContext(const ImGuiContext&) = delete;
         ImGuiContext(ImGuiContext&&) noexcept = delete;
         ~ImGuiContext();
 
-        ImGuiContext& operator=(const ImGuiContext&)     = delete;
+        ImGuiContext& operator=(const ImGuiContext&) = delete;
         ImGuiContext& operator=(ImGuiContext&&) noexcept = delete;
 
         void SetInputEnabled(const bool bEnabled)
@@ -33,9 +33,9 @@ namespace ig
 
         bool HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    private:
-        RenderContext&                 renderContext;
-        Handle<GpuView, RenderContext> fontSrv{ };
-        bool                           bInputEnabled = true;
+      private:
+        RenderContext& renderContext;
+        Handle<GpuView, RenderContext> fontSrv{};
+        bool bInputEnabled = true;
     };
 } // namespace ig

@@ -35,36 +35,36 @@ namespace ig
 
     struct Action final
     {
-    public:
+      public:
         [[nodiscard]] bool IsAnyPressing() const noexcept { return State == ig::EInputState::Pressed || State == EInputState::OnPressing; }
 
-    public:
+      public:
         EInputState State = EInputState::None;
     };
 
     struct Axis final
     {
-    public:
+      public:
         [[nodiscard]] float GetScaledValue() const noexcept { return Value * Scale; }
 
-    public:
+      public:
         float Scale = 1.f;
         float Value = 0.0f;
     };
 
     class InputManager final
     {
-    private:
+      private:
         struct ActionMapping
         {
-            Handle<Action, InputManager> ActionHandle{ };
-            EInput                       MappedInput{EInput::None};
+            Handle<Action, InputManager> ActionHandle{};
+            EInput MappedInput{EInput::None};
         };
 
         struct AxisMapping
         {
-            Handle<Axis, InputManager> AxisHandle{ };
-            EInput                     MappedInput{EInput::None};
+            Handle<Axis, InputManager> AxisHandle{};
+            EInput MappedInput{EInput::None};
         };
 
         struct RawMouseInput
@@ -73,13 +73,13 @@ namespace ig
             float DeltaY = 0.f;
         };
 
-    public:
+      public:
         InputManager();
-        InputManager(const InputManager&)     = delete;
+        InputManager(const InputManager&) = delete;
         InputManager(InputManager&&) noexcept = delete;
         ~InputManager();
 
-        InputManager& operator=(const InputManager&)     = delete;
+        InputManager& operator=(const InputManager&) = delete;
         InputManager& operator=(InputManager&&) noexcept = delete;
 
         void MapAction(const String name, const EInput input);
@@ -90,17 +90,17 @@ namespace ig
         void SetScale(const String name, const float newScale);
 
         [[nodiscard]] Handle<Action, InputManager> QueryAction(const String name) const;
-        [[nodiscard]] Handle<Axis, InputManager>   QueryAxis(const String name) const;
+        [[nodiscard]] Handle<Axis, InputManager> QueryAxis(const String name) const;
 
         [[nodiscard]] Action GetAction(const Handle<Action, InputManager> action) const;
-        [[nodiscard]] Axis   GetAxis(const Handle<Axis, InputManager> axis) const;
+        [[nodiscard]] Axis GetAxis(const Handle<Axis, InputManager> axis) const;
 
         bool HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
 
         void HandleRawMouseInput();
         void PostUpdate();
 
-    private:
+      private:
         void HandleKeyDown(const WPARAM wParam, const bool bIsMouse);
         void HandleKeyUp(const WPARAM wParam, const bool bIsMouse);
 
@@ -111,24 +111,24 @@ namespace ig
 
         void PollRawMouseInput();
 
-    private:
+      private:
         HandleStorage<Action, InputManager> actionRegistry;
-        HandleStorage<Axis, InputManager>   axisRegistry;
+        HandleStorage<Axis, InputManager> axisRegistry;
 
-        UnorderedMap<String, ActionMapping> nameActionTable{ };
-        UnorderedMap<String, AxisMapping>   nameAxisTable{ };
+        UnorderedMap<String, ActionMapping> nameActionTable{};
+        UnorderedMap<String, AxisMapping> nameAxisTable{};
 
-        constexpr static size_t                                                   NumScopedInputs = magic_enum::enum_count<EInput>();
+        constexpr static size_t NumScopedInputs = magic_enum::enum_count<EInput>();
         eastl::array<UnorderedSet<Handle<Action, InputManager>>, NumScopedInputs> actionSets;
-        eastl::array<UnorderedSet<Handle<Axis, InputManager>>, NumScopedInputs>   axisSets;
+        eastl::array<UnorderedSet<Handle<Axis, InputManager>>, NumScopedInputs> axisSets;
 
         UnorderedSet<EInput> processedInputs;
 
-        std::jthread                 rawMouseInputPollingThread;
-        HANDLE                       rawMouseInputPollingDoneEvent{INVALID_HANDLE_VALUE};
-        Mutex                        rawMouseInputPollingMutex;
-        eastl::vector<uint8_t>       rawInputBuffer;
+        std::jthread rawMouseInputPollingThread;
+        HANDLE rawMouseInputPollingDoneEvent{INVALID_HANDLE_VALUE};
+        Mutex rawMouseInputPollingMutex;
+        eastl::vector<uint8_t> rawInputBuffer;
         eastl::vector<RawMouseInput> polledRawMouseInputs;
-        size_t                       rawInputOffset{sizeof(RAWINPUTHEADER)};
+        size_t rawInputOffset{sizeof(RAWINPUTHEADER)};
     };
 } // namespace ig

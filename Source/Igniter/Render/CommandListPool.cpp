@@ -4,10 +4,10 @@
 
 namespace ig
 {
-    CommandListPool::CommandListPool(GpuDevice& gpuDevice, const EQueueType cmdListType) :
-        frameManager(frameManager),
-        numReservedCtx(NumTargetCommandListPerThread * std::thread::hardware_concurrency() * NumFramesInFlight),
-        cmdQueueType(cmdListType)
+    CommandListPool::CommandListPool(GpuDevice& gpuDevice, const EQueueType cmdListType)
+        : frameManager(frameManager)
+        , numReservedCtx(NumTargetCommandListPerThread * std::thread::hardware_concurrency() * NumFramesInFlight)
+        , cmdQueueType(cmdListType)
     {
         IG_CHECK(numReservedCtx > 0);
         cmdLists.reserve(numReservedCtx);

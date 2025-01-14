@@ -9,7 +9,10 @@ IG_DECLARE_LOG_CATEGORY(MaterialImporter);
 
 namespace ig
 {
-    MaterialImporter::MaterialImporter(AssetManager& assetManager) : assetManager(assetManager) { }
+    MaterialImporter::MaterialImporter(AssetManager& assetManager)
+        : assetManager(assetManager)
+    {
+    }
 
     Result<Material::Desc, EMaterialAssetImportStatus> MaterialImporter::Import(const AssetInfo& assetInfo, const MaterialAssetCreateDesc& desc)
     {
@@ -24,20 +27,20 @@ namespace ig
         }
 
         const ManagedAsset<Texture> diffuse{assetManager.LoadTexture(desc.DiffuseVirtualPath)};
-        Guid                        diffuseTexGuid{DefaultTextureGuid};
+        Guid diffuseTexGuid{DefaultTextureGuid};
         if (diffuse)
         {
             const Texture* diffusePtr = assetManager.Lookup(diffuse);
             IG_CHECK(diffusePtr != nullptr);
             const Texture::Desc& diffuseDescSnapshot{diffusePtr->GetSnapshot()};
-            const AssetInfo&     diffuseInfo{diffuseDescSnapshot.Info};
+            const AssetInfo& diffuseInfo{diffuseDescSnapshot.Info};
             diffuseTexGuid = diffuseInfo.GetGuid();
         }
         IG_CHECK(diffuseTexGuid.isValid());
 
         const Material::LoadDesc loadDesc{.DiffuseTexGuid = diffuseTexGuid};
 
-        Json serializedMeta{ };
+        Json serializedMeta{};
         serializedMeta << assetInfo << loadDesc;
 
         const Path metadataPath{MakeAssetMetadataPath(EAssetCategory::Material, assetInfo.GetGuid())};

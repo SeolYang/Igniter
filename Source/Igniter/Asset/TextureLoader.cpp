@@ -16,7 +16,10 @@ IG_DECLARE_LOG_CATEGORY(TextureLoader);
 
 namespace ig
 {
-    TextureLoader::TextureLoader(RenderContext& renderContext) : renderContext(renderContext) { }
+    TextureLoader::TextureLoader(RenderContext& renderContext)
+        : renderContext(renderContext)
+    {
+    }
 
     Result<Texture, ETextureLoaderStatus> TextureLoader::Load(const Texture::Desc& desc)
     {
@@ -50,9 +53,9 @@ namespace ig
             return MakeFail<Texture, ETextureLoaderStatus::FileDoesNotExists>();
         }
 
-        DirectX::TexMetadata  ddsMeta;
+        DirectX::TexMetadata ddsMeta;
         DirectX::ScratchImage scratchImage;
-        HRESULT               res = DirectX::LoadFromDDSFile(assetPath.c_str(), DirectX::DDS_FLAGS_NONE, &ddsMeta, scratchImage);
+        HRESULT res = DirectX::LoadFromDDSFile(assetPath.c_str(), DirectX::DDS_FLAGS_NONE, &ddsMeta, scratchImage);
         if (FAILED(res))
         {
             return MakeFail<Texture, ETextureLoaderStatus::FailedLoadFromFile>();
@@ -87,7 +90,7 @@ namespace ig
 
         /* Configure Texture Description */
         /* #sy_todo Support MSAA */
-        GpuTextureDesc texDesc{ };
+        GpuTextureDesc texDesc{};
         if (loadDesc.bIsCubemap)
         {
             /* #sy_todo Support Cubemap Array */
@@ -120,7 +123,7 @@ namespace ig
             IG_CHECK(!loadDesc.IsArray());
             texDesc.AsTexture3D(loadDesc.Width, loadDesc.Height, loadDesc.DepthOrArrayLength, loadDesc.Mips, loadDesc.Format);
         }
-        texDesc.DebugName     = String(std::format("{}({})", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
+        texDesc.DebugName = String(std::format("{}({})", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
         texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
         /* Create Texture from GpuDevice */
@@ -131,23 +134,23 @@ namespace ig
         }
 
         /* Upload texture subresources from sysram to vram */
-        const size_t                        numSubresources = scratchImage.GetImageCount();
+        const size_t numSubresources = scratchImage.GetImageCount();
         std::vector<D3D12_SUBRESOURCE_DATA> subresources(numSubresources);
-        const DirectX::Image*               images = scratchImage.GetImages();
+        const DirectX::Image* images = scratchImage.GetImages();
 
         for (size_t idx = 0; idx < numSubresources; ++idx)
         {
             D3D12_SUBRESOURCE_DATA& subresource = subresources[idx];
-            subresource.RowPitch                = images[idx].rowPitch;
-            subresource.SlicePitch              = images[idx].slicePitch;
-            subresource.pData                   = images[idx].pixels;
+            subresource.RowPitch = images[idx].rowPitch;
+            subresource.SlicePitch = images[idx].slicePitch;
+            subresource.pData = images[idx].pixels;
         }
 
         // COMMON Layout 인 상태에서 텍스처가 GPU 메모리 상에서 어떻게 배치되어있는지
         GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
 
         const GpuCopyableFootprints destCopyableFootprints =
-                renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
+            renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
         UploadContext texUploadCtx = gpuUploader.Reserve(destCopyableFootprints.RequiredSize);
 
         GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
@@ -159,14 +162,14 @@ namespace ig
         texUploadSync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
-        auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
+        GpuFence& mainGfxFence = renderContext.GetMainGfxFence();
+        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
-                                             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                             D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
             cmdList->Close();
         }
@@ -176,9 +179,8 @@ namespace ig
         barrierSync.WaitOnCpu();
 
         const RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
-                                                                                   D3D12_TEX2D_SRV{
-                                                                                       .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f
-                                                                                   });
+                                                                                 D3D12_TEX2D_SRV{
+                                                                                     .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f});
         if (!srv)
         {
             return MakeFail<Texture, ETextureLoaderStatus::FailedCreateShaderResourceView>();
@@ -195,8 +197,7 @@ namespace ig
             .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #sy_todo if filter == comparison, setup comparison func */,
             .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
             .MinLOD = 0.f,
-            .MaxLOD = 0.f
-        });
+            .MaxLOD = 0.f});
         if (!samplerView)
         {
             return MakeFail<Texture, ETextureLoaderStatus::FailedCreateSamplerView>();
@@ -209,18 +210,18 @@ namespace ig
     Result<Texture, details::EMakeDefaultTexStatus> TextureLoader::MakeDefault(const AssetInfo& assetInfo)
     {
         constexpr DXGI_FORMAT Format{DXGI_FORMAT_R8G8B8A8_UNORM};
-        constexpr LONG_PTR    BytesPerPixel{4};
-        constexpr LONG_PTR    BlockSizeInPixels{8};
-        constexpr LONG_PTR    NumBlocksPerAxis{16};
-        constexpr uint8_t     BrightPixelElement{220};
-        constexpr uint8_t     DarkPixelElement{127};
+        constexpr LONG_PTR BytesPerPixel{4};
+        constexpr LONG_PTR BlockSizeInPixels{8};
+        constexpr LONG_PTR NumBlocksPerAxis{16};
+        constexpr uint8_t BrightPixelElement{220};
+        constexpr uint8_t DarkPixelElement{127};
 
-        constexpr LONG_PTR   Width{BlockSizeInPixels * NumBlocksPerAxis};
-        constexpr LONG_PTR   Height{BlockSizeInPixels * NumBlocksPerAxis};
-        constexpr LONG_PTR   NumPixels{Width * Height};
+        constexpr LONG_PTR Width{BlockSizeInPixels * NumBlocksPerAxis};
+        constexpr LONG_PTR Height{BlockSizeInPixels * NumBlocksPerAxis};
+        constexpr LONG_PTR NumPixels{Width * Height};
         std::vector<uint8_t> bytes(NumPixels * BytesPerPixel);
-        bool                 bUseBrightPixel = true;
-        uint32_t             pixelCounter{0};
+        bool bUseBrightPixel = true;
+        uint32_t pixelCounter{0};
         for (LONG_PTR pixelIdx = 0; pixelIdx < NumPixels; ++pixelIdx)
         {
             const LONG_PTR offset{pixelIdx * BytesPerPixel};
@@ -235,7 +236,7 @@ namespace ig
             bUseBrightPixel = (pixelCounter % (BlockSizeInPixels * BlockSizeInPixels * NumBlocksPerAxis) == 0) ? !bUseBrightPixel : bUseBrightPixel;
         }
 
-        GpuTextureDesc texDesc{ };
+        GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
         RenderHandle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
@@ -254,10 +255,10 @@ namespace ig
             .SlicePitch = SlicePitch,
         };
 
-        GpuUploader&                gpuUploader{renderContext.GetGpuUploader()};
+        GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
         const GpuCopyableFootprints dstCopyableFootprints{renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0)};
-        UploadContext               uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
-        GpuTexture*                 newTexturePtr = renderContext.Lookup(newTexture);
+        UploadContext uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
+        GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
         IG_CHECK(newTexturePtr != nullptr);
         std::vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);
@@ -266,14 +267,14 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
-        auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
+        GpuFence& mainGfxFence = renderContext.GetMainGfxFence();
+        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
-                                             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                             D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
             cmdList->Close();
         }
@@ -283,9 +284,8 @@ namespace ig
         barrierSync.WaitOnCpu();
 
         RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
-                                                                             D3D12_TEX2D_SRV{
-                                                                                 .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f
-                                                                             });
+                                                                           D3D12_TEX2D_SRV{
+                                                                               .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f});
         if (!srv)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateShaderResourceView>();
@@ -299,8 +299,7 @@ namespace ig
         };
 
         const RenderHandle<GpuView> samplerView = renderContext.CreateSamplerView(
-            D3D12_SAMPLER_DESC
-            {
+            D3D12_SAMPLER_DESC{
                 .Filter = loadDesc.Filter,
                 .AddressU = loadDesc.AddressModeU,
                 .AddressV = loadDesc.AddressModeV,
@@ -310,8 +309,7 @@ namespace ig
                 .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE,
                 .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
                 .MinLOD = 0.f,
-                .MaxLOD = 0.f
-            });
+                .MaxLOD = 0.f});
         if (!samplerView)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateSamplerView>();
@@ -324,21 +322,21 @@ namespace ig
     Result<Texture, details::EMakeDefaultTexStatus> TextureLoader::MakeMonochrome(const AssetInfo& assetInfo, const Color& color)
     {
         constexpr DXGI_FORMAT Format{DXGI_FORMAT_R8G8B8A8_UNORM};
-        constexpr LONG_PTR    BytesPerPixel{4};
+        constexpr LONG_PTR BytesPerPixel{4};
 
-        constexpr LONG_PTR   Width{1};
-        constexpr LONG_PTR   Height{1};
-        constexpr LONG_PTR   NumPixels{Width * Height};
+        constexpr LONG_PTR Width{1};
+        constexpr LONG_PTR Height{1};
+        constexpr LONG_PTR NumPixels{Width * Height};
         std::vector<uint8_t> bytes(NumPixels * BytesPerPixel);
 
-        Color saturatedColor{ };
+        Color saturatedColor{};
         color.Saturate(saturatedColor);
         bytes[0] = static_cast<uint8_t>(saturatedColor.R() * 255);
         bytes[1] = static_cast<uint8_t>(saturatedColor.G() * 255);
         bytes[2] = static_cast<uint8_t>(saturatedColor.B() * 255);
         bytes[3] = 255;
 
-        GpuTextureDesc texDesc{ };
+        GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
         const RenderHandle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
@@ -347,7 +345,7 @@ namespace ig
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateTexture>();
         }
 
-        GpuTexture*        newTexturePtr{renderContext.Lookup(newTexture)};
+        GpuTexture* newTexturePtr{renderContext.Lookup(newTexture)};
         constexpr LONG_PTR RowPitch{Width * BytesPerPixel};
         constexpr LONG_PTR SlicePitch{Height * RowPitch};
         IG_CHECK(SlicePitch == bytes.size());
@@ -359,23 +357,23 @@ namespace ig
         };
         std::vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
 
-        GpuUploader&                gpuUploader{renderContext.GetGpuUploader()};
+        GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
         const GpuCopyableFootprints dstCopyableFootprints{renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0)};
-        UploadContext               uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
+        UploadContext uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);
         std::optional<GpuSyncPoint> sync{gpuUploader.Submit(uploadCtx)};
         IG_CHECK(sync);
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        GpuFence&     mainGfxFence = renderContext.GetMainGfxFence();
-        auto          cmdList       = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
+        GpuFence& mainGfxFence = renderContext.GetMainGfxFence();
+        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
-                                             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                             D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
             cmdList->Close();
         }
@@ -386,21 +384,18 @@ namespace ig
         barrierSync.WaitOnCpu();
 
         const RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
-                                                                                   D3D12_TEX2D_SRV
-                                                                                   {
-                                                                                       .MostDetailedMip = 0,
-                                                                                       .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
-                                                                                       .PlaneSlice = 0,
-                                                                                       .ResourceMinLODClamp = 0.f
-                                                                                   });
+                                                                                 D3D12_TEX2D_SRV{
+                                                                                     .MostDetailedMip = 0,
+                                                                                     .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
+                                                                                     .PlaneSlice = 0,
+                                                                                     .ResourceMinLODClamp = 0.f});
 
         if (!srv)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateShaderResourceView>();
         }
 
-        const Texture::LoadDesc loadDesc
-        {
+        const Texture::LoadDesc loadDesc{
             .Format = Format,
             .Width = Width,
             .Height = Height,
@@ -417,8 +412,7 @@ namespace ig
             .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE,
             .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
             .MinLOD = 0.f,
-            .MaxLOD = 0.f
-        });
+            .MaxLOD = 0.f});
 
         if (!samplerView)
         {

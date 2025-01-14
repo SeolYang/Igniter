@@ -10,7 +10,7 @@ namespace ig
     {
         friend class GpuDevice;
 
-    public:
+      public:
         RootSignature(const RootSignature&) = delete;
         RootSignature(RootSignature&& other) noexcept;
         ~RootSignature();
@@ -23,10 +23,10 @@ namespace ig
 
         [[nodiscard]] auto& GetNative() { return *rootSignature.Get(); }
 
-    private:
+      private:
         RootSignature(ComPtr<ID3D12RootSignature> newRootSignature);
 
-    private:
+      private:
         ComPtr<ID3D12RootSignature> rootSignature;
     };
 } // namespace ig

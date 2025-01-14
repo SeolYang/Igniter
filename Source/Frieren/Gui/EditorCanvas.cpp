@@ -15,17 +15,19 @@
 
 namespace fe
 {
-    EditorCanvas::EditorCanvas(TestApp& testApp) :
-        app(testApp),
-        statisticsPanel(ig::MakePtr<StatisticsPanel>()),
-        cachedStringDebugger(ig::MakePtr<CachedStringDebugger>()),
-        entityList(ig::MakePtr<EntityList>()),
-        entityInspector(ig::MakePtr<EntityInspector>(*entityList)),
-        textureImportPanel(ig::MakePtr<TextureImportPanel>()),
-        staticMeshImportPanel(ig::MakePtr<StaticMeshImportPanel>()),
-        assetInspector(ig::MakePtr<AssetInspector>()) { }
+    EditorCanvas::EditorCanvas(TestApp& testApp)
+        : app(testApp)
+        , statisticsPanel(ig::MakePtr<StatisticsPanel>())
+        , cachedStringDebugger(ig::MakePtr<CachedStringDebugger>())
+        , entityList(ig::MakePtr<EntityList>())
+        , entityInspector(ig::MakePtr<EntityInspector>(*entityList))
+        , textureImportPanel(ig::MakePtr<TextureImportPanel>())
+        , staticMeshImportPanel(ig::MakePtr<StaticMeshImportPanel>())
+        , assetInspector(ig::MakePtr<AssetInspector>())
+    {
+    }
 
-    EditorCanvas::~EditorCanvas() { }
+    EditorCanvas::~EditorCanvas() {}
 
     void EditorCanvas::OnGui()
     {
@@ -58,7 +60,9 @@ namespace fe
                     entityInspector->SetActiveWorld(&ig::Engine::GetWorld());
                 }
 
-                if (ImGui::MenuItem("Editor Camera", nullptr, nullptr, false)) { }
+                if (ImGui::MenuItem("Editor Camera", nullptr, nullptr, false))
+                {
+                }
 
                 ImGui::EndMenu();
             }
@@ -115,7 +119,7 @@ namespace fe
                         if (ImGui::MenuItem(type.prop(ig::meta::TitleCaseNameProperty).value().cast<ig::String>().ToCString()))
                         {
                             app.SetGameSystem(
-                                std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({ }).try_cast<ig::Ptr<ig::GameSystem>>()));
+                                std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>()));
                         }
                     }
                 }

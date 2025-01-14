@@ -11,8 +11,8 @@
 
 namespace fe
 {
-    EntityInspector::EntityInspector(const EntityList& entityList) :
-        entityList(&entityList)
+    EntityInspector::EntityInspector(const EntityList& entityList)
+        : entityList(&entityList)
     {
         for (const auto& [typeID, type] : entt::resolve())
         {
@@ -36,8 +36,8 @@ namespace fe
             IG_CHECK(name != nullptr);
 
             componentInfos.emplace_back(ComponentInfo{
-                    typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
-                    ig::String{std::format("{}##SelectableComponent", *name)}});
+                typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
+                ig::String{std::format("{}##SelectableComponent", *name)}});
         }
 
         componentInfos.shrink_to_fit();
@@ -58,7 +58,7 @@ namespace fe
         }
 
         constexpr std::string_view attachComponentPopup{"AttachComponentPopup"};
-        ig::Registry&              registry = activeWorld->GetRegistry();
+        ig::Registry& registry = activeWorld->GetRegistry();
 
         ig::ImGuiX::PushPositiveButtonHighlightColor();
         if (ImGui::Button("Attach Component", ImVec2(-FLT_MIN, 0.0f)))
@@ -170,7 +170,7 @@ namespace fe
         ig::Registry& registry = activeWorld->GetRegistry();
         for (size_t idx = 0; idx < componentInfos.size(); ++idx)
         {
-            const ComponentInfo&    componentInfo    = componentInfos[idx];
+            const ComponentInfo& componentInfo = componentInfos[idx];
             const entt::sparse_set* componentStorage = registry.storage(componentInfo.ID);
             if (componentStorage == nullptr || !componentStorage->contains(selectedEntity))
             {

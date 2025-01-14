@@ -27,20 +27,20 @@ namespace ig
     {
         friend class AssetManager;
 
-    public:
+      public:
         MaterialLoader(AssetManager& assetManager);
-        MaterialLoader(const MaterialLoader&)     = delete;
+        MaterialLoader(const MaterialLoader&) = delete;
         MaterialLoader(MaterialLoader&&) noexcept = delete;
-        ~MaterialLoader()                         = default;
+        ~MaterialLoader() = default;
 
-        MaterialLoader& operator=(const MaterialLoader&)     = delete;
+        MaterialLoader& operator=(const MaterialLoader&) = delete;
         MaterialLoader& operator=(MaterialLoader&&) noexcept = delete;
 
-    private:
-        Result<Material, EMaterialLoadStatus>            Load(const Material::Desc& desc);
+      private:
+        Result<Material, EMaterialLoadStatus> Load(const Material::Desc& desc);
         Result<Material, details::EMakeDefaultMatStatus> MakeDefault(const AssetInfo& assetInfo);
 
-    private:
+      private:
         AssetManager& assetManager;
     };
 } // namespace ig

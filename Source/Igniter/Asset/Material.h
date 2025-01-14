@@ -8,17 +8,17 @@ namespace ig
 {
     struct MaterialAssetCreateDesc final
     {
-    public:
+      public:
         String DiffuseVirtualPath{};
     };
 
     struct MaterialAssetLoadDesc final
     {
-    public:
+      public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-    public:
+      public:
         Guid DiffuseTexGuid{DefaultTextureGuid};
     };
 
@@ -26,14 +26,14 @@ namespace ig
 
     class Material final
     {
-    public:
+      public:
         using ImportDesc = MaterialAssetCreateDesc;
         using LoadDesc = MaterialAssetLoadDesc;
         using Desc = AssetDesc<Material>;
 
         friend class AssetManager;
 
-    public:
+      public:
         Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
         Material(const Material&) = delete;
         Material(Material&&) noexcept = default;
@@ -45,14 +45,14 @@ namespace ig
         [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
         [[nodiscard]] ManagedAsset<Texture> GetDiffuse() const { return diffuse; }
 
-    private:
+      private:
         void Destroy();
 
-    public:
+      public:
         /* #sy_wip Common 헤더로 이동 */
         static constexpr std::string_view EngineDefault{"Engine\\Default"};
 
-    private:
+      private:
         AssetManager* assetManager{nullptr};
         Desc snapshot{};
         ManagedAsset<Texture> diffuse{};

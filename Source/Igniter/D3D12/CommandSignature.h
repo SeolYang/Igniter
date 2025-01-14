@@ -8,7 +8,7 @@ namespace ig
     {
         friend class GpuDevice;
 
-    public:
+      public:
         CommandSignature(const CommandSignature&) = delete;
         CommandSignature(CommandSignature&&) noexcept = default;
         CommandSignature& operator=(const CommandSignature&) = delete;
@@ -21,12 +21,13 @@ namespace ig
         [[nodiscard]] ID3D12CommandSignature& GetNative() { return *native.Get(); }
         [[nodiscard]] const ID3D12CommandSignature& GetNative() const { return *native.Get(); }
 
-    private:
+      private:
         explicit CommandSignature(ComPtr<ID3D12CommandSignature> commandSignature)
             : native(std::move(commandSignature))
-        {}
+        {
+        }
 
-    private:
+      private:
         ComPtr<ID3D12CommandSignature> native;
     };
-}
+} // namespace ig

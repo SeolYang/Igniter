@@ -12,18 +12,18 @@ namespace fe
 
     class CameraPossessSystem
     {
-    public:
+      public:
         CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem);
 
         void Update();
 
-    private:
+      private:
         void Configure();
 
-    private:
-        ig::Window&                              window;
+      private:
+        ig::Window& window;
         ig::Handle<ig::Action, ig::InputManager> togglePossessToCameraHandle;
-        FpsCameraControllSystem&                 fpsCamControllSystem;
+        FpsCameraControllSystem& fpsCamControllSystem;
 
         bool bEnabled = false;
     };

@@ -3,11 +3,11 @@
 
 namespace ig
 {
-    constexpr inline size_t InvalidTLSFLevelIdx = (size_t) -1;
+    constexpr inline size_t InvalidTLSFLevelIdx = (size_t)-1;
 
     static size_t MapFirstLevelIndex(const size_t allocSize)
     {
-        return std::min<uint8_t>(64Ui8 - (uint8_t) std::countl_zero(allocSize) - 1Ui8, 63Ui8);
+        return std::min<uint8_t>(64Ui8 - (uint8_t)std::countl_zero(allocSize) - 1Ui8, 63Ui8);
     }
 
     static size_t MapSecondLevelIndex(const size_t allocSize, const size_t firstLevelIdx, const size_t secondLevelParam)
@@ -55,4 +55,4 @@ namespace ig
             blockRegistry.Destroy(headBlockHandle);
         }
     }
-}    // namespace ig
+} // namespace ig

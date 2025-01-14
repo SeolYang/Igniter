@@ -4,17 +4,17 @@
 
 namespace ig::ImGuiX
 {
-    AssetSelectModalPopup::AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter) :
-        label(label),
-        assetInfoChildLabel(std::format("{}##Child", label)),
-        assetCategoryToFilter(assetCategoryToFilter)
+    AssetSelectModalPopup::AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter)
+        : label(label)
+        , assetInfoChildLabel(std::format("{}##Child", label))
+        , assetCategoryToFilter(assetCategoryToFilter)
     {
         IG_CHECK(assetCategoryToFilter != ig::EAssetCategory::Unknown);
     }
 
     void AssetSelectModalPopup::Open()
     {
-        selectedGuid   = { };
+        selectedGuid = {};
         bAssetSelected = false;
         TakeAssetSnapshotsFromManager();
         ImGui::OpenPopup(label.ToCString());
@@ -39,9 +39,7 @@ namespace ig::ImGuiX
         }
 
         std::sort(cachedAssetInfos.begin(), cachedAssetInfos.end(), [](const AssetInfo& lhs, const AssetInfo& rhs)
-        {
-            return (lhs.Snapshot.Info.GetVirtualPath().Compare(rhs.Snapshot.Info.GetVirtualPath())) < 0;
-        });
+                  { return (lhs.Snapshot.Info.GetVirtualPath().Compare(rhs.Snapshot.Info.GetVirtualPath())) < 0; });
     }
 
     bool AssetSelectModalPopup::Begin()
@@ -61,8 +59,8 @@ namespace ig::ImGuiX
         {
             for (const AssetInfo& cachedAssetInfo : cachedAssetInfos)
             {
-                const ig::Guid& guid      = cachedAssetInfo.Snapshot.Info.GetGuid();
-                bool            bSelected = guid == selectedGuid;
+                const ig::Guid& guid = cachedAssetInfo.Snapshot.Info.GetGuid();
+                bool bSelected = guid == selectedGuid;
                 if (filter.PassFilter(cachedAssetInfo.Snapshot.Info.GetVirtualPath().ToCString()) &&
                     ImGui::Selectable(cachedAssetInfo.SelectableLabel.ToCString(), &bSelected, ImGuiSelectableFlags_DontClosePopups))
                 {
@@ -72,8 +70,8 @@ namespace ig::ImGuiX
         }
         ImGui::EndChild();
 
-        const bool  bShouldActiveSelectButton = selectedGuid.isValid();
-        const float buttonWidth               = bShouldActiveSelectButton ? ImGui::GetContentRegionAvail().x * 0.49f : ImGui::GetContentRegionAvail().x;
+        const bool bShouldActiveSelectButton = selectedGuid.isValid();
+        const float buttonWidth = bShouldActiveSelectButton ? ImGui::GetContentRegionAvail().x * 0.49f : ImGui::GetContentRegionAvail().x;
         if (bShouldActiveSelectButton && ImGui::Button("Select", ImVec2{buttonWidth, 0.f}))
         {
             bAssetSelected = true;

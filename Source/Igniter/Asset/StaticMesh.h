@@ -10,11 +10,11 @@ namespace ig
 {
     struct StaticMeshImportDesc
     {
-    public:
+      public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-    public:
+      public:
         bool bMakeLeftHanded = true;
         bool bFlipUVs = true;
         bool bFlipWindingOrder = true;
@@ -30,11 +30,11 @@ namespace ig
 
     struct StaticMeshLoadDesc
     {
-    public:
+      public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-    public:
+      public:
         uint32_t NumVertices{0};
         uint32_t NumIndices{0};
         size_t CompressedVerticesSizeInBytes{0};
@@ -49,12 +49,12 @@ namespace ig
     class AssetManager;
     class StaticMesh final
     {
-    public:
+      public:
         using ImportDesc = StaticMeshImportDesc;
         using LoadDesc = StaticMeshLoadDesc;
         using Desc = AssetDesc<StaticMesh>;
 
-    public:
+      public:
         StaticMesh(RenderContext& renderContext, AssetManager& assetManager,
                    const Desc& snapshot,
                    const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace);
@@ -69,10 +69,10 @@ namespace ig
         [[nodiscard]] MeshStorage::Handle<VertexSM> GetVertexSpace() const noexcept { return vertexSpace; }
         [[nodiscard]] MeshStorage::Handle<U32> GetVertexIndexSpace() const noexcept { return vertexIndexSpace; }
 
-    private:
+      private:
         void Destroy();
 
-    private:
+      private:
         RenderContext* renderContext{nullptr};
         AssetManager* assetManager{nullptr};
         Desc snapshot{}; // desc snapshot

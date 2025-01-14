@@ -26,7 +26,7 @@ namespace ig
     {
         friend class Application;
 
-    public:
+      public:
         Engine(const IgniterDesc& desc);
         ~Engine();
 
@@ -52,10 +52,10 @@ namespace ig
 
         static void Stop();
 
-    private:
+      private:
         int Execute(Application& application);
 
-    private:
+      private:
         static Engine* instance;
         bool bInitialized = false;
         bool bShouldExit = false;

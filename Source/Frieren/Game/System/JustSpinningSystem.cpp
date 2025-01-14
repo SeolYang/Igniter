@@ -11,13 +11,11 @@ namespace fe
     {
         ig::Registry& registry = world.GetRegistry();
         registry.view<ig::TransformComponent>().each([deltaTime]([[maybe_unused]] const auto entity, ig::TransformComponent& transform)
-        {
-            transform.Rotation *= ig::Quaternion::CreateFromYawPitchRoll(deltaTime, 0.f, 0.f);
-        });
+                                                     { transform.Rotation *= ig::Quaternion::CreateFromYawPitchRoll(deltaTime, 0.f, 0.f); });
     }
 
     template <>
-    void DefineMeta<JustSpinningSystem>() { }
+    void DefineMeta<JustSpinningSystem>() {}
 
     IG_DEFINE_TYPE_META_AS_GAME_SYSTEM(JustSpinningSystem);
 } // namespace fe

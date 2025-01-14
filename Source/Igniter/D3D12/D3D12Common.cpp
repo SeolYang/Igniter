@@ -35,7 +35,7 @@ namespace ig
         {
         case EDescriptorHeapType::CBV_SRV_UAV:
             return gpuViewType == EGpuViewType::ShaderResourceView || gpuViewType == EGpuViewType::ConstantBufferView ||
-                    gpuViewType == EGpuViewType::UnorderedAccessView;
+                   gpuViewType == EGpuViewType::UnorderedAccessView;
         case EDescriptorHeapType::Sampler:
             return gpuViewType == EGpuViewType::Sampler;
         case EDescriptorHeapType::RTV:

@@ -6,7 +6,7 @@ namespace fe
 {
     struct FpsCameraController
     {
-    public:
+      public:
         ~FpsCameraController() = default;
 
         ig::Vector3 GetCurrentVelocity() const
@@ -19,22 +19,22 @@ namespace fe
             return ig::Quaternion::CreateFromYawPitchRoll(ig::Deg2Rad(CurrentYaw), ig::Deg2Rad(CurrentPitch), 0.f);
         }
 
-        ig::Json&       Serialize(ig::Json& archive) const;
+        ig::Json& Serialize(ig::Json& archive) const;
         const ig::Json& Deserialize(const ig::Json& archive);
-        static void     OnInspector(ig::Registry* registry, const ig::Entity entity);
+        static void OnInspector(ig::Registry* registry, const ig::Entity entity);
 
-    public:
-        float MovementPower                = 25.f;
+      public:
+        float MovementPower = 25.f;
         float MovementPowerAttenuationTime = 0.65f; /* Seconds */
-        float MouseYawSentisitivity        = 0.03f; /* Degrees */
-        float MousePitchSentisitivity      = 0.03f; /* Degrees */
-        float SprintFactor                 = 4.f;
+        float MouseYawSentisitivity = 0.03f;        /* Degrees */
+        float MousePitchSentisitivity = 0.03f;      /* Degrees */
+        float SprintFactor = 4.f;
 
-        ig::Vector3 LatestImpulse{ };
-        float       ElapsedTimeAfterLatestImpulse = 0.f;
+        ig::Vector3 LatestImpulse{};
+        float ElapsedTimeAfterLatestImpulse = 0.f;
 
-        float                  CurrentYaw      = 0.f; /* Degrees */
-        float                  CurrentPitch    = 0.f; /* Degrees */
+        float CurrentYaw = 0.f;   /* Degrees */
+        float CurrentPitch = 0.f; /* Degrees */
         constexpr static float MinPitchDegrees = -45.f;
         constexpr static float MaxPitchDegrees = 45.f;
     };

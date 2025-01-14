@@ -3,7 +3,7 @@ namespace ig
 {
     class ImGuiCanvas
     {
-    public:
+      public:
         ImGuiCanvas() = default;
         ImGuiCanvas(const ImGuiCanvas&) = delete;
         ImGuiCanvas(ImGuiCanvas&&) noexcept = delete;
@@ -14,7 +14,7 @@ namespace ig
 
         virtual void OnImGui() final;
 
-    protected:
+      protected:
         virtual void OnGui() = 0;
     };
 } // namespace ig

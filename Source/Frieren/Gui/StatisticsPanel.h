@@ -6,20 +6,20 @@ namespace fe
     class Renderer;
     class StatisticsPanel final
     {
-    public:
+      public:
         explicit StatisticsPanel();
-        StatisticsPanel(const StatisticsPanel&)     = delete;
+        StatisticsPanel(const StatisticsPanel&) = delete;
         StatisticsPanel(StatisticsPanel&&) noexcept = delete;
-        ~StatisticsPanel()                          = default;
+        ~StatisticsPanel() = default;
 
         StatisticsPanel& operator=(const StatisticsPanel&) = delete;
-        StatisticsPanel& operator=(StatisticsPanel&&)      = delete;
+        StatisticsPanel& operator=(StatisticsPanel&&) = delete;
 
         void OnImGui();
 
-    private:
-        bool            bEnablePolling  = true;
-        int             pollingInterval = 60;
-        int             pollingStep     = pollingInterval;
+      private:
+        bool bEnablePolling = true;
+        int pollingInterval = 60;
+        int pollingStep = pollingInterval;
     };
 } // namespace fe

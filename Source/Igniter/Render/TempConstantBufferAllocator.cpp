@@ -9,9 +9,9 @@
 namespace ig
 {
     TempConstantBufferAllocator::TempConstantBufferAllocator(
-        RenderContext& renderContext, const size_t reservedBufferSizeInBytes /*= DefaultReservedBufferSizeInBytes*/) :
-        renderContext(&renderContext),
-        reservedSizeInBytesPerFrame(reservedBufferSizeInBytes)
+        RenderContext& renderContext, const size_t reservedBufferSizeInBytes /*= DefaultReservedBufferSizeInBytes*/)
+        : renderContext(&renderContext)
+        , reservedSizeInBytesPerFrame(reservedBufferSizeInBytes)
     {
         IG_CHECK(reservedSizeInBytesPerFrame % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
 

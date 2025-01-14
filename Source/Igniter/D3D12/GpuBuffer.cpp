@@ -3,17 +3,22 @@
 
 namespace ig
 {
-    GpuBuffer::GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource) :
-        desc(newDesc),
-        allocation(std::move(newAllocation)),
-        resource(std::move(newResource)) { }
+    GpuBuffer::GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource)
+        : desc(newDesc)
+        , allocation(std::move(newAllocation))
+        , resource(std::move(newResource))
+    {
+    }
 
-    GpuBuffer::GpuBuffer(GpuBuffer&& other) noexcept :
-        desc(other.desc),
-        allocation(std::move(other.allocation)),
-        resource(std::move(other.resource)) { }
+    GpuBuffer::GpuBuffer(GpuBuffer&& other) noexcept
+        : desc(other.desc)
+        , allocation(std::move(other.allocation))
+        , resource(std::move(other.resource))
+    {
+    }
 
-    GpuBuffer::GpuBuffer(ComPtr<ID3D12Resource> bufferResource) : resource(std::move(bufferResource))
+    GpuBuffer::GpuBuffer(ComPtr<ID3D12Resource> bufferResource)
+        : resource(std::move(bufferResource))
     {
         IG_CHECK(resource);
         desc.From(resource->GetDesc());
@@ -22,9 +27,9 @@ namespace ig
 
     GpuBuffer& GpuBuffer::operator=(GpuBuffer&& other) noexcept
     {
-        desc       = other.desc;
+        desc = other.desc;
         allocation = std::move(other.allocation);
-        resource   = std::move(other.resource);
+        resource = std::move(other.resource);
         return *this;
     }
 
@@ -60,7 +65,6 @@ namespace ig
             {
                 if (ptr != nullptr)
                     Unmap();
-            }
-        };
+            }};
     }
 } // namespace ig

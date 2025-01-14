@@ -13,24 +13,24 @@ namespace fe
 
         if (ImGui::Button("Search"))
         {
-            bFiltered           = true;
+            bFiltered = true;
             searchTargetHashVal = std::stoull(inputBuffer);
         }
 
         ImGui::SameLine();
         if (ImGui::Button("Reset") || bLoadRequired)
         {
-            cachedStrings  = ig::String::GetCachedStrings();
-            bSortRequired  = true;
-            bFiltered      = false;
-            bLoadRequired  = false;
+            cachedStrings = ig::String::GetCachedStrings();
+            bSortRequired = true;
+            bFiltered = false;
+            bLoadRequired = false;
             inputBuffer[0] = '\0';
         }
 
         constexpr ImGuiTableFlags flags =
-                ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable |
-                ImGuiTableFlags_RowBg | ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_Borders |
-                ImGuiTableFlags_ScrollY;
+            ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable |
+            ImGuiTableFlags_RowBg | ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_Borders |
+            ImGuiTableFlags_ScrollY;
 
         if (ImGui::BeginTable("Cached Hash-String Table", 2, flags))
         {
@@ -49,7 +49,7 @@ namespace fe
                               });
 
                     sortSpecs->SpecsDirty = false;
-                    bSortRequired         = false;
+                    bSortRequired = false;
                 }
             }
 
@@ -67,7 +67,8 @@ namespace fe
                 if (searchTargetHashVal != ig::InvalidHashVal)
                 {
                     const auto foundItr = std::find_if(cachedStrings.cbegin(), cachedStrings.cend(),
-                                                       [val = searchTargetHashVal](const auto& hashStrPair) { return hashStrPair.first == val; });
+                                                       [val = searchTargetHashVal](const auto& hashStrPair)
+                                                       { return hashStrPair.first == val; });
 
                     if (foundItr != cachedStrings.cend())
                     {

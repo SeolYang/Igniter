@@ -21,8 +21,8 @@ namespace ig
         IG_CHECK(Mesh == other.Mesh);
     }
 
-    StaticMeshComponent::StaticMeshComponent(StaticMeshComponent&& other) noexcept :
-        Mesh(std::exchange(other.Mesh, {}))
+    StaticMeshComponent::StaticMeshComponent(StaticMeshComponent&& other) noexcept
+        : Mesh(std::exchange(other.Mesh, {}))
     {
     }
 

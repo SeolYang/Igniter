@@ -11,7 +11,9 @@ IG_DECLARE_LOG_CATEGORY(World);
 
 namespace ig
 {
-    World::World(AssetManager& assetManager, const Handle<Map, AssetManager> map) : assetManager(&assetManager), map(map)
+    World::World(AssetManager& assetManager, const Handle<Map, AssetManager> map)
+        : assetManager(&assetManager)
+        , map(map)
     {
         if (map)
         {
@@ -33,23 +35,23 @@ namespace ig
 
     Json& World::Serialize(Json& archive) const
     {
-        Json entitesRoot{ };
+        Json entitesRoot{};
         auto resolvedMeta = entt::resolve();
         for (const auto entity : registry.view<Entity>(entt::exclude<NonSerializable>))
         {
             if (!registry.all_of<NonSerializable>(entity))
             {
-                Json entityRoot{ };
+                Json entityRoot{};
                 for (auto&& [typeID, type] : resolvedMeta)
                 {
                     const entt::sparse_set* const storage = registry.storage(typeID);
                     if (storage != nullptr && storage->contains(entity))
                     {
-                        Json       componentRoot{ };
+                        Json componentRoot{};
                         const auto nameProperty = type.prop(meta::NameProperty);
                         IG_CHECK(nameProperty);
                         componentRoot[ComponentNameHintKey] = nameProperty.value().cast<String>();
-                        auto serializeJson                  = type.func(meta::SerializeComponentJsonFunc);
+                        auto serializeJson = type.func(meta::SerializeComponentJsonFunc);
                         if (serializeJson)
                         {
                             serializeJson.invoke(type, std::ref(componentRoot), std::cref(registry), entity);
@@ -81,13 +83,13 @@ namespace ig
         {
             /* #sy_todo key가 number가 아니였을 경우 처리 */
             const auto oldEntity = static_cast<Entity>(std::stoul(rootItr.key()));
-            const auto entity    = registry.create(oldEntity);
+            const auto entity = registry.create(oldEntity);
             IG_CHECK(oldEntity == entity); /* #sy_note 버그는 아니지만, 처리해야함 */
             const Json& entityRoot = rootItr.value();
             for (auto entityItr = entityRoot.cbegin(); entityItr != entityRoot.cend(); ++entityItr)
             {
-                const auto componentID  = static_cast<entt::id_type>(std::stoul(entityItr.key()));
-                auto       resolvedType = entt::resolve(componentID);
+                const auto componentID = static_cast<entt::id_type>(std::stoul(entityItr.key()));
+                auto resolvedType = entt::resolve(componentID);
                 const auto nameProperty = resolvedType.prop(meta::NameProperty);
                 if (!resolvedType)
                 {

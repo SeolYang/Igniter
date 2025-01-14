@@ -117,7 +117,7 @@ namespace ig
         {                               \
             T##_DefineMeta();           \
                                         \
-        private:                        \
+          private:                      \
             static T##_DefineMeta _reg; \
         };                              \
     }

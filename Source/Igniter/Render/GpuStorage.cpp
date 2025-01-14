@@ -7,15 +7,15 @@
 
 namespace ig
 {
-    GpuStorage::GpuStorage(RenderContext& renderContext, const GpuStorageDesc& desc) :
-        renderContext(renderContext),
-        debugName(desc.DebugName),
-        elementSize(desc.ElementSize),
-        bufferSize((U64)desc.NumInitElements * desc.ElementSize),
-        bIsShaderReadWritable(ContainsFlags(desc.Flags, EGpuStorageFlags::ShaderReadWrite)),
-        bIsUavCounterEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableUavCounter)),
-        bIsLinearAllocEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableLinearAllocation)),
-        fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
+    GpuStorage::GpuStorage(RenderContext& renderContext, const GpuStorageDesc& desc)
+        : renderContext(renderContext)
+        , debugName(desc.DebugName)
+        , elementSize(desc.ElementSize)
+        , bufferSize((U64)desc.NumInitElements * desc.ElementSize)
+        , bIsShaderReadWritable(ContainsFlags(desc.Flags, EGpuStorageFlags::ShaderReadWrite))
+        , bIsUavCounterEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableUavCounter))
+        , bIsLinearAllocEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableLinearAllocation))
+        , fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
     {
         IG_CHECK(desc.NumInitElements > 0);
         IG_CHECK(elementSize > 0);

@@ -11,11 +11,11 @@ namespace ig
     template <typename Ty>
     struct InFlightFramesResource
     {
-    public:
-        [[nodiscard]] Ty&       operator[](const LocalFrameIndex localFrameIdx) noexcept { return Resources[localFrameIdx]; }
+      public:
+        [[nodiscard]] Ty& operator[](const LocalFrameIndex localFrameIdx) noexcept { return Resources[localFrameIdx]; }
         [[nodiscard]] const Ty& operator[](const LocalFrameIndex localFrameIdx) const noexcept { return Resources[localFrameIdx]; }
 
-    public:
+      public:
         eastl::array<Ty, NumFramesInFlight> Resources{};
     };
 
@@ -25,10 +25,10 @@ namespace ig
     template <typename Ty, typename Dependency>
     struct DeferredResourceManagePackage
     {
-    public:
-        mutable SharedMutex                                           StorageMutex;
-        HandleStorage<Ty, Dependency>                                 Storage;
-        InFlightFramesResource<Mutex>                                 DeferredDestroyPendingListMutex;
+      public:
+        mutable SharedMutex StorageMutex;
+        HandleStorage<Ty, Dependency> Storage;
+        InFlightFramesResource<Mutex> DeferredDestroyPendingListMutex;
         InFlightFramesResource<eastl::vector<Handle<Ty, Dependency>>> DeferredDestroyPendingList;
     };
 } // namespace ig

@@ -7,7 +7,7 @@ namespace ig
     class StaticMesh;
     struct StaticMeshComponent
     {
-    public:
+      public:
         StaticMeshComponent() = default;
         StaticMeshComponent(const StaticMeshComponent& other);
         StaticMeshComponent(StaticMeshComponent&& other) noexcept;
@@ -22,13 +22,13 @@ namespace ig
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
-    public:
+      public:
         ManagedAsset<StaticMesh> Mesh{};
 
-    private:
+      private:
         void Destroy();
 
-    private:
+      private:
         constexpr static std::string_view ContainerKey{"StaticMeshComponent"};
         constexpr static std::string_view MeshGuidKey{"StaticMeshGuid"};
     };

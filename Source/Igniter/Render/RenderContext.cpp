@@ -4,16 +4,16 @@
 
 namespace ig
 {
-    RenderContext::RenderContext(const Window& window) :
-        mainGfxQueue(*gpuDevice.CreateCommandQueue("MainGfx", EQueueType::Graphics)),
-        mainGfxCmdListPool(gpuDevice, EQueueType::Graphics),
-        asyncComputeQueue(*gpuDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute)),
-        asyncComputeCmdListPool(gpuDevice, EQueueType::Compute),
-        asyncCopyQueue(*gpuDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy)),
-        asyncCopyCmdListPool(gpuDevice, EQueueType::Copy),
-        gpuViewManager(gpuDevice),
-        gpuUploader(gpuDevice),
-        swapchain(MakePtr<Swapchain>(window, *this))
+    RenderContext::RenderContext(const Window& window)
+        : mainGfxQueue(*gpuDevice.CreateCommandQueue("MainGfx", EQueueType::Graphics))
+        , mainGfxCmdListPool(gpuDevice, EQueueType::Graphics)
+        , asyncComputeQueue(*gpuDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute))
+        , asyncComputeCmdListPool(gpuDevice, EQueueType::Compute)
+        , asyncCopyQueue(*gpuDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy))
+        , asyncCopyCmdListPool(gpuDevice, EQueueType::Copy)
+        , gpuViewManager(gpuDevice)
+        , gpuUploader(gpuDevice)
+        , swapchain(MakePtr<Swapchain>(window, *this))
     {
         for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {

@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    enum class EStaticMeshImportStatus :U8
+    enum class EStaticMeshImportStatus : U8
     {
         Success,
         FileDoesNotExists,
@@ -20,19 +20,19 @@ namespace ig
     {
         friend class AssetManager;
 
-    public:
+      public:
         explicit StaticMeshImporter(AssetManager& assetManager);
-        StaticMeshImporter(const StaticMeshImporter&)     = delete;
+        StaticMeshImporter(const StaticMeshImporter&) = delete;
         StaticMeshImporter(StaticMeshImporter&&) noexcept = delete;
-        ~StaticMeshImporter()                             = default;
+        ~StaticMeshImporter() = default;
 
-        StaticMeshImporter& operator=(const StaticMeshImporter&)     = delete;
+        StaticMeshImporter& operator=(const StaticMeshImporter&) = delete;
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
-    private:
+      private:
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
 
-    private:
+      private:
         AssetManager& assetManager;
     };
 } // namespace ig

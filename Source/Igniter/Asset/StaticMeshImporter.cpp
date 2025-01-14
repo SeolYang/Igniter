@@ -12,8 +12,10 @@ namespace ig
 {
     constexpr inline size_t NumIndicesPerFace = 3;
 
-    StaticMeshImporter::StaticMeshImporter(AssetManager& assetManager) :
-        assetManager(assetManager) {}
+    StaticMeshImporter::StaticMeshImporter(AssetManager& assetManager)
+        : assetManager(assetManager)
+    {
+    }
 
     static bool CheckAssimpSceneLoadingSucceed(const String resPathStr, const Assimp::Importer& importer, const aiScene* scene)
     {

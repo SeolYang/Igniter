@@ -3,7 +3,7 @@
 
 namespace ig::meta
 {
-    constexpr inline entt::hashed_string GameSystemProperty      = "GameSystem"_hs;
+    constexpr inline entt::hashed_string GameSystemProperty = "GameSystem"_hs;
     constexpr inline entt::hashed_string GameSystemConstructFunc = "GameSystemConstruct"_hs;
 } // namespace ig::meta
 
@@ -17,18 +17,18 @@ namespace ig
      */
     class GameSystem
     {
-    public:
-        GameSystem()                      = default;
-        GameSystem(const GameSystem&)     = delete;
+      public:
+        GameSystem() = default;
+        GameSystem(const GameSystem&) = delete;
         GameSystem(GameSystem&&) noexcept = delete;
-        virtual ~GameSystem()             = default;
+        virtual ~GameSystem() = default;
 
-        GameSystem& operator=(const GameSystem&)     = delete;
+        GameSystem& operator=(const GameSystem&) = delete;
         GameSystem& operator=(GameSystem&&) noexcept = delete;
 
-        virtual void PreUpdate([[maybe_unused]] const float deltaTime, [[maybe_unused]] World& world) { }
+        virtual void PreUpdate([[maybe_unused]] const float deltaTime, [[maybe_unused]] World& world) {}
         virtual void Update(const float deltaTime, World& world) = 0;
-        virtual void PostUpdate([[maybe_unused]] const float deltaTime, [[maybe_unused]] World& world) { }
+        virtual void PostUpdate([[maybe_unused]] const float deltaTime, [[maybe_unused]] World& world) {}
     };
 
     template <typename Ty>

@@ -18,9 +18,9 @@ namespace ig
         const HWND parentWindowHandle, const String dialogTitle, const std::span<const DialogFilter> filters)
     {
         CoInitializeUnique();
-        Microsoft::WRL::ComPtr<IFileDialog>       fileDialog;
+        Microsoft::WRL::ComPtr<IFileDialog> fileDialog;
         Microsoft::WRL::ComPtr<IFileDialogEvents> fileDialogEvents;
-        Microsoft::WRL::ComPtr<IShellItem>        shellItem;
+        Microsoft::WRL::ComPtr<IShellItem> shellItem;
 
         // #sy_note Save 다이얼로그엔 CLSID_FileSaveDialog
         HRESULT result = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));

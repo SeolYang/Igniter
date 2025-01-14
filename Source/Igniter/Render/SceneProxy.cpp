@@ -16,12 +16,12 @@
 
 namespace ig
 {
-    SceneProxy::SceneProxy(tf::Executor& taskExecutor, RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager) :
-        taskExecutor(&taskExecutor),
-        renderContext(&renderContext),
-        meshStorage(&meshStorage),
-        assetManager(&assetManager),
-        numWorker((U32)taskExecutor.num_workers())
+    SceneProxy::SceneProxy(tf::Executor& taskExecutor, RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager)
+        : taskExecutor(&taskExecutor)
+        , renderContext(&renderContext)
+        , meshStorage(&meshStorage)
+        , assetManager(&assetManager)
+        , numWorker((U32)taskExecutor.num_workers())
     {
         GpuBufferDesc renderableIndicesBufferDesc;
         renderableIndicesBufferDesc.AsStructuredBuffer<U32>(kNumInitRenderableIndices);
@@ -658,7 +658,7 @@ namespace ig
                 const MeshProxy& meshProxy = meshProxyPackage.ProxyMap[localFrameIdx][staticMeshComponent.Mesh];
                 const MaterialProxy& materialProxy = materialProxyPackage.ProxyMap[localFrameIdx][materialComponent.Instance];
                 const U64 instancingKey = InstancingPackage::MakeInstancingMapKey(meshProxy, materialProxy);
-                //IG_CHECK(instancingPackage.GlobalInstancingMap.contains(instancingKey));
+                // IG_CHECK(instancingPackage.GlobalInstancingMap.contains(instancingKey));
                 const U32 instancingId = instancingPackage.GlobalInstancingMap[instancingKey].InstancingId;
                 const Index workerId = taskExecutor->this_worker_id();
 
@@ -865,7 +865,7 @@ namespace ig
                     const bool bHasNextUploadInfo = (idx + 1) < uploadInfos.size();
                     // 현재 업로드 정보가 마지막이거나, 다음 업로드 정보가 Storage에서 불연속적일 때.
                     const bool bPendingCopyCommand = !bHasNextUploadInfo ||
-                        ((uploadInfos[idx].StorageSpaceRef.get().OffsetIndex + 1) != uploadInfos[idx + 1].StorageSpaceRef.get().OffsetIndex);
+                                                     ((uploadInfos[idx].StorageSpaceRef.get().OffsetIndex + 1) != uploadInfos[idx + 1].StorageSpaceRef.get().OffsetIndex);
                     if (bPendingCopyCommand)
                     {
                         cmdList->CopyBuffer(*proxyPackage.StagingBuffer[localFrameIdx], srcOffset, copySize, *storageBufferPtr, dstOffset);

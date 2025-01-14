@@ -5,22 +5,22 @@ namespace ig
 {
     struct AxisAlignedBoundingBox
     {
-    public:
+      public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-    public:
+      public:
         Vector3 Min{};
         Vector3 Max{};
     };
 
     struct BoundingSphere
     {
-    public:
+      public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-    public:
+      public:
         Vector3 Centroid{};
         float Radius = 0.f;
     };
@@ -29,4 +29,15 @@ namespace ig
     {
         return BoundingSphere{(aabb.Min + aabb.Max) * 0.5f, Vector3::Distance(aabb.Min, aabb.Max) * 0.5f};
     }
+
+    struct Frustum
+    {
+      public:
+        Plane Near;
+        Plane Far;
+        Plane Left;
+        Plane Right;
+        Plane Top;
+        Plane Bottom;
+    };
 } // namespace ig

@@ -3,10 +3,12 @@
 
 namespace ig
 {
-    MeshStorage::MeshStorage(RenderContext& renderContext) :
-        renderContext(renderContext),
-        staticMeshVertexGpuStorage(renderContext, GpuStorageDesc{"StaticMeshVertexStorage"_fs, static_cast<U32>(sizeof(VertexSM)), 8192u}),
-        vertexIndexGpuStorage(renderContext, GpuStorageDesc{"VertexIndexStorage"_fs, static_cast<U32>(sizeof(U32)), 16u * 8192u}) {}
+    MeshStorage::MeshStorage(RenderContext& renderContext)
+        : renderContext(renderContext)
+        , staticMeshVertexGpuStorage(renderContext, GpuStorageDesc{"StaticMeshVertexStorage"_fs, static_cast<U32>(sizeof(VertexSM)), 8192u})
+        , vertexIndexGpuStorage(renderContext, GpuStorageDesc{"VertexIndexStorage"_fs, static_cast<U32>(sizeof(U32)), 16u * 8192u})
+    {
+    }
 
     MeshStorage::~MeshStorage()
     {

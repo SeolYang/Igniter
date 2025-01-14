@@ -39,26 +39,26 @@ namespace ig
     // ex. EAssetManagerOptionFlag, SuppressLog, SuppressDirty etc..
     class AssetManager final
     {
-    private:
+      private:
         using VirtualPathGuidTable = UnorderedMap<String, Guid>;
         using AssetMutex = Mutex;
         using AssetLock = UniqueLock;
 
-    public:
+      public:
         using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
 
         struct Snapshot
         {
-        public:
+          public:
             bool IsCached() const { return RefCount > 0 || Info.GetScope() == EAssetScope::Static || Info.GetScope() == EAssetScope::Engine; }
 
-        public:
+          public:
             AssetInfo Info{};
             uint32_t RefCount{};
             Size HandleHash{IG_NUMERIC_MAX_OF(HandleHash)};
         };
 
-    public:
+      public:
         AssetManager(RenderContext& renderContext);
         AssetManager(const AssetManager&) = delete;
         AssetManager(AssetManager&&) noexcept = delete;
@@ -275,7 +275,7 @@ namespace ig
 
         void DispatchEvent();
 
-    private:
+      private:
         template <typename T>
         details::AssetCache<T>& GetCache()
         {
@@ -493,7 +493,7 @@ namespace ig
         void ClearTempAssets();
         void RestoreTempAssets();
 
-    private:
+      private:
         Ptr<details::AssetMonitor> assetMonitor;
         std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
 

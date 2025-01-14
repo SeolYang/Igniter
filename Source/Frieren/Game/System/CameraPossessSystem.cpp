@@ -12,8 +12,9 @@ IG_DEFINE_LOG_CATEGORY(CameraPossessSystemLog);
 
 namespace fe
 {
-    CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem) :
-        window(ig::Engine::GetWindow()), fpsCamControllSystem(fpsCamControllSystem)
+    CameraPossessSystem::CameraPossessSystem(FpsCameraControllSystem& fpsCamControllSystem)
+        : window(ig::Engine::GetWindow())
+        , fpsCamControllSystem(fpsCamControllSystem)
     {
         const auto& inputManager = ig::Engine::GetInputManager();
         togglePossessToCameraHandle = inputManager.QueryAction(ig::String("TogglePossessCamera"));

@@ -11,13 +11,17 @@ namespace ig
     class CommandList;
     class CommandListPool final
     {
-    private:
+      private:
         template <typename Deleter>
         class TempCommandList final
         {
-        public:
-            TempCommandList(CommandList* cmdList, Deleter&& deleter) :
-                cmdList(cmdList), deleter(deleter) { IG_CHECK(cmdList != nullptr); }
+          public:
+            TempCommandList(CommandList* cmdList, Deleter&& deleter)
+                : cmdList(cmdList)
+                , deleter(deleter)
+            {
+                IG_CHECK(cmdList != nullptr);
+            }
             TempCommandList(const TempCommandList&) = delete;
             TempCommandList(TempCommandList&&) noexcept = delete;
             ~TempCommandList() { deleter(cmdList); }
@@ -39,12 +43,12 @@ namespace ig
                 return *cmdList;
             }
 
-        private:
+          private:
             Deleter deleter;
             CommandList* cmdList = nullptr;
         };
 
-    public:
+      public:
         CommandListPool(GpuDevice& gpuDevice, const EQueueType cmdListType);
         CommandListPool(const CommandListPool&) = delete;
         CommandListPool(CommandListPool&&) noexcept = delete;
@@ -72,7 +76,7 @@ namespace ig
 
         void PreRender(const LocalFrameIndex localFrameIdx);
 
-    private:
+      private:
         constexpr static size_t NumTargetCommandListPerThread = 8;
         const FrameManager& frameManager;
         const size_t numReservedCtx;

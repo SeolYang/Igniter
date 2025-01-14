@@ -3,15 +3,14 @@
 
 namespace ig::meta
 {
-    constexpr inline entt::hashed_string SerializeComponentJsonFunc   = "SerializeComponentJson"_hs;
+    constexpr inline entt::hashed_string SerializeComponentJsonFunc = "SerializeComponentJson"_hs;
     constexpr inline entt::hashed_string DeserializeComponentJsonFunc = "DeserializeComponentJson"_hs;
 } // namespace ig::meta
 
 namespace ig
 {
     template <typename Archive, typename Ty>
-    concept Serializable = requires(Archive& archive, Ty& data, const Ty& constData)
-    {
+    concept Serializable = requires(Archive& archive, Ty& data, const Ty& constData) {
         {
             constData.Serialize(archive)
         } -> std::same_as<Archive&>;

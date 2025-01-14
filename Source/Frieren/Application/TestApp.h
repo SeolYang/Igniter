@@ -15,7 +15,7 @@ namespace fe
 
     class TestApp : public ig::Application
     {
-    public:
+      public:
         explicit TestApp(const ig::AppDesc& desc);
         ~TestApp() override;
 
@@ -25,7 +25,7 @@ namespace fe
 
         void SetGameSystem(ig::Ptr<ig::GameSystem> newGameSystem);
 
-    private:
+      private:
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas> editorCanvas;
 

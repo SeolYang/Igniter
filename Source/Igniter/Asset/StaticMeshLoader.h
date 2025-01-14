@@ -28,21 +28,21 @@ namespace ig
     {
         friend class AssetManager;
 
-    public:
+      public:
         StaticMeshLoader(RenderContext& renderContext, AssetManager& assetManager);
 
-        StaticMeshLoader(const StaticMeshLoader&)     = delete;
+        StaticMeshLoader(const StaticMeshLoader&) = delete;
         StaticMeshLoader(StaticMeshLoader&&) noexcept = delete;
-        ~StaticMeshLoader()                           = default;
+        ~StaticMeshLoader() = default;
 
-        StaticMeshLoader& operator=(const StaticMeshLoader&)     = delete;
+        StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
         StaticMeshLoader& operator=(StaticMeshLoader&&) noexcept = delete;
 
-    private:
+      private:
         Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc) const;
 
-    private:
+      private:
         RenderContext& renderContext;
-        AssetManager&  assetManager;
+        AssetManager& assetManager;
     };
 } // namespace ig

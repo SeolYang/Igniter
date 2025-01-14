@@ -12,13 +12,13 @@ namespace fe
 {
     class JustSpinningSystem final : public ig::GameSystem
     {
-    public:
-        JustSpinningSystem()                              = default;
-        JustSpinningSystem(const JustSpinningSystem&)     = delete;
+      public:
+        JustSpinningSystem() = default;
+        JustSpinningSystem(const JustSpinningSystem&) = delete;
         JustSpinningSystem(JustSpinningSystem&&) noexcept = delete;
-        ~JustSpinningSystem() override                    = default;
+        ~JustSpinningSystem() override = default;
 
-        JustSpinningSystem& operator=(const JustSpinningSystem&)     = delete;
+        JustSpinningSystem& operator=(const JustSpinningSystem&) = delete;
         JustSpinningSystem& operator=(JustSpinningSystem&&) noexcept = delete;
 
         void Update(const float deltaTime, ig::World& world) override;

@@ -4,9 +4,14 @@
 namespace ig
 {
     GpuTexture::GpuTexture(const GpuTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource)
-        : desc(newDesc), allocation(std::move(newAllocation)), resource(std::move(newResource)) { }
+        : desc(newDesc)
+        , allocation(std::move(newAllocation))
+        , resource(std::move(newResource))
+    {
+    }
 
-    GpuTexture::GpuTexture(ComPtr<ID3D12Resource> textureResource) : resource(std::move(textureResource))
+    GpuTexture::GpuTexture(ComPtr<ID3D12Resource> textureResource)
+        : resource(std::move(textureResource))
     {
         IG_CHECK(resource);
         desc.From(resource->GetDesc());
@@ -14,11 +19,15 @@ namespace ig
     }
 
     GpuTexture::GpuTexture(GpuTexture&& other) noexcept
-        : desc(other.desc), allocation(std::move(other.allocation)), resource(std::move(other.resource)) { }
+        : desc(other.desc)
+        , allocation(std::move(other.allocation))
+        , resource(std::move(other.resource))
+    {
+    }
 
     GpuTexture& GpuTexture::operator=(GpuTexture&& other) noexcept
     {
-        this->desc       = other.desc;
+        this->desc = other.desc;
         this->allocation = std::move(other.allocation);
         return *this;
     }

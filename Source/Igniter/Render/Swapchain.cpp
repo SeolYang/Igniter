@@ -12,7 +12,8 @@ IG_DEFINE_LOG_CATEGORY(SwapchainLog);
 namespace ig
 {
     Swapchain::Swapchain(const Window& window, RenderContext& renderContext, const bool bEnableVSync /*= false*/)
-        : renderContext(renderContext), bVSyncEnabled(bEnableVSync)
+        : renderContext(renderContext)
+        , bVSyncEnabled(bEnableVSync)
     {
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
 
@@ -25,21 +26,21 @@ namespace ig
 
         IG_VERIFY_SUCCEEDED(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory)));
 
-        DXGI_SWAP_CHAIN_DESC1 desc = { };
-        desc.Width                 = 0;
-        desc.Height                = 0;
+        DXGI_SWAP_CHAIN_DESC1 desc = {};
+        desc.Width = 0;
+        desc.Height = 0;
         /*
          * #sy_todo Support hdr
          * #sy_ref https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-hdr-sample-win32
          */
-        desc.Format      = DXGI_FORMAT_R8G8B8A8_UNORM;
-        desc.Stereo      = false;
-        desc.SampleDesc  = {1, 0};
+        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.Stereo = false;
+        desc.SampleDesc = {1, 0};
         desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         desc.BufferCount = NumFramesInFlight;
-        desc.Scaling     = DXGI_SCALING_STRETCH;
-        desc.SwapEffect  = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-        desc.AlphaMode   = DXGI_ALPHA_MODE_UNSPECIFIED;
+        desc.Scaling = DXGI_SCALING_STRETCH;
+        desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
         CheckTearingSupport(factory);
         desc.Flags = bTearingEnabled ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
@@ -56,9 +57,9 @@ namespace ig
             ComPtr<ID3D12Resource1> resource;
             IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(localFrameIdx, IID_PPV_ARGS(&resource)));
             SetObjectName(resource.Get(), std::format("Backbuffer LF#{}", localFrameIdx));
-            backBuffers.Resources[localFrameIdx]       = renderContext.CreateTexture(GpuTexture{resource});
+            backBuffers.Resources[localFrameIdx] = renderContext.CreateTexture(GpuTexture{resource});
             renderTargetViews.Resources[localFrameIdx] =
-                    renderContext.CreateRenderTargetView(backBuffers.Resources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
+                renderContext.CreateRenderTargetView(backBuffers.Resources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
         }
     }
 

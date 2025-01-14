@@ -15,7 +15,7 @@ namespace ig
     {
         struct UploadRequest final
         {
-        public:
+          public:
             void Reset()
             {
                 OffsetInBytes = 0;
@@ -24,7 +24,7 @@ namespace ig
                 Sync = {};
             }
 
-        public:
+          public:
             std::unique_ptr<CommandList> CmdList;
             size_t OffsetInBytes = 0;
             size_t SizeInBytes = 0;
@@ -37,12 +37,15 @@ namespace ig
     {
         friend class GpuUploader;
 
-    public:
+      public:
         UploadContext(const UploadContext&) = delete;
 
-        UploadContext(UploadContext&& other) noexcept :
-            uploadBuffer(std::exchange(other.uploadBuffer, nullptr)),
-            offsettedCpuAddr(std::exchange(other.offsettedCpuAddr, nullptr)), request(std::exchange(other.request, nullptr)) {}
+        UploadContext(UploadContext&& other) noexcept
+            : uploadBuffer(std::exchange(other.uploadBuffer, nullptr))
+            , offsettedCpuAddr(std::exchange(other.offsettedCpuAddr, nullptr))
+            , request(std::exchange(other.request, nullptr))
+        {
+        }
 
         ~UploadContext() = default;
 
@@ -68,13 +71,13 @@ namespace ig
         void CopyTextureSimple(
             GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources);
 
-    private:
+      private:
         UploadContext();
 
-        UploadContext(GpuBuffer* uploadBuffer, uint8_t* uploadBufferCpuAddr, details::UploadRequest* request) :
-            uploadBuffer(uploadBuffer),
-            offsettedCpuAddr(uploadBufferCpuAddr + request->OffsetInBytes),
-            request(request)
+        UploadContext(GpuBuffer* uploadBuffer, uint8_t* uploadBufferCpuAddr, details::UploadRequest* request)
+            : uploadBuffer(uploadBuffer)
+            , offsettedCpuAddr(uploadBufferCpuAddr + request->OffsetInBytes)
+            , request(request)
         {
             IG_CHECK(uploadBuffer != nullptr);
             IG_CHECK(uploadBufferCpuAddr != nullptr);
@@ -90,7 +93,7 @@ namespace ig
             request = nullptr;
         }
 
-    private:
+      private:
         GpuBuffer* uploadBuffer = nullptr;
         uint8_t* offsettedCpuAddr = nullptr;
         details::UploadRequest* request = nullptr;
@@ -100,7 +103,7 @@ namespace ig
     class CommandQueue;
     class GpuUploader final
     {
-    public:
+      public:
         GpuUploader(GpuDevice& gpuDevice);
         GpuUploader(const GpuUploader&) = delete;
         GpuUploader(GpuUploader&&) noexcept = delete;
@@ -114,13 +117,13 @@ namespace ig
 
         void PreRender(const LocalFrameIndex localFrameIdx) { this->currentLocalFrameIdx = localFrameIdx; }
 
-    private:
+      private:
         details::UploadRequest* AllocateRequestUnsafe();
         void WaitForRequestUnsafe(const size_t numWaitFor);
         void ResizeUnsafe(const size_t newSize);
         void FlushQueue();
 
-    private:
+      private:
         GpuDevice& gpuDevice;
         Ptr<CommandQueue> copyQueue{};
         InFlightFramesResource<Ptr<GpuFence>> copyFence{};

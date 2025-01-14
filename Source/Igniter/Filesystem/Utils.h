@@ -7,17 +7,17 @@ namespace ig
     {
         if (!fs::exists(path))
         {
-            return Json{ };
+            return Json{};
         }
 
         std::ifstream fileStream{path.c_str()};
         if (!fileStream.is_open())
         {
-            return Json{ };
+            return Json{};
         }
 
         Json newJson{Json::parse(fileStream, nullptr, false)};
-        return newJson.is_discarded() ? Json{ } : newJson;
+        return newJson.is_discarded() ? Json{} : newJson;
     }
 
     inline bool SaveJsonToFile(const Path& path, const Json& jsonData)

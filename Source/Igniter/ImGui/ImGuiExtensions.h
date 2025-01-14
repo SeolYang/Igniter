@@ -40,7 +40,7 @@ namespace ig::ImGuiX
     std::optional<E> EnumMenuItems(std::optional<E> lastSelection = std::nullopt, [[maybe_unused]] const Excludes... excludes)
     {
         constexpr auto& EnumNames = magic_enum::enum_names<E>();
-        constexpr auto& EnumVals  = magic_enum::enum_values<E>();
+        constexpr auto& EnumVals = magic_enum::enum_values<E>();
         static_assert(EnumNames.size() == EnumVals.size());
         std::optional<E> selection = std::nullopt;
         for (size_t idx = 0; idx < EnumVals.size(); ++idx)

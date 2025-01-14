@@ -11,22 +11,22 @@ namespace ig::ImGuiX
     // 단순히, 열린 순간에 로드 가능한 에셋의 리스트만 뽑아내면 된다.
     class AssetSelectModalPopup final
     {
-    private:
+      private:
         using AssetSnapshot = ig::AssetManager::Snapshot;
 
         struct AssetInfo
         {
             AssetSnapshot Snapshot;
-            ig::String    SelectableLabel;
+            ig::String SelectableLabel;
         };
 
-    public:
+      public:
         AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter);
-        AssetSelectModalPopup(const AssetSelectModalPopup&)     = delete;
+        AssetSelectModalPopup(const AssetSelectModalPopup&) = delete;
         AssetSelectModalPopup(AssetSelectModalPopup&&) noexcept = delete;
-        ~AssetSelectModalPopup()                                = default;
+        ~AssetSelectModalPopup() = default;
 
-        AssetSelectModalPopup& operator=(const AssetSelectModalPopup&)     = delete;
+        AssetSelectModalPopup& operator=(const AssetSelectModalPopup&) = delete;
         AssetSelectModalPopup& operator=(AssetSelectModalPopup&&) noexcept = delete;
 
         void Open();
@@ -34,18 +34,18 @@ namespace ig::ImGuiX
         void End();
 
         [[nodiscard]] bool IsAssetSelected() const { return bAssetSelected; }
-        ig::Guid           GetSelectedAssetGuid() const { return selectedGuid; }
+        ig::Guid GetSelectedAssetGuid() const { return selectedGuid; }
 
-    private:
+      private:
         void TakeAssetSnapshotsFromManager();
 
-    private:
-        ig::String               label;
-        ig::String               assetInfoChildLabel;
-        ig::EAssetCategory       assetCategoryToFilter = ig::EAssetCategory::Unknown;
+      private:
+        ig::String label;
+        ig::String assetInfoChildLabel;
+        ig::EAssetCategory assetCategoryToFilter = ig::EAssetCategory::Unknown;
         eastl::vector<AssetInfo> cachedAssetInfos;
-        ImGuiTextFilter          filter;
-        ig::Guid                 selectedGuid;
-        bool                     bAssetSelected = false;
+        ImGuiTextFilter filter;
+        ig::Guid selectedGuid;
+        bool bAssetSelected = false;
     };
 } // namespace ig::ImGuiX

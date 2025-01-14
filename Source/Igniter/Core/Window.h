@@ -8,19 +8,19 @@ namespace ig
     {
         const uint32_t Width;
         const uint32_t Height;
-        const String   Title;
+        const String Title;
     };
 
     // @dependency	ig::Engine, ig::Logger, ig::InputManager
     class Window final
     {
-    public:
+      public:
         Window(const WindowDescription& description);
         ~Window();
-        Window(const Window&)     = delete;
+        Window(const Window&) = delete;
         Window(Window&&) noexcept = delete;
 
-        Window& operator=(const Window&)     = delete;
+        Window& operator=(const Window&) = delete;
         Window& operator=(Window&&) noexcept = delete;
 
         const WindowDescription& GetDescription() const { return windowDesc; }
@@ -36,15 +36,15 @@ namespace ig
 
         void PumpMessage();
 
-    private:
+      private:
         static LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
-    private:
+      private:
         WindowDescription windowDesc;
 
         std::wstring windowTitle;
-        WNDCLASSEX   windowClass;
-        HWND         windowHandle = nullptr;
+        WNDCLASSEX windowClass;
+        HWND windowHandle = nullptr;
 
         Viewport viewport;
 

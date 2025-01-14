@@ -26,7 +26,7 @@ namespace ig
         template <typename GpuDataType>
         struct GpuProxy
         {
-        public:
+          public:
             struct UploadInfo
             {
                 CRef<GpuStorage::Allocation> StorageSpaceRef;
@@ -35,7 +35,7 @@ namespace ig
 
             using GpuData_t = GpuDataType;
 
-        public:
+          public:
             constexpr static U32 kDataSize = (U32)sizeof(GpuDataType);
 
             GpuStorage::Allocation StorageSpace{};
@@ -120,13 +120,13 @@ namespace ig
         using OrderedInstancingMap = OrderedMap<U64, InstancingGpuData>;
         struct InstancingPackage
         {
-        public:
+          public:
             static inline U64 MakeInstancingMapKey(const MeshProxy& meshProxy, const MaterialProxy& materialProxy)
             {
                 return ((U64)materialProxy.StorageSpace.OffsetIndex << 32) | meshProxy.StorageSpace.OffsetIndex;
             }
 
-        public:
+          public:
             InFlightFramesResource<Ptr<GpuStorage>> InstancingDataStorage;
             InFlightFramesResource<Ptr<GpuStorage>> TransformIndexStorage;
             Vector<InstancingMap> ThreadLocalInstancingMaps;
@@ -140,7 +140,7 @@ namespace ig
             InFlightFramesResource<Size> StagingBufferSize;
         };
 
-    public:
+      public:
         explicit SceneProxy(tf::Executor& taskExecutor, RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager);
         SceneProxy(const SceneProxy&) = delete;
         SceneProxy(SceneProxy&&) noexcept = delete;
@@ -214,7 +214,7 @@ namespace ig
 
         [[nodiscard]] U32 GetNumInstancing() const noexcept { return (U32)instancingPackage.GlobalInstancingMap.size(); }
 
-    private:
+      private:
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
         void UpdateMeshProxy(const LocalFrameIndex localFrameIdx);
         void UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
@@ -230,7 +230,7 @@ namespace ig
 
         void ReplicateRenderableIndices(const LocalFrameIndex localFrameIdx);
 
-    private:
+      private:
         tf::Executor* taskExecutor = nullptr;
         RenderContext* renderContext = nullptr;
         AssetManager* assetManager = nullptr;

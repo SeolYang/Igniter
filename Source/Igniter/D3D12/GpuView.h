@@ -5,14 +5,14 @@ namespace ig
 {
     class GpuView final
     {
-    public:
+      public:
         [[nodiscard]] bool IsValid() const noexcept { return Type != EGpuViewType::Unknown && Index != InvalidIndexU32; }
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
         [[nodiscard]] bool HasValidCpuHandle() const noexcept { return CpuHandle.ptr != std::numeric_limits<decltype(CpuHandle.ptr)>::max(); }
         [[nodiscard]] bool HasValidGpuHandle() const noexcept { return GpuHandle.ptr != std::numeric_limits<decltype(GpuHandle.ptr)>::max(); }
 
-    public:
+      public:
         EGpuViewType Type = EGpuViewType::Unknown;  /* Type of descriptor. */
         uint32_t Index = InvalidIndexU32;           /* Index of descriptor in Descriptor Heap. */
         D3D12_CPU_DESCRIPTOR_HANDLE CpuHandle = {}; /* CPU Handle of descriptor. */

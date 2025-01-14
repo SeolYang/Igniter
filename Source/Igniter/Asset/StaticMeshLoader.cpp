@@ -14,9 +14,11 @@ IG_DECLARE_LOG_CATEGORY(StaticMeshLoader);
 
 namespace ig
 {
-    StaticMeshLoader::StaticMeshLoader(RenderContext& renderContext, AssetManager& assetManager) :
-        renderContext(renderContext),
-        assetManager(assetManager) {}
+    StaticMeshLoader::StaticMeshLoader(RenderContext& renderContext, AssetManager& assetManager)
+        : renderContext(renderContext)
+        , assetManager(assetManager)
+    {
+    }
 
     Result<StaticMesh, EStaticMeshLoadStatus> StaticMeshLoader::Load(const StaticMesh::Desc& desc) const
     {

@@ -66,11 +66,14 @@ namespace ig
 
     StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager,
                            const Desc& snapshot,
-                           const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace) :
-        renderContext(&renderContext),
-        assetManager(&assetManager),
-        snapshot(snapshot),
-        vertexSpace(vertexSpace), vertexIndexSpace(vertexIndexSpace) {}
+                           const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace)
+        : renderContext(&renderContext)
+        , assetManager(&assetManager)
+        , snapshot(snapshot)
+        , vertexSpace(vertexSpace)
+        , vertexIndexSpace(vertexIndexSpace)
+    {
+    }
 
     StaticMesh::~StaticMesh()
     {

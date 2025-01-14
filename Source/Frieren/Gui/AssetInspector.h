@@ -6,7 +6,7 @@ namespace fe
 {
     class AssetInspector final
     {
-    public:
+      public:
         AssetInspector();
         AssetInspector(const AssetInspector&) = delete;
         AssetInspector(AssetInspector&&) noexcept = delete;
@@ -17,7 +17,7 @@ namespace fe
 
         void OnImGui();
 
-    private:
+      private:
         void RenderMenuBar();
         void RenderFilterMenu();
         void RenderMainFrame();
@@ -33,7 +33,7 @@ namespace fe
         void RenderSelector(const char* label, const ig::Guid guid);
         int RenderSelectorPopup(const ig::EAssetCategory selectAssetType);
 
-    private:
+      private:
         std::vector<ig::AssetManager::Snapshot> snapshots{};
         bool bIsDirty{true};
         ig::chrono::system_clock::time_point lastUpdated{ig::chrono::system_clock::now()};

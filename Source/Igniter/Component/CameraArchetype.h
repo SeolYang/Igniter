@@ -6,7 +6,7 @@ namespace ig
 {
     struct CameraArchetype
     {
-    public:
+      public:
         static Entity Create(Registry& registry)
         {
             const Entity newEntity = registry.create();

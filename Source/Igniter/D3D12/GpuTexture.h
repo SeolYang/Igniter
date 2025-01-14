@@ -10,7 +10,7 @@ namespace ig
     {
         friend class GpuDevice;
 
-    public:
+      public:
         GpuTexture(ComPtr<ID3D12Resource> textureResource);
         GpuTexture(const GpuTexture&) = delete;
         GpuTexture(GpuTexture&& other) noexcept;
@@ -41,12 +41,12 @@ namespace ig
             return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<uint32_t>(desc.GetNumSubresources()));
         }
 
-    private:
+      private:
         GpuTexture(const GpuTextureDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource);
 
-    private:
-        GpuTextureDesc              desc;
+      private:
+        GpuTextureDesc desc;
         ComPtr<D3D12MA::Allocation> allocation;
-        ComPtr<ID3D12Resource>      resource;
+        ComPtr<ID3D12Resource> resource;
     };
 } // namespace ig

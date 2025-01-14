@@ -16,8 +16,8 @@
 
 namespace fe
 {
-    TestApp::TestApp(const ig::AppDesc& desc) :
-        Application(desc)
+    TestApp::TestApp(const ig::AppDesc& desc)
+        : Application(desc)
     {
         /* #sy_test 입력 매니저 테스트 */
         ig::InputManager& inputManager = ig::Engine::GetInputManager();

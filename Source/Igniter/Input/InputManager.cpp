@@ -71,7 +71,7 @@ namespace ig
     InputManager::InputManager()
     {
         rawMouseInputPollingDoneEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-        rawMouseInputPollingThread    = std::jthread{
+        rawMouseInputPollingThread = std::jthread{
             [this]()
             {
                 HWND window = CreateWindowEx(0, TEXT("Message"), NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
@@ -81,11 +81,11 @@ namespace ig
                     return;
                 }
 
-                RAWINPUTDEVICE rawMouse{ };
+                RAWINPUTDEVICE rawMouse{};
                 rawMouse.usUsagePage = 0x01; /* HID_USAGE_PAGE_GENERIC */
-                rawMouse.usUsage     = 0x02; /* HID_USAGE_GENERIC_MOUSE */
-                rawMouse.dwFlags     = 0;
-                rawMouse.hwndTarget  = window;
+                rawMouse.usUsage = 0x02;     /* HID_USAGE_GENERIC_MOUSE */
+                rawMouse.dwFlags = 0;
+                rawMouse.hwndTarget = window;
                 if (RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse)) == FALSE)
                 {
                     IG_LOG(InputManagerLog, Fatal, "Failed to create raw input mouse. {:#X}", GetLastError());
@@ -104,7 +104,7 @@ namespace ig
                     ZoneScoped;
                     // https://learn.microsoft.com/ko-kr/windows/win32/api/winuser/nf-winuser-msgwaitformultipleobjects
                     if (const bool bDoneEventSignaled =
-                                MsgWaitForMultipleObjects(1, &this->rawMouseInputPollingDoneEvent, FALSE, INFINITE, QS_RAWINPUT) != WAIT_OBJECT_0 + 1;
+                            MsgWaitForMultipleObjects(1, &this->rawMouseInputPollingDoneEvent, FALSE, INFINITE, QS_RAWINPUT) != WAIT_OBJECT_0 + 1;
                         bDoneEventSignaled)
                     {
                         break;
@@ -118,8 +118,7 @@ namespace ig
                 rawMouse.dwFlags |= RIDEV_REMOVE;
                 RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse));
                 DestroyWindow(window);
-            }
-        };
+            }};
     }
 
     InputManager::~InputManager()
@@ -160,7 +159,7 @@ namespace ig
         }
 
         const Handle<Action, InputManager> newHandle = actionRegistry.Create();
-        nameActionTable[name]                        = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
+        nameActionTable[name] = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
         IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
         actionSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManagerLog, Info, "Action {} mapped to '{}'", name, input);
@@ -202,7 +201,7 @@ namespace ig
         }
 
         const Handle<Axis, InputManager> newHandle = axisRegistry.Create(scale);
-        nameAxisTable[name]                        = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
+        nameAxisTable[name] = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
         IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
         axisSets[ToUnderlying(input)].insert(newHandle);
         IG_LOG(InputManagerLog, Info, "Axis {} mapped to '{}'", name, input);
@@ -245,7 +244,7 @@ namespace ig
         }
 
         IG_LOG(InputManagerLog, Error, "Action {} does not exists.", name);
-        return Handle<Action, InputManager>{ };
+        return Handle<Action, InputManager>{};
     }
 
     Handle<Axis, InputManager> InputManager::QueryAxis(const String name) const
@@ -257,7 +256,7 @@ namespace ig
         }
 
         IG_LOG(InputManagerLog, Error, "Axis {} does not exists.", name);
-        return Handle<Axis, InputManager>{ };
+        return Handle<Axis, InputManager>{};
     }
 
     Action InputManager::GetAction(const Handle<Action, InputManager> action) const
@@ -266,7 +265,7 @@ namespace ig
         if (actionPtr == nullptr)
         {
             IG_LOG(InputManagerLog, Error, "The action handle is not valid.");
-            return Action{ };
+            return Action{};
         }
 
         return *actionPtr;
@@ -278,7 +277,7 @@ namespace ig
         if (axisPtr == nullptr)
         {
             IG_LOG(InputManagerLog, Error, "The action handle is not valid.");
-            return Axis{ };
+            return Axis{};
         }
 
         return *axisPtr;
@@ -459,14 +458,14 @@ namespace ig
             }
 
             constexpr size_t BatchMessageSize = 64Ui64;
-            const size_t     newBufferSize    = cbSize * BatchMessageSize;
+            const size_t newBufferSize = cbSize * BatchMessageSize;
             if (rawInputBuffer.size() < newBufferSize)
             {
                 rawInputBuffer.resize(newBufferSize);
             }
 
-            auto         sizeOfBuffer = static_cast<UINT>(rawInputBuffer.size());
-            const size_t numInputs    = GetRawInputBuffer((RAWINPUT*)rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
+            auto sizeOfBuffer = static_cast<UINT>(rawInputBuffer.size());
+            const size_t numInputs = GetRawInputBuffer((RAWINPUT*)rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
             if (numInputs == 0 || numInputs == NumericMaxOfValue(numInputs))
             {
                 break;

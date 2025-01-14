@@ -6,34 +6,34 @@ namespace ig
     // @dependency	None
     class Timer final
     {
-    public:
-        Timer()                 = default;
-        Timer(const Timer&)     = delete;
+      public:
+        Timer() = default;
+        Timer(const Timer&) = delete;
         Timer(Timer&&) noexcept = delete;
-        ~Timer()                = default;
+        ~Timer() = default;
 
-        Timer& operator=(const Timer&)     = delete;
+        Timer& operator=(const Timer&) = delete;
         Timer& operator=(Timer&&) noexcept = delete;
 
         void Begin()
         {
             const auto now = std::chrono::high_resolution_clock::now();
-            begin          = now;
+            begin = now;
 
             constexpr std::chrono::nanoseconds FrameCounterMeasureTime = std::chrono::seconds(1);
-            const auto                         frameCounterElapsed     = now - frameCounterBegin;
+            const auto frameCounterElapsed = now - frameCounterBegin;
             if (frameCounterElapsed >= FrameCounterMeasureTime)
             {
                 frameCounterBegin = now;
-                framePerSeconds   = static_cast<uint16_t>(frameCounter);
-                frameCounter      = 0;
+                framePerSeconds = static_cast<uint16_t>(frameCounter);
+                frameCounter = 0;
             }
         }
 
         void End()
         {
             const auto now = std::chrono::high_resolution_clock::now();
-            deltaTime      = now - begin;
+            deltaTime = now - begin;
 
             ++frameCounter;
         }
@@ -54,22 +54,22 @@ namespace ig
             return std::chrono::duration_cast<T>(std::chrono::system_clock::now().time_since_epoch()).count();
         }
 
-    private:
-        std::chrono::steady_clock::time_point begin     = std::chrono::high_resolution_clock::now();
-        std::chrono::nanoseconds              deltaTime = std::chrono::nanoseconds(0);
+      private:
+        std::chrono::steady_clock::time_point begin = std::chrono::high_resolution_clock::now();
+        std::chrono::nanoseconds deltaTime = std::chrono::nanoseconds(0);
 
-        uint64_t                                       frameCounter      = 0;
-        uint16_t                                       framePerSeconds   = 0;
+        uint64_t frameCounter = 0;
+        uint16_t framePerSeconds = 0;
         std::chrono::high_resolution_clock::time_point frameCounterBegin = std::chrono::high_resolution_clock::now();
     };
 
     struct TempTimer
     {
-    public:
-        void   Begin() { begin = Timer::Now(); }
+      public:
+        void Begin() { begin = Timer::Now(); }
         size_t End() const { return Timer::Now() - begin; }
 
-    public:
+      public:
         size_t begin = 0;
     };
 } // namespace ig

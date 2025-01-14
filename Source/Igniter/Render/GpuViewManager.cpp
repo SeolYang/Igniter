@@ -6,12 +6,14 @@
 
 namespace ig
 {
-    GpuViewManager::GpuViewManager(GpuDevice& gpuDevice, const uint32_t numCbvSrvUavDescriptors, const uint32_t numSamplerDescriptors, const uint32_t numRtvDescriptors, const uint32_t numDsvDescriptors) :
-        gpuDevice(gpuDevice),
-        cbvSrvUavHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerCbvSrvUavHeap", EDescriptorHeapType::CBV_SRV_UAV, numCbvSrvUavDescriptors).value())),
-        samplerHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value())),
-        rtvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerRtvHeap", EDescriptorHeapType::RTV, numRtvDescriptors).value())),
-        dsvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value())) { }
+    GpuViewManager::GpuViewManager(GpuDevice& gpuDevice, const uint32_t numCbvSrvUavDescriptors, const uint32_t numSamplerDescriptors, const uint32_t numRtvDescriptors, const uint32_t numDsvDescriptors)
+        : gpuDevice(gpuDevice)
+        , cbvSrvUavHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerCbvSrvUavHeap", EDescriptorHeapType::CBV_SRV_UAV, numCbvSrvUavDescriptors).value()))
+        , samplerHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value()))
+        , rtvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerRtvHeap", EDescriptorHeapType::RTV, numRtvDescriptors).value()))
+        , dsvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value()))
+    {
+    }
 
     GpuViewManager::~GpuViewManager()
     {
@@ -157,16 +159,16 @@ namespace ig
         case EGpuViewType::ShaderResourceView:
         case EGpuViewType::UnorderedAccessView:
             return cbvSrvUavHeap->Allocate(type);
-            
+
         case EGpuViewType::Sampler:
             return samplerHeap->Allocate(type);
-            
+
         case EGpuViewType::RenderTargetView:
             return rtvHeap->Allocate(type);
-            
+
         case EGpuViewType::DepthStencilView:
             return dsvHeap->Allocate(type);
-            
+
         default:
             return GpuView{};
         }

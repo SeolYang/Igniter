@@ -75,11 +75,11 @@ namespace ig
     using GpuTextureRtvDesc = std::variant<D3D12_TEX1D_RTV, D3D12_TEX2D_RTV, D3D12_TEX2DMS_RTV, D3D12_TEX3D_RTV, D3D12_TEX1D_ARRAY_RTV,
                                            D3D12_TEX2D_ARRAY_RTV, D3D12_TEX2DMS_ARRAY_RTV>;
     using GpuTextureDsvDesc =
-    std::variant<D3D12_TEX1D_DSV, D3D12_TEX2D_DSV, D3D12_TEX2DMS_DSV, D3D12_TEX1D_ARRAY_DSV, D3D12_TEX2D_ARRAY_DSV, D3D12_TEX2DMS_ARRAY_DSV>;
+        std::variant<D3D12_TEX1D_DSV, D3D12_TEX2D_DSV, D3D12_TEX2DMS_DSV, D3D12_TEX1D_ARRAY_DSV, D3D12_TEX2D_ARRAY_DSV, D3D12_TEX2DMS_ARRAY_DSV>;
 
     struct GpuCopyableFootprints final
     {
-    public:
+      public:
         size_t RequiredSize = 0;
         std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
         std::vector<uint32_t> NumRows{};

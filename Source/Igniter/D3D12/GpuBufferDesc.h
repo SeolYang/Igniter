@@ -58,7 +58,7 @@ namespace ig
     /* #sy_todo 기본 값 설정 */
     class GpuBufferDesc final : public D3D12_RESOURCE_DESC1
     {
-    public:
+      public:
         void AsConstantBuffer(const uint32_t sizeOfBufferInBytes);
         void AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false);
         void AsUploadBuffer(const uint32_t sizeOfBufferInBytes);
@@ -127,16 +127,16 @@ namespace ig
 
         void From(const D3D12_RESOURCE_DESC& desc);
 
-    private:
+      private:
         void AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices);
         void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
 
-    public:
+      public:
         using UavCounter = U32;
         constexpr static Size kUavCounterSize = sizeof(UavCounter);
         String DebugName = String{"Unknown Buffer"};
 
-    private:
+      private:
         uint32_t structureByteStride = 1;
         uint32_t numElements = 1;
         EGpuBufferType bufferType = EGpuBufferType::Unknown;
