@@ -278,7 +278,7 @@ namespace ig
     }
 
     void SceneProxy::PrepareNextFrame(const LocalFrameIndex localFrameIdx)
-    { 
+    {
         // 다음 프레임 작업 준비
         const LocalFrameIndex nextLocalFrameIdx = (localFrameIdx + 1) % NumFramesInFlight;
         tf::Taskflow prepareNextFrameFlow{};
@@ -294,6 +294,29 @@ namespace ig
                     });
                 subflow.join();
             });
+
+        tf::Task invalidateMeshProxy = prepareNextFrameFlow.emplace(
+            [this, nextLocalFrameIdx]()
+            {
+                ZoneScopedN("InvalidateNextFrameMeshProxy");
+                for (auto& [staticMesh, proxy] : meshProxyPackage.ProxyMap[nextLocalFrameIdx])
+                {
+                    IG_CHECK(staticMesh);
+                    proxy.bMightBeDestroyed = true;
+                }
+            });
+
+        tf::Task invalidateMaterialProxy = prepareNextFrameFlow.emplace(
+            [this, nextLocalFrameIdx]()
+            {
+                ZoneScopedN("InvalidateNextFrameMaterialProxy");
+                for (auto& [material, proxy] : materialProxyPackage.ProxyMap[nextLocalFrameIdx])
+                {
+                    IG_CHECK(material);
+                    proxy.bMightBeDestroyed = true;
+                }
+            });
+
         tf::Task invalidateRenderableProxy = prepareNextFrameFlow.emplace(
             [this, nextLocalFrameIdx](tf::Subflow& subflow)
             {
@@ -306,6 +329,19 @@ namespace ig
                     });
                 subflow.join();
             });
+
+        tf::Task partialInvalidateInstancingData = prepareNextFrameFlow.emplace(
+            [this, nextLocalFrameIdx]()
+            {
+                ZoneScopedN("PartiallyInvalidateNextFrameInstancingData");
+                instancingPackage.InstancingDataStorage[nextLocalFrameIdx]->ForceReset();
+                instancingPackage.TransformIndexStorage[nextLocalFrameIdx]->ForceReset();
+                for (InstancingMap& threadLocalMap : instancingPackage.ThreadLocalInstancingMaps)
+                {
+                    threadLocalMap.clear();
+                }
+            });
+
         invalidationFuture[nextLocalFrameIdx] = taskExecutor->run(std::move(prepareNextFrameFlow));
     }
 
@@ -396,13 +432,6 @@ namespace ig
     {
         const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
 
-        /* Instancing Data의 경우 부담이 크지 않기 때문에 일단 여기서 처리 */
-        instancingPackage.InstancingDataStorage[localFrameIdx]->ForceReset();
-        instancingPackage.TransformIndexStorage[localFrameIdx]->ForceReset();
-        for (InstancingMap& threadLocalMap : instancingPackage.ThreadLocalInstancingMaps)
-        {
-            threadLocalMap.clear();
-        }
         instancingPackage.GlobalInstancingMap.clear();
         instancingPackage.SumNumInstances = 0;
 
@@ -513,12 +542,6 @@ namespace ig
         auto& proxyMap = meshProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *meshProxyPackage.Storage[localFrameIdx];
 
-        for (auto& [staticMesh, proxy] : proxyMap)
-        {
-            IG_CHECK(staticMesh);
-            proxy.bMightBeDestroyed = true;
-        }
-
         std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh, true)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
         {
@@ -584,12 +607,6 @@ namespace ig
 
         auto& proxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *materialProxyPackage.Storage[localFrameIdx];
-
-        for (auto& [material, proxy] : proxyMap)
-        {
-            IG_CHECK(material);
-            proxy.bMightBeDestroyed = true;
-        }
 
         std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::Material, true)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
