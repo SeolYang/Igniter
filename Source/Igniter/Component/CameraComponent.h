@@ -24,7 +24,7 @@ namespace ig
       public:
         Viewport CameraViewport{0.f, 0.f, 1280.f, 720.f};
         float NearZ = 0.1f;
-        float FarZ = 300.f;
+        float FarZ = 1000.f;
         /* Degrees Field Of View */
         float Fov = 45.f;
 

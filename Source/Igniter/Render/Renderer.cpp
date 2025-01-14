@@ -401,7 +401,7 @@ namespace ig
             const ComputeCullingConstants computeCullingConstants{.PerFrameDataCbv = perFrameBuffer.PerFrameDataCbv};
             computeCullingCmdList->SetRoot32BitConstants(0, computeCullingConstants, 0);
 
-            constexpr U32 kNumThreads = 32;
+            constexpr U32 kNumThreads = 16;
             const Size numRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
             const U32 numThreadGroup = ((U32)numRenderables - 1) / kNumThreads + 1;
             computeCullingCmdList->Dispatch(numThreadGroup, 1, 1);

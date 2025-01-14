@@ -108,7 +108,7 @@ struct TransformData
 
 ConstantBuffer<ComputeCullingConstants> gComputeCullingConstantsBuffer : register(b0);
 
-[numthreads(32, 1, 1)]
+[numthreads(16, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
 	ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[gComputeCullingConstantsBuffer.PerFrameDataCbv];

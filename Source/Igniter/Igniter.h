@@ -142,6 +142,7 @@ using namespace entt::literals;
 #pragma warning(pop)
 
 #include <xxhash.h>
+#include <constexpr-xxh3.h>
 
 #include <EASTL/vector.h>
 #include <EASTL/array.h>

@@ -7,42 +7,16 @@ namespace ig
     inline constexpr uint64_t InvalidHashVal = 0xffffffffffffffffUi64;
 
     template <typename Ty>
-    inline U32 HashInstance(const Ty& instance)
+    inline U64 HashInstance(const Ty& instance)
     {
-        constexpr Size NumDwordChunks = sizeof(Ty) / 4u;
-        constexpr Size NumRemainingBytes = sizeof(Ty) % 4u;
-        constexpr Size RemainingBytesOffset = sizeof(Ty) - NumRemainingBytes;
-
-        const U32* const instanceDwordsPtr = reinterpret_cast<const U32*>(&instance);
-        const U8* const instanceBytesPtr = reinterpret_cast<const U8*>(&instance) + RemainingBytesOffset;
-
-#if ENABLE_SSE_CRC32
-        U32 hash = 0xFFFFFFFFu;
-        for (Index dwordChunkIdx = 0; dwordChunkIdx < NumDwordChunks; ++dwordChunkIdx)
-        {
-            hash = _mm_crc32_u32(hash, instanceDwordsPtr[dwordChunkIdx]);
-        }
-
-        for (Index byteIdx = 0; byteIdx < NumRemainingBytes; ++byteIdx)
-        {
-            hash = _mm_crc32_u32(hash, instanceBytesPtr[byteIdx]);
-        }
-#else
-        constexpr U32 FnvPrime = 16777619u;
-        constexpr U32 FnvOffsetBasis = 2166136261u;
-
-        U32 hash = FnvOffsetBasis;
-        for (Index dwordChunkIdx = 0; dwordChunkIdx < NumDwordChunks; ++dwordChunkIdx)
-        {
-            hash = FnvPrime * hash ^ instanceDwordsPtr[dwordChunkIdx];
-        }
-
-        for (Index byteIdx = 0; byteIdx < NumRemainingBytes; ++byteIdx)
-        {
-            hash = FnvPrime * hash ^ instanceBytesPtr[byteIdx];
-        }
-#endif
-        return hash ^ 0xFFFFFFFFu;
+        static_assert(sizeof(Ty)%8 == 0);
+        return constexpr_xxh3::XXH3_64bits_internal(
+            reinterpret_cast<const U64*>(&instance), sizeof(Ty), 0, constexpr_xxh3::kSecret, sizeof(constexpr_xxh3::kSecret),
+            [](const U64* input, size_t len, uint64_t, const void*,
+               size_t) constexpr noexcept
+            {
+                return constexpr_xxh3::hashLong_64b_internal(input, len, constexpr_xxh3::kSecret, sizeof(constexpr_xxh3::kSecret));
+            });
     }
 
     inline uint64_t HashRange(const uint32_t* const begin, const uint32_t* const end, uint64_t hash)
