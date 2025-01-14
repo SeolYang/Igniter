@@ -131,7 +131,7 @@ namespace ig
             InFlightFramesResource<Ptr<GpuStorage>> TransformIndexStorage;
             Vector<InstancingMap> ThreadLocalInstancingMaps;
             OrderedInstancingMap GlobalInstancingMap;
-            U32 SumNumInstances;
+            U32 SumNumInstances{0};
             GpuStorage::Allocation InstancingDataSpace;
             GpuStorage::Allocation TransformIdxSpace;
 
@@ -139,6 +139,13 @@ namespace ig
             InFlightFramesResource<U8*> MappedStagingBuffer;
             InFlightFramesResource<Size> StagingBufferSize;
         };
+
+        struct StaticMeshRenderableData
+        {
+            Entity Owner = NullEntity;
+            U64 InstancingKey = IG_NUMERIC_MAX_OF(InstancingKey);
+        };
+        Vector<Vector<StaticMeshRenderableData>> localIntermediateStaticMeshData;
 
       public:
         explicit SceneProxy(tf::Executor& taskExecutor, RenderContext& renderContext, const MeshStorage& meshStorage, AssetManager& assetManager);

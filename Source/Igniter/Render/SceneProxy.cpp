@@ -114,6 +114,7 @@ namespace ig
         transformProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
         instancingPackage.ThreadLocalInstancingMaps.resize(numWorker);
+        localIntermediateStaticMeshData.resize(numWorker);
 
         lightProxyPackage.PendingReplicationGroups.resize(numWorker);
 
@@ -422,6 +423,8 @@ namespace ig
                 IG_CHECK(foundItr != threadLocalMap.end());
 
                 ++foundItr->second.NumInstances;
+
+                localIntermediateStaticMeshData[workerId].emplace_back(entity, instancingKey);
             });
 
         tf::Task buildGlobalInstancingDataMap = subflow.emplace(
@@ -634,7 +637,7 @@ namespace ig
         materialProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, [[maybe_unused]] const Registry& registry)
     {
         IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
 
@@ -642,66 +645,50 @@ namespace ig
         auto& renderableStorage = *renderableProxyPackage.Storage[localFrameIdx];
         const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
 
-        const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
-        tf::Task buildStaticMeshRenderables = subflow.for_each(
-            staticMeshEntityView.begin(), staticMeshEntityView.end(),
-            [this, staticMeshEntityView, &renderableProxyMap, &transformProxyMap, localFrameIdx](const Entity entity)
+        tf::Task buildStaticMeshRenderables = subflow.for_each_index(
+            0, (I32)numWorker, 1,
+            [this, &renderableProxyMap, &transformProxyMap](const Index workerId)
             {
-                const StaticMeshComponent& staticMeshComponent = staticMeshEntityView.get<const StaticMeshComponent>(entity);
-                if (!staticMeshComponent.Mesh)
+                Vector<StaticMeshRenderableData>& intermediateData = localIntermediateStaticMeshData[workerId];
+                for (const StaticMeshRenderableData& renderableData : intermediateData)
                 {
-                    return;
-                }
-                IG_CHECK(meshProxyPackage.ProxyMap[localFrameIdx].contains(staticMeshComponent.Mesh));
-
-                const MaterialComponent& materialComponent = staticMeshEntityView.get<const MaterialComponent>(entity);
-                if (!materialComponent.Instance)
-                {
-                    return;
-                }
-                IG_CHECK(materialProxyPackage.ProxyMap[localFrameIdx].contains(materialComponent.Instance));
-
-                const MeshProxy& meshProxy = meshProxyPackage.ProxyMap[localFrameIdx][staticMeshComponent.Mesh];
-                const MaterialProxy& materialProxy = materialProxyPackage.ProxyMap[localFrameIdx][materialComponent.Instance];
-                const U64 instancingKey = InstancingPackage::MakeInstancingMapKey(meshProxy, materialProxy);
-                // IG_CHECK(instancingPackage.GlobalInstancingMap.contains(instancingKey));
-                const U32 instancingId = instancingPackage.GlobalInstancingMap[instancingKey].InstancingId;
-                const Index workerId = taskExecutor->this_worker_id();
-
-                const auto renderableFoundItr = renderableProxyMap.find(entity);
-                if (renderableFoundItr == renderableProxyMap.end())
-                {
-                    renderableProxyPackage.PendingProxyGroups[taskExecutor->this_worker_id()].emplace_back(
-                        entity,
-                        RenderableProxy{
-                            .StorageSpace = {},
-                            .GpuData = RenderableGpuData{
-                                .Type = ERenderableType::StaticMesh,
-                                .DataIdx = instancingId,
-                                .TransformDataIdx = (U32)transformProxyMap.at(entity).StorageSpace.OffsetIndex},
-                            .bMightBeDestroyed = false});
-
-                    renderableProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
-                }
-                else
-                {
-                    RenderableProxy& proxy = renderableFoundItr->second;
-                    if (proxy.GpuData.Type != ERenderableType::StaticMesh)
+                    const U32 instancingId = instancingPackage.GlobalInstancingMap[renderableData.InstancingKey].InstancingId;
+                    const auto renderableFoundItr = renderableProxyMap.find(renderableData.Owner);
+                    if (renderableFoundItr == renderableProxyMap.end())
                     {
-                        return;
+                        renderableProxyPackage.PendingProxyGroups[taskExecutor->this_worker_id()].emplace_back(
+                            renderableData.Owner,
+                            RenderableProxy{
+                                .StorageSpace = {},
+                                .GpuData = RenderableGpuData{
+                                    .Type = ERenderableType::StaticMesh,
+                                    .DataIdx = instancingId,
+                                    .TransformDataIdx = (U32)transformProxyMap.at(renderableData.Owner).StorageSpace.OffsetIndex},
+                                .bMightBeDestroyed = false});
+
+                        renderableProxyPackage.PendingReplicationGroups[workerId].emplace_back(renderableData.Owner);
                     }
-
-                    IG_CHECK(proxy.bMightBeDestroyed);
-                    proxy.bMightBeDestroyed = false;
-
-                    if (instancingId != proxy.GpuData.DataIdx)
+                    else
                     {
-                        proxy.GpuData.DataIdx = instancingId;
-                        renderableProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
-                    }
+                        RenderableProxy& proxy = renderableFoundItr->second;
+                        if (proxy.GpuData.Type != ERenderableType::StaticMesh)
+                        {
+                            return;
+                        }
 
-                    renderableIndicesGroups[workerId].emplace_back((U32)proxy.StorageSpace.OffsetIndex);
+                        IG_CHECK(proxy.bMightBeDestroyed);
+                        proxy.bMightBeDestroyed = false;
+
+                        if (instancingId != proxy.GpuData.DataIdx)
+                        {
+                            proxy.GpuData.DataIdx = instancingId;
+                            renderableProxyPackage.PendingReplicationGroups[workerId].emplace_back(renderableData.Owner);
+                        }
+
+                        renderableIndicesGroups[workerId].emplace_back((U32)proxy.StorageSpace.OffsetIndex);
+                    }
                 }
+                intermediateData.clear();
             });
 
         // 모든 종류의 Renderable에 대한 Proxy가 만들어 진 이후
