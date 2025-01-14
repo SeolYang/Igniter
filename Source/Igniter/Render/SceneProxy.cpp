@@ -469,18 +469,18 @@ namespace ig
         tf::Task finalizeGlobalInstancingDataMap = subflow.emplace(
             [this, localFrameIdx]()
             {
-                U32 instanceId = 0;
+                U32 instancingId = 0;
                 U32 transformOffset = 0;
                 for (auto& [instanceKey, globalData] : instancingPackage.GlobalInstancingMap)
                 {
-                    globalData.InstancingId = instanceId;
+                    globalData.InstancingId = instancingId;
                     globalData.TransformOffset = transformOffset;
 
-                    ++instanceId;
+                    ++instancingId;
                     transformOffset += globalData.NumInstances;
                 }
 
-                IG_CHECK(instanceId == instancingPackage.GlobalInstancingMap.size());
+                IG_CHECK(instancingId == instancingPackage.GlobalInstancingMap.size());
                 IG_CHECK(transformOffset == instancingPackage.SumNumInstances);
             });
 
