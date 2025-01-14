@@ -2,7 +2,6 @@ struct PerFrameData
 {
     float4x4 ViewProj;
     float4 CameraPos;
-    float4 CameraForward;
 
     uint StaticMeshVertexStorageSrv;
     uint VertexIndexStorageSrv;

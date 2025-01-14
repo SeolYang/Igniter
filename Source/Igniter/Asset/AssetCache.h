@@ -63,6 +63,18 @@ namespace ig::details
             return LoadUnsafe(guid, bShouldIncreaseRefCounter);
         }
 
+        void Clone(const Guid& guid, const U32 numClones = 1)
+        {
+            IG_CHECK(numClones > 0);
+            IG_CHECK(guid.isValid());
+
+            ReadWriteLock rwLock{mutex};
+            IG_CHECK(cachedAssets.contains(guid));
+            IG_CHECK(refCounterTable.contains(guid));
+
+            refCounterTable[guid] += numClones;
+        }
+
         [[nodiscard]] bool IsCached(const Guid& guid) const override
         {
             ReadOnlyLock lock{mutex};

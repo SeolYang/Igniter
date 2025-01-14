@@ -30,6 +30,11 @@ namespace ig
     {
     }
 
+    MaterialComponent::MaterialComponent(const ManagedAsset<Material> ownedInstance) :
+        Instance(ownedInstance)
+    {
+    }
+
     MaterialComponent::~MaterialComponent()
     {
         Destroy();

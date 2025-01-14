@@ -19,17 +19,17 @@ namespace ig
             return XMMatrixLookToLH(Position, lookDirection, Vector3::Up);
         }
 
-        [[nodiscard]] Vector3 GetForwardDirection() const { return Vector3::Transform(Vector3::Forward, Rotation); }
+        [[nodiscard]] Vector3 GetForward() const { return Vector3::Transform(Vector3::Forward, Rotation); }
 
-        [[nodiscard]] Vector3 GetBackwardDirection() const { return Vector3::Transform(Vector3::Backward, Rotation); }
+        [[nodiscard]] Vector3 GetBackward() const { return Vector3::Transform(Vector3::Backward, Rotation); }
 
-        [[nodiscard]] Vector3 GetRightDirection() const { return Vector3::Transform(Vector3::Right, Rotation); }
+        [[nodiscard]] Vector3 GetRight() const { return Vector3::Transform(Vector3::Right, Rotation); }
 
-        [[nodiscard]] Vector3 GetLeftDirection() const { return Vector3::Transform(Vector3::Left, Rotation); }
+        [[nodiscard]] Vector3 GetLeft() const { return Vector3::Transform(Vector3::Left, Rotation); }
 
-        [[nodiscard]] Vector3 GetDownDirection() const { return Vector3::Transform(Vector3::Down, Rotation); }
+        [[nodiscard]] Vector3 GetDown() const { return Vector3::Transform(Vector3::Down, Rotation); }
 
-        [[nodiscard]] Vector3 GetUpDirection() const { return Vector3::Transform(Vector3::Up, Rotation); }
+        [[nodiscard]] Vector3 GetUp() const { return Vector3::Transform(Vector3::Up, Rotation); }
 
         Json&       Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);

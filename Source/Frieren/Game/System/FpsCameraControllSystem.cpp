@@ -58,22 +58,22 @@ namespace fe
                 ig::Vector3 direction{ };
                 if (moveLeftAction.IsAnyPressing())
                 {
-                    direction += transform.GetLeftDirection();
+                    direction += transform.GetLeft();
                 }
 
                 if (moveRightAction.IsAnyPressing())
                 {
-                    direction += transform.GetRightDirection();
+                    direction += transform.GetRight();
                 }
 
                 if (moveForwardAction.IsAnyPressing())
                 {
-                    direction += transform.GetForwardDirection();
+                    direction += transform.GetForward();
                 }
 
                 if (moveBackwardAction.IsAnyPressing())
                 {
-                    direction += transform.GetBackwardDirection();
+                    direction += transform.GetBackward();
                 }
 
                 if (moveUpAction.IsAnyPressing())

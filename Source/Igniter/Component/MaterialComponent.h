@@ -9,6 +9,7 @@ namespace ig
     {
     public:
         MaterialComponent();
+        MaterialComponent(const ManagedAsset<Material> ownedInstance);
         MaterialComponent(const MaterialComponent& other);
         MaterialComponent(MaterialComponent&& other) noexcept;
         ~MaterialComponent();

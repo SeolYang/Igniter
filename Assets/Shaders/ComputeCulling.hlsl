@@ -7,7 +7,6 @@ struct PerFrameData
 {
     float4x4 ViewProj;
     float4 CameraPos;
-    float4 CameraForward;
 
     uint StaticMeshVertexStorageSrv;
     uint VertexIndexStorageSrv;
@@ -28,6 +27,8 @@ struct PerFrameData
     uint NumMaxRenderables;
 
     uint PerFrameDataCbv;
+
+    uint3 Padding;
 };
 
 struct MeshData
@@ -63,7 +64,7 @@ struct RenderableData
 
 ConstantBuffer<ComputeCullingConstants> gComputeCullingConstantsBuffer : register(b0);
 
-[numthreads(16, 1, 1)]
+[numthreads(32, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[gComputeCullingConstantsBuffer.PerFrameDataCbv];

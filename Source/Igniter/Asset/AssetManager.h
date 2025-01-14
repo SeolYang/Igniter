@@ -176,18 +176,18 @@ namespace ig
         void Delete(const EAssetCategory assetType, const String virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
-        ManagedAsset<T> Clone(const ManagedAsset<T> handle, const bool bShouldSuppressDirty = false)
+        bool Clone(const ManagedAsset<T> handle, const U32 numClones = 1, const bool bShouldSuppressDirty = false)
         {
             if (!handle)
             {
-                return handle;
+                return false;
             }
 
             details::AssetCache<T>& cache = GetCache<T>();
             const T* asset = cache.Lookup(handle);
             if (asset == nullptr)
             {
-                return handle;
+                return false;
             }
 
             if (!bShouldSuppressDirty)
@@ -195,7 +195,14 @@ namespace ig
                 bIsDirty = true;
             }
 
-            return cache.Load(asset->GetSnapshot().Info.GetGuid());
+            const AssetInfo& assetInfo = asset->GetSnapshot().Info;
+            cache.Clone(assetInfo.GetGuid(), numClones);
+            IG_LOG(AssetManagerLog, Info, "<{}:{}> {}({}) cloned({}).",
+                   assetInfo.GetCategory(), assetInfo.GetScope(),
+                   assetInfo.GetVirtualPath(), assetInfo.GetGuid(),
+                   numClones);
+
+            return true;
         }
 
         template <typename T>

@@ -38,13 +38,15 @@ namespace ig
         D3D12_DRAW_ARGUMENTS DrawIndexedArguments;
     };
 
-    struct PerFrameBuffer
+    // 나중에 여러 카메라에 대해 렌더링하게 되면 Per Frame은 아닐수도?
+    struct  PerFrameBuffer
     {
         Matrix ViewProj{};
+
         Vector3 CameraPosition{};
         float Padding0;
-        Vector3 CameraForward{};
-        float Padding1;
+
+        //Frustum CameraFrustum;
 
         U32 StaticMeshVertexStorageSrv = IG_NUMERIC_MAX_OF(StaticMeshVertexStorageSrv);
         U32 VertexIndexStorageSrv = IG_NUMERIC_MAX_OF(VertexIndexStorageSrv);
@@ -65,8 +67,9 @@ namespace ig
         U32 NumMaxRenderables = IG_NUMERIC_MAX_OF(NumMaxRenderables);
 
         U32 PerFrameDataCbv = IG_NUMERIC_MAX_OF(PerFrameDataCbv);
-
         // TODO Light Sttorage/Indices/NumMaxLights
+
+        U32 Padding[3];
     };
 
     struct ComputeCullingConstants
@@ -242,7 +245,6 @@ namespace ig
             const Matrix projMatrix = camera.CreatePerspective();
             perFrameBuffer.ViewProj = ConvertToShaderSuitableForm(viewMatrix * projMatrix);
             perFrameBuffer.CameraPosition = transformComponent.Position;
-            perFrameBuffer.CameraForward = transformComponent.GetForwardDirection();
             bMainCameraExists = true;
             break;
         }
@@ -366,7 +368,7 @@ namespace ig
             const ComputeCullingConstants computeCullingConstants{.PerFrameDataCbv = perFrameBuffer.PerFrameDataCbv};
             computeCullingCmdList->SetRoot32BitConstants(0, computeCullingConstants, 0);
 
-            constexpr U32 kNumThreads = 16;
+            constexpr U32 kNumThreads = 32;
             const Size numRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
             const U32 numThreadGroup = ((U32)numRenderables - 1) / kNumThreads + 1;
             computeCullingCmdList->Dispatch(numThreadGroup, 1, 1);
