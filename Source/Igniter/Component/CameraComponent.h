@@ -1,12 +1,14 @@
 #pragma once
 #include "Igniter/Core/Math.h"
+#include "Igniter/Core/BoundingVolume.h"
 #include "Igniter/Core/Meta.h"
 
 namespace ig
 {
+    struct TransformComponent;
     struct CameraComponent
     {
-    public:
+      public:
         [[nodiscard]] Matrix CreatePerspective() const
         {
             const float aspectRatio = CameraViewport.AspectRatio();
@@ -15,17 +17,18 @@ namespace ig
             return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
         }
 
-        Json&       Serialize(Json& archive) const;
+        Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
-    public:
+      public:
         Viewport CameraViewport{0.f, 0.f, 1280.f, 720.f};
-        float    NearZ = 0.1f;
-        float    FarZ  = 1000.f;
+        float NearZ = 0.1f;
+        float FarZ = 300.f;
         /* Degrees Field Of View */
         float Fov = 45.f;
 
+        bool bEnableFrustumCull = true;
         bool bIsMainCamera = false;
         /* #sy_improvements Support Orthographic? */
     };

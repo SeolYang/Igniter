@@ -1,6 +1,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Json.h"
 #include "Igniter/Core/Serialization.h"
+#include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Component/CameraComponent.h"
 
 namespace ig
@@ -69,6 +70,7 @@ namespace ig
         ImGui::InputFloat("Height", &camera.CameraViewport.height);
 
         ImGui::Checkbox("Is Main Camera", &camera.bIsMainCamera);
+        ImGui::Checkbox("Enable Frustum Culling", &camera.bEnableFrustumCull);
     }
 
     IG_DEFINE_TYPE_META_AS_COMPONENT(CameraComponent);

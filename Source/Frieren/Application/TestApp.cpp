@@ -186,16 +186,17 @@ namespace fe
                     registry.emplace<ig::MaterialComponent>(newAxeEntity, axeMaterial);
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
                     nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
-                    RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
-                    randComp.MoveDirection = ig::Vector3{
-                        ig::Random(-1.f, 1.f),
-                        ig::Random(-1.f, 1.f),
-                        ig::Random(-1.f, 1.f)};
-                    randComp.MoveDirection.Normalize();
-                    randComp.MoveSpeed = ig::Random(0.f, 5.f);
 
-                    randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
-                    randComp.RotateSpeed = ig::Random(0.f, 15.f);
+                    //RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
+                    //randComp.MoveDirection = ig::Vector3{
+                    //    ig::Random(-1.f, 1.f),
+                    //    ig::Random(-1.f, 1.f),
+                    //    ig::Random(-1.f, 1.f)};
+                    //randComp.MoveDirection.Normalize();
+                    //randComp.MoveSpeed = ig::Random(0.f, 5.f);
+
+                    //randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
+                    //randComp.RotateSpeed = ig::Random(0.f, 15.f);
                 }
             }
         }

@@ -6,8 +6,11 @@ struct GenDrawCommandsConstants
 
 struct PerFrameData
 {
+	float4x4 View;
     float4x4 ViewProj;
-    float4 CameraPos;
+    
+    float4 CamPosInvAspectRatio;
+	float4 ViewFrustumParams;
 
     uint StaticMeshVertexStorageSrv;
     uint VertexIndexStorageSrv;

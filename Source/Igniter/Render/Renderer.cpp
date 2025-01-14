@@ -41,12 +41,24 @@ namespace ig
     // 나중에 여러 카메라에 대해 렌더링하게 되면 Per Frame은 아닐수도?
     struct PerFrameBuffer
     {
+        Matrix View{};
         Matrix ViewProj{};
 
-        Vector3 CameraPosition{};
-        float Padding0;
-
-        // Frustum CameraFrustum;
+        // [1]: Real-Time Rendering 4th ed. 22.14.1 Frustum Plane Extraction
+        // [2]: https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
+        // [3]: https://iquilezles.org/articles/frustum/
+        // (CameraPos.xyz, InverseAspectRatio)
+        Vector4 CamPosInvAspectRatio{};
+        // (cos(fovy*0.5f), sin(fovy*0.5f), Near, Far)
+        // View Frustum (in view space) =>
+        // r = 1/aspect_ratio
+        // Left = (r*cos, 0, sin, 0)
+        // Right = (-r*cos, 0, sin, 0)
+        // Bottom = (0, cos, sin, 0)
+        // Top = (0, -cos, sin, 0)
+        // Near = (0, 0, 1, -N)
+        // Far = (0, 0, -1, F)
+        Vector4 ViewFrustumParams{};
 
         U32 StaticMeshVertexStorageSrv = IG_NUMERIC_MAX_OF(StaticMeshVertexStorageSrv);
         U32 VertexIndexStorageSrv = IG_NUMERIC_MAX_OF(VertexIndexStorageSrv);
@@ -248,8 +260,22 @@ namespace ig
 
             const Matrix viewMatrix = transformComponent.CreateView();
             const Matrix projMatrix = camera.CreatePerspective();
+            perFrameBuffer.View = ConvertToShaderSuitableForm(viewMatrix);
             perFrameBuffer.ViewProj = ConvertToShaderSuitableForm(viewMatrix * projMatrix);
-            perFrameBuffer.CameraPosition = transformComponent.Position;
+            perFrameBuffer.CamPosInvAspectRatio = Vector4{
+                transformComponent.Position.x,
+                transformComponent.Position.y,
+                transformComponent.Position.z,
+                1.f/camera.CameraViewport.AspectRatio()};
+
+            const float halfFovYRad = Deg2Rad(camera.Fov * 0.5f);
+            const float cosHalfFovY{std::cosf(halfFovYRad)};
+            const float sinHalfFovY{std::sinf(halfFovYRad)};
+            perFrameBuffer.ViewFrustumParams = Vector4{
+                cosHalfFovY, sinHalfFovY,
+                camera.NearZ, camera.FarZ};
+
+            perFrameBuffer.Padding[0] = camera.bEnableFrustumCull;
             bMainCameraExists = true;
             break;
         }
@@ -270,19 +296,21 @@ namespace ig
         {
             renderCmdList->Open(pso.get());
 
-            renderCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-                                                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-                                                    D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            renderCmdList->AddPendingTextureBarrier(
+                *backBuffer,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
+                D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
             renderCmdList->FlushBarriers();
 
             renderCmdList->ClearRenderTarget(*backBufferRtv);
             GpuView* dsv = renderContext->Lookup(dsvs[localFrameIdx]);
             renderCmdList->ClearDepth(*dsv);
-            renderCmdList->AddPendingTextureBarrier(*backBuffer,
-                                                    D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
-                                                    D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                                    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
+            renderCmdList->AddPendingTextureBarrier(
+                *backBuffer,
+                D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
             renderCmdList->FlushBarriers();
 
             renderCmdList->Close();
@@ -427,7 +455,7 @@ namespace ig
             genDrawCmdsCmdList->AddPendingBufferBarrier(
                 *instancingStorageBuffer,
                 D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_SHADER_RESOURCE);
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
             genDrawCmdsCmdList->FlushBarriers();
 
             const GpuView* drawOpaqueStaticMeshCmd = renderContext->Lookup(drawOpaqueStaticMeshCmdStorage[localFrameIdx]->GetUnorderedResourceView());
@@ -445,7 +473,7 @@ namespace ig
             genDrawCmdsCmdList->AddPendingBufferBarrier(
                 *instancingStorageBuffer,
                 D3D12_BARRIER_SYNC_COMPUTE_SHADING, D3D12_BARRIER_SYNC_NONE,
-                D3D12_BARRIER_ACCESS_SHADER_RESOURCE, D3D12_BARRIER_ACCESS_NO_ACCESS);
+                D3D12_BARRIER_ACCESS_UNORDERED_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS);
             genDrawCmdsCmdList->FlushBarriers();
 
             genDrawCmdsCmdList->Close();

@@ -1,27 +1,32 @@
 struct PerFrameData
 {
-    float4x4 ViewProj;
-    float4 CameraPos;
+	float4x4 View;
+	float4x4 ViewProj;
+    
+	float4 CamPosInvAspectRatio;
+	float4 ViewFrustumParams;
 
-    uint StaticMeshVertexStorageSrv;
-    uint VertexIndexStorageSrv;
+	uint StaticMeshVertexStorageSrv;
+	uint VertexIndexStorageSrv;
 
-    uint TransformStorageSrv;
-    uint MaterialStorageSrv;
-    uint MeshStorageSrv;
+	uint TransformStorageSrv;
+	uint MaterialStorageSrv;
+	uint MeshStorageSrv;
 
-    uint InstancingDataStorageSrv;
-    uint InstancingDataStorageUav;
+	uint InstancingDataStorageSrv;
+	uint InstancingDataStorageUav;
 
-    uint TransformIdxStorageSrv;
-    uint TransformIdxStorageUav;
+	uint TransformIdxStorageSrv;
+	uint TransformIdxStorageUav;
 
-    uint RenderableStorageSrv;
+	uint RenderableStorageSrv;
 
-    uint RenderableIndicesBufferSrv;
-    uint NumMaxRenderables;
+	uint RenderableIndicesBufferSrv;
+	uint NumMaxRenderables;
 
-    uint PerFrameDataCbv;
+	uint PerFrameDataCbv;
+
+	uint3 Padding;
 };
 
 struct PerDrawData
