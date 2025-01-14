@@ -158,6 +158,7 @@ namespace ig
 
         // 여기서 렌더링 전 필요한 Scene 정보를 모두 모으고, GPU 메모리에 변경점 들을 반영해주어야 한다
         [[nodiscard]] GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
+        void PrepareNextFrame(const LocalFrameIndex localFrameIdx);
 
         [[nodiscard]] RenderHandle<GpuView> GetTransformProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
         {
@@ -242,6 +243,8 @@ namespace ig
         RenderContext* renderContext = nullptr;
         AssetManager* assetManager = nullptr;
         const MeshStorage* meshStorage = nullptr;
+
+        InFlightFramesResource<tf::Future<void>> invalidationFuture;
 
         U32 numWorker{1};
 

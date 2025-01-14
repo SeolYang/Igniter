@@ -155,10 +155,14 @@ namespace ig
         IG_CHECK(assetManager != nullptr);
         ZoneScoped;
 
+        if (invalidationFuture[localFrameIdx].valid())
+        {
+            invalidationFuture[localFrameIdx].wait();
+        }
+
         const Registry& registry = world.GetRegistry();
 
         tf::Taskflow rootTaskFlow{};
-
         tf::Task updateTransformTask = rootTaskFlow.emplace(
             [this, localFrameIdx, &registry](tf::Subflow& subflow)
             {
@@ -190,37 +194,11 @@ namespace ig
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
             });
 
-        tf::Task invalidateInstancingData = rootTaskFlow.emplace(
-            [this, localFrameIdx]()
-            {
-                instancingPackage.InstancingDataStorage[localFrameIdx]->ForceReset();
-                instancingPackage.TransformIndexStorage[localFrameIdx]->ForceReset();
-                for (InstancingMap& threadLocalMap : instancingPackage.ThreadLocalInstancingMaps)
-                {
-                    threadLocalMap.clear();
-                }
-                instancingPackage.GlobalInstancingMap.clear();
-                instancingPackage.SumNumInstances = 0;
-            });
-
         tf::Task buildInstancingData = rootTaskFlow.emplace(
             [this, localFrameIdx, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("BuildInstancingData");
                 BuildInstancingData(subflow, localFrameIdx, registry);
-                subflow.join();
-            });
-
-        tf::Task invalidateRenderableProxy = rootTaskFlow.emplace(
-            [this, localFrameIdx](tf::Subflow& subflow)
-            {
-                ZoneScopedN("InvalidateRenderableProxy");
-                subflow.for_each(
-                    renderableProxyPackage.ProxyMap[localFrameIdx].begin(), renderableProxyPackage.ProxyMap[localFrameIdx].end(),
-                    [](auto& keyValuePair)
-                    {
-                        keyValuePair.second.bMightBeDestroyed = true;
-                    });
                 subflow.join();
             });
 
@@ -232,8 +210,8 @@ namespace ig
                 subflow.join();
             });
 
-        buildInstancingData.succeed(invalidateInstancingData, updateMaterialTask, updateMeshTask);
-        updateRenderableTask.succeed(invalidateRenderableProxy, updateTransformTask, buildInstancingData);
+        buildInstancingData.succeed(updateMaterialTask, updateMeshTask);
+        updateRenderableTask.succeed(updateTransformTask, buildInstancingData);
 
         tf::Task replicateTransformData = rootTaskFlow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
@@ -289,7 +267,9 @@ namespace ig
         replicateRenderableData.succeed(updateRenderableTask);
         replicateRenderableIndices.succeed(updateRenderableTask);
 
+        // 현재 프레임 작업 시작
         taskExecutor->run(rootTaskFlow).wait();
+        // 현재 프레임 작업 완료
 
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
         IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
@@ -297,18 +277,43 @@ namespace ig
         return syncPoint;
     }
 
+    void SceneProxy::PrepareNextFrame(const LocalFrameIndex localFrameIdx)
+    { 
+        // 다음 프레임 작업 준비
+        const LocalFrameIndex nextLocalFrameIdx = (localFrameIdx + 1) % NumFramesInFlight;
+        tf::Taskflow prepareNextFrameFlow{};
+        tf::Task invalidateTransformProxy = prepareNextFrameFlow.emplace(
+            [this, nextLocalFrameIdx](tf::Subflow& subflow)
+            {
+                ZoneScopedN("InvalidateNextFrameTransformProxy");
+                subflow.for_each(
+                    transformProxyPackage.ProxyMap[nextLocalFrameIdx].begin(), transformProxyPackage.ProxyMap[nextLocalFrameIdx].end(),
+                    [](auto& keyValuePair)
+                    {
+                        keyValuePair.second.bMightBeDestroyed = true;
+                    });
+                subflow.join();
+            });
+        tf::Task invalidateRenderableProxy = prepareNextFrameFlow.emplace(
+            [this, nextLocalFrameIdx](tf::Subflow& subflow)
+            {
+                ZoneScopedN("InvalidateNextFrameRenderableProxy");
+                subflow.for_each(
+                    renderableProxyPackage.ProxyMap[nextLocalFrameIdx].begin(), renderableProxyPackage.ProxyMap[nextLocalFrameIdx].end(),
+                    [](auto& keyValuePair)
+                    {
+                        keyValuePair.second.bMightBeDestroyed = true;
+                    });
+                subflow.join();
+            });
+        invalidationFuture[nextLocalFrameIdx] = taskExecutor->run(std::move(prepareNextFrameFlow));
+    }
+
     void SceneProxy::UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
         IG_CHECK(transformProxyPackage.PendingDestructions.empty());
 
         auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
-        auto invalidateProxyTask = subflow.for_each(
-            entityProxyMap.begin(), entityProxyMap.end(),
-            [](auto& keyValuePair)
-            {
-                keyValuePair.second.bMightBeDestroyed = true;
-            });
-
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
         const auto transformView = registry.view<const TransformComponent>();
 
@@ -316,9 +321,8 @@ namespace ig
             transformView.begin(), transformView.end(),
             [this, &registry, &entityProxyMap, transformView](const Entity entity)
             {
-                const auto transformFoundItr = entityProxyMap.find(entity);
-
                 const Index workerId = taskExecutor->this_worker_id();
+                const auto transformFoundItr = entityProxyMap.find(entity);
                 if (transformFoundItr == entityProxyMap.end())
                 {
                     transformProxyPackage.PendingProxyGroups[workerId].emplace_back(entity, TransformProxy{});
@@ -326,6 +330,8 @@ namespace ig
                 }
                 else
                 {
+                    // View 내부에 있는 Entity는 유일하기 때문에
+                    // 해당 엔티티가 소유한 메모리 공간에 대한 데이터 쓰기 또한 data hazard를 발생 시키지 않는다.
                     TransformProxy& proxy = transformFoundItr->second;
                     IG_CHECK(proxy.bMightBeDestroyed);
                     proxy.bMightBeDestroyed = false;
@@ -382,7 +388,6 @@ namespace ig
                 transformProxyPackage.PendingDestructions.clear();
             });
 
-        invalidateProxyTask.precede(updateTransformProxy);
         updateTransformProxy.precede(commitPendingProxyTask);
         commitPendingProxyTask.precede(commitDestructions);
     }
@@ -390,6 +395,17 @@ namespace ig
     void SceneProxy::BuildInstancingData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
         const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
+
+        /* Instancing Data의 경우 부담이 크지 않기 때문에 일단 여기서 처리 */
+        instancingPackage.InstancingDataStorage[localFrameIdx]->ForceReset();
+        instancingPackage.TransformIndexStorage[localFrameIdx]->ForceReset();
+        for (InstancingMap& threadLocalMap : instancingPackage.ThreadLocalInstancingMaps)
+        {
+            threadLocalMap.clear();
+        }
+        instancingPackage.GlobalInstancingMap.clear();
+        instancingPackage.SumNumInstances = 0;
+
         tf::Task buildLocalInstancingDataMaps = subflow.for_each(
             staticMeshEntityView.begin(), staticMeshEntityView.end(),
             [this, localFrameIdx, staticMeshEntityView](const Entity entity)

@@ -165,6 +165,7 @@ namespace ig
                 renderContext->PreRender(localFrameIdx);
                 meshStorage->PreRender(localFrameIdx);
                 replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
+                sceneProxy->PrepareNextFrame(localFrameIdx);
                 renderer->PreRender(localFrameIdx);
                 application.PreRender(localFrameIdx);
             }
