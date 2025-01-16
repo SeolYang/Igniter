@@ -20,6 +20,11 @@ namespace ig
     {
         friend class AssetManager;
 
+        struct StaticMeshData
+        {
+
+        };
+
       public:
         explicit StaticMeshImporter(AssetManager& assetManager);
         StaticMeshImporter(const StaticMeshImporter&) = delete;
@@ -31,6 +36,9 @@ namespace ig
 
       private:
         std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
+
+        static U32 MakeAssimpImportFlagsFromDesc(const StaticMesh::ImportDesc& desc);
+        static Size ImportMaterialsFromScene(AssetManager& assetManager, const aiScene* scene);
 
       private:
         AssetManager& assetManager;

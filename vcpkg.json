@@ -21,7 +21,6 @@
     "directxmath",
     "entt",
     "crossguid",
-    "xxhash",
     "eastl",
     "taskflow",
     "joltphysics"
@@ -83,10 +82,6 @@
     {
       "name":"crossguid",
       "version":"2021-10-22"
-    },
-    {
-      "name":"xxhash",
-      "version":"0.8.2"
     },
     {
       "name":"eastl",

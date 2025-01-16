@@ -23,7 +23,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Thirdparty\constexpr-xxh3\constexpr-xxh3.h" />
     <ClInclude Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
     <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
     <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h" />

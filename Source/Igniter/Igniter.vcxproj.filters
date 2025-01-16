@@ -73,9 +73,6 @@
     <Filter Include="Source\Shaders">
       <UniqueIdentifier>{fad9bc78-c629-4d3b-9c86-12403966d4c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Thirdparty\constexpr-xxh3">
-      <UniqueIdentifier>{8cc65e59-09bf-4e5d-bd6d-e09ae83ac834}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h">
@@ -422,9 +419,6 @@
     </ClInclude>
     <ClInclude Include="Component\MaterialComponent.h">
       <Filter>Source\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Thirdparty\constexpr-xxh3\constexpr-xxh3.h">
-      <Filter>Thirdparty\constexpr-xxh3</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

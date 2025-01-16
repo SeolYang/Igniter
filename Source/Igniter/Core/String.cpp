@@ -16,6 +16,11 @@ namespace ig
         return hashStringMapMutex;
     }
 
+    U64 String::CalculateHash(const std::string_view str)
+    {
+        return ankerl::unordered_dense::hash<std::string_view>{}(str);
+    }
+
     String::String(const std::string_view strView)
     {
         SetString(strView);
@@ -40,7 +45,7 @@ namespace ig
 
     bool String::operator==(const std::string_view rhs) const noexcept
     {
-        return this->hashOfString == XXH64(rhs.data(), rhs.length(), 0);
+        return this->hashOfString == CalculateHash(rhs);
     }
 
     bool String::operator==(const std::wstring_view rhs) const
@@ -60,7 +65,7 @@ namespace ig
             }
             else
             {
-                hashOfString = XXH64(strView.data(), strView.length(), 0);
+                hashOfString = CalculateHash(strView);
                 IG_CHECK(hashOfString != InvalidHashVal);
 
                 HashStringMap& hashStringMap{GetHashStringMap()};

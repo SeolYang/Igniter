@@ -91,9 +91,10 @@ namespace ig
         using HashStringMap = StableUnorderedMap<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
         [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
+        [[nodiscard]] static U64 CalculateHash(const std::string_view str);
 
       private:
-        uint64_t hashOfString{0};
+        U64 hashOfString{0};
     };
 
     namespace literals

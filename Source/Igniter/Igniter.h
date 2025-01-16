@@ -141,9 +141,6 @@ using namespace entt::literals;
 #include <spdlog/spdlog.h>
 #pragma warning(pop)
 
-#include <xxhash.h>
-#include <constexpr-xxh3.h>
-
 #include <EASTL/vector.h>
 #include <EASTL/array.h>
 #include <EASTL/list.h>
