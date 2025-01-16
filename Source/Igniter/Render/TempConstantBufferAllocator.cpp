@@ -9,7 +9,7 @@
 namespace ig
 {
     TempConstantBufferAllocator::TempConstantBufferAllocator(
-        RenderContext& renderContext, const size_t reservedBufferSizeInBytes /*= DefaultReservedBufferSizeInBytes*/)
+        RenderContext& renderContext, const Size reservedBufferSizeInBytes /*= DefaultReservedBufferSizeInBytes*/)
         : renderContext(&renderContext)
         , reservedSizeInBytesPerFrame(reservedBufferSizeInBytes)
     {
@@ -39,8 +39,8 @@ namespace ig
     {
         IG_CHECK(localFrameIdx < NumFramesInFlight);
         UniqueLock lock{mutexes[localFrameIdx]};
-        const size_t allocSizeInBytes = desc.GetSizeAsBytes();
-        const size_t offset = allocatedSizeInBytes[localFrameIdx];
+        const Size allocSizeInBytes = desc.GetSizeAsBytes();
+        const Size offset = allocatedSizeInBytes[localFrameIdx];
         allocatedSizeInBytes[localFrameIdx] += allocSizeInBytes;
         IG_CHECK(offset <= reservedSizeInBytesPerFrame);
 

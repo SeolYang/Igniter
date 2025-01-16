@@ -4,7 +4,7 @@
 
 namespace ig
 {
-    size_t SizeOfTexelInBits(const DXGI_FORMAT format);
+    Size SizeOfTexelInBits(const DXGI_FORMAT format);
     uint16_t CalculateMaxNumMipLevels(const uint64_t width, const uint64_t height, const uint64_t depth);
     bool IsDepthStencilFormat(const DXGI_FORMAT format);
     bool IsTypelessFormat(const DXGI_FORMAT format);
@@ -67,7 +67,7 @@ namespace ig
         void From(const D3D12_RESOURCE_DESC& desc);
 
         /* #sy_todo https://learn.microsoft.com/en-us/windows/win32/direct3d12/d3d12calcsubresource 에 따르면 3D 텍스처의 Array Size는 항상 0*/
-        size_t GetNumSubresources() const { return static_cast<size_t>(DepthOrArraySize) * MipLevels; }
+        Size GetNumSubresources() const { return static_cast<Size>(DepthOrArraySize) * MipLevels; }
 
         U32 GetArraySize() const { return IsTexture3D() ? 0 : DepthOrArraySize; }
 

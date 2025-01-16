@@ -88,7 +88,7 @@ namespace ig
     void CommandList::AddPendingBufferBarrier(GpuBuffer& targetBuffer,
                                               const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter,
                                               D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter,
-                                              const size_t offset, const size_t sizeAsBytes)
+                                              const Size offset, const Size sizeAsBytes)
     {
         IG_CHECK(IsValid());
         IG_CHECK(targetBuffer);
@@ -184,8 +184,8 @@ namespace ig
     }
 
     void CommandList::CopyBuffer(GpuBuffer& src,
-                                 const size_t srcOffsetInBytes, const size_t numBytes,
-                                 GpuBuffer& dst, const size_t dstOffsetInBytes)
+                                 const Size srcOffsetInBytes, const Size numBytes,
+                                 GpuBuffer& dst, const Size dstOffsetInBytes)
     {
         IG_CHECK(IsValid());
         IG_CHECK(src);
@@ -203,7 +203,7 @@ namespace ig
         CopyBuffer(src, 0, srcDesc.GetSizeAsBytes(), dst, 0);
     }
 
-    void CommandList::CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx,
+    void CommandList::CopyTextureRegion(GpuBuffer& src, const Size srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx,
                                         const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
     {
         IG_CHECK(src);

@@ -457,22 +457,22 @@ namespace ig
                 break;
             }
 
-            constexpr size_t BatchMessageSize = 64Ui64;
-            const size_t newBufferSize = cbSize * BatchMessageSize;
+            constexpr Size BatchMessageSize = 64Ui64;
+            const Size newBufferSize = cbSize * BatchMessageSize;
             if (rawInputBuffer.size() < newBufferSize)
             {
                 rawInputBuffer.resize(newBufferSize);
             }
 
             auto sizeOfBuffer = static_cast<UINT>(rawInputBuffer.size());
-            const size_t numInputs = GetRawInputBuffer((RAWINPUT*)rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
+            const Size numInputs = GetRawInputBuffer((RAWINPUT*)rawInputBuffer.data(), &sizeOfBuffer, sizeof(RAWINPUTHEADER));
             if (numInputs == 0 || numInputs == NumericMaxOfValue(numInputs))
             {
                 break;
             }
 
             auto* currentRawInput = (RAWINPUT*)rawInputBuffer.data();
-            for (size_t idx = 0; idx < numInputs; ++idx, currentRawInput = NEXTRAWINPUTBLOCK(currentRawInput))
+            for (Size idx = 0; idx < numInputs; ++idx, currentRawInput = NEXTRAWINPUTBLOCK(currentRawInput))
             {
                 auto* rawMouse = (RAWMOUSE*)((BYTE*)currentRawInput + rawInputOffset);
                 // 더 많은 마우스 이벤트를 얻을 수 있음!

@@ -56,7 +56,7 @@ namespace ig
         RenderHandle<PipelineState> CreatePipelineState(const GraphicsPipelineStateDesc& desc);
         RenderHandle<PipelineState> CreatePipelineState(const ComputePipelineStateDesc& desc);
         RenderHandle<GpuView> CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer);
-        RenderHandle<GpuView> CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes);
+        RenderHandle<GpuView> CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer, const Size offset, const Size sizeInBytes);
         RenderHandle<GpuView> CreateShaderResourceView(const RenderHandle<GpuBuffer> buffer);
         RenderHandle<GpuView> CreateUnorderedAccessView(const RenderHandle<GpuBuffer> buffer);
         RenderHandle<GpuView> CreateShaderResourceView(RenderHandle<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);

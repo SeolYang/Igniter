@@ -53,7 +53,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::EmptyBlob>();
         }
 
-        const size_t expectedBlobSize = loadDesc.CompressedVerticesSizeInBytes + loadDesc.CompressedIndicesSizeInBytes;
+        const Size expectedBlobSize = loadDesc.CompressedVerticesSizeInBytes + loadDesc.CompressedIndicesSizeInBytes;
         if (blob.size() != expectedBlobSize)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::BlobSizeMismatch>();
@@ -82,7 +82,7 @@ namespace ig
         bool bVertexBufferDecodeSucceed = false;
         UploadContext verticesUploadCtx = gpuUploader.Reserve(vertexSpacePtr->Allocation.AllocSize);
         {
-            constexpr size_t compressedVerticesOffset = 0;
+            constexpr Size compressedVerticesOffset = 0;
             const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(),
                                                                 loadDesc.NumVertices,
                                                                 sizeof(VertexSM),
@@ -104,7 +104,7 @@ namespace ig
         bool bIndexBufferDecodeSucceed = false;
         UploadContext indicesUploadCtx = gpuUploader.Reserve(vertexIndexSpacePtr->Allocation.AllocSize);
         {
-            const size_t compressedIndicesOffset = loadDesc.CompressedVerticesSizeInBytes;
+            const Size compressedIndicesOffset = loadDesc.CompressedVerticesSizeInBytes;
             const int decodeResult = meshopt_decodeIndexBuffer<U32>(reinterpret_cast<U32*>(indicesUploadCtx.GetOffsettedCpuAddress()),
                                                                          loadDesc.NumIndices, blob.data() + compressedIndicesOffset, loadDesc.CompressedIndicesSizeInBytes);
 

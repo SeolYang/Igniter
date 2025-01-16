@@ -40,7 +40,7 @@ namespace ig
         IG_CHECK(watcher != nullptr);
         IG_CHECK(watcher->IsReadyToWatch());
 
-        constexpr size_t ReservedRawBufferSizeInBytes = 1024Ui64 * 1024Ui64;
+        constexpr Size ReservedRawBufferSizeInBytes = 1024Ui64 * 1024Ui64;
         Vector<uint8_t> rawBuffer(ReservedRawBufferSizeInBytes);
         WCHAR fileNameBuffer[MAX_PATH]{0};
 

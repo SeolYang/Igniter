@@ -47,7 +47,7 @@ namespace ig
             return blob;
         }
 
-        const size_t sizeOfBlob = fs::file_size(path);
+        const Size sizeOfBlob = fs::file_size(path);
         IG_CHECK(sizeOfBlob > 0);
         blob.resize(sizeOfBlob);
         blobStream.read((char*)blob.data(), blob.size());
@@ -69,7 +69,7 @@ namespace ig
         return true;
     }
 
-    template <size_t N>
+    template <Size N>
     inline bool SaveBlobsToFile(const Path& path, const std::array<std::span<const uint8_t>, N> blobs)
     {
         IG_CHECK(blobs.size() > 0);

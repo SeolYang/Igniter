@@ -432,7 +432,7 @@ namespace ig::details
             return GetDescMap(filter).GetAssetInfos();
         }
 
-        size_t numDescs{0};
+        Size numDescs{0};
         for (const auto& typeDescTablePair : guidDescTables)
         {
             const TypelessAssetDescMap& descMap{*typeDescTablePair.second};

@@ -49,7 +49,7 @@ namespace ig
         [[nodiscard]] uint16_t GetStableFps() const { return framePerSeconds; }
 
         template <typename T = std::chrono::milliseconds>
-        static inline size_t Now()
+        static inline Size Now()
         {
             return std::chrono::duration_cast<T>(std::chrono::system_clock::now().time_since_epoch()).count();
         }
@@ -67,9 +67,9 @@ namespace ig
     {
       public:
         void Begin() { begin = Timer::Now(); }
-        size_t End() const { return Timer::Now() - begin; }
+        Size End() const { return Timer::Now() - begin; }
 
       public:
-        size_t begin = 0;
+        Size begin = 0;
     };
 } // namespace ig

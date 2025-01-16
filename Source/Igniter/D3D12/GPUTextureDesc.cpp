@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    static inline size_t SizeOfPixelInBits(const DXGI_FORMAT format)
+    static inline Size SizeOfPixelInBits(const DXGI_FORMAT format)
     {
         switch (static_cast<int>(format))
         {
@@ -149,7 +149,7 @@ namespace ig
         }
     }
 
-    static inline size_t SizeOfPixelInBytes(const DXGI_FORMAT format)
+    static inline Size SizeOfPixelInBytes(const DXGI_FORMAT format)
     {
         return SizeOfPixelInBits(format) / 8;
     }
@@ -964,7 +964,7 @@ namespace ig
          */
         Vector<D3D12_SUBRESOURCE_DATA> result{};
         result.reserve(this->GetNumSubresources());
-        const size_t bytesPerPixel{SizeOfPixelInBytes(Format)};
+        const Size bytesPerPixel{SizeOfPixelInBytes(Format)};
         const uint8_t* ptr{memoryBlock.data()};
         [[maybe_unused]] const uint8_t* const ptrEnd{ptr + memoryBlock.size_bytes()};
         switch (Dimension)
@@ -979,8 +979,8 @@ namespace ig
                 for (uint16_t mipSlice = 0; mipSlice < MipLevels; ++mipSlice)
                 {
                     IG_CHECK(ptr < ptrEnd);
-                    size_t rowPitch{0};
-                    size_t slicePitch{0};
+                    Size rowPitch{0};
+                    Size slicePitch{0};
                     IG_VERIFY_SUCCEEDED(DirectX::ComputePitch(Format, width, height, rowPitch, slicePitch));
 
                     result.emplace_back(D3D12_SUBRESOURCE_DATA{
@@ -1009,8 +1009,8 @@ namespace ig
             for (uint16_t mipSlice = 0; mipSlice < MipLevels; ++mipSlice)
             {
                 IG_CHECK(ptr < ptrEnd);
-                const size_t rowPitch{width * bytesPerPixel};
-                const size_t slicePitch{height * rowPitch};
+                const Size rowPitch{width * bytesPerPixel};
+                const Size slicePitch{height * rowPitch};
 
                 for (uint16_t slice = 0; slice < depth; ++slice)
                 {

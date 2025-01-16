@@ -25,6 +25,6 @@ namespace ig
       private:
         ComPtr<ID3D12PipelineState> native;
         const bool bIsGraphics;
-        // const size_t pipelineStateHash;
+        // const Size pipelineStateHash;
     };
 } // namespace ig

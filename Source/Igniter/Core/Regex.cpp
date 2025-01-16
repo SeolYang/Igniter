@@ -26,7 +26,7 @@ namespace ig
                 result.reserve(matches.size());
                 for (const auto& subMatch : matches)
                 {
-                    result.emplace_back(std::string_view{subMatch.first, static_cast<size_t>(subMatch.length())});
+                    result.emplace_back(std::string_view{subMatch.first, static_cast<Size>(subMatch.length())});
                 }
             }
         }
@@ -43,7 +43,7 @@ namespace ig
             std::cmatch match{};
             while (std::regex_search(searchBegin, match, regex))
             {
-                result.emplace_back(std::string_view{match[0].first, static_cast<size_t>(match[0].length())});
+                result.emplace_back(std::string_view{match[0].first, static_cast<Size>(match[0].length())});
                 searchBegin = match.suffix().first;
             }
         }

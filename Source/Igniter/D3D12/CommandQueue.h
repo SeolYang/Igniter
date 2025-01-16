@@ -38,7 +38,7 @@ namespace ig
         CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);
 
       private:
-        static constexpr size_t RecommendedMinNumCommandLists = 16;
+        static constexpr Size RecommendedMinNumCommandLists = 16;
 
       private:
         ComPtr<ID3D12CommandQueue> native;

@@ -118,7 +118,7 @@ namespace ig
         UnorderedMap<String, ActionMapping> nameActionTable{};
         UnorderedMap<String, AxisMapping> nameAxisTable{};
 
-        constexpr static size_t NumScopedInputs = magic_enum::enum_count<EInput>();
+        constexpr static Size NumScopedInputs = magic_enum::enum_count<EInput>();
         eastl::array<UnorderedSet<Handle<Action, InputManager>>, NumScopedInputs> actionSets;
         eastl::array<UnorderedSet<Handle<Axis, InputManager>>, NumScopedInputs> axisSets;
 
@@ -129,6 +129,6 @@ namespace ig
         Mutex rawMouseInputPollingMutex;
         eastl::vector<uint8_t> rawInputBuffer;
         eastl::vector<RawMouseInput> polledRawMouseInputs;
-        size_t rawInputOffset{sizeof(RAWINPUTHEADER)};
+        Size rawInputOffset{sizeof(RAWINPUTHEADER)};
     };
 } // namespace ig

@@ -99,12 +99,12 @@ namespace ig
 
     namespace literals
     {
-        inline String operator""_fs(const char* str, const size_t count)
+        inline String operator""_fs(const char* str, const Size count)
         {
             return std::string_view{str, count};
         }
 
-        inline String operator""_fs(const wchar_t* wstr, const size_t count)
+        inline String operator""_fs(const wchar_t* wstr, const Size count)
         {
             return std::wstring_view{wstr, count};
         }
@@ -116,7 +116,7 @@ template <>
 struct std::hash<ig::String>
 {
   public:
-    [[nodiscard]] size_t operator()(const ig::String& str) const noexcept { return str.GetHash(); }
+    [[nodiscard]] ig::Size operator()(const ig::String& str) const noexcept { return str.GetHash(); }
 };
 
 template <>

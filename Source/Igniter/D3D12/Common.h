@@ -80,10 +80,10 @@ namespace ig
     struct GpuCopyableFootprints final
     {
       public:
-        size_t RequiredSize = 0;
+        Size RequiredSize = 0;
         Vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
         Vector<U32> NumRows{};
-        Vector<size_t> RowSizesInBytes{};
+        Vector<Size> RowSizesInBytes{};
     };
 
     constexpr inline bool IsGreyScaleFormat(const DXGI_FORMAT format)

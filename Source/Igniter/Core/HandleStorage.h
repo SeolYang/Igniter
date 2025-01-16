@@ -12,7 +12,7 @@ IG_DECLARE_LOG_CATEGORY(HandleStorageLog);
 namespace ig::details
 {
     template <typename Ty>
-    consteval size_t GetHeuristicOptimalChunkSize()
+    consteval Size GetHeuristicOptimalChunkSize()
     {
         /* @TODO Fine-Tuning or find more optimal model */
         if (sizeof(Ty) < 512i64)
@@ -73,8 +73,8 @@ namespace ig
         HandleStorage& operator=(const HandleStorage&) = delete;
         HandleStorage& operator=(HandleStorage&&) noexcept = delete;
 
-        [[nodiscard]] size_t GetCapacity() const { return slotCapacity; }
-        [[nodiscard]] size_t GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
+        [[nodiscard]] Size GetCapacity() const { return slotCapacity; }
+        [[nodiscard]] Size GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
 
         template <typename... Args>
         Handle<Ty, Dependency> Create(Args&&... args)
@@ -262,13 +262,13 @@ namespace ig
       private:
         bool GrowChunks()
         {
-            const size_t newChunkCapacity = GetNewChunkCapacity();
+            const Size newChunkCapacity = GetNewChunkCapacity();
             if (newChunkCapacity == chunks.size())
             {
                 return false;
             }
 
-            const size_t numNewChunks = newChunkCapacity - chunks.size();
+            const Size numNewChunks = newChunkCapacity - chunks.size();
             chunks.reserve(newChunkCapacity);
             for ([[maybe_unused]] const auto _ : views::iota(0Ui64, numNewChunks))
             {
@@ -296,7 +296,7 @@ namespace ig
 
         [[nodiscard]] bool IsSlotInRange(const U32 slot) const { return slot < slotCapacity; }
 
-        [[nodiscard]] size_t GetNewChunkCapacity() const
+        [[nodiscard]] Size GetNewChunkCapacity() const
         {
             if (chunks.empty())
             {
@@ -309,9 +309,9 @@ namespace ig
         [[nodiscard]] Ty* CalcAddressOfSlot(const U32 slot)
         {
             IG_CHECK(IsSlotInRange(slot));
-            const size_t chunkIdx = slot / NumSlotsPerChunk;
+            const Size chunkIdx = slot / NumSlotsPerChunk;
             IG_CHECK(chunkIdx < chunks.size());
-            const size_t slotIdxInChunk = slot % NumSlotsPerChunk;
+            const Size slotIdxInChunk = slot % NumSlotsPerChunk;
             IG_CHECK(slotIdxInChunk < NumSlotsPerChunk);
             return reinterpret_cast<Ty*>(chunks[chunkIdx] + (slotIdxInChunk * SizeOfElement));
         }
@@ -319,9 +319,9 @@ namespace ig
         [[nodiscard]] const Ty* CalcAddressOfSlot(const U32 slot) const
         {
             IG_CHECK(IsSlotInRange(slot));
-            const size_t chunkIdx = slot / NumSlotsPerChunk;
+            const Size chunkIdx = slot / NumSlotsPerChunk;
             IG_CHECK(chunkIdx < chunks.size());
-            const size_t slotIdxInChunk = slot % NumSlotsPerChunk;
+            const Size slotIdxInChunk = slot % NumSlotsPerChunk;
             IG_CHECK(slotIdxInChunk < NumSlotsPerChunk);
             return reinterpret_cast<const Ty*>(chunks[chunkIdx] + (slotIdxInChunk * SizeOfElement));
         }
@@ -345,28 +345,28 @@ namespace ig
         }
 
       private:
-        constexpr static size_t ChunkSizeInBytes = details::GetHeuristicOptimalChunkSize<Ty>();
+        constexpr static Size ChunkSizeInBytes = details::GetHeuristicOptimalChunkSize<Ty>();
 
         /*
          * LSB 0~29     <30 bits>  : Slot Bit
          * LSB 29~61    <32 bits>  : Version Bits
          * LSB 62~63    <2  bits>  : Reserved for future
          */
-        constexpr static size_t SlotSizeInBits = 30;
-        constexpr static size_t VersionOffset = SlotSizeInBits;
-        constexpr static size_t VersionSizeInBits = 32;
-        constexpr static size_t ReservedBits = 2;
+        constexpr static Size SlotSizeInBits = 30;
+        constexpr static Size VersionOffset = SlotSizeInBits;
+        constexpr static Size VersionSizeInBits = 32;
+        constexpr static Size ReservedBits = 2;
         static_assert(VersionOffset + VersionSizeInBits + ReservedBits == 64);
-        constexpr static size_t SizeOfElement = sizeof(Ty);
-        constexpr static size_t MaxNumSlots = Pow<size_t>(2, SlotSizeInBits);
+        constexpr static Size SizeOfElement = sizeof(Ty);
+        constexpr static Size MaxNumSlots = Pow<Size>(2, SlotSizeInBits);
         constexpr static VersionType MaxVersion = Pow<VersionType>(2, VersionSizeInBits) - 1;
-        constexpr static size_t NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
+        constexpr static Size NumSlotsPerChunk = ChunkSizeInBytes / SizeOfElement;
         static_assert(NumSlotsPerChunk <= MaxNumSlots);
-        constexpr static size_t MaxNumChunks = MaxNumSlots / NumSlotsPerChunk;
+        constexpr static Size MaxNumChunks = MaxNumSlots / NumSlotsPerChunk;
 
         constexpr static U32 FreeSlotMagicNumber = 0xF3EE6102u;
 
-        constexpr static size_t InitialNumChunks = 4;
+        constexpr static Size InitialNumChunks = 4;
         eastl::vector<uint8_t*> chunks{};
 
         U32 slotCapacity = 0;

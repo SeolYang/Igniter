@@ -6,7 +6,7 @@ namespace ig
     class ThreadUIDGenerator final
     {
       public:
-        static size_t GetUID();
+        static Size GetUID();
     };
 
     class ThreadInfo final

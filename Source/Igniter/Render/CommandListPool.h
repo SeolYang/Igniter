@@ -77,9 +77,9 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx);
 
       private:
-        constexpr static size_t NumTargetCommandListPerThread = 8;
+        constexpr static Size NumTargetCommandListPerThread = 8;
         const FrameManager& frameManager;
-        const size_t numReservedCtx;
+        const Size numReservedCtx;
         const EQueueType cmdQueueType;
 
         Mutex poolMutex;

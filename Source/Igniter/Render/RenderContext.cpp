@@ -108,7 +108,7 @@ namespace ig
         return gpuViewPackage.Storage.Create(newView);
     }
 
-    RenderHandle<GpuView> RenderContext::CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer, const size_t offset, const size_t sizeInBytes)
+    RenderHandle<GpuView> RenderContext::CreateConstantBufferView(const RenderHandle<GpuBuffer> buffer, const Size offset, const Size sizeInBytes)
     {
         ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);

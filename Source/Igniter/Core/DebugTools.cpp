@@ -94,7 +94,7 @@ namespace ig
 
             const CapturedFrames& capturedFrames = callStack.capturedFramesTable[captureHash];
             std::ostringstream outputStream{};
-            for (size_t idx = 0; idx < capturedFrames.NumCapturedFrames; ++idx)
+            for (Size idx = 0; idx < capturedFrames.NumCapturedFrames; ++idx)
             {
                 const void* const frame = capturedFrames.Frames[idx];
                 if (frame == nullptr)

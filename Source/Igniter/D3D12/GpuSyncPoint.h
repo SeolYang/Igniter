@@ -28,8 +28,8 @@ namespace ig
         [[nodiscard]] bool IsValid() const noexcept { return fence != nullptr && syncPoint > 0; }
         [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
-        [[nodiscard]] size_t GetSyncPoint() const noexcept { return syncPoint; }
-        [[nodiscard]] size_t GetCompletedSyncPoint() const;
+        [[nodiscard]] Size GetSyncPoint() const noexcept { return syncPoint; }
+        [[nodiscard]] Size GetCompletedSyncPoint() const;
         [[nodiscard]] bool IsExpired() const { return GetSyncPoint() <= GetCompletedSyncPoint(); }
 
         [[nodiscard]] ID3D12Fence& GetFence()
@@ -45,10 +45,10 @@ namespace ig
         static GpuSyncPoint Invalid() { return {}; }
 
       private:
-        GpuSyncPoint(ID3D12Fence& fence, const size_t syncPoint);
+        GpuSyncPoint(ID3D12Fence& fence, const Size syncPoint);
 
       private:
         ID3D12Fence* fence = nullptr;
-        size_t syncPoint = 0;
+        Size syncPoint = 0;
     };
 } // namespace ig

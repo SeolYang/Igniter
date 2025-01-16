@@ -134,11 +134,11 @@ namespace ig
         }
 
         /* Upload texture subresources from sysram to vram */
-        const size_t numSubresources = scratchImage.GetImageCount();
+        const Size numSubresources = scratchImage.GetImageCount();
         Vector<D3D12_SUBRESOURCE_DATA> subresources(numSubresources);
         const DirectX::Image* images = scratchImage.GetImages();
 
-        for (size_t idx = 0; idx < numSubresources; ++idx)
+        for (Size idx = 0; idx < numSubresources; ++idx)
         {
             D3D12_SUBRESOURCE_DATA& subresource = subresources[idx];
             subresource.RowPitch = images[idx].rowPitch;

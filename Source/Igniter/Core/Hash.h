@@ -56,7 +56,7 @@ namespace ig
 
     /* #sy_ref DirectX-Graphics-Samples */
     template <typename T>
-    uint64_t HashState(const T* stateDesc, size_t count = 1, uint64_t hash = 2166136261U)
+    uint64_t HashState(const T* stateDesc, Size count = 1, uint64_t hash = 2166136261U)
     {
         static_assert((sizeof(T) & 3) == 0 && alignof(T) >= 4, "State object is not word-aligned");
         return HashRange((U32*)stateDesc, (U32*)(stateDesc + count), hash);

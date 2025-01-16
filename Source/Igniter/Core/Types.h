@@ -21,7 +21,7 @@ namespace ig
     using I32 = int32_t;
     using I64 = int64_t;
     using Size = size_t;
-    using Index = size_t;
+    using Index = Size;
     constexpr Index InvalidIndex = 0xffffffffffffffffUi64;
     constexpr U32 InvalidIndexU32 = 0xffffffffU;
     using GlobalFrameIndex = Index;
@@ -111,7 +111,7 @@ namespace ig
 
     template <typename T>
         requires std::is_array_v<T>
-    Ptr<T> MakePtr(const size_t size)
+    Ptr<T> MakePtr(const Size size)
     {
         return std::make_unique<T>(size);
     }

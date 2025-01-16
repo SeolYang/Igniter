@@ -19,7 +19,7 @@ namespace ig
         }
 
         ResizeUnsafe(InitialBufferCapacity);
-        for (size_t idx = 0; idx < RequestCapacity; ++idx)
+        for (Size idx = 0; idx < RequestCapacity; ++idx)
         {
             uploadRequests[idx].Reset();
             uploadRequests[idx].CmdList =
@@ -36,10 +36,10 @@ namespace ig
         }
     }
 
-    UploadContext GpuUploader::Reserve(const size_t requestSize)
+    UploadContext GpuUploader::Reserve(const Size requestSize)
     {
-        const static thread_local size_t tuid = ThreadUIDGenerator::GetUID();
-        size_t expected = InvalidThreadID;
+        const static thread_local Size tuid = ThreadUIDGenerator::GetUID();
+        Size expected = InvalidThreadID;
         while (!reservedThreadID.compare_exchange_weak(expected, tuid, std::memory_order::acq_rel))
         {
             expected = InvalidThreadID;
@@ -47,7 +47,7 @@ namespace ig
         }
 
         IG_CHECK(requestSize > 0);
-        const size_t alignedRequestSize = AlignTo(requestSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
+        const Size alignedRequestSize = AlignTo(requestSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
 
         if (alignedRequestSize > bufferCapacity)
         {
@@ -78,7 +78,7 @@ namespace ig
         else
         {
             IG_CHECK(bufferHead < bufferCapacity);
-            const size_t padding = bufferCapacity - bufferHead;
+            const Size padding = bufferCapacity - bufferHead;
 
             if ((bufferUsedSizeInBytes + padding + alignedRequestSize) <= bufferCapacity)
             {
@@ -143,7 +143,7 @@ namespace ig
 
     std::optional<GpuSyncPoint> GpuUploader::Submit(UploadContext& context)
     {
-        const static thread_local size_t tuid = ThreadUIDGenerator::GetUID();
+        const static thread_local Size tuid = ThreadUIDGenerator::GetUID();
         if (reservedThreadID.load(std::memory_order::acquire) != tuid)
         {
             IG_CHECK_NO_ENTRY();
@@ -182,14 +182,14 @@ namespace ig
         return newRequest;
     }
 
-    void GpuUploader::WaitForRequestUnsafe(const size_t numWaitFor)
+    void GpuUploader::WaitForRequestUnsafe(const Size numWaitFor)
     {
         IG_CHECK(numWaitFor > 0 && numWaitFor <= numInFlightRequests);
 
-        const size_t begin = requestTail;
-        for (size_t counter = 0; counter < numWaitFor; ++counter)
+        const Size begin = requestTail;
+        for (Size counter = 0; counter < numWaitFor; ++counter)
         {
-            const size_t idx = (begin + counter) % RequestCapacity;
+            const Size idx = (begin + counter) % RequestCapacity;
             uploadRequests[idx].Sync.WaitOnCpu();
 
             IG_CHECK(numInFlightRequests > 0);
@@ -201,9 +201,9 @@ namespace ig
         }
     }
 
-    void GpuUploader::ResizeUnsafe(const size_t newSize)
+    void GpuUploader::ResizeUnsafe(const Size newSize)
     {
-        const size_t alignedNewSize = AlignTo(newSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
+        const Size alignedNewSize = AlignTo(newSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
         if (alignedNewSize > bufferCapacity)
         {
             FlushQueue();
@@ -243,7 +243,7 @@ namespace ig
     }
 
     void UploadContext::WriteData(
-        const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes)
+        const uint8_t* srcAddr, const Size srcOffsetInBytes, const Size destOffsetInBytes, const Size writeSizeInBytes)
     {
         IG_CHECK(uploadBuffer != nullptr);
         IG_CHECK(offsettedCpuAddr != nullptr);
@@ -259,7 +259,7 @@ namespace ig
         }
     }
 
-    void UploadContext::CopyBuffer(const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes /*= 0*/)
+    void UploadContext::CopyBuffer(const Size srcOffsetInBytes, const Size numBytes, GpuBuffer& dst, const Size dstOffsetInBytes /*= 0*/)
     {
         if (!IsValid())
         {
@@ -275,7 +275,7 @@ namespace ig
     }
 
     void UploadContext::CopyTextureRegion(
-        const size_t srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+        const Size srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
     {
         if (!IsValid())
         {
@@ -296,19 +296,19 @@ namespace ig
         {
             const D3D12_SUBRESOURCE_DATA& srcSubresource = subresources[idx];
             const D3D12_SUBRESOURCE_FOOTPRINT& dstFootprint = dstCopyableFootprints.Layouts[idx].Footprint;
-            const size_t rowSizesInBytes = dstCopyableFootprints.RowSizesInBytes[idx];
+            const Size rowSizesInBytes = dstCopyableFootprints.RowSizesInBytes[idx];
             for (U32 z = 0; z < dstFootprint.Depth; ++z)
             {
-                const size_t dstSlicePitch = static_cast<size_t>(dstFootprint.RowPitch) * dstCopyableFootprints.NumRows[idx];
-                const size_t dstSliceOffset = dstSlicePitch * z;
-                const size_t srcSliceOffset = srcSubresource.SlicePitch * z;
+                const Size dstSlicePitch = static_cast<Size>(dstFootprint.RowPitch) * dstCopyableFootprints.NumRows[idx];
+                const Size dstSliceOffset = dstSlicePitch * z;
+                const Size srcSliceOffset = srcSubresource.SlicePitch * z;
                 for (U32 y = 0; y < dstCopyableFootprints.NumRows[idx]; ++y)
                 {
-                    const size_t dstRowOffset = static_cast<size_t>(dstFootprint.RowPitch) * y;
-                    const size_t srcRowOffset = srcSubresource.RowPitch * y;
+                    const Size dstRowOffset = static_cast<Size>(dstFootprint.RowPitch) * y;
+                    const Size srcRowOffset = srcSubresource.RowPitch * y;
 
-                    const size_t dstOffset = dstCopyableFootprints.Layouts[idx].Offset + dstSliceOffset + dstRowOffset;
-                    const size_t srcOffset = srcSliceOffset + srcRowOffset;
+                    const Size dstOffset = dstCopyableFootprints.Layouts[idx].Offset + dstSliceOffset + dstRowOffset;
+                    const Size srcOffset = srcSliceOffset + srcRowOffset;
                     WriteData(reinterpret_cast<const uint8_t*>(srcSubresource.pData), srcOffset, dstOffset, rowSizesInBytes);
                 }
             }

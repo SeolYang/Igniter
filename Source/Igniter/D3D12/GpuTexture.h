@@ -36,7 +36,7 @@ namespace ig
             return *resource.Get();
         }
 
-        [[nodiscard]] size_t GetIntermediateSize() const
+        [[nodiscard]] Size GetIntermediateSize() const
         {
             return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<U32>(desc.GetNumSubresources()));
         }

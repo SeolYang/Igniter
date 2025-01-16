@@ -51,7 +51,7 @@ namespace ig::details
 
 namespace ig
 {
-    inline constexpr size_t GuidBytesLength = 16;
+    inline constexpr Size GuidBytesLength = 16;
     using GuidBytes = std::array<uint8_t, GuidBytesLength>;
 
     constexpr static std::array<uint8_t, GuidBytesLength> GuidBytesFrom(const std::string_view strView)

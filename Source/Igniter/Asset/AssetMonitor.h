@@ -17,7 +17,7 @@ namespace ig::details
         virtual Vector<AssetInfo> GetAssetInfos() const = 0;
         virtual AssetInfo GetAssetInfo(const Guid guid) const = 0;
         virtual void Update(const AssetInfo& assetInfo) = 0;
-        virtual size_t GetSize() const = 0;
+        virtual Size GetSize() const = 0;
         virtual bool IsEmpty() const = 0;
     };
 
@@ -75,7 +75,7 @@ namespace ig::details
 
         typename T::Desc GetDesc(const Guid guid) const { return container.at(guid); }
 
-        size_t GetSize() const override { return container.size(); }
+        Size GetSize() const override { return container.size(); }
 
         bool IsEmpty() const override { return container.empty(); }
 

@@ -46,7 +46,7 @@ namespace ig
         void AddPendingBufferBarrier(GpuBuffer& targetBuffer,
                                      const D3D12_BARRIER_SYNC syncBefore, const D3D12_BARRIER_SYNC syncAfter,
                                      D3D12_BARRIER_ACCESS accessBefore, const D3D12_BARRIER_ACCESS accessAfter,
-                                     const size_t offset = 0, const size_t sizeAsBytes = std::numeric_limits<size_t>::max());
+                                     const Size offset = 0, const Size sizeAsBytes = std::numeric_limits<Size>::max());
         void FlushBarriers();
 
         void ClearRenderTarget(const GpuView& rtv, F32 r = 0.f, F32 g = 0.f, F32 b = 0.f, F32 a = 1.f);
@@ -55,9 +55,9 @@ namespace ig
         void ClearStencil(const GpuView& dsv, uint8_t stencil = 0);
 
         void CopyBuffer(GpuBuffer& src, GpuBuffer& dst);
-        void CopyBuffer(GpuBuffer& src, const size_t srcOffsetInBytes, const size_t numBytes,
-                        GpuBuffer& dst, const size_t dstOffsetInBytes);
-        void CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes,
+        void CopyBuffer(GpuBuffer& src, const Size srcOffsetInBytes, const Size numBytes,
+                        GpuBuffer& dst, const Size dstOffsetInBytes);
+        void CopyTextureRegion(GpuBuffer& src, const Size srcOffsetInBytes,
                                GpuTexture& dst, const U32 subresourceIdx,
                                const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
         void CopyTextureSimple(GpuTexture& src, GpuTexture& dst);

@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    GpuSyncPoint::GpuSyncPoint(ID3D12Fence& fence, const size_t syncPoint)
+    GpuSyncPoint::GpuSyncPoint(ID3D12Fence& fence, const Size syncPoint)
         : fence(&fence)
         , syncPoint(syncPoint)
     {
@@ -40,12 +40,12 @@ namespace ig
         return (fence != nullptr && (fence == rhs.fence)) && syncPoint <= rhs.syncPoint;
     }
 
-    size_t GpuSyncPoint::GetCompletedSyncPoint() const
+    Size GpuSyncPoint::GetCompletedSyncPoint() const
     {
         IG_CHECK(fence != nullptr);
         if (!IsValid())
         {
-            return std::numeric_limits<size_t>::max();
+            return std::numeric_limits<Size>::max();
         }
 
         return fence->GetCompletedValue();

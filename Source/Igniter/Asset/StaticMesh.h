@@ -37,8 +37,8 @@ namespace ig
       public:
         U32 NumVertices{0};
         U32 NumIndices{0};
-        size_t CompressedVerticesSizeInBytes{0};
-        size_t CompressedIndicesSizeInBytes{0};
+        Size CompressedVerticesSizeInBytes{0};
+        Size CompressedIndicesSizeInBytes{0};
         AxisAlignedBoundingBox AABB{};
     };
 

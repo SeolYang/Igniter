@@ -12,7 +12,7 @@ namespace ig
 
     template <typename T>
         requires std::is_arithmetic_v<T>
-    consteval T Pow(const T base, const size_t exp)
+    consteval T Pow(const T base, const Size exp)
     {
         if (exp == 0)
         {

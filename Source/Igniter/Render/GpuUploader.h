@@ -26,9 +26,9 @@ namespace ig
 
           public:
             std::unique_ptr<CommandList> CmdList;
-            size_t OffsetInBytes = 0;
-            size_t SizeInBytes = 0;
-            size_t PaddingInBytes = 0;
+            Size OffsetInBytes = 0;
+            Size SizeInBytes = 0;
+            Size PaddingInBytes = 0;
             GpuSyncPoint Sync{};
         };
     } // namespace details
@@ -54,8 +54,8 @@ namespace ig
 
         bool IsValid() const { return (uploadBuffer != nullptr) && (offsettedCpuAddr != nullptr) && (request != nullptr); }
 
-        size_t GetSize() const { return request != nullptr ? request->SizeInBytes : 0; }
-        size_t GetOffset() const { return request != nullptr ? request->OffsetInBytes : 0; }
+        Size GetSize() const { return request != nullptr ? request->SizeInBytes : 0; }
+        Size GetOffset() const { return request != nullptr ? request->OffsetInBytes : 0; }
 
         uint8_t* GetOffsettedCpuAddress()
         {
@@ -63,11 +63,11 @@ namespace ig
             return offsettedCpuAddr;
         }
 
-        void WriteData(const uint8_t* srcAddr, const size_t srcOffsetInBytes, const size_t destOffsetInBytes, const size_t writeSizeInBytes);
+        void WriteData(const uint8_t* srcAddr, const Size srcOffsetInBytes, const Size destOffsetInBytes, const Size writeSizeInBytes);
 
-        void CopyBuffer(const size_t srcOffsetInBytes, const size_t numBytes, GpuBuffer& dst, const size_t dstOffsetInBytes = 0);
+        void CopyBuffer(const Size srcOffsetInBytes, const Size numBytes, GpuBuffer& dst, const Size dstOffsetInBytes = 0);
         void CopyTextureRegion(
-            const size_t srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
+            const Size srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
         void CopyTextureSimple(
             GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources);
 
@@ -112,15 +112,15 @@ namespace ig
         GpuUploader& operator=(const GpuUploader&) = delete;
         GpuUploader& operator=(GpuUploader&&) noexcept = delete;
 
-        [[nodiscard]] UploadContext Reserve(const size_t requestSize);
+        [[nodiscard]] UploadContext Reserve(const Size requestSize);
         std::optional<GpuSyncPoint> Submit(UploadContext& context);
 
         void PreRender(const LocalFrameIndex localFrameIdx) { this->currentLocalFrameIdx = localFrameIdx; }
 
       private:
         details::UploadRequest* AllocateRequestUnsafe();
-        void WaitForRequestUnsafe(const size_t numWaitFor);
-        void ResizeUnsafe(const size_t newSize);
+        void WaitForRequestUnsafe(const Size numWaitFor);
+        void ResizeUnsafe(const Size newSize);
         void FlushQueue();
 
       private:
@@ -133,17 +133,17 @@ namespace ig
         constexpr static uint64_t InvalidThreadID = std::numeric_limits<uint64_t>::max();
         std::atomic_uint64_t reservedThreadID = InvalidThreadID;
 
-        constexpr static size_t InitialBufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
-        size_t bufferCapacity = 0;
+        constexpr static Size InitialBufferCapacity = 64 * 1024 * 1024; /* Initial Size = 64 MB */
+        Size bufferCapacity = 0;
         std::unique_ptr<GpuBuffer> buffer;
         uint8_t* bufferCpuAddr = nullptr;
-        size_t bufferHead = 0;
-        size_t bufferUsedSizeInBytes = 0;
+        Size bufferHead = 0;
+        Size bufferUsedSizeInBytes = 0;
 
-        constexpr static size_t RequestCapacity = 16;
+        constexpr static Size RequestCapacity = 16;
         details::UploadRequest uploadRequests[RequestCapacity];
-        size_t requestHead = 0;
-        size_t requestTail = 0;
-        size_t numInFlightRequests = 0;
+        Size requestHead = 0;
+        Size requestTail = 0;
+        Size numInFlightRequests = 0;
     };
 } // namespace ig
