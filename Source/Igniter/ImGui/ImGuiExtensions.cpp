@@ -211,7 +211,7 @@ namespace ig::ImGuiX
         style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.501960813999176f, 0.501960813999176f, 0.501960813999176f, 1.0f);
         style.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 0.4392156898975372f, 0.8784313797950745f, 1.0f);
         style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.0f, 0.4392156898975372f, 0.8784313797950745f, 1.0f);
-        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.0f, 0.4392156898975372f, 0.8784313797950745f, 1.0f);
+        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.0f, 0.1392156898975372f, 0.2784313797950745f, 1.0f);
         style.Colors[ImGuiCol_Button] = ImVec4(0.1843137294054031f, 0.1843137294054031f, 0.1843137294054031f, 1.0f);
         style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.3411764800548553f, 0.3411764800548553f, 0.3411764800548553f, 1.0f);
         style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.4392156898975372f, 0.8784313797950745f, 1.0f);
