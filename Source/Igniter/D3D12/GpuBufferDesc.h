@@ -4,7 +4,7 @@
 
 namespace ig
 {
-    inline uint32_t AdjustSizeForConstantBuffer(const uint32_t originalSizeInBytes)
+    inline U32 AdjustSizeForConstantBuffer(const U32 originalSizeInBytes)
     {
         return ((originalSizeInBytes / D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) + 1) * D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
     }
@@ -59,10 +59,10 @@ namespace ig
     class GpuBufferDesc final : public D3D12_RESOURCE_DESC1
     {
       public:
-        void AsConstantBuffer(const uint32_t sizeOfBufferInBytes);
-        void AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false);
-        void AsUploadBuffer(const uint32_t sizeOfBufferInBytes);
-        void AsReadbackBuffer(const uint32_t sizeOfBufferInBytes);
+        void AsConstantBuffer(const U32 sizeOfBufferInBytes);
+        void AsStructuredBuffer(const U32 sizeOfElementInBytes, const U32 numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false);
+        void AsUploadBuffer(const U32 sizeOfBufferInBytes);
+        void AsReadbackBuffer(const U32 sizeOfBufferInBytes);
 
         template <typename T>
         void AsConstantBuffer()
@@ -71,20 +71,20 @@ namespace ig
         }
 
         template <typename T>
-        void AsStructuredBuffer(const uint32_t numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false)
+        void AsStructuredBuffer(const U32 numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false)
         {
             AsStructuredBuffer(sizeof(T), numOfElements, bShouldEnableShaderReadWrite, bShouldEnableUavCounter);
         }
 
         template <typename T>
-        void AsVertexBuffer(const uint32_t numVertices)
+        void AsVertexBuffer(const U32 numVertices)
         {
             AsVertexBuffer(sizeof(T), numVertices);
         }
 
         template <typename T>
-            requires std::same_as<T, uint8_t> || std::same_as<T, uint16_t> || std::same_as<T, uint32_t>
-        void AsIndexBuffer(const uint32_t numIndices)
+            requires std::same_as<T, uint8_t> || std::same_as<T, uint16_t> || std::same_as<T, U32>
+        void AsIndexBuffer(const U32 numIndices)
         {
             AsIndexBuffer(sizeof(T), numIndices);
         }
@@ -112,8 +112,8 @@ namespace ig
         [[nodiscard]] bool IsCpuAccessible() const noexcept { return bIsCpuAccessible; }
         [[nodiscard]] bool IsUavCounterEnabled() const noexcept { return bIsUavCounterEnabled; }
         [[nodiscard]] EGpuBufferType GetBufferType() const noexcept { return bufferType; }
-        [[nodiscard]] uint32_t GetStructureByteStride() const noexcept { return structureByteStride; }
-        [[nodiscard]] uint32_t GetNumElements() const noexcept { return numElements; }
+        [[nodiscard]] U32 GetStructureByteStride() const noexcept { return structureByteStride; }
+        [[nodiscard]] U32 GetNumElements() const noexcept { return numElements; }
         [[nodiscard]] uint64_t GetSizeAsBytes() const noexcept { return Width; }
         [[nodiscard]] Size GetUavCounterOffset() const noexcept
         {
@@ -128,8 +128,8 @@ namespace ig
         void From(const D3D12_RESOURCE_DESC& desc);
 
       private:
-        void AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices);
-        void AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices);
+        void AsVertexBuffer(const U32 sizeOfVertexInBytes, const U32 numVertices);
+        void AsIndexBuffer(const U32 sizeOfIndexInBytes, const U32 numIndices);
 
       public:
         using UavCounter = U32;
@@ -137,8 +137,8 @@ namespace ig
         String DebugName = String{"Unknown Buffer"};
 
       private:
-        uint32_t structureByteStride = 1;
-        uint32_t numElements = 1;
+        U32 structureByteStride = 1;
+        U32 numElements = 1;
         EGpuBufferType bufferType = EGpuBufferType::Unknown;
         bool bIsShaderReadWritable = false;
         bool bIsCpuAccessible = false;

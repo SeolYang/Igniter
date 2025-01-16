@@ -44,7 +44,7 @@ namespace ig
 
         [[nodiscard]] double GetDeltaTimeF64() const { return GetDeltaTimeNanos() * 1e-09; }
 
-        [[nodiscard]] float GetDeltaTime() const { return static_cast<float>(GetDeltaTimeF64()); }
+        [[nodiscard]] F32 GetDeltaTime() const { return static_cast<F32>(GetDeltaTimeF64()); }
 
         [[nodiscard]] uint16_t GetStableFps() const { return framePerSeconds; }
 

@@ -59,9 +59,9 @@ namespace ig
 
     TextureImporter::TextureImporter()
     {
-        uint32_t creationFlags = 0;
+        U32 creationFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
-        creationFlags |= static_cast<uint32_t>(D3D11_CREATE_DEVICE_DEBUG);
+        creationFlags |= static_cast<U32>(D3D11_CREATE_DEVICE_DEBUG);
 #endif
         const D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_10_0;
         const HRESULT res = D3D11CreateDevice(
@@ -237,8 +237,8 @@ namespace ig
         const TextureLoadDesc newLoadConfig{
             .Format = texMetadata.format,
             .Dimension = details::AsTexDimension(texMetadata.dimension),
-            .Width = static_cast<uint32_t>(texMetadata.width),
-            .Height = static_cast<uint32_t>(texMetadata.height),
+            .Width = static_cast<U32>(texMetadata.width),
+            .Height = static_cast<U32>(texMetadata.height),
             .DepthOrArrayLength = static_cast<uint16_t>(texMetadata.IsVolumemap() ? texMetadata.depth : texMetadata.arraySize),
             .Mips = static_cast<uint16_t>(texMetadata.mipLevels),
             .bIsCubemap = texMetadata.IsCubemap(),

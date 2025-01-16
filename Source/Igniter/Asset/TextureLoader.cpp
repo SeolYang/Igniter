@@ -150,7 +150,7 @@ namespace ig
         GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
 
         const GpuCopyableFootprints destCopyableFootprints =
-            renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, static_cast<uint32_t>(numSubresources), 0);
+            renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, static_cast<U32>(numSubresources), 0);
         UploadContext texUploadCtx = gpuUploader.Reserve(destCopyableFootprints.RequiredSize);
 
         GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
@@ -221,7 +221,7 @@ namespace ig
         constexpr LONG_PTR NumPixels{Width * Height};
         Vector<uint8_t> bytes(NumPixels * BytesPerPixel);
         bool bUseBrightPixel = true;
-        uint32_t pixelCounter{0};
+        U32 pixelCounter{0};
         for (LONG_PTR pixelIdx = 0; pixelIdx < NumPixels; ++pixelIdx)
         {
             const LONG_PTR offset{pixelIdx * BytesPerPixel};

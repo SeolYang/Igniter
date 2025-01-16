@@ -127,7 +127,7 @@ namespace ig
 
         GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
-        depthStencilDesc.AsDepthStencil(static_cast<uint32_t>(mainViewport.width), static_cast<uint32_t>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
+        depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
 
         auto initialCmdList = renderContext.GetMainGfxCommandListPool().Request(0, "Initial Transition"_fs);
         initialCmdList->Open();
@@ -268,9 +268,9 @@ namespace ig
                 transformComponent.Position.z,
                 1.f/camera.CameraViewport.AspectRatio()};
 
-            const float halfFovYRad = Deg2Rad(camera.Fov * 0.5f);
-            const float cosHalfFovY{std::cosf(halfFovYRad)};
-            const float sinHalfFovY{std::sinf(halfFovYRad)};
+            const F32 halfFovYRad = Deg2Rad(camera.Fov * 0.5f);
+            const F32 cosHalfFovY{std::cosf(halfFovYRad)};
+            const F32 sinHalfFovY{std::sinf(halfFovYRad)};
             perFrameBuffer.ViewFrustumParams = Vector4{
                 cosHalfFovY, sinHalfFovY,
                 camera.NearZ, camera.FarZ};

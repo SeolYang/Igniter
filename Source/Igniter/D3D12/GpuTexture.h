@@ -38,7 +38,7 @@ namespace ig
 
         [[nodiscard]] size_t GetIntermediateSize() const
         {
-            return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<uint32_t>(desc.GetNumSubresources()));
+            return GetRequiredIntermediateSize(resource.Get(), 0, static_cast<U32>(desc.GetNumSubresources()));
         }
 
       private:

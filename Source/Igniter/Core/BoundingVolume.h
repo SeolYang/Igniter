@@ -22,7 +22,7 @@ namespace ig
 
       public:
         Vector3 Centroid{};
-        float Radius = 0.f;
+        F32 Radius = 0.f;
     };
 
     inline BoundingSphere ToBoundingSphere(const AxisAlignedBoundingBox& aabb) noexcept

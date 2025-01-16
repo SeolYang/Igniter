@@ -45,11 +45,11 @@ namespace ig
     struct Axis final
     {
       public:
-        [[nodiscard]] float GetScaledValue() const noexcept { return Value * Scale; }
+        [[nodiscard]] F32 GetScaledValue() const noexcept { return Value * Scale; }
 
       public:
-        float Scale = 1.f;
-        float Value = 0.0f;
+        F32 Scale = 1.f;
+        F32 Value = 0.0f;
     };
 
     class InputManager final
@@ -69,8 +69,8 @@ namespace ig
 
         struct RawMouseInput
         {
-            float DeltaX = 0.f;
-            float DeltaY = 0.f;
+            F32 DeltaX = 0.f;
+            F32 DeltaY = 0.f;
         };
 
       public:
@@ -85,9 +85,9 @@ namespace ig
         void MapAction(const String name, const EInput input);
         void UnmapAction(const String name);
 
-        void MapAxis(const String name, const EInput input, const float scale = 1.f);
+        void MapAxis(const String name, const EInput input, const F32 scale = 1.f);
         void UnmapAxis(const String name);
-        void SetScale(const String name, const float newScale);
+        void SetScale(const String name, const F32 newScale);
 
         [[nodiscard]] Handle<Action, InputManager> QueryAction(const String name) const;
         [[nodiscard]] Handle<Axis, InputManager> QueryAxis(const String name) const;
@@ -95,7 +95,7 @@ namespace ig
         [[nodiscard]] Action GetAction(const Handle<Action, InputManager> action) const;
         [[nodiscard]] Axis GetAxis(const Handle<Axis, InputManager> axis) const;
 
-        bool HandleEvent(const uint32_t message, const WPARAM wParam, const LPARAM lParam);
+        bool HandleEvent(const U32 message, const WPARAM wParam, const LPARAM lParam);
 
         void HandleRawMouseInput();
         void PostUpdate();
@@ -107,7 +107,7 @@ namespace ig
         bool HandlePressAction(const EInput input);
         bool HandleReleaseAction(const EInput input);
 
-        bool HandleAxis(const EInput input, const float value, const bool bIsDifferential = false);
+        bool HandleAxis(const EInput input, const F32 value, const bool bIsDifferential = false);
 
         void PollRawMouseInput();
 

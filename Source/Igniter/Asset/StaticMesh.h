@@ -35,8 +35,8 @@ namespace ig
         const Json& Deserialize(const Json& archive);
 
       public:
-        uint32_t NumVertices{0};
-        uint32_t NumIndices{0};
+        U32 NumVertices{0};
+        U32 NumIndices{0};
         size_t CompressedVerticesSizeInBytes{0};
         size_t CompressedIndicesSizeInBytes{0};
         AxisAlignedBoundingBox AABB{};

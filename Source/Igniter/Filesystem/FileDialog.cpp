@@ -43,7 +43,7 @@ namespace ig
                            return COMDLG_FILTERSPEC{.pszName = filter.Name.c_str(), .pszSpec = filter.FilterPattern.c_str()};
                        });
 
-        result = fileDialog->SetFileTypes(static_cast<uint32_t>(filterSpecs.size()), filterSpecs.data());
+        result = fileDialog->SetFileTypes(static_cast<U32>(filterSpecs.size()), filterSpecs.data());
         if (FAILED(result))
         {
             return MakeFail<String, EOpenFileDialogStatus::SetFileTypes>();

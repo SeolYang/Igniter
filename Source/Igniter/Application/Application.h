@@ -8,7 +8,7 @@ namespace ig
     struct AppDesc
     {
         String WindowTitle;
-        uint32_t WindowWidth, WindowHeight;
+        U32 WindowWidth, WindowHeight;
     };
 
     class Engine;
@@ -25,9 +25,9 @@ namespace ig
 
         int Execute();
 
-        virtual void PreUpdate([[maybe_unused]] const float deltaTime) {};
-        virtual void Update(const float deltaTime) = 0;
-        virtual void PostUpdate([[maybe_unused]] const float deltaTime) {};
+        virtual void PreUpdate([[maybe_unused]] const F32 deltaTime) {};
+        virtual void Update(const F32 deltaTime) = 0;
+        virtual void PostUpdate([[maybe_unused]] const F32 deltaTime) {};
 
         virtual void OnImGui() {};
 

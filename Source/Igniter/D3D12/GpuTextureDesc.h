@@ -16,28 +16,28 @@ namespace ig
         GpuTextureDesc() = default;
         virtual ~GpuTextureDesc() = default;
 
-        void AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false,
+        void AsTexture1D(const U32 width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false,
                          const bool bEnableSimultaneousAccess = false);
-        void AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
+        void AsTexture2D(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
                          const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
-                         const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
-        void AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth, const uint16_t mipLevels, const DXGI_FORMAT format,
+                         const U32 sampleCount = 1, U32 sampleQuality = 0);
+        void AsTexture3D(const U32 width, const U32 height, const uint16_t depth, const uint16_t mipLevels, const DXGI_FORMAT format,
                          const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
-                         const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                         const U32 sampleCount = 1, U32 sampleQuality = 0);
 
-        void AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
-                            const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false, const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
-        void AsDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format);
+        void AsRenderTarget(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
+                            const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false, const U32 sampleCount = 1, U32 sampleQuality = 0);
+        void AsDepthStencil(const U32 width, const U32 height, const DXGI_FORMAT format);
 
-        void AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,
+        void AsTexture1DArray(const U32 width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,
                               const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false);
-        void AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength, const uint16_t mipLevels,
+        void AsTexture2DArray(const U32 width, const U32 height, const uint16_t arrayLength, const uint16_t mipLevels,
                               const DXGI_FORMAT format, const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false,
-                              const bool bEnableMSAA = false, const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                              const bool bEnableMSAA = false, const U32 sampleCount = 1, U32 sampleQuality = 0);
 
-        void AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
+        void AsCubemap(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
                        const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false,
-                       const uint32_t sampleCount = 1, uint32_t sampleQuality = 0);
+                       const U32 sampleCount = 1, U32 sampleQuality = 0);
 
         bool IsUnorderedAccessCompatible() const;
         bool IsDepthStencilCompatible() const;
@@ -69,7 +69,7 @@ namespace ig
         /* #sy_todo https://learn.microsoft.com/en-us/windows/win32/direct3d12/d3d12calcsubresource 에 따르면 3D 텍스처의 Array Size는 항상 0*/
         size_t GetNumSubresources() const { return static_cast<size_t>(DepthOrArraySize) * MipLevels; }
 
-        uint32_t GetArraySize() const { return IsTexture3D() ? 0 : DepthOrArraySize; }
+        U32 GetArraySize() const { return IsTexture3D() ? 0 : DepthOrArraySize; }
 
         /* #sy_note 간단한 format(비압축/RGBA)과 간단한 구조(Array, Slice)에 대한 subresource 정보만 생성 */
         Vector<D3D12_SUBRESOURCE_DATA> GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const;

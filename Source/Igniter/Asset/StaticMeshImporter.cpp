@@ -98,7 +98,7 @@ namespace ig
 
         IG_LOG(StaticMeshImporterLog, Info, "Remapped #Vertices {} -> {}.", vertices.size(), remappedVertexCount);
 
-        constexpr float CacheHitRatioThreshold = 1.02f;
+        constexpr F32 CacheHitRatioThreshold = 1.02f;
         meshopt_optimizeVertexCache(
             remappedIndices.data(), remappedIndices.data(), remappedIndices.size(),
             remappedVertices.size());

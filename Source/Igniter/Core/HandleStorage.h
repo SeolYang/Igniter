@@ -27,12 +27,12 @@ namespace ig::details
 namespace ig
 {
     template <typename Ty, typename Dependency>
-        requires(sizeof(Ty) >= sizeof(uint32_t))
+        requires(sizeof(Ty) >= sizeof(U32))
     class HandleStorage final
     {
       private:
-        using SlotType = uint32_t;
-        using VersionType = uint32_t;
+        using SlotType = U32;
+        using VersionType = U32;
 
       public:
         HandleStorage() { GrowChunks(); }
@@ -275,8 +275,8 @@ namespace ig
                 chunks.emplace_back(static_cast<uint8_t*>(_aligned_malloc(ChunkSizeInBytes, std::hardware_destructive_interference_size)));
             }
 
-            const uint32_t oldSlotCapacity = slotCapacity;
-            slotCapacity = static_cast<uint32_t>(NumSlotsPerChunk * newChunkCapacity);
+            const U32 oldSlotCapacity = slotCapacity;
+            slotCapacity = static_cast<U32>(NumSlotsPerChunk * newChunkCapacity);
             freeSlots.reserve(slotCapacity);
             slotVersions.resize(slotCapacity);
             reservedToDestroyFlags.resize(slotCapacity);
@@ -294,7 +294,7 @@ namespace ig
             return true;
         }
 
-        [[nodiscard]] bool IsSlotInRange(const uint32_t slot) const { return slot < slotCapacity; }
+        [[nodiscard]] bool IsSlotInRange(const U32 slot) const { return slot < slotCapacity; }
 
         [[nodiscard]] size_t GetNewChunkCapacity() const
         {
@@ -306,7 +306,7 @@ namespace ig
             return std::min(chunks.size() + chunks.size() / 2, MaxNumChunks);
         }
 
-        [[nodiscard]] Ty* CalcAddressOfSlot(const uint32_t slot)
+        [[nodiscard]] Ty* CalcAddressOfSlot(const U32 slot)
         {
             IG_CHECK(IsSlotInRange(slot));
             const size_t chunkIdx = slot / NumSlotsPerChunk;
@@ -316,7 +316,7 @@ namespace ig
             return reinterpret_cast<Ty*>(chunks[chunkIdx] + (slotIdxInChunk * SizeOfElement));
         }
 
-        [[nodiscard]] const Ty* CalcAddressOfSlot(const uint32_t slot) const
+        [[nodiscard]] const Ty* CalcAddressOfSlot(const U32 slot) const
         {
             IG_CHECK(IsSlotInRange(slot));
             const size_t chunkIdx = slot / NumSlotsPerChunk;
@@ -326,7 +326,7 @@ namespace ig
             return reinterpret_cast<const Ty*>(chunks[chunkIdx] + (slotIdxInChunk * SizeOfElement));
         }
 
-        void MarkAsFreeSlot(const uint32_t slot)
+        void MarkAsFreeSlot(const U32 slot)
         {
             IG_CHECK(IsSlotInRange(slot));
             using MagicNumberType = std::decay_t<decltype(FreeSlotMagicNumber)>;
@@ -335,7 +335,7 @@ namespace ig
             *freeSlotMagicNumberPtr = FreeSlotMagicNumber;
         }
 
-        [[nodiscard]] bool IsMarkedAsFreeSlot(const uint32_t slot) const
+        [[nodiscard]] bool IsMarkedAsFreeSlot(const U32 slot) const
         {
             IG_CHECK(IsSlotInRange(slot));
             using MagicNumberType = std::decay_t<decltype(FreeSlotMagicNumber)>;
@@ -364,12 +364,12 @@ namespace ig
         static_assert(NumSlotsPerChunk <= MaxNumSlots);
         constexpr static size_t MaxNumChunks = MaxNumSlots / NumSlotsPerChunk;
 
-        constexpr static uint32_t FreeSlotMagicNumber = 0xF3EE6102u;
+        constexpr static U32 FreeSlotMagicNumber = 0xF3EE6102u;
 
         constexpr static size_t InitialNumChunks = 4;
         eastl::vector<uint8_t*> chunks{};
 
-        uint32_t slotCapacity = 0;
+        U32 slotCapacity = 0;
         eastl::vector<SlotType> freeSlots{};
         eastl::vector<VersionType> slotVersions{};
         eastl::bitvector<> reservedToDestroyFlags{};

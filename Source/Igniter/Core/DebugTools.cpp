@@ -6,7 +6,7 @@
 
 namespace ig::details
 {
-    template <uint32_t BufferSize = 256>
+    template <U32 BufferSize = 256>
     struct SymbolInfo : public SYMBOL_INFO
     {
       public:
@@ -59,7 +59,7 @@ namespace ig
         return callStack;
     }
 
-    uint32_t CallStack::Capture()
+    U32 CallStack::Capture()
     {
         CallStack& callStack = GetCallStack();
         CapturedFrames frames{};

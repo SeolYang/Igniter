@@ -105,7 +105,7 @@ namespace ig
         UploadContext indicesUploadCtx = gpuUploader.Reserve(vertexIndexSpacePtr->Allocation.AllocSize);
         {
             const size_t compressedIndicesOffset = loadDesc.CompressedVerticesSizeInBytes;
-            const int decodeResult = meshopt_decodeIndexBuffer<uint32_t>(reinterpret_cast<uint32_t*>(indicesUploadCtx.GetOffsettedCpuAddress()),
+            const int decodeResult = meshopt_decodeIndexBuffer<U32>(reinterpret_cast<U32*>(indicesUploadCtx.GetOffsettedCpuAddress()),
                                                                          loadDesc.NumIndices, blob.data() + compressedIndicesOffset, loadDesc.CompressedIndicesSizeInBytes);
 
             if (decodeResult == 0)

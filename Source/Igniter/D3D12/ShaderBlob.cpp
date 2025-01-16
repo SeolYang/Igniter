@@ -107,7 +107,7 @@ namespace ig
         ComPtr<IDxcLibrary> library;
         IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
 
-        uint32_t codePage = CP_UTF8;
+        U32 codePage = CP_UTF8;
         const std::wstring wideSourcePath = desc.SourcePath.ToWideString();
         ComPtr<IDxcBlobEncoding> sourceBlob;
         IG_VERIFY_SUCCEEDED(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
@@ -117,7 +117,7 @@ namespace ig
 
         const DxcBuffer buffer{.Ptr = sourceBlob->GetBufferPointer(), .Size = sourceBlob->GetBufferSize(), .Encoding = codePage};
 
-        IG_VERIFY_SUCCEEDED(compiler->Compile(&buffer, arguments.data(), static_cast<uint32_t>(arguments.size()), defaultIncludeHandler.Get(),
+        IG_VERIFY_SUCCEEDED(compiler->Compile(&buffer, arguments.data(), static_cast<U32>(arguments.size()), defaultIncludeHandler.Get(),
                                               IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
         ComPtr<IDxcBlobUtf8> errors;

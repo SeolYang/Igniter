@@ -6,7 +6,7 @@
 
 namespace ig
 {
-    GpuViewManager::GpuViewManager(GpuDevice& gpuDevice, const uint32_t numCbvSrvUavDescriptors, const uint32_t numSamplerDescriptors, const uint32_t numRtvDescriptors, const uint32_t numDsvDescriptors)
+    GpuViewManager::GpuViewManager(GpuDevice& gpuDevice, const U32 numCbvSrvUavDescriptors, const U32 numSamplerDescriptors, const U32 numRtvDescriptors, const U32 numDsvDescriptors)
         : gpuDevice(gpuDevice)
         , cbvSrvUavHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerCbvSrvUavHeap", EDescriptorHeapType::CBV_SRV_UAV, numCbvSrvUavDescriptors).value()))
         , samplerHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value()))

@@ -54,7 +54,7 @@ namespace ig
 
           public:
             AssetInfo Info{};
-            uint32_t RefCount{};
+            U32 RefCount{};
             Size HandleHash{IG_NUMERIC_MAX_OF(HandleHash)};
         };
 

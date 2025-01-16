@@ -13,7 +13,7 @@ namespace ig::details
         struct Snapshot
         {
             const U64 HandleHash{IG_NUMERIC_MAX_OF(HandleHash)};
-            const uint32_t RefCount{};
+            const U32 RefCount{};
         };
 
       public:
@@ -100,7 +100,7 @@ namespace ig::details
             IG_CHECK(cachedAssets.contains(guid));
             IG_CHECK(refCounterTable.contains(guid));
             IG_CHECK(refCounterTable[guid] > 0);
-            const uint32_t refCount{--refCounterTable[guid]};
+            const U32 refCount{--refCounterTable[guid]};
             if (refCount == 0 && assetInfo.GetScope() == EAssetScope::Managed)
             {
                 InvalidateUnsafe(guid);
@@ -168,6 +168,6 @@ namespace ig::details
         mutable SharedMutex mutex;
         HandleStorage<T, class AssetManager> registry;
         UnorderedMap<Guid, ManagedAsset<T>> cachedAssets{};
-        UnorderedMap<Guid, uint32_t> refCounterTable{};
+        UnorderedMap<Guid, U32> refCounterTable{};
     };
 } // namespace ig::details

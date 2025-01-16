@@ -49,16 +49,16 @@ namespace ig
                                      const size_t offset = 0, const size_t sizeAsBytes = std::numeric_limits<size_t>::max());
         void FlushBarriers();
 
-        void ClearRenderTarget(const GpuView& rtv, float r = 0.f, float g = 0.f, float b = 0.f, float a = 1.f);
-        void ClearDepthStencil(const GpuView& dsv, float depth = 1.f, uint8_t stencil = 0);
-        void ClearDepth(const GpuView& dsv, float depth = 1.f);
+        void ClearRenderTarget(const GpuView& rtv, F32 r = 0.f, F32 g = 0.f, F32 b = 0.f, F32 a = 1.f);
+        void ClearDepthStencil(const GpuView& dsv, F32 depth = 1.f, uint8_t stencil = 0);
+        void ClearDepth(const GpuView& dsv, F32 depth = 1.f);
         void ClearStencil(const GpuView& dsv, uint8_t stencil = 0);
 
         void CopyBuffer(GpuBuffer& src, GpuBuffer& dst);
         void CopyBuffer(GpuBuffer& src, const size_t srcOffsetInBytes, const size_t numBytes,
                         GpuBuffer& dst, const size_t dstOffsetInBytes);
         void CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes,
-                               GpuTexture& dst, const uint32_t subresourceIdx,
+                               GpuTexture& dst, const U32 subresourceIdx,
                                const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout);
         void CopyTextureSimple(GpuTexture& src, GpuTexture& dst);
 
@@ -69,22 +69,22 @@ namespace ig
         void SetIndexBuffer(GpuBuffer& indexBuffer);
         void SetRenderTarget(const GpuView& rtv, std::optional<std::reference_wrapper<GpuView>> dsv = std::nullopt);
         void SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology);
-        void SetViewport(const float topLeftX, const float topLeftY, const float width, const float height, const float minDepth = 0.f,
-                         const float maxDepth = 1.f);
+        void SetViewport(const F32 topLeftX, const F32 topLeftY, const F32 width, const F32 height, const F32 minDepth = 0.f,
+                         const F32 maxDepth = 1.f);
         void SetViewport(const Viewport& viewport);
         void SetScissorRect(const long left, const long top, const long right, const long bottom);
         void SetScissorRect(const Viewport& viewport);
-        void SetRoot32BitConstants(const uint32_t registerSlot, const uint32_t num32BitValuesToSet,
-                                   const void* srcData, const uint32_t destOffsetIn32BitValues);
+        void SetRoot32BitConstants(const U32 registerSlot, const U32 num32BitValuesToSet,
+                                   const void* srcData, const U32 destOffsetIn32BitValues);
         template <typename T>
             requires(std::is_pod_v<T>)
-        void SetRoot32BitConstants(const uint32_t registerSlot, const T& data, const uint32_t destOffsetIn32BitValues)
+        void SetRoot32BitConstants(const U32 registerSlot, const T& data, const U32 destOffsetIn32BitValues)
         {
             IG_CHECK(sizeof(T) % 4 == 0 && "Data loss may occur specific conditions.");
             SetRoot32BitConstants(registerSlot, sizeof(T) / 4, reinterpret_cast<const void*>(&data), destOffsetIn32BitValues);
         }
 
-        void DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset = 0, const uint32_t vertexOffset = 0);
+        void DrawIndexed(const U32 numIndices, const U32 indexOffset = 0, const U32 vertexOffset = 0);
 
         void Dispatch(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ);
 

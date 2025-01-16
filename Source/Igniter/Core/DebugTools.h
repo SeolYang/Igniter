@@ -22,7 +22,7 @@ namespace ig
         CallStack& operator=(const CallStack&) = delete;
         CallStack& operator=(CallStack&&) noexcept = delete;
 
-        static uint32_t Capture();
+        static U32 Capture();
         static std::string_view Dump(const DWORD captureHash);
 
       private:

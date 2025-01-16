@@ -7,7 +7,7 @@
 namespace ig
 {
     DescriptorHeap::DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
-                                   const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap, const uint32_t descriptorHandleIncSizeInHeap)
+                                   const bool bIsShaderVisibleHeap, const U32 numDescriptorsInHeap, const U32 descriptorHandleIncSizeInHeap)
         : descriptorHeapType(newDescriptorHeapType)
         , descriptorHeap(newDescriptorHeap)
         , descriptorHandleIncrementSize(descriptorHandleIncSizeInHeap)
@@ -17,7 +17,7 @@ namespace ig
         , gpuDescriptorHandleForHeapStart(bIsShaderVisible ? descriptorHeap->GetGPUDescriptorHandleForHeapStart() : D3D12_GPU_DESCRIPTOR_HANDLE{std::numeric_limits<decltype(D3D12_GPU_DESCRIPTOR_HANDLE::ptr)>::max()})
     {
         IG_CHECK(newDescriptorHeap);
-        for (uint32_t idx = 0; idx < numDescriptorsInHeap; ++idx)
+        for (U32 idx = 0; idx < numDescriptorsInHeap; ++idx)
         {
             this->descriptorIdxPool.push(idx);
         }
@@ -40,12 +40,12 @@ namespace ig
         IG_CHECK(numInitialDescriptors == descriptorIdxPool.size());
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const uint32_t index) const
+    D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedCPUDescriptorHandle(const U32 index) const
     {
         return CD3DX12_CPU_DESCRIPTOR_HANDLE{cpuDescriptorHandleForHeapStart, static_cast<INT>(index), descriptorHandleIncrementSize};
     }
 
-    D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedGPUDescriptorHandle(const uint32_t index) const
+    D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetIndexedGPUDescriptorHandle(const U32 index) const
     {
         return bIsShaderVisible ? CD3DX12_GPU_DESCRIPTOR_HANDLE{gpuDescriptorHandleForHeapStart, static_cast<INT>(index), descriptorHandleIncrementSize} : gpuDescriptorHandleForHeapStart;
     }
@@ -72,7 +72,7 @@ namespace ig
             return GpuView{};
         }
 
-        const uint32_t newDescriptorIdx = descriptorIdxPool.top();
+        const U32 newDescriptorIdx = descriptorIdxPool.top();
         descriptorIdxPool.pop();
         return GpuView{
             .Type = desiredType,

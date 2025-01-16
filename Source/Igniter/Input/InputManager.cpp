@@ -180,7 +180,7 @@ namespace ig
         IG_LOG(InputManagerLog, Info, "Action {} unmapped from '{}'.", name, mappedInput);
     }
 
-    void InputManager::MapAxis(const String name, const EInput input, const float scale)
+    void InputManager::MapAxis(const String name, const EInput input, const F32 scale)
     {
         if (!name.IsValid() || name.IsEmpty())
         {
@@ -222,7 +222,7 @@ namespace ig
         IG_LOG(InputManagerLog, Info, "Axis {} unmapped from '{}'.", name, mappedInput);
     }
 
-    void InputManager::SetScale(const String name, const float newScale)
+    void InputManager::SetScale(const String name, const F32 newScale)
     {
         if (!nameAxisTable.contains(name))
         {
@@ -283,7 +283,7 @@ namespace ig
         return *axisPtr;
     }
 
-    bool InputManager::HandleEvent(const uint32_t message, const WPARAM wParam, [[maybe_unused]] const LPARAM lParam)
+    bool InputManager::HandleEvent(const U32 message, const WPARAM wParam, [[maybe_unused]] const LPARAM lParam)
     {
         constexpr WPARAM mouseLBWParam = 1;
         constexpr WPARAM mouseRBWParam = 2;
@@ -321,8 +321,8 @@ namespace ig
         UniqueLock rawMouseInputPollingLock{this->rawMouseInputPollingMutex};
         if (!polledRawMouseInputs.empty())
         {
-            float deltaX = 0.f;
-            float deltaY = 0.f;
+            F32 deltaX = 0.f;
+            F32 deltaY = 0.f;
             for (const RawMouseInput rawMouseInput : polledRawMouseInputs)
             {
                 deltaX += rawMouseInput.DeltaX;
@@ -422,7 +422,7 @@ namespace ig
         return false;
     }
 
-    bool InputManager::HandleAxis(const EInput input, const float value, const bool bIsDifferential)
+    bool InputManager::HandleAxis(const EInput input, const F32 value, const bool bIsDifferential)
     {
         ZoneScoped;
         bool bAnyAxisHandled = false;
@@ -476,7 +476,7 @@ namespace ig
             {
                 auto* rawMouse = (RAWMOUSE*)((BYTE*)currentRawInput + rawInputOffset);
                 // 더 많은 마우스 이벤트를 얻을 수 있음!
-                polledRawMouseInputs.emplace_back(RawMouseInput{.DeltaX = (float)rawMouse->lLastX, .DeltaY = (float)rawMouse->lLastY});
+                polledRawMouseInputs.emplace_back(RawMouseInput{.DeltaX = (F32)rawMouse->lLastX, .DeltaY = (F32)rawMouse->lLastY});
             }
         }
     }

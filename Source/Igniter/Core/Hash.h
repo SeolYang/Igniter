@@ -24,15 +24,15 @@ namespace ig
         return hash ^ 0xFFFFFFFFFFFFFFFFllu;
     }
 
-    inline uint64_t HashRange(const uint32_t* const begin, const uint32_t* const end, uint64_t hash)
+    inline uint64_t HashRange(const U32* const begin, const U32* const end, uint64_t hash)
     {
 #if ENABLE_SSE_CRC32
         const uint64_t* iter64 = (const uint64_t*)AlignUp(begin, 8);
         const uint64_t* const end64 = (const uint64_t* const)AlignDown(end, 8);
 
-        if ((uint32_t*)iter64 > begin)
+        if ((U32*)iter64 > begin)
         {
-            hash = _mm_crc32_u32((uint32_t)hash, *begin);
+            hash = _mm_crc32_u32((U32)hash, *begin);
         }
 
         while (iter64 < end64)
@@ -40,12 +40,12 @@ namespace ig
             hash = _mm_crc32_u64((uint64_t)hash, *iter64++);
         }
 
-        if ((uint32_t*)iter64 < end)
+        if ((U32*)iter64 < end)
         {
-            hash = _mm_crc32_u32((uint32_t)hash, *(uint32_t*)iter64);
+            hash = _mm_crc32_u32((U32)hash, *(U32*)iter64);
         }
 #else
-        for (const uint32_t* iter = begin; iter < end; ++iter)
+        for (const U32* iter = begin; iter < end; ++iter)
         {
             hash = 16777619U * hash ^ *iter;
         }
@@ -59,7 +59,7 @@ namespace ig
     uint64_t HashState(const T* stateDesc, size_t count = 1, uint64_t hash = 2166136261U)
     {
         static_assert((sizeof(T) & 3) == 0 && alignof(T) >= 4, "State object is not word-aligned");
-        return HashRange((uint32_t*)stateDesc, (uint32_t*)(stateDesc + count), hash);
+        return HashRange((U32*)stateDesc, (U32*)(stateDesc + count), hash);
     }
 
     constexpr uint64_t HashStringSimple(const std::string_view targetString)
@@ -95,7 +95,7 @@ namespace ig
     constexpr uint64_t TypeHash64 = EvalCRC64(GetTypeName<T>());
 
     template <typename T>
-    constexpr uint32_t TypeHash = entt::type_hash<T>::value();
+    constexpr U32 TypeHash = entt::type_hash<T>::value();
 
     /* #sy_ref https://stackoverflow.com/questions/3058139/hash-32bit-int-to-16bit-int */
     static constexpr uint16_t ReduceHashTo16Bits(const uint64_t hash)

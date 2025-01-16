@@ -31,7 +31,7 @@ namespace ig
                                          { return &cmdList->GetNative(); });
 
         Vector<CommandList::NativeType*> natives = ToVector(toNative);
-        native->ExecuteCommandLists(static_cast<uint32_t>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
+        native->ExecuteCommandLists(static_cast<U32>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
     bool CommandQueue::Signal(GpuSyncPoint& syncPoint)

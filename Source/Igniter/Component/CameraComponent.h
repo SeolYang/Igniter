@@ -11,9 +11,9 @@ namespace ig
       public:
         [[nodiscard]] Matrix CreatePerspective() const
         {
-            const float aspectRatio = CameraViewport.AspectRatio();
+            const F32 aspectRatio = CameraViewport.AspectRatio();
             IG_CHECK(aspectRatio >= 0.f);
-            const float fovRads = Deg2Rad(Fov);
+            const F32 fovRads = Deg2Rad(Fov);
             return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
         }
 
@@ -23,10 +23,10 @@ namespace ig
 
       public:
         Viewport CameraViewport{0.f, 0.f, 1280.f, 720.f};
-        float NearZ = 0.1f;
-        float FarZ = 1000.f;
+        F32 NearZ = 0.1f;
+        F32 FarZ = 1000.f;
         /* Degrees Field Of View */
-        float Fov = 45.f;
+        F32 Fov = 45.f;
 
         bool bEnableFrustumCull = true;
         bool bIsMainCamera = false;

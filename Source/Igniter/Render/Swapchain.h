@@ -29,7 +29,7 @@ namespace ig
         InFlightFramesResource<RenderHandle<GpuView>> GetBackBufferRenderTargetViews() const { return renderTargetViews; }
 
         // #sy_todo Impl Resize Swapchain!
-        // void Resize(const uint32_t width, const uint32_t height);
+        // void Resize(const U32 width, const U32 height);
         // #sy_todo Impl Change Color Space
         // void SetColorSpace(DXGI_COLOR_SPACE_TYPE newColorSpace);
 

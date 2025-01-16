@@ -50,8 +50,8 @@ namespace ig
       public:
         DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
         ETextureDimension Dimension = ETextureDimension::Tex2D;
-        uint32_t Width = 1;
-        uint32_t Height = 1;
+        U32 Width = 1;
+        U32 Height = 1;
         uint16_t DepthOrArrayLength = 1;
         uint16_t Mips = 1;
         bool bIsCubemap = false;

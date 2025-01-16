@@ -6,8 +6,8 @@ namespace ig
 {
     struct WindowDescription
     {
-        const uint32_t Width;
-        const uint32_t Height;
+        const U32 Width;
+        const U32 Height;
         const String Title;
     };
 

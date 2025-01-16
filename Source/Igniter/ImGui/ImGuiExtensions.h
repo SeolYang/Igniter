@@ -58,7 +58,7 @@ namespace ig::ImGuiX
         return selection;
     }
 
-    bool EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format, const bool bReadOnly = false);
+    bool EditVector3(const std::string_view label, Vector3& vector, const F32 speed, const std::string_view format, const bool bReadOnly = false);
     bool EditTransform(const std::string_view label, TransformComponent& transform);
     void SeparatorText(const std::string_view text);
     bool EditColor3(const std::string_view label, Color& color);
@@ -91,5 +91,5 @@ namespace ig::ImGuiX
     ImVec2 GetFramePadding();
 
     void SetupDefaultTheme();
-    void SetupTransparentTheme(bool bStyleDark_, float alpha_);
+    void SetupTransparentTheme(bool bStyleDark_, F32 alpha_);
 } // namespace ig::ImGuiX

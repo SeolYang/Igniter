@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    void GpuBufferDesc::AsConstantBuffer(const uint32_t sizeOfBufferInBytes)
+    void GpuBufferDesc::AsConstantBuffer(const U32 sizeOfBufferInBytes)
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
@@ -25,7 +25,7 @@ namespace ig
         Format = DXGI_FORMAT_UNKNOWN;
     }
 
-    void GpuBufferDesc::AsStructuredBuffer(const uint32_t sizeOfElementInBytes, const uint32_t numOfElements, const bool bShouldEnableShaderReadWrite /*= false*/, const bool bShouldEnableUavCounter /*= false*/)
+    void GpuBufferDesc::AsStructuredBuffer(const U32 sizeOfElementInBytes, const U32 numOfElements, const bool bShouldEnableShaderReadWrite /*= false*/, const bool bShouldEnableUavCounter /*= false*/)
     {
         IG_VERIFY(sizeOfElementInBytes > 0);
         IG_VERIFY(numOfElements > 0);
@@ -54,7 +54,7 @@ namespace ig
         Format = DXGI_FORMAT_UNKNOWN;
     }
 
-    void GpuBufferDesc::AsUploadBuffer(const uint32_t sizeOfBufferInBytes)
+    void GpuBufferDesc::AsUploadBuffer(const U32 sizeOfBufferInBytes)
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
@@ -76,7 +76,7 @@ namespace ig
         Format = DXGI_FORMAT_UNKNOWN;
     }
 
-    void GpuBufferDesc::AsReadbackBuffer(const uint32_t sizeOfBufferInBytes)
+    void GpuBufferDesc::AsReadbackBuffer(const U32 sizeOfBufferInBytes)
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
@@ -98,7 +98,7 @@ namespace ig
         Format = DXGI_FORMAT_UNKNOWN;
     }
 
-    void GpuBufferDesc::AsVertexBuffer(const uint32_t sizeOfVertexInBytes, const uint32_t numVertices)
+    void GpuBufferDesc::AsVertexBuffer(const U32 sizeOfVertexInBytes, const U32 numVertices)
     {
         IG_VERIFY(sizeOfVertexInBytes > 0);
         IG_VERIFY(numVertices > 0);
@@ -120,7 +120,7 @@ namespace ig
         Flags = D3D12_RESOURCE_FLAG_NONE;
     }
 
-    void GpuBufferDesc::AsIndexBuffer(const uint32_t sizeOfIndexInBytes, const uint32_t numIndices)
+    void GpuBufferDesc::AsIndexBuffer(const U32 sizeOfIndexInBytes, const U32 numIndices)
     {
         IG_VERIFY(sizeOfIndexInBytes > 0);
         IG_VERIFY(numIndices > 0);
@@ -171,7 +171,7 @@ namespace ig
         std::optional<D3D12_CONSTANT_BUFFER_VIEW_DESC> desc{};
         if (IsConstantBufferViewCompatible(bufferType))
         {
-            desc = D3D12_CONSTANT_BUFFER_VIEW_DESC{.BufferLocation = bufferLocation, .SizeInBytes = static_cast<uint32_t>(Width)};
+            desc = D3D12_CONSTANT_BUFFER_VIEW_DESC{.BufferLocation = bufferLocation, .SizeInBytes = static_cast<U32>(Width)};
         }
 
         return desc;

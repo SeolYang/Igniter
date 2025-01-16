@@ -7,7 +7,7 @@ namespace ig
 {
     struct IgniterDesc
     {
-        uint32_t WindowWidth, WindowHeight;
+        U32 WindowWidth, WindowHeight;
         String WindowTitle;
     };
 

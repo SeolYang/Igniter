@@ -116,7 +116,7 @@ namespace ig
             barrierGroups.emplace_back(
                 D3D12_BARRIER_GROUP{
                     .Type = D3D12_BARRIER_TYPE_GLOBAL,
-                    .NumBarriers = static_cast<uint32_t>(pendingGlobalBarriers.size()),
+                    .NumBarriers = static_cast<U32>(pendingGlobalBarriers.size()),
                     .pGlobalBarriers = pendingGlobalBarriers.data()});
         }
 
@@ -125,7 +125,7 @@ namespace ig
             barrierGroups.emplace_back(
                 D3D12_BARRIER_GROUP{
                     .Type = D3D12_BARRIER_TYPE_TEXTURE,
-                    .NumBarriers = static_cast<uint32_t>(pendingTextureBarriers.size()),
+                    .NumBarriers = static_cast<U32>(pendingTextureBarriers.size()),
                     .pTextureBarriers = pendingTextureBarriers.data()});
         }
 
@@ -134,7 +134,7 @@ namespace ig
             barrierGroups.emplace_back(
                 D3D12_BARRIER_GROUP{
                     .Type = D3D12_BARRIER_TYPE_BUFFER,
-                    .NumBarriers = static_cast<uint32_t>(pendingBufferBarriers.size()),
+                    .NumBarriers = static_cast<U32>(pendingBufferBarriers.size()),
                     .pBufferBarriers = pendingBufferBarriers.data()});
         }
 
@@ -144,16 +144,16 @@ namespace ig
         pendingBufferBarriers.clear();
     }
 
-    void CommandList::ClearRenderTarget(const GpuView& rtv, float r /*= 0.f*/, float g /*= 0.f*/, float b /*= 0.f*/, float a /*= 1.f*/)
+    void CommandList::ClearRenderTarget(const GpuView& rtv, F32 r /*= 0.f*/, F32 g /*= 0.f*/, F32 b /*= 0.f*/, F32 a /*= 1.f*/)
     {
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
         IG_CHECK(rtv && (rtv.Type == EGpuViewType::RenderTargetView));
-        const float rgba[4] = {r, g, b, a};
+        const F32 rgba[4] = {r, g, b, a};
         cmdList->ClearRenderTargetView(rtv.CpuHandle, rgba, 0, nullptr);
     }
 
-    void CommandList::ClearDepthStencil(const GpuView& dsv, float depth /*= 1.f*/, uint8_t stencil /*= 0*/)
+    void CommandList::ClearDepthStencil(const GpuView& dsv, F32 depth /*= 1.f*/, uint8_t stencil /*= 0*/)
     {
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
@@ -163,7 +163,7 @@ namespace ig
         cmdList->ClearDepthStencilView(dsvCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil, 0, nullptr);
     }
 
-    void CommandList::ClearDepth(const GpuView& dsv, float depth /*= 1.f*/)
+    void CommandList::ClearDepth(const GpuView& dsv, F32 depth /*= 1.f*/)
     {
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);
@@ -203,7 +203,7 @@ namespace ig
         CopyBuffer(src, 0, srcDesc.GetSizeAsBytes(), dst, 0);
     }
 
-    void CommandList::CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx,
+    void CommandList::CopyTextureRegion(GpuBuffer& src, const size_t srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx,
                                         const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
     {
         IG_CHECK(src);
@@ -252,7 +252,7 @@ namespace ig
                         views::transform([](DescriptorHeap* ptr)
                                          { return &ptr->GetNative(); });
         auto nativePtrs = ToVector(toNative);
-        cmdList->SetDescriptorHeaps(static_cast<uint32_t>(nativePtrs.size()), nativePtrs.data());
+        cmdList->SetDescriptorHeaps(static_cast<U32>(nativePtrs.size()), nativePtrs.data());
     }
 
     void CommandList::SetDescriptorHeap(DescriptorHeap& descriptorHeap)
@@ -298,8 +298,8 @@ namespace ig
         cmdList->IASetPrimitiveTopology(primitiveTopology);
     }
 
-    void CommandList::SetViewport(const float topLeftX, const float topLeftY, const float width, const float height,
-                                  const float minDepth /*= 0.f*/, const float maxDepth /*= 1.f*/)
+    void CommandList::SetViewport(const F32 topLeftX, const F32 topLeftY, const F32 width, const F32 height,
+                                  const F32 minDepth /*= 0.f*/, const F32 maxDepth /*= 1.f*/)
     {
         IG_CHECK(IsValid());
         const D3D12_VIEWPORT viewport{topLeftX, topLeftY, width, height, minDepth, maxDepth};
@@ -326,7 +326,7 @@ namespace ig
             static_cast<long>(viewport.x), static_cast<long>(viewport.y), static_cast<long>(viewport.width), static_cast<long>(viewport.height));
     }
 
-    void CommandList::DrawIndexed(const uint32_t numIndices, const uint32_t indexOffset, const uint32_t vertexOffset)
+    void CommandList::DrawIndexed(const U32 numIndices, const U32 indexOffset, const U32 vertexOffset)
     {
         IG_CHECK(IsValid());
         cmdList->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
@@ -350,12 +350,12 @@ namespace ig
                                  &nativeCmdBuffer, cmdBufferDesc.GetUavCounterOffset());
     }
 
-    void CommandList::SetRoot32BitConstants(const uint32_t registerSlot,
-                                            const uint32_t num32BitValuesToSet,
+    void CommandList::SetRoot32BitConstants(const U32 registerSlot,
+                                            const U32 num32BitValuesToSet,
                                             const void* srcData,
-                                            const uint32_t destOffsetIn32BitValues)
+                                            const U32 destOffsetIn32BitValues)
     {
-        constexpr uint32_t NumMaximumRootConstants = 64;
+        constexpr U32 NumMaximumRootConstants = 64;
         IG_VERIFY(num32BitValuesToSet < NumMaximumRootConstants);
         IG_CHECK((destOffsetIn32BitValues + num32BitValuesToSet) < NumMaximumRootConstants);
         IG_CHECK(srcData != nullptr);

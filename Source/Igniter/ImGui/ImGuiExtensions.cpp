@@ -10,14 +10,14 @@ namespace ig::ImGuiX
         return ImGui::GetCurrentContext()->Style.FramePadding;
     }
 
-    bool EditVector3(const std::string_view label, Vector3& vector, const float speed, const std::string_view format, const bool bReadOnly)
+    bool EditVector3(const std::string_view label, Vector3& vector, const F32 speed, const std::string_view format, const bool bReadOnly)
     {
         bool bModified = false;
         constexpr ImColor XComponentColor{0.8f, 0.15f, 0.f, 1.f};
         constexpr ImColor YComponentColor{0.404f, 0.66f, 0.f, 1.f};
         constexpr ImColor ZComponentColor{0.172f, 0.5f, 0.93f, 1.f};
         constexpr auto CalculateColorBoxRect =
-            [](const float width, const float offset, const ImVec2 cursorPos, const ImVec2 labelSize, const ImVec2 framePadding)
+            [](const F32 width, const F32 offset, const ImVec2 cursorPos, const ImVec2 labelSize, const ImVec2 framePadding)
         {
             return ImRect{
                 ImVec2{cursorPos.x + offset, cursorPos.y + labelSize.y * 0.35f},
@@ -35,9 +35,9 @@ namespace ig::ImGuiX
         ImGui::BeginGroup();
         ImGui::PushID(label.data());
         ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-        constexpr float ColorBoxOffset = 5.5f;
-        constexpr float ColorBoxWidth = 3.5f;
-        constexpr float ColorBoxRounding = 3.5f;
+        constexpr F32 ColorBoxOffset = 5.5f;
+        constexpr F32 ColorBoxWidth = 3.5f;
+        constexpr F32 ColorBoxRounding = 3.5f;
         ImGui::PushID(0);
         {
             const ImRect colorBoxRect{CalculateColorBoxRect(ColorBoxWidth, ColorBoxOffset, window->DC.CursorPos, labelSize, style.FramePadding)};
@@ -115,8 +115,8 @@ namespace ig::ImGuiX
 
     void SeparatorText(const std::string_view text)
     {
-        constexpr float SeparatorThickness = 1.0f;
-        constexpr float SeparatorOffset = 10.f;
+        constexpr F32 SeparatorThickness = 1.0f;
+        constexpr F32 SeparatorOffset = 10.f;
         const ImVec2 textSize{ImGui::CalcTextSize(text.data())};
         ImGui::Text(text.data());
         ImGui::SameLine();
@@ -128,7 +128,7 @@ namespace ig::ImGuiX
     bool EditColor3(const std::string_view label, Color& color)
     {
         /* #sy_todo 사이즈 조절 */
-        float colorVal[3]{color.R(), color.G(), color.B()};
+        F32 colorVal[3]{color.R(), color.G(), color.B()};
         if (ImGui::ColorEdit3(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
         {
             color.x = colorVal[0];
@@ -143,7 +143,7 @@ namespace ig::ImGuiX
     bool EditColor4(const std::string_view label, Color& color)
     {
         /* #sy_todo 사이즈 조절 (원본 구현 참고) */
-        float colorVal[4]{color.R(), color.G(), color.B(), color.A()};
+        F32 colorVal[4]{color.R(), color.G(), color.B(), color.A()};
         if (ImGui::ColorEdit4(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
         {
             color.x = colorVal[0];
@@ -246,7 +246,7 @@ namespace ig::ImGuiX
         style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.105882354080677f, 0.1137254908680916f, 0.1372549086809158f, 0.7529411911964417f);
     }
 
-    void SetupTransparentTheme(bool bStyleDark_, float alpha_)
+    void SetupTransparentTheme(bool bStyleDark_, F32 alpha_)
     {
         ImGuiStyle& style = ImGui::GetStyle();
 
@@ -298,7 +298,7 @@ namespace ig::ImGuiX
             for (int i = 0; i <= ImGuiCol_COUNT; i++)
             {
                 ImVec4& col = style.Colors[i];
-                float H, S, V;
+                F32 H, S, V;
                 ImGui::ColorConvertRGBtoHSV(col.x, col.y, col.z, H, S, V);
 
                 if (S < 0.1f)

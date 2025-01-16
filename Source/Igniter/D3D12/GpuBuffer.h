@@ -48,7 +48,7 @@ namespace ig
             {
                 view = D3D12_VERTEX_BUFFER_VIEW{
                     .BufferLocation = resource->GetGPUVirtualAddress(),
-                    .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
+                    .SizeInBytes = static_cast<U32>(desc.GetSizeAsBytes()),
                     .StrideInBytes = desc.GetStructureByteStride()};
             }
 
@@ -62,7 +62,7 @@ namespace ig
             {
                 view = D3D12_INDEX_BUFFER_VIEW{
                     .BufferLocation = resource->GetGPUVirtualAddress(),
-                    .SizeInBytes = static_cast<uint32_t>(desc.GetSizeAsBytes()),
+                    .SizeInBytes = static_cast<U32>(desc.GetSizeAsBytes()),
                     .Format = desc.GetIndexFormat()};
             }
 

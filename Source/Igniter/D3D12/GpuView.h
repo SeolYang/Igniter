@@ -14,7 +14,7 @@ namespace ig
 
       public:
         EGpuViewType Type = EGpuViewType::Unknown;  /* Type of descriptor. */
-        uint32_t Index = InvalidIndexU32;           /* Index of descriptor in Descriptor Heap. */
+        U32 Index = InvalidIndexU32;           /* Index of descriptor in Descriptor Heap. */
         D3D12_CPU_DESCRIPTOR_HANDLE CpuHandle = {}; /* CPU Handle of descriptor. */
         D3D12_GPU_DESCRIPTOR_HANDLE GpuHandle = {}; /* GPU Handle of descriptor. */
     };

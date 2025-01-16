@@ -215,7 +215,7 @@ namespace ig
 
             static const auto UploadBufferName = String("Async Upload Buffer");
             GpuBufferDesc bufferDesc{};
-            bufferDesc.AsUploadBuffer(static_cast<uint32_t>(alignedNewSize));
+            bufferDesc.AsUploadBuffer(static_cast<U32>(alignedNewSize));
             bufferDesc.DebugName = UploadBufferName;
             buffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(bufferDesc).value());
 
@@ -275,7 +275,7 @@ namespace ig
     }
 
     void UploadContext::CopyTextureRegion(
-        const size_t srcOffsetInBytes, GpuTexture& dst, const uint32_t subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+        const size_t srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
     {
         if (!IsValid())
         {
@@ -292,17 +292,17 @@ namespace ig
         GpuTexture& dst, const GpuCopyableFootprints& dstCopyableFootprints, const std::span<const D3D12_SUBRESOURCE_DATA> subresources)
     {
         /* Write subresources to upload buffer */
-        for (uint32_t idx = 0; idx < subresources.size(); ++idx)
+        for (U32 idx = 0; idx < subresources.size(); ++idx)
         {
             const D3D12_SUBRESOURCE_DATA& srcSubresource = subresources[idx];
             const D3D12_SUBRESOURCE_FOOTPRINT& dstFootprint = dstCopyableFootprints.Layouts[idx].Footprint;
             const size_t rowSizesInBytes = dstCopyableFootprints.RowSizesInBytes[idx];
-            for (uint32_t z = 0; z < dstFootprint.Depth; ++z)
+            for (U32 z = 0; z < dstFootprint.Depth; ++z)
             {
                 const size_t dstSlicePitch = static_cast<size_t>(dstFootprint.RowPitch) * dstCopyableFootprints.NumRows[idx];
                 const size_t dstSliceOffset = dstSlicePitch * z;
                 const size_t srcSliceOffset = srcSubresource.SlicePitch * z;
-                for (uint32_t y = 0; y < dstCopyableFootprints.NumRows[idx]; ++y)
+                for (U32 y = 0; y < dstCopyableFootprints.NumRows[idx]; ++y)
                 {
                     const size_t dstRowOffset = static_cast<size_t>(dstFootprint.RowPitch) * y;
                     const size_t srcRowOffset = srcSubresource.RowPitch * y;

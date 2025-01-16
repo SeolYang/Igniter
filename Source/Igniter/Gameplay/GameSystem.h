@@ -26,9 +26,9 @@ namespace ig
         GameSystem& operator=(const GameSystem&) = delete;
         GameSystem& operator=(GameSystem&&) noexcept = delete;
 
-        virtual void PreUpdate([[maybe_unused]] const float deltaTime, [[maybe_unused]] World& world) {}
-        virtual void Update(const float deltaTime, World& world) = 0;
-        virtual void PostUpdate([[maybe_unused]] const float deltaTime, [[maybe_unused]] World& world) {}
+        virtual void PreUpdate([[maybe_unused]] const F32 deltaTime, [[maybe_unused]] World& world) {}
+        virtual void Update(const F32 deltaTime, World& world) = 0;
+        virtual void PostUpdate([[maybe_unused]] const F32 deltaTime, [[maybe_unused]] World& world) {}
     };
 
     template <typename Ty>

@@ -19,7 +19,7 @@ namespace ig
 
         ComPtr<IDXGIFactory5> factory;
 
-        uint32_t factoryFlags = 0;
+        U32 factoryFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
         factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
@@ -65,7 +65,7 @@ namespace ig
 
     Swapchain::~Swapchain()
     {
-        for (uint32_t idx = 0; idx < NumFramesInFlight; ++idx)
+        for (U32 idx = 0; idx < NumFramesInFlight; ++idx)
         {
             renderContext.DestroyGpuView(renderTargetViews.Resources[idx]);
             renderContext.DestroyTexture(backBuffers.Resources[idx]);
@@ -87,8 +87,8 @@ namespace ig
 
     void Swapchain::Present()
     {
-        const uint32_t syncInterval = bVSyncEnabled ? 1 : 0;
-        const uint32_t presentFlags = bTearingEnabled && !bVSyncEnabled ? DXGI_PRESENT_ALLOW_TEARING : 0;
+        const U32 syncInterval = bVSyncEnabled ? 1 : 0;
+        const U32 presentFlags = bTearingEnabled && !bVSyncEnabled ? DXGI_PRESENT_ALLOW_TEARING : 0;
         const HRESULT result = swapchain->Present(syncInterval, presentFlags);
         if (result == DXGI_ERROR_DEVICE_REMOVED || result == DXGI_ERROR_DEVICE_RESET)
         {

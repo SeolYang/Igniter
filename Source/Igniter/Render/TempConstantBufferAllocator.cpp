@@ -16,7 +16,7 @@ namespace ig
         IG_CHECK(reservedSizeInBytesPerFrame % D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT == 0);
 
         GpuBufferDesc desc{};
-        desc.AsConstantBuffer(static_cast<uint32_t>(reservedSizeInBytesPerFrame));
+        desc.AsConstantBuffer(static_cast<U32>(reservedSizeInBytesPerFrame));
 
         for (const LocalFrameIndex localFrameIdx : std::views::iota(0Ui8, NumFramesInFlight))
         {

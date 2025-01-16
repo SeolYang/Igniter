@@ -71,7 +71,7 @@ namespace ig::ImGuiX
         ImGui::EndChild();
 
         const bool bShouldActiveSelectButton = selectedGuid.isValid();
-        const float buttonWidth = bShouldActiveSelectButton ? ImGui::GetContentRegionAvail().x * 0.49f : ImGui::GetContentRegionAvail().x;
+        const F32 buttonWidth = bShouldActiveSelectButton ? ImGui::GetContentRegionAvail().x * 0.49f : ImGui::GetContentRegionAvail().x;
         if (bShouldActiveSelectButton && ImGui::Button("Select", ImVec2{buttonWidth, 0.f}))
         {
             bAssetSelected = true;

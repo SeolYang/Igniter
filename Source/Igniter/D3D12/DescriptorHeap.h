@@ -24,8 +24,8 @@ namespace ig
 
         ID3D12DescriptorHeap& GetNative() { return *descriptorHeap.Get(); }
         EDescriptorHeapType GetType() const { return descriptorHeapType; }
-        D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const uint32_t index) const;
-        D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const uint32_t index) const;
+        D3D12_CPU_DESCRIPTOR_HANDLE GetIndexedCPUDescriptorHandle(const U32 index) const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetIndexedGPUDescriptorHandle(const U32 index) const;
 
         /* #sy_todo optional 대신 그냥 invalid gpu view 반환 하도록 변경 하기 */
         GpuView Allocate(const EGpuViewType desiredType);
@@ -33,18 +33,18 @@ namespace ig
 
       private:
         DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
-                       const bool bIsShaderVisibleHeap, const uint32_t numDescriptorsInHeap, const uint32_t descriptorHandleIncSizeInHeap);
+                       const bool bIsShaderVisibleHeap, const U32 numDescriptorsInHeap, const U32 descriptorHandleIncSizeInHeap);
 
       private:
         EDescriptorHeapType descriptorHeapType;
         ComPtr<ID3D12DescriptorHeap> descriptorHeap;
-        uint32_t descriptorHandleIncrementSize = 0;
-        uint32_t numInitialDescriptors = 0;
+        U32 descriptorHandleIncrementSize = 0;
+        U32 numInitialDescriptors = 0;
 
         bool bIsShaderVisible = false;
         D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandleForHeapStart{};
         D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
 
-        std::priority_queue<uint32_t, Vector<uint32_t>, std::greater<uint32_t>> descriptorIdxPool;
+        std::priority_queue<U32, Vector<U32>, std::greater<U32>> descriptorIdxPool;
     };
 } // namespace ig

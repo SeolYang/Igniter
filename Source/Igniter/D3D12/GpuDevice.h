@@ -56,7 +56,7 @@ namespace ig
         [[nodiscard]] auto& GetNative() { return *device.Get(); }
         [[nodiscard]] const auto& GetNative() const { return *device.Get(); }
         [[nodiscard]] U32 GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const;
-        [[nodiscard]] GpuCopyableFootprints GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset) const;
+        [[nodiscard]] GpuCopyableFootprints GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const U32 firstSubresource, const U32 numSubresources, const uint64_t baseOffset) const;
         [[nodiscard]] HRESULT GetDeviceRemovedReason() const { return device->GetDeviceRemovedReason(); }
         [[nodiscard]] Statistics GetStatistics() const;
 
@@ -67,7 +67,7 @@ namespace ig
         [[nodiscard]] Option<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
         [[nodiscard]] Option<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
         [[nodiscard]] Option<GpuTexture> CreateTexture(const GpuTextureDesc& textureDesc);
-        [[nodiscard]] Option<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors);
+        [[nodiscard]] Option<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const U32 numDescriptors);
         [[nodiscard]] Option<GpuFence> CreateFence(const std::string_view debugName);
         [[nodiscard]] Option<CommandSignature> CreateCommandSignature(const std::string_view debugName, const CommandSignatureDesc& desc, const Option<Ref<RootSignature>> rootSignatureOpt);
         [[nodiscard]] ComPtr<D3D12MA::Pool> CreateCustomMemoryPool(const D3D12MA::POOL_DESC& desc);

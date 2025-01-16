@@ -131,7 +131,7 @@ namespace ig
                 assetManager->DispatchEvent();
             }
 
-            const float deltaTime = timer->GetDeltaTime();
+            const F32 deltaTime = timer->GetDeltaTime();
             {
                 ZoneScopedN("Engine: PreUpdate");
                 application.PreUpdate(deltaTime);

@@ -33,8 +33,8 @@ namespace ig
             CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle, (screenWidth - description.Width) / 2,
                            (screenHeight - description.Height) / 2, rect.right - rect.left, rect.top - rect.bottom, NULL, NULL, windowClass.hInstance, NULL);
 
-        viewport.width = static_cast<float>(rect.right - rect.left);
-        viewport.height = static_cast<float>(rect.top - rect.bottom);
+        viewport.width = static_cast<F32>(rect.right - rect.left);
+        viewport.height = static_cast<F32>(rect.top - rect.bottom);
 
         ShowWindow(windowHandle, SW_SHOWDEFAULT);
         UpdateWindow(windowHandle);

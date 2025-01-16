@@ -181,7 +181,7 @@ namespace ig
                format == DXGI_FORMAT_BC7_TYPELESS;
     }
 
-    void GpuTextureDesc::AsTexture1D(const uint32_t width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite,
+    void GpuTextureDesc::AsTexture1D(const U32 width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite,
                                      const bool bEnableSimultaneousAccess)
     {
         bIsArray = false;
@@ -206,9 +206,9 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsTexture2D(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
+    void GpuTextureDesc::AsTexture2D(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
                                      const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
-                                     const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+                                     const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
         IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
@@ -233,9 +233,9 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsTexture3D(const uint32_t width, const uint32_t height, const uint16_t depth, const uint16_t mipLevels,
+    void GpuTextureDesc::AsTexture3D(const U32 width, const U32 height, const uint16_t depth, const uint16_t mipLevels,
                                      const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess /*= false*/,
-                                     const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+                                     const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
         IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
@@ -260,9 +260,9 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsRenderTarget(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
-                                        const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/,
-                                        uint32_t sampleQuality /*= 0*/)
+    void GpuTextureDesc::AsRenderTarget(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
+                                        const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/,
+                                        U32 sampleQuality /*= 0*/)
     {
         IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
@@ -288,7 +288,7 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsDepthStencil(const uint32_t width, const uint32_t height, const DXGI_FORMAT format)
+    void GpuTextureDesc::AsDepthStencil(const U32 width, const U32 height, const DXGI_FORMAT format)
     {
         bIsArray = false;
         bIsMSAAEnabled = false;
@@ -313,7 +313,7 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsTexture1DArray(const uint32_t width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,
+    void GpuTextureDesc::AsTexture1DArray(const U32 width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,
                                           const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/)
     {
         bIsArray = true;
@@ -338,9 +338,9 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsTexture2DArray(const uint32_t width, const uint32_t height, const uint16_t arrayLength, const uint16_t mipLevels,
+    void GpuTextureDesc::AsTexture2DArray(const U32 width, const U32 height, const uint16_t arrayLength, const uint16_t mipLevels,
                                           const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/,
-                                          const bool bEnableMSAA /*= false*/, const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+                                          const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
         IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
@@ -365,9 +365,9 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsCubemap(const uint32_t width, const uint32_t height, const uint16_t mipLevels, const DXGI_FORMAT format,
+    void GpuTextureDesc::AsCubemap(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
                                    const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
-                                   const uint32_t sampleCount /*= 1*/, uint32_t sampleQuality /*= 0*/)
+                                   const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
         IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
@@ -974,7 +974,7 @@ namespace ig
             for (uint16_t arraySlice = 0; arraySlice < DepthOrArraySize; ++arraySlice)
             {
                 uint64_t width{Width};
-                uint32_t height{Height};
+                U32 height{Height};
 
                 for (uint16_t mipSlice = 0; mipSlice < MipLevels; ++mipSlice)
                 {
@@ -1003,7 +1003,7 @@ namespace ig
 
         case D3D12_RESOURCE_DIMENSION_TEXTURE3D:
             uint64_t width{Width};
-            uint32_t height{Height};
+            U32 height{Height};
             uint16_t depth{DepthOrArraySize};
 
             for (uint16_t mipSlice = 0; mipSlice < MipLevels; ++mipSlice)

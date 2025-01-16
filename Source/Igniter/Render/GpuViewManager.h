@@ -15,10 +15,10 @@ namespace ig
     {
       public:
         GpuViewManager(GpuDevice& gpuDevice,
-                       const uint32_t numCbvSrvUavDescriptors = DefaultNumCbvSrvUavDescriptors,
-                       const uint32_t numSamplerDescriptors = DefaultNumSamplerDescriptors,
-                       const uint32_t numRtvDescriptors = DefaultNumRtvDescriptors,
-                       const uint32_t numDsvDescriptors = DefaultNumDsvDescriptors);
+                       const U32 numCbvSrvUavDescriptors = DefaultNumCbvSrvUavDescriptors,
+                       const U32 numSamplerDescriptors = DefaultNumSamplerDescriptors,
+                       const U32 numRtvDescriptors = DefaultNumRtvDescriptors,
+                       const U32 numDsvDescriptors = DefaultNumDsvDescriptors);
         GpuViewManager(const GpuViewManager&) = delete;
         GpuViewManager(GpuViewManager&&) noexcept = delete;
         ~GpuViewManager();
@@ -47,10 +47,10 @@ namespace ig
         DescriptorHeap& GetDsvDescHeap();
 
       private:
-        constexpr static uint32_t DefaultNumCbvSrvUavDescriptors = 4096;
-        constexpr static uint32_t DefaultNumSamplerDescriptors = 64;
-        constexpr static uint32_t DefaultNumRtvDescriptors = 512;
-        constexpr static uint32_t DefaultNumDsvDescriptors = DefaultNumRtvDescriptors;
+        constexpr static U32 DefaultNumCbvSrvUavDescriptors = 4096;
+        constexpr static U32 DefaultNumSamplerDescriptors = 64;
+        constexpr static U32 DefaultNumRtvDescriptors = 512;
+        constexpr static U32 DefaultNumDsvDescriptors = DefaultNumRtvDescriptors;
 
         GpuDevice& gpuDevice;
         Ptr<DescriptorHeap> cbvSrvUavHeap;

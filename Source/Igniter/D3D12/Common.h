@@ -82,7 +82,7 @@ namespace ig
       public:
         size_t RequiredSize = 0;
         Vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
-        Vector<uint32_t> NumRows{};
+        Vector<U32> NumRows{};
         Vector<size_t> RowSizesInBytes{};
     };
 

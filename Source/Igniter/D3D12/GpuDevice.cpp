@@ -62,7 +62,7 @@ namespace ig
 #endif
     }
 
-    uint32_t GpuDevice::GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const
+    U32 GpuDevice::GetDescriptorHandleIncrementSize(const EDescriptorHeapType type) const
     {
         switch (type)
         {
@@ -80,7 +80,7 @@ namespace ig
 
     bool GpuDevice::AcquireAdapterFromFactory()
     {
-        uint32_t factoryCreationFlags = 0;
+        U32 factoryCreationFlags = 0;
         {
 #if defined(DEBUG) || defined(_DEBUG)
             factoryCreationFlags |= DXGI_CREATE_FACTORY_DEBUG;
@@ -404,7 +404,7 @@ namespace ig
         return PipelineState{std::move(newPipelineState), false};
     }
 
-    Option<DescriptorHeap> GpuDevice::CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const uint32_t numDescriptors)
+    Option<DescriptorHeap> GpuDevice::CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const U32 numDescriptors)
     {
         IG_CHECK(device);
 
@@ -541,7 +541,7 @@ namespace ig
         return customPool;
     }
 
-    GpuCopyableFootprints GpuDevice::GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const uint32_t firstSubresource, const uint32_t numSubresources, const uint64_t baseOffset) const
+    GpuCopyableFootprints GpuDevice::GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const U32 firstSubresource, const U32 numSubresources, const uint64_t baseOffset) const
     {
         GpuCopyableFootprints footPrints{};
         footPrints.Layouts.resize(numSubresources);
@@ -605,7 +605,7 @@ namespace ig
         IG_CHECK((offset + sizeInBytes) < buffer.GetDesc().GetSizeAsBytes());
 
         const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
-            .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<uint32_t>(sizeInBytes)};
+            .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<U32>(sizeInBytes)};
 
         device->CreateConstantBufferView(&cbvDesc, gpuView.CpuHandle);
     }
