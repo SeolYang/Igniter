@@ -10,13 +10,18 @@ namespace ig
     inline U64 HashInstance(const Ty& instance)
     {
         static_assert(sizeof(Ty)%8 == 0);
-        return constexpr_xxh3::XXH3_64bits_internal(
-            reinterpret_cast<const U64*>(&instance), sizeof(Ty), 0, constexpr_xxh3::kSecret, sizeof(constexpr_xxh3::kSecret),
-            [](const U64* input, size_t len, uint64_t, const void*,
-               size_t) constexpr noexcept
-            {
-                return constexpr_xxh3::hashLong_64b_internal(input, len, constexpr_xxh3::kSecret, sizeof(constexpr_xxh3::kSecret));
-            });
+        constexpr U64 FnvPrime = 16777619u;
+        constexpr U64 FnvOffsetBasis = 2166136261u;
+        constexpr Size NumChunks = sizeof(Ty) / 8;
+
+        const U64* ptr = reinterpret_cast<const U64*>(&instance);
+        U64 hash = FnvOffsetBasis;
+        for (Index idx = 0; idx < NumChunks; ++idx)
+        {
+            hash = FnvPrime * hash ^ ptr[idx];
+        }
+
+        return hash ^ 0xFFFFFFFFFFFFFFFFllu;
     }
 
     inline uint64_t HashRange(const uint32_t* const begin, const uint32_t* const end, uint64_t hash)
