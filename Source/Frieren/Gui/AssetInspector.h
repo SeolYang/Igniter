@@ -34,7 +34,7 @@ namespace fe
         int RenderSelectorPopup(const ig::EAssetCategory selectAssetType);
 
       private:
-        std::vector<ig::AssetManager::Snapshot> snapshots{};
+        ig::Vector<ig::AssetManager::Snapshot> snapshots{};
         bool bIsDirty{true};
         ig::chrono::system_clock::time_point lastUpdated{ig::chrono::system_clock::now()};
 

@@ -49,7 +49,7 @@ namespace fe
             Guid{"f9ed3d69-d906-4b03-9def-16b6b37211e7"},
         };
 
-         std::vector<std::future<ManagedAsset<StaticMesh>>> homuraMeshFutures{};
+         ig::Vector<std::future<ManagedAsset<StaticMesh>>> homuraMeshFutures{};
          for (Guid guid : homuraMeshGuids)
         {
              homuraMeshFutures.emplace_back(std::async(
@@ -112,7 +112,7 @@ namespace fe
              Guid{"f8dad50c-7331-42a4-be15-72923762a76a"},
          };
 
-         std::vector<std::future<ManagedAsset<StaticMesh>>> littleTokyoMeshFutures{};
+         ig::Vector<std::future<ManagedAsset<StaticMesh>>> littleTokyoMeshFutures{};
          for (Guid guid : littleTokyoMeshGuids)
         {
              littleTokyoMeshFutures.emplace_back(std::async(
@@ -138,7 +138,7 @@ namespace fe
              registry.emplace<NameComponent>(cameraEntity, "Camera"_fs);
 
             TransformComponent& cameraTransform = registry.get<TransformComponent>(cameraEntity);
-            cameraTransform.Position = Vector3{0.f, 0.f, -30.f};
+            cameraTransform.Position = ig::Vector3{0.f, 0.f, -30.f};
 
             CameraComponent& cameraComponent = registry.get<CameraComponent>(cameraEntity);
             cameraComponent.CameraViewport = Igniter::GetWindow().GetViewport();

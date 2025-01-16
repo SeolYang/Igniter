@@ -35,7 +35,7 @@ namespace ig
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
       private:
-        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
+        Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
 
         static U32 MakeAssimpImportFlagsFromDesc(const StaticMesh::ImportDesc& desc);
         static Size ImportMaterialsFromScene(AssetManager& assetManager, const aiScene* scene);

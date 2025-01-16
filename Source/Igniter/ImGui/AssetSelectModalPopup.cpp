@@ -23,7 +23,7 @@ namespace ig::ImGuiX
     void AssetSelectModalPopup::TakeAssetSnapshotsFromManager()
     {
         cachedAssetInfos.clear();
-        std::vector<AssetSnapshot> snapshots = ig::Engine::GetAssetManager().TakeSnapshots();
+        Vector<AssetSnapshot> snapshots = ig::Engine::GetAssetManager().TakeSnapshots();
         if (snapshots.empty())
         {
             return;

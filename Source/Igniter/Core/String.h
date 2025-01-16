@@ -79,13 +79,13 @@ namespace ig
         [[nodiscard]] bool IsValid() const noexcept { return hashOfString != InvalidHashVal; }
         [[nodiscard]] bool IsEmpty() const noexcept { return hashOfString == 0; }
 
-        [[nodiscard]] std::vector<String> Split(const String delimiter) const;
+        [[nodiscard]] Vector<String> Split(const String delimiter) const;
 
         [[nodiscard]] String ToTitleCase() const;
 
         [[nodiscard]] int Compare(const String other) const noexcept;
 
-        static std::vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
+        static Vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
       private:
         using HashStringMap = StableUnorderedMap<uint64_t, std::string>;

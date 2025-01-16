@@ -955,14 +955,14 @@ namespace ig
         SamplerFeedbackMipRegion = {};
     }
 
-    std::vector<D3D12_SUBRESOURCE_DATA> GpuTextureDesc::GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const
+    Vector<D3D12_SUBRESOURCE_DATA> GpuTextureDesc::GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const
     {
         /* #sy_ref 텍스처 서브-리소스 데이터 생성
          * https://github.com/microsoft/DirectXTex/blob/main/DirectXTex/DirectXTexImage.cpp#L145
          * https://github.com/microsoft/DirectXTex/blob/main/DirectXTex/DirectXTexUtil.cpp#L924
          * https://learn.microsoft.com/en-us/windows/win32/direct3d12/subresources
          */
-        std::vector<D3D12_SUBRESOURCE_DATA> result{};
+        Vector<D3D12_SUBRESOURCE_DATA> result{};
         result.reserve(this->GetNumSubresources());
         const size_t bytesPerPixel{SizeOfPixelInBytes(Format)};
         const uint8_t* ptr{memoryBlock.data()};

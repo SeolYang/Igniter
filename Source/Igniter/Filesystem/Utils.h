@@ -33,9 +33,9 @@ namespace ig
         return true;
     }
 
-    inline std::vector<uint8_t> LoadBlobFromFile(const Path& path)
+    inline Vector<uint8_t> LoadBlobFromFile(const Path& path)
     {
-        std::vector<uint8_t> blob;
+        Vector<uint8_t> blob;
         if (!fs::exists(path))
         {
             return blob;

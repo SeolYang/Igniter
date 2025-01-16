@@ -77,7 +77,7 @@ namespace ig
         [[nodiscard]] ManagedAsset<Texture> LoadTexture(const Guid& guid, const bool bShouldSuppressDirty = false);
         [[nodiscard]] ManagedAsset<Texture> LoadTexture(const String virtualPath, const bool bShouldSuppressDirty = false);
 
-        std::vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty = false);
+        Vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty = false);
         [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty = false);
         [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty = false);
 
@@ -269,7 +269,7 @@ namespace ig
         }
 
         // Unknown == no filter
-        [[nodiscard]] std::vector<Snapshot> TakeSnapshots(const EAssetCategory filter = EAssetCategory::Unknown, const bool bOnlyTakeCached = false) const;
+        [[nodiscard]] Vector<Snapshot> TakeSnapshots(const EAssetCategory filter = EAssetCategory::Unknown, const bool bOnlyTakeCached = false) const;
 
         [[nodiscard]] ModifiedEvent& GetModifiedEvent() { return assetModifiedEvent; }
 
@@ -495,7 +495,7 @@ namespace ig
 
       private:
         Ptr<details::AssetMonitor> assetMonitor;
-        std::vector<Ptr<details::TypelessAssetCache>> assetCaches;
+        Vector<Ptr<details::TypelessAssetCache>> assetCaches;
 
         Mutex assetMutexTableMutex;
         StableUnorderedMap<Guid, AssetMutex> assetMutexTable;

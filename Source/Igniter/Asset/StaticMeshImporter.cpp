@@ -187,9 +187,9 @@ namespace ig
         return MakeSuccess<StaticMesh::Desc, EStaticMeshImportStatus>(assetInfo, newLoadConfig);
     }
 
-    std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::Import(const String resPathStr, const StaticMesh::ImportDesc& desc)
+    Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::Import(const String resPathStr, const StaticMesh::ImportDesc& desc)
     {
-        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
+        Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
         const Path resPath{resPathStr.ToStringView()};
         if (!fs::exists(resPath))
         {

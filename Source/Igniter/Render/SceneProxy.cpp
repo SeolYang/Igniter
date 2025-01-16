@@ -542,7 +542,7 @@ namespace ig
         auto& proxyMap = meshProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *meshProxyPackage.Storage[localFrameIdx];
 
-        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh, true)};
+        Vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh, true)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
         {
             IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::StaticMesh);
@@ -608,7 +608,7 @@ namespace ig
         auto& proxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *materialProxyPackage.Storage[localFrameIdx];
 
-        std::vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::Material, true)};
+        Vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::Material, true)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
         {
             IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::Material);

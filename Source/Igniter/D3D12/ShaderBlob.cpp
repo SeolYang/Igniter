@@ -11,7 +11,7 @@ namespace ig
     ShaderBlob::ShaderBlob(const ShaderCompileDesc& desc)
         : type(desc.Type)
     {
-        std::vector<const wchar_t*> arguments;
+        Vector<const wchar_t*> arguments;
         arguments.push_back(TEXT("-E"));
         arguments.push_back(TEXT("main"));
 

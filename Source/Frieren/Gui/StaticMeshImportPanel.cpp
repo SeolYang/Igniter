@@ -46,7 +46,7 @@ namespace fe
     {
         config = {};
 
-        static const std::vector<ig::DialogFilter> Filters{
+        static const ig::Vector<ig::DialogFilter> Filters{
             ig::DialogFilter{.Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs},
         };
 

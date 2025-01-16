@@ -14,10 +14,10 @@ namespace ig
         return std::regex_match(str.ToCString(), regex, flags);
     }
 
-    std::vector<String> RegexMatchN(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags
+    Vector<String> RegexMatchN(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags
                                     /*= std::regex_constants::match_default*/)
     {
-        std::vector<String> result{};
+        Vector<String> result{};
         if (str.IsValid())
         {
             std::cmatch matches{};
@@ -34,9 +34,9 @@ namespace ig
         return result;
     }
 
-    std::vector<String> RegexSearch(const String str, const std::regex& regex)
+    Vector<String> RegexSearch(const String str, const std::regex& regex)
     {
-        std::vector<String> result{};
+        Vector<String> result{};
         if (str.IsValid())
         {
             const char* searchBegin{str.ToCString()};

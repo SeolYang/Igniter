@@ -29,14 +29,14 @@ namespace ig
             return MakeFail<String, EOpenFileDialogStatus::CreateDialog>();
         }
 
-        std::vector<WideDialogFilter> wideFilters(filters.size());
+        Vector<WideDialogFilter> wideFilters(filters.size());
         std::transform(filters.begin(), filters.end(), wideFilters.begin(),
                        [](const DialogFilter& filter)
                        {
                            return WideDialogFilter{.Name = filter.Name.ToWideString(), .FilterPattern = filter.FilterPattern.ToWideString()};
                        });
 
-        std::vector<COMDLG_FILTERSPEC> filterSpecs(filters.size());
+        Vector<COMDLG_FILTERSPEC> filterSpecs(filters.size());
         std::transform(wideFilters.begin(), wideFilters.end(), filterSpecs.begin(),
                        [](const WideDialogFilter& filter)
                        {

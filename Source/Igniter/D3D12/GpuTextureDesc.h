@@ -72,7 +72,7 @@ namespace ig
         uint32_t GetArraySize() const { return IsTexture3D() ? 0 : DepthOrArraySize; }
 
         /* #sy_note 간단한 format(비압축/RGBA)과 간단한 구조(Array, Slice)에 대한 subresource 정보만 생성 */
-        std::vector<D3D12_SUBRESOURCE_DATA> GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const;
+        Vector<D3D12_SUBRESOURCE_DATA> GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const;
 
       public:
         String DebugName = String{"Unknown Texture"};

@@ -158,10 +158,10 @@ namespace ig
         return LoadTexture(assetMonitor->GetGuid(EAssetCategory::Texture, virtualPath));
     }
 
-    std::vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty)
+    Vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty)
     {
-        std::vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(resPath, desc);
-        std::vector<Guid> output;
+        Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(resPath, desc);
+        Vector<Guid> output;
         output.reserve(results.size());
         for (Result<StaticMesh::Desc, EStaticMeshImportStatus>& result : results)
         {
@@ -366,10 +366,10 @@ namespace ig
         return assetMonitor->GetAssetInfo(guid);
     }
 
-    std::vector<AssetManager::Snapshot> AssetManager::TakeSnapshots(const EAssetCategory filter, const bool bOnlyTakeCached) const
+    Vector<AssetManager::Snapshot> AssetManager::TakeSnapshots(const EAssetCategory filter, const bool bOnlyTakeCached) const
     {
-        std::vector<Snapshot> snapshots;
-        std::vector<AssetInfo> assetInfoSnapshots{assetMonitor->TakeSnapshots(filter)};
+        Vector<Snapshot> snapshots;
+        Vector<AssetInfo> assetInfoSnapshots{assetMonitor->TakeSnapshots(filter)};
         snapshots.reserve(assetInfoSnapshots.size());
 
         if (filter != EAssetCategory::Unknown)

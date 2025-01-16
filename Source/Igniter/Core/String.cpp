@@ -128,7 +128,7 @@ namespace ig
         return String{path.c_str()};
     }
 
-    std::vector<String> String::Split(const String delimiter) const
+    Vector<String> String::Split(const String delimiter) const
     {
         auto splitStrViews{
             ToStringView() | views::split(delimiter.ToStringView()) |
@@ -138,7 +138,14 @@ namespace ig
                     return String{std::string_view{&*element.begin(), static_cast<size_t>(ranges::distance(element))}};
                 })};
 
-        return std::vector<String>{splitStrViews.begin(), splitStrViews.end()};
+        // results의 크기를 미리 reserve 할 수 있는 방법이 없을까?
+        Vector<String> results{};
+        for (const String result : splitStrViews)
+        {
+            results.emplace_back(result);
+        }
+
+        return results;
     }
 
     String String::ToTitleCase() const
@@ -170,12 +177,12 @@ namespace ig
         return this->ToStringView().compare(other.ToStringView());
     }
 
-    std::vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()
+    Vector<std::pair<uint64_t, std::string_view>> String::GetCachedStrings()
     {
         ReadOnlyLock lock{GetHashStringMapMutex()};
         HashStringMap& hashStringMap{GetHashStringMap()};
 
-        std::vector<std::pair<uint64_t, std::string_view>> cachedStrs;
+        Vector<std::pair<uint64_t, std::string_view>> cachedStrs;
         cachedStrs.reserve(hashStringMap.size());
         for (const auto& itr : hashStringMap)
         {

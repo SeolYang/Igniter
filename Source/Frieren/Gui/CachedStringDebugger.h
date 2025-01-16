@@ -20,7 +20,7 @@ namespace fe
       private:
         constexpr static size_t MaxInputLength = 32;
         std::string inputBuffer{MaxInputLength};
-        std::vector<std::pair<uint64_t, std::string_view>> cachedStrings{};
+        ig::Vector<std::pair<uint64_t, std::string_view>> cachedStrings{};
         bool bSortRequired = true;
         bool bLoadRequired = true;
         bool bFiltered = false;

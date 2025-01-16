@@ -47,7 +47,7 @@ namespace ig
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FileDoesNotExists>();
         }
 
-        std::vector<uint8_t> blob = LoadBlobFromFile(assetPath);
+        Vector<uint8_t> blob = LoadBlobFromFile(assetPath);
         if (blob.empty())
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::EmptyBlob>();

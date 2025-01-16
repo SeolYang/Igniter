@@ -13,8 +13,8 @@ namespace ig::details
         virtual void Insert(const Json& serializedMetadata) = 0;
         virtual void Erase(const Guid guid) = 0;
         virtual bool Contains(const Guid guid) const = 0;
-        virtual std::vector<Json> GetSerializedDescs() const = 0;
-        virtual std::vector<AssetInfo> GetAssetInfos() const = 0;
+        virtual Vector<Json> GetSerializedDescs() const = 0;
+        virtual Vector<AssetInfo> GetAssetInfos() const = 0;
         virtual AssetInfo GetAssetInfo(const Guid guid) const = 0;
         virtual void Update(const AssetInfo& assetInfo) = 0;
         virtual size_t GetSize() const = 0;
@@ -45,9 +45,9 @@ namespace ig::details
 
         bool Contains(const Guid guid) const override { return container.contains(guid); }
 
-        std::vector<Json> GetSerializedDescs() const override
+        Vector<Json> GetSerializedDescs() const override
         {
-            std::vector<Json> result;
+            Vector<Json> result;
             result.reserve(container.size());
             for (auto guidDescPair : container)
             {
@@ -59,9 +59,9 @@ namespace ig::details
             return result;
         }
 
-        std::vector<AssetInfo> GetAssetInfos() const override
+        Vector<AssetInfo> GetAssetInfos() const override
         {
-            std::vector<AssetInfo> assetInfos;
+            Vector<AssetInfo> assetInfos;
             assetInfos.reserve(GetSize());
             for (const auto& guidDescPair : container)
             {
@@ -166,7 +166,7 @@ namespace ig::details
         void Remove(const Guid& guid, const bool bShouldExpired = true);
         void SaveAllChanges();
 
-        [[nodiscard]] std::vector<AssetInfo> TakeSnapshots(const EAssetCategory filter) const;
+        [[nodiscard]] Vector<AssetInfo> TakeSnapshots(const EAssetCategory filter) const;
 
       private:
         void InitAssetDescTables();
@@ -227,8 +227,8 @@ namespace ig::details
 
       private:
         mutable SharedMutex mutex;
-        std::vector<std::pair<EAssetCategory, VirtualPathGuidTable>> virtualPathGuidTables;
-        std::vector<std::pair<EAssetCategory, Ptr<TypelessAssetDescMap>>> guidDescTables;
+        Vector<std::pair<EAssetCategory, VirtualPathGuidTable>> virtualPathGuidTables;
+        Vector<std::pair<EAssetCategory, Ptr<TypelessAssetDescMap>>> guidDescTables;
         UnorderedMap<Guid, AssetInfo> expiredAssetInfos;
     };
 } // namespace ig::details

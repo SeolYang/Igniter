@@ -89,7 +89,7 @@ namespace ig
         String GetVirtualPath() const { return virtualPath; }
         EAssetCategory GetCategory() const { return category; }
         EAssetScope GetScope() const { return scope; }
-        const std::vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
+        const Vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
         void SetVirtualPath(const String newVirtualPath);
         void SetScope(const EAssetScope newScope) { scope = (newScope == EAssetScope::Engine) ? EAssetScope::Static : newScope; }
@@ -103,7 +103,7 @@ namespace ig
         uint64_t creationTime = 0;
         Guid guid{};
         String virtualPath{};
-        std::vector<String> virtualPathHierarchy{};
+        Vector<String> virtualPathHierarchy{};
         EAssetCategory category = EAssetCategory::Unknown;
         EAssetScope scope = EAssetScope::Managed;
     };

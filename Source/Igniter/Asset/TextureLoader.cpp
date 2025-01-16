@@ -135,7 +135,7 @@ namespace ig
 
         /* Upload texture subresources from sysram to vram */
         const size_t numSubresources = scratchImage.GetImageCount();
-        std::vector<D3D12_SUBRESOURCE_DATA> subresources(numSubresources);
+        Vector<D3D12_SUBRESOURCE_DATA> subresources(numSubresources);
         const DirectX::Image* images = scratchImage.GetImages();
 
         for (size_t idx = 0; idx < numSubresources; ++idx)
@@ -219,7 +219,7 @@ namespace ig
         constexpr LONG_PTR Width{BlockSizeInPixels * NumBlocksPerAxis};
         constexpr LONG_PTR Height{BlockSizeInPixels * NumBlocksPerAxis};
         constexpr LONG_PTR NumPixels{Width * Height};
-        std::vector<uint8_t> bytes(NumPixels * BytesPerPixel);
+        Vector<uint8_t> bytes(NumPixels * BytesPerPixel);
         bool bUseBrightPixel = true;
         uint32_t pixelCounter{0};
         for (LONG_PTR pixelIdx = 0; pixelIdx < NumPixels; ++pixelIdx)
@@ -260,7 +260,7 @@ namespace ig
         UploadContext uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
         GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
         IG_CHECK(newTexturePtr != nullptr);
-        std::vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
+        Vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);
         std::optional<GpuSyncPoint> sync{gpuUploader.Submit(uploadCtx)};
         IG_CHECK(sync);
@@ -327,7 +327,7 @@ namespace ig
         constexpr LONG_PTR Width{1};
         constexpr LONG_PTR Height{1};
         constexpr LONG_PTR NumPixels{Width * Height};
-        std::vector<uint8_t> bytes(NumPixels * BytesPerPixel);
+        Vector<uint8_t> bytes(NumPixels * BytesPerPixel);
 
         Color saturatedColor{};
         color.Saturate(saturatedColor);
@@ -355,7 +355,7 @@ namespace ig
             .RowPitch = RowPitch,
             .SlicePitch = SlicePitch,
         };
-        std::vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
+        Vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
 
         GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
         const GpuCopyableFootprints dstCopyableFootprints{renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0)};

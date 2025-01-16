@@ -25,13 +25,13 @@ namespace ig
         }
     }
 
-    std::vector<FileChangeInfo> CoFileWatcher::RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory)
+    Vector<FileChangeInfo> CoFileWatcher::RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory)
     {
         IG_CHECK(IsReadyToWatch() && task.IsValid());
         this->bEnsureCatchChanges = bEnsureCatch;
         this->bIgnoreDirectoryChanges = bIgnoreDirectory;
         task.Resume();
-        std::vector<FileChangeInfo> tempBuffer{std::move(buffer)};
+        Vector<FileChangeInfo> tempBuffer{std::move(buffer)};
         return tempBuffer;
     }
 
@@ -41,7 +41,7 @@ namespace ig
         IG_CHECK(watcher->IsReadyToWatch());
 
         constexpr size_t ReservedRawBufferSizeInBytes = 1024Ui64 * 1024Ui64;
-        std::vector<uint8_t> rawBuffer(ReservedRawBufferSizeInBytes);
+        Vector<uint8_t> rawBuffer(ReservedRawBufferSizeInBytes);
         WCHAR fileNameBuffer[MAX_PATH]{0};
 
         while (!watcher->bStopWatching)

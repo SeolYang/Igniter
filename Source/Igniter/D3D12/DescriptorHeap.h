@@ -45,6 +45,6 @@ namespace ig
         D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandleForHeapStart{};
         D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandleForHeapStart{};
 
-        std::priority_queue<uint32_t, std::vector<uint32_t>, std::greater<uint32_t>> descriptorIdxPool;
+        std::priority_queue<uint32_t, Vector<uint32_t>, std::greater<uint32_t>> descriptorIdxPool;
     };
 } // namespace ig

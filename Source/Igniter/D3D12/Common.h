@@ -81,9 +81,9 @@ namespace ig
     {
       public:
         size_t RequiredSize = 0;
-        std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
-        std::vector<uint32_t> NumRows{};
-        std::vector<size_t> RowSizesInBytes{};
+        Vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> Layouts{};
+        Vector<uint32_t> NumRows{};
+        Vector<size_t> RowSizesInBytes{};
     };
 
     constexpr inline bool IsGreyScaleFormat(const DXGI_FORMAT format)

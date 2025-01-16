@@ -22,7 +22,7 @@ namespace ig::details
         virtual EAssetCategory GetAssetType() const = 0;
         virtual void Invalidate(const Guid& guid) = 0;
         virtual [[nodiscard]] bool IsCached(const Guid& guid) const = 0;
-        virtual [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const = 0;
+        virtual [[nodiscard]] Vector<Snapshot> TakeSnapshots() const = 0;
         [[nodiscard]] virtual Snapshot TakeSnapshot(const Guid& guid) const = 0;
     };
 
@@ -109,10 +109,10 @@ namespace ig::details
 
         // #sy_todo Unload with Handle?
 
-        [[nodiscard]] std::vector<Snapshot> TakeSnapshots() const override
+        [[nodiscard]] Vector<Snapshot> TakeSnapshots() const override
         {
             ReadOnlyLock lock{mutex};
-            std::vector<Snapshot> refCounterSnapshots{};
+            Vector<Snapshot> refCounterSnapshots{};
             refCounterSnapshots.reserve(refCounterTable.size());
             for (const auto& guidRefCounter : refCounterTable)
             {

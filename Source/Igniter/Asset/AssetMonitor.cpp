@@ -347,7 +347,7 @@ namespace ig::details
         for (const auto& assetTypeDescTablePair : guidDescTables)
         {
             TypelessAssetDescMap& descMap{*assetTypeDescTablePair.second};
-            std::vector<Json> serializedDescs{descMap.GetSerializedDescs()};
+            Vector<Json> serializedDescs{descMap.GetSerializedDescs()};
             for (const Json& serializedDesc : serializedDescs)
             {
                 AssetInfo assetInfo{};
@@ -369,7 +369,7 @@ namespace ig::details
 
     void AssetMonitor::CleanupOrphanFiles()
     {
-        std::vector<Path> orphanFiles{};
+        Vector<Path> orphanFiles{};
         for (const auto assetType : magic_enum::enum_values<EAssetCategory>())
         {
             if (assetType == EAssetCategory::Unknown)
@@ -424,7 +424,7 @@ namespace ig::details
         IG_LOG(AssetMonitorLog, Info, "All info changes saved.");
     }
 
-    std::vector<AssetInfo> AssetMonitor::TakeSnapshots(const EAssetCategory filter) const
+    Vector<AssetInfo> AssetMonitor::TakeSnapshots(const EAssetCategory filter) const
     {
         ReadOnlyLock lock{mutex};
         if (filter != EAssetCategory::Unknown)
@@ -439,12 +439,12 @@ namespace ig::details
             numDescs += descMap.GetSize();
         }
 
-        std::vector<AssetInfo> assetInfoSnapshots{};
+        Vector<AssetInfo> assetInfoSnapshots{};
         assetInfoSnapshots.reserve(numDescs);
         for (const auto& typeDescTablePair : guidDescTables)
         {
             const TypelessAssetDescMap& descMap{*typeDescTablePair.second};
-            std::vector<AssetInfo> assetInfos{descMap.GetAssetInfos()};
+            Vector<AssetInfo> assetInfos{descMap.GetAssetInfos()};
             assetInfoSnapshots.insert(assetInfoSnapshots.end(), assetInfos.begin(), assetInfos.end());
         }
 

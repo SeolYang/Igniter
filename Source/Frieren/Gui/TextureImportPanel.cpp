@@ -74,7 +74,7 @@ namespace fe
     {
         config = {};
 
-        static const std::vector<ig::DialogFilter> Filters{
+        static const ig::Vector<ig::DialogFilter> Filters{
             ig::DialogFilter{.Name = "Texture Resources"_fs, .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"_fs},
         };
 

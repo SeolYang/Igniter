@@ -97,7 +97,7 @@ namespace ig
         CoFileWatcher(const String directoryPathStr, const EFileWatchFilterFlags filters, const bool bWatchRecursively = true);
         ~CoFileWatcher();
 
-        std::vector<FileChangeInfo> RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory = true);
+        Vector<FileChangeInfo> RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory = true);
 
       private:
         bool IsReadyToWatch() const { return directory != INVALID_HANDLE_VALUE; }
@@ -111,7 +111,7 @@ namespace ig
         bool bStopWatching{false};
         bool bWatchRecursively = true;
         EFileWatchFilterFlags filters = EFileWatchFilterFlags::ChangeFileName | EFileWatchFilterFlags::ChangeLastWrite;
-        std::vector<FileChangeInfo> buffer{};
+        Vector<FileChangeInfo> buffer{};
 
         bool bEnsureCatchChanges = false;
         bool bIgnoreDirectoryChanges = true;
