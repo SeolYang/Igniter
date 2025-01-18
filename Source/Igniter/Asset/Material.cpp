@@ -9,14 +9,14 @@ namespace ig
 {
     Json& MaterialAssetLoadDesc::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_JSON_SIMPLE(MaterialAssetLoadDesc, archive, DiffuseTexGuid);
+        IG_SERIALIZE_TO_JSON(MaterialAssetLoadDesc, archive, DiffuseTexGuid);
         return archive;
     }
 
     const Json& MaterialAssetLoadDesc::Deserialize(const Json& archive)
     {
         *this = {};
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(MaterialAssetLoadDesc, archive, DiffuseTexGuid, Guid{DefaultTextureGuid});
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(MaterialAssetLoadDesc, archive, DiffuseTexGuid, Guid{DefaultTextureGuid});
         return archive;
     }
 

@@ -6,6 +6,7 @@
 #include "Igniter/Asset/MaterialImporter.h"
 
 IG_DECLARE_LOG_CATEGORY(MaterialImporter);
+//IG_DEFINE_LOG_CATEGORY(MaterialImporter);
 
 namespace ig
 {

@@ -7,7 +7,8 @@
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/World.h"
 
-IG_DECLARE_LOG_CATEGORY(World);
+IG_DECLARE_LOG_CATEGORY(WorldLog);
+IG_DEFINE_LOG_CATEGORY(WorldLog);
 
 namespace ig
 {
@@ -93,7 +94,7 @@ namespace ig
                 const auto nameProperty = resolvedType.prop(meta::NameProperty);
                 if (!resolvedType)
                 {
-                    IG_LOG(World, Warning, "Ignored Component {}({}): {} does not registered to meta registry.", nameProperty.value().cast<String>(),
+                    IG_LOG(WorldLog, Warning, "Ignored Component {}({}): {} does not registered to meta registry.", nameProperty.value().cast<String>(),
                            componentID);
                     continue;
                 }
@@ -101,21 +102,21 @@ namespace ig
                 auto addComponent = resolvedType.func(meta::AddComponentFunc);
                 if (!addComponent)
                 {
-                    IG_LOG(World, Warning, "Ignored Type ID: {} add component meta function does not registered to meta registry.",
+                    IG_LOG(WorldLog, Warning, "Ignored Type ID: {} add component meta function does not registered to meta registry.",
                            nameProperty.value().cast<String>());
                     continue;
                 }
 
                 if (!addComponent.invoke(resolvedType, std::ref(registry), entity).cast<bool>())
                 {
-                    IG_LOG(World, Warning, "Failed to add component {}({}) to entity", nameProperty.value().cast<String>(), componentID);
+                    IG_LOG(WorldLog, Warning, "Failed to add component {}({}) to entity", nameProperty.value().cast<String>(), componentID);
                     continue;
                 }
 
                 auto deserializeJson = resolvedType.func(meta::DeserializeComponentJsonFunc);
                 if (!deserializeJson)
                 {
-                    IG_LOG(World, Warning, "Ignored component {}({}) deserialization. The deserialize meta function does not registered.",
+                    IG_LOG(WorldLog, Warning, "Ignored component {}({}) deserialization. The deserialize meta function does not registered.",
                            nameProperty.value().cast<String>(), componentID);
                     continue;
                 }

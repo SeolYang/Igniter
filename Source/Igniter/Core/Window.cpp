@@ -6,7 +6,7 @@
 #include "Igniter/ImGui/ImGuiContext.h"
 #include "Igniter/Core/Window.h"
 
-IG_DECLARE_LOG_CATEGORY(Window);
+IG_DECLARE_PRIVATE_LOG_CATEGORY(WindowLog);
 
 namespace ig
 {
@@ -68,7 +68,7 @@ namespace ig
         clientRect.bottom = rightBottom.y;
         if (::ClipCursor(&clientRect) == FALSE)
         {
-            IG_LOG(Window, Error, "Failed to clip cursor to main window.");
+            IG_LOG(WindowLog, Error, "Failed to clip cursor to main window.");
         }
     }
 

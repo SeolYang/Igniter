@@ -14,13 +14,13 @@ namespace ig
 
     Json& NameComponent::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_JSON_SIMPLE(NameComponent, archive, Name);
+        IG_SERIALIZE_TO_JSON(NameComponent, archive, Name);
         return archive;
     }
 
     const ig::Json& NameComponent::Deserialize(const Json& archive)
     {
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(NameComponent, archive, Name, String{});
+        IG_DESERIALIZE_FROM_JSON(NameComponent, archive, Name);
         return archive;
     }
 

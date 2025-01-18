@@ -6,7 +6,8 @@
 #include "Igniter/Filesystem/Utils.h"
 #include "Igniter/Asset/TextureImporter.h"
 
-IG_DECLARE_LOG_CATEGORY(TextureImporter);
+IG_DECLARE_LOG_CATEGORY(TextureImporterLog);
+IG_DEFINE_LOG_CATEGORY(TextureImporterLog);
 
 namespace ig
 {
@@ -69,7 +70,7 @@ namespace ig
 
         if (FAILED(res))
         {
-            IG_LOG(TextureImporter, Error, "Failed create d3d11 device. HRESULT: {:#X}", res);
+            IG_LOG(TextureImporterLog, Error, "Failed create d3d11 device. HRESULT: {:#X}", res);
         }
     }
 
@@ -102,7 +103,7 @@ namespace ig
         {
             // 만약 DDS 타입이면, 바로 가공 없이 에셋으로 사용한다. 이 경우,
             // 제공된 config 은 무시된다.; 애초에 DDS로 미리 가공했는데 다시 압축을 풀고, 밉맵을 생성하고 할 필요가 없음.
-            IG_LOG(TextureImporter, Warning,
+            IG_LOG(TextureImporterLog, Warning,
                    "For DDS files, the provided configuration values are disregarded, "
                    "and the supplied file is used as the asset as it is. File: {}",
                    resPathStr.ToStringView());
@@ -168,7 +169,7 @@ namespace ig
             {
                 if (bIsHDRFormat && importDesc.CompressionMode != ETextureCompressionMode::BC6H)
                 {
-                    IG_LOG(TextureImporter, Warning,
+                    IG_LOG(TextureImporterLog, Warning,
                            "The compression method for HDR extension textures is "
                            "enforced "
                            "to be the 'BC6H' algorithm. File: {}",
@@ -178,7 +179,7 @@ namespace ig
                 }
                 else if (IsGreyScaleFormat(texMetadata.format) && importDesc.CompressionMode == ETextureCompressionMode::BC4)
                 {
-                    IG_LOG(TextureImporter, Warning,
+                    IG_LOG(TextureImporterLog, Warning,
                            "The compression method for greyscale-formatted "
                            "textures is "
                            "enforced to be the 'BC4' algorithm. File: {}",
@@ -227,7 +228,7 @@ namespace ig
         const Path resMetadataPath{MakeResourceMetadataPath(resPath)};
         if (SaveJsonToFile(resMetadataPath, resMetadata))
         {
-            IG_LOG(TextureImporter, Warning, "Failed to create resource metadata {}.", resMetadataPath.string());
+            IG_LOG(TextureImporterLog, Warning, "Failed to create resource metadata {}.", resMetadataPath.string());
         }
 
         /* Configure Texture Asset Metadata */
@@ -262,7 +263,7 @@ namespace ig
         IG_CHECK(!assetPath.empty());
         if (fs::exists(assetPath))
         {
-            IG_LOG(TextureImporter, Warning, "The Asset file {} alread exist.", assetPath.string());
+            IG_LOG(TextureImporterLog, Warning, "The Asset file {} alread exist.", assetPath.string());
         }
 
         const HRESULT res = DirectX::SaveToDDSFile(

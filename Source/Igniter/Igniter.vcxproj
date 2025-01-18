@@ -178,6 +178,7 @@
     <ClCompile Include="Core\ComInitializer.cpp" />
     <ClCompile Include="Core\DebugTools.cpp" />
     <ClCompile Include="Core\Engine.cpp" />
+    <ClCompile Include="Core\HandleStorage.cpp" />
     <ClCompile Include="Core\Log.cpp" />
     <ClCompile Include="Core\Regex.cpp" />
     <ClCompile Include="Core\String.cpp" />

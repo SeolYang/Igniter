@@ -5,6 +5,45 @@
 
 namespace ig
 {
+    class Logger;
+}
+
+/* #sy_note 카테고리의 고유성을 보장하기 위해, 네임스페이스의 밖에 정의되어야 함. */
+#define IG_DECLARE_LOG_CATEGORY(LOG_CATEGORY_NAME)                               \
+    namespace ig::categories                                                     \
+    {                                                                            \
+        struct LOG_CATEGORY_NAME                                                 \
+        {                                                                        \
+            friend class ig::Logger;                                             \
+            LOG_CATEGORY_NAME();                                                 \
+            static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
+                                                                                 \
+          private:                                                               \
+            static LOG_CATEGORY_NAME _reg;                                       \
+            U64 _hash{};                                                         \
+        };                                                                       \
+    }
+
+#define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)                            \
+    namespace ig::categories                                                 \
+    {                                                                        \
+        LOG_CATEGORY_NAME::LOG_CATEGORY_NAME()                               \
+        {                                                                    \
+            ig::Logger::GetInstance().RegisterCategory<LOG_CATEGORY_NAME>(); \
+        }                                                                    \
+        LOG_CATEGORY_NAME LOG_CATEGORY_NAME::_reg;                           \
+    }
+
+#define IG_DECLARE_PRIVATE_LOG_CATEGORY(LOG_CATEGORY_NAME) \
+    IG_DECLARE_LOG_CATEGORY(LOG_CATEGORY_NAME)            \
+    IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)
+
+IG_DECLARE_LOG_CATEGORY(LogTemp);
+IG_DECLARE_LOG_CATEGORY(LogEnsure);
+IG_DECLARE_LOG_CATEGORY(LogError);
+
+namespace ig
+{
     enum class ELogVerbosity
     {
         Trace,
@@ -31,6 +70,12 @@ namespace ig
         {
             if (IsLogSuppressedInCurrentThread())
             {
+                return;
+            }
+
+            if (Category::_reg._hash != TypeHash64<Category>)
+            {
+                IG_CHECK_NO_ENTRY();
                 return;
             }
 
@@ -80,6 +125,7 @@ namespace ig
                 categoryPtr = new spdlog::logger(C::CategoryName.data(), {consoleSink, fileSink});
                 categoryPtr->set_level(spdlog::level::trace);
                 categories.emplace_back(TypeHash64<C>, categoryPtr);
+                C::_reg._hash = TypeHash64<C>;
             }
             else
             {
@@ -119,30 +165,6 @@ namespace ig
     };
 } // namespace ig
 
-/* #sy_note 카테고리의 고유성을 보장하기 위해, 네임스페이스의 밖에 정의되어야 함. */
-#define IG_DECLARE_LOG_CATEGORY(LOG_CATEGORY_NAME)                               \
-    namespace ig::categories                                                     \
-    {                                                                            \
-        struct LOG_CATEGORY_NAME                                                 \
-        {                                                                        \
-            LOG_CATEGORY_NAME();                                                 \
-            static constexpr std::string_view CategoryName = #LOG_CATEGORY_NAME; \
-                                                                                 \
-          private:                                                               \
-            static LOG_CATEGORY_NAME _reg;                                       \
-        };                                                                       \
-    }
-
-#define IG_DEFINE_LOG_CATEGORY(LOG_CATEGORY_NAME)                            \
-    namespace ig::categories                                                 \
-    {                                                                        \
-        LOG_CATEGORY_NAME::LOG_CATEGORY_NAME()                               \
-        {                                                                    \
-            ig::Logger::GetInstance().RegisterCategory<LOG_CATEGORY_NAME>(); \
-        }                                                                    \
-        LOG_CATEGORY_NAME LOG_CATEGORY_NAME::_reg;                           \
-    }
-
 #if defined(DEBUG) || defined(_DEBUG)
 #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...)                                                                \
     ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__); \
@@ -154,7 +176,3 @@ namespace ig
 #define IG_LOG(LOG_CATEGORY, LOG_VERBOSITY, MESSAGE, ...) \
     ig::Logger::GetInstance().Log<ig::categories::LOG_CATEGORY, ig::ELogVerbosity::LOG_VERBOSITY>(MESSAGE, __VA_ARGS__)
 #endif
-
-IG_DECLARE_LOG_CATEGORY(LogTemp);
-
-IG_DECLARE_LOG_CATEGORY(LogEnsure);

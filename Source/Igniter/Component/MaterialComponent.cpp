@@ -59,11 +59,11 @@ namespace ig
         Material* material = Engine::GetAssetManager().Lookup(Instance);
         if (material != nullptr)
         {
-            IG_SERIALIZE_GUID_JSON(archive, material->GetSnapshot().Info.GetGuid(), ContainerKey, MeshGuidKey);
+            archive[ContainerKey][MeshGuidKey] = ToJson(material->GetSnapshot().Info.GetGuid());
         }
         else
         {
-            IG_SERIALIZE_GUID_JSON(archive, Guid{DefaultMaterialGuid}, ContainerKey, MeshGuidKey);
+            archive[ContainerKey][MeshGuidKey] = ToJson(Guid{DefaultMaterialGuid});
         }
         return archive;
     }
@@ -72,8 +72,7 @@ namespace ig
     {
         AssetManager& assetManager = Engine::GetAssetManager();
         Guid materialGuid{};
-        IG_DESERIALIZE_GUID_JSON(archive, materialGuid, ContainerKey, MeshGuidKey, Guid{});
-        if (!materialGuid.isValid())
+        if (FromJson(archive[ContainerKey][MeshGuidKey], materialGuid))
         {
             materialGuid = Guid{DefaultMaterialGuid};
         }

@@ -10,13 +10,13 @@ namespace ig::meta
 namespace ig
 {
     template <typename Archive, typename Ty>
-    concept Serializable = requires(Archive& archive, Ty& data, const Ty& constData) {
+    concept Serializable = requires(Archive& archive, const Archive& constArchive, Ty& data, const Ty& constData) {
         {
             constData.Serialize(archive)
         } -> std::same_as<Archive&>;
 
         {
-            data.Deserialize(archive)
+            data.Deserialize(constArchive)
         } -> std::same_as<const Archive&>;
     };
 

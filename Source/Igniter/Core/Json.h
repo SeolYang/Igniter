@@ -1,45 +1,9 @@
 #pragma once
-// #sy_todo Json Serialization API 완전히 리팩토링 하기
-
-#include "Igniter/Igniter.h"
-#include "Igniter/Core/Log.h"
-
-IG_DECLARE_LOG_CATEGORY(JsonDeserializer);
+#include "Igniter/Core/String.h"
+#include "Igniter/Core/Serialization.h"
 
 namespace ig::details
 {
-    template <typename VarType>
-    void Serialize(Json& archive, const VarType& var, const std::string_view containerKey, const std::string_view varKey)
-    {
-        if (!archive.contains(containerKey))
-        {
-            archive[containerKey] = nlohmann::json{};
-        }
-
-        IG_CHECK(!archive[containerKey].is_discarded());
-        archive[containerKey][varKey] = var;
-    }
-
-    template <typename VarType, typename F>
-    void Deserialize(
-        const Json& archive, VarType& var, const std::string_view containerKey, const std::string_view varKey, F callback, VarType fallback)
-    {
-        IG_CHECK(!archive.is_discarded());
-        if (!archive.contains(containerKey) || !archive[containerKey].contains(varKey))
-        {
-            var = fallback;
-            IG_LOG(JsonDeserializer, Warning, "{}::{} does not exists in Json archive.", containerKey, varKey);
-            return;
-        }
-
-        if (!callback(archive, var))
-        {
-            var = fallback;
-            IG_LOG(JsonDeserializer, Warning, "Type mismatch/Invalid value found in {}::{}.", containerKey, varKey);
-            return;
-        }
-    }
-
     template <typename T>
     concept ConvertibleJsonInternalArray = std::is_same<T, Json::array_t>::value;
 
@@ -61,7 +25,10 @@ namespace ig::details
     concept ConvertibleJsonInternalString = std::is_convertible_v<T, Json::string_t>;
 
     template <typename T>
-    struct JsonInternal;
+    struct JsonInternal
+    {
+        using Type = void;
+    };
 
     template <ConvertibleJsonInternalArray T>
     struct JsonInternal<T>
@@ -103,120 +70,248 @@ namespace ig::details
     using JsonInternal_t = JsonInternal<T>::Type;
 } // namespace ig::details
 
-#define IG_SERIALIZE_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) ig::details::Serialize(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY)
-
-#define IG_SERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) ig::details::Serialize(JSON_ARCHIVE, VAR.str(), CONTAINER_KEY, VALUE_KEY)
-
-#define IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY) \
-    ig::details::Serialize(JSON_ARCHIVE, magic_enum::enum_name<std::decay_t<decltype(VAR)>>(VAR), CONTAINER_KEY, VALUE_KEY)
-
-#define IG_SERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) IG_SERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
-
-#define IG_SERIALIZE_GUID_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) IG_SERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
-
-#define IG_SERIALIZE_ENUM_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) IG_SERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR)
-
-#define IG_SERIALIZE_JSON_OBJECT(DATA_TYPE, JSON_ARCHIVE, VAR) \
-    {                                                          \
-        Json newArchive{};                                     \
-        VAR.Serialize(newArchive);                             \
-        JSON_ARCHIVE[#DATA_TYPE][#VAR] = newArchive;           \
+namespace ig
+{
+    template <typename T>
+        requires Serializable<Json, T>
+    Json ToJson(const T& data)
+    {
+        Json newJson{};
+        data.Serialize(newJson);
+        return newJson;
     }
 
-/*
- * #sy_note Deserialize 하고 싶은 Json Archive 내부에 원하는 값이 없을 수도 있다. 그에 대해선 아래와 같이 대응 하기로 결정.
- * 1. 값 설정 Callback 은 Json 내부에 원하는 값이 있는 경우에만 호출 된다.
- *  1.1. 단 이 경우, '키'는 유효하지만 원하는 타입으로 가져올 수 없는 경우엔 Callback 함수는 false 를 반환해야 한다.
- *  1.2. 만약 값을 가져오는데 완전히 성공하면 true 를 반환해야 한다.
- * 2. 만약 원하는 값이 없는 경우이거나 (1.1)의 경우 대신 지정한 Fall-back 값이 설정 되도록 해야 한다.
- *
- * 이렇게, Deserialize 과정에서 실제 값이 Json 에 없는 경우에 대한 오류 처리를 유연하게 할 수 있다.
- */
+    /*
+     * Serializable 타입에 대한 FromJson 여부는 다소 모호 할 수 있음.
+     * 완전 성공을 성공으로 보느냐, 부분 성공도 성공으로 보느냐를 정확히 하기 어려움.
+     * 그러므로, 전달된 json 객체가 object 타입 또는 null이 아닌 경우 실패 하였다고 보고.
+     * 실제로 json 객체를 통해 값을 완벽하게 Deserialize 하지 못하였다 하더라도,
+     * 데이터 타입의 deserialize가 적절한 fallback 처리를 해주었다고 가정 하고,
+     * 내부의 값 자체는 정상적으로 처리 되었기 때문에 성공으로 가정.
+     * 예시. 빈 json object를 Deserialize 하였을 때, Data 내부를 fallback value로 채워 넣는 것은 정상적인 작동 방식이다.
+     */
+    template <typename T>
+        requires Serializable<Json, T>
+    bool FromJson(const Json& json, T& data)
+    {
+        if (!json.is_object() && !json.is_null())
+        {
+            return false;
+        }
 
-#define IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                                  \
-    ig::details::Deserialize<std::decay_t<decltype(VAR)>>(                                                          \
-        JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
-        [](const ig::Json& archive, std::decay_t<decltype(VAR)>& var)                                               \
-        {                                                                                                           \
-            IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
-            using JsoInternal = ig::details::JsonInternal_t<std::decay_t<decltype(var)>>;                           \
-            const JsoInternal* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const JsoInternal*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                         \
-            if (bTypeMismatch)                                                                                      \
-            {                                                                                                       \
-                return false;                                                                                       \
-            }                                                                                                       \
-            var = static_cast<std::decay_t<decltype(VAR)>>(*valuePtr);                                              \
-            return true;                                                                                            \
-        },                                                                                                          \
-        FALLBACK)
+        data.Deserialize(json);
+        return true;
+    }
 
-#define IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
-    ig::details::Deserialize<ig::Guid>(                                                                             \
-        JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
-        [](const ig::Json& archive, ig::Guid& var)                                                                  \
-        {                                                                                                           \
-            IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
-            const std::string* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const std::string*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                         \
-            if (bTypeMismatch)                                                                                      \
-            {                                                                                                       \
-                return false;                                                                                       \
-            }                                                                                                       \
-            var = xg::Guid(valuePtr->c_str());                                                                      \
-            return true;                                                                                            \
-        },                                                                                                          \
-        FALLBACK)
+    template <typename T>
+        requires(!std::is_void_v<details::JsonInternal_t<T>>)
+    Json ToJson(const T& data)
+    {
+        return data;
+    }
 
-#define IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY, FALLBACK)                             \
-    ig::details::Deserialize<std::decay_t<decltype(VAR)>>(                                                          \
-        JSON_ARCHIVE, VAR, CONTAINER_KEY, VALUE_KEY,                                                                \
-        [](const ig::Json& archive, std::decay_t<decltype(VAR)>& var)                                               \
-        {                                                                                                           \
-            IG_CHECK(archive.contains(CONTAINER_KEY) && archive[CONTAINER_KEY].contains(VALUE_KEY));                \
-            const std::string* valuePtr = archive[CONTAINER_KEY][VALUE_KEY].template get_ptr<const std::string*>(); \
-            const bool bTypeMismatch = valuePtr == nullptr;                                                         \
-            if (bTypeMismatch)                                                                                      \
-            {                                                                                                       \
-                return false;                                                                                       \
-            }                                                                                                       \
-            auto valueOpt = magic_enum::enum_cast<std::decay_t<decltype(VAR)>>(*valuePtr);                          \
-            if (!valueOpt)                                                                                          \
-            {                                                                                                       \
-                return false;                                                                                       \
-            }                                                                                                       \
-            var = *valueOpt;                                                                                        \
-            return true;                                                                                            \
-        },                                                                                                          \
-        FALLBACK)
+    template <typename T>
+        requires(!std::is_void_v<details::JsonInternal_t<T>>)
+    bool FromJson(const Json& json, T& data)
+    {
+        nlohmann::from_json(json, data);
+        const typename details::JsonInternal_t<T>* serializedPtr =
+            json.template get_ptr<const typename details::JsonInternal_t<T>*>();
+        if (serializedPtr == nullptr)
+        {
+            return false;
+        }
 
-#define IG_DESERIALIZE_JSON_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
-    IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, VAR)
+        data = static_cast<T>(*serializedPtr);
+        return true;
+    }
 
-#define IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
-    IG_DESERIALIZE_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
+    template <>
+    inline Json ToJson(const Guid& guid)
+    {
+        Json newJson;
+        nlohmann::to_json(newJson, guid.str());
+        return newJson;
+    }
 
-#define IG_DESERIALIZE_JSON_GUID_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
-    IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, VAR)
+    template <>
+    inline bool FromJson(const Json& json, Guid& guid)
+    {
+        const std::string* serializedPtr = json.template get_ptr<const std::string*>();
+        if (serializedPtr == nullptr)
+        {
+            return false;
+        }
 
-#define IG_DESERIALIZE_JSON_GUID_SIMPLE_FALLBACK(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
-    IG_DESERIALIZE_GUID_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
+        guid = Guid{*serializedPtr};
+        return true;
+    }
 
-#define IG_DESERIALIZE_JSON_ENUM_SIMPLE(DATA_TYPE, JSON_ARCHIVE, VAR) \
-    IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, VAR)
+    template <>
+    inline Json ToJson(const String& str)
+    {
+        return ToJson(str.ToStandard());
+    }
 
-#define IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(DATA_TYPE, JSON_ARCHIVE, VAR, FALLBACK) \
-    IG_DESERIALIZE_ENUM_JSON(JSON_ARCHIVE, VAR, #DATA_TYPE, #VAR, FALLBACK)
+    template <>
+    inline bool FromJson(const Json& json, String& str)
+    {
+        const std::string* serializedPtr = json.template get_ptr<const std::string*>();
+        if (serializedPtr == nullptr)
+        {
+            return false;
+        }
 
-#define IG_DESERIALIZE_JSON_OBJECT(DATA_TYPE, JSON_ARCHIVE, VAR)                                             \
-    {                                                                                                        \
-        if (!JSON_ARCHIVE[#DATA_TYPE].contains(#VAR))                                                        \
-        {                                                                                                    \
-            IG_LOG(JsonDeserializer, Warning, "{}::{} does not found in json container.", #DATA_TYPE, #VAR); \
-        }                                                                                                    \
-        else                                                                                                 \
-        {                                                                                                    \
-            const Json objectArchive{JSON_ARCHIVE[#DATA_TYPE][#VAR]};                                        \
-            VAR.Deserialize(objectArchive);                                                                  \
-        }                                                                                                    \
+        str = String(*serializedPtr);
+        return true;
+    }
+
+    template <typename E>
+        requires std::is_enum_v<E>
+    Json ToJson(const E& enumerator)
+    {
+        Json newJson{};
+        nlohmann::to_json(newJson, magic_enum::enum_name<E>(enumerator));
+        return newJson;
+    }
+
+    template <typename E>
+        requires std::is_enum_v<E>
+    bool FromJson(const Json& json, E& enumerator)
+    {
+        enumerator = magic_enum::enum_value<E>(0);
+
+        const std::string* serializedPtr = json.template get_ptr<const std::string*>();
+        if (serializedPtr == nullptr)
+        {
+            return false;
+        }
+
+        std::optional<E> enumOpt = magic_enum::enum_cast<E>(*serializedPtr);
+        if (!enumOpt)
+        {
+            return false;
+        }
+
+        enumerator = *enumOpt;
+        return true;
+    }
+
+    template <typename T, Size N>
+    Json ToJson(const Array<T, N>& array)
+    {
+        Json newJson{};
+
+        if constexpr (!std::is_void_v<details::JsonInternal_t<T>>)
+        {
+            nlohmann::to_json(newJson, std::vector<T>{array.cbegin(), array.cend()});
+        }
+        else
+        {
+            std::vector<Json> newJsonVector;
+            newJsonVector.resize(N);
+            for (Index idx = 0; idx < N; ++idx)
+            {
+                newJsonVector[idx] = ToJson(array[idx]);
+            }
+            nlohmann::to_json(newJson, newJsonVector);
+        }
+
+        return newJson;
+    }
+
+    template <typename T, Size N>
+    bool FromJson(const Json& json, Array<T, N>& array)
+    {
+        const std::vector<Json>* serializedPtr = json.template get_ptr<const std::vector<Json>*>();
+        if (serializedPtr == nullptr)
+        {
+            return false;
+        }
+
+        const ig::Size minSize = std::min(N, serializedPtr->size());
+        for (ig::Index idx = 0; idx < minSize; ++idx)
+        {
+            if (!FromJson(serializedPtr->at(idx), array[idx]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template <typename T>
+    Json ToJson(const Vector<T>& vector)
+    {
+        Json newJson{};
+
+        if constexpr (!std::is_void_v<details::JsonInternal_t<T>>)
+        {
+            nlohmann::to_json(newJson, vector);
+        }
+        else
+        {
+            const Size numData = vector.size();
+            std::vector<Json> newJsonVector;
+            newJsonVector.resize(numData);
+            for (Index idx = 0; idx < numData; ++idx)
+            {
+                newJsonVector[idx] = ToJson(vector[idx]);
+            }
+            nlohmann::to_json(newJson, newJsonVector);
+        }
+
+        return newJson;
+    }
+
+    template <typename T>
+    bool FromJson(const Json& json, Vector<T>& vector)
+    {
+        const std::vector<Json>* serializedPtr = json.template get_ptr<const std::vector<Json>*>();
+        if (serializedPtr == nullptr)
+        {
+            return false;
+        }
+
+        const Size numSerializedData = serializedPtr->size();
+        vector.resize(numSerializedData);
+        for (ig::Index idx = 0; idx < numSerializedData; ++idx)
+        {
+            if (!FromJson(serializedPtr->at(idx), vector[idx]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+} // namespace ig
+
+#define IG_SERIALIZE_TO_JSON(CLASS, ARCHIVE, VARIABLE) ARCHIVE[#CLASS][#VARIABLE] = ig::ToJson(VARIABLE)
+
+/* FromJson 실패 시 Variable Type의 Default Constructor를 Fallback 값으로 사용 */
+#define IG_DESERIALIZE_FROM_JSON(CLASS, ARCHIVE, VARIABLE)    \
+    if (!ARCHIVE.contains(#CLASS) ||                          \
+        !ARCHIVE[#CLASS].contains(#VARIABLE) ||               \
+        !ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], VARIABLE))  \
+    {                                                         \
+        VARIABLE = std::remove_cvref_t<decltype(VARIABLE)>{}; \
+    }
+
+/* FromJson 실패 시 지정된 Fallback 값을 사용. */
+#define IG_DESERIALIZE_FROM_JSON_FALLBACK(CLASS, ARCHIVE, VARIABLE, FALLBACK) \
+    if (!ARCHIVE.contains(#CLASS) ||                                          \
+        !ARCHIVE[#CLASS].contains(#VARIABLE) ||                               \
+        !ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], VARIABLE))                  \
+    {                                                                         \
+        VARIABLE = FALLBACK;                                                  \
+    }
+
+/* FromJson 실패 시 기존 값 유지. 단 Vector와 Array는 최초 실패 지점 전 까지의 원소가 반영 됨. */
+#define IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(CLASS, ARCHIVE, VARIABLE) \
+    if (ARCHIVE.contains(#CLASS) &&                                    \
+        ARCHIVE[#CLASS].contains(#VARIABLE))                           \
+    {                                                                  \
+        ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], VARIABLE);            \
     }

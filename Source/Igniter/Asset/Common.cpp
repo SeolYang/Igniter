@@ -8,13 +8,13 @@ namespace ig
 {
     Json& ResourceInfo::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_ENUM_JSON_SIMPLE(ResourceInfo, archive, Category);
+        IG_SERIALIZE_TO_JSON(ResourceInfo, archive, Category);
         return archive;
     }
 
     const Json& ResourceInfo::Deserialize(const Json& archive)
     {
-        IG_DESERIALIZE_JSON_ENUM_SIMPLE_FALLBACK(ResourceInfo, archive, Category, EAssetCategory::Unknown);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(ResourceInfo, archive, Category, EAssetCategory::Unknown);
         return archive;
     }
 
@@ -45,22 +45,22 @@ namespace ig
 
     Json& AssetInfo::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime);
-        IG_SERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid);
-        IG_SERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath);
-        IG_SERIALIZE_ENUM_JSON(archive, category, key::AssetInfo, key::Category);
-        IG_SERIALIZE_ENUM_JSON(archive, scope, key::AssetInfo, key::Scope);
+        IG_SERIALIZE_TO_JSON(AssetInfo, archive, creationTime);
+        IG_SERIALIZE_TO_JSON(AssetInfo, archive, guid);
+        IG_SERIALIZE_TO_JSON(AssetInfo, archive, virtualPath);
+        IG_SERIALIZE_TO_JSON(AssetInfo, archive, category);
+        IG_SERIALIZE_TO_JSON(AssetInfo, archive, scope);
         return archive;
     }
 
     const Json& AssetInfo::Deserialize(const Json& archive)
     {
         *this = {};
-        IG_DESERIALIZE_JSON(archive, creationTime, key::AssetInfo, key::CreationTime, 0);
-        IG_DESERIALIZE_GUID_JSON(archive, guid, key::AssetInfo, key::Guid, xg::Guid{});
-        IG_DESERIALIZE_JSON(archive, virtualPath, key::AssetInfo, key::VirtualPath, String{});
-        IG_DESERIALIZE_ENUM_JSON(archive, category, key::AssetInfo, key::Category, EAssetCategory::Unknown);
-        IG_DESERIALIZE_ENUM_JSON(archive, scope, key::AssetInfo, key::Scope, EAssetScope::Managed);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(AssetInfo, archive, creationTime);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(AssetInfo, archive, guid);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(AssetInfo, archive, virtualPath);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(AssetInfo, archive, category);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(AssetInfo, archive, scope);
         ConstructVirtualPathHierarchy();
         return archive;
     }

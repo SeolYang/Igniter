@@ -10,43 +10,43 @@ namespace ig
 {
     Json& StaticMeshImportDesc::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bMakeLeftHanded);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateNormals);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bSplitLargeMeshes);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bPreTransformVertices);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImproveCacheLocality);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateUVCoords);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipUVs);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipWindingOrder);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateBoundingBoxes);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImportMaterials);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bMakeLeftHanded);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bGenerateNormals);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bSplitLargeMeshes);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bPreTransformVertices);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bImproveCacheLocality);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bGenerateUVCoords);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bFlipUVs);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bFlipWindingOrder);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bGenerateBoundingBoxes);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bImportMaterials);
         return archive;
     }
 
     const Json& StaticMeshImportDesc::Deserialize(const Json& archive)
     {
         *this = {};
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bMakeLeftHanded);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipUVs);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bFlipWindingOrder);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateNormals);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bSplitLargeMeshes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bPreTransformVertices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImproveCacheLocality);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateUVCoords);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bGenerateBoundingBoxes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshImportDesc, archive, bImportMaterials);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bMakeLeftHanded);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bFlipUVs);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bFlipWindingOrder);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bGenerateNormals);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bSplitLargeMeshes);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bPreTransformVertices);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bImproveCacheLocality);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bGenerateUVCoords);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bGenerateBoundingBoxes);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bImportMaterials);
         return archive;
     }
 
     Json& StaticMeshLoadDesc::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
-        IG_SERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumVertices);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumIndices);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
 
-        IG_SERIALIZE_JSON_OBJECT(StaticMeshLoadDesc, archive, AABB);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, AABB);
 
         return archive;
     }
@@ -54,13 +54,12 @@ namespace ig
     const Json& StaticMeshLoadDesc::Deserialize(const Json& archive)
     {
         *this = {};
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumVertices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, NumIndices);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
-        IG_DESERIALIZE_JSON_SIMPLE(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumVertices);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumIndices);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
 
-        IG_DESERIALIZE_JSON_OBJECT(StaticMeshLoadDesc, archive, AABB);
-
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, AABB);
         return archive;
     }
 

@@ -504,6 +504,11 @@ namespace ig
             [this, localFrameIdx]()
             {
                 const Size numInstancing = instancingPackage.GlobalInstancingMap.size();
+                if (numInstancing == 0)
+                {
+                    return;
+                }
+
                 instancingPackage.InstancingDataSpace =
                     instancingPackage.InstancingDataStorage[localFrameIdx]->Allocate(numInstancing);
                 instancingPackage.TransformIdxSpace =
@@ -597,7 +602,7 @@ namespace ig
             IG_CHECK(extractedElement->second.StorageSpace.IsValid());
             storage.Deallocate(extractedElement->second.StorageSpace);
         }
-        materialProxyPackage.PendingDestructions.clear();
+        meshProxyPackage.PendingDestructions.clear();
     }
 
     void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx)

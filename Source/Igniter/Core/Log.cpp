@@ -1,6 +1,10 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Log.h"
 
+IG_DEFINE_LOG_CATEGORY(LogTemp);
+IG_DEFINE_LOG_CATEGORY(LogEnsure);
+IG_DEFINE_LOG_CATEGORY(LogError);
+
 namespace ig
 {
     Logger::Logger()

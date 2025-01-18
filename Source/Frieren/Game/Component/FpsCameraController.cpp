@@ -14,21 +14,21 @@ namespace fe
 
     ig::Json& FpsCameraController::Serialize(ig::Json& archive) const
     {
-        IG_SERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPower);
-        IG_SERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MovementPowerAttenuationTime);
-        IG_SERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MouseYawSentisitivity);
-        IG_SERIALIZE_JSON_SIMPLE(FpsCameraController, archive, MousePitchSentisitivity);
-        IG_SERIALIZE_JSON_SIMPLE(FpsCameraController, archive, SprintFactor);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MovementPower);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MovementPowerAttenuationTime);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MouseYawSentisitivity);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MousePitchSentisitivity);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, SprintFactor);
         return archive;
     }
 
     const ig::Json& FpsCameraController::Deserialize(const ig::Json& archive)
     {
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(FpsCameraController, archive, MovementPower, 25.f);
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(FpsCameraController, archive, MovementPowerAttenuationTime, 0.65f);
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(FpsCameraController, archive, MouseYawSentisitivity, 0.03f);
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(FpsCameraController, archive, MousePitchSentisitivity, 0.03f);
-        IG_DESERIALIZE_JSON_SIMPLE_FALLBACK(FpsCameraController, archive, SprintFactor, 4.f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MovementPower, 25.f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MovementPowerAttenuationTime, 0.65f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MouseYawSentisitivity, 0.03f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MousePitchSentisitivity, 0.03f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, SprintFactor, 4.f);
         return archive;
     }
 
