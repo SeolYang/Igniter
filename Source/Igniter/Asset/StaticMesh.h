@@ -8,8 +8,12 @@
 
 namespace ig
 {
+    class StaticMesh;
     struct StaticMeshImportDesc
     {
+      public:
+        constexpr static U8 kMaxNumLods = 8;
+
       public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
@@ -21,11 +25,23 @@ namespace ig
         bool bGenerateNormals = false;
         bool bSplitLargeMeshes = false;
         bool bPreTransformVertices = false;
-        bool bImproveCacheLocality = false;
         bool bGenerateUVCoords = false;
         bool bGenerateBoundingBoxes = false;
-
+        bool bImproveCacheLocality = false;
         bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
+
+        bool bGenerateLODs = true;
+        // 1 <= NumLods <= kMaxNumLods, bGenerateLods && 2 <= NumLods => Generate New Lods
+        U8 NumLods = 1;
+        // LOD (NumLods-1) 에서 보존될 인덱스 수에 대한 계수
+        // 값에 따라 최소 (1.0-MaxSimplificationFactor) * (NumIndices[LOD0])까지 타겟 인덱스 수를 설정 한다.
+        F32 MaxSimplificationFactor = 0.5f;
+
+        bool bOptimizeVertexCache = true;
+        bool bOptimizeOverdraw = true;
+        /* Overdraw Optimization으로 인해 생길 수 있는 정점 캐시 효율 하락을 얼마만큼 허용 할 지(1.05 == 5%) */
+        F32 OverdrawOptimizerThreshold = 1.05f;
+        bool bOptimizeVertexFetch = true;
     };
 
     struct StaticMeshLoadDesc
@@ -36,10 +52,12 @@ namespace ig
 
       public:
         U32 NumVertices{0};
-        U32 NumIndices{0};
         Size CompressedVerticesSizeInBytes{0};
-        Size CompressedIndicesSizeInBytes{0};
-        AxisAlignedBoundingBox AABB{};
+
+        U8 NumLods{1};
+        Array<U32, StaticMeshImportDesc::kMaxNumLods> NumIndicesPerLod;
+        Array<Size, StaticMeshImportDesc::kMaxNumLods> CompressedIndicesSizePerLod;
+        AABB AABB{};
     };
 
     class GpuBuffer;
@@ -50,16 +68,23 @@ namespace ig
     class StaticMesh final
     {
       public:
+        constexpr static U8 kMaxNumLods = StaticMeshImportDesc::kMaxNumLods;
+
+      public:
         using ImportDesc = StaticMeshImportDesc;
         using LoadDesc = StaticMeshLoadDesc;
         using Desc = AssetDesc<StaticMesh>;
 
       public:
-        StaticMesh(RenderContext& renderContext, AssetManager& assetManager,
-                   const Desc& snapshot,
-                   const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace);
+        StaticMesh(
+            RenderContext& renderContext, AssetManager& assetManager,
+            const Desc& snapshot,
+            const MeshStorage::Handle<VertexSM> vertexSpace,
+            const U8 numLods,
+            const Array<MeshStorage::Handle<U32>, kMaxNumLods> vertexIndexSpacePerLod);
+
         StaticMesh(const StaticMesh&) = delete;
-        StaticMesh(StaticMesh&&) noexcept = default;
+        StaticMesh(StaticMesh&& other) noexcept;
         ~StaticMesh();
 
         StaticMesh& operator=(const StaticMesh&) = delete;
@@ -67,7 +92,16 @@ namespace ig
 
         [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
         [[nodiscard]] MeshStorage::Handle<VertexSM> GetVertexSpace() const noexcept { return vertexSpace; }
-        [[nodiscard]] MeshStorage::Handle<U32> GetVertexIndexSpace() const noexcept { return vertexIndexSpace; }
+        [[nodiscard]] U8 GetNumLods() const noexcept { return numLods; }
+        [[nodiscard]] MeshStorage::Handle<U32> GetIndexSpace(const U8 lod) const noexcept
+        {
+            if (lod >= numLods)
+            {
+                return {};
+            }
+
+            return vertexIndexSpacePerLod[lod];
+        }
 
       private:
         void Destroy();
@@ -76,7 +110,10 @@ namespace ig
         RenderContext* renderContext{nullptr};
         AssetManager* assetManager{nullptr};
         Desc snapshot{}; // desc snapshot
+
         MeshStorage::Handle<VertexSM> vertexSpace{};
-        MeshStorage::Handle<U32> vertexIndexSpace{};
+
+        U8 numLods = 1; // least 1
+        Array<MeshStorage::Handle<U32>, kMaxNumLods> vertexIndexSpacePerLod;
     };
 } // namespace ig

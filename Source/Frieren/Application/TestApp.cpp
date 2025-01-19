@@ -161,12 +161,11 @@ namespace fe
         // Igniter::GetAssetManager().Import("TestMap"_fs, {.WorldToSerialize = world.get()});
         // world = MakePtr<World>();
         // world->Deserialize(dumpedWorld);
-
-        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         ig::World& worldInstance = ig::Engine::GetWorld();
         ig::Registry& registry = worldInstance.GetRegistry();
         FpsCmaeraArchetype::Create(registry, true);
 
+        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);
         IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
         ig::ManagedAsset<ig::Material> axeMaterial = assetManager.Load<ig::Material>("Axe"_fs);
@@ -187,20 +186,19 @@ namespace fe
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
                     nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
 
-                    //RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
-                    //randComp.MoveDirection = ig::Vector3{
-                    //    ig::Random(-1.f, 1.f),
-                    //    ig::Random(-1.f, 1.f),
-                    //    ig::Random(-1.f, 1.f)};
-                    //randComp.MoveDirection.Normalize();
-                    //randComp.MoveSpeed = ig::Random(0.f, 5.f);
+                    RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
+                    randComp.MoveDirection = ig::Vector3{
+                        ig::Random(-1.f, 1.f),
+                        ig::Random(-1.f, 1.f),
+                        ig::Random(-1.f, 1.f)};
+                    randComp.MoveDirection.Normalize();
+                    randComp.MoveSpeed = ig::Random(0.f, 5.f);
 
-                    //randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
-                    //randComp.RotateSpeed = ig::Random(0.f, 15.f);
+                    randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
+                    randComp.RotateSpeed = ig::Random(0.f, 15.f);
                 }
             }
         }
-        // worldInstance = ig::World{assetManager, assetManager.Load<ig::Map>(ig::Guid{"92d1aad6-7d75-41a4-be10-c9f8bfdb787e"})};
     }
 
     TestApp::~TestApp()

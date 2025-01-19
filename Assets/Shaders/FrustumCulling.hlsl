@@ -1,38 +1,4 @@
-struct ComputeCullingConstants
-{
-	uint PerFrameDataCbv;
-};
-
-struct PerFrameData
-{
-	float4x4 View;
-	float4x4 ViewProj;
-    
-	float4 CamPosInvAspectRatio;
-	float4 ViewFrustumParams;
-
-	uint StaticMeshVertexStorageSrv;
-	uint VertexIndexStorageSrv;
-
-	uint TransformStorageSrv;
-	uint MaterialStorageSrv;
-	uint MeshStorageSrv;
-
-	uint InstancingDataStorageSrv;
-	uint InstancingDataStorageUav;
-
-	uint TransformIdxStorageSrv;
-	uint TransformIdxStorageUav;
-
-	uint RenderableStorageSrv;
-
-	uint RenderableIndicesBufferSrv;
-	uint NumMaxRenderables;
-
-	uint PerFrameDataCbv;
-
-	uint3 Padding;
-};
+#include "Common.hlsl"
 
 float ExtractMaxAbsScale(float4x4 toWorld)
 {
@@ -71,78 +37,74 @@ bool IsVisible(float invAspectRatio, float4 viewFrusumParams, float3 bsCentroid,
 		topPlaneSignedDist > -bsViewRadius;
 }
 
-struct MeshData
+struct FrustumCullingConstants
 {
-	uint VertexOffset;
-	uint NumVertices;
-	uint IndexOffset;
-	uint NumIndices;
-
-	float3 BsCentroid;
-	float BsRadius;
+	uint PerFrameDataCbv;
+	uint MeshLodInstanceStorageUav;
+	uint CullingDataBufferUav;
 };
-
-struct InstancingData
-{
-	uint MaterialDataIdx;
-	uint MeshDataIdx;
-	uint InstanceId;
-	uint TransformOffset;
-	uint MaxNumInstances;
-	uint NumInstances;
-};
-
-struct RenderableData
-{
-	uint Type;
-	uint DataIdx;
-	uint TransformIdx;
-};
-
-struct TransformData
-{
-	float4 Cols[3];
-};
-
-#define RENDERABLE_TYPE_STATIC_MESH 0
-
-ConstantBuffer<ComputeCullingConstants> gComputeCullingConstantsBuffer : register(b0);
+ConstantBuffer<FrustumCullingConstants> gConstants : register(b0);
 
 [numthreads(16, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
-	ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[gComputeCullingConstantsBuffer.PerFrameDataCbv];
-
+	ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[gConstants.PerFrameDataCbv];
 	if (DTid.x >= perFrameData.NumMaxRenderables)
 	{
 		return;
 	}
-
+	
 	StructuredBuffer<uint> renderableIndices = ResourceDescriptorHeap[perFrameData.RenderableIndicesBufferSrv];
 	uint renderableIdx = renderableIndices[DTid.x];
 	StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
 	RenderableData renderableData = renderableStorage[renderableIdx];
-    
 	if (renderableData.Type == RENDERABLE_TYPE_STATIC_MESH)
 	{
 		RWStructuredBuffer<InstancingData> instancingDataStorage =
             ResourceDescriptorHeap[perFrameData.InstancingDataStorageUav];
-		StructuredBuffer<MeshData> meshDataStorage =
+		StructuredBuffer<Mesh> meshStorage =
             ResourceDescriptorHeap[perFrameData.MeshStorageSrv];
 		StructuredBuffer<TransformData> transformStorage =
 			ResourceDescriptorHeap[perFrameData.TransformStorageSrv];
-
+		
 		TransformData transformData = transformStorage[renderableData.TransformIdx];
-		float4x4 toWorld = transpose(float4x4(transformData.Cols[0], transformData.Cols[1], transformData.Cols[2], float4(0.f, 0.f, 0.f, 1.f)));
+		float4x4 toWorld = transpose(float4x4(
+			transformData.Cols[0],
+			transformData.Cols[1],
+			transformData.Cols[2],
+			float4(0.f, 0.f, 0.f, 1.f)));
+		
 		InstancingData instancingData = instancingDataStorage.Load(renderableData.DataIdx);
-		MeshData mesh = meshDataStorage[instancingData.MeshDataIdx];
-		if (perFrameData.Padding.x == 0 || IsVisible(perFrameData.CamPosInvAspectRatio.w, perFrameData.ViewFrustumParams, mesh.BsCentroid, mesh.BsRadius, toWorld, perFrameData.View))
+		Mesh mesh = meshStorage[instancingData.MeshIdx];
+		
+		if (!perFrameData.EnableFrustumCulling ||
+			IsVisible(
+				perFrameData.CamPosInvAspectRatio.w,
+				perFrameData.ViewFrustumParams,
+				mesh.BsCentroid,
+				mesh.BsRadius,
+				toWorld, perFrameData.ToView))
 		{
-			RWStructuredBuffer<uint> transformIdxStorage = ResourceDescriptorHeap[perFrameData.TransformIdxStorageUav];
-			uint transformIdx = 0;
-			uint originTransformIdx = 0;
-			InterlockedAdd(instancingDataStorage[renderableData.DataIdx].NumInstances, 1, transformIdx);
-			InterlockedExchange(transformIdxStorage[instancingData.TransformOffset + transformIdx], renderableData.TransformIdx, originTransformIdx);
+			float camNearToFarDist = perFrameData.ViewFrustumParams.w - perFrameData.ViewFrustumParams.z;
+			float3 meshInstancePos = float3(transformData.Cols[0].w, transformData.Cols[1].w, transformData.Cols[2].w);
+			float meshInstanceToCamDist = length(meshInstancePos - perFrameData.CamPosInvAspectRatio.xyz);
+			
+			// 현재는 거리 기반 LOD 계산 -> 추후 Screen Space 기반 화면에서 어느정도 영역을 커버하는지 측정해서, 해당 값을 기반으로 정하는
+			// 알고리즘으로 개선해보기! (만약 엄청나게 큰 메쉬일 경우를 고려해서)
+			// 가능하면 Static Mesh Component에 해당 파라미터 추가하기
+			MeshLodInstance newVisibleLodInstance;
+			newVisibleLodInstance.RenderableIdx = renderableIdx;
+			newVisibleLodInstance.Lod = uint(lerp(float(min(perFrameData.MinMeshLod, mesh.NumLods)), float(mesh.NumLods), saturate(meshInstanceToCamDist / camNearToFarDist)));
+			InterlockedAdd(
+				instancingDataStorage[renderableData.DataIdx].NumVisibleLodInstances[newVisibleLodInstance.Lod],
+				1, 
+				newVisibleLodInstance.LodInstanceId);
+			
+			AppendStructuredBuffer<MeshLodInstance> meshLodInstances = ResourceDescriptorHeap[gConstants.MeshLodInstanceStorageUav];
+			meshLodInstances.Append(newVisibleLodInstance);
+			
+			RWStructuredBuffer<CullingData> cullingDataBuffer = ResourceDescriptorHeap[gConstants.CullingDataBufferUav];
+			InterlockedAdd(cullingDataBuffer[0].NumVisibleLodInstances, 1);
 		}
 	}
 }

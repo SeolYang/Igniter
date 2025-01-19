@@ -27,19 +27,26 @@ IG_DEFINE_LOG_CATEGORY(RendererLog);
 
 namespace ig
 {
-    struct DrawOpaqueStaticMeshCommand
+    struct DrawInstance
     {
-        U32 PerFrameDataCbv = IG_NUMERIC_MAX_OF(PerFrameDataCbv);
-        U32 InstancingId = IG_NUMERIC_MAX_OF(InstancingId);
-        U32 MaterialIdx = IG_NUMERIC_MAX_OF(MaterialIdx);
-        U32 VertexOffset = IG_NUMERIC_MAX_OF(VertexOffset);
-        U32 VertexIdxStorageOffset = IG_NUMERIC_MAX_OF(VertexIdxStorageOffset);
-        U32 TransformIdxStorageOffset = IG_NUMERIC_MAX_OF(TransformIdxStorageOffset);
+        U32 PerFrameCbv;
+        U32 MaterialIdx;
+        U32 VertexOffset;
+        U32 VertexIdxOffset;
+        U32 IndirectTransformOffset;
+
         D3D12_DRAW_ARGUMENTS DrawIndexedArguments;
     };
 
+    struct StaticMeshLodInstance
+    {
+        U32 RenderableIdx = IG_NUMERIC_MAX_OF(RenderableIdx);
+        U32 Lod = 0;
+        U32 LodInstanceId = 0;
+    };
+
     // 나중에 여러 카메라에 대해 렌더링하게 되면 Per Frame은 아닐수도?
-    struct PerFrameBuffer
+    struct PerFrameConstants
     {
         Matrix View{};
         Matrix ViewProj{};
@@ -59,6 +66,8 @@ namespace ig
         // Near = (0, 0, 1, -N)
         // Far = (0, 0, -1, F)
         Vector4 ViewFrustumParams{};
+        U32 EnableFrustumCulling = true;
+        U32 MinMeshLod = 0;
 
         U32 StaticMeshVertexStorageSrv = IG_NUMERIC_MAX_OF(StaticMeshVertexStorageSrv);
         U32 VertexIndexStorageSrv = IG_NUMERIC_MAX_OF(VertexIndexStorageSrv);
@@ -70,29 +79,40 @@ namespace ig
         U32 InstancingDataStorageSrv = IG_NUMERIC_MAX_OF(InstancingDataStorageSrv);
         U32 InstancingDataStorageUav = IG_NUMERIC_MAX_OF(InstancingDataStorageUav);
 
-        U32 TransformIdxStorageSrv = IG_NUMERIC_MAX_OF(TransformIdxStorageSrv);
-        U32 TransformIdxStorageUav = IG_NUMERIC_MAX_OF(TransformIdxStorageUav);
+        U32 IndirectTransformStorageSrv = IG_NUMERIC_MAX_OF(IndirectTransformStorageSrv);
+        U32 IndirectTransformStorageUav = IG_NUMERIC_MAX_OF(IndirectTransformStorageUav);
 
         U32 RenderableStorageSrv = IG_NUMERIC_MAX_OF(RenderableStorageSrv);
 
         U32 RenderableIndicesBufferSrv = IG_NUMERIC_MAX_OF(RenderableIndicesBufferSrv);
         U32 NumMaxRenderables = IG_NUMERIC_MAX_OF(NumMaxRenderables);
 
-        U32 PerFrameDataCbv = IG_NUMERIC_MAX_OF(PerFrameDataCbv);
         // TODO Light Sttorage/Indices/NumMaxLights
-
-        U32 Padding[3];
     };
 
-    struct ComputeCullingConstants
+    struct FrustumCullingConstants
     {
-        U32 PerFrameDataCbv;
+        U32 PerFrameCbv;
+        U32 MeshLodInstanceStorageUav;
+        U32 CullingDataBufferUav;
     };
 
-    struct GenDrawCmdConstants
+    struct CompactMeshLodInstancesConstants
     {
-        U32 PerFrameDataCbv;
-        U32 DrawOpaqueStaticMeshCmdBufferUav;
+        U32 PerFrameCbv;
+        U32 MeshLodInstanceStorageUav;
+        U32 CullingDataBufferSrv;
+    };
+
+    struct GenerateDrawInstanceConstants
+    {
+        U32 PerFrameCbv;
+        U32 DrawInstanceBufferUav;
+    };
+
+    struct CullingData
+    {
+        U32 NumVisibleLodInstances;
     };
 
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy)
@@ -159,38 +179,72 @@ namespace ig
         ZeroMemory(mappedUavCounterResetBuffer, sizeof(GpuBufferDesc::kUavCounterSize));
         uavCounterResetBuffer->Unmap();
 
-        const ShaderCompileDesc computeCullingShaderDesc{.SourcePath = "Assets/Shaders/ComputeCulling.hlsl"_fs, .Type = EShaderType::Compute};
-        computeCullingShader = MakePtr<ShaderBlob>(computeCullingShaderDesc);
+        const ShaderCompileDesc frustumCullingShaderDesc{.SourcePath = "Assets/Shaders/FrustumCulling.hlsl"_fs, .Type = EShaderType::Compute};
+        frustumCullingShader = MakePtr<ShaderBlob>(frustumCullingShaderDesc);
+        ComputePipelineStateDesc frustumCullingPsoDesc{};
+        frustumCullingPsoDesc.Name = "FrustumCullingPSO"_fs;
+        frustumCullingPsoDesc.SetComputeShader(*frustumCullingShader);
+        frustumCullingPsoDesc.SetRootSignature(*bindlessRootSignature);
+        frustumCullingPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(frustumCullingPsoDesc).value());
+        IG_CHECK(frustumCullingPso->IsCompute());
 
-        ComputePipelineStateDesc computeCullingPsoDesc{};
-        computeCullingPsoDesc.SetComputeShader(*computeCullingShader);
-        computeCullingPsoDesc.SetRootSignature(*bindlessRootSignature);
-        computeCullingPsoDesc.Name = "ComputeCullingPipelineState"_fs;
-        computeCullingPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(computeCullingPsoDesc).value());
-        IG_CHECK(computeCullingPso->IsCompute());
+        GpuBufferDesc cullingDataBufferDesc{};
+        cullingDataBufferDesc.AsStructuredBuffer<CullingData>(1, true);
+        for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
+        {
+            cullingDataBufferDesc.DebugName = std::format("CullingDataBuffer", localFrameIdx);
+            cullingDataBuffer[localFrameIdx] = renderContext.CreateBuffer(cullingDataBufferDesc);
+            cullingDataBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(cullingDataBuffer[localFrameIdx]);
+            cullingDataBufferUav[localFrameIdx] = renderContext.CreateUnorderedAccessView(cullingDataBuffer[localFrameIdx]);
+        }
 
-        const ShaderCompileDesc genDrawCmdsShaderDesc{.SourcePath = "Assets/Shaders/GenDrawCommands.hlsl"_fs, .Type = EShaderType::Compute};
-        genDrawCmdsShader = MakePtr<ShaderBlob>(genDrawCmdsShaderDesc);
-        ComputePipelineStateDesc genDrawCmdPsoDesc{};
-        genDrawCmdPsoDesc.SetComputeShader(*genDrawCmdsShader);
-        genDrawCmdPsoDesc.SetRootSignature(*bindlessRootSignature);
-        genDrawCmdPsoDesc.Name = "GenDrawCmdsPso"_fs;
-        genDrawCmdsPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(genDrawCmdPsoDesc).value());
-        IG_CHECK(genDrawCmdsPso->IsCompute());
+        const ShaderCompileDesc compactMeshLodInstancesDesc{.SourcePath = "Assets/Shaders/CompactMeshLodInstances.hlsl"_fs, .Type = EShaderType::Compute};
+        compactMeshLodInstancesShader = MakePtr<ShaderBlob>(compactMeshLodInstancesDesc);
+        ComputePipelineStateDesc compactMeshLodInstancesPsoDesc{};
+        compactMeshLodInstancesPsoDesc.Name = "CompactMeshLodInstancesPSO"_fs;
+        compactMeshLodInstancesPsoDesc.SetComputeShader(*compactMeshLodInstancesShader);
+        compactMeshLodInstancesPsoDesc.SetRootSignature(*bindlessRootSignature);
+        compactMeshLodInstancesPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(compactMeshLodInstancesPsoDesc).value());
+        IG_CHECK(compactMeshLodInstancesPso->IsCompute());
+
+        const ShaderCompileDesc genDrawInstanceCmdShaderDesc{.SourcePath = "Assets/Shaders/GenerateDrawInstanceCommand.hlsl"_fs, .Type = EShaderType::Compute};
+        generateDrawInstanceCmdShader = MakePtr<ShaderBlob>(genDrawInstanceCmdShaderDesc);
+        ComputePipelineStateDesc generateDrawInstanceCmdPsoDesc{};
+        generateDrawInstanceCmdPsoDesc.SetComputeShader(*generateDrawInstanceCmdShader);
+        generateDrawInstanceCmdPsoDesc.SetRootSignature(*bindlessRootSignature);
+        generateDrawInstanceCmdPsoDesc.Name = "GenerateDrawInstanceCmdPso"_fs;
+        generateDrawInstanceCmdPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(generateDrawInstanceCmdPsoDesc).value());
+        IG_CHECK(generateDrawInstanceCmdPso->IsCompute());
 
         CommandSignatureDesc commandSignatureDesc{};
-        commandSignatureDesc.AddConstant(0, 0, 6)
+        commandSignatureDesc.AddConstant(0, 0, 5)
             .AddDrawArgument()
-            .SetCommandByteStride<DrawOpaqueStaticMeshCommand>();
-        commandSignature = MakePtr<CommandSignature>(gpuDevice.CreateCommandSignature("IndirectCommandSignature", commandSignatureDesc, *bindlessRootSignature).value());
+            .SetCommandByteStride<DrawInstance>();
+        drawInstanceCmdSignature = MakePtr<CommandSignature>(
+            gpuDevice.CreateCommandSignature(
+                         "DrawInstanceCmdSignature",
+                         commandSignatureDesc,
+                         *bindlessRootSignature)
+                .value());
 
         for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            drawOpaqueStaticMeshCmdStorage[localFrameIdx] = MakePtr<GpuStorage>(
+            meshLodInstanceStorage[localFrameIdx] = MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    .DebugName = String(std::format("StaticMeshLodInstanceStorage.{}", localFrameIdx)),
+                    .ElementSize = (U32)sizeof(StaticMeshLodInstance),
+                    .NumInitElements = kInitNumDrawCommands,
+                    .Flags =
+                        EGpuStorageFlags::ShaderReadWrite |
+                        EGpuStorageFlags::EnableUavCounter |
+                        EGpuStorageFlags::EnableLinearAllocation});
+
+            drawInstanceCmdStorage[localFrameIdx] = MakePtr<GpuStorage>(
                 renderContext,
                 GpuStorageDesc{
                     .DebugName = String(std::format("DrawRenderableCmdBuffer.{}", localFrameIdx)),
-                    .ElementSize = (U32)sizeof(DrawOpaqueStaticMeshCommand),
+                    .ElementSize = (U32)sizeof(DrawInstance),
                     .NumInitElements = kInitNumDrawCommands,
                     .Flags =
                         EGpuStorageFlags::ShaderReadWrite |
@@ -205,7 +259,13 @@ namespace ig
     {
         for (const auto localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            drawOpaqueStaticMeshCmdStorage[localFrameIdx]->ForceReset();
+            drawInstanceCmdStorage[localFrameIdx]->ForceReset();
+            meshLodInstanceStorage[localFrameIdx]->ForceReset();
+
+            renderContext->DestroyGpuView(cullingDataBufferSrv[localFrameIdx]);
+            renderContext->DestroyGpuView(cullingDataBufferUav[localFrameIdx]);
+            renderContext->DestroyBuffer(cullingDataBuffer[localFrameIdx]);
+
             renderContext->DestroyGpuView(dsvs[localFrameIdx]);
             renderContext->DestroyTexture(depthStencils[localFrameIdx]);
         }
@@ -215,22 +275,32 @@ namespace ig
     {
         tempConstantBufferAllocator->Reset(localFrameIdx);
 
-        if (drawCmdSpace[localFrameIdx].IsValid())
+        if (meshLodInstanceSpace[localFrameIdx].IsValid())
         {
-            drawCmdSpace[localFrameIdx] = {};
-            // 블럭을 합쳐서 fragmentation 최소화
-            drawOpaqueStaticMeshCmdStorage[localFrameIdx]->ForceReset();
+            meshLodInstanceSpace[localFrameIdx] = {};
+            meshLodInstanceStorage[localFrameIdx]->ForceReset();
         }
 
-        const Size numRequiredCmds = sceneProxy->GetMaxNumRenderables(localFrameIdx);
-        if (numRequiredCmds > 0)
+        if (drawInstanceCmdSpace[localFrameIdx].IsValid())
         {
-            drawCmdSpace[localFrameIdx] =
-                drawOpaqueStaticMeshCmdStorage[localFrameIdx]->Allocate(numRequiredCmds);
+            drawInstanceCmdSpace[localFrameIdx] = {};
+            // 블럭을 합쳐서 fragmentation 최소화
+            drawInstanceCmdStorage[localFrameIdx]->ForceReset();
+        }
+
+        const Size numMaxRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
+        const Size numInstancing = sceneProxy->GetNumInstancing();
+        if (numInstancing > 0 && numMaxRenderables > 0)
+        {
+            meshLodInstanceSpace[localFrameIdx] =
+                meshLodInstanceStorage[localFrameIdx]->Allocate(numMaxRenderables);
+
+            drawInstanceCmdSpace[localFrameIdx] =
+                drawInstanceCmdStorage[localFrameIdx]->Allocate(numInstancing * StaticMesh::kMaxNumLods);
         }
     }
 
-    GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, const World& world, [[maybe_unused]] GpuSyncPoint sceneProxyRepSyncPoint)
+    GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint)
     {
         ZoneScoped;
 
@@ -239,7 +309,7 @@ namespace ig
         IG_CHECK(sceneProxy != nullptr);
 
         // 프레임 마다 업데이트 되는 버퍼 데이터 업데이트
-        PerFrameBuffer perFrameBuffer{};
+        PerFrameConstants perFrameConstants{};
 
         const Registry& registry = world.GetRegistry();
         const auto cameraView = registry.view<const CameraComponent, const TransformComponent>();
@@ -260,22 +330,22 @@ namespace ig
 
             const Matrix viewMatrix = transformComponent.CreateView();
             const Matrix projMatrix = camera.CreatePerspective();
-            perFrameBuffer.View = ConvertToShaderSuitableForm(viewMatrix);
-            perFrameBuffer.ViewProj = ConvertToShaderSuitableForm(viewMatrix * projMatrix);
-            perFrameBuffer.CamPosInvAspectRatio = Vector4{
+            perFrameConstants.View = ConvertToShaderSuitableForm(viewMatrix);
+            perFrameConstants.ViewProj = ConvertToShaderSuitableForm(viewMatrix * projMatrix);
+            perFrameConstants.CamPosInvAspectRatio = Vector4{
                 transformComponent.Position.x,
                 transformComponent.Position.y,
                 transformComponent.Position.z,
-                1.f/camera.CameraViewport.AspectRatio()};
+                1.f / camera.CameraViewport.AspectRatio()};
 
             const F32 halfFovYRad = Deg2Rad(camera.Fov * 0.5f);
             const F32 cosHalfFovY{std::cosf(halfFovYRad)};
             const F32 sinHalfFovY{std::sinf(halfFovYRad)};
-            perFrameBuffer.ViewFrustumParams = Vector4{
+            perFrameConstants.ViewFrustumParams = Vector4{
                 cosHalfFovY, sinHalfFovY,
                 camera.NearZ, camera.FarZ};
 
-            perFrameBuffer.Padding[0] = camera.bEnableFrustumCull;
+            perFrameConstants.EnableFrustumCulling = camera.bEnableFrustumCull;
             bMainCameraExists = true;
             break;
         }
@@ -316,171 +386,210 @@ namespace ig
         {
             const GpuView* staticMeshVertexStorageSrv = renderContext->Lookup(meshStorage->GetStaticMeshVertexStorageSrv());
             IG_CHECK(staticMeshVertexStorageSrv != nullptr && staticMeshVertexStorageSrv->IsValid());
-            perFrameBuffer.StaticMeshVertexStorageSrv = staticMeshVertexStorageSrv->Index;
+            perFrameConstants.StaticMeshVertexStorageSrv = staticMeshVertexStorageSrv->Index;
 
             const GpuView* vertexIndexStorageSrv = renderContext->Lookup(meshStorage->GetIndexStorageSrv());
             IG_CHECK(vertexIndexStorageSrv != nullptr && vertexIndexStorageSrv->IsValid());
-            perFrameBuffer.VertexIndexStorageSrv = vertexIndexStorageSrv->Index;
+            perFrameConstants.VertexIndexStorageSrv = vertexIndexStorageSrv->Index;
 
             const GpuView* transformStorageSrv = renderContext->Lookup(sceneProxy->GetTransformProxyStorageSrv(localFrameIdx));
             IG_CHECK(transformStorageSrv != nullptr && transformStorageSrv->IsValid());
-            perFrameBuffer.TransformStorageSrv = transformStorageSrv->Index;
+            perFrameConstants.TransformStorageSrv = transformStorageSrv->Index;
 
             const GpuView* materialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv(localFrameIdx));
             IG_CHECK(materialStorageSrv != nullptr && materialStorageSrv->IsValid());
-            perFrameBuffer.MaterialStorageSrv = materialStorageSrv->Index;
+            perFrameConstants.MaterialStorageSrv = materialStorageSrv->Index;
 
             const GpuView* meshProxyStorageSrv = renderContext->Lookup(sceneProxy->GetMeshProxySrv(localFrameIdx));
             IG_CHECK(meshProxyStorageSrv != nullptr && meshProxyStorageSrv->IsValid());
-            perFrameBuffer.MeshStorageSrv = meshProxyStorageSrv->Index;
+            perFrameConstants.MeshStorageSrv = meshProxyStorageSrv->Index;
 
+            //GpuBuffer* instancingStorageBuffer = renderContext->Lookup(sceneProxy->GetInstancingStorageBuffer(localFrameIdx));
             const GpuView* instancingStorageSrv = renderContext->Lookup(sceneProxy->GetInstancingStorageSrv(localFrameIdx));
-            IG_CHECK(instancingStorageSrv != nullptr && instancingStorageSrv->IsValid());
-            perFrameBuffer.InstancingDataStorageSrv = instancingStorageSrv->Index;
-
             const GpuView* instancingStorageUav = renderContext->Lookup(sceneProxy->GetInstancingStorageUav(localFrameIdx));
+            //IG_CHECK(instancingStorageBuffer != nullptr && instancingStorageBuffer->IsValid());
+            IG_CHECK(instancingStorageSrv != nullptr && instancingStorageSrv->IsValid());
             IG_CHECK(instancingStorageUav != nullptr && instancingStorageUav->IsValid());
-            perFrameBuffer.InstancingDataStorageUav = instancingStorageUav->Index;
+            perFrameConstants.InstancingDataStorageSrv = instancingStorageSrv->Index;
+            perFrameConstants.InstancingDataStorageUav = instancingStorageUav->Index;
 
-            const GpuView* transformIdxStorageSrv = renderContext->Lookup(sceneProxy->GetTransformIndexStorageSrv(localFrameIdx));
-            IG_CHECK(transformIdxStorageSrv != nullptr && transformIdxStorageSrv->IsValid());
-            perFrameBuffer.TransformIdxStorageSrv = transformIdxStorageSrv->Index;
-
-            const GpuView* transformIdxStorageUav = renderContext->Lookup(sceneProxy->GetTransformIndexStorageUav(localFrameIdx));
-            IG_CHECK(transformIdxStorageUav != nullptr && transformIdxStorageUav->IsValid());
-            perFrameBuffer.TransformIdxStorageUav = transformIdxStorageUav->Index;
+            //GpuBuffer* transformIdxStorageBuffer = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageBuffer(localFrameIdx));
+            const GpuView* indirectTransformStorageSrv = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageSrv(localFrameIdx));
+            const GpuView* indirectTransformStorageUav = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageUav(localFrameIdx));
+            //IG_CHECK(transformIdxStorageBuffer != nullptr && transformIdxStorageBuffer->IsValid());
+            IG_CHECK(indirectTransformStorageSrv != nullptr && indirectTransformStorageSrv->IsValid());
+            IG_CHECK(indirectTransformStorageUav != nullptr && indirectTransformStorageUav->IsValid());
+            perFrameConstants.IndirectTransformStorageSrv = indirectTransformStorageSrv->Index;
+            perFrameConstants.IndirectTransformStorageUav = indirectTransformStorageUav->Index;
 
             const GpuView* renderableStorageSrv = renderContext->Lookup(sceneProxy->GetRenderableProxyStorageSrv(localFrameIdx));
             IG_CHECK(renderableStorageSrv != nullptr && renderableStorageSrv->IsValid());
-            perFrameBuffer.RenderableStorageSrv = renderableStorageSrv->Index;
+            perFrameConstants.RenderableStorageSrv = renderableStorageSrv->Index;
 
             const GpuView* renderableIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetRenderableIndicesSrv(localFrameIdx));
             IG_CHECK(renderableIndicesBufferSrv != nullptr && renderableIndicesBufferSrv->IsValid());
-            perFrameBuffer.RenderableIndicesBufferSrv = renderableIndicesBufferSrv->Index;
-            perFrameBuffer.NumMaxRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
+            perFrameConstants.RenderableIndicesBufferSrv = renderableIndicesBufferSrv->Index;
+            perFrameConstants.NumMaxRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
 
-            TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameBuffer>(localFrameIdx);
+            TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameConstants>(localFrameIdx);
             const GpuView* perFrameBufferCbv = renderContext->Lookup(perFrameConstantBuffer.GetConstantBufferView());
             IG_CHECK(perFrameBufferCbv != nullptr && perFrameBufferCbv->IsValid());
-            perFrameBuffer.PerFrameDataCbv = perFrameBufferCbv->Index;
-            perFrameConstantBuffer.Write(perFrameBuffer);
+            perFrameConstantBuffer.Write(perFrameConstants);
 
-            GpuBuffer* drawOpaqueStaticMeshCmdBuffer = renderContext->Lookup(drawOpaqueStaticMeshCmdStorage[localFrameIdx]->GetGpuBuffer());
-            IG_CHECK(drawOpaqueStaticMeshCmdBuffer != nullptr && drawOpaqueStaticMeshCmdBuffer->IsValid());
-            const GpuBufferDesc& drawOpaqueStaticMeshCmdBufferDesc = drawOpaqueStaticMeshCmdBuffer->GetDesc();
-            IG_CHECK(drawOpaqueStaticMeshCmdBufferDesc.IsUavCounterEnabled());
-            GpuBuffer* instancingStorageBuffer = renderContext->Lookup(sceneProxy->GetInstancingStorageBuffer(localFrameIdx));
-            IG_CHECK(instancingStorageBuffer != nullptr && instancingStorageBuffer->IsValid());
-            GpuBuffer* transformIdxStorageBuffer = renderContext->Lookup(sceneProxy->GetTransformIndexStorageBuffer(localFrameIdx));
-            IG_CHECK(transformIdxStorageBuffer != nullptr && transformIdxStorageBuffer->IsValid());
+            GpuBuffer* meshLodInstanceBuffer = renderContext->Lookup(meshLodInstanceStorage[localFrameIdx]->GetGpuBuffer());
+            const GpuBufferDesc& meshLodInstanceBufferDesc = meshLodInstanceBuffer->GetDesc();
+            const GpuView* meshLodInstanceBufferUav = renderContext->Lookup(meshLodInstanceStorage[localFrameIdx]->GetUnorderedResourceView());
+            IG_CHECK(meshLodInstanceBuffer != nullptr && meshLodInstanceBuffer->IsValid());
+            IG_CHECK(meshLodInstanceBufferDesc.IsUavCounterEnabled());
+            IG_CHECK(meshLodInstanceBufferUav != nullptr && meshLodInstanceBufferUav->IsValid());
+
+            GpuBuffer* drawInstanceCmdBuffer = renderContext->Lookup(drawInstanceCmdStorage[localFrameIdx]->GetGpuBuffer());
+            const GpuBufferDesc& drawInstanceCmdBufferDesc = drawInstanceCmdBuffer->GetDesc();
+            const GpuView* drawInstanceCmdBufferUav = renderContext->Lookup(drawInstanceCmdStorage[localFrameIdx]->GetUnorderedResourceView());
+            IG_CHECK(drawInstanceCmdBuffer != nullptr && drawInstanceCmdBuffer->IsValid());
+            IG_CHECK(drawInstanceCmdBufferDesc.IsUavCounterEnabled());
+            IG_CHECK(drawInstanceCmdBufferUav != nullptr && drawInstanceCmdBufferUav->IsValid());
+
+            GpuBuffer* cullingDataBufferPtr = renderContext->Lookup(cullingDataBuffer[localFrameIdx]);
+            const GpuView* cullingDataBufferSrvPtr = renderContext->Lookup(cullingDataBufferSrv[localFrameIdx]);
+            const GpuView* cullingDataBufferUavPtr = renderContext->Lookup(cullingDataBufferUav[localFrameIdx]);
+            IG_CHECK(cullingDataBufferPtr != nullptr && cullingDataBufferPtr->IsValid());
+            IG_CHECK(cullingDataBufferSrvPtr != nullptr && cullingDataBufferSrvPtr->IsValid());
+            IG_CHECK(cullingDataBufferUavPtr != nullptr && cullingDataBufferUavPtr->IsValid());
+
             auto bindlessDescHeaps = renderContext->GetBindlessDescriptorHeaps();
             CommandQueue& asyncComputeQueue{renderContext->GetAsyncComputeQueue()};
             CommandListPool& asyncComputeCmdListPool{renderContext->GetAsyncComputeCommandListPool()};
-
             {
-                auto computeCullingCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "ComputeCullingCmdList"_fs);
-                computeCullingCmdList->Open(computeCullingPso.get());
-                computeCullingCmdList->SetDescriptorHeaps(bindlessDescHeaps);
-                computeCullingCmdList->SetRootSignature(*bindlessRootSignature);
+                const FrustumCullingConstants frustumCullingConstants{
+                    .PerFrameCbv = perFrameBufferCbv->Index,
+                    .MeshLodInstanceStorageUav = meshLodInstanceBufferUav->Index,
+                    .CullingDataBufferUav = cullingDataBufferUavPtr->Index};
 
-                computeCullingCmdList->AddPendingBufferBarrier(
-                    *instancingStorageBuffer,
-                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
-                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
-                computeCullingCmdList->AddPendingBufferBarrier(
-                    *transformIdxStorageBuffer,
-                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
-                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
-                computeCullingCmdList->FlushBarriers();
+                auto cmdList = asyncComputeCmdListPool.Request(localFrameIdx, "FrustumCullingCmdList"_fs);
+                cmdList->Open(frustumCullingPso.get());
+                cmdList->SetDescriptorHeaps(bindlessDescHeaps);
+                cmdList->SetRootSignature(*bindlessRootSignature);
 
-                const ComputeCullingConstants computeCullingConstants{.PerFrameDataCbv = perFrameBuffer.PerFrameDataCbv};
-                computeCullingCmdList->SetRoot32BitConstants(0, computeCullingConstants, 0);
-
-                constexpr U32 kNumThreads = 16;
-                const Size numRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
-                const U32 numThreadGroup = ((U32)numRenderables - 1) / kNumThreads + 1;
-                computeCullingCmdList->Dispatch(numThreadGroup, 1, 1);
-
-                computeCullingCmdList->AddPendingBufferBarrier(
-                    *instancingStorageBuffer,
-                    D3D12_BARRIER_SYNC_COMPUTE_SHADING, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_UNORDERED_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS);
-                computeCullingCmdList->AddPendingBufferBarrier(
-                    *transformIdxStorageBuffer,
-                    D3D12_BARRIER_SYNC_COMPUTE_SHADING, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_UNORDERED_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS);
-                computeCullingCmdList->FlushBarriers();
-
-                computeCullingCmdList->Close();
-
-                asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
-                CommandList* cmdLists[]{computeCullingCmdList};
-                asyncComputeQueue.ExecuteCommandLists(cmdLists);
-            }
-            GpuSyncPoint computeCullingSync = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
-
-            {
-                auto genDrawCmdsCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "GenDrawCmdCmdList"_fs);
-                genDrawCmdsCmdList->Open(genDrawCmdsPso.get());
-                genDrawCmdsCmdList->SetDescriptorHeaps(bindlessDescHeaps);
-                genDrawCmdsCmdList->SetRootSignature(*bindlessRootSignature);
-
-                genDrawCmdsCmdList->AddPendingBufferBarrier(
+                cmdList->AddPendingBufferBarrier(
                     *uavCounterResetBuffer,
                     D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
-                genDrawCmdsCmdList->AddPendingBufferBarrier(
-                    *drawOpaqueStaticMeshCmdBuffer,
+                cmdList->AddPendingBufferBarrier(
+                    *meshLodInstanceBuffer,
                     D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
-                genDrawCmdsCmdList->FlushBarriers();
+                cmdList->AddPendingBufferBarrier(
+                    *cullingDataBufferPtr,
+                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+                cmdList->FlushBarriers();
 
-                genDrawCmdsCmdList->CopyBuffer(
+                /* 
+                * 나중에 아예 Zero Init 용 통합 버퍼, 예를들어 현재 상태에선 
+                * Union(kUavCounterSize, CullingData) 크기에 해당하는 버퍼 1개만 할당!
+                */
+                cmdList->CopyBuffer(
                     *uavCounterResetBuffer, 0, GpuBufferDesc::kUavCounterSize,
-                    *drawOpaqueStaticMeshCmdBuffer, drawOpaqueStaticMeshCmdBufferDesc.GetUavCounterOffset());
+                    *meshLodInstanceBuffer, meshLodInstanceBufferDesc.GetUavCounterOffset());
+                cmdList->CopyBuffer(
+                    *uavCounterResetBuffer, 0, sizeof(CullingData),
+                    *cullingDataBufferPtr, 0);
 
-                genDrawCmdsCmdList->AddPendingBufferBarrier(
-                    *uavCounterResetBuffer,
-                    D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_COPY_SOURCE, D3D12_BARRIER_ACCESS_NO_ACCESS);
-                genDrawCmdsCmdList->AddPendingBufferBarrier(
-                    *drawOpaqueStaticMeshCmdBuffer,
+                cmdList->AddPendingBufferBarrier(
+                    *meshLodInstanceBuffer,
                     D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
                     D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
-                genDrawCmdsCmdList->AddPendingBufferBarrier(
-                    *instancingStorageBuffer,
-                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
-                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
-                genDrawCmdsCmdList->FlushBarriers();
+                cmdList->AddPendingBufferBarrier(
+                    *cullingDataBufferPtr,
+                    D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
+                    D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
+                cmdList->FlushBarriers();
 
-                const GpuView* drawOpaqueStaticMeshCmd = renderContext->Lookup(drawOpaqueStaticMeshCmdStorage[localFrameIdx]->GetUnorderedResourceView());
-                IG_CHECK(drawOpaqueStaticMeshCmd != nullptr && drawOpaqueStaticMeshCmd->IsValid());
-                const GenDrawCmdConstants genDrawCmdConstants{.PerFrameDataCbv = perFrameBuffer.PerFrameDataCbv, .DrawOpaqueStaticMeshCmdBufferUav = drawOpaqueStaticMeshCmd->Index};
-                genDrawCmdsCmdList->SetRoot32BitConstants(0, genDrawCmdConstants, 0);
+                cmdList->SetRoot32BitConstants(0, frustumCullingConstants, 0);
 
-                const U32 numThreadGroup = sceneProxy->GetNumInstancing();
-                genDrawCmdsCmdList->Dispatch(numThreadGroup, 1, 1);
+                constexpr U32 kNumThreadsPerGroup = 16;
+                const U32 numRenderables = (U32)sceneProxy->GetMaxNumRenderables(localFrameIdx);
+                const U32 numThreadGroup = std::max(1u, (numRenderables - 1) / (kNumThreadsPerGroup + 1));
+                cmdList->Dispatch(numThreadGroup, 1, 1);
 
-                genDrawCmdsCmdList->AddPendingBufferBarrier(
-                    *drawOpaqueStaticMeshCmdBuffer,
-                    D3D12_BARRIER_SYNC_COMPUTE_SHADING, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_UNORDERED_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS);
-                genDrawCmdsCmdList->AddPendingBufferBarrier(
-                    *instancingStorageBuffer,
-                    D3D12_BARRIER_SYNC_COMPUTE_SHADING, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_UNORDERED_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS);
-                genDrawCmdsCmdList->FlushBarriers();
+                cmdList->Close();
 
-                genDrawCmdsCmdList->Close();
-
-                asyncComputeQueue.Wait(computeCullingSync);
-                CommandList* cmdLists[]{genDrawCmdsCmdList};
+                CommandList* cmdLists[]{cmdList};
+                asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
                 asyncComputeQueue.ExecuteCommandLists(cmdLists);
             }
-            GpuSyncPoint genDrawCmdsSync = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
+            GpuSyncPoint frustumCullingSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
+
+            {
+                const CompactMeshLodInstancesConstants comapctMeshLodInstancesConstants{
+                    .PerFrameCbv = perFrameBufferCbv->Index,
+                    .MeshLodInstanceStorageUav = meshLodInstanceBufferUav->Index,
+                    .CullingDataBufferSrv = cullingDataBufferSrvPtr->Index};
+
+                auto cmdList = asyncComputeCmdListPool.Request(localFrameIdx, "CompactMeshLodInstacesCmdList"_fs);
+                cmdList->Open(compactMeshLodInstancesPso.get());
+                cmdList->SetDescriptorHeaps(bindlessDescHeaps);
+                cmdList->SetRootSignature(*bindlessRootSignature);
+
+                cmdList->SetRoot32BitConstants(0, comapctMeshLodInstancesConstants, 0);
+
+                constexpr U32 kNumThreadsPerGruop = 16;
+                const U32 numRenderables = (U32)sceneProxy->GetMaxNumRenderables(localFrameIdx);
+                const U32 numThreadGroup = std::max(1u, (numRenderables - 1) / (kNumThreadsPerGruop + 1));
+                cmdList->Dispatch(numThreadGroup, 1, 1);
+
+                cmdList->Close();
+
+                CommandList* cmdLists[]{cmdList};
+                asyncComputeQueue.Wait(frustumCullingSyncPoint);
+                asyncComputeQueue.ExecuteCommandLists(cmdLists);
+            }
+            GpuSyncPoint compactMeshLodInstancesSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
+
+            {
+                const GenerateDrawInstanceConstants generateInstanceDrawConstants{
+                    .PerFrameCbv = perFrameBufferCbv->Index,
+                    .DrawInstanceBufferUav = drawInstanceCmdBufferUav->Index};
+
+                auto cmdList = asyncComputeCmdListPool.Request(localFrameIdx, "GenerateDrawInstanceCmdList"_fs);
+                cmdList->Open(generateDrawInstanceCmdPso.get());
+                cmdList->SetDescriptorHeaps(bindlessDescHeaps);
+                cmdList->SetRootSignature(*bindlessRootSignature);
+
+                cmdList->AddPendingBufferBarrier(
+                    *uavCounterResetBuffer,
+                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
+                cmdList->AddPendingBufferBarrier(*drawInstanceCmdBuffer,
+                                                 D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                                                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+                cmdList->FlushBarriers();
+
+                cmdList->CopyBuffer(
+                    *uavCounterResetBuffer, 0, GpuBufferDesc::kUavCounterSize,
+                    *drawInstanceCmdBuffer, drawInstanceCmdBufferDesc.GetUavCounterOffset());
+
+                cmdList->AddPendingBufferBarrier(
+                    *drawInstanceCmdBuffer,
+                    D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
+                    D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
+                cmdList->FlushBarriers();
+
+                cmdList->SetRoot32BitConstants(0, generateInstanceDrawConstants, 0);
+                // constexpr U32 kNumThreadsPerGroup = 1;
+                const U32 numLodInstancing = sceneProxy->GetNumInstancing() * StaticMesh::kMaxNumLods;
+                cmdList->Dispatch(numLodInstancing, 1, 1);
+
+                cmdList->Close();
+
+                CommandList* cmdLists[]{cmdList};
+                asyncComputeQueue.Wait(compactMeshLodInstancesSyncPoint);
+                asyncComputeQueue.ExecuteCommandLists(cmdLists);
+            }
+            GpuSyncPoint generateDrawInstanceSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(renderContext->GetAsyncComputeFence());
 
             // Culling이 완료되면 Command Buffer를 가지고 ExecuteIndirect!
-
             renderCmdList->Open(pso.get());
             {
                 renderCmdList->SetDescriptorHeaps(bindlessDescHeaps);
@@ -492,7 +601,7 @@ namespace ig
                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
                     D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
                 renderCmdList->AddPendingBufferBarrier(
-                    *drawOpaqueStaticMeshCmdBuffer,
+                    *drawInstanceCmdBuffer,
                     D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_EXECUTE_INDIRECT,
                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT);
                 renderCmdList->FlushBarriers();
@@ -504,7 +613,7 @@ namespace ig
                 renderCmdList->SetViewport(mainViewport);
                 renderCmdList->SetScissorRect(mainViewport);
                 renderCmdList->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                renderCmdList->ExecuteIndirect(*commandSignature, *drawOpaqueStaticMeshCmdBuffer);
+                renderCmdList->ExecuteIndirect(*drawInstanceCmdSignature, *drawInstanceCmdBuffer);
 
                 renderCmdList->AddPendingTextureBarrier(
                     *backBuffer,
@@ -512,14 +621,14 @@ namespace ig
                     D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
                     D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_PRESENT);
                 renderCmdList->AddPendingBufferBarrier(
-                    *drawOpaqueStaticMeshCmdBuffer,
+                    *drawInstanceCmdBuffer,
                     D3D12_BARRIER_SYNC_EXECUTE_INDIRECT, D3D12_BARRIER_SYNC_NONE,
                     D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT, D3D12_BARRIER_ACCESS_NO_ACCESS);
                 renderCmdList->FlushBarriers();
             }
             renderCmdList->Close();
             CommandList* mainPassCmdLists[]{renderCmdList};
-            mainGfxQueue.Wait(genDrawCmdsSync);
+            mainGfxQueue.Wait(generateDrawInstanceSyncPoint);
             mainGfxQueue.ExecuteCommandLists(mainPassCmdLists);
         }
 

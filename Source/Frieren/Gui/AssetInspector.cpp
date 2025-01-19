@@ -339,9 +339,13 @@ namespace fe
             return;
         }
         ImGui::Text("Num Vertices: %u", loadDescOpt->NumVertices);
-        ImGui::Text("Num Indices: %u", loadDescOpt->NumIndices);
 
-        ig::AxisAlignedBoundingBox aabb = loadDescOpt->AABB;
+        for (ig::U8 lod = 0; lod < loadDescOpt->NumLods; ++lod)
+        {
+            ImGui::Text("LOD%u Num Indices: %u", (ig::U32)lod, loadDescOpt->NumIndicesPerLod[lod]);
+        }
+
+        ig::AABB aabb = loadDescOpt->AABB;
         ImGui::Text("AABB(Min) ");
         ImGui::SameLine();
         ig::ImGuiX::EditVector3("AABB(Min)", aabb.Min, 0.f, "%.4f", true);

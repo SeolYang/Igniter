@@ -4,7 +4,7 @@
 
 namespace ig
 {
-    Json& AxisAlignedBoundingBox::Serialize(Json& archive) const
+    Json& AABB::Serialize(Json& archive) const
     {
         IG_SERIALIZE_TO_JSON(AxisAlignedBoundingBox, archive, Min.x);
         IG_SERIALIZE_TO_JSON(AxisAlignedBoundingBox, archive, Min.y);
@@ -15,7 +15,7 @@ namespace ig
         return archive;
     }
 
-    const Json& AxisAlignedBoundingBox::Deserialize(const Json& archive)
+    const Json& AABB::Deserialize(const Json& archive)
     {
         IG_DESERIALIZE_FROM_JSON(AxisAlignedBoundingBox, archive, Min.x);
         IG_DESERIALIZE_FROM_JSON(AxisAlignedBoundingBox, archive, Min.y);

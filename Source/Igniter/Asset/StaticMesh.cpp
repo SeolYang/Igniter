@@ -20,6 +20,13 @@ namespace ig
         IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bFlipWindingOrder);
         IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bGenerateBoundingBoxes);
         IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bImportMaterials);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bGenerateLODs);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, NumLods);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, MaxSimplificationFactor);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bOptimizeVertexCache);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bOptimizeOverdraw);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, OverdrawOptimizerThreshold);
+        IG_SERIALIZE_TO_JSON(StaticMeshImportDesc, archive, bOptimizeVertexFetch);
         return archive;
     }
 
@@ -36,15 +43,24 @@ namespace ig
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bGenerateUVCoords);
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bGenerateBoundingBoxes);
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bImportMaterials);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bGenerateLODs);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, NumLods);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, MaxSimplificationFactor);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bOptimizeVertexCache);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bOptimizeOverdraw);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, OverdrawOptimizerThreshold);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshImportDesc, archive, bOptimizeVertexFetch);
         return archive;
     }
 
     Json& StaticMeshLoadDesc::Serialize(Json& archive) const
     {
         IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumVertices);
-        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumIndices);
         IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
-        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
+
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumLods);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumIndicesPerLod);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, CompressedIndicesSizePerLod);
 
         IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, AABB);
 
@@ -55,23 +71,41 @@ namespace ig
     {
         *this = {};
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumVertices);
-        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumIndices);
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, CompressedVerticesSizeInBytes);
-        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, CompressedIndicesSizeInBytes);
+
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumLods);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumIndicesPerLod);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, CompressedIndicesSizePerLod);
 
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, AABB);
         return archive;
     }
 
-    StaticMesh::StaticMesh(RenderContext& renderContext, AssetManager& assetManager,
-                           const Desc& snapshot,
-                           const MeshStorage::Handle<VertexSM> vertexSpace, MeshStorage::Handle<U32> vertexIndexSpace)
+    StaticMesh::StaticMesh(
+        RenderContext& renderContext, AssetManager& assetManager,
+        const Desc& snapshot,
+        const MeshStorage::Handle<VertexSM> vertexSpace,
+        const U8 numLods,
+        const Array<MeshStorage::Handle<U32>, kMaxNumLods> vertexIndexSpacePerLod)
         : renderContext(&renderContext)
         , assetManager(&assetManager)
         , snapshot(snapshot)
         , vertexSpace(vertexSpace)
-        , vertexIndexSpace(vertexIndexSpace)
+        , numLods(numLods)
+        , vertexIndexSpacePerLod(vertexIndexSpacePerLod)
     {
+        IG_CHECK(vertexSpace.Value != 8);
+    }
+
+    StaticMesh::StaticMesh(StaticMesh&& other) noexcept
+        : renderContext(std::exchange(other.renderContext, nullptr))
+        , assetManager(std::exchange(other.assetManager, nullptr))
+        , snapshot(other.snapshot)
+        , vertexSpace(std::exchange(other.vertexSpace, {}))
+        , numLods(std::exchange<U8, U8>(other.numLods, 0))
+        , vertexIndexSpacePerLod(std::exchange(other.vertexIndexSpacePerLod, {}))
+    {
+        IG_CHECK(vertexSpace.Value != 8);
     }
 
     StaticMesh::~StaticMesh()
@@ -81,14 +115,19 @@ namespace ig
 
     void StaticMesh::Destroy()
     {
-        MeshStorage& meshStorage = Engine::GetMeshStorage();
-        meshStorage.Destroy(vertexSpace);
-        meshStorage.Destroy(vertexIndexSpace);
-
         renderContext = nullptr;
         assetManager = nullptr;
+
+        MeshStorage& meshStorage = Engine::GetMeshStorage();
+        meshStorage.Destroy(vertexSpace);
         vertexSpace = {};
-        vertexIndexSpace = {};
+
+        for (Index lod = 0; lod < numLods; ++lod)
+        {
+            meshStorage.Destroy(vertexIndexSpacePerLod[lod]);
+            vertexIndexSpacePerLod[lod] = {};
+        }
+        numLods = 0;
     }
 
     StaticMesh& StaticMesh::operator=(StaticMesh&& rhs) noexcept
@@ -98,10 +137,12 @@ namespace ig
         this->renderContext = std::exchange(rhs.renderContext, nullptr);
         this->assetManager = std::exchange(rhs.assetManager, nullptr);
         this->snapshot = rhs.snapshot;
+
         this->vertexSpace = std::exchange(rhs.vertexSpace, {});
-        this->vertexIndexSpace = std::exchange(rhs.vertexIndexSpace, {});
+
+        this->numLods = std::exchange<U8, U8>(rhs.numLods, 0);
+        this->vertexIndexSpacePerLod = std::exchange(rhs.vertexIndexSpacePerLod, {});
 
         return *this;
     }
-
 } // namespace ig

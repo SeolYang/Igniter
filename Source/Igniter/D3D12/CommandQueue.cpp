@@ -24,6 +24,8 @@ namespace ig
     void CommandQueue::ExecuteCommandLists(const std::span<CommandList*> cmdLists)
     {
         IG_CHECK(IsValid());
+        IG_CHECK(!cmdLists.empty());
+
         auto toNative = views::all(cmdLists) |
                         views::filter([](CommandList* cmdList)
                                       { return cmdList != nullptr; }) |

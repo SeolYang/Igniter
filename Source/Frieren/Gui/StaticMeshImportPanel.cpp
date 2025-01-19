@@ -17,6 +17,7 @@ namespace fe
         }
         else
         {
+            // 만약에 Resource Metadatas가 있다면 해당 데이터 활용
             ImGui::SameLine();
             ImGui::Text("%s", path.ToStringView().data());
 
@@ -30,6 +31,22 @@ namespace fe
             ImGui::Checkbox("Generate UV Coordinates", &config.bGenerateUVCoords);
             ImGui::Checkbox("Generate Bounding Boxes", &config.bGenerateBoundingBoxes);
             ImGui::Checkbox("Import Materials", &config.bImportMaterials);
+            ImGui::Checkbox("Generate LODs", &config.bGenerateLODs);
+
+            if (config.bGenerateLODs)
+            {
+                int numLods = (int)config.NumLods;
+                if (ImGui::SliderInt("Num LODs",
+                                     &numLods,
+                                     1, (int)ig::StaticMeshImportDesc::kMaxNumLods))
+                {
+                    config.NumLods = (ig::U8)numLods;
+                }
+
+                ImGui::SliderFloat("Max Simplification Factor",
+                                   &config.MaxSimplificationFactor,
+                                   0.01f, 1.0f);
+            }
 
             if (ImGui::Button("Import"))
             {

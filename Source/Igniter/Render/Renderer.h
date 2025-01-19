@@ -50,16 +50,24 @@ namespace ig
 
         Ptr<GpuBuffer> uavCounterResetBuffer;
 
-        Ptr<ShaderBlob> computeCullingShader;
-        Ptr<PipelineState> computeCullingPso;
+        Ptr<ShaderBlob> frustumCullingShader;
+        Ptr<PipelineState> frustumCullingPso;
+        InFlightFramesResource<RenderHandle<GpuBuffer>> cullingDataBuffer;
+        InFlightFramesResource<RenderHandle<GpuView>> cullingDataBufferSrv;
+        InFlightFramesResource<RenderHandle<GpuView>> cullingDataBufferUav;
 
-        Ptr<ShaderBlob> genDrawCmdsShader;
-        Ptr<PipelineState> genDrawCmdsPso;
+        Ptr<ShaderBlob> compactMeshLodInstancesShader;
+        Ptr<PipelineState> compactMeshLodInstancesPso;
+
+        Ptr<ShaderBlob> generateDrawInstanceCmdShader;
+        Ptr<PipelineState> generateDrawInstanceCmdPso;
         constexpr static U32 kInitNumDrawCommands = 16;
-        InFlightFramesResource<Ptr<GpuStorage>> drawOpaqueStaticMeshCmdStorage;
-        InFlightFramesResource<GpuStorage::Allocation> drawCmdSpace;
+        InFlightFramesResource<Ptr<GpuStorage>> meshLodInstanceStorage;
+        InFlightFramesResource<GpuStorage::Allocation> meshLodInstanceSpace;
+        InFlightFramesResource<Ptr<GpuStorage>> drawInstanceCmdStorage;
+        InFlightFramesResource<GpuStorage::Allocation> drawInstanceCmdSpace;
 
-        Ptr<CommandSignature> commandSignature;
+        Ptr<CommandSignature> drawInstanceCmdSignature;
 
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
     };

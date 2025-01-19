@@ -16,8 +16,8 @@ namespace ig
 
         auto& GetNative() { return *native.Get(); }
 
-        bool IsGraphics() const { return bIsGraphics; }
-        bool IsCompute() const { return !bIsGraphics; }
+        bool IsGraphics() const { return native && bIsGraphics; }
+        bool IsCompute() const { return native && !bIsGraphics; }
 
       private:
         PipelineState(ComPtr<ID3D12PipelineState> newPSO, const bool bIsGraphicsPSO);

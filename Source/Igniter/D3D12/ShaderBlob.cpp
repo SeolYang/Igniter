@@ -98,6 +98,7 @@ namespace ig
             arguments.push_back(TEXT("-Qstrip_debug"));
         }
 
+        arguments.push_back(TEXT("-I /Assets/Shaders"));
         ComPtr<IDxcUtils> utils;
         IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(utils.ReleaseAndGetAddressOf())));
 

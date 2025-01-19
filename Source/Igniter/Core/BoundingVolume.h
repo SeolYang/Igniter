@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    struct AxisAlignedBoundingBox
+    struct AABB
     {
       public:
         Json& Serialize(Json& archive) const;
@@ -25,7 +25,7 @@ namespace ig
         F32 Radius = 0.f;
     };
 
-    inline BoundingSphere ToBoundingSphere(const AxisAlignedBoundingBox& aabb) noexcept
+    inline BoundingSphere ToBoundingSphere(const AABB& aabb) noexcept
     {
         return BoundingSphere{(aabb.Min + aabb.Max) * 0.5f, Vector3::Distance(aabb.Min, aabb.Max) * 0.5f};
     }

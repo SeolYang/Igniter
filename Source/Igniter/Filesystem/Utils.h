@@ -69,8 +69,7 @@ namespace ig
         return true;
     }
 
-    template <Size N>
-    inline bool SaveBlobsToFile(const Path& path, const std::array<std::span<const uint8_t>, N> blobs)
+    inline bool SaveBlobsToFile(const Path& path, const std::span<std::span<const uint8_t>> blobs)
     {
         IG_CHECK(blobs.size() > 0);
         std::ofstream fileStream{path.c_str(), std::ios::out | std::ios::binary | std::ios::trunc};
@@ -88,4 +87,11 @@ namespace ig
         fileStream.close();
         return true;
     }
+
+    template <Size N>
+    bool SaveBlobsToFile(const Path& path, const std::array<std::span<const uint8_t>, N> blobs)
+    {
+        return SaveBlobsToFile(path, std::span{blobs.data(), N});
+    }
+
 } // namespace ig

@@ -26,13 +26,14 @@ namespace ig
     class [[nodiscard]] Result final
     {
       public:
+        Result() = default;
+
         Result(const Result&) = delete;
 
         Result(Result&& other) noexcept
             : dummy{}
             , status(other.status)
         {
-            IG_CHECK(other.status != E::Success && other.bOwnershipTransferred || other.status == E::Success && !other.bOwnershipTransferred);
             if (!other.bOwnershipTransferred)
             {
                 ::new (&value) T(std::move(other.value));
@@ -45,7 +46,7 @@ namespace ig
             IG_CHECK(!IsSuccess() || (IsSuccess() && bOwnershipTransferred) && "Result doesn't handled.");
             if constexpr (!std::is_trivial_v<T>)
             {
-                if (status == E::Success)
+                if (status == E::Success && !bOwnershipTransferred)
                 {
                     value.~T();
                 }
@@ -53,7 +54,26 @@ namespace ig
         }
 
         Result& operator=(const Result&) = delete;
-        Result& operator=(Result&&) noexcept = delete;
+        Result& operator=(Result&& rhs) noexcept
+        {
+            IG_CHECK((!IsSuccess() || bOwnershipTransferred) && "Result doesn't handled.");
+            if constexpr (!std::is_trivial_v<T>)
+            {
+                if (status == E::Success)
+                {
+                    value.~T();
+                }
+            }
+
+            if (!rhs.bOwnershipTransferred)
+            {
+                ::new (&value) T(std::move(rhs.value));
+            }
+            bOwnershipTransferred = std::exchange(rhs.bOwnershipTransferred, true);
+            status = rhs.status;
+
+            return *this;
+        }
 
         [[nodiscard]] T Take()
         {
@@ -105,10 +125,10 @@ namespace ig
                 constexpr NonTrivialDummy() noexcept {}
             } dummy;
 
-            std::decay_t<T> value;
+            std::decay_t<T> value{};
         };
 
-        const E status;
+        E status{};
         bool bOwnershipTransferred = true;
     };
 

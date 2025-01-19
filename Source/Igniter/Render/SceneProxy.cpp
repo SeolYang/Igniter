@@ -59,16 +59,16 @@ namespace ig
                 MakePtr<GpuStorage>(
                     renderContext,
                     GpuStorageDesc{
-                        String(std::format("SM_InstanceDataStorage{}", localFrameIdx)),
+                        String(std::format("InstancingDataStorage{}", localFrameIdx)),
                         (U32)sizeof(InstancingGpuData),
                         kNumInitStaticMeshInstances,
                         EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
 
-            instancingPackage.TransformIndexStorage[localFrameIdx] =
+            instancingPackage.IndirectTransformStorage[localFrameIdx] =
                 MakePtr<GpuStorage>(
                     renderContext,
                     GpuStorageDesc{
-                        String(std::format("SM_TransformIdxStorage{}", localFrameIdx)),
+                        String(std::format("IndirectTransformStorage{}", localFrameIdx)),
                         (U32)sizeof(U32),
                         kNumInitStaticMeshInstances,
                         EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
@@ -335,7 +335,7 @@ namespace ig
             {
                 ZoneScopedN("PartiallyInvalidateNextFrameInstancingData");
                 instancingPackage.InstancingDataStorage[nextLocalFrameIdx]->ForceReset();
-                instancingPackage.TransformIndexStorage[nextLocalFrameIdx]->ForceReset();
+                instancingPackage.IndirectTransformStorage[nextLocalFrameIdx]->ForceReset();
                 for (InstancingMap& threadLocalMap : instancingPackage.ThreadLocalInstancingMaps)
                 {
                     threadLocalMap.clear();
@@ -511,8 +511,8 @@ namespace ig
 
                 instancingPackage.InstancingDataSpace =
                     instancingPackage.InstancingDataStorage[localFrameIdx]->Allocate(numInstancing);
-                instancingPackage.TransformIdxSpace =
-                    instancingPackage.TransformIndexStorage[localFrameIdx]->Allocate(instancingPackage.SumNumInstances);
+                instancingPackage.IndirectTransformSpace =
+                    instancingPackage.IndirectTransformStorage[localFrameIdx]->Allocate(instancingPackage.SumNumInstances);
             });
 
         // 결국 transform offset을 정할려면 linear 하게 돌아야 하나?
@@ -524,7 +524,7 @@ namespace ig
                 for (auto& [instanceKey, globalData] : instancingPackage.GlobalInstancingMap)
                 {
                     globalData.InstancingId = instancingId;
-                    globalData.TransformOffset = transformOffset;
+                    globalData.IndirectTransformOffset = transformOffset;
 
                     ++instancingId;
                     transformOffset += globalData.NumInstances;
@@ -553,7 +553,7 @@ namespace ig
             IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::StaticMesh);
             IG_CHECK(snapshot.IsCached());
 
-            ManagedAsset<StaticMesh> cachedStaticMesh = assetManager->LoadStaticMesh(snapshot.Info.GetGuid(), true);
+            ManagedAsset<StaticMesh> cachedStaticMesh = ManagedAsset<StaticMesh>{snapshot.HandleHash};
             IG_CHECK(cachedStaticMesh);
 
             if (!proxyMap.contains(cachedStaticMesh))
@@ -570,21 +570,27 @@ namespace ig
             if (const U64 currentDataHashValue = HashInstance(*staticMeshPtr);
                 proxy.DataHashValue != currentDataHashValue)
             {
-                const MeshStorage::Handle<U32> vertexIndexSpace = staticMeshPtr->GetVertexIndexSpace();
-                const MeshStorage::Handle<VertexSM> vertexSpace = staticMeshPtr->GetVertexSpace();
-                const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(vertexSpace);
-                const MeshStorage::Space<U32>* vertexIndexSpacePtr = meshStorage->Lookup(vertexIndexSpace);
+                const U8 numLods = staticMeshPtr->GetNumLods();
+                Array<MeshLodGpuData, StaticMesh::kMaxNumLods> lods;
+                for (U8 lod = 0; lod < numLods; ++lod)
+                {
+                    const MeshStorage::Space<U32>* indexSpace =
+                        meshStorage->Lookup(staticMeshPtr->GetIndexSpace(lod));
+                    lods[lod] = MeshLodGpuData{
+                        .IndexOffset = (U32)(indexSpace != nullptr ? indexSpace->Allocation.OffsetIndex : 0),
+                        .NumIndices = (U32)(indexSpace != nullptr ? indexSpace->Allocation.NumElements : 0)};
+                }
+
+                const MeshStorage::Space<VertexSM>* vertexSpacePtr = meshStorage->Lookup(staticMeshPtr->GetVertexSpace());
                 proxy.GpuData = MeshGpuData{
                     .VertexOffset = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.OffsetIndex : 0),
                     .NumVertices = (U32)(vertexSpacePtr != nullptr ? vertexSpacePtr->Allocation.NumElements : 0),
-                    .IndexOffset = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.OffsetIndex : 0),
-                    .NumIndices = (U32)(vertexIndexSpacePtr != nullptr ? vertexIndexSpacePtr->Allocation.NumElements : 0),
+                    .NumLods = numLods,
+                    .Lods = lods,
                     .BoundingVolume = ToBoundingSphere(staticMeshPtr->GetSnapshot().LoadDescriptor.AABB)};
                 proxy.DataHashValue = currentDataHashValue;
                 meshProxyPackage.PendingReplicationGroups[0].emplace_back(cachedStaticMesh);
             }
-
-            assetManager->Unload(cachedStaticMesh, true);
         }
 
         for (auto& [material, proxy] : proxyMap)
@@ -619,7 +625,7 @@ namespace ig
             IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::Material);
             IG_CHECK(snapshot.IsCached());
 
-            ManagedAsset<Material> cachedMaterial = assetManager->LoadMaterial(snapshot.Info.GetGuid(), true);
+            ManagedAsset<Material> cachedMaterial{snapshot.HandleHash};
             IG_CHECK(cachedMaterial);
 
             if (!proxyMap.contains(cachedMaterial))
@@ -653,8 +659,6 @@ namespace ig
                 proxy.DataHashValue = currentDataHashValue;
                 materialProxyPackage.PendingReplicationGroups[0].emplace_back(cachedMaterial);
             }
-
-            assetManager->Unload(cachedMaterial, true);
         }
 
         for (auto& [material, proxy] : proxyMap)
@@ -925,6 +929,11 @@ namespace ig
                     {
                         compactedCmdLists.emplace_back(cmdListPtr);
                     }
+                }
+
+                if (compactedCmdLists.empty())
+                {
+                    return;
                 }
 
                 CommandQueue& cmdQueue = renderContext->GetAsyncCopyQueue();

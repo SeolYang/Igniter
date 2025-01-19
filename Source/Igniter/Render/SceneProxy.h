@@ -4,6 +4,7 @@
 #include "Igniter/Render/Common.h"
 #include "Igniter/Render/GpuStorage.h"
 #include "Igniter/Asset/Common.h"
+#include "Igniter/Asset/StaticMesh.h"
 
 namespace ig
 {
@@ -56,13 +57,19 @@ namespace ig
             U32 DiffuseTextureSampler = IG_NUMERIC_MAX_OF(DiffuseTextureSampler);
         };
 
-        // 작업 완료 후 MeshGpuData->StaticMeshGpuData
+        struct MeshLodGpuData
+        {
+            U32 IndexOffset = 0u;
+            U32 NumIndices = 0u;
+        };
+
         struct MeshGpuData
         {
             U32 VertexOffset = 0u;
             U32 NumVertices = 0u;
-            U32 IndexOffset = 0u;
-            U32 NumIndices = 0u;
+
+            U32 NumLods = 0u;
+            Array<MeshLodGpuData, StaticMesh::kMaxNumLods> Lods;
             BoundingSphere BoundingVolume;
         };
 
@@ -110,10 +117,10 @@ namespace ig
             U32 MaterialDataIdx = IG_NUMERIC_MAX_OF(MaterialDataIdx);
             U32 MeshDataIdx = IG_NUMERIC_MAX_OF(MeshDataIdx);
             U32 InstancingId = IG_NUMERIC_MAX_OF(InstancingId);
-            // [TransformOffset, TransformOffset + NumInstances)
-            U32 TransformOffset = IG_NUMERIC_MAX_OF(TransformOffset);
+            // [IndirectTransformOffset, IndirectTransformOffset + NumInstances)
+            U32 IndirectTransformOffset = IG_NUMERIC_MAX_OF(IndirectTransformOffset);
             U32 NumInstances = 0;
-            U32 NumVisibleInstances = 0;
+            Array<U32, StaticMesh::kMaxNumLods> NumVisibleLodInstances{0};
         };
 
         using InstancingMap = UnorderedMap<U64, InstancingGpuData>;
@@ -128,12 +135,12 @@ namespace ig
 
           public:
             InFlightFramesResource<Ptr<GpuStorage>> InstancingDataStorage;
-            InFlightFramesResource<Ptr<GpuStorage>> TransformIndexStorage;
+            InFlightFramesResource<Ptr<GpuStorage>> IndirectTransformStorage;
             Vector<InstancingMap> ThreadLocalInstancingMaps;
             OrderedInstancingMap GlobalInstancingMap;
             U32 SumNumInstances{0};
             GpuStorage::Allocation InstancingDataSpace;
-            GpuStorage::Allocation TransformIdxSpace;
+            GpuStorage::Allocation IndirectTransformSpace;
 
             InFlightFramesResource<Ptr<GpuBuffer>> StagingBuffer;
             InFlightFramesResource<U8*> MappedStagingBuffer;
@@ -190,19 +197,19 @@ namespace ig
             return instancingPackage.InstancingDataStorage[localFrameIdx]->GetUnorderedResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetTransformIndexStorageBuffer(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuBuffer> GetIndirectTransformStorageBuffer(const LocalFrameIndex localFrameIdx) const
         {
-            return instancingPackage.TransformIndexStorage[localFrameIdx]->GetGpuBuffer();
+            return instancingPackage.IndirectTransformStorage[localFrameIdx]->GetGpuBuffer();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetTransformIndexStorageSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageSrv(const LocalFrameIndex localFrameIdx) const
         {
-            return instancingPackage.TransformIndexStorage[localFrameIdx]->GetShaderResourceView();
+            return instancingPackage.IndirectTransformStorage[localFrameIdx]->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetTransformIndexStorageUav(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageUav(const LocalFrameIndex localFrameIdx) const
         {
-            return instancingPackage.TransformIndexStorage[localFrameIdx]->GetUnorderedResourceView();
+            return instancingPackage.IndirectTransformStorage[localFrameIdx]->GetUnorderedResourceView();
         }
 
         [[nodiscard]] RenderHandle<GpuView> GetRenderableProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
