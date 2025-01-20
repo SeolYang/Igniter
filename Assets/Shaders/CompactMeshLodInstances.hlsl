@@ -20,14 +20,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[gConstants.PerFrameCbv];
 	
 	ConsumeStructuredBuffer<MeshLodInstance> meshLodInstances = ResourceDescriptorHeap[gConstants.MeshLodInstanceStorageUav];
-	uint numRemainLodInstances;
-	uint lodInstanceStride;
-	meshLodInstances.GetDimensions(numRemainLodInstances, lodInstanceStride);
-	if (numRemainLodInstances == 0)
-	{
-		return;
-	}
-	
 	StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
 	StructuredBuffer<InstancingData> instancingDataStorage = ResourceDescriptorHeap[perFrameData.InstancingDataStorageSrv];
 	

@@ -14,6 +14,7 @@ namespace ig
     class RenderContext;
     class MeshStorage;
     class SceneProxy;
+    class CommandSignature;
     class TempConstantBufferAllocator;
     class World;
 
@@ -32,6 +33,9 @@ namespace ig
         GpuSyncPoint Render(const LocalFrameIndex localFrameIdx);
         GpuSyncPoint Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint);
 
+        [[nodiscard]] U8 GetMinMeshLod() const noexcept { return minMeshLod; }
+        void SetMinMeshLod(U8 newMinMeshLod) { minMeshLod = newMinMeshLod; }
+
         [[nodiscard]] const TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
 
       private:
@@ -39,6 +43,9 @@ namespace ig
         RenderContext* renderContext = nullptr;
         const MeshStorage* meshStorage = nullptr;
         const SceneProxy* sceneProxy = nullptr;
+
+        // #sy_test
+        U8 minMeshLod = 0;
 
         Viewport mainViewport{};
         Ptr<ShaderBlob> vs;

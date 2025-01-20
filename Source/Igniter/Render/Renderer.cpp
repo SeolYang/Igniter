@@ -192,7 +192,7 @@ namespace ig
         cullingDataBufferDesc.AsStructuredBuffer<CullingData>(1, true);
         for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            cullingDataBufferDesc.DebugName = std::format("CullingDataBuffer", localFrameIdx);
+            cullingDataBufferDesc.DebugName = std::format("CullingDataBuffer{}", localFrameIdx);
             cullingDataBuffer[localFrameIdx] = renderContext.CreateBuffer(cullingDataBufferDesc);
             cullingDataBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(cullingDataBuffer[localFrameIdx]);
             cullingDataBufferUav[localFrameIdx] = renderContext.CreateUnorderedAccessView(cullingDataBuffer[localFrameIdx]);
@@ -413,10 +413,10 @@ namespace ig
             perFrameConstants.InstancingDataStorageSrv = instancingStorageSrv->Index;
             perFrameConstants.InstancingDataStorageUav = instancingStorageUav->Index;
 
-            //GpuBuffer* transformIdxStorageBuffer = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageBuffer(localFrameIdx));
+            //GpuBuffer* indirectTransformStorageBuffer = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageBuffer(localFrameIdx));
             const GpuView* indirectTransformStorageSrv = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageSrv(localFrameIdx));
             const GpuView* indirectTransformStorageUav = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageUav(localFrameIdx));
-            //IG_CHECK(transformIdxStorageBuffer != nullptr && transformIdxStorageBuffer->IsValid());
+            //IG_CHECK(indirectTransformStorageBuffer != nullptr && indirectTransformStorageBuffer->IsValid());
             IG_CHECK(indirectTransformStorageSrv != nullptr && indirectTransformStorageSrv->IsValid());
             IG_CHECK(indirectTransformStorageUav != nullptr && indirectTransformStorageUav->IsValid());
             perFrameConstants.IndirectTransformStorageSrv = indirectTransformStorageSrv->Index;
@@ -430,6 +430,8 @@ namespace ig
             IG_CHECK(renderableIndicesBufferSrv != nullptr && renderableIndicesBufferSrv->IsValid());
             perFrameConstants.RenderableIndicesBufferSrv = renderableIndicesBufferSrv->Index;
             perFrameConstants.NumMaxRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
+
+            perFrameConstants.MinMeshLod = minMeshLod;
 
             TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameConstants>(localFrameIdx);
             const GpuView* perFrameBufferCbv = renderContext->Lookup(perFrameConstantBuffer.GetConstantBufferView());
@@ -485,10 +487,10 @@ namespace ig
                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
                 cmdList->FlushBarriers();
 
-                /* 
-                * 나중에 아예 Zero Init 용 통합 버퍼, 예를들어 현재 상태에선 
-                * Union(kUavCounterSize, CullingData) 크기에 해당하는 버퍼 1개만 할당!
-                */
+                /*
+                 * 나중에 아예 Zero Init 용 통합 버퍼, 예를들어 현재 상태에선
+                 * Union(kUavCounterSize, CullingData) 크기에 해당하는 버퍼 1개만 할당!
+                 */
                 cmdList->CopyBuffer(
                     *uavCounterResetBuffer, 0, GpuBufferDesc::kUavCounterSize,
                     *meshLodInstanceBuffer, meshLodInstanceBufferDesc.GetUavCounterOffset());
@@ -510,7 +512,8 @@ namespace ig
 
                 constexpr U32 kNumThreadsPerGroup = 16;
                 const U32 numRenderables = (U32)sceneProxy->GetMaxNumRenderables(localFrameIdx);
-                const U32 numThreadGroup = std::max(1u, (numRenderables - 1) / (kNumThreadsPerGroup + 1));
+                const U32 numRemainThreads = numRenderables % kNumThreadsPerGroup;
+                const U32 numThreadGroup = numRenderables / kNumThreadsPerGroup + (numRemainThreads > 0 ? 1 : 0);
                 cmdList->Dispatch(numThreadGroup, 1, 1);
 
                 cmdList->Close();
@@ -534,9 +537,10 @@ namespace ig
 
                 cmdList->SetRoot32BitConstants(0, comapctMeshLodInstancesConstants, 0);
 
-                constexpr U32 kNumThreadsPerGruop = 16;
+                constexpr U32 kNumThreadsPerGroup = 16;
                 const U32 numRenderables = (U32)sceneProxy->GetMaxNumRenderables(localFrameIdx);
-                const U32 numThreadGroup = std::max(1u, (numRenderables - 1) / (kNumThreadsPerGruop + 1));
+                const U32 numRemainThreads = numRenderables % kNumThreadsPerGroup;
+                const U32 numThreadGroup = numRenderables / kNumThreadsPerGroup + (numRemainThreads > 0 ? 1 : 0);
                 cmdList->Dispatch(numThreadGroup, 1, 1);
 
                 cmdList->Close();
@@ -561,9 +565,10 @@ namespace ig
                     *uavCounterResetBuffer,
                     D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
-                cmdList->AddPendingBufferBarrier(*drawInstanceCmdBuffer,
-                                                 D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-                                                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+                cmdList->AddPendingBufferBarrier(
+                    *drawInstanceCmdBuffer,
+                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
                 cmdList->FlushBarriers();
 
                 cmdList->CopyBuffer(

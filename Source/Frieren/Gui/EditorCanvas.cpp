@@ -1,5 +1,6 @@
 #include "Frieren/Frieren.h"
 #include "Igniter/Core/Engine.h"
+#include "Igniter/Render/Renderer.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/GameSystem.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
@@ -128,6 +129,19 @@ namespace fe
             }
 
             ImGui::EndMainMenuBar();
+        }
+
+        // #sy_test
+        static bool bLodTest = true;
+        if (ImGui::Begin("LOD Test", &bLodTest))
+        {
+            ig::I32 tempValue = ig::Engine::GetRenderer().GetMinMeshLod();
+            if(ImGui::SliderInt("Min LOD Level", &tempValue, 0, 7))
+            {
+                ig::Engine::GetRenderer().SetMinMeshLod((ig::U8)tempValue);
+            }
+
+            ImGui::End();
         }
 
         if (bStatisticsPanelOpend)
