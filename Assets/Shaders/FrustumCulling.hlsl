@@ -45,7 +45,7 @@ struct FrustumCullingConstants
 };
 ConstantBuffer<FrustumCullingConstants> gConstants : register(b0);
 
-[numthreads(16, 1, 1)]
+[numthreads(32, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
 	ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[gConstants.PerFrameDataCbv];

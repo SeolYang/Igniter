@@ -510,7 +510,7 @@ namespace ig
 
                 cmdList->SetRoot32BitConstants(0, frustumCullingConstants, 0);
 
-                constexpr U32 kNumThreadsPerGroup = 16;
+                constexpr U32 kNumThreadsPerGroup = 32;
                 const U32 numRenderables = (U32)sceneProxy->GetMaxNumRenderables(localFrameIdx);
                 const U32 numRemainThreads = numRenderables % kNumThreadsPerGroup;
                 const U32 numThreadGroup = numRenderables / kNumThreadsPerGroup + (numRemainThreads > 0 ? 1 : 0);
@@ -537,7 +537,7 @@ namespace ig
 
                 cmdList->SetRoot32BitConstants(0, comapctMeshLodInstancesConstants, 0);
 
-                constexpr U32 kNumThreadsPerGroup = 16;
+                constexpr U32 kNumThreadsPerGroup = 32;
                 const U32 numRenderables = (U32)sceneProxy->GetMaxNumRenderables(localFrameIdx);
                 const U32 numRemainThreads = numRenderables % kNumThreadsPerGroup;
                 const U32 numThreadGroup = numRenderables / kNumThreadsPerGroup + (numRemainThreads > 0 ? 1 : 0);
