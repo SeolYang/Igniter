@@ -38,7 +38,7 @@ namespace fe
                 int numLods = (int)config.NumLods;
                 if (ImGui::SliderInt("Num LODs",
                                      &numLods,
-                                     1, (int)ig::StaticMeshImportDesc::kMaxNumLods))
+                                     2, (int)ig::StaticMeshImportDesc::kMaxNumLods))
                 {
                     config.NumLods = (ig::U8)numLods;
                 }

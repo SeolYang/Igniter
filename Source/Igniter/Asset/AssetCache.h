@@ -40,7 +40,7 @@ namespace ig::details
 
         EAssetCategory GetAssetType() const override { return AssetType; }
 
-        void Cache(const Guid& guid, T&& asset)
+        void Cache(const Guid& guid, T asset)
         {
             IG_CHECK(guid.isValid());
 

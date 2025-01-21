@@ -226,23 +226,77 @@ namespace ig
     void ig::StaticMeshImporter::GenerateLODs(StaticMeshData& meshData, const U8 numLods, const F32 maxSimplificationFactor)
     {
         IG_CHECK(numLods >= 2 && numLods <= StaticMesh::kMaxNumLods);
-        meshData.NumLods = numLods;
+        meshData.NumLods = 1;
 
-        const Vector<VertexSM>& rootLODVertices = meshData.Vertices;
-        const Vector<U32>& rootLODIndices = meshData.IndicesPerLod[0];
+        const Vector<VertexSM>& rootLodVertices = meshData.Vertices;
+        const Vector<U32>& rootLodIndices = meshData.IndicesPerLod[0];
         // LOD 0 (최소 1개 LOD)는 LOD 생성에서 제외(원본)
         const F32 simplificationFactorStride = maxSimplificationFactor / (F32)numLods;
         for (Index lod = 1; lod < numLods; ++lod)
         {
-            const Size targetNumIndices = std::max(3llu, (Size)((F32)rootLODIndices.size() * (1.f - (simplificationFactorStride * (F32)lod))));
-            Vector<U32>& indices = meshData.IndicesPerLod[lod];
-            indices.resize(meshData.IndicesPerLod[lod - 1].size());
-            const Size numSimplifiedIndices = meshopt_simplifySloppy(
-                indices.data(),
-                rootLODIndices.data(), rootLODIndices.size(),
-                &rootLODVertices[0].Position.x, rootLODVertices.size(), sizeof(VertexSM),
-                targetNumIndices, FLT_MAX, nullptr);
-            indices.resize(numSimplifiedIndices);
+            const Size previousLodNumIndices = meshData.IndicesPerLod[lod - 1].size();
+            const Size targetNumIndices = std::max(3llu, (Size)((F32)rootLodIndices.size() * (1.f - (simplificationFactorStride * (F32)lod))));
+            Vector<U32>& lodIndices = meshData.IndicesPerLod[lod];
+            lodIndices.resize(rootLodIndices.size());
+
+            // 1. Simplify 함수로 error value 0.02(2% deviation); 이전 대비 최소 5% 이상 감소시 통과
+            Size numSimplifiedIndices = meshopt_simplify(
+                lodIndices.data(),
+                rootLodIndices.data(), rootLodIndices.size(),
+                &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
+                targetNumIndices, 0.02f,
+                0, nullptr);
+
+            const Size simplifyOptThreshold = (Size)(previousLodNumIndices * 0.95f);
+            const Size simplifySloppyOptThreshold = (Size)(previousLodNumIndices * 0.9f);
+            bool simplifyPass = numSimplifiedIndices <= simplifyOptThreshold;
+
+            // 2. Simplify 함수로 error value 무제한; 이전 대비 최소 5% 이상 감소시 통과
+            if (!simplifyPass)
+            {
+                numSimplifiedIndices = meshopt_simplify(
+                    lodIndices.data(),
+                    rootLodIndices.data(), rootLodIndices.size(),
+                    &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
+                    targetNumIndices, FLT_MAX,
+                    0, nullptr);
+
+                simplifyPass = numSimplifiedIndices <= simplifyOptThreshold;
+            }
+
+            // 3. SimplifySloppy 함수로 error value 0.05(5% deviation); 이전 대비 최소 10% 이상 감소시 통과;
+            if (!simplifyPass)
+            {
+                numSimplifiedIndices = meshopt_simplifySloppy(
+                    lodIndices.data(),
+                    rootLodIndices.data(), rootLodIndices.size(),
+                    &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
+                    targetNumIndices, 0.1f, nullptr);
+
+                simplifyPass = numSimplifiedIndices <= simplifySloppyOptThreshold;
+            }
+
+            // 4. SimplifySloppy 함수로 error value 무제한; 이전 대비 감소 없을 시, 이 이상의 lod 생성은 불가능 판단, 생성 종료
+            if (!simplifyPass)
+            {
+                numSimplifiedIndices = meshopt_simplifySloppy(
+                    lodIndices.data(),
+                    rootLodIndices.data(), rootLodIndices.size(),
+                    &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
+                    targetNumIndices, FLT_MAX, nullptr);
+
+                simplifyPass = numSimplifiedIndices < previousLodNumIndices;
+            }
+
+            if (!simplifyPass)
+            {
+                lodIndices.clear();
+                break;
+            }
+
+            ++meshData.NumLods;
+            lodIndices.resize(numSimplifiedIndices);
+            meshopt_optimizeVertexCache(lodIndices.data(), lodIndices.data(), lodIndices.size(), rootLodVertices.size());
         }
     }
 

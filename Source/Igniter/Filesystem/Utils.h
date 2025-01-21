@@ -80,7 +80,11 @@ namespace ig
 
         for (const std::span<const uint8_t> blob : blobs)
         {
-            IG_CHECK(blob.size_bytes() > 0);
+            if (blob.empty())
+            {
+                continue;
+            }
+
             fileStream.write(reinterpret_cast<const char*>(blob.data()), blob.size_bytes());
         }
 

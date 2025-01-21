@@ -645,12 +645,6 @@
     <FxCompile Include="..\..\Assets\Shaders\BasicVertexShader.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\ComputeCulling.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\GenDrawCommands.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\BasicPixelShader.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
