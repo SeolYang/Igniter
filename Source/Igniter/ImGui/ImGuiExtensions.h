@@ -24,10 +24,24 @@ namespace ig::ImGuiX
             if (ImGui::Selectable(EnumNames[idx].data(), selectedIdx == idx))
             {
                 selectedIdx = idx;
+                break;
             }
         }
 
         return true;
+    }
+
+    template <typename E>
+        requires std::is_enum_v<E>
+    bool BeginEnumCombo(const std::string_view name, E& enumValue)
+    {
+        int selected = 0;
+        const bool bSuccuess = BeginEnumCombo<E>(name, selected);
+        if (bSuccuess)
+        {
+            enumValue = magic_enum::enum_value<E>(selected);
+        }
+       return bSuccuess;
     }
 
     inline void EndEnumCombo()
