@@ -55,26 +55,25 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	}
 	
 	StructuredBuffer<uint> renderableIndices = ResourceDescriptorHeap[perFrameData.RenderableIndicesBufferSrv];
-	uint renderableIdx = renderableIndices[DTid.x];
 	StructuredBuffer<RenderableData> renderableStorage = ResourceDescriptorHeap[perFrameData.RenderableStorageSrv];
-	RenderableData renderableData = renderableStorage[renderableIdx];
+	StructuredBuffer<Mesh> meshStorage = ResourceDescriptorHeap[perFrameData.MeshStorageSrv];
+	StructuredBuffer<TransformData> transformStorage = ResourceDescriptorHeap[perFrameData.TransformStorageSrv];
+	RWStructuredBuffer<InstancingData> instancingDataStorage = ResourceDescriptorHeap[perFrameData.InstancingDataStorageUav];
+	RWStructuredBuffer<CullingData> cullingDataBuffer = ResourceDescriptorHeap[gConstants.CullingDataBufferUav];
+	AppendStructuredBuffer<MeshLodInstance> meshLodInstances = ResourceDescriptorHeap[gConstants.MeshLodInstanceStorageUav];
+		
+	uint renderableIdx = renderableIndices[DTid.x];
+	RenderableData renderableData = renderableStorage[renderableIdx]; // 모든 스레드에 걸쳐서 Unique
 	if (renderableData.Type == RENDERABLE_TYPE_STATIC_MESH)
 	{
-		RWStructuredBuffer<InstancingData> instancingDataStorage =
-            ResourceDescriptorHeap[perFrameData.InstancingDataStorageUav];
-		StructuredBuffer<Mesh> meshStorage =
-            ResourceDescriptorHeap[perFrameData.MeshStorageSrv];
-		StructuredBuffer<TransformData> transformStorage =
-			ResourceDescriptorHeap[perFrameData.TransformStorageSrv];
-		
-		TransformData transformData = transformStorage[renderableData.TransformIdx];
+		TransformData transformData = transformStorage[renderableData.TransformIdx]; // 모든 스레드에 걸쳐서 Unique
 		float4x4 toWorld = transpose(float4x4(
 			transformData.Cols[0],
 			transformData.Cols[1],
 			transformData.Cols[2],
 			float4(0.f, 0.f, 0.f, 1.f)));
 		
-		InstancingData instancingData = instancingDataStorage.Load(renderableData.DataIdx);
+		InstancingData instancingData = instancingDataStorage.Load(renderableData.DataIdx); // 겹칠 가능성 O
 		Mesh mesh = meshStorage[instancingData.MeshIdx];
 		
 		if (!perFrameData.EnableFrustumCulling ||
@@ -94,16 +93,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			// 가능하면 Static Mesh Component에 해당 파라미터 추가하기
 			MeshLodInstance newVisibleLodInstance;
 			newVisibleLodInstance.RenderableIdx = renderableIdx;
-			newVisibleLodInstance.Lod = uint(lerp(float(min(perFrameData.MinMeshLod, mesh.NumLods-1)), float(mesh.NumLods), saturate(meshInstanceToCamDist / camNearToFarDist)));
+			newVisibleLodInstance.Lod = uint(lerp(float(min(perFrameData.MinMeshLod, mesh.NumLods - 1)), float(mesh.NumLods), saturate(meshInstanceToCamDist / camNearToFarDist)));
 			InterlockedAdd(
 				instancingDataStorage[renderableData.DataIdx].NumVisibleLodInstances[newVisibleLodInstance.Lod],
 				1,
 				newVisibleLodInstance.LodInstanceId);
 			
-			AppendStructuredBuffer<MeshLodInstance> meshLodInstances = ResourceDescriptorHeap[gConstants.MeshLodInstanceStorageUav];
 			meshLodInstances.Append(newVisibleLodInstance);
-		
-			RWStructuredBuffer<CullingData> cullingDataBuffer = ResourceDescriptorHeap[gConstants.CullingDataBufferUav];
 			InterlockedAdd(cullingDataBuffer[0].NumVisibleLodInstances, 1);
 		}
 	}

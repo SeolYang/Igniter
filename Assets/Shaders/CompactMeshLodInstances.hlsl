@@ -31,7 +31,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	uint v_laneIdx = WaveGetLaneIndex(); // VGPR
 	uint s_executeMask = 0xffffffff; // SGPR
 	uint v_currentLaneMask = uint(1) << v_laneIdx; // VGPR
-	
 	while ((s_executeMask & v_currentLaneMask) != 0)
 	{
 		uint s_renderableIdx = WaveReadLaneFirst(v_renderableIdx);
