@@ -41,5 +41,5 @@ namespace ig
         Quaternion Rotation;
     };
 
-    IG_DECLARE_TYPE_META(TransformComponent);
+    IG_DECLARE_META(TransformComponent);
 } // namespace ig

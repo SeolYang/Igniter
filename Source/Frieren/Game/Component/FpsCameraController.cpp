@@ -8,7 +8,7 @@ namespace fe
     template <>
     void DefineMeta<FpsCameraController>()
     {
-        IG_SET_META_ON_INSPECTOR_FUNC(FpsCameraController, FpsCameraController::OnInspector);
+        IG_SET_ON_INSPECTOR_META(FpsCameraController, FpsCameraController::OnInspector);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(FpsCameraController);
     }
 
@@ -50,5 +50,5 @@ namespace fe
         ImGui::InputFloat("Current Pitch", &controller.CurrentPitch, 0.f, 0.f, "%.3f deg", ImGuiInputTextFlags_ReadOnly);
     }
 
-    IG_DEFINE_TYPE_META_AS_COMPONENT(FpsCameraController);
+    IG_DEFINE_COMPONENT_META(FpsCameraController);
 } // namespace fe

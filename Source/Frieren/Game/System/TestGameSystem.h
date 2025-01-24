@@ -28,5 +28,5 @@ namespace fe
         CameraPossessSystem cameraPossessSystem{fpsCameraControllSystem};
     };
 
-    IG_DECLARE_TYPE_META(TestGameSystem);
+    IG_DECLARE_META(TestGameSystem);
 } // namespace fe

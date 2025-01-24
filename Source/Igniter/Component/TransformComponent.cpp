@@ -10,7 +10,7 @@ namespace ig
     template <>
     void DefineMeta<TransformComponent>()
     {
-        IG_SET_META_ON_INSPECTOR_FUNC(TransformComponent, TransformComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(TransformComponent, TransformComponent::OnInspector);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(TransformComponent);
     }
 
@@ -63,5 +63,5 @@ namespace ig
         ImGuiX::EditTransform("Transform", transform);
     }
 
-    IG_DEFINE_TYPE_META_AS_COMPONENT(TransformComponent);
+    IG_DEFINE_COMPONENT_META(TransformComponent);
 } // namespace ig

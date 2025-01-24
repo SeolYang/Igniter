@@ -9,7 +9,7 @@ namespace ig
     template <>
     void DefineMeta<CameraComponent>()
     {
-        IG_SET_META_ON_INSPECTOR_FUNC(CameraComponent, CameraComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(CameraComponent, CameraComponent::OnInspector);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(CameraComponent);
     }
 
@@ -73,5 +73,5 @@ namespace ig
         ImGui::Checkbox("Enable Frustum Culling", &camera.bEnableFrustumCull);
     }
 
-    IG_DEFINE_TYPE_META_AS_COMPONENT(CameraComponent);
+    IG_DEFINE_COMPONENT_META(CameraComponent);
 } // namespace ig

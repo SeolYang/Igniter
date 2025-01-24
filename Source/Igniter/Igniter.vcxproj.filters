@@ -426,6 +426,9 @@
     <ClInclude Include="Component\LightComponent.h">
       <Filter>Source\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Component\StaticMeshArchetype.h">
+      <Filter>Source\Component\Archetype</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -628,6 +631,12 @@
     </ClCompile>
     <ClCompile Include="Component\LightComponent.cpp">
       <Filter>Source\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\CameraArchetype.cpp">
+      <Filter>Source\Component\Archetype</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\StaticMeshArchetype.cpp">
+      <Filter>Source\Component\Archetype</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

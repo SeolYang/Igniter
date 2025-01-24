@@ -39,5 +39,5 @@ namespace fe
         constexpr static float MaxPitchDegrees = 45.f;
     };
 
-    IG_DECLARE_TYPE_META(FpsCameraController);
+    IG_DECLARE_META(FpsCameraController);
 } // namespace fe

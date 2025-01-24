@@ -163,7 +163,8 @@ namespace fe
         // world->Deserialize(dumpedWorld);
         ig::World& worldInstance = ig::Engine::GetWorld();
         ig::Registry& registry = worldInstance.GetRegistry();
-        FpsCmaeraArchetype::Create(registry, true);
+        const ig::Entity mainCam = FpsCameraArchetype::Create(&registry);
+        registry.get<ig::CameraComponent>(mainCam).bIsMainCamera = true;
 
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);
@@ -186,16 +187,16 @@ namespace fe
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
                     nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
 
-                    //RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
-                    //randComp.MoveDirection = ig::Vector3{
-                    //    ig::Random(-1.f, 1.f),
-                    //    ig::Random(-1.f, 1.f),
-                    //    ig::Random(-1.f, 1.f)};
-                    //randComp.MoveDirection.Normalize();
-                    //randComp.MoveSpeed = ig::Random(0.f, 5.f);
+                    // RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
+                    // randComp.MoveDirection = ig::Vector3{
+                    //     ig::Random(-1.f, 1.f),
+                    //     ig::Random(-1.f, 1.f),
+                    //     ig::Random(-1.f, 1.f)};
+                    // randComp.MoveDirection.Normalize();
+                    // randComp.MoveSpeed = ig::Random(0.f, 5.f);
 
-                    //randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
-                    //randComp.RotateSpeed = ig::Random(0.f, 15.f);
+                    // randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
+                    // randComp.RotateSpeed = ig::Random(0.f, 15.f);
                 }
             }
         }

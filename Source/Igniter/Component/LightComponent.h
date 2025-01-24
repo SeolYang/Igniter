@@ -15,5 +15,5 @@ namespace ig
         Light Property;
     };
 
-    IG_DECLARE_TYPE_META(LightComponent);
+    IG_DECLARE_META(LightComponent);
 } // namespace ig

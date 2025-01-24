@@ -11,7 +11,7 @@ namespace ig
     template <>
     void DefineMeta<MaterialComponent>()
     {
-        IG_SET_META_ON_INSPECTOR_FUNC(MaterialComponent, MaterialComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(MaterialComponent, MaterialComponent::OnInspector);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(MaterialComponent);
     }
 
@@ -132,5 +132,5 @@ namespace ig
         Instance = {};
     }
 
-    IG_DEFINE_TYPE_META_AS_COMPONENT(MaterialComponent);
+    IG_DEFINE_COMPONENT_META(MaterialComponent);
 } // namespace ig

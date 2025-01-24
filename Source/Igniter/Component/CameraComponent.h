@@ -33,5 +33,5 @@ namespace ig
         /* #sy_improvements Support Orthographic? */
     };
 
-    IG_DECLARE_TYPE_META(CameraComponent);
+    IG_DECLARE_META(CameraComponent);
 } // namespace ig

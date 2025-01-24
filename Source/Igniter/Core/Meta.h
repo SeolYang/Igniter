@@ -18,6 +18,8 @@ namespace ig::meta
     constexpr inline entt::hashed_string RemoveComponentFunc = "RemoveComponent"_hs;
     // Signature:OnInspectorFunc(Registry*, Entity); // #sy_todo -> Ref<Registry>로 변경 할 것
     constexpr inline entt::hashed_string OnInspectorFunc = "OnInspectorFunc"_hs;
+    constexpr inline entt::hashed_string ArchetypeProperty = "Archetype"_hs;
+    constexpr inline entt::hashed_string ArchetypeCreateFunc = "ArchetypeCreate"_hs;
     constexpr inline entt::hashed_string StartupAppClass = "StartupClass"_hs;
 
     [[nodiscard]] inline bool HasProperty(const ig::meta::Type& type, const entt::hashed_string propertyIdentifier)
@@ -48,11 +50,27 @@ namespace ig::meta
         return IsReflectedType(type) && bHasComponentIdentity;
     }
 
+
     template <typename T>
     [[nodiscard]] bool IsComponent()
     {
         using Ty = std::decay_t<T>;
         return IsComponent(entt::resolve<Ty>());
+    }
+
+    [[nodiscard]] inline bool IsArchetype(const ig::meta::Type& type)
+    {
+        const auto bOwningArchetypeProperty = static_cast<bool>(type.prop(ArchetypeProperty));
+        const auto bOwningCreateFunc = static_cast<bool>(type.func(ArchetypeCreateFunc));
+        const bool bHasArchetypeIdentity = bOwningArchetypeProperty && bOwningCreateFunc;
+        return IsReflectedType(type) && bHasArchetypeIdentity;
+    }
+
+    template <typename T>
+    [[nodiscard]] bool IsArchetype()
+    {
+        using Ty = std::decay_t<T>;
+        return IsArchetype(entt::resolve<Ty>());
     }
 
     template <typename... Args>
@@ -108,7 +126,7 @@ namespace ig
     }
 } // namespace ig
 
-#define IG_DECLARE_TYPE_META(T)         \
+#define IG_DECLARE_META(T)              \
     template <typename Ty>              \
     void DefineMeta();                  \
     namespace details::meta             \
@@ -122,7 +140,7 @@ namespace ig
         };                              \
     }
 
-#define IG_DEFINE_TYPE_META(T)                                                            \
+#define IG_DEFINE_META(T)                                                                 \
     namespace details::meta                                                               \
     {                                                                                     \
         T##_DefineMeta::T##_DefineMeta()                                                  \
@@ -135,7 +153,7 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                              \
     }
 
-#define IG_DEFINE_TYPE_META_AS_COMPONENT(T)                                                        \
+#define IG_DEFINE_COMPONENT_META(T)                                                                \
     namespace details::meta                                                                        \
     {                                                                                              \
         T##_DefineMeta::T##_DefineMeta()                                                           \
@@ -151,7 +169,22 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                                       \
     }
 
-#define IG_DEFINE_TYPE_META_AS_STARTUP_APP(T)                                             \
+#define IG_DEFINE_ARCHETYPE_META(T)                                                             \
+    namespace details::meta                                                                     \
+    {                                                                                           \
+        T##_DefineMeta::T##_DefineMeta()                                                        \
+        {                                                                                       \
+            static_assert(std::is_same_v<decltype(&T::Create), ig::Entity (*)(ig::Registry*)>); \
+            entt::meta<T>().type(ig::TypeHash<T>);                                              \
+            entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                              \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase());       \
+            entt::meta<T>().prop(ig::meta::ArchetypeProperty);                                  \
+            entt::meta<T>().template func<&T::Create>(ig::meta::ArchetypeCreateFunc);           \
+        }                                                                                       \
+        T##_DefineMeta T##_DefineMeta::_reg;                                                    \
+    }
+
+#define IG_DEFINE_STARTUP_APP_META(T)                                                     \
     namespace details::meta                                                               \
     {                                                                                     \
         T##_DefineMeta::T##_DefineMeta()                                                  \
@@ -166,6 +199,6 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                              \
     }
 
-#define IG_SET_META_ON_INSPECTOR_FUNC(T, Func)                                           \
+#define IG_SET_ON_INSPECTOR_META(T, Func)                                                \
     static_assert(std::is_invocable_v<decltype(Func), ig::Registry*, const ig::Entity>); \
     entt::meta<T>().func<&Func>(ig::meta::OnInspectorFunc)

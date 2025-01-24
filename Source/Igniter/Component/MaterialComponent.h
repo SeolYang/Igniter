@@ -32,5 +32,5 @@ namespace ig
         constexpr static std::string_view MeshGuidKey{"MaterialGuid"};
     };
 
-    IG_DECLARE_TYPE_META(MaterialComponent);
+    IG_DECLARE_META(MaterialComponent);
 } // namespace ig

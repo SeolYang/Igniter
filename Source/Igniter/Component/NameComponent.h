@@ -15,5 +15,5 @@ namespace ig
         String Name{"New Entity"};
     };
 
-    IG_DECLARE_TYPE_META(NameComponent);
+    IG_DECLARE_META(NameComponent);
 } // namespace ig

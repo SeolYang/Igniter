@@ -1,20 +1,21 @@
 #pragma once
-#include "Igniter/Component/CameraComponent.h"
 #include "Igniter/Component/TransformComponent.h"
+#include "Igniter/Component/StaticMeshComponent.h"
+#include "Igniter/Component/MaterialComponent.h"
 
 namespace ig
 {
-    struct CameraArchetype
+    struct StaticMeshArchetype
     {
-      public:
         static Entity Create(Registry* registry)
         {
             const Entity newEntity = registry->create();
-            registry->emplace<CameraComponent>(newEntity);
             registry->emplace<TransformComponent>(newEntity);
+            registry->emplace<StaticMeshComponent>(newEntity);
+            registry->emplace<MaterialComponent>(newEntity);
             return newEntity;
         }
     };
 
-    IG_DECLARE_META(CameraArchetype);
+    IG_DECLARE_META(StaticMeshArchetype);
 } // namespace ig

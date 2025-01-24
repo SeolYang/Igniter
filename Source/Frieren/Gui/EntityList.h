@@ -31,5 +31,6 @@ namespace fe
       private:
         ig::World* activeWorld = nullptr;
         ig::Entity selectedEntity = entt::null;
+        ig::Vector<ig::Entity> entites;
     };
 } // namespace fe

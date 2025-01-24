@@ -69,6 +69,9 @@
     <ClCompile Include="Gui\TextureImportPanel.cpp">
       <Filter>Source\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Component\FpsCameraArchetype.cpp">
+      <Filter>Source\Game\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\TestApp.h">

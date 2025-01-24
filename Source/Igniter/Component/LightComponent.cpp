@@ -9,7 +9,7 @@ namespace ig
     template <>
     void DefineMeta<LightComponent>()
     {
-        IG_SET_META_ON_INSPECTOR_FUNC(LightComponent, LightComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(LightComponent, LightComponent::OnInspector);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(LightComponent);
     }
 
@@ -38,5 +38,5 @@ namespace ig
         }
     }
 
-    IG_DEFINE_TYPE_META_AS_COMPONENT(LightComponent);
+    IG_DEFINE_COMPONENT_META(LightComponent);
 }

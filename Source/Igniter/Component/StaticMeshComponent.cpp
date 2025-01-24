@@ -10,7 +10,7 @@ namespace ig
     template <>
     void DefineMeta<StaticMeshComponent>()
     {
-        IG_SET_META_ON_INSPECTOR_FUNC(StaticMeshComponent, StaticMeshComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(StaticMeshComponent, StaticMeshComponent::OnInspector);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(StaticMeshComponent);
     }
 
@@ -122,5 +122,5 @@ namespace ig
         Mesh = {};
     }
 
-    IG_DEFINE_TYPE_META_AS_COMPONENT(StaticMeshComponent);
+    IG_DEFINE_COMPONENT_META(StaticMeshComponent);
 } // namespace ig

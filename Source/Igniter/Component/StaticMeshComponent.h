@@ -1,5 +1,6 @@
 #pragma once
 #include "Igniter/Core/Handle.h"
+#include "Igniter/Asset/Common.h"
 #include "Igniter/Core/Meta.h"
 
 namespace ig
@@ -33,5 +34,5 @@ namespace ig
         constexpr static std::string_view MeshGuidKey{"StaticMeshGuid"};
     };
 
-    IG_DECLARE_TYPE_META(StaticMeshComponent);
+    IG_DECLARE_META(StaticMeshComponent);
 } // namespace ig

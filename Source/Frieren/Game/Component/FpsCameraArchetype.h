@@ -6,19 +6,21 @@
 
 namespace fe
 {
-    struct FpsCmaeraArchetype
+    struct FpsCameraArchetype
     {
       public:
-        static ig::Entity Create(ig::Registry& registry, const bool bIsMainCamera)
+        static ig::Entity Create(ig::Registry* registry)
         {
             using namespace ig::literals;
-            const ig::Entity newEntity = registry.create();
-            auto& cameraComponent = registry.emplace<ig::CameraComponent>(newEntity);
-            cameraComponent.bIsMainCamera = bIsMainCamera;
-            registry.emplace<ig::TransformComponent>(newEntity);
-            registry.emplace<FpsCameraController>(newEntity);
-            registry.emplace<ig::NameComponent>(newEntity, "FpsCamera"_fs);
+            const ig::Entity newEntity = registry->create();
+            auto& cameraComponent = registry->emplace<ig::CameraComponent>(newEntity);
+            cameraComponent.bIsMainCamera = false;
+            registry->emplace<ig::TransformComponent>(newEntity);
+            registry->emplace<FpsCameraController>(newEntity);
+            registry->emplace<ig::NameComponent>(newEntity, "FpsCamera"_fs);
             return newEntity;
         }
     };
+
+    IG_DECLARE_META(FpsCameraArchetype);
 } // namespace fe
