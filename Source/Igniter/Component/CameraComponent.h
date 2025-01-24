@@ -17,6 +17,14 @@ namespace ig
             return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
         }
 
+        [[nodiscard]] Matrix CreatePerspectiveForReverseZ() const
+        {
+            const F32 aspectRatio = CameraViewport.AspectRatio();
+            IG_CHECK(aspectRatio >= 0.f);
+            const F32 fovRads = Deg2Rad(Fov);
+            return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, FarZ, NearZ);
+        }
+
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);

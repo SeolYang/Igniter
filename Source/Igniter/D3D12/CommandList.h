@@ -50,8 +50,8 @@ namespace ig
         void FlushBarriers();
 
         void ClearRenderTarget(const GpuView& rtv, F32 r = 0.f, F32 g = 0.f, F32 b = 0.f, F32 a = 1.f);
-        void ClearDepthStencil(const GpuView& dsv, F32 depth = 1.f, uint8_t stencil = 0);
-        void ClearDepth(const GpuView& dsv, F32 depth = 1.f);
+        void ClearDepthStencil(const GpuView& dsv, F32 depth, uint8_t stenci);
+        void ClearDepth(const GpuView& dsv, F32 depth);
         void ClearStencil(const GpuView& dsv, uint8_t stencil = 0);
 
         void CopyBuffer(GpuBuffer& src, GpuBuffer& dst);

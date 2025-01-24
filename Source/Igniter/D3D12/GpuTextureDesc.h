@@ -27,7 +27,7 @@ namespace ig
 
         void AsRenderTarget(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
                             const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false, const U32 sampleCount = 1, U32 sampleQuality = 0);
-        void AsDepthStencil(const U32 width, const U32 height, const DXGI_FORMAT format);
+        void AsDepthStencil(const U32 width, const U32 height, const DXGI_FORMAT format, const bool bReverseZ);
 
         void AsTexture1DArray(const U32 width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,
                               const bool bEnableShaderReadWrite = false, const bool bEnableSimultaneousAccess = false);
@@ -77,6 +77,10 @@ namespace ig
       public:
         String DebugName = String{"Unknown Texture"};
         D3D12_BARRIER_LAYOUT InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
+
+        F32 ClearDepthValue = 1.f;
+        U8 ClearStencilValue = 0;
+        Color ClearColorValue = Color{0.f, 0.f, 0.f, 1.f};
 
       private:
         bool bIsArray = false;

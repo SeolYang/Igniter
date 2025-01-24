@@ -288,7 +288,7 @@ namespace ig
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
-    void GpuTextureDesc::AsDepthStencil(const U32 width, const U32 height, const DXGI_FORMAT format)
+    void GpuTextureDesc::AsDepthStencil(const U32 width, const U32 height, const DXGI_FORMAT format, const bool bReverseZ)
     {
         bIsArray = false;
         bIsMSAAEnabled = false;
@@ -311,6 +311,8 @@ namespace ig
         InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
         Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
+
+        ClearDepthValue = bReverseZ ? 0.f : 1.f;
     }
 
     void GpuTextureDesc::AsTexture1DArray(const U32 width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,

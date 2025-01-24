@@ -502,11 +502,15 @@ namespace ig
         Option<D3D12_CLEAR_VALUE> clearValue{};
         if (textureDesc.IsRenderTargetCompatible())
         {
-            clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .Color = {0.f, 0.f, 0.f, 1.f}};
+            clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format};
+            clearValue->Color[0] = textureDesc.ClearColorValue.R();
+            clearValue->Color[1] = textureDesc.ClearColorValue.G();
+            clearValue->Color[2] = textureDesc.ClearColorValue.B();
+            clearValue->Color[3] = textureDesc.ClearColorValue.A();
         }
         else if (textureDesc.IsDepthStencilCompatible())
         {
-            clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .DepthStencil = {.Depth = 1.f, .Stencil = 0}};
+            clearValue = D3D12_CLEAR_VALUE{.Format = textureDesc.Format, .DepthStencil = {.Depth = textureDesc.ClearDepthValue, .Stencil = textureDesc.ClearStencilValue}};
         }
 
         ComPtr<D3D12MA::Allocation> allocation{};

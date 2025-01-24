@@ -136,6 +136,7 @@ namespace ig
         vs = MakePtr<ShaderBlob>(vsDesc);
         ps = MakePtr<ShaderBlob>(psDesc);
 
+        // Reverse-Z PSO & Viewport
         GraphicsPipelineStateDesc psoDesc;
         psoDesc.SetVertexShader(*vs);
         psoDesc.SetPixelShader(*ps);
@@ -143,11 +144,13 @@ namespace ig
         psoDesc.NumRenderTargets = 1;
         psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+        psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC{CD3DX12_DEFAULT{}};
+        psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
         pso = MakePtr<PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
 
         GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
-        depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT);
+        depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT, true);
 
         auto initialCmdList = renderContext.GetMainGfxCommandListPool().Request(0, "Initial Transition"_fs);
         initialCmdList->Open();
@@ -329,7 +332,7 @@ namespace ig
             }
 
             const Matrix viewMatrix = transformComponent.CreateView();
-            const Matrix projMatrix = camera.CreatePerspective();
+            const Matrix projMatrix = camera.CreatePerspectiveForReverseZ();
             perFrameConstants.View = ConvertToShaderSuitableForm(viewMatrix);
             perFrameConstants.ViewProj = ConvertToShaderSuitableForm(viewMatrix * projMatrix);
             perFrameConstants.CamPosInvAspectRatio = Vector4{
@@ -370,7 +373,7 @@ namespace ig
 
             renderCmdList->ClearRenderTarget(*backBufferRtv);
             GpuView* dsv = renderContext->Lookup(dsvs[localFrameIdx]);
-            renderCmdList->ClearDepth(*dsv);
+            renderCmdList->ClearDepth(*dsv, 0.f);
             renderCmdList->AddPendingTextureBarrier(
                 *backBuffer,
                 D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
@@ -404,19 +407,19 @@ namespace ig
             IG_CHECK(meshProxyStorageSrv != nullptr && meshProxyStorageSrv->IsValid());
             perFrameConstants.MeshStorageSrv = meshProxyStorageSrv->Index;
 
-            //GpuBuffer* instancingStorageBuffer = renderContext->Lookup(sceneProxy->GetInstancingStorageBuffer(localFrameIdx));
+            // GpuBuffer* instancingStorageBuffer = renderContext->Lookup(sceneProxy->GetInstancingStorageBuffer(localFrameIdx));
             const GpuView* instancingStorageSrv = renderContext->Lookup(sceneProxy->GetInstancingStorageSrv(localFrameIdx));
             const GpuView* instancingStorageUav = renderContext->Lookup(sceneProxy->GetInstancingStorageUav(localFrameIdx));
-            //IG_CHECK(instancingStorageBuffer != nullptr && instancingStorageBuffer->IsValid());
+            // IG_CHECK(instancingStorageBuffer != nullptr && instancingStorageBuffer->IsValid());
             IG_CHECK(instancingStorageSrv != nullptr && instancingStorageSrv->IsValid());
             IG_CHECK(instancingStorageUav != nullptr && instancingStorageUav->IsValid());
             perFrameConstants.InstancingDataStorageSrv = instancingStorageSrv->Index;
             perFrameConstants.InstancingDataStorageUav = instancingStorageUav->Index;
 
-            //GpuBuffer* indirectTransformStorageBuffer = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageBuffer(localFrameIdx));
+            // GpuBuffer* indirectTransformStorageBuffer = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageBuffer(localFrameIdx));
             const GpuView* indirectTransformStorageSrv = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageSrv(localFrameIdx));
             const GpuView* indirectTransformStorageUav = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageUav(localFrameIdx));
-            //IG_CHECK(indirectTransformStorageBuffer != nullptr && indirectTransformStorageBuffer->IsValid());
+            // IG_CHECK(indirectTransformStorageBuffer != nullptr && indirectTransformStorageBuffer->IsValid());
             IG_CHECK(indirectTransformStorageSrv != nullptr && indirectTransformStorageSrv->IsValid());
             IG_CHECK(indirectTransformStorageUav != nullptr && indirectTransformStorageUav->IsValid());
             perFrameConstants.IndirectTransformStorageSrv = indirectTransformStorageSrv->Index;
@@ -613,7 +616,7 @@ namespace ig
 
                 renderCmdList->ClearRenderTarget(*backBufferRtv);
                 GpuView* dsv = renderContext->Lookup(dsvs[localFrameIdx]);
-                renderCmdList->ClearDepth(*dsv);
+                renderCmdList->ClearDepth(*dsv, 0.f);
                 renderCmdList->SetRenderTarget(*backBufferRtv, *dsv);
                 renderCmdList->SetViewport(mainViewport);
                 renderCmdList->SetScissorRect(mainViewport);
