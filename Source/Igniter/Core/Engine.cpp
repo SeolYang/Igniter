@@ -114,6 +114,7 @@ namespace ig
         IG_LOG(EngineLog, Info, "Igniting Main Loop!");
         while (!bShouldExit)
         {
+            FrameMark;
             ZoneScoped;
             /********  Begin Frame  *******/
             const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
