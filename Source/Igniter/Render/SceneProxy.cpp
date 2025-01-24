@@ -11,6 +11,7 @@
 #include "Igniter/Component/CameraComponent.h"
 #include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Component/MaterialComponent.h"
+#include "Igniter/Component/LightComponent.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/Render/SceneProxy.h"
 
@@ -25,9 +26,6 @@ namespace ig
     {
         GpuBufferDesc renderableIndicesBufferDesc;
         renderableIndicesBufferDesc.AsStructuredBuffer<U32>(kNumInitRenderableIndices);
-
-        GpuBufferDesc lightIndicesBufferDesc;
-        lightIndicesBufferDesc.AsStructuredBuffer<U32>(kNumInitLightIndices);
 
         for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
         {
@@ -93,11 +91,6 @@ namespace ig
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
             renderableIndicesBuffer[localFrameIdx] = renderContext.CreateBuffer(renderableIndicesBufferDesc);
             renderableIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(renderableIndicesBuffer[localFrameIdx]);
-
-            lightIndicesBufferSize[localFrameIdx] = kNumInitLightIndices;
-            lightIndicesBufferDesc.DebugName = String(std::format("LightIndicesBuffer{}", localFrameIdx));
-            lightIndicesBuffer[localFrameIdx] = renderContext.CreateBuffer(lightIndicesBufferDesc);
-            lightIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(lightIndicesBuffer[localFrameIdx]);
         }
 
         meshProxyPackage.PendingReplicationGroups.resize(numWorker);
@@ -113,6 +106,11 @@ namespace ig
         transformProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
         transformProxyPackage.WorkGroupCmdLists.resize(numWorker);
 
+        lightProxyPackage.PendingReplicationGroups.resize(numWorker);
+        lightProxyPackage.PendingProxyGroups.resize(numWorker);
+        lightProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
+        lightProxyPackage.WorkGroupCmdLists.resize(numWorker);
+
         instancingPackage.ThreadLocalInstancingMaps.resize(numWorker);
         localIntermediateStaticMeshData.resize(numWorker);
 
@@ -125,7 +123,6 @@ namespace ig
 
         renderableIndicesGroups.resize(numWorker);
         renderableIndices.reserve(kNumInitRenderableIndices);
-        lightIndices.reserve(kNumInitLightIndices);
     }
 
     SceneProxy::~SceneProxy()
@@ -139,11 +136,7 @@ namespace ig
             lightProxyPackage.Storage[localFrameIdx]->ForceReset();
 
             renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
-            renderContext->DestroyGpuView(lightIndicesBufferSrv[localFrameIdx]);
-
             renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
-            renderContext->DestroyBuffer(lightIndicesBuffer[localFrameIdx]);
-
             renderContext->DestroyBuffer(renderableIndicesStagingBuffer[localFrameIdx]);
         }
     }
@@ -168,6 +161,14 @@ namespace ig
             {
                 ZoneScopedN("UpdateTransformProxy");
                 UpdateTransformProxy(subflow, localFrameIdx, registry);
+                subflow.join();
+            });
+
+        tf::Task updateLightTask = rootTaskFlow.emplace(
+            [this, localFrameIdx, &registry](tf::Subflow& subflow)
+            {
+                ZoneScopedN("UpdateLightProxy");
+                UpdateLightProxy(subflow, localFrameIdx, registry);
                 subflow.join();
             });
 
@@ -221,6 +222,14 @@ namespace ig
                 subflow.join();
             });
 
+        tf::Task replicateLightData = rootTaskFlow.emplace(
+            [this, localFrameIdx](tf::Subflow& subflow)
+            {
+                ZoneScopedN("ReplicateLightData");
+                ReplicateProxyData(subflow, localFrameIdx, lightProxyPackage);
+                subflow.join();
+            });
+
         tf::Task replicateMaterialData = rootTaskFlow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
@@ -260,6 +269,7 @@ namespace ig
             });
 
         replicateTransformData.succeed(updateTransformTask);
+        replicateLightData.succeed(updateLightTask);
         replicateMaterialData.succeed(updateMaterialTask);
         replicateMeshData.succeed(updateMeshTask);
         replicateInstancingData.succeed(buildInstancingData);
@@ -428,12 +438,95 @@ namespace ig
         commitPendingProxyTask.precede(commitDestructions);
     }
 
+    void SceneProxy::UpdateLightProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    {
+        IG_CHECK(lightProxyPackage.PendingDestructions.empty());
+
+        auto& entityProxyMap = lightProxyPackage.ProxyMap[localFrameIdx];
+        auto& storage = *lightProxyPackage.Storage[localFrameIdx];
+        const auto lightView = registry.view<const LightComponent, const TransformComponent>();
+
+        tf::Task updateLightProxy = subflow.for_each(
+            lightView.begin(), lightView.end(),
+            [this, &registry, &entityProxyMap, lightView](const Entity entity)
+            {
+                const Index workerId = taskExecutor->this_worker_id();
+                const auto lightItr = entityProxyMap.find(entity);
+                if (lightItr == entityProxyMap.end())
+                {
+                    lightProxyPackage.PendingProxyGroups[workerId].emplace_back(entity, LightProxy{});
+                    lightProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
+                }
+                else
+                {
+                    // View 내부에 있는 Entity는 유일하기 때문에
+                    // 해당 엔티티가 소유한 메모리 공간에 대한 데이터 쓰기 또한 data hazard를 발생 시키지 않는다.
+                    LightProxy& proxy = lightItr->second;
+                    IG_CHECK(proxy.bMightBeDestroyed);
+                    proxy.bMightBeDestroyed = false;
+
+                    const auto& lightComponent = lightView.get<LightComponent>(entity);
+                    const auto& transformComponent = lightView.get<TransformComponent>(entity);
+                    const std::pair<LightComponent, TransformComponent> combinedComponents =
+                        std::make_pair(lightComponent, transformComponent);
+                    if (const U64 currentDataHashValue = HashInstance(combinedComponents);
+                        proxy.DataHashValue != currentDataHashValue)
+                    {
+                        proxy.GpuData.Property = lightComponent.Property;
+                        proxy.GpuData.WorldPosition = transformComponent.Position;
+                        proxy.GpuData.Forward = transformComponent.GetForward();
+
+                        proxy.DataHashValue = currentDataHashValue;
+                        lightProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
+                    }
+                }
+            });
+
+        tf::Task commitPendingProxyTask = subflow.emplace(
+            [this, &entityProxyMap, &storage]()
+            {
+                for (Index groupIdx = 0; groupIdx < numWorker; ++groupIdx)
+                {
+                    for (auto& [pendingEntity, pendingProxy] : lightProxyPackage.PendingProxyGroups[groupIdx])
+                    {
+                        pendingProxy.StorageSpace = storage.Allocate(1);
+                        entityProxyMap[pendingEntity] = pendingProxy;
+                    }
+                    lightProxyPackage.PendingProxyGroups[groupIdx].clear();
+                }
+            });
+
+        tf::Task commitDestructions = subflow.emplace(
+            [this, &entityProxyMap, &storage, localFrameIdx]()
+            {
+                for (auto& [entity, proxy] : entityProxyMap)
+                {
+                    if (proxy.bMightBeDestroyed)
+                    {
+                        lightProxyPackage.PendingDestructions.emplace_back(entity);
+                    }
+                }
+
+                for (const Entity entity : lightProxyPackage.PendingDestructions)
+                {
+                    const auto extractedElement = lightProxyPackage.ProxyMap[localFrameIdx].extract(entity);
+                    IG_CHECK(extractedElement.has_value());
+                    IG_CHECK(extractedElement->second.StorageSpace.IsValid());
+                    storage.Deallocate(extractedElement->second.StorageSpace);
+                }
+                lightProxyPackage.PendingDestructions.clear();
+            });
+
+        updateLightProxy.precede(commitPendingProxyTask);
+        commitPendingProxyTask.precede(commitDestructions);
+    }
+
     void SceneProxy::BuildInstancingData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
     {
         const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
 
         instancingPackage.GlobalInstancingMap.clear();
-        instancingPackage.SumNumInstances = 0;
+        instancingPackage.NumInstances = 0;
 
         tf::Task buildLocalInstancingDataMaps = subflow.for_each(
             staticMeshEntityView.begin(), staticMeshEntityView.end(),
@@ -493,7 +586,7 @@ namespace ig
                             globalData.NumInstances += data.NumInstances;
                         }
 
-                        instancingPackage.SumNumInstances += data.NumInstances;
+                        instancingPackage.NumInstances += data.NumInstances;
                     }
 
                     localInstanceMap.clear();
@@ -512,7 +605,7 @@ namespace ig
                 instancingPackage.InstancingDataSpace =
                     instancingPackage.InstancingDataStorage[localFrameIdx]->Allocate(numInstancing);
                 instancingPackage.IndirectTransformSpace =
-                    instancingPackage.IndirectTransformStorage[localFrameIdx]->Allocate(instancingPackage.SumNumInstances);
+                    instancingPackage.IndirectTransformStorage[localFrameIdx]->Allocate(instancingPackage.NumInstances);
             });
 
         // 결국 transform offset을 정할려면 linear 하게 돌아야 하나?
@@ -531,7 +624,7 @@ namespace ig
                 }
 
                 IG_CHECK(instancingId == instancingPackage.GlobalInstancingMap.size());
-                IG_CHECK(transformOffset == instancingPackage.SumNumInstances);
+                IG_CHECK(transformOffset == instancingPackage.NumInstances);
             });
 
         buildLocalInstancingDataMaps.precede(buildGlobalInstancingDataMap);

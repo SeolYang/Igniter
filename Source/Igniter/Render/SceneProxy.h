@@ -3,6 +3,7 @@
 #include "Igniter/Core/BoundingVolume.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/Render/GpuStorage.h"
+#include "Igniter/Render/Light.h"
 #include "Igniter/Asset/Common.h"
 #include "Igniter/Asset/StaticMesh.h"
 
@@ -82,6 +83,9 @@ namespace ig
 
         struct LightGpuData
         {
+            Light Property;
+            Vector3 WorldPosition;
+            Vector3 Forward;
         };
 
         using TransformProxy = GpuProxy<TransformGpuData>;
@@ -138,7 +142,7 @@ namespace ig
             InFlightFramesResource<Ptr<GpuStorage>> IndirectTransformStorage;
             Vector<InstancingMap> ThreadLocalInstancingMaps;
             OrderedInstancingMap GlobalInstancingMap;
-            U32 SumNumInstances{0};
+            U32 NumInstances{0};
             GpuStorage::Allocation InstancingDataSpace;
             GpuStorage::Allocation IndirectTransformSpace;
 
@@ -222,6 +226,16 @@ namespace ig
             return renderableIndicesBufferSrv[localFrameIdx];
         }
 
+        [[nodiscard]] RenderHandle<GpuView> GetLightStorageSrv(const LocalFrameIndex localFrameIdx) const
+        {
+            return lightProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+        }
+
+        [[nodiscard]] RenderHandle<GpuBuffer> GetLightStorageBuffer(const LocalFrameIndex localFrameIdx) const
+        {
+            return lightProxyPackage.Storage[localFrameIdx]->GetGpuBuffer();
+        }
+
         [[nodiscard]] U32 GetMaxNumRenderables(const LocalFrameIndex localFrameIdx) const noexcept
         {
             return maxNumRenderables[localFrameIdx];
@@ -229,10 +243,15 @@ namespace ig
 
         [[nodiscard]] U32 GetNumInstancing() const noexcept { return (U32)instancingPackage.GlobalInstancingMap.size(); }
 
+        [[nodiscard]] U16 GetNumLights(const LocalFrameIndex localFrameIdx) const noexcept { return (U16)lightProxyPackage.ProxyMap[localFrameIdx].size(); }
+
+        [[nodiscard]] const auto& GetLightProxyMap(const LocalFrameIndex localFrameIdx) const noexcept { return lightProxyPackage.ProxyMap[localFrameIdx]; }
+
       private:
         void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
         void UpdateMeshProxy(const LocalFrameIndex localFrameIdx);
         void UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateLightProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
 
         void BuildInstancingData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
 
@@ -270,7 +289,7 @@ namespace ig
         constexpr static U32 kNumInitRenderableElements = 2048u;
         ProxyPackage<RenderableProxy> renderableProxyPackage;
 
-        constexpr static U32 kNumInitLightElements = 512u;
+        constexpr static U32 kNumInitLightElements = kMaxNumLights;
         ProxyPackage<LightProxy> lightProxyPackage;
 
         /* 현재 버퍼가 수용 할 수 있는 최대 수, 만약 부족하다면 새로 할당 필요! */
@@ -285,12 +304,5 @@ namespace ig
         InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesStagingBuffer;
         InFlightFramesResource<U8*> mappedRenderableIndicesStagingBuffer;
         InFlightFramesResource<Size> renderableIndicesStagingBufferSize;
-
-        constexpr static U32 kNumInitLightIndices = 2048u;
-        InFlightFramesResource<U32> lightIndicesBufferSize;
-        InFlightFramesResource<U32> numMaxLights;
-        InFlightFramesResource<RenderHandle<GpuBuffer>> lightIndicesBuffer;
-        InFlightFramesResource<RenderHandle<GpuView>> lightIndicesBufferSrv;
-        Vector<U32> lightIndices;
     };
 } // namespace ig

@@ -2,11 +2,12 @@
 
 namespace ig
 {
-    enum class ELightType
+    enum class ELightType : U32
     {
         Point,
     };
 
+    constexpr U16 kMaxNumLights = NumericMaxOfValue(kMaxNumLights);
     struct Light
     {
         ELightType Type = ELightType::Point;
