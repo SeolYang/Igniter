@@ -62,6 +62,7 @@
     <ClInclude Include="Asset\TextureLoader.h" />
     <ClInclude Include="Component\CameraArchetype.h" />
     <ClInclude Include="Component\CameraComponent.h" />
+    <ClInclude Include="Component\LightArchetype.h" />
     <ClInclude Include="Component\LightComponent.h" />
     <ClInclude Include="Component\MaterialComponent.h" />
     <ClInclude Include="Component\NameComponent.h" />
@@ -174,6 +175,7 @@
     <ClCompile Include="Asset\TextureLoader.cpp" />
     <ClCompile Include="Component\CameraArchetype.cpp" />
     <ClCompile Include="Component\CameraComponent.cpp" />
+    <ClCompile Include="Component\LightArchetype.cpp" />
     <ClCompile Include="Component\LightComponent.cpp" />
     <ClCompile Include="Component\MaterialComponent.cpp" />
     <ClCompile Include="Component\NameComponent.cpp" />
