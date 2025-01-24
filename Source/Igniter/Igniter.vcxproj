@@ -641,6 +641,7 @@ xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /
       <PrecompiledHeaderFile>Igniter/Igniter.h</PrecompiledHeaderFile>
       <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
       <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

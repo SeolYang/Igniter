@@ -3,6 +3,21 @@
 
 namespace ig
 {
+    /*
+    * 렌더 패스 실행 흐름
+    * RenderPass.Init() (Constructor) (RenderPass 에서 시작되는 리소스 생성 및 초기화)
+    * // Render Loop begin
+    * RenderPass.SetParams(ParamStructure) (외부 리소스 설정; ex. CommandBuffer, Buffer, Texture, etc..)
+    * RenderPass.Execute()
+    *   if activated
+    *      RenderPass.PreRender()
+    *      RenderPass.Render()
+    *      RenderPass.PostRender()
+    *   else
+    *      RenderPass.ExecuteWhenInactive()
+    * // Render Loop end
+    * RenderPass.Deinit() (Destructor)
+    */
     class RenderPass
     {
       public:
