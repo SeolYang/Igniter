@@ -179,6 +179,7 @@ using namespace entt::literals;
 namespace ig /* Constants */
 {
     inline constexpr LocalFrameIndex NumFramesInFlight = 2;
+    inline constexpr auto LocalFramesView = views::iota(0Ui8, NumFramesInFlight);
 }
 
 #ifdef _M_X64
