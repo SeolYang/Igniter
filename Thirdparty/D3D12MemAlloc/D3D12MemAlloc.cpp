@@ -20,6 +20,8 @@
 // THE SOFTWARE.
 //
 
+#include "Igniter/Igniter.h"
+
 #pragma warning(push)
 #pragma warning(disable : 26827)
 #pragma warning(disable : 26495)
@@ -28,7 +30,6 @@
 #pragma warning(disable : 4324)
 #pragma warning(disable : 4505)
 #pragma warning(disable : 4063)
-#include <D3D12MemAlloc.h>
 
 #include <combaseapi.h>
 #include <mutex>

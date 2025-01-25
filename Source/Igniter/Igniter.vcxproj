@@ -137,6 +137,7 @@
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
     <ClInclude Include="Render\RenderPass.h" />
+    <ClInclude Include="Render\RenderPass\LightClusteringPass.h" />
     <ClInclude Include="Render\RenderPass\TestForwardShadingPass.h" />
     <ClInclude Include="Render\RenderPass\CompactMeshLodInstancesPass.h" />
     <ClInclude Include="Render\RenderPass\FrustumCullingPass.h" />
@@ -150,11 +151,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='CheckHandleLeaks|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Asan|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\Thirdparty\SimpleMath\SimpleMath\SimpleMath.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -238,6 +239,7 @@
     <ClCompile Include="Render\RenderPass\FrustumCullingPass.cpp" />
     <ClCompile Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.cpp" />
     <ClCompile Include="Render\RenderPass\ImGuiRenderPass.cpp" />
+    <ClCompile Include="Render\RenderPass\LightClusteringPass.cpp" />
     <ClCompile Include="Render\RenderPass\TestForwardShadingPass.cpp" />
     <ClCompile Include="Render\SceneProxy.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />

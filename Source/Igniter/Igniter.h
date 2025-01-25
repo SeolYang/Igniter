@@ -94,6 +94,7 @@
 #pragma warning(disable : 4324)
 #pragma warning(disable : 4505)
 #pragma warning(disable : 4063)
+#define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED
 #include <D3D12MemAlloc.h>
 #pragma warning(pop)
 

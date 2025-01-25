@@ -450,6 +450,9 @@
     <ClInclude Include="Render\RenderPass\ImGuiRenderPass.h">
       <Filter>Source\Render\RenderPass</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RenderPass\LightClusteringPass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -675,6 +678,9 @@
       <Filter>Source\Render\RenderPass</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderPass\ImGuiRenderPass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderPass\LightClusteringPass.cpp">
       <Filter>Source\Render\RenderPass</Filter>
     </ClCompile>
   </ItemGroup>
