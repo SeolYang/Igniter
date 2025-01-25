@@ -58,6 +58,34 @@ namespace ig
     template <typename T, Size N = 1Ui64>
     using Array = eastl::array<T, N>;
 
+    template <typename T, Size N>
+    [[nodiscard]] std::span<T> MakeSpan(const Array<T, N>& arr) noexcept
+    {
+        static_assert(N > 0);
+        return std::span{arr.data(), N};
+    }
+
+    template <typename T, Size N>
+    [[nodiscard]] std::span<T> MakeSpan(const T (&arr)[N]) noexcept
+    {
+        static_assert(N > 0);
+        return std::span{arr, N};
+    }
+
+    template <typename T, Size N>
+    [[nodiscard]] std::span<const T> MakeConstSpan(const Array<T, N>& arr) noexcept
+    {
+        static_assert(N > 0);
+        return std::span{arr.data(), N};
+    }
+
+    template <typename T, Size N>
+    [[nodiscard]] std::span<const T> MakeConstSpan(const T (&arr)[N]) noexcept
+    {
+        static_assert(N > 0);
+        return std::span{arr, N};
+    }
+
     using Entity = entt::entity;
     constexpr auto NullEntity = entt::null;
     using Registry = entt::registry;
