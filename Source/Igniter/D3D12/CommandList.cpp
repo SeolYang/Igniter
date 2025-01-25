@@ -279,7 +279,7 @@ namespace ig
         cmdList->IASetIndexBuffer(&ibView.value());
     }
 
-    void CommandList::SetRenderTarget(const GpuView& rtv, std::optional<std::reference_wrapper<GpuView>> dsv /*= std::nullopt*/)
+    void CommandList::SetRenderTarget(const GpuView& rtv, Option<CRef<GpuView>> dsv /*= std::nullopt*/)
     {
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics);

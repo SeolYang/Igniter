@@ -67,7 +67,7 @@ namespace ig
         void SetDescriptorHeap(DescriptorHeap& descriptorHeap);
         void SetVertexBuffer(GpuBuffer& vertexBuffer);
         void SetIndexBuffer(GpuBuffer& indexBuffer);
-        void SetRenderTarget(const GpuView& rtv, std::optional<std::reference_wrapper<GpuView>> dsv = std::nullopt);
+        void SetRenderTarget(const GpuView& rtv, Option<CRef<GpuView>> dsv = std::nullopt);
         void SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology);
         void SetViewport(const F32 topLeftX, const F32 topLeftY, const F32 width, const F32 height, const F32 minDepth = 0.f,
                          const F32 maxDepth = 1.f);
