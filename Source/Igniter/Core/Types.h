@@ -59,14 +59,14 @@ namespace ig
     using Array = eastl::array<T, N>;
 
     template <typename T, Size N>
-    [[nodiscard]] std::span<T> MakeSpan(const Array<T, N>& arr) noexcept
+    [[nodiscard]] std::span<T> MakeSpan(Array<T, N>& arr) noexcept
     {
         static_assert(N > 0);
         return std::span{arr.data(), N};
     }
 
     template <typename T, Size N>
-    [[nodiscard]] std::span<T> MakeSpan(const T (&arr)[N]) noexcept
+    [[nodiscard]] std::span<T> MakeSpan(T (&arr)[N]) noexcept
     {
         static_assert(N > 0);
         return std::span{arr, N};

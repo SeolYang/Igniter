@@ -24,7 +24,7 @@ namespace ig
 
         bool IsTearingSupport() const { return bTearingEnabled; }
         RenderHandle<GpuTexture> GetBackBuffer() const { return backBuffers.Resources[swapchain->GetCurrentBackBufferIndex()]; }
-        RenderHandle<GpuView> GetRenderTargetView() const { return renderTargetViews.Resources[swapchain->GetCurrentBackBufferIndex()]; }
+        RenderHandle<GpuView> GetBackBufferRtv() const { return renderTargetViews.Resources[swapchain->GetCurrentBackBufferIndex()]; }
         InFlightFramesResource<RenderHandle<GpuTexture>> GetBackBuffers() const { return backBuffers; }
         InFlightFramesResource<RenderHandle<GpuView>> GetBackBufferRenderTargetViews() const { return renderTargetViews; }
 

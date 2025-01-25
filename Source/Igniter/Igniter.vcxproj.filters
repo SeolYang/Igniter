@@ -73,6 +73,9 @@
     <Filter Include="Source\Shaders">
       <UniqueIdentifier>{fad9bc78-c629-4d3b-9c86-12403966d4c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Render\RenderPass">
+      <UniqueIdentifier>{450610c0-9e0b-4a17-aff7-03ac553dcc0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h">
@@ -432,6 +435,21 @@
     <ClInclude Include="Component\LightArchetype.h">
       <Filter>Source\Component\Archetype</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RenderPass\FrustumCullingPass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderPass\CompactMeshLodInstancesPass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderPass\TestForwardShadingPass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderPass\ImGuiRenderPass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -643,6 +661,21 @@
     </ClCompile>
     <ClCompile Include="Component\LightArchetype.cpp">
       <Filter>Source\Component\Archetype</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderPass\FrustumCullingPass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderPass\CompactMeshLodInstancesPass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderPass\TestForwardShadingPass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderPass\ImGuiRenderPass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

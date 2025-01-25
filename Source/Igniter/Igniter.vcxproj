@@ -137,6 +137,11 @@
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
     <ClInclude Include="Render\RenderPass.h" />
+    <ClInclude Include="Render\RenderPass\TestForwardShadingPass.h" />
+    <ClInclude Include="Render\RenderPass\CompactMeshLodInstancesPass.h" />
+    <ClInclude Include="Render\RenderPass\FrustumCullingPass.h" />
+    <ClInclude Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.h" />
+    <ClInclude Include="Render\RenderPass\ImGuiRenderPass.h" />
     <ClInclude Include="Render\SceneProxy.h" />
     <ClInclude Include="Render\Swapchain.h" />
     <ClInclude Include="Render\TempConstantBufferAllocator.h" />
@@ -229,6 +234,11 @@
     <ClCompile Include="Render\RenderContext.cpp" />
     <ClCompile Include="Render\Renderer.cpp" />
     <ClCompile Include="Render\RenderPass.cpp" />
+    <ClCompile Include="Render\RenderPass\CompactMeshLodInstancesPass.cpp" />
+    <ClCompile Include="Render\RenderPass\FrustumCullingPass.cpp" />
+    <ClCompile Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.cpp" />
+    <ClCompile Include="Render\RenderPass\ImGuiRenderPass.cpp" />
+    <ClCompile Include="Render\RenderPass\TestForwardShadingPass.cpp" />
     <ClCompile Include="Render\SceneProxy.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />
     <ClCompile Include="Render\TempConstantBufferAllocator.cpp" />
