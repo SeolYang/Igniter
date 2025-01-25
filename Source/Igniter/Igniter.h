@@ -93,6 +93,7 @@
 #pragma warning(disable : 4189)
 #pragma warning(disable : 4324)
 #pragma warning(disable : 4505)
+#pragma warning(disable : 4063)
 #include <D3D12MemAlloc.h>
 #pragma warning(pop)
 

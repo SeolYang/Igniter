@@ -20,10 +20,10 @@
 #ifndef _WIN32
     #include <wsl/winadapter.h>
 #endif
-#include "AgilitySDK/d3dx12/d3dx12_property_format_table.h"
+#include "d3dx12_property_format_table.h"
 #include <assert.h>
 #include <algorithm>
-#include "AgilitySDK/D3D12TokenizedProgramFormat.hpp"
+#include "D3D12TokenizedProgramFormat.hpp"
 #if defined(D3D12_SDK_VERSION) && (D3D12_SDK_VERSION >= 606)
 #ifndef ASSUME
   #define ASSUME(x) assert(x)
@@ -2367,7 +2367,7 @@ bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::IsSupportedTextureDisplayableFormat
 //---------------------------------------------------------------------------------------------------------------------------------
 bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FloatAndNotFloatFormats(DXGI_FORMAT FormatA, DXGI_FORMAT FormatB)
 {
-    UINT NumComponents = std::min(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
+    UINT NumComponents = (std::min)(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
     for (UINT c = 0; c < NumComponents; c++)
     {
         D3D_FORMAT_COMPONENT_INTERPRETATION fciA = GetFormatComponentInterpretation(FormatA, c);
@@ -2383,7 +2383,7 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::FloatAndNotFloatFormats(DXGI_FORMAT Fo
 //---------------------------------------------------------------------------------------------------------------------------------
 bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT FormatA, DXGI_FORMAT FormatB)
 {
-    UINT NumComponents = std::min(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
+    UINT NumComponents = (std::min)(GetNumComponentsInFormat(FormatA), GetNumComponentsInFormat(FormatB));
     for (UINT c = 0; c < NumComponents; c++)
     {
         D3D_FORMAT_COMPONENT_INTERPRETATION fciA = GetFormatComponentInterpretation(FormatA, c);
@@ -2398,11 +2398,23 @@ bool  D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::SNORMAndUNORMFormats(DXGI_FORMAT Forma
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
-// Formats allowed by runtime for decode histogram.  Scopes to tested formats.
+// Formats allowed by runtime for decode histogram.
  bool D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::DecodeHistogramAllowedForOutputFormatSupport(DXGI_FORMAT Format)
  {
-     return Format == DXGI_FORMAT_NV12 
-         || Format == DXGI_FORMAT_P010;
+     return (
+         /* YUV 4:2:0 */
+            Format == DXGI_FORMAT_NV12
+         || Format == DXGI_FORMAT_P010
+         || Format == DXGI_FORMAT_P016
+         /* YUV 4:2:2 */
+         || Format == DXGI_FORMAT_YUY2
+         || Format == DXGI_FORMAT_Y210
+         || Format == DXGI_FORMAT_Y216
+         /* YUV 4:4:4 */
+         || Format == DXGI_FORMAT_AYUV
+         || Format == DXGI_FORMAT_Y410
+         || Format == DXGI_FORMAT_Y416
+     );
  }
 
 //---------------------------------------------------------------------------------------------------------------------------------

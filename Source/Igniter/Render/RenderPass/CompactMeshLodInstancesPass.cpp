@@ -46,11 +46,11 @@ namespace ig
 
     void CompactMeshLodInstancesPass::SetParams(const CompactMeshLodInstancesPassParams newParams)
     {
-        IG_CHECK(params.CmdList != nullptr);
-        IG_CHECK(params.PerFrameCbvPtr != nullptr);
-        IG_CHECK(params.MeshLodInstanceStorageUavHandle);
-        IG_CHECK(params.CullingDataBufferSrvHandle);
-        IG_CHECK(params.NumRenderables > 0);
+        IG_CHECK(newParams.CmdList != nullptr);
+        IG_CHECK(newParams.PerFrameCbvPtr != nullptr);
+        IG_CHECK(newParams.MeshLodInstanceStorageUavHandle);
+        IG_CHECK(newParams.CullingDataBufferSrvHandle);
+        IG_CHECK(newParams.NumRenderables > 0);
         params = newParams;
     }
 

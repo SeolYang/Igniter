@@ -71,7 +71,6 @@ namespace ig
     {
         IG_CHECK(numElements > 0);
         IG_CHECK(blocks.size() > 0);
-        IG_CHECK(!bIsLinearAllocEnabled || allocatedSize == 0);
         if (gpuBuffer.IsNull())
         {
             return Allocation::Invalid();
