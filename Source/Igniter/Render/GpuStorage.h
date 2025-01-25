@@ -77,6 +77,7 @@ namespace ig
         [[nodiscard]] Size GetBufferSize() const noexcept { return bufferSize; }
         [[nodiscard]] Size GetNumAllocatedElements() const noexcept { return allocatedSize / elementSize; }
         [[nodiscard]] GpuFence& GetStorageFence() noexcept { return fence; }
+        [[nodiscard]] bool IsLinearAllocator() const noexcept { return bIsLinearAllocEnabled; }
 
         [[nodiscard]] RenderHandle<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
         [[nodiscard]] RenderHandle<GpuView> GetShaderResourceView() const noexcept { return srv; }
