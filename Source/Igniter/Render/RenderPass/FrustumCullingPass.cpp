@@ -48,7 +48,7 @@ namespace ig
         frustumCullingPsoDesc.SetComputeShader(*shader);
         frustumCullingPsoDesc.SetRootSignature(bindlessRootSignature);
         pso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(frustumCullingPsoDesc).value());
-        IG_CHECK(frustumCullingPso->IsCompute());
+        IG_CHECK(pso->IsCompute());
 
         GpuBufferDesc cullingDataBufferDesc{};
         cullingDataBufferDesc.AsStructuredBuffer<CullingData>(1, true);

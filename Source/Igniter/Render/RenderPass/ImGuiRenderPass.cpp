@@ -20,7 +20,7 @@ namespace ig
     void ImGuiRenderPass::SetParams(const ImGuiRenderPassParams& newParams)
     {
         IG_CHECK(newParams.CmdList != nullptr);
-        IG_CHECK(newParams.BackBuffer != nullptr);
+        IG_CHECK(newParams.BackBuffer);
         IG_CHECK(newParams.BackBufferRtv);
         IG_CHECK(newParams.MainViewport.width > 0.f && newParams.MainViewport.height > 0.f);
         params = newParams;

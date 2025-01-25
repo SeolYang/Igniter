@@ -52,7 +52,7 @@ namespace ig
         generateDrawInstanceCmdPsoDesc.SetRootSignature(bindlessRootSignature);
         generateDrawInstanceCmdPsoDesc.Name = "GenerateDrawInstanceCmdPso"_fs;
         pso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(generateDrawInstanceCmdPsoDesc).value());
-        IG_CHECK(generateDrawInstanceCmdPso->IsCompute());
+        IG_CHECK(pso->IsCompute());
 
         for (const LocalFrameIndex localFrameIdx : LocalFramesView)
         {

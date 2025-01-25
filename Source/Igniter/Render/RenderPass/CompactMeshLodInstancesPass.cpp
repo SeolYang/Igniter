@@ -36,7 +36,7 @@ namespace ig
         compactMeshLodInstancesPsoDesc.SetComputeShader(*shader);
         compactMeshLodInstancesPsoDesc.SetRootSignature(bindlessRootSignature);
         pso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(compactMeshLodInstancesPsoDesc).value());
-        IG_CHECK(compactMeshLodInstancesPso->IsCompute());
+        IG_CHECK(pso->IsCompute());
     }
 
     CompactMeshLodInstancesPass::~CompactMeshLodInstancesPass()
