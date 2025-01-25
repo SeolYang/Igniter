@@ -10,8 +10,8 @@ namespace ig
      * RenderPass.SetParams(ParamStructure) (외부 리소스 설정; ex. CommandBuffer, Buffer, Texture, etc..)
      * RenderPass.Execute()
      *   if activated
-     *      RenderPass.PreRender()
-     *      RenderPass.Render()
+     *      RenderPass.PreExecute()
+     *      RenderPass.OnExecute()
      *      RenderPass.PostRender()
      *   else
      *      RenderPass.ExecuteWhenInactive()
@@ -29,9 +29,9 @@ namespace ig
         virtual void Execute(const LocalFrameIndex localFrameIdx) final;
 
       protected:
-        virtual void PreRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
-        virtual void Render(const LocalFrameIndex localFrameIdx) = 0;
-        virtual void PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
+        virtual void PreExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
+        virtual void OnExecute(const LocalFrameIndex localFrameIdx) = 0;
+        virtual void PostExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
         virtual void OnResize([[maybe_unused]] const U32 width, [[maybe_unused]] const U32 height) {}
 
         virtual void ExecuteWhenInactive([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}

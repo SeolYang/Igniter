@@ -65,7 +65,7 @@ namespace ig
         params = newParams;
     }
 
-    void TestForwardShadingPass::Render([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void TestForwardShadingPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);

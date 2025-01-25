@@ -95,7 +95,7 @@ namespace ig
         params = newParams;
     }
 
-    void FrustumCullingPass::PreRender(const LocalFrameIndex localFrameIdx)
+    void FrustumCullingPass::PreExecute(const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(meshLodInstanceStorage[localFrameIdx] != nullptr &&
                  meshLodInstanceStorage[localFrameIdx]->IsLinearAllocator());
@@ -103,7 +103,7 @@ namespace ig
         meshLodInstanceStorage[localFrameIdx]->Allocate(params.NumRenderables);
     }
 
-    void FrustumCullingPass::Render(const LocalFrameIndex localFrameIdx)
+    void FrustumCullingPass::OnExecute(const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);

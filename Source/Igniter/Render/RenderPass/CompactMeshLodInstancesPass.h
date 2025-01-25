@@ -36,7 +36,7 @@ namespace ig
         void SetParams(const CompactMeshLodInstancesPassParams newParams);
 
       protected:
-        void Render(const LocalFrameIndex localFrameIdx) override;
+        void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
       public:
         constexpr static U32 kNumThreadsPerGroup = 32;

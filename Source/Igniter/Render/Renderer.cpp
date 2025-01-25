@@ -289,12 +289,14 @@ namespace ig
             GpuFence& asyncComputeFence = renderContext->GetAsyncComputeFence();
             CommandListPool& asyncComputeCmdListPool = renderContext->GetAsyncComputeCommandListPool();
 
-            auto frustumCullingCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "FrustumCullingCmdList"_fs);
+            auto frustumCullingCmdList =
+                asyncComputeCmdListPool.Request(localFrameIdx, "FrustumCullingCmdList"_fs);
             {
                 frustumCullingPass->SetParams({.CmdList = frustumCullingCmdList,
                                                .ZeroFilledBufferPtr = zeroFilledBuffer.get(),
                                                .PerFrameCbvPtr = perFrameCbv,
-                                               .NumRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx)});
+                                               .NumRenderables =
+                                                   sceneProxy->GetMaxNumRenderables(localFrameIdx)});
                 frustumCullingPass->Execute(localFrameIdx);
 
                 CommandList* cmdLists[]{frustumCullingCmdList};
@@ -302,13 +304,17 @@ namespace ig
                 asyncComputeQueue.ExecuteCommandLists(cmdLists);
             }
 
-            auto compactMeshLodInstancesCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "CompactMeshLodInstancesCmdList"_fs);
+            auto compactMeshLodInstancesCmdList =
+                asyncComputeCmdListPool.Request(localFrameIdx, "CompactMeshLodInstancesCmdList"_fs);
             {
                 compactMeshLodInstancesPass->SetParams({.CmdList = compactMeshLodInstancesCmdList,
                                                         .PerFrameCbvPtr = perFrameCbv,
-                                                        .MeshLodInstanceStorageUavHandle = frustumCullingPass->GetMeshLodInstanceStorageUav(localFrameIdx),
-                                                        .CullingDataBufferSrvHandle = frustumCullingPass->GetCullingDataBufferSrv(localFrameIdx),
-                                                        .NumRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx)});
+                                                        .MeshLodInstanceStorageUavHandle =
+                                                            frustumCullingPass->GetMeshLodInstanceStorageUav(localFrameIdx),
+                                                        .CullingDataBufferSrvHandle =
+                                                            frustumCullingPass->GetCullingDataBufferSrv(localFrameIdx),
+                                                        .NumRenderables =
+                                                            sceneProxy->GetMaxNumRenderables(localFrameIdx)});
                 compactMeshLodInstancesPass->Execute(localFrameIdx);
 
                 CommandList* cmdLists[]{compactMeshLodInstancesCmdList};
@@ -317,7 +323,8 @@ namespace ig
                 asyncComputeQueue.ExecuteCommandLists(cmdLists);
             }
 
-            auto generateMeshLodDrawCmdsCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "GenMeshLodDrawCmdsCmdList"_fs);
+            auto generateMeshLodDrawCmdsCmdList =
+                asyncComputeCmdListPool.Request(localFrameIdx, "GenMeshLodDrawCmdsCmdList"_fs);
             {
                 generateMeshLodDrawCmdsPass->SetParams({.CmdList = generateMeshLodDrawCmdsCmdList,
                                                         .PerFrameCbvPtr = perFrameCbv,
@@ -331,11 +338,14 @@ namespace ig
                 asyncComputeQueue.ExecuteCommandLists(cmdLists);
             }
 
-            auto testForwardPassCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ForwardShading"_fs);
+            auto testForwardPassCmdList =
+                mainGfxCmdListPool.Request(localFrameIdx, "ForwardShading"_fs);
             {
                 testForwardShadingPass->SetParams({.CmdList = testForwardPassCmdList,
-                                                   .DrawInstanceCmdSignature = generateMeshLodDrawCmdsPass->GetCommandSignature(),
-                                                   .DrawInstanceCmdStorageBuffer = generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
+                                                   .DrawInstanceCmdSignature =
+                                                       generateMeshLodDrawCmdsPass->GetCommandSignature(),
+                                                   .DrawInstanceCmdStorageBuffer =
+                                                       generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
                                                    .BackBuffer = swapchain.GetBackBuffer(),
                                                    .BackBufferRtv = swapchain.GetBackBufferRtv(),
                                                    .Dsv = dsvs[localFrameIdx],
@@ -350,7 +360,8 @@ namespace ig
         }
 
         IG_CHECK(imguiRenderPass != nullptr);
-        auto imguiRenderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList"_fs);
+        auto imguiRenderCmdList =
+            mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList"_fs);
         {
             imguiRenderPass->SetParams({.CmdList = imguiRenderCmdList,
                                         .BackBuffer = swapchain.GetBackBuffer(),

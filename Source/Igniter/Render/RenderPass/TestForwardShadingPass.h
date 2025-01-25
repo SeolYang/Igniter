@@ -42,7 +42,7 @@ namespace ig
         void SetParams(const TestForwardShadingPassParams newParams);
 
       protected:
-        void Render(const LocalFrameIndex localFrameIdx) override;
+        void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
       private:
         RenderContext* renderContext = nullptr;

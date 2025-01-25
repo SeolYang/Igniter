@@ -39,8 +39,8 @@ namespace ig
         [[nodiscard]] RenderHandle<GpuView> GetCullingDataBufferSrv(const LocalFrameIndex localFrameIdx) const noexcept { return cullingDataBufferSrv[localFrameIdx]; }
 
       protected:
-        void PreRender(const LocalFrameIndex localFrameIdx) override;
-        void Render(const LocalFrameIndex localFrameIdx) override;
+        void PreExecute(const LocalFrameIndex localFrameIdx) override;
+        void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
       public:
         constexpr static Size kNumInitMeshLodInstances = 256;

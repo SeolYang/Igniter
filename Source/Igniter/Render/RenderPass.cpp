@@ -7,9 +7,9 @@ namespace ig
     {
         if (bIsActivated)
         {
-            PreRender(localFrameIdx);
-            Render(localFrameIdx);
-            PostRender(localFrameIdx);
+            PreExecute(localFrameIdx);
+            OnExecute(localFrameIdx);
+            PostExecute(localFrameIdx);
         }
         else
         {

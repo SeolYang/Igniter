@@ -94,7 +94,7 @@ namespace ig
         params = newParams;
     }
 
-    void GenerateMeshLodDrawCommandsPass::PreRender(const LocalFrameIndex localFrameIdx)
+    void GenerateMeshLodDrawCommandsPass::PreExecute(const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(drawInstanceCmdStorage[localFrameIdx] != nullptr &&
                  drawInstanceCmdStorage[localFrameIdx]->IsLinearAllocator());
@@ -102,7 +102,7 @@ namespace ig
         drawInstanceCmdStorage[localFrameIdx]->Allocate((Size)params.NumInstancing * StaticMesh::kMaxNumLods);
     }
 
-    void GenerateMeshLodDrawCommandsPass::Render(const LocalFrameIndex localFrameIdx)
+    void GenerateMeshLodDrawCommandsPass::OnExecute(const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);

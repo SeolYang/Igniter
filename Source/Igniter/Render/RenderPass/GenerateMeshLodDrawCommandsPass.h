@@ -40,8 +40,8 @@ namespace ig
         [[nodiscard]] CommandSignature* GetCommandSignature() noexcept { return cmdSignature.get(); }
 
       protected:
-        void PreRender(const LocalFrameIndex localFrameIdx) override;
-        void Render(const LocalFrameIndex localFrameIdx) override;
+        void PreExecute(const LocalFrameIndex localFrameIdx) override;
+        void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
       public:
         constexpr static U32 kNumInitDrawCommands = 128;
