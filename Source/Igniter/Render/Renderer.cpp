@@ -114,13 +114,13 @@ namespace ig
             mainGfxQueue.ExecuteCommandLists(cmdLists);
         }
 
-        GpuBufferDesc uavCounterResetBufferDesc{};
-        uavCounterResetBufferDesc.AsUploadBuffer(GpuBufferDesc::kUavCounterSize);
-        uavCounterResetBufferDesc.DebugName = "UavCounterResetBuffer"_fs;
-        uavCounterResetBuffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(uavCounterResetBufferDesc).value());
-        auto const mappedUavCounterResetBuffer = reinterpret_cast<GpuBufferDesc::UavCounter*>(uavCounterResetBuffer->Map());
-        ZeroMemory(mappedUavCounterResetBuffer, sizeof(GpuBufferDesc::kUavCounterSize));
-        uavCounterResetBuffer->Unmap();
+        GpuBufferDesc zeroFilledBufferDesc{};
+        zeroFilledBufferDesc.AsUploadBuffer(kZeroFilledBufferSize);
+        zeroFilledBufferDesc.DebugName = "ZeroFilledBuffer"_fs;
+        zeroFilledBuffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(zeroFilledBufferDesc).value());
+        U8* const mappedZeroFilledBuffer = zeroFilledBuffer->Map();
+        ZeroMemory(mappedZeroFilledBuffer, kZeroFilledBufferSize);
+        zeroFilledBuffer->Unmap();
 
         frustumCullingPass = MakePtr<FrustumCullingPass>(renderContext, *bindlessRootSignature);
         compactMeshLodInstancesPass = MakePtr<CompactMeshLodInstancesPass>(renderContext, *bindlessRootSignature);
@@ -292,7 +292,7 @@ namespace ig
             auto frustumCullingCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "FrustumCullingCmdList"_fs);
             {
                 frustumCullingPass->SetParams({.CmdList = frustumCullingCmdList,
-                                               .ZeroFilledBufferPtr = uavCounterResetBuffer.get(),
+                                               .ZeroFilledBufferPtr = zeroFilledBuffer.get(),
                                                .PerFrameCbvPtr = perFrameCbv,
                                                .NumRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx)});
                 frustumCullingPass->Execute(localFrameIdx);
@@ -321,7 +321,7 @@ namespace ig
             {
                 generateMeshLodDrawCmdsPass->SetParams({.CmdList = generateMeshLodDrawCmdsCmdList,
                                                         .PerFrameCbvPtr = perFrameCbv,
-                                                        .ZeroFilledBufferPtr = uavCounterResetBuffer.get(),
+                                                        .ZeroFilledBufferPtr = zeroFilledBuffer.get(),
                                                         .NumInstancing = sceneProxy->GetNumInstancing()});
                 generateMeshLodDrawCmdsPass->Execute(localFrameIdx);
 

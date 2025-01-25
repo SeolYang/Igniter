@@ -53,7 +53,8 @@ namespace ig
         eastl::array<RenderHandle<GpuTexture>, NumFramesInFlight> depthStencils;
         eastl::array<RenderHandle<GpuView>, NumFramesInFlight> dsvs;
 
-        Ptr<GpuBuffer> uavCounterResetBuffer;
+        constexpr static Size kZeroFilledBufferSize = 512Ui64;
+        Ptr<GpuBuffer> zeroFilledBuffer;
 
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
 
