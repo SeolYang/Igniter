@@ -3,6 +3,7 @@
 struct GenerateInstanceDrawCommandsConstants
 {
 	uint PerFrameDataCbv;
+    uint CullingDataBufferSrv;
 	uint DrawInstanceBufferUav;
 };
 ConstantBuffer<GenerateInstanceDrawCommandsConstants> gConstants : register(b0);
@@ -12,6 +13,12 @@ void main( uint3 DTid : SV_DispatchThreadID )
 {
 	ConstantBuffer<PerFrameData> perFrameData = ResourceDescriptorHeap[gConstants.PerFrameDataCbv];
 	StructuredBuffer<InstancingData> instancingDataStorage = ResourceDescriptorHeap[perFrameData.InstancingDataStorageSrv];
+    StructuredBuffer<CullingData> cullingDataBuffer = ResourceDescriptorHeap[gConstants.CullingDataBufferSrv];
+    if (DTid.x >= cullingDataBuffer[0].NumVisibleLodInstances)
+    {
+        return;
+    }
+	
 	InstancingData instancingData = instancingDataStorage[DTid.x];
 	
 	uint lodIndirectTransformOffset = instancingData.IndirectTransformOffset;

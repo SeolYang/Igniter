@@ -19,6 +19,7 @@ namespace ig
     {
         CommandList* CmdList = nullptr;
         const GpuView* PerFrameCbvPtr = nullptr;
+        RenderHandle<GpuView> CullingDataBufferSrv;
         GpuBuffer* ZeroFilledBufferPtr = nullptr;
         U32 NumInstancing = 0;
     };

@@ -236,7 +236,7 @@ namespace ig
         const GpuView* renderableIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetRenderableIndicesSrv(localFrameIdx));
         IG_CHECK(renderableIndicesBufferSrv != nullptr && renderableIndicesBufferSrv->IsValid());
         perFrameConstants.RenderableIndicesBufferSrv = renderableIndicesBufferSrv->Index;
-        perFrameConstants.NumMaxRenderables = sceneProxy->GetMaxNumRenderables(localFrameIdx);
+        perFrameConstants.NumMaxRenderables = sceneProxy->GetNumRenderables(localFrameIdx);
 
         perFrameConstants.MinMeshLod = minMeshLod;
 
@@ -253,7 +253,7 @@ namespace ig
         GpuFence& mainGfxFence = renderContext->GetMainGfxFence();
         CommandListPool& mainGfxCmdListPool = renderContext->GetMainGfxCommandListPool();
         auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
-        if (sceneProxy->GetMaxNumRenderables(localFrameIdx) == 0 || !bMainCameraExists)
+        if (sceneProxy->GetNumRenderables(localFrameIdx) == 0 || !bMainCameraExists)
         {
             renderCmdList->Open();
 
@@ -296,7 +296,7 @@ namespace ig
                                                .ZeroFilledBufferPtr = zeroFilledBuffer.get(),
                                                .PerFrameCbvPtr = perFrameCbv,
                                                .NumRenderables =
-                                                   sceneProxy->GetMaxNumRenderables(localFrameIdx)});
+                                                   sceneProxy->GetNumRenderables(localFrameIdx)});
                 frustumCullingPass->Execute(localFrameIdx);
 
                 CommandList* cmdLists[]{frustumCullingCmdList};
@@ -314,7 +314,7 @@ namespace ig
                                                         .CullingDataBufferSrvHandle =
                                                             frustumCullingPass->GetCullingDataBufferSrv(localFrameIdx),
                                                         .NumRenderables =
-                                                            sceneProxy->GetMaxNumRenderables(localFrameIdx)});
+                                                            sceneProxy->GetNumRenderables(localFrameIdx)});
                 compactMeshLodInstancesPass->Execute(localFrameIdx);
 
                 CommandList* cmdLists[]{compactMeshLodInstancesCmdList};
@@ -328,6 +328,7 @@ namespace ig
             {
                 generateMeshLodDrawCmdsPass->SetParams({.CmdList = generateMeshLodDrawCmdsCmdList,
                                                         .PerFrameCbvPtr = perFrameCbv,
+                                                        .CullingDataBufferSrv = frustumCullingPass->GetCullingDataBufferSrv(localFrameIdx),
                                                         .ZeroFilledBufferPtr = zeroFilledBuffer.get(),
                                                         .NumInstancing = sceneProxy->GetNumInstancing()});
                 generateMeshLodDrawCmdsPass->Execute(localFrameIdx);

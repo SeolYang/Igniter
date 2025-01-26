@@ -236,9 +236,9 @@ namespace ig
             return lightProxyPackage.Storage[localFrameIdx]->GetGpuBuffer();
         }
 
-        [[nodiscard]] U32 GetMaxNumRenderables(const LocalFrameIndex localFrameIdx) const noexcept
+        [[nodiscard]] U32 GetNumRenderables([[maybe_unused]] const LocalFrameIndex localFrameIdx) const noexcept
         {
-            return maxNumRenderables[localFrameIdx];
+            return (U32)renderableIndices.size();
         }
 
         [[nodiscard]] U32 GetNumInstancing() const noexcept { return (U32)instancingPackage.GlobalInstancingMap.size(); }
@@ -295,7 +295,6 @@ namespace ig
         /* 현재 버퍼가 수용 할 수 있는 최대 수, 만약 부족하다면 새로 할당 필요! */
         constexpr static U32 kNumInitRenderableIndices = kNumInitRenderableElements;
         InFlightFramesResource<U32> renderableIndicesBufferSize;
-        InFlightFramesResource<U32> maxNumRenderables;
         InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesBuffer;
         InFlightFramesResource<RenderHandle<GpuView>> renderableIndicesBufferSrv;
         Vector<Vector<U32>> renderableIndicesGroups;

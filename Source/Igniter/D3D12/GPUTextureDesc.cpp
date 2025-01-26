@@ -190,7 +190,7 @@ namespace ig
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        IG_VERIFY(width > 0);
+        IG_CHECK(width > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
         Alignment = 0;
         Width = width;
@@ -210,14 +210,14 @@ namespace ig
                                      const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
                                      const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
-        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        IG_VERIFY(width > 0 && height > 0);
+        IG_CHECK(width > 0 && height > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -237,14 +237,14 @@ namespace ig
                                      const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess /*= false*/,
                                      const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
-        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        IG_VERIFY(width > 0 && height > 0 && depth > 0);
+        IG_CHECK(width > 0 && height > 0 && depth > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
         Alignment = 0;
         Width = width;
@@ -264,14 +264,14 @@ namespace ig
                                         const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/,
                                         U32 sampleQuality /*= 0*/)
     {
-        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = false;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        IG_VERIFY(width > 0 && height > 0);
+        IG_CHECK(width > 0 && height > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -296,8 +296,8 @@ namespace ig
         bIsShaderReadWrite = false;
         bIsAllowSimultaneousAccess = false;
 
-        IG_VERIFY(width > 0 && height > 0);
-        IG_VERIFY(IsDepthStencilFormat(format));
+        IG_CHECK(width > 0 && height > 0);
+        IG_CHECK(IsDepthStencilFormat(format));
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -324,7 +324,7 @@ namespace ig
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        IG_VERIFY(width > 0 && arrayLength > 0);
+        IG_CHECK(width > 0 && arrayLength > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
         Alignment = 0;
         Width = width;
@@ -344,14 +344,14 @@ namespace ig
                                           const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/,
                                           const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
-        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
-        IG_VERIFY(width > 0 && height > 0 && arrayLength > 0);
+        IG_CHECK(width > 0 && height > 0 && arrayLength > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -371,14 +371,13 @@ namespace ig
                                    const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
                                    const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
-        IG_VERIFY(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
+        IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = true;
         bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
-
-        IG_VERIFY(width > 0 && height > 0);
+        IG_CHECK(width > 0 && height > 0);
         Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         Alignment = 0;
         Width = width;
@@ -413,6 +412,7 @@ namespace ig
     D3D12MA::ALLOCATION_DESC GpuTextureDesc::GetAllocationDesc() const
     {
         D3D12MA::ALLOCATION_DESC desc{};
+        /* #sy_todo 추후 GPU Upload도 지원 할 것! (만약 스트리밍 텍스처로 사용된다면 성능상 큰 차이 예상) */
         desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
         return desc;
     }

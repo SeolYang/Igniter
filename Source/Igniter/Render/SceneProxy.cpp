@@ -1144,18 +1144,18 @@ namespace ig
         }
         IG_CHECK(renderableIndicesStagingBuffer[localFrameIdx]);
 
-        maxNumRenderables[localFrameIdx] = (U32)renderableIndices.size();
-        if (maxNumRenderables[localFrameIdx] == 0)
+        const U32 numRenderables = (U32)renderableIndices.size();
+        if (numRenderables == 0)
         {
             return;
         }
 
-        if (renderableIndicesBufferSize[localFrameIdx] < maxNumRenderables[localFrameIdx])
+        if (renderableIndicesBufferSize[localFrameIdx] < numRenderables)
         {
             renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
             renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
 
-            const U32 newBufferSize = std::max(maxNumRenderables[localFrameIdx], renderableIndicesBufferSize[localFrameIdx] * 2);
+            const U32 newBufferSize = std::max(numRenderables, renderableIndicesBufferSize[localFrameIdx] * 2);
             GpuBufferDesc renderableIndicesBufferDesc;
             renderableIndicesBufferDesc.AsStructuredBuffer<U32>(newBufferSize);
             renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
@@ -1175,7 +1175,7 @@ namespace ig
         auto* mappedBuffer = mappedRenderableIndicesStagingBuffer[localFrameIdx];
 
         const U32 replicationSize = (U32)requiredStagingBufferSize;
-        IG_CHECK(replicationSize == (sizeof(U32) * maxNumRenderables[localFrameIdx]));
+        IG_CHECK(replicationSize == (sizeof(U32) * numRenderables));
         std::memcpy(mappedBuffer, renderableIndices.data(), replicationSize);
 
         CommandListPool& copyCmdListPool = renderContext->GetAsyncCopyCommandListPool();

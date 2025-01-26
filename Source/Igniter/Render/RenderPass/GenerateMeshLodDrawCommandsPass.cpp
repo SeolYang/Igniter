@@ -31,6 +31,7 @@ namespace ig
     struct GenerateDrawInstanceConstants
     {
         U32 PerFrameCbv;
+        U32 CullingDataBufferSrv;
         U32 DrawInstanceBufferUav;
     };
 } // namespace ig
@@ -89,6 +90,7 @@ namespace ig
     {
         IG_CHECK(newParams.CmdList != nullptr);
         IG_CHECK(newParams.PerFrameCbvPtr != nullptr);
+        IG_CHECK(newParams.CullingDataBufferSrv);
         IG_CHECK(newParams.ZeroFilledBufferPtr != nullptr);
         IG_CHECK(newParams.NumInstancing > 0);
         params = newParams;
@@ -110,6 +112,9 @@ namespace ig
         IG_CHECK(pso != nullptr);
         IG_CHECK(drawInstanceCmdStorage[localFrameIdx]->GetNumAllocatedElements() == ((Size)params.NumInstancing * StaticMesh::kMaxNumLods));
 
+        const GpuView* cullingDataBufferSrvPtr = renderContext->Lookup(params.CullingDataBufferSrv);
+        IG_CHECK(cullingDataBufferSrvPtr != nullptr);
+
         GpuBuffer* drawInstanceStorageBufferPtr = renderContext->Lookup(drawInstanceCmdStorage[localFrameIdx]->GetGpuBuffer());
         IG_CHECK(drawInstanceStorageBufferPtr != nullptr);
         const GpuBufferDesc& drawInstanceStorageBufferDesc = drawInstanceStorageBufferPtr->GetDesc();
@@ -119,6 +124,7 @@ namespace ig
 
         const GenerateDrawInstanceConstants generateInstanceDrawConstants{
             .PerFrameCbv = params.PerFrameCbvPtr->Index,
+            .CullingDataBufferSrv = cullingDataBufferSrvPtr->Index,
             .DrawInstanceBufferUav = drawInstanceStorageUavPtr->Index};
 
         CommandList& cmdList = *params.CmdList;
