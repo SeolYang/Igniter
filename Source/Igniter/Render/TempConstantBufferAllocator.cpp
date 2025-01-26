@@ -69,19 +69,4 @@ namespace ig
         allocatedViews[localFrameIdx].clear();
         allocatedSizeInBytes[localFrameIdx] = 0;
     }
-
-    void TempConstantBufferAllocator::InitBufferStateTransition(CommandList& cmdList)
-    {
-        for (const RenderHandle<GpuBuffer> buffer : buffers)
-        {
-            GpuBuffer* bufferPtr = renderContext->Lookup(buffer);
-            IG_CHECK(bufferPtr != nullptr);
-
-            /* #sy_todo 제대로 상태 전이 시킬 것 */
-            cmdList.AddPendingBufferBarrier(*bufferPtr,
-                                            D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_ALL_SHADING,
-                                            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_CONSTANT_BUFFER);
-        }
-        cmdList.FlushBarriers();
-    }
 } // namespace ig

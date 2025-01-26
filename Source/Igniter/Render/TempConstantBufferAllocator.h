@@ -63,8 +63,6 @@ namespace ig
         // 이전에, 현재 시작할 프레임(local frame)에서 할당된 모든 할당을 해제한다. 프레임 시작시 반드시 호출해야함.
         void Reset(const LocalFrameIndex localFrameIdx);
 
-        void InitBufferStateTransition(CommandList& cmdList);
-
         [[nodiscard]] Size GetUsedSizeInBytes(const LocalFrameIndex localFrameIdx) const noexcept { return allocatedSizeInBytes[localFrameIdx]; }
         [[nodiscard]] Size GetReservedSizeInBytesPerFrame() const noexcept { return reservedSizeInBytesPerFrame; }
 
