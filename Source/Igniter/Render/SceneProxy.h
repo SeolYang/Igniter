@@ -16,6 +16,7 @@ namespace ig
     class MeshStorage;
     class SceneProxy
     {
+      public:
         enum class ERenderableType : U32
         {
             StaticMesh,

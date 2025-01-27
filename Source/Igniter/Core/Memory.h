@@ -50,6 +50,11 @@ namespace ig
         return dest | ((((1Ui64 << SizeInBits) - 1) & src) << OffsetInBits);
     }
 
+    inline constexpr Size BytesToBits(const Size bytes)
+    {
+        return bytes * 8Ui64;
+    }
+
     inline constexpr double BytesToKiloBytes(const Size bytes)
     {
         return bytes / 1024.0;

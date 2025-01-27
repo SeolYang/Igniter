@@ -59,6 +59,7 @@ namespace ig
         [[nodiscard]] GpuCopyableFootprints GetCopyableFootprints(const D3D12_RESOURCE_DESC1& resDesc, const U32 firstSubresource, const U32 numSubresources, const uint64_t baseOffset) const;
         [[nodiscard]] HRESULT GetDeviceRemovedReason() const { return device->GetDeviceRemovedReason(); }
         [[nodiscard]] Statistics GetStatistics() const;
+        [[nodiscard]] bool IsGpuUploadHeapSupported() const noexcept { return bGpuUploadHeapSupported; }
 
         [[nodiscard]] Option<CommandQueue> CreateCommandQueue(const std::string_view debugName, const EQueueType queueType);
         [[nodiscard]] Option<CommandList> CreateCommandList(const std::string_view debugName, const EQueueType targetQueueType);
@@ -116,5 +117,6 @@ namespace ig
         bool bRaytracing10Supported = false;
         bool bRaytracing11Supported = false;
         bool bShaderModel66Supported = false;
+        bool bGpuUploadHeapSupported = false;
     };
 } // namespace ig

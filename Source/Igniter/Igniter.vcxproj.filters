@@ -723,5 +723,8 @@
     <FxCompile Include="..\..\Assets\Shaders\GenerateDrawInstanceCommand.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="ClearBuffer.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

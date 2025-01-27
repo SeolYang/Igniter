@@ -8,6 +8,8 @@
 #include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Component/NameComponent.h"
 #include "Igniter/Component/MaterialComponent.h"
+#include "Igniter/Component/LightArchetype.h"
+#include "Igniter/Component/StaticMeshArchetype.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/Game/Component/FpsCameraArchetype.h"
 #include "Frieren/Game/Component/RandMovementComponent.h"
@@ -46,41 +48,64 @@ namespace fe
         ig::World& worldInstance = ig::Engine::GetWorld();
         ig::Registry& registry = worldInstance.GetRegistry();
         const ig::Entity mainCam = FpsCameraArchetype::Create(&registry);
-        registry.get<ig::CameraComponent>(mainCam).bIsMainCamera = true;
+        auto& cameraComponent = registry.get<ig::CameraComponent>(mainCam);
+        cameraComponent.bIsMainCamera = true;
 
+        /* ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+         ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);*/
+        // IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
+        // ig::ManagedAsset<ig::Material> axeMaterial = assetManager.Load<ig::Material>("Axe"_fs);
+        // IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
+
+        // for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
+        //{
+        //     for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)
+        //     {
+        //         for (ig::U32 axeGridZ = 0; axeGridZ < kAxeGridSizeZ; ++axeGridZ)
+        //         {
+        //             ig::Entity newAxeEntity = registry.create();
+        //             ig::TransformComponent& transform = registry.emplace<ig::TransformComponent>(newAxeEntity);
+        //             transform.Position = kAxeOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)axeGridX, (ig::F32)axeGridY, (ig::F32)axeGridZ});
+        //             ig::StaticMeshComponent& staticMeshComponent = registry.emplace<ig::StaticMeshComponent>(newAxeEntity);
+        //             staticMeshComponent.Mesh = axeStaticMesh;
+        //             registry.emplace<ig::MaterialComponent>(newAxeEntity, axeMaterial);
+        //             ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
+        //             nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
+
+        //            // RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
+        //            // randComp.MoveDirection = ig::Vector3{
+        //            //     ig::Random(-1.f, 1.f),
+        //            //     ig::Random(-1.f, 1.f),
+        //            //     ig::Random(-1.f, 1.f)};
+        //            // randComp.MoveDirection.Normalize();
+        //            // randComp.MoveSpeed = ig::Random(0.f, 5.f);
+
+        //            // randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
+        //            // randComp.RotateSpeed = ig::Random(0.f, 15.f);
+        //        }
+        //    }
+        //}
+
+        constexpr ig::Size kNumLights = 12;
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);
-        IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        ig::ManagedAsset<ig::Material> axeMaterial = assetManager.Load<ig::Material>("Axe"_fs);
-        IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
+        assetManager.Clone(axeStaticMesh, (ig::U32)kNumLights - 1);
 
-        for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
+        constexpr ig::F32 kLightRadius = 5.f;
+        constexpr ig::F32 kLightDistance = 100.f;
+        ig::F32 lightZ = cameraComponent.NearZ - kLightRadius;
+        for (ig::Index lightIdx = 0; lightIdx < kNumLights; ++lightIdx)
         {
-            for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)
-            {
-                for (ig::U32 axeGridZ = 0; axeGridZ < kAxeGridSizeZ; ++axeGridZ)
-                {
-                    ig::Entity newAxeEntity = registry.create();
-                    ig::TransformComponent& transform = registry.emplace<ig::TransformComponent>(newAxeEntity);
-                    transform.Position = kAxeOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)axeGridX, (ig::F32)axeGridY, (ig::F32)axeGridZ});
-                    ig::StaticMeshComponent& staticMeshComponent = registry.emplace<ig::StaticMeshComponent>(newAxeEntity);
-                    staticMeshComponent.Mesh = axeStaticMesh;
-                    registry.emplace<ig::MaterialComponent>(newAxeEntity, axeMaterial);
-                    ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
-                    nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
-
-                    // RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
-                    // randComp.MoveDirection = ig::Vector3{
-                    //     ig::Random(-1.f, 1.f),
-                    //     ig::Random(-1.f, 1.f),
-                    //     ig::Random(-1.f, 1.f)};
-                    // randComp.MoveDirection.Normalize();
-                    // randComp.MoveSpeed = ig::Random(0.f, 5.f);
-
-                    // randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
-                    // randComp.RotateSpeed = ig::Random(0.f, 15.f);
-                }
-            }
+            const ig::Entity lightEntity = ig::PointLightArchetype::Create(&registry);
+            auto& lightComponent = registry.get<ig::LightComponent>(lightEntity);
+            lightComponent.Property.Radius = kLightRadius;
+            auto& transformComponent = registry.get<ig::TransformComponent>(lightEntity);
+            transformComponent.Position.z = lightZ;
+            transformComponent.Scale = ig::Vector3{4.f, 4.f, 4.f};
+            lightZ += kLightDistance;
+            auto& staticMeshComponent = registry.emplace<ig::StaticMeshComponent>(lightEntity);
+            staticMeshComponent.Mesh = axeStaticMesh;
+            registry.emplace<ig::MaterialComponent>(lightEntity);
         }
     }
 

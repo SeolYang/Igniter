@@ -38,7 +38,6 @@ namespace ig
 
         bool bEnableFrustumCull = true;
         bool bIsMainCamera = false;
-        /* #sy_improvements Support Orthographic? */
     };
 
     IG_DECLARE_META(CameraComponent);

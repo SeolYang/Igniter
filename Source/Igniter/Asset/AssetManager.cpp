@@ -32,8 +32,6 @@ namespace ig
     AssetManager::~AssetManager()
     {
         UnRegisterEngineDefault();
-        /* #sy_improvements 에셋도 Load시 가장 최근 callstack 정보를 저장하도록 만드는 것도 나쁘지 않을 것 같음! */
-        /* 아니면, 핸들의 핸들? */
         for (const auto& snapshot : TakeSnapshots())
         {
             if (snapshot.IsCached())

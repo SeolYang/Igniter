@@ -14,6 +14,7 @@ namespace ig
         ConstantBuffer,
         StructuredBuffer,
         UploadBuffer,
+        GpuUploadBuffer,
         ReadbackBuffer,
         VertexBuffer,
         IndexBuffer,
@@ -27,22 +28,56 @@ namespace ig
 
     constexpr bool IsConstantBufferViewCompatible(const EGpuBufferType type)
     {
-        return type == EGpuBufferType::ConstantBuffer;
+        switch (type)
+        {
+        case EGpuBufferType::ConstantBuffer:
+        case EGpuBufferType::StructuredBuffer:
+        case EGpuBufferType::UploadBuffer:
+        case EGpuBufferType::GpuUploadBuffer:
+            return true;
+        default:
+            return false;
+        }
     }
 
     constexpr bool IsShaderResourceViewCompatible(const EGpuBufferType type)
     {
-        return type == EGpuBufferType::StructuredBuffer;
+        switch (type)
+        {
+        case EGpuBufferType::ConstantBuffer:
+        case EGpuBufferType::StructuredBuffer:
+        case EGpuBufferType::UploadBuffer:
+        case EGpuBufferType::GpuUploadBuffer:
+            return true;
+        default:
+            return false;
+        }
     }
 
     constexpr bool IsUnorderedAccessViewCompatible(const EGpuBufferType type)
     {
-        return type == EGpuBufferType::StructuredBuffer;
+        switch (type)
+        {
+        case EGpuBufferType::ConstantBuffer:
+        case EGpuBufferType::StructuredBuffer:
+        case EGpuBufferType::GpuUploadBuffer:
+            return true;
+        default:
+            return false;
+        }
     }
 
     constexpr bool IsUploadCompatible(const EGpuBufferType type)
     {
-        return type == EGpuBufferType::UploadBuffer;
+        switch (type)
+        {
+        case EGpuBufferType::ConstantBuffer:
+        case EGpuBufferType::UploadBuffer:
+        case EGpuBufferType::GpuUploadBuffer:
+            return true;
+        default:
+            return false;
+        }
     }
 
     constexpr bool IsReadbackCompatible(const EGpuBufferType type)
@@ -61,7 +96,12 @@ namespace ig
       public:
         void AsConstantBuffer(const U32 sizeOfBufferInBytes);
         void AsStructuredBuffer(const U32 sizeOfElementInBytes, const U32 numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false);
-        void AsUploadBuffer(const U32 sizeOfBufferInBytes);
+        void AsUploadBuffer(const U32 sizeOfBufferInBytes, const bool bIsShaderResource = false);
+        void AsGpuUploadBuffer(const U32 sizeOfBufferInBytes, const bool bShouldEnableShaderReadWrite = false)
+        {
+            AsUploadBuffer(sizeOfBufferInBytes);
+            Flags = bShouldEnableShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+        }
         void AsReadbackBuffer(const U32 sizeOfBufferInBytes);
 
         template <typename T>

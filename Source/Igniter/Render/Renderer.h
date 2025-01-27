@@ -58,6 +58,7 @@ namespace ig
 
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
 
+        Ptr<class LightClusteringPass> lightClusteringPass;
         Ptr<class FrustumCullingPass> frustumCullingPass;
         Ptr<class CompactMeshLodInstancesPass> compactMeshLodInstancesPass;
         Ptr<class GenerateMeshLodDrawCommandsPass> generateMeshLodDrawCmdsPass;

@@ -305,6 +305,19 @@ namespace ig
                 subflow.join();
             });
 
+        tf::Task invalidateLightProxy = prepareNextFrameFlow.emplace(
+            [this, nextLocalFrameIdx](tf::Subflow& subflow)
+            {
+                ZoneScopedN("InvalidateNextFrameLightProxy");
+                subflow.for_each(
+                    lightProxyPackage.ProxyMap[nextLocalFrameIdx].begin(), lightProxyPackage.ProxyMap[nextLocalFrameIdx].end(),
+                    [](auto& keyValuePair)
+                    {
+                        keyValuePair.second.bMightBeDestroyed = true;
+                    });
+                subflow.join();
+            });
+
         tf::Task invalidateMeshProxy = prepareNextFrameFlow.emplace(
             [this, nextLocalFrameIdx]()
             {

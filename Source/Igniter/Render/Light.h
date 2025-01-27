@@ -7,7 +7,7 @@ namespace ig
         Point,
     };
 
-    constexpr U16 kMaxNumLights = NumericMaxOfValue(kMaxNumLights);
+    constexpr U32 kMaxNumLights = (std::numeric_limits<U16>::max() + 1)/8;
     struct Light
     {
         ELightType Type = ELightType::Point;

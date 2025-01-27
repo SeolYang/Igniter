@@ -54,7 +54,7 @@ namespace ig
         Format = DXGI_FORMAT_UNKNOWN;
     }
 
-    void GpuBufferDesc::AsUploadBuffer(const U32 sizeOfBufferInBytes)
+    void GpuBufferDesc::AsUploadBuffer(const U32 sizeOfBufferInBytes, const bool bIsShaderResource)
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
@@ -72,7 +72,7 @@ namespace ig
         MipLevels = 1;
         SampleDesc = {.Count = 1, .Quality = 0};
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        Flags = D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
+        Flags = bIsShaderResource ? D3D12_RESOURCE_FLAG_NONE : D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
         Format = DXGI_FORMAT_UNKNOWN;
     }
 
@@ -144,7 +144,6 @@ namespace ig
 
     D3D12MA::ALLOCATION_DESC GpuBufferDesc::GetAllocationDesc() const
     {
-        /* #sy_todo Resizable BAR를 지원한다면 GPU_UPLOAD로 지정하는 것도 고려 */
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
         D3D12MA::ALLOCATION_DESC desc{.HeapType = D3D12_HEAP_TYPE_DEFAULT};
         switch (bufferType)
@@ -154,6 +153,9 @@ namespace ig
             break;
         case EGpuBufferType::UploadBuffer:
             desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+            break;
+        case EGpuBufferType::GpuUploadBuffer:
+            desc.HeapType = D3D12_HEAP_TYPE_GPU_UPLOAD;
             break;
         case EGpuBufferType::ReadbackBuffer:
             desc.HeapType = D3D12_HEAP_TYPE_READBACK;

@@ -15,6 +15,7 @@
 #include "Igniter/Render/TempConstantBufferAllocator.h"
 #include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/SceneProxy.h"
+#include "Igniter/Render/RenderPass/LightClusteringPass.h"
 #include "Igniter/Render/RenderPass/FrustumCullingPass.h"
 #include "Igniter/Render/RenderPass/CompactMeshLodInstancesPass.h"
 #include "Igniter/Render/RenderPass/GenerateMeshLodDrawCommandsPass.h"
@@ -122,6 +123,7 @@ namespace ig
         ZeroMemory(mappedZeroFilledBuffer, kZeroFilledBufferSize);
         zeroFilledBuffer->Unmap();
 
+        lightClusteringPass = MakePtr<LightClusteringPass>(renderContext, sceneProxy, mainViewport);
         frustumCullingPass = MakePtr<FrustumCullingPass>(renderContext, *bindlessRootSignature);
         compactMeshLodInstancesPass = MakePtr<CompactMeshLodInstancesPass>(renderContext, *bindlessRootSignature);
         generateMeshLodDrawCmdsPass = MakePtr<GenerateMeshLodDrawCommandsPass>(renderContext, *bindlessRootSignature);
@@ -159,6 +161,11 @@ namespace ig
         const Registry& registry = world.GetRegistry();
         const auto cameraView = registry.view<const CameraComponent, const TransformComponent>();
         bool bMainCameraExists = false;
+        Vector3 camWorldPos;
+        Matrix camViewMat{};
+        Matrix camProjMat{};
+        float camNearPlane = 0.f;
+        float camFarPlane = 0.f;
         for (auto [entity, camera, transformComponent] : cameraView.each())
         {
             /* #sy_todo Multiple Camera, OnImGui Target per camera */
@@ -173,10 +180,14 @@ namespace ig
                 continue;
             }
 
-            const Matrix viewMatrix = transformComponent.CreateView();
-            const Matrix projMatrix = camera.CreatePerspectiveForReverseZ();
-            perFrameConstants.View = ConvertToShaderSuitableForm(viewMatrix);
-            perFrameConstants.ViewProj = ConvertToShaderSuitableForm(viewMatrix * projMatrix);
+            camWorldPos = transformComponent.Position;
+            camViewMat = transformComponent.CreateView();
+            camProjMat = camera.CreatePerspectiveForReverseZ();
+            camNearPlane = camera.NearZ;
+            camFarPlane = camera.FarZ;
+
+            perFrameConstants.View = ConvertToShaderSuitableForm(camViewMat);
+            perFrameConstants.ViewProj = ConvertToShaderSuitableForm(camViewMat * camProjMat);
             perFrameConstants.CamPosInvAspectRatio = Vector4{
                 transformComponent.Position.x,
                 transformComponent.Position.y,
@@ -284,6 +295,23 @@ namespace ig
             IG_CHECK(compactMeshLodInstancesPass != nullptr);
             IG_CHECK(generateMeshLodDrawCmdsPass != nullptr);
             IG_CHECK(testForwardShadingPass != nullptr);
+
+            //CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+            //GpuFence& asyncCopyFence = renderContext->GetAsyncCopyFence();
+            CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
+            auto lightClusteringCmdList =
+                asyncCopyCmdListPool.Request(localFrameIdx, "LightClusteringCmdList"_fs);
+            {
+                lightClusteringPass->SetParams(
+                    {.CmdList = lightClusteringCmdList,
+                     .CamWorldPos = camWorldPos,
+                     .ViewMat = camViewMat,
+                     .ProjMat = camProjMat,
+                     .NearPlane = camNearPlane,
+                     .FarPlane = camFarPlane,
+                     .TargetViewport = mainViewport});
+                lightClusteringPass->Execute(localFrameIdx);
+            }
 
             CommandQueue& asyncComputeQueue = renderContext->GetAsyncComputeQueue();
             GpuFence& asyncComputeFence = renderContext->GetAsyncComputeFence();
