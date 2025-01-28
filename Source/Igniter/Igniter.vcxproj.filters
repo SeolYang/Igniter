@@ -723,7 +723,10 @@
     <FxCompile Include="..\..\Assets\Shaders\GenerateDrawInstanceCommand.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ClearBuffer.hlsl">
+    <FxCompile Include="..\..\Assets\Shaders\LightClustering.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\ClearU32Buffer.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

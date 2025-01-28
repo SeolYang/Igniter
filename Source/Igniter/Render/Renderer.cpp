@@ -123,7 +123,7 @@ namespace ig
         ZeroMemory(mappedZeroFilledBuffer, kZeroFilledBufferSize);
         zeroFilledBuffer->Unmap();
 
-        lightClusteringPass = MakePtr<LightClusteringPass>(renderContext, sceneProxy, mainViewport);
+        lightClusteringPass = MakePtr<LightClusteringPass>(renderContext, sceneProxy, *bindlessRootSignature, mainViewport);
         frustumCullingPass = MakePtr<FrustumCullingPass>(renderContext, *bindlessRootSignature);
         compactMeshLodInstancesPass = MakePtr<CompactMeshLodInstancesPass>(renderContext, *bindlessRootSignature);
         generateMeshLodDrawCmdsPass = MakePtr<GenerateMeshLodDrawCommandsPass>(renderContext, *bindlessRootSignature);
@@ -296,26 +296,47 @@ namespace ig
             IG_CHECK(generateMeshLodDrawCmdsPass != nullptr);
             IG_CHECK(testForwardShadingPass != nullptr);
 
-            //CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
-            //GpuFence& asyncCopyFence = renderContext->GetAsyncCopyFence();
-            CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
-            auto lightClusteringCmdList =
-                asyncCopyCmdListPool.Request(localFrameIdx, "LightClusteringCmdList"_fs);
-            {
-                lightClusteringPass->SetParams(
-                    {.CmdList = lightClusteringCmdList,
-                     .CamWorldPos = camWorldPos,
-                     .ViewMat = camViewMat,
-                     .ProjMat = camProjMat,
-                     .NearPlane = camNearPlane,
-                     .FarPlane = camFarPlane,
-                     .TargetViewport = mainViewport});
-                lightClusteringPass->Execute(localFrameIdx);
-            }
-
             CommandQueue& asyncComputeQueue = renderContext->GetAsyncComputeQueue();
             GpuFence& asyncComputeFence = renderContext->GetAsyncComputeFence();
             CommandListPool& asyncComputeCmdListPool = renderContext->GetAsyncComputeCommandListPool();
+
+            CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+            GpuFence& asyncCopyFence = renderContext->GetAsyncCopyFence();
+            CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
+
+            auto lightIdxListCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "LightIdxListCopyCmdList"_fs);
+            auto clearTileDwordsBufferCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "ClearTileDwordsBufferCmdList"_fs);
+            auto lightClusteringCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClusteringCmdList"_fs);
+            {
+                auto gpuParamsConstantBuffer = tempConstantBufferAllocator->Allocate<LightClusteringPassGpuParams>(localFrameIdx);
+
+                lightClusteringPass->SetParams(
+                    {.LightIdxListCopyCmdList = lightIdxListCopyCmdList,
+                     .ClearTileDwordsBufferCmdList = clearTileDwordsBufferCmdList,
+                     .LightClusteringCmdList = lightClusteringCmdList,
+                     .CamWorldPos = camWorldPos,
+                     .ProjMat = camProjMat,
+                     .NearPlane = camNearPlane,
+                     .FarPlane = camFarPlane,
+                     .TargetViewport = mainViewport,
+                     .PerFrameCbvPtr = perFrameCbv,
+                     .GpuParamsConstantBuffer = &gpuParamsConstantBuffer});
+
+                lightClusteringPass->Execute(localFrameIdx);
+
+                CommandList* lightIdxListCopyCmdLists[]{lightIdxListCopyCmdList};
+                asyncCopyQueue.ExecuteCommandLists(lightIdxListCopyCmdLists);
+                GpuSyncPoint lightIdxListCopySyncPoint = asyncCopyQueue.MakeSyncPointWithSignal(asyncCopyFence);
+
+                CommandList* clearTileDwordsBufferCmdLists[]{clearTileDwordsBufferCmdList};
+                asyncComputeQueue.ExecuteCommandLists(clearTileDwordsBufferCmdLists);
+                GpuSyncPoint clearTileDwordsBufferSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
+
+                CommandList* lightClusteringCmdLists[]{lightClusteringCmdList};
+                asyncComputeQueue.Wait(lightIdxListCopySyncPoint);
+                asyncComputeQueue.Wait(clearTileDwordsBufferSyncPoint);
+                asyncComputeQueue.ExecuteCommandLists(lightClusteringCmdLists);
+            }
 
             auto frustumCullingCmdList =
                 asyncComputeCmdListPool.Request(localFrameIdx, "FrustumCullingCmdList"_fs);

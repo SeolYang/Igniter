@@ -1,12 +1,15 @@
 #define MAX_MESH_LOD 8
 #define RENDERABLE_TYPE_STATIC_MESH 0
+#define FLT_MAX 3.402823466e+38F
 
 struct PerFrameData
 {
 	float4x4 ToView;
 	float4x4 ToViewProj;
     
+	/* (x,y,z): cam pos, w: inv aspect ratio */
 	float4 CamPosInvAspectRatio;
+	/* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
 	float4 ViewFrustumParams;
 	uint EnableFrustumCulling;
 	// test purpose
@@ -29,6 +32,14 @@ struct PerFrameData
 
 	uint RenderableIndicesBufferSrv;
 	uint NumMaxRenderables;
+};
+
+struct Light
+{
+    uint Type;
+    float Radius;
+    float3 WorldPos;
+    float3 Forward;
 };
 
 struct Material
