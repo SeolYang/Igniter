@@ -55,29 +55,25 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID)
         }
     }
     
-    float numLightsInTileF32 = float(numLightsInTile);
-    float numLightsF32 = float(gConstants.NumLights);
-    float density = numLightsInTileF32 / numLightsF32;
-    
     float3 srcColor = inputTex[DTid.xy].rgb;
     float3 debugColor;
-    if (numLightsInTileF32 == 0)
+    if (numLightsInTile == 0)
     {
         debugColor = srcColor;
     }
-    else if (density <= 0.0003f)
+    else if (numLightsInTile <= 3)
     {
         debugColor = ReallyLowDensityTileColor;
     }
-    else if (density <= 0.001f)
+    else if (numLightsInTile <= 10)
     {
         debugColor = LowDensityTileColor;
     }
-    else if (density <= 0.0015f)
+    else if (numLightsInTile <= 17)
     {
         debugColor = MidDensityTileColor;
     }
-    else if (density <= 0.0025f)
+    else if (numLightsInTile <= 32)
     {
         debugColor = HighDensityTileColor;
     }
