@@ -21,6 +21,7 @@
 #include "Igniter/Render/RenderPass/GenerateMeshLodDrawCommandsPass.h"
 #include "Igniter/Render/RenderPass/TestForwardShadingPass.h"
 #include "Igniter/Render/RenderPass/ImGuiRenderPass.h"
+#include "Igniter/Render/RenderPass/DebugLightClusterPass.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/Component/TransformComponent.h"
@@ -90,29 +91,19 @@ namespace ig
         GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
         depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT, true);
+        depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
 
-        CommandQueue& mainGfxQueue{renderContext.GetMainGfxQueue()};
-        auto dsvLayoutTransitionCmdList = renderContext.GetMainGfxCommandListPool().Request(0, "DSV Layout Transition"_fs);
+        GpuTextureDesc offScreenTexDesc;
+        offScreenTexDesc.DebugName = "OffscreenTex"_fs;
+        offScreenTexDesc.AsRenderTarget((U32)mainViewport.width, (U32)mainViewport.height, 1, DXGI_FORMAT_R8G8B8A8_UNORM, true);
+        offScreenTexDesc.InitialLayout = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+
+        for (const LocalFrameIndex localFrameIdx : LocalFramesView)
         {
-            dsvLayoutTransitionCmdList->Open();
-
-            for (const LocalFrameIndex localFrameIdx : LocalFramesView)
-            {
-                depthStencils[localFrameIdx] = renderContext.CreateTexture(depthStencilDesc);
-                dsvs[localFrameIdx] = renderContext.CreateDepthStencilView(depthStencils[localFrameIdx], D3D12_TEX2D_DSV{.MipSlice = 0});
-
-                dsvLayoutTransitionCmdList->AddPendingTextureBarrier(*renderContext.Lookup(depthStencils[localFrameIdx]),
-                                                                     D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                                                     D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                                                     D3D12_BARRIER_LAYOUT_UNDEFINED, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
-            }
-
-            dsvLayoutTransitionCmdList->FlushBarriers();
-
-            dsvLayoutTransitionCmdList->Close();
-
-            CommandList* cmdLists[]{dsvLayoutTransitionCmdList};
-            mainGfxQueue.ExecuteCommandLists(cmdLists);
+            depthStencils[localFrameIdx] = renderContext.CreateTexture(depthStencilDesc);
+            dsvs[localFrameIdx] =
+                renderContext.CreateDepthStencilView(depthStencils[localFrameIdx],
+                                                     D3D12_TEX2D_DSV{.MipSlice = 0});
         }
 
         GpuBufferDesc zeroFilledBufferDesc{};
@@ -127,10 +118,9 @@ namespace ig
         frustumCullingPass = MakePtr<FrustumCullingPass>(renderContext, *bindlessRootSignature);
         compactMeshLodInstancesPass = MakePtr<CompactMeshLodInstancesPass>(renderContext, *bindlessRootSignature);
         generateMeshLodDrawCmdsPass = MakePtr<GenerateMeshLodDrawCommandsPass>(renderContext, *bindlessRootSignature);
-        testForwardShadingPass = MakePtr<TestForwardShadingPass>(renderContext, *bindlessRootSignature);
+        testForwardShadingPass = MakePtr<TestForwardShadingPass>(renderContext, *bindlessRootSignature, mainViewport);
+        debugLightClusterPass = MakePtr<DebugLightClusterPass>(renderContext, *bindlessRootSignature, mainViewport);
         imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);
-
-        mainGfxQueue.MakeSyncPointWithSignal(renderContext.GetMainGfxFence()).WaitOnCpu();
     }
 
     Renderer::~Renderer()
@@ -315,6 +305,7 @@ namespace ig
                      .ClearTileDwordsBufferCmdList = clearTileDwordsBufferCmdList,
                      .LightClusteringCmdList = lightClusteringCmdList,
                      .CamWorldPos = camWorldPos,
+                     .ViewMat = camViewMat,
                      .ProjMat = camProjMat,
                      .NearPlane = camNearPlane,
                      .FarPlane = camFarPlane,
@@ -337,6 +328,7 @@ namespace ig
                 asyncComputeQueue.Wait(clearTileDwordsBufferSyncPoint);
                 asyncComputeQueue.ExecuteCommandLists(lightClusteringCmdLists);
             }
+            // GpuSyncPoint lightClusteringSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
 
             auto frustumCullingCmdList =
                 asyncComputeCmdListPool.Request(localFrameIdx, "FrustumCullingCmdList"_fs);
@@ -396,15 +388,73 @@ namespace ig
                                                        generateMeshLodDrawCmdsPass->GetCommandSignature(),
                                                    .DrawInstanceCmdStorageBuffer =
                                                        generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
-                                                   .BackBuffer = swapchain.GetBackBuffer(),
-                                                   .BackBufferRtv = swapchain.GetBackBufferRtv(),
                                                    .Dsv = dsvs[localFrameIdx],
                                                    .MainViewport = mainViewport});
                 testForwardShadingPass->Execute(localFrameIdx);
 
-                CommandList* cmdLists[]{testForwardPassCmdList};
+                // 이미 이 시점에서 LightClustering은 완료 되었음.
                 GpuSyncPoint prevPassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
                 mainGfxQueue.Wait(prevPassSyncPoint);
+                CommandList* cmdLists[]{testForwardPassCmdList};
+                mainGfxQueue.ExecuteCommandLists(cmdLists);
+            }
+
+            auto debugLightClusterPassCmdList =
+                asyncComputeCmdListPool.Request(localFrameIdx, "DebugLightCluster"_fs);
+            {
+                debugLightClusterPass->SetParams({.CmdList = debugLightClusterPassCmdList,
+                                                  .MainViewport = mainViewport,
+                                                  .NumLights = sceneProxy->GetNumLights(localFrameIdx),
+                                                  .PerFrameDataCbv = perFrameCbv,
+                                                  .TileDwordsBufferSrv = lightClusteringPass->GetTilesBufferSrv(localFrameIdx),
+                                                  .InputTex = testForwardShadingPass->GetOutputTex(localFrameIdx),
+                                                  .InputTexSrv = testForwardShadingPass->GetOutputTexSrv(localFrameIdx)});
+                debugLightClusterPass->Execute(localFrameIdx);
+
+                GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
+                asyncComputeQueue.Wait(prevPassSyncPoint);
+                CommandList* cmdLists[]{debugLightClusterPassCmdList};
+                asyncComputeQueue.ExecuteCommandLists(cmdLists);
+            }
+
+            auto copyFinalOutputToBackbuffer =
+                mainGfxCmdListPool.Request(localFrameIdx, "CopyFinalOutputToBackbuffer"_fs);
+            {
+                GpuTexture* debugLightClusterPassOutput = renderContext->Lookup(debugLightClusterPass->GetOutputTex(localFrameIdx));
+
+                copyFinalOutputToBackbuffer->Open();
+
+                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
+                    *debugLightClusterPassOutput,
+                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE,
+                    D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS, D3D12_BARRIER_LAYOUT_COPY_SOURCE);
+                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
+                    *backBuffer,
+                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST,
+                    D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_COPY_DEST);
+                copyFinalOutputToBackbuffer->FlushBarriers();
+
+                copyFinalOutputToBackbuffer->CopyTextureSimple(*debugLightClusterPassOutput, *backBuffer);
+
+                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
+                    *debugLightClusterPassOutput,
+                    D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
+                    D3D12_BARRIER_ACCESS_COPY_SOURCE, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                    D3D12_BARRIER_LAYOUT_COPY_SOURCE, D3D12_BARRIER_LAYOUT_COMMON);
+                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
+                    *backBuffer,
+                    D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
+                    D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                    D3D12_BARRIER_LAYOUT_COPY_DEST, D3D12_BARRIER_LAYOUT_COMMON);
+                copyFinalOutputToBackbuffer->FlushBarriers();
+
+                copyFinalOutputToBackbuffer->Close();
+
+                GpuSyncPoint prevPassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
+                mainGfxQueue.Wait(prevPassSyncPoint);
+                CommandList* cmdLists[]{copyFinalOutputToBackbuffer};
                 mainGfxQueue.ExecuteCommandLists(cmdLists);
             }
         }

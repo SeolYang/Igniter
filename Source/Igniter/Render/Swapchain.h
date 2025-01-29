@@ -23,10 +23,11 @@ namespace ig
         ~Swapchain();
 
         bool IsTearingSupport() const { return bTearingEnabled; }
-        RenderHandle<GpuTexture> GetBackBuffer() const { return backBuffers.Resources[swapchain->GetCurrentBackBufferIndex()]; }
-        RenderHandle<GpuView> GetBackBufferRtv() const { return renderTargetViews.Resources[swapchain->GetCurrentBackBufferIndex()]; }
+
+        RenderHandle<GpuTexture> GetBackBuffer() const { return backBuffers[(LocalFrameIndex)swapchain->GetCurrentBackBufferIndex()]; }
+        RenderHandle<GpuView> GetBackBufferRtv() const { return rtv[(LocalFrameIndex)swapchain->GetCurrentBackBufferIndex()]; }
         InFlightFramesResource<RenderHandle<GpuTexture>> GetBackBuffers() const { return backBuffers; }
-        InFlightFramesResource<RenderHandle<GpuView>> GetBackBufferRenderTargetViews() const { return renderTargetViews; }
+        InFlightFramesResource<RenderHandle<GpuView>> GetBackBufferRenderTargetViews() const { return rtv; }
 
         // #sy_todo Impl Resize Swapchain!
         // void Resize(const U32 width, const U32 height);
@@ -45,6 +46,6 @@ namespace ig
         const bool bVSyncEnabled;
         bool bTearingEnabled = false;
         InFlightFramesResource<RenderHandle<GpuTexture>> backBuffers;
-        InFlightFramesResource<RenderHandle<GpuView>> renderTargetViews;
+        InFlightFramesResource<RenderHandle<GpuView>> rtv;
     };
 } // namespace ig

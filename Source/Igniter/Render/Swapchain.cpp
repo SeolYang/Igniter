@@ -57,18 +57,19 @@ namespace ig
             ComPtr<ID3D12Resource1> resource;
             IG_VERIFY_SUCCEEDED(swapchain->GetBuffer(localFrameIdx, IID_PPV_ARGS(&resource)));
             SetObjectName(resource.Get(), std::format("Backbuffer LF#{}", localFrameIdx));
-            backBuffers.Resources[localFrameIdx] = renderContext.CreateTexture(GpuTexture{resource});
-            renderTargetViews.Resources[localFrameIdx] =
-                renderContext.CreateRenderTargetView(backBuffers.Resources[localFrameIdx], D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
+            backBuffers[localFrameIdx] = renderContext.CreateTexture(GpuTexture{resource});
+            rtv[localFrameIdx] =
+                renderContext.CreateRenderTargetView(backBuffers[localFrameIdx],
+                                                     D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
         }
     }
 
     Swapchain::~Swapchain()
     {
-        for (U32 idx = 0; idx < NumFramesInFlight; ++idx)
+        for (const LocalFrameIndex idx : LocalFramesView)
         {
-            renderContext.DestroyGpuView(renderTargetViews.Resources[idx]);
-            renderContext.DestroyTexture(backBuffers.Resources[idx]);
+            renderContext.DestroyGpuView(rtv[idx]);
+            renderContext.DestroyTexture(backBuffers[idx]);
         }
     }
 

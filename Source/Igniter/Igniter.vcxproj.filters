@@ -453,6 +453,9 @@
     <ClInclude Include="Render\RenderPass\LightClusteringPass.h">
       <Filter>Source\Render\RenderPass</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RenderPass\DebugLightClusterPass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -683,6 +686,9 @@
     <ClCompile Include="Render\RenderPass\LightClusteringPass.cpp">
       <Filter>Source\Render\RenderPass</Filter>
     </ClCompile>
+    <ClCompile Include="Render\RenderPass\DebugLightClusterPass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
@@ -727,6 +733,9 @@
       <Filter>Source\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\ClearU32Buffer.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\DebugLightCluster.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

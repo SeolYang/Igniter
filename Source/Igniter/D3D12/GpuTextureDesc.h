@@ -26,6 +26,7 @@ namespace ig
                          const U32 sampleCount = 1, U32 sampleQuality = 0);
 
         void AsRenderTarget(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
+                            const bool bEnableShaderReadWrite = false,
                             const bool bEnableSimultaneousAccess = false, const bool bEnableMSAA = false, const U32 sampleCount = 1, U32 sampleQuality = 0);
         void AsDepthStencil(const U32 width, const U32 height, const DXGI_FORMAT format, const bool bReverseZ);
 

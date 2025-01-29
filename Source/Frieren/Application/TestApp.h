@@ -30,13 +30,13 @@ namespace fe
         ig::Ptr<EditorCanvas> editorCanvas;
 
 #if defined(DEBUG) || defined(_DEBUG)
-        constexpr static ig::U32 kAxeGridSizeX = 10;
-        constexpr static ig::U32 kAxeGridSizeY = 10;
-        constexpr static ig::U32 kAxeGridSizeZ = 100;
+        constexpr static ig::U32 kAxeGridSizeX = 20;
+        constexpr static ig::U32 kAxeGridSizeY = 20;
+        constexpr static ig::U32 kAxeGridSizeZ = 20;
 #else
-        constexpr static ig::U32 kAxeGridSizeX = 100;
-        constexpr static ig::U32 kAxeGridSizeY = 10;
-        constexpr static ig::U32 kAxeGridSizeZ = 100;
+        constexpr static ig::U32 kAxeGridSizeX = 20;
+        constexpr static ig::U32 kAxeGridSizeY = 20;
+        constexpr static ig::U32 kAxeGridSizeZ = 20;
 #endif
 
         constexpr static ig::U32 kNumAxes = kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ;

@@ -20,8 +20,6 @@ namespace ig
         CommandList* CmdList = nullptr;
         CommandSignature* DrawInstanceCmdSignature = nullptr;
         RenderHandle<GpuBuffer> DrawInstanceCmdStorageBuffer;
-        RenderHandle<GpuTexture> BackBuffer;
-        RenderHandle<GpuView> BackBufferRtv;
         RenderHandle<GpuView> Dsv;
         Viewport MainViewport;
     };
@@ -31,7 +29,7 @@ namespace ig
     class TestForwardShadingPass : public RenderPass
     {
       public:
-        TestForwardShadingPass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
+        TestForwardShadingPass(RenderContext& renderContext, RootSignature& bindlessRootSignature, const Viewport& mainViewport);
         TestForwardShadingPass(const TestForwardShadingPass&) = delete;
         TestForwardShadingPass(TestForwardShadingPass&&) noexcept = delete;
         ~TestForwardShadingPass() override;
@@ -40,6 +38,17 @@ namespace ig
         TestForwardShadingPass& operator=(TestForwardShadingPass&&) noexcept = delete;
 
         void SetParams(const TestForwardShadingPassParams newParams);
+
+        [[nodiscard]]
+        RenderHandle<GpuTexture> GetOutputTex(const LocalFrameIndex localFrameIdx) const noexcept
+        {
+            return outputTex[localFrameIdx];
+        }
+        [[nodiscard]]
+        RenderHandle<GpuView> GetOutputTexSrv(const LocalFrameIndex localFrameIdx) const noexcept
+        {
+            return outputTexSrv[localFrameIdx];
+        }
 
       protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
@@ -53,5 +62,9 @@ namespace ig
         Ptr<ShaderBlob> vs;
         Ptr<ShaderBlob> ps;
         Ptr<PipelineState> pso;
+
+        InFlightFramesResource<RenderHandle<GpuTexture>> outputTex;
+        InFlightFramesResource<RenderHandle<GpuView>> outputTexRtv;
+        InFlightFramesResource<RenderHandle<GpuView>> outputTexSrv;
     };
 } // namespace ig

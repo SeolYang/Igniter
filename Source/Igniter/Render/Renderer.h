@@ -63,6 +63,7 @@ namespace ig
         Ptr<class CompactMeshLodInstancesPass> compactMeshLodInstancesPass;
         Ptr<class GenerateMeshLodDrawCommandsPass> generateMeshLodDrawCmdsPass;
         Ptr<class TestForwardShadingPass> testForwardShadingPass;
+        Ptr<class DebugLightClusterPass> debugLightClusterPass;
         Ptr<class ImGuiRenderPass> imguiRenderPass;
     };
 } // namespace ig

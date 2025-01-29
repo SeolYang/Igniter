@@ -184,6 +184,7 @@ namespace ig
     void GpuTextureDesc::AsTexture1D(const U32 width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite,
                                      const bool bEnableSimultaneousAccess)
     {
+        IG_CHECK(mipLevels > 0);
         bIsArray = false;
         bIsMSAAEnabled = false;
         bIsCubemap = false;
@@ -210,6 +211,7 @@ namespace ig
                                      const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
                                      const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
+        IG_CHECK(mipLevels > 0);
         IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
@@ -237,6 +239,7 @@ namespace ig
                                      const DXGI_FORMAT format, const bool bEnableShaderReadWrite, const bool bEnableSimultaneousAccess /*= false*/,
                                      const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
+        IG_CHECK(mipLevels > 0);
         IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
@@ -261,14 +264,16 @@ namespace ig
     }
 
     void GpuTextureDesc::AsRenderTarget(const U32 width, const U32 height, const uint16_t mipLevels, const DXGI_FORMAT format,
+                                        const bool bEnableShaderReadWrite,
                                         const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/,
                                         U32 sampleQuality /*= 0*/)
     {
+        IG_CHECK(mipLevels > 0);
         IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = false;
         bIsMSAAEnabled = bEnableMSAA;
         bIsCubemap = false;
-        bIsShaderReadWrite = false;
+        bIsShaderReadWrite = bEnableShaderReadWrite;
         bIsAllowSimultaneousAccess = bEnableSimultaneousAccess;
 
         IG_CHECK(width > 0 && height > 0);
@@ -282,9 +287,9 @@ namespace ig
         SampleDesc.Count = bIsMSAAEnabled ? sampleCount : 1;
         SampleDesc.Quality = bIsMSAAEnabled ? sampleQuality : 0;
         Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        InitialLayout = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
-        Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-        Flags = bIsAllowSimultaneousAccess ? Flags | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : Flags;
+        Flags = bEnableShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+        Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+        Flags |= (bIsAllowSimultaneousAccess ? D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : D3D12_RESOURCE_FLAG_NONE);
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
     }
 
@@ -308,7 +313,6 @@ namespace ig
         SampleDesc.Count = 1;
         SampleDesc.Quality = 0;
         Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
         Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
         SamplerFeedbackMipRegion = {.Width = 0, .Height = 0, .Depth = 0};
 
@@ -318,6 +322,7 @@ namespace ig
     void GpuTextureDesc::AsTexture1DArray(const U32 width, const uint16_t arrayLength, const uint16_t mipLevels, const DXGI_FORMAT format,
                                           const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/)
     {
+        IG_CHECK(mipLevels > 0);
         bIsArray = true;
         bIsMSAAEnabled = false;
         bIsCubemap = false;
@@ -344,6 +349,7 @@ namespace ig
                                           const DXGI_FORMAT format, const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/,
                                           const bool bEnableMSAA /*= false*/, const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
+        IG_CHECK(mipLevels > 0);
         IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
         bIsMSAAEnabled = bEnableMSAA;
@@ -371,6 +377,7 @@ namespace ig
                                    const bool bEnableShaderReadWrite /*= false*/, const bool bEnableSimultaneousAccess /*= false*/, const bool bEnableMSAA /*= false*/,
                                    const U32 sampleCount /*= 1*/, U32 sampleQuality /*= 0*/)
     {
+        IG_CHECK(mipLevels > 0);
         IG_CHECK(!bEnableMSAA || (bEnableMSAA && !bEnableSimultaneousAccess));
         bIsArray = true;
         bIsMSAAEnabled = bEnableMSAA;
@@ -405,8 +412,7 @@ namespace ig
 
     bool GpuTextureDesc::IsRenderTargetCompatible() const
     {
-        return ((Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) == D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) && !IsUnorderedAccessCompatible() &&
-               !IsDepthStencilCompatible();
+        return (Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) == D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     }
 
     D3D12MA::ALLOCATION_DESC GpuTextureDesc::GetAllocationDesc() const
