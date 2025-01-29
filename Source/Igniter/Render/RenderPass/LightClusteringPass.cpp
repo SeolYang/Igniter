@@ -199,7 +199,7 @@ namespace ig
             const U64 clearParams = (numTileDwords << 32) | tileDwordsBufferUavPtr->Index;
             tileDwordsBufferClearCmdList.SetRoot32BitConstants(0, clearParams, 0);
 
-            constexpr U32 NumThreads = 32;
+            constexpr U32 NumThreads = 1024;
             const U32 numThreadGroup = ((U32)numTileDwords + NumThreads - 1) / NumThreads;
             tileDwordsBufferClearCmdList.Dispatch(numThreadGroup, 1, 1);
 
