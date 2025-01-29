@@ -1,7 +1,7 @@
 #include "Common.hlsl"
 
 //#define MAX_LIGHTS (65536/4)
-#define MAX_LIGHTS 32
+#define MAX_LIGHTS 8192
 #define NUM_DEPTH_BINS 32
 #define MAX_DEPTH_BIN_IDX 31
 #define MAX_DEPTH_BIN_IDX_F32 31.f
@@ -74,31 +74,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     Light v_light = lightStorage[v_lightIdx];
     
     float4 v_lightPosView = mul(float4(v_light.WorldPos.x, v_light.WorldPos.y, v_light.WorldPos.z, 1.f), perFrameData.ToView);
-    float3 v_lightToCam = normalize(float3(-v_lightPosView.x, -v_lightPosView.y, -v_lightPosView.z));
-
-    float v_nearPointZView = (v_lightPosView.xyz + (v_lightToCam * v_light.Radius)).z;
-    float v_farPointZView = (v_lightPosView.xyz + (-v_lightToCam * v_light.Radius)).z;
-    
-    int v_minDepthBinIdx = int(32.f * ((v_nearPointZView - s_nearPlane) * s_invCamPlaneDist));
-    int v_centerDepthBinIdx = int(32.f * ((v_lightPosView.z - s_nearPlane) * s_invCamPlaneDist));
-    int v_maxDepthBinIdx = int(32.f * ((v_farPointZView - s_nearPlane) * s_invCamPlaneDist));
-
-    bool v_bShouldCulled = (v_centerDepthBinIdx < 0 || v_centerDepthBinIdx >= NUM_DEPTH_BINS) &&
-        ((v_minDepthBinIdx < 0 && v_maxDepthBinIdx < 0) ||
-        (v_minDepthBinIdx >= NUM_DEPTH_BINS && v_maxDepthBinIdx >= NUM_DEPTH_BINS));
-    if (v_bShouldCulled)
-    {
-        return;
-    }
-
-    v_minDepthBinIdx = max(0, v_minDepthBinIdx);
-    v_maxDepthBinIdx = min(MAX_DEPTH_BIN_IDX, v_maxDepthBinIdx);
-
-    for (uint depthBinIdx = v_minDepthBinIdx; depthBinIdx <= v_maxDepthBinIdx; ++depthBinIdx)
-    {
-        InterlockedMin(depthBins[depthBinIdx].x, DTid.x);
-        InterlockedMax(depthBins[depthBinIdx].y, DTid.x);
-    }
     
     // 타일 정보만 구하면 되기 때문에 aabbScreen = (min.x, min.y, max.x, max.y)
     float4 v_aabbScreen = float4(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -118,16 +93,49 @@ void main(uint3 DTid : SV_DispatchThreadID)
         v_aabbScreen.w = max(v_aabbCornerScreen.y, v_aabbScreen.w);
     }
     
+    // Depth Bin Culling 조건
+    const float v_nearPointZView = v_lightPosView.z - v_light.Radius;
+    const float v_farPointZView = v_lightPosView.z + v_light.Radius;
+    const bool bDepthBinCullCond0 = v_farPointZView < s_nearPlane && v_nearPointZView < s_nearPlane;
+    const bool bDepthBinCullCond1 = v_farPointZView > s_farPlane && v_nearPointZView > s_farPlane;
+    const bool bDepthBinCullCond2 = v_lightPosView.z < s_nearPlane || v_lightPosView.z > s_farPlane;
+    const bool bCulledByDepthBin = (bDepthBinCullCond0 || bDepthBinCullCond1) && bDepthBinCullCond2;
+    
+    // Tile Culling 조건
+    const bool bTileCullCond0 = (v_aabbScreen.x < 0.f && v_aabbScreen.z < 0.f);
+    const bool bTileCullCond1 = (v_aabbScreen.x >= params.ViewportWidth && v_aabbScreen.z >= params.ViewportWidth);
+    const bool bTileCullCond2 = (v_aabbScreen.y < 0.f && v_aabbScreen.w < 0.f);
+    const bool bTileCullCond3 = (v_aabbScreen.y >= params.ViewportHeight && v_aabbScreen.w >= params.ViewportHeight);
+    const bool bTileCullCond4 = 
+        ((v_aabbScreen.z - v_aabbScreen.x) < LIGHT_DIST_EPSILON) ||
+        ((v_aabbScreen.w - v_aabbScreen.y) < LIGHT_DIST_EPSILON);
+    const bool bCulledByTile = bTileCullCond0 || bTileCullCond1 || bTileCullCond2 || bTileCullCond3 || bTileCullCond4;
+    
+    if (bCulledByDepthBin || bCulledByTile)
+    {
+        return;
+    }
+    
+    // Depth Bin 채우기
+    int v_minDepthBinIdx = int(32.f * ((v_nearPointZView - s_nearPlane) * s_invCamPlaneDist));
+    int v_centerDepthBinIdx = int(32.f * ((v_lightPosView.z - s_nearPlane) * s_invCamPlaneDist));
+    int v_maxDepthBinIdx = int(32.f * ((v_farPointZView - s_nearPlane) * s_invCamPlaneDist));
+    
+    v_minDepthBinIdx = max(0, v_minDepthBinIdx);
+    v_maxDepthBinIdx = min(MAX_DEPTH_BIN_IDX, v_maxDepthBinIdx);
+
+    for (uint depthBinIdx = uint(v_minDepthBinIdx); depthBinIdx <= uint(v_maxDepthBinIdx); ++depthBinIdx)
+    {
+        InterlockedMin(depthBins[depthBinIdx].x, DTid.x);
+        InterlockedMax(depthBins[depthBinIdx].y, DTid.x);
+    }
+    
+    // Tile 채우기
     v_aabbScreen.x = clamp(v_aabbScreen.x, 0.f, params.ViewportWidth - 1.f);
     v_aabbScreen.y = clamp(v_aabbScreen.y, 0.f, params.ViewportHeight - 1.f);
     v_aabbScreen.z = clamp(v_aabbScreen.z, 0.f, params.ViewportWidth - 1.f);
     v_aabbScreen.w = clamp(v_aabbScreen.w, 0.f, params.ViewportHeight - 1.f);
-
-    if ((v_aabbScreen.z - v_aabbScreen.x) < LIGHT_DIST_EPSILON || (v_aabbScreen.w - v_aabbScreen.y) < LIGHT_DIST_EPSILON)
-    {
-        return;
-    }
-
+    
     v_aabbScreen *= INV_TILE_SIZE;
     const uint v_firstTileX = uint(v_aabbScreen.x);
     const uint v_firstTileY = uint(v_aabbScreen.y);
