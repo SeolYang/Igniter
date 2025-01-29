@@ -52,7 +52,7 @@ namespace ig
         lightClusteringPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(lightClusteringPsoDesc).value());
         IG_CHECK(lightClusteringPso->IsCompute());
 
-        lightProxyMapIdxList.reserve(kMaxNumLights);
+        lightProxyIdxViewZList.reserve(kMaxNumLights);
 
         GpuBufferDesc lightIdxListStagingBufferDesc{};
         lightIdxListStagingBufferDesc.AsUploadBuffer((U32)sizeof(U32) * kMaxNumLights);
@@ -142,29 +142,25 @@ namespace ig
 
         // Sorting Lights / Upload ight Idx List
         {
-            lightProxyMapIdxList.clear();
-            IG_CHECK(lightProxyMapIdxList.capacity() == kMaxNumLights);
+            lightProxyIdxViewZList.clear();
+            IG_CHECK(lightProxyIdxViewZList.capacity() == kMaxNumLights);
 
             for (Index idx = 0; idx < std::min((Size)kMaxNumLights, lightProxyMapValues.size()); ++idx)
             {
-                lightProxyMapIdxList.emplace_back((U16)idx);
+                const SceneProxy::LightProxy& proxy = lightProxyMapValues[idx].second;
+                lightProxyIdxViewZList.emplace_back((U16)idx, 
+                                                    Vector4::Transform(Vector4(proxy.GpuData.WorldPosition.x, proxy.GpuData.WorldPosition.y, proxy.GpuData.WorldPosition.z, 1.f), params.ViewMat).z);
             }
 
-            std::sort(lightProxyMapIdxList.begin(), lightProxyMapIdxList.end(),
-                      [this, &lightProxyMapValues](const Index lhsIdx, const Index rhsIdx)
+            std::sort(lightProxyIdxViewZList.begin(), lightProxyIdxViewZList.end(),
+                      [this, &lightProxyMapValues](const auto& lhs, const auto& rhs)
                       {
-                          const SceneProxy::LightProxy& lhsProxy = lightProxyMapValues[lhsIdx].second;
-                          const SceneProxy::LightProxy& rhsProxy = lightProxyMapValues[rhsIdx].second;
-
-                          const float lhsDist = Vector3::DistanceSquared(lhsProxy.GpuData.WorldPosition, params.CamWorldPos);
-                          const float rhsDist = Vector3::DistanceSquared(rhsProxy.GpuData.WorldPosition, params.CamWorldPos);
-
-                          return lhsDist < rhsDist;
+                          return lhs.second < rhs.second;
                       });
 
-            for (Size lightIdxListIdx = 0; lightIdxListIdx < lightProxyMapIdxList.size(); ++lightIdxListIdx)
+            for (Size lightIdxListIdx = 0; lightIdxListIdx < lightProxyIdxViewZList.size(); ++lightIdxListIdx)
             {
-                const Size lightProxyIdx = lightProxyMapIdxList[lightIdxListIdx];
+                const Size lightProxyIdx = lightProxyIdxViewZList[lightIdxListIdx].first;
                 const SceneProxy::LightProxy& lightProxy = lightProxyMapValues[lightProxyIdx].second;
                 mappedLightIdxListStagingBuffer[localFrameIdx][lightIdxListIdx] = (U32)lightProxy.StorageSpace.OffsetIndex;
             }
@@ -176,7 +172,7 @@ namespace ig
 
             CommandList& lightIdxListCopyCmdList = *params.LightIdxListCopyCmdList;
             lightIdxListCopyCmdList.Open();
-            lightIdxListCopyCmdList.CopyBuffer(*lightIdxListStagingBufferPtr, 0, sizeof(U32) * lightProxyMapValues.size(), *lightIdxListBufferPtr, 0);
+            lightIdxListCopyCmdList.CopyBuffer(*lightIdxListStagingBufferPtr, 0, sizeof(U32) * lightProxyIdxViewZList.size(), *lightIdxListBufferPtr, 0);
             lightIdxListCopyCmdList.Close();
         }
 
@@ -212,7 +208,7 @@ namespace ig
 
         // Light Clustering
         {
-            const U32 numLights = (U32)lightProxyMapIdxList.size();
+            const U32 numLights = (U32)lightProxyIdxViewZList.size();
             const LightClusteringPassGpuParams gpuParams{
                 .ToProj = ConvertToShaderSuitableForm(params.ProjMat),
                 .ViewportWidth = params.TargetViewport.width,

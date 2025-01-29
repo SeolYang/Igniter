@@ -21,6 +21,7 @@ namespace ig
         CommandList* LightClusteringCmdList = nullptr;
 
         Vector3 CamWorldPos{};
+        Matrix ViewMat{};
         Matrix ProjMat{};
         // NearPlane < FarPlane => Reverse-Z를 사용하긴 하지만 Light Clustering엔 반대로 들어오지 않도록 Assertion으로 체크 할 것
         float NearPlane = 0.f;
@@ -111,7 +112,7 @@ namespace ig
         Ptr<ShaderBlob> lightClusteringShader;
         Ptr<PipelineState> lightClusteringPso;
 
-        Vector<U16> lightProxyMapIdxList;
+        Vector<std::pair<U16, float>> lightProxyIdxViewZList;
         InFlightFramesResource<RenderHandle<GpuBuffer>> lightIdxListStagingBuffer;
         InFlightFramesResource<U32*> mappedLightIdxListStagingBuffer;
         InFlightFramesResource<BufferPackage> lightIdxListBufferPackage;
