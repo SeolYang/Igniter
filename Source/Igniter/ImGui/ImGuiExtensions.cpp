@@ -125,35 +125,36 @@ namespace ig::ImGuiX
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, SeparatorThickness);
     }
 
-    bool EditColor3(const std::string_view label, Color& color)
+    inline bool EditColor3(const std::string_view label, F32* color)
     {
         /* #sy_todo 사이즈 조절 */
-        F32 colorVal[3]{color.R(), color.G(), color.B()};
-        if (ImGui::ColorEdit3(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
-        {
-            color.x = colorVal[0];
-            color.y = colorVal[1];
-            color.z = colorVal[2];
-            return true;
-        }
+        return ImGui::ColorEdit3(label.data(), color, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs);
+    }
 
-        return false;
+    inline bool EditColor4(const std::string_view label, F32* color)
+    {
+        /* #sy_todo 사이즈 조절 */
+        return ImGui::ColorEdit4(label.data(), color, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs);
+    }
+
+    bool EditColor3(const std::string_view label, Color& color)
+    {
+        return EditColor3(label, &color.x);
+    }
+
+    bool EditColor3(const std::string_view label, Vector3& color)
+    {
+        return EditColor3(label, &color.x);
     }
 
     bool EditColor4(const std::string_view label, Color& color)
     {
-        /* #sy_todo 사이즈 조절 (원본 구현 참고) */
-        F32 colorVal[4]{color.R(), color.G(), color.B(), color.A()};
-        if (ImGui::ColorEdit4(label.data(), colorVal, ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoInputs))
-        {
-            color.x = colorVal[0];
-            color.y = colorVal[1];
-            color.z = colorVal[2];
-            color.w = colorVal[3];
-            return true;
-        }
+        return EditColor4(label, &color.x);
+    }
 
-        return false;
+    bool EditColor4(const std::string_view label, Vector4& color)
+    {
+        return EditColor4(label, &color.x);
     }
 
     void SetupDefaultTheme()

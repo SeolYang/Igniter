@@ -37,7 +37,9 @@ struct PerFrameData
 struct Light
 {
     uint Type;
+    float Intensity;
     float Radius;
+    float4 Color;
     float3 WorldPos;
     float3 Forward;
 };

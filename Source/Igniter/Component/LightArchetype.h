@@ -14,7 +14,7 @@ namespace ig
             registry->emplace<TransformComponent>(entity);
             LightComponent& light = registry->emplace<LightComponent>(entity);
             light.Property.Type = ELightType::Point;
-            light.Property.Radius = 1.f;
+            light.Property.FalloffRadius = 1.f;
             return entity;
         }
     };

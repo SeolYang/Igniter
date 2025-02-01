@@ -77,6 +77,8 @@ namespace ig::ImGuiX
     void SeparatorText(const std::string_view text);
     bool EditColor3(const std::string_view label, Color& color);
     bool EditColor4(const std::string_view label, Color& color);
+    bool EditColor3(const std::string_view label, Vector3& color);
+    bool EditColor4(const std::string_view label, Vector4& color);
 
     inline void PushPositiveButtonHighlightColor()
     {

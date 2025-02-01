@@ -15,14 +15,14 @@ namespace ig
 
     Json& LightComponent::Serialize(Json& archive) const
     {
-        IG_SERIALIZE_TO_JSON(LightComponent, archive, Property.Radius);
+        IG_SERIALIZE_TO_JSON(LightComponent, archive, Property.FalloffRadius);
         IG_SERIALIZE_TO_JSON(LightComponent, archive, Property.Type);
         return archive;
     }
 
     const Json& LightComponent::Deserialize(const Json& archive)
     {
-        IG_DESERIALIZE_FROM_JSON_FALLBACK(LightComponent, archive, Property.Radius, 1.f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(LightComponent, archive, Property.FalloffRadius, 1.f);
         IG_DESERIALIZE_FROM_JSON_FALLBACK(LightComponent, archive, Property.Type, ELightType::Point);
         return archive;
     }
@@ -31,12 +31,24 @@ namespace ig
     {
         IG_CHECK(registry != nullptr && entity != NullEntity);
         LightComponent& light = registry->get<LightComponent>(entity);
-        ImGui::DragFloat("Radius", &light.Property.Radius, 0.1f, 0.01f, 100000000.f);
+        ImGui::DragFloat("FalloffRadius", &light.Property.FalloffRadius, 0.1f, 0.01f, FLT_MAX);
         if (ImGuiX::BeginEnumCombo("Type", light.Property.Type))
         {
             ImGuiX::EndEnumCombo();
         }
+
+        ImGui::DragFloat(std::format("Intensity({})", ToLightIntensityUnit(light.Property.Type)).c_str(), &light.Property.Intensity);
+
+        bool bLightColorEdited = ImGuiX::EditColor3("Color", light.Property.Color);
+        ImGui::SameLine();
+        bLightColorEdited |= ImGuiX::EditVector3("Color", light.Property.Color, 0.001f, "%.03f"); 
+        if (bLightColorEdited)
+        {
+            light.Property.Color.x = std::clamp<float>(light.Property.Color.x, 0.f, 1.f);
+            light.Property.Color.y = std::clamp<float>(light.Property.Color.y, 0.f, 1.f);
+            light.Property.Color.z = std::clamp<float>(light.Property.Color.z, 0.f, 1.f);
+        }
     }
 
     IG_DEFINE_COMPONENT_META(LightComponent);
-}
+} // namespace ig

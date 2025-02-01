@@ -63,17 +63,17 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	AppendStructuredBuffer<MeshLodInstance> meshLodInstances = ResourceDescriptorHeap[gConstants.MeshLodInstanceStorageUav];
 		
 	uint renderableIdx = renderableIndices[DTid.x];
-	RenderableData renderableData = renderableStorage[renderableIdx]; // 모든 스레드에 걸쳐서 Unique
+	RenderableData renderableData = renderableStorage[renderableIdx];
 	if (renderableData.Type == RENDERABLE_TYPE_STATIC_MESH)
 	{
-		TransformData transformData = transformStorage[renderableData.TransformIdx]; // 모든 스레드에 걸쳐서 Unique
+		TransformData transformData = transformStorage[renderableData.TransformIdx];
 		float4x4 toWorld = transpose(float4x4(
 			transformData.Cols[0],
 			transformData.Cols[1],
 			transformData.Cols[2],
 			float4(0.f, 0.f, 0.f, 1.f)));
 		
-		InstancingData instancingData = instancingDataStorage.Load(renderableData.DataIdx); // 겹칠 가능성 O
+		InstancingData instancingData = instancingDataStorage.Load(renderableData.DataIdx);
 		Mesh mesh = meshStorage[instancingData.MeshIdx];
 		
 		if (!perFrameData.EnableFrustumCulling ||

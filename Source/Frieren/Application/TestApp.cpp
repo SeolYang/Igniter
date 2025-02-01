@@ -73,7 +73,7 @@ namespace fe
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
                     nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
                     auto& lightComponent = registry.emplace<ig::LightComponent>(newAxeEntity);
-                    lightComponent.Property.Radius = 2.f;
+                    lightComponent.Property.FalloffRadius = 2.f;
 
                     RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
                     randComp.MoveDirection = ig::Vector3{
@@ -101,7 +101,7 @@ namespace fe
         //{
         //     const ig::Entity lightEntity = ig::PointLightArchetype::Create(&registry);
         //     auto& lightComponent = registry.get<ig::LightComponent>(lightEntity);
-        //     lightComponent.Property.Radius = kLightRadius;
+        //     lightComponent.Property.FalloffRadius = kLightRadius;
         //     auto& transformComponent = registry.get<ig::TransformComponent>(lightEntity);
         //     transformComponent.Position.z = lightZ;
         //     transformComponent.Scale = ig::Vector3{4.f, 4.f, 4.f};
