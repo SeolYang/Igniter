@@ -16,7 +16,7 @@ namespace ig
 
     struct LightClusteringPassParams
     {
-        CommandList* LightIdxListCopyCmdList = nullptr;
+        CommandList* InitCopyCmdList = nullptr;
         CommandList* ClearTileDwordsBufferCmdList = nullptr;
         CommandList* LightClusteringCmdList = nullptr;
 

@@ -1,4 +1,5 @@
 #include "Igniter/Igniter.h"
+#include "Igniter/Core/Engine.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/D3D12/GpuBufferDesc.h"
@@ -137,7 +138,7 @@ namespace ig
 
     void LightClusteringPass::SetParams(const LightClusteringPassParams& newParams)
     {
-        IG_CHECK(newParams.LightIdxListCopyCmdList != nullptr);
+        IG_CHECK(newParams.InitCopyCmdList != nullptr);
         IG_CHECK(newParams.ClearTileDwordsBufferCmdList != nullptr);
         IG_CHECK(newParams.LightClusteringCmdList != nullptr);
         IG_CHECK(newParams.NearPlane < newParams.FarPlane);
@@ -153,33 +154,45 @@ namespace ig
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(sceneProxy != nullptr);
 
-        const auto& lightProxyMapValues = sceneProxy->GetLightProxyMap(localFrameIdx).values();
-
         // Sorting Lights / Upload ight Idx List
-        {
-            lightProxyIdxViewZList.clear();
-            IG_CHECK(lightProxyIdxViewZList.capacity() == kMaxNumLights);
+        const auto& lightProxyMapValues = sceneProxy->GetLightProxyMap(localFrameIdx).values();
+        const U32 numLights = (U32)std::min((Size)kMaxNumLights, lightProxyMapValues.size());
+        lightProxyIdxViewZList.resize(numLights);
 
-            for (Index idx = 0; idx < std::min((Size)kMaxNumLights, lightProxyMapValues.size()); ++idx)
+        tf::Executor& taskExecutor = Engine::GetTaskExecutor();
+        tf::Taskflow buildLightIdxList{};
+
+        tf::Task prepareIntermediateList = buildLightIdxList.for_each_index(
+            0i32, (I32)numLights, 1i32,
+            [this, &lightProxyMapValues](const Size idx)
             {
                 const SceneProxy::LightProxy& proxy = lightProxyMapValues[idx].second;
-                lightProxyIdxViewZList.emplace_back((U16)idx,
-                                                    Vector4::Transform(Vector4(proxy.GpuData.WorldPosition.x, proxy.GpuData.WorldPosition.y, proxy.GpuData.WorldPosition.z, 1.f), params.ViewMat).z);
-            }
+                lightProxyIdxViewZList[idx] = std::make_pair((U16)idx,
+                                                             Vector4::Transform(
+                                                                 Vector4(proxy.GpuData.WorldPosition.x, proxy.GpuData.WorldPosition.y, proxy.GpuData.WorldPosition.z, 1.f),
+                                                                 params.ViewMat)
+                                                                 .z);
+            });
 
-            std::sort(lightProxyIdxViewZList.begin(), lightProxyIdxViewZList.end(),
-                      [this, &lightProxyMapValues](const auto& lhs, const auto& rhs)
-                      {
-                          return lhs.second < rhs.second;
-                      });
+        tf::Task sortIntermediateList = buildLightIdxList.sort(
+            lightProxyIdxViewZList.begin(), lightProxyIdxViewZList.end(),
+            [](const std::pair<U16, float>& lhs, const std::pair<U16, float>& rhs)
+            { return lhs.second < rhs.second; });
 
-            for (Size lightIdxListIdx = 0; lightIdxListIdx < lightProxyIdxViewZList.size(); ++lightIdxListIdx)
+        tf::Task updateToStagingBuffer = buildLightIdxList.for_each_index(
+            0i32, (I32)numLights, 1i32,
+            [this, &lightProxyMapValues, localFrameIdx](const Size lightIdxListIdx)
             {
                 const Size lightProxyIdx = lightProxyIdxViewZList[lightIdxListIdx].first;
                 const SceneProxy::LightProxy& lightProxy = lightProxyMapValues[lightProxyIdx].second;
                 mappedLightIdxListStagingBuffer[localFrameIdx][lightIdxListIdx] = (U32)lightProxy.StorageSpace.OffsetIndex;
-            }
+            });
 
+        prepareIntermediateList.precede(sortIntermediateList);
+        sortIntermediateList.precede(updateToStagingBuffer);
+        tf::Future<void> buildLightIdxListFut = taskExecutor.run(buildLightIdxList);
+
+        {
             GpuBuffer* lightIdxListStagingBufferPtr = renderContext->Lookup(lightIdxListStagingBuffer[localFrameIdx]);
             IG_CHECK(lightIdxListStagingBufferPtr != nullptr);
             GpuBuffer* lightIdxListBufferPtr = renderContext->Lookup(lightIdxListBufferPackage[localFrameIdx].Buffer);
@@ -189,7 +202,7 @@ namespace ig
             GpuBuffer* depthBinsBufferPtr = renderContext->Lookup(depthBinsBufferPackage[localFrameIdx].Buffer);
             IG_CHECK(depthBinsBufferPtr != nullptr);
 
-            CommandList& lightIdxListCopyCmdList = *params.LightIdxListCopyCmdList;
+            CommandList& lightIdxListCopyCmdList = *params.InitCopyCmdList;
             lightIdxListCopyCmdList.Open();
             lightIdxListCopyCmdList.CopyBuffer(*lightIdxListStagingBufferPtr, 0, sizeof(U32) * lightProxyIdxViewZList.size(), *lightIdxListBufferPtr, 0);
             lightIdxListCopyCmdList.CopyBuffer(*depthBinInitBufferPtr, *depthBinsBufferPtr);
@@ -228,12 +241,11 @@ namespace ig
 
         // Light Clustering
         {
-            const U32 numLights = (U32)lightProxyIdxViewZList.size();
             const LightClusteringPassGpuParams gpuParams{
                 .ToProj = ConvertToShaderSuitableForm(params.ProjMat),
                 .ViewportWidth = params.TargetViewport.width,
                 .ViewportHeight = params.TargetViewport.height,
-                .NumLights = numLights,
+                .NumLights = (U32)numLights,
                 .LightStorageBufferSrv = lightStorageBufferSrvPtr->Index,
                 .LightIdxListBufferSrv = lightIdxListBufferSrvPtr->Index,
                 .TileDwordsBufferUav = tileDwordsBufferUavPtr->Index,
@@ -260,5 +272,7 @@ namespace ig
 
             lightClusteringCmdList.Close();
         }
+
+        buildLightIdxListFut.wait();
     }
 } // namespace ig

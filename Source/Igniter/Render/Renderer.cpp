@@ -316,14 +316,14 @@ namespace ig
             GpuFence& asyncCopyFence = renderContext->GetAsyncCopyFence();
             CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
 
-            auto lightIdxListCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "LightIdxListCopyCmdList"_fs);
+            auto lightClusteringInitCopyCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "LightClusteringInitCopyCmdList"_fs);
             auto clearTileDwordsBufferCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "ClearTileDwordsBufferCmdList"_fs);
             auto lightClusteringCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClusteringCmdList"_fs);
             {
                 auto gpuParamsConstantBuffer = tempConstantBufferAllocator->Allocate<LightClusteringPassGpuParams>(localFrameIdx);
 
                 lightClusteringPass->SetParams(
-                    {.LightIdxListCopyCmdList = lightIdxListCopyCmdList,
+                    {.InitCopyCmdList = lightClusteringInitCopyCmdList,
                      .ClearTileDwordsBufferCmdList = clearTileDwordsBufferCmdList,
                      .LightClusteringCmdList = lightClusteringCmdList,
                      .CamWorldPos = camWorldPos,
@@ -337,7 +337,7 @@ namespace ig
 
                 lightClusteringPass->Execute(localFrameIdx);
 
-                CommandList* lightIdxListCopyCmdLists[]{lightIdxListCopyCmdList};
+                CommandList* lightIdxListCopyCmdLists[]{lightClusteringInitCopyCmdList};
                 asyncCopyQueue.ExecuteCommandLists(lightIdxListCopyCmdLists);
                 GpuSyncPoint lightIdxListCopySyncPoint = asyncCopyQueue.MakeSyncPointWithSignal(asyncCopyFence);
 
