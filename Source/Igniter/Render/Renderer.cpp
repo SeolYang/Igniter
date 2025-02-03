@@ -19,6 +19,7 @@
 #include "Igniter/Render/RenderPass/FrustumCullingPass.h"
 #include "Igniter/Render/RenderPass/CompactMeshLodInstancesPass.h"
 #include "Igniter/Render/RenderPass/GenerateMeshLodDrawCommandsPass.h"
+#include "Igniter/Render/RenderPass/ZPrePass.h"
 #include "Igniter/Render/RenderPass/TestForwardShadingPass.h"
 #include "Igniter/Render/RenderPass/ImGuiRenderPass.h"
 #include "Igniter/Render/RenderPass/DebugLightClusterPass.h"
@@ -75,6 +76,11 @@ namespace ig
 
         U32 RenderableIndicesBufferSrv = IG_NUMERIC_MAX_OF(RenderableIndicesBufferSrv);
         U32 NumMaxRenderables = IG_NUMERIC_MAX_OF(NumMaxRenderables);
+
+        U32 LightStorageSrv = IG_NUMERIC_MAX_OF(LightStorageSrv);
+        U32 LightIdxListSrv = IG_NUMERIC_MAX_OF(LightIdxListSrv);
+        U32 LightTileBitfieldBufferSrv = IG_NUMERIC_MAX_OF(LightTileBitfieldBufferSrv);
+        U32 LightDepthBinBufferSrv = IG_NUMERIC_MAX_OF(LightDepthBinBufferSrv);
     };
 
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy)
@@ -91,7 +97,7 @@ namespace ig
         GpuTextureDesc depthStencilDesc;
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
         depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT, true);
-        depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+        depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
 
         GpuTextureDesc offScreenTexDesc;
         offScreenTexDesc.DebugName = "OffscreenTex"_fs;
@@ -118,6 +124,7 @@ namespace ig
         frustumCullingPass = MakePtr<FrustumCullingPass>(renderContext, *bindlessRootSignature);
         compactMeshLodInstancesPass = MakePtr<CompactMeshLodInstancesPass>(renderContext, *bindlessRootSignature);
         generateMeshLodDrawCmdsPass = MakePtr<GenerateMeshLodDrawCommandsPass>(renderContext, *bindlessRootSignature);
+        zPrePass = MakePtr<ZPrePass>(renderContext, *bindlessRootSignature);
         testForwardShadingPass = MakePtr<TestForwardShadingPass>(renderContext, *bindlessRootSignature, mainViewport);
         debugLightClusterPass = MakePtr<DebugLightClusterPass>(renderContext, *bindlessRootSignature, mainViewport);
         imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);
@@ -139,11 +146,10 @@ namespace ig
 
     GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint)
     {
-        ZoneScoped;
-
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(meshStorage != nullptr);
         IG_CHECK(sceneProxy != nullptr);
+        ZoneScoped;
 
         // 프레임 마다 업데이트 되는 버퍼 데이터 업데이트
         PerFrameConstants perFrameConstants{};
@@ -239,6 +245,22 @@ namespace ig
         perFrameConstants.RenderableIndicesBufferSrv = renderableIndicesBufferSrv->Index;
         perFrameConstants.NumMaxRenderables = sceneProxy->GetNumRenderables(localFrameIdx);
 
+        const GpuView* lightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv(localFrameIdx));
+        IG_CHECK(lightStorageSrv != nullptr);
+        perFrameConstants.LightStorageSrv = lightStorageSrv->Index;
+
+        const GpuView* lightIdxListSrv = renderContext->Lookup(lightClusteringPass->GetLightIdxListSrv(localFrameIdx));
+        IG_CHECK(lightIdxListSrv != nullptr);
+        perFrameConstants.LightIdxListSrv = lightIdxListSrv->Index;
+
+        const GpuView* lightTileBitfieldBufferSrv = renderContext->Lookup(lightClusteringPass->GetTilesBufferSrv(localFrameIdx));
+        IG_CHECK(lightTileBitfieldBufferSrv != nullptr);
+        perFrameConstants.LightTileBitfieldBufferSrv = lightTileBitfieldBufferSrv->Index;
+
+        const GpuView* lightDepthBinBufferSrv = renderContext->Lookup(lightClusteringPass->GetDepthBinsBufferSrv(localFrameIdx));
+        IG_CHECK(lightDepthBinBufferSrv != nullptr);
+        perFrameConstants.LightDepthBinBufferSrv = lightDepthBinBufferSrv->Index;
+
         perFrameConstants.MinMeshLod = minMeshLod;
 
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameConstants>(localFrameIdx);
@@ -326,6 +348,7 @@ namespace ig
                 CommandList* lightClusteringCmdLists[]{lightClusteringCmdList};
                 asyncComputeQueue.Wait(lightIdxListCopySyncPoint);
                 asyncComputeQueue.Wait(clearTileDwordsBufferSyncPoint);
+                asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
                 asyncComputeQueue.ExecuteCommandLists(lightClusteringCmdLists);
             }
             // GpuSyncPoint lightClusteringSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
@@ -379,6 +402,25 @@ namespace ig
                 asyncComputeQueue.Wait(prevPassSyncPoint);
                 asyncComputeQueue.ExecuteCommandLists(cmdLists);
             }
+            GpuSyncPoint generateMeshLodCmdsSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
+
+            auto zPrePassCmdList =
+                mainGfxCmdListPool.Request(localFrameIdx, "ZPrePass"_fs);
+            {
+                zPrePass->SetParams({.CmdList = zPrePassCmdList,
+                                     .DrawInstanceCmdSignature =
+                                         generateMeshLodDrawCmdsPass->GetCommandSignature(),
+                                     .DrawInstanceCmdStorageBuffer =
+                                         generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
+                                     .DepthTex = depthStencils[localFrameIdx],
+                                     .Dsv = dsvs[localFrameIdx],
+                                     .MainViewport = mainViewport});
+
+                zPrePass->Execute(localFrameIdx);
+                mainGfxQueue.Wait(generateMeshLodCmdsSyncPoint);
+                CommandList* cmdLists[]{zPrePassCmdList};
+                mainGfxQueue.ExecuteCommandLists(cmdLists);
+            }
 
             auto testForwardPassCmdList =
                 mainGfxCmdListPool.Request(localFrameIdx, "ForwardShading"_fs);
@@ -388,12 +430,13 @@ namespace ig
                                                        generateMeshLodDrawCmdsPass->GetCommandSignature(),
                                                    .DrawInstanceCmdStorageBuffer =
                                                        generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
+                                                   .DepthTex = depthStencils[localFrameIdx],
                                                    .Dsv = dsvs[localFrameIdx],
                                                    .MainViewport = mainViewport});
                 testForwardShadingPass->Execute(localFrameIdx);
 
                 // 이미 이 시점에서 LightClustering은 완료 되었음.
-                GpuSyncPoint prevPassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
+                GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
                 mainGfxQueue.Wait(prevPassSyncPoint);
                 CommandList* cmdLists[]{testForwardPassCmdList};
                 mainGfxQueue.ExecuteCommandLists(cmdLists);
@@ -474,6 +517,8 @@ namespace ig
             mainGfxQueue.Wait(prevPassSyncPoint);
             mainGfxQueue.ExecuteCommandLists(cmdLists);
         }
+
+        PIXEndEvent();
 
         swapchain.Present();
         return mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);

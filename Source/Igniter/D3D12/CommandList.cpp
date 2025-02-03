@@ -292,6 +292,13 @@ namespace ig
         cmdList->OMSetRenderTargets(1, &rtvCpuHandle, FALSE, dsv ? &dsvCpuHandle : nullptr);
     }
 
+    void CommandList::SetDepthOnlyTarget(const GpuView& dsv)
+    {
+        IG_CHECK(dsv);
+        IG_CHECK(dsv.Type == EGpuViewType::DepthStencilView);
+        cmdList->OMSetRenderTargets(0, nullptr, FALSE, &dsv.CpuHandle);
+    }
+
     void CommandList::SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY primitiveTopology)
     {
         IG_CHECK(IsValid());

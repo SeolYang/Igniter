@@ -456,6 +456,12 @@
     <ClInclude Include="Render\RenderPass\DebugLightClusterPass.h">
       <Filter>Source\Render\RenderPass</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RenderPass\ZPrePass.h">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\RenderableTag.h">
+      <Filter>Source\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -689,6 +695,9 @@
     <ClCompile Include="Render\RenderPass\DebugLightClusterPass.cpp">
       <Filter>Source\Render\RenderPass</Filter>
     </ClCompile>
+    <ClCompile Include="Render\RenderPass\ZPrePass.cpp">
+      <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
@@ -705,6 +714,12 @@
     </None>
     <None Include="..\..\Thirdparty\fmod\include\fmod\fmod.cs">
       <Filter>Thirdparty\fmod</Filter>
+    </None>
+    <None Include="..\..\Assets\Shaders\Constants.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </None>
+    <None Include="..\..\Assets\Shaders\BxDFs.hlsl">
+      <Filter>Source\Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -736,6 +751,15 @@
       <Filter>Source\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\DebugLightCluster.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\Types.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\Utils.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\ZPrePass.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

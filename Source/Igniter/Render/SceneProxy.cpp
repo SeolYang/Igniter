@@ -12,6 +12,7 @@
 #include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Component/MaterialComponent.h"
 #include "Igniter/Component/LightComponent.h"
+#include "Igniter/Component/RenderableTag.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/Render/SceneProxy.h"
 
@@ -374,7 +375,7 @@ namespace ig
 
         auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
         auto& storage = *transformProxyPackage.Storage[localFrameIdx];
-        const auto transformView = registry.view<const TransformComponent>();
+        const auto transformView = registry.view<const TransformComponent, RenderableTag>();
 
         tf::Task updateTransformProxy = subflow.for_each(
             transformView.begin(), transformView.end(),

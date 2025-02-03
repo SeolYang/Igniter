@@ -85,7 +85,9 @@ namespace ig
 
         void SetParams(const LightClusteringPassParams& newParams);
 
+        [[nodiscard]] RenderHandle<GpuView> GetLightIdxListSrv(const LocalFrameIndex localFrameIdx) const noexcept { return lightIdxListBufferPackage[localFrameIdx].Srv; }
         [[nodiscard]] RenderHandle<GpuView> GetTilesBufferSrv(const LocalFrameIndex localFrameIdx) const noexcept { return tileDwordsBufferPackage[localFrameIdx].Srv; }
+        [[nodiscard]] RenderHandle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
         [[nodiscard]] RenderHandle<GpuView> GetDepthBinsBufferSrv(const LocalFrameIndex localFrameIdx) const noexcept { return depthBinsBufferPackage[localFrameIdx].Srv; }
 
       protected:
@@ -99,10 +101,10 @@ namespace ig
 
         static_assert((kMaxNumLights % 2) == 0);
         // Tile당 kMaxNumLights 만큼의 비트가 필요
-        constexpr static Size kTileSize = 8;
+        constexpr static Size kTileSize = 16;
         constexpr static Size kNumPixelsPerTile = kTileSize * kTileSize;
         constexpr static float kInvTileSize = 1.f / (float)kTileSize;
-        constexpr static Size kNumDepthBins = 32;
+        constexpr static Size kNumDepthBins = 4096;
         constexpr static Size kNumDWordsPerTile = kMaxNumLights / BytesToBits(sizeof(U32));
         constexpr static Size kDepthBinsBufferSize = kNumDepthBins * sizeof(DepthBin);
 
@@ -124,6 +126,7 @@ namespace ig
         Size numTileDwords = 0;
         InFlightFramesResource<BufferPackage> tileDwordsBufferPackage;
         InFlightFramesResource<BufferPackage> depthBinsBufferPackage;
+        RenderHandle<GpuBuffer> depthBinInitBuffer;
 
         LightClusteringPassParams params;
     };

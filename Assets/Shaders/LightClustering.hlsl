@@ -1,14 +1,5 @@
 #include "Common.hlsl"
 
-//#define MAX_LIGHTS (65536/4)
-#define MAX_LIGHTS 8192
-#define NUM_DEPTH_BINS 32
-#define MAX_DEPTH_BIN_IDX 31
-#define MAX_DEPTH_BIN_IDX_F32 31.f
-#define LIGHT_SIZE_EPSILON 0.0001f
-#define INV_TILE_SIZE 1.f/8.f
-#define NUM_U32_PER_TILE (MAX_LIGHTS / 32)
-
 struct LightClusteringConstants
 {
     uint PerFrameDataCbv;
@@ -43,18 +34,12 @@ static const float4 kAabbCornerOffsets[8] =
     float4(-1.f, -1.f, 1.f, 0.f)
 };
 
-[numthreads(32, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID)
+#define NUM_THREADS 32
+[numthreads(NUM_THREADS, 1, 1)]
+void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
 {
     ConstantBuffer<LightClusteringParams> params = ResourceDescriptorHeap[gConstants.LightClusteringParamsCbv];
-    
-    RWStructuredBuffer<uint2> depthBins = ResourceDescriptorHeap[params.DepthBinsBufferUav];
-    if (DTid.x < NUM_DEPTH_BINS)
-    {
-        depthBins[DTid.x] = uint2(0xFFFFFFFF, 0);
-    }
-    DeviceMemoryBarrierWithGroupSync();
-    
+
     if (DTid.x >= params.NumLights)
     {
         return;
@@ -74,6 +59,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
     Light v_light = lightStorage[v_lightIdx];
     
     float4 v_lightPosView = mul(float4(v_light.WorldPos.x, v_light.WorldPos.y, v_light.WorldPos.z, 1.f), perFrameData.ToView);
+    
+    // Depth Bin Culling 조건
+    const float v_nearPointZView = v_lightPosView.z - v_light.Radius;
+    const float v_farPointZView = v_lightPosView.z + v_light.Radius;
+    const bool bDepthBinCullCond0 = v_farPointZView < s_nearPlane || v_nearPointZView > s_farPlane;
+    const bool bDepthBinCullCond1 = v_lightPosView.z < s_nearPlane || v_lightPosView.z > s_farPlane;
+    const bool bCulledByDepthBin = bDepthBinCullCond0 && bDepthBinCullCond1;
     
     // 타일 정보만 구하면 되기 때문에 aabbScreen = (min.x, min.y, max.x, max.y)
     float4 v_aabbScreen = float4(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -99,13 +91,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
         v_aabbScreen.w = max(v_aabbCornerScreen.y, v_aabbScreen.w);
     }
     
-    // Depth Bin Culling 조건
-    const float v_nearPointZView = v_lightPosView.z - v_light.Radius;
-    const float v_farPointZView = v_lightPosView.z + v_light.Radius;
-    const bool bDepthBinCullCond0 = v_farPointZView < s_nearPlane || v_nearPointZView > s_farPlane;
-    const bool bDepthBinCullCond1 = v_lightPosView.z < s_nearPlane || v_lightPosView.z > s_farPlane;
-    const bool bCulledByDepthBin = bDepthBinCullCond0 && bDepthBinCullCond1;
-    
     // Tile Culling 조건
     const bool bTileCullCond0 = v_aabbScreen.x > params.ViewportWidth || v_aabbScreen.z < 0.f;
     const bool bTileCullCond1 = v_aabbScreen.y > params.ViewportHeight || v_aabbScreen.w < 0.f;
@@ -116,20 +101,31 @@ void main(uint3 DTid : SV_DispatchThreadID)
     {
         return;
     }
-
+    
     // Depth Bin 채우기
-    int v_minDepthBinIdx = int(32.f * ((v_nearPointZView - s_nearPlane) * s_invCamPlaneDist));
-    int v_maxDepthBinIdx = int(32.f * ((v_farPointZView - s_nearPlane) * s_invCamPlaneDist));
-    
-    v_minDepthBinIdx = max(0, v_minDepthBinIdx);
-    v_maxDepthBinIdx = min(MAX_DEPTH_BIN_IDX, v_maxDepthBinIdx);
+    RWStructuredBuffer<uint2> depthBins = ResourceDescriptorHeap[params.DepthBinsBufferUav];
+    int v_minDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_nearPointZView - s_nearPlane) * s_invCamPlaneDist));
+    int v_maxDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_farPointZView - s_nearPlane) * s_invCamPlaneDist));
+    v_minDepthBinIdx = clamp(v_minDepthBinIdx, 0, MAX_DEPTH_BIN_IDX);
+    v_maxDepthBinIdx = clamp(v_maxDepthBinIdx, 0, MAX_DEPTH_BIN_IDX);
         
-    for (uint depthBinIdx = uint(v_minDepthBinIdx); depthBinIdx <= uint(v_maxDepthBinIdx); ++depthBinIdx)
+    const uint v_lightIdxListIdx = DTid.x;
+    const int s_minDepthBinIdx = WaveActiveMin(v_minDepthBinIdx);
+    const int s_maxDepthBinIdx = WaveActiveMax(v_maxDepthBinIdx);
+    for (int s_depthBinIdx = s_minDepthBinIdx; s_depthBinIdx <= s_maxDepthBinIdx; ++s_depthBinIdx)
     {
-        InterlockedMin(depthBins[depthBinIdx].x, DTid.x);
-        InterlockedMax(depthBins[depthBinIdx].y, DTid.x);
+        if (s_depthBinIdx >= v_minDepthBinIdx && s_depthBinIdx <= v_maxDepthBinIdx)
+        {
+            const uint s_minLightIdxListIdx = WaveActiveMin(v_lightIdxListIdx);
+            const uint s_maxLightIdxListIdx = WaveActiveMax(v_lightIdxListIdx);
+            if (WaveIsFirstLane())
+            {
+                InterlockedMin(depthBins[s_depthBinIdx].x, s_minLightIdxListIdx);
+                InterlockedMax(depthBins[s_depthBinIdx].y, s_maxLightIdxListIdx);
+            }
+        }
     }
-    
+
     // Tile 채우기
     v_aabbScreen.x = clamp(v_aabbScreen.x, 0.f, params.ViewportWidth);
     v_aabbScreen.y = clamp(v_aabbScreen.y, 0.f, params.ViewportHeight);
@@ -141,16 +137,30 @@ void main(uint3 DTid : SV_DispatchThreadID)
     const uint v_firstTileY = uint(v_aabbScreen.y);
     const uint v_lastTileX = uint(v_aabbScreen.z);
     const uint v_lastTileY = uint(v_aabbScreen.w);
-    
     const uint s_numTileX = uint(params.ViewportWidth * INV_TILE_SIZE);
-    for (uint v_tileX = v_firstTileX; v_tileX < v_lastTileX; ++v_tileX)
+    
+    // 그룹내 스레드는 항상 최악의 경우를 상정한다. 최악의 경우
+    // v_tileY = 0 ~ Max, v_tileX = 0~Max를 모든 스레드가 실행한다
+    // 이걸 최소화 할려면? 같은 v_tileY과 v_tileX를 가지는 thread를 모아서 한번에 처리하자
+    // 그러면 InterlockedOr의 비율이 1/NumThreads로 줄어들지 않을까?
+    const uint mergedFirstTileX = WaveActiveMin(v_firstTileX);
+    const uint mergedFirstTileY = WaveActiveMin(v_firstTileY);
+    const uint mergedLastTileX = WaveActiveMax(v_lastTileX);
+    const uint mergedLastTileY = WaveActiveMax(v_lastTileY);
+    for (uint tileY = mergedFirstTileY; tileY <= mergedLastTileY; ++tileY)
     {
-        for (uint v_tileY = v_firstTileY; v_tileY < v_lastTileY; ++v_tileY)
+        for (uint tileX = mergedFirstTileX; tileX <= mergedLastTileX; ++tileX)
         {
-            const uint v_tileDwordOffset = ((s_numTileX * v_tileY) + v_tileX) * NUM_U32_PER_TILE;
-            const uint v_lightDwordOffset = v_tileDwordOffset + (DTid.x / 32);
-            const uint v_lightDword = (uint(1) << (DTid.x % 32));
-            InterlockedOr(tileDwords[v_lightDwordOffset], v_lightDword);
+            const uint tileDwordOffset = ((s_numTileX * tileY) + tileX) * NUM_U32_PER_TILE;
+            const uint lightDwordOffset = tileDwordOffset + (DTid.x / 32);
+            const uint mask = WaveActiveBallot(
+                        (tileX >= v_firstTileX && tileX <= v_lastTileX) &&
+                        (tileY >= v_firstTileY && tileY <= v_lastTileY)).x;
+
+            if (WaveIsFirstLane())
+            {
+                InterlockedOr(tileDwords[lightDwordOffset], mask);
+            }
         }
     }
 }

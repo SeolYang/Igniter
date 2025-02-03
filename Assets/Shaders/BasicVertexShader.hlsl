@@ -14,6 +14,8 @@ struct VertexShaderOutput
 {
 	float4 aPos : SV_POSITION;
 	float2 aUv : TEXCOORD;
+    float3 aNormal : NORMAL;
+    float3 aWorldPos : WORLD_POS;
 };
 
 VertexShaderOutput main(uint vertexID : SV_VertexID, uint instanceId : SV_InstanceID)
@@ -33,5 +35,7 @@ VertexShaderOutput main(uint vertexID : SV_VertexID, uint instanceId : SV_Instan
 	VertexShaderOutput output;
 	output.aPos = mul(float4(vertex.Position.xyz, 1.f), worldViewProj);
 	output.aUv = vertex.TexCoord0;
+    output.aNormal = vertex.Normal;
+    output.aWorldPos = mul(float4(vertex.Position.xyz, 1.f), worldMat).xyz;
 	return output;
 }

@@ -35,14 +35,14 @@ namespace ig
 #endif
     {
         IG_CHECK(instance == nullptr);
-        
+
         instance = this;
         IG_LOG(EngineLog, Info, "Igniter Engine Version {}", version::Version);
         IG_LOG(EngineLog, Info, "Igniting Engine Runtime!");
         CoInitializeUnique();
         // 엔진 인스턴스가 생성된 스레드를 메인 스레드로 가정
         ThreadInfo::RegisterMainThreadID();
-        
+
         timer = MakePtr<Timer>();
         IG_LOG(EngineLog, Info, "Timer Initialized.");
         window = MakePtr<Window>(WindowDescription{.Width = desc.WindowWidth, .Height = desc.WindowHeight, .Title = desc.WindowTitle});
@@ -52,7 +52,7 @@ namespace ig
 
         renderContext = MakePtr<RenderContext>(*window);
         IG_LOG(EngineLog, Info, "OnImGui Context Initialized.");
-        
+
         meshStorage = MakePtr<MeshStorage>(*renderContext);
         IG_LOG(EngineLog, Info, "Mesh Storage Initialized.");
 
@@ -63,7 +63,7 @@ namespace ig
 
         sceneProxy = MakePtr<SceneProxy>(taskExecutor, *renderContext, *meshStorage, *assetManager);
         IG_LOG(EngineLog, Info, "Scene Proxy Initialized.");
-        
+
         renderer = MakePtr<Renderer>(*window, *renderContext, *meshStorage, *sceneProxy);
         IG_LOG(EngineLog, Info, "Renderer Initialized.");
 

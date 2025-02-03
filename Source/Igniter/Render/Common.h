@@ -5,7 +5,7 @@
 
 namespace ig
 {
-    constexpr U32 kMaxNumLights = 8192;
+    constexpr U32 kMaxNumLights = 32768;
 
     template <typename Ty>
     using RenderHandle = Handle<Ty, class RenderContext>;

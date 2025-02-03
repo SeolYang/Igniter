@@ -1,4 +1,7 @@
 #pragma once
+
+
+
 #pragma warning(disable : 4530)
 #include <array>
 #include <bitset>
@@ -101,6 +104,7 @@
 #include <d3d11.h>
 #include <DirectXTex/DirectXTex.h>
 
+#define USE_PIX
 #include <WinPixEventRuntime/pix3.h>
 
 #include <SimpleMath/SimpleMath.h>

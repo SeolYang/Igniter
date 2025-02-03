@@ -98,6 +98,19 @@ namespace ig
             depthBinsBufferPackage[localFrameIdx].Srv = renderContext.CreateShaderResourceView(newDepthBinsBuffer);
             depthBinsBufferPackage[localFrameIdx].Uav = renderContext.CreateUnorderedAccessView(newDepthBinsBuffer);
         }
+
+        depthBinsBufferDesc.DebugName = "DepthBinInitBuffer"_fs;
+        depthBinInitBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
+        GpuBuffer* depthBinInitBufferPtr = renderContext.Lookup(depthBinInitBuffer);
+        GpuUploader& gpuUploader = renderContext.GetGpuUploader();
+        UploadContext uploadCtx = gpuUploader.Reserve(depthBinsBufferDesc.GetSizeAsBytes());
+        DepthBin* uploadDataPtr = reinterpret_cast<DepthBin*>(uploadCtx.GetOffsettedCpuAddress());
+        for (Index idx = 0; idx < kNumDepthBins; ++idx)
+        {
+            uploadDataPtr[idx] = DepthBin{.FirstLightIdx = 0xFFFFFFFF, .LastLightIdx = 0};
+        }
+        uploadCtx.CopyBuffer(0, depthBinsBufferDesc.GetSizeAsBytes(), *depthBinInitBufferPtr);
+        gpuUploader.Submit(uploadCtx)->WaitOnCpu();
     }
 
     LightClusteringPass::~LightClusteringPass()
@@ -118,6 +131,8 @@ namespace ig
             renderContext->DestroyGpuView(depthBinsBufferPackage[localFrameIdx].Uav);
             renderContext->DestroyBuffer(depthBinsBufferPackage[localFrameIdx].Buffer);
         }
+
+        renderContext->DestroyBuffer(depthBinInitBuffer);
     }
 
     void LightClusteringPass::SetParams(const LightClusteringPassParams& newParams)
@@ -148,7 +163,7 @@ namespace ig
             for (Index idx = 0; idx < std::min((Size)kMaxNumLights, lightProxyMapValues.size()); ++idx)
             {
                 const SceneProxy::LightProxy& proxy = lightProxyMapValues[idx].second;
-                lightProxyIdxViewZList.emplace_back((U16)idx, 
+                lightProxyIdxViewZList.emplace_back((U16)idx,
                                                     Vector4::Transform(Vector4(proxy.GpuData.WorldPosition.x, proxy.GpuData.WorldPosition.y, proxy.GpuData.WorldPosition.z, 1.f), params.ViewMat).z);
             }
 
@@ -169,10 +184,15 @@ namespace ig
             IG_CHECK(lightIdxListStagingBufferPtr != nullptr);
             GpuBuffer* lightIdxListBufferPtr = renderContext->Lookup(lightIdxListBufferPackage[localFrameIdx].Buffer);
             IG_CHECK(lightIdxListBufferPtr != nullptr);
+            GpuBuffer* depthBinInitBufferPtr = renderContext->Lookup(depthBinInitBuffer);
+            IG_CHECK(depthBinInitBufferPtr != nullptr);
+            GpuBuffer* depthBinsBufferPtr = renderContext->Lookup(depthBinsBufferPackage[localFrameIdx].Buffer);
+            IG_CHECK(depthBinsBufferPtr != nullptr);
 
             CommandList& lightIdxListCopyCmdList = *params.LightIdxListCopyCmdList;
             lightIdxListCopyCmdList.Open();
             lightIdxListCopyCmdList.CopyBuffer(*lightIdxListStagingBufferPtr, 0, sizeof(U32) * lightProxyIdxViewZList.size(), *lightIdxListBufferPtr, 0);
+            lightIdxListCopyCmdList.CopyBuffer(*depthBinInitBufferPtr, *depthBinsBufferPtr);
             lightIdxListCopyCmdList.Close();
         }
 

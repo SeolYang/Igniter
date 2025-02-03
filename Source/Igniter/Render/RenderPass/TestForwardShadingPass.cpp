@@ -37,6 +37,7 @@ namespace ig
 
         // Reverse-Z PSO
         GraphicsPipelineStateDesc psoDesc;
+        psoDesc.Name = "FowardShadingPSO"_fs;
         psoDesc.SetVertexShader(*vs);
         psoDesc.SetPixelShader(*ps);
         psoDesc.SetRootSignature(bindlessRootSignature);
@@ -44,7 +45,8 @@ namespace ig
         psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC{CD3DX12_DEFAULT{}};
-        psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+        psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+        psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
         pso = MakePtr<PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
 
         constexpr DXGI_FORMAT kOutputTexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -103,7 +105,9 @@ namespace ig
         const GpuView* outputTexRtvPtr = renderContext->Lookup(outputTexRtv[localFrameIdx]);
         IG_CHECK(outputTexRtvPtr != nullptr);
 
+        GpuTexture* depthTex = renderContext->Lookup(params.DepthTex);
         const GpuView* dsv = renderContext->Lookup(params.Dsv);
+        IG_CHECK(depthTex != nullptr);
         IG_CHECK(dsv != nullptr);
 
         CommandList& cmdList = *params.CmdList;
@@ -122,10 +126,14 @@ namespace ig
             *drawInstanceCmdStorageBuffer,
             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_EXECUTE_INDIRECT,
             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT);
+        cmdList.AddPendingTextureBarrier(
+            *depthTex,
+            D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
+            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_READ,
+            D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ);
         cmdList.FlushBarriers();
 
         cmdList.ClearRenderTarget(*outputTexRtvPtr);
-        cmdList.ClearDepth(*dsv, 0.f);
         cmdList.SetRenderTarget(*outputTexRtvPtr, *dsv);
         cmdList.SetViewport(params.MainViewport);
         cmdList.SetScissorRect(params.MainViewport);

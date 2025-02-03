@@ -2,6 +2,7 @@
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Component/MaterialComponent.h"
+#include "Igniter/Component/RenderableTag.h"
 
 namespace ig
 {
@@ -13,6 +14,7 @@ namespace ig
             registry->emplace<TransformComponent>(newEntity);
             registry->emplace<StaticMeshComponent>(newEntity);
             registry->emplace<MaterialComponent>(newEntity);
+            registry->emplace<RenderableTag>(newEntity);
             return newEntity;
         }
     };

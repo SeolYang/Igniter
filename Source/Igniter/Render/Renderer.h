@@ -62,6 +62,7 @@ namespace ig
         Ptr<class FrustumCullingPass> frustumCullingPass;
         Ptr<class CompactMeshLodInstancesPass> compactMeshLodInstancesPass;
         Ptr<class GenerateMeshLodDrawCommandsPass> generateMeshLodDrawCmdsPass;
+        Ptr<class ZPrePass> zPrePass;
         Ptr<class TestForwardShadingPass> testForwardShadingPass;
         Ptr<class DebugLightClusterPass> debugLightClusterPass;
         Ptr<class ImGuiRenderPass> imguiRenderPass;
