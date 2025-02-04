@@ -35,7 +35,7 @@ VertexShaderOutput main(uint vertexID : SV_VertexID, uint instanceId : SV_Instan
 	VertexShaderOutput output;
 	output.aPos = mul(float4(vertex.Position.xyz, 1.f), worldViewProj);
 	output.aUv = vertex.TexCoord0;
-    output.aNormal = vertex.Normal;
+    output.aNormal = mul(float4(vertex.Normal, 0.f), worldMat).xyz;
     output.aWorldPos = mul(float4(vertex.Position.xyz, 1.f), worldMat).xyz;
 	return output;
 }

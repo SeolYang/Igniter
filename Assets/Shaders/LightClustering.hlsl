@@ -91,75 +91,76 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
         v_aabbScreen.w = max(v_aabbCornerScreen.y, v_aabbScreen.w);
     }
     
-    // Tile Culling 조건
+    // Depth Bin 채우기
+    if (!bCulledByDepthBin)
+    {
+        RWStructuredBuffer<uint2> depthBins = ResourceDescriptorHeap[params.DepthBinsBufferUav];
+        int v_minDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_nearPointZView - s_nearPlane) * s_invCamPlaneDist));
+        int v_maxDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_farPointZView - s_nearPlane) * s_invCamPlaneDist));
+        v_minDepthBinIdx = clamp(v_minDepthBinIdx, 0, MAX_DEPTH_BIN_IDX);
+        v_maxDepthBinIdx = clamp(v_maxDepthBinIdx, 0, MAX_DEPTH_BIN_IDX);
+        
+        const uint v_lightIdxListIdx = DTid.x;
+        const int s_minDepthBinIdx = WaveActiveMin(v_minDepthBinIdx);
+        const int s_maxDepthBinIdx = WaveActiveMax(v_maxDepthBinIdx);
+        for (int s_depthBinIdx = s_minDepthBinIdx; s_depthBinIdx <= s_maxDepthBinIdx; ++s_depthBinIdx)
+        {
+            if (s_depthBinIdx >= v_minDepthBinIdx && s_depthBinIdx <= v_maxDepthBinIdx)
+            {
+                const uint s_minLightIdxListIdx = WaveActiveMin(v_lightIdxListIdx);
+                const uint s_maxLightIdxListIdx = WaveActiveMax(v_lightIdxListIdx);
+                if (WaveIsFirstLane())
+                {
+                    InterlockedMin(depthBins[s_depthBinIdx].x, s_minLightIdxListIdx);
+                    InterlockedMax(depthBins[s_depthBinIdx].y, s_maxLightIdxListIdx);
+                }
+            }
+        }
+    }
+
+        // Tile Culling 조건
     const bool bTileCullCond0 = v_aabbScreen.x > params.ViewportWidth || v_aabbScreen.z < 0.f;
     const bool bTileCullCond1 = v_aabbScreen.y > params.ViewportHeight || v_aabbScreen.w < 0.f;
     const bool bTileCullCond2 = (v_aabbScreen.z - v_aabbScreen.x) < LIGHT_SIZE_EPSILON || (v_aabbScreen.w - v_aabbScreen.y) < LIGHT_SIZE_EPSILON;
     const bool bCulledByTile = bTileCullCond0 || bTileCullCond1 || bTileCullCond2;
     
-    if (bCulledByDepthBin || bCulledByTile)
+    if (!bCulledByTile && (v_farPointZView >= s_nearPlane))
     {
-        return;
-    }
+        // Tile 채우기
+        v_aabbScreen.x = clamp(v_aabbScreen.x, 0.f, params.ViewportWidth);
+        v_aabbScreen.y = clamp(v_aabbScreen.y, 0.f, params.ViewportHeight);
+        v_aabbScreen.z = clamp(v_aabbScreen.z, 0.f, params.ViewportWidth);
+        v_aabbScreen.w = clamp(v_aabbScreen.w, 0.f, params.ViewportHeight);
     
-    // Depth Bin 채우기
-    RWStructuredBuffer<uint2> depthBins = ResourceDescriptorHeap[params.DepthBinsBufferUav];
-    int v_minDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_nearPointZView - s_nearPlane) * s_invCamPlaneDist));
-    int v_maxDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_farPointZView - s_nearPlane) * s_invCamPlaneDist));
-    v_minDepthBinIdx = clamp(v_minDepthBinIdx, 0, MAX_DEPTH_BIN_IDX);
-    v_maxDepthBinIdx = clamp(v_maxDepthBinIdx, 0, MAX_DEPTH_BIN_IDX);
-        
-    const uint v_lightIdxListIdx = DTid.x;
-    const int s_minDepthBinIdx = WaveActiveMin(v_minDepthBinIdx);
-    const int s_maxDepthBinIdx = WaveActiveMax(v_maxDepthBinIdx);
-    for (int s_depthBinIdx = s_minDepthBinIdx; s_depthBinIdx <= s_maxDepthBinIdx; ++s_depthBinIdx)
-    {
-        if (s_depthBinIdx >= v_minDepthBinIdx && s_depthBinIdx <= v_maxDepthBinIdx)
-        {
-            const uint s_minLightIdxListIdx = WaveActiveMin(v_lightIdxListIdx);
-            const uint s_maxLightIdxListIdx = WaveActiveMax(v_lightIdxListIdx);
-            if (WaveIsFirstLane())
-            {
-                InterlockedMin(depthBins[s_depthBinIdx].x, s_minLightIdxListIdx);
-                InterlockedMax(depthBins[s_depthBinIdx].y, s_maxLightIdxListIdx);
-            }
-        }
-    }
-
-    // Tile 채우기
-    v_aabbScreen.x = clamp(v_aabbScreen.x, 0.f, params.ViewportWidth);
-    v_aabbScreen.y = clamp(v_aabbScreen.y, 0.f, params.ViewportHeight);
-    v_aabbScreen.z = clamp(v_aabbScreen.z, 0.f, params.ViewportWidth);
-    v_aabbScreen.w = clamp(v_aabbScreen.w, 0.f, params.ViewportHeight);
-    
-    v_aabbScreen *= INV_TILE_SIZE;
-    const uint v_firstTileX = uint(v_aabbScreen.x);
-    const uint v_firstTileY = uint(v_aabbScreen.y);
-    const uint v_lastTileX = uint(v_aabbScreen.z);
-    const uint v_lastTileY = uint(v_aabbScreen.w);
-    const uint s_numTileX = uint(params.ViewportWidth * INV_TILE_SIZE);
+        v_aabbScreen *= INV_TILE_SIZE;
+        const uint v_firstTileX = uint(v_aabbScreen.x);
+        const uint v_firstTileY = uint(v_aabbScreen.y);
+        const uint v_lastTileX = uint(v_aabbScreen.z);
+        const uint v_lastTileY = uint(v_aabbScreen.w);
+        const uint s_numTileX = uint(params.ViewportWidth * INV_TILE_SIZE);
     
     // 그룹내 스레드는 항상 최악의 경우를 상정한다. 최악의 경우
     // v_tileY = 0 ~ Max, v_tileX = 0~Max를 모든 스레드가 실행한다
     // 이걸 최소화 할려면? 같은 v_tileY과 v_tileX를 가지는 thread를 모아서 한번에 처리하자
     // 그러면 InterlockedOr의 비율이 1/NumThreads로 줄어들지 않을까?
-    const uint mergedFirstTileX = WaveActiveMin(v_firstTileX);
-    const uint mergedFirstTileY = WaveActiveMin(v_firstTileY);
-    const uint mergedLastTileX = WaveActiveMax(v_lastTileX);
-    const uint mergedLastTileY = WaveActiveMax(v_lastTileY);
-    for (uint tileY = mergedFirstTileY; tileY <= mergedLastTileY; ++tileY)
-    {
-        for (uint tileX = mergedFirstTileX; tileX <= mergedLastTileX; ++tileX)
+        const uint mergedFirstTileX = WaveActiveMin(v_firstTileX);
+        const uint mergedFirstTileY = WaveActiveMin(v_firstTileY);
+        const uint mergedLastTileX = WaveActiveMax(v_lastTileX);
+        const uint mergedLastTileY = WaveActiveMax(v_lastTileY);
+        for (uint tileY = mergedFirstTileY; tileY <= mergedLastTileY; ++tileY)
         {
-            const uint tileDwordOffset = ((s_numTileX * tileY) + tileX) * NUM_U32_PER_TILE;
-            const uint lightDwordOffset = tileDwordOffset + (DTid.x / 32);
-            const uint mask = WaveActiveBallot(
+            for (uint tileX = mergedFirstTileX; tileX <= mergedLastTileX; ++tileX)
+            {
+                const uint tileDwordOffset = ((s_numTileX * tileY) + tileX) * NUM_U32_PER_TILE;
+                const uint lightDwordOffset = tileDwordOffset + (DTid.x / 32);
+                const uint mask = WaveActiveBallot(
                         (tileX >= v_firstTileX && tileX <= v_lastTileX) &&
                         (tileY >= v_firstTileY && tileY <= v_lastTileY)).x;
 
-            if (WaveIsFirstLane())
-            {
-                InterlockedOr(tileDwords[lightDwordOffset], mask);
+                if (WaveIsFirstLane())
+                {
+                    InterlockedOr(tileDwords[lightDwordOffset], mask);
+                }
             }
         }
     }

@@ -54,9 +54,9 @@ namespace fe
         cameraComponent.bIsMainCamera = true;
 
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("Fox_fox1_0"_fs);
+        ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
         IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        ig::ManagedAsset<ig::Material> axeMaterial = assetManager.Load<ig::Material>("fox_material"_fs);
+        ig::ManagedAsset<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
         IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
 
         for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
@@ -67,7 +67,7 @@ namespace fe
                 {
                     ig::Entity newAxeEntity = registry.create();
                     ig::TransformComponent& transform = registry.emplace<ig::TransformComponent>(newAxeEntity);
-                    transform.Scale = ig::Vector3{0.02f, 0.02f, 0.02f};
+                    transform.Scale = ig::Vector3{1.f, 1.0f, 1.f};
                     transform.Position = kAxeOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)axeGridX, (ig::F32)axeGridY, (ig::F32)axeGridZ});
                     ig::StaticMeshComponent& staticMeshComponent = registry.emplace<ig::StaticMeshComponent>(newAxeEntity);
                     staticMeshComponent.Mesh = axeStaticMesh;
@@ -77,12 +77,12 @@ namespace fe
                     registry.emplace<ig::RenderableTag>(newAxeEntity);
 
                     RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
-                    //randComp.MoveDirection = ig::Vector3{
-                    //    ig::Random(-1.f, 1.f),
-                    //    ig::Random(-1.f, 1.f),
-                    //    ig::Random(-1.f, 1.f)};
-                    //randComp.MoveDirection.Normalize();
-                    //randComp.MoveSpeed = ig::Random(0.1f, 1.5f);
+                    // randComp.MoveDirection = ig::Vector3{
+                    //     ig::Random(-1.f, 1.f),
+                    //     ig::Random(-1.f, 1.f),
+                    //     ig::Random(-1.f, 1.f)};
+                    // randComp.MoveDirection.Normalize();
+                    // randComp.MoveSpeed = ig::Random(0.1f, 1.5f);
 
                     randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
                     randComp.RotateSpeed = ig::Random(0.f, 15.f);
@@ -102,7 +102,7 @@ namespace fe
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newLightEntity);
                     nameComponent.Name = ig::String(std::format("Light ({}, {}, {})", lightGridX, lightGridY, lightGridZ));
                     auto& lightComponent = registry.emplace<ig::LightComponent>(newLightEntity);
-                    //lightComponent.Property.FalloffRadius = 30.f;
+                    // lightComponent.Property.FalloffRadius = 30.f;
                     lightComponent.Property.FalloffRadius = 15.f;
                     lightComponent.Property.Intensity = 20.f;
                     lightComponent.Property.Color = ig::Vector3{ig::Random(0.f, 1.f), ig::Random(0.f, 1.f), ig::Random(0.f, 1.f)};
@@ -113,7 +113,7 @@ namespace fe
                         ig::Random(-1.f, 1.f),
                         ig::Random(-1.f, 1.f)};
                     randComp.MoveDirection.Normalize();
-                    randComp.MoveSpeed = ig::Random(1.f, 3.5f);
+                    randComp.MoveSpeed = ig::Random(1.f, 5.5f);
                 }
             }
         }
