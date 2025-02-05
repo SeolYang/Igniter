@@ -762,5 +762,8 @@
     <FxCompile Include="..\..\Assets\Shaders\ZPrePass.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\QuadVertexShader.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

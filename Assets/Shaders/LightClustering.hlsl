@@ -36,7 +36,7 @@ static const float4 kAabbCornerOffsets[8] =
 
 #define NUM_THREADS 32
 [numthreads(NUM_THREADS, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
+void main(uint3 DTid : SV_DispatchThreadID)
 {
     ConstantBuffer<LightClusteringParams> params = ResourceDescriptorHeap[gConstants.LightClusteringParamsCbv];
 

@@ -99,11 +99,6 @@ namespace ig
         depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT, true);
         depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
 
-        GpuTextureDesc offScreenTexDesc;
-        offScreenTexDesc.DebugName = "OffscreenTex"_fs;
-        offScreenTexDesc.AsRenderTarget((U32)mainViewport.width, (U32)mainViewport.height, 1, DXGI_FORMAT_R8G8B8A8_UNORM, true);
-        offScreenTexDesc.InitialLayout = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
-
         for (const LocalFrameIndex localFrameIdx : LocalFramesView)
         {
             depthStencils[localFrameIdx] = renderContext.CreateTexture(depthStencilDesc);
