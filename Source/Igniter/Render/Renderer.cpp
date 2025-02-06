@@ -237,15 +237,15 @@ namespace ig
         IG_CHECK(lightStorageSrv != nullptr);
         perFrameConstants.LightStorageSrv = lightStorageSrv->Index;
 
-        const GpuView* lightIdxListSrv = renderContext->Lookup(lightClusteringPass->GetLightIdxListSrv(localFrameIdx));
+        const GpuView* lightIdxListSrv = renderContext->Lookup(lightClusteringPass->GetLightIdxListSrv());
         IG_CHECK(lightIdxListSrv != nullptr);
         perFrameConstants.LightIdxListSrv = lightIdxListSrv->Index;
 
-        const GpuView* lightTileBitfieldBufferSrv = renderContext->Lookup(lightClusteringPass->GetTilesBufferSrv(localFrameIdx));
+        const GpuView* lightTileBitfieldBufferSrv = renderContext->Lookup(lightClusteringPass->GetTilesBufferSrv());
         IG_CHECK(lightTileBitfieldBufferSrv != nullptr);
         perFrameConstants.LightTileBitfieldBufferSrv = lightTileBitfieldBufferSrv->Index;
 
-        const GpuView* lightDepthBinBufferSrv = renderContext->Lookup(lightClusteringPass->GetDepthBinsBufferSrv(localFrameIdx));
+        const GpuView* lightDepthBinBufferSrv = renderContext->Lookup(lightClusteringPass->GetDepthBinsBufferSrv());
         IG_CHECK(lightDepthBinBufferSrv != nullptr);
         perFrameConstants.LightDepthBinBufferSrv = lightDepthBinBufferSrv->Index;
 
@@ -362,9 +362,9 @@ namespace ig
                 compactMeshLodInstancesPass->SetParams({.CmdList = compactMeshLodInstancesCmdList,
                                                         .PerFrameCbvPtr = perFrameCbv,
                                                         .MeshLodInstanceStorageUavHandle =
-                                                            frustumCullingPass->GetMeshLodInstanceStorageUav(localFrameIdx),
+                                                            frustumCullingPass->GetMeshLodInstanceStorageUav(),
                                                         .CullingDataBufferSrvHandle =
-                                                            frustumCullingPass->GetCullingDataBufferSrv(localFrameIdx),
+                                                            frustumCullingPass->GetCullingDataBufferSrv(),
                                                         .NumRenderables =
                                                             sceneProxy->GetNumRenderables()});
                 compactMeshLodInstancesPass->Execute(localFrameIdx);
@@ -380,7 +380,7 @@ namespace ig
             {
                 generateMeshLodDrawCmdsPass->SetParams({.CmdList = generateMeshLodDrawCmdsCmdList,
                                                         .PerFrameCbvPtr = perFrameCbv,
-                                                        .CullingDataBufferSrv = frustumCullingPass->GetCullingDataBufferSrv(localFrameIdx),
+                                                        .CullingDataBufferSrv = frustumCullingPass->GetCullingDataBufferSrv(),
                                                         .ZeroFilledBufferPtr = zeroFilledBuffer.get(),
                                                         .NumInstancing = sceneProxy->GetNumInstancing()});
                 generateMeshLodDrawCmdsPass->Execute(localFrameIdx);
@@ -399,7 +399,7 @@ namespace ig
                                      .DrawInstanceCmdSignature =
                                          generateMeshLodDrawCmdsPass->GetCommandSignature(),
                                      .DrawInstanceCmdStorageBuffer =
-                                         generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
+                                         generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(),
                                      .DepthTex = depthStencil,
                                      .Dsv = dsv,
                                      .MainViewport = mainViewport});
@@ -417,7 +417,7 @@ namespace ig
                                                    .DrawInstanceCmdSignature =
                                                        generateMeshLodDrawCmdsPass->GetCommandSignature(),
                                                    .DrawInstanceCmdStorageBuffer =
-                                                       generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
+                                                       generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(),
                                                    .DepthTex = depthStencil,
                                                    .Dsv = dsv,
                                                    .MainViewport = mainViewport});
@@ -437,9 +437,9 @@ namespace ig
                                                   .MainViewport = mainViewport,
                                                   .NumLights = sceneProxy->GetNumLights(),
                                                   .PerFrameDataCbv = perFrameCbv,
-                                                  .TileDwordsBufferSrv = lightClusteringPass->GetTilesBufferSrv(localFrameIdx),
-                                                  .InputTex = testForwardShadingPass->GetOutputTex(localFrameIdx),
-                                                  .InputTexSrv = testForwardShadingPass->GetOutputTexSrv(localFrameIdx)});
+                                                  .TileDwordsBufferSrv = lightClusteringPass->GetTilesBufferSrv(),
+                                                  .InputTex = testForwardShadingPass->GetOutputTex(),
+                                                  .InputTexSrv = testForwardShadingPass->GetOutputTexSrv()});
                 debugLightClusterPass->Execute(localFrameIdx);
 
                 GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
@@ -451,7 +451,7 @@ namespace ig
             auto copyFinalOutputToBackbuffer =
                 mainGfxCmdListPool.Request(localFrameIdx, "CopyFinalOutputToBackbuffer"_fs);
             {
-                GpuTexture* debugLightClusterPassOutput = renderContext->Lookup(debugLightClusterPass->GetOutputTex(localFrameIdx));
+                GpuTexture* debugLightClusterPassOutput = renderContext->Lookup(debugLightClusterPass->GetOutputTex());
 
                 copyFinalOutputToBackbuffer->Open();
 

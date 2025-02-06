@@ -37,7 +37,7 @@ namespace ig
 
         void SetParams(const GenerateMeshLodDrawCommandsPassParams& newParams);
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetDrawInstanceCmdStorageBuffer(const LocalFrameIndex localFrameIdx) const noexcept { return drawInstanceCmdStorage[localFrameIdx]->GetGpuBuffer(); }
+        [[nodiscard]] RenderHandle<GpuBuffer> GetDrawInstanceCmdStorageBuffer() const noexcept { return drawInstanceCmdStorage->GetGpuBuffer(); }
         [[nodiscard]] CommandSignature* GetCommandSignature() noexcept { return cmdSignature.get(); }
 
       protected:
@@ -56,7 +56,7 @@ namespace ig
         Ptr<ShaderBlob> shader;
         Ptr<PipelineState> pso;
 
-        InFlightFramesResource<Ptr<GpuStorage>> drawInstanceCmdStorage;
+        Ptr<GpuStorage> drawInstanceCmdStorage;
 
         Ptr<CommandSignature> cmdSignature;
     };

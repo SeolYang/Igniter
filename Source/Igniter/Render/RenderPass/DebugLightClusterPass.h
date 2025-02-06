@@ -42,9 +42,9 @@ namespace ig
         void SetParams(const DebugLightClusterPassParams& newParams);
 
         [[nodiscard]]
-        RenderHandle<GpuTexture> GetOutputTex(const LocalFrameIndex localFrameIdx) const noexcept
+        RenderHandle<GpuTexture> GetOutputTex() const noexcept
         {
-            return outputTex[localFrameIdx];
+            return outputTex;
         }
 
       protected:
@@ -59,7 +59,7 @@ namespace ig
         Ptr<ShaderBlob> shader;
         Ptr<PipelineState> pso;
 
-        InFlightFramesResource<RenderHandle<GpuTexture>> outputTex;
-        InFlightFramesResource<RenderHandle<GpuView>> outputTexUav;
+        RenderHandle<GpuTexture> outputTex;
+        RenderHandle<GpuView> outputTexUav;
     };
 } // namespace ig

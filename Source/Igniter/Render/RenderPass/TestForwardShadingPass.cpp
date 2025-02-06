@@ -54,30 +54,20 @@ namespace ig
         outputTexDesc.AsRenderTarget((U32)mainViewport.width, (U32)mainViewport.height,
                                      1, kOutputTexFormat);
         outputTexDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
-
-        for (const auto localFrameIdx : LocalFramesView)
-        {
-            outputTexDesc.DebugName = String(std::format("ForwardShadingOutputTex.{}", localFrameIdx));
-            const RenderHandle<GpuTexture> newOutputTex = renderContext.CreateTexture(outputTexDesc);
-            outputTex[localFrameIdx] = newOutputTex;
-            outputTexRtv[localFrameIdx] =
-                renderContext.CreateRenderTargetView(newOutputTex,
-                                                     D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0},
-                                                     kOutputTexFormat);
-            outputTexSrv[localFrameIdx] =
-                renderContext.CreateShaderResourceView(newOutputTex,
-                                                       D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1, .PlaneSlice = 0});
-        }
+        outputTexDesc.DebugName = String(std::format("ForwardShadingOutputTex"));
+        outputTex = renderContext.CreateTexture(outputTexDesc);
+        outputTexRtv = renderContext.CreateRenderTargetView(outputTex,
+                                                            D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0},
+                                                            kOutputTexFormat);
+        outputTexSrv = renderContext.CreateShaderResourceView(outputTex,
+                                                              D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1, .PlaneSlice = 0});
     }
 
     TestForwardShadingPass::~TestForwardShadingPass()
     {
-        for (const auto localFrameIdx : LocalFramesView)
-        {
-            renderContext->DestroyGpuView(outputTexRtv[localFrameIdx]);
-            renderContext->DestroyGpuView(outputTexSrv[localFrameIdx]);
-            renderContext->DestroyTexture(outputTex[localFrameIdx]);
-        }
+        renderContext->DestroyGpuView(outputTexRtv);
+        renderContext->DestroyGpuView(outputTexSrv);
+        renderContext->DestroyTexture(outputTex);
     }
 
     void TestForwardShadingPass::SetParams(const TestForwardShadingPassParams newParams)
@@ -100,9 +90,9 @@ namespace ig
         GpuBuffer* drawInstanceCmdStorageBuffer = renderContext->Lookup(params.DrawInstanceCmdStorageBuffer);
         IG_CHECK(drawInstanceCmdStorageBuffer != nullptr);
 
-        GpuTexture* outputTexPtr = renderContext->Lookup(outputTex[localFrameIdx]);
+        GpuTexture* outputTexPtr = renderContext->Lookup(outputTex);
         IG_CHECK(outputTexPtr != nullptr);
-        const GpuView* outputTexRtvPtr = renderContext->Lookup(outputTexRtv[localFrameIdx]);
+        const GpuView* outputTexRtvPtr = renderContext->Lookup(outputTexRtv);
         IG_CHECK(outputTexRtvPtr != nullptr);
 
         GpuTexture* depthTex = renderContext->Lookup(params.DepthTex);

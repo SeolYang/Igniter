@@ -55,19 +55,16 @@ namespace ig
         pso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(generateDrawInstanceCmdPsoDesc).value());
         IG_CHECK(pso->IsCompute());
 
-        for (const LocalFrameIndex localFrameIdx : LocalFramesView)
-        {
-            drawInstanceCmdStorage[localFrameIdx] = MakePtr<GpuStorage>(
-                renderContext,
-                GpuStorageDesc{
-                    .DebugName = String(std::format("DrawRenderableCmdBuffer.{}", localFrameIdx)),
-                    .ElementSize = (U32)sizeof(DrawInstance),
-                    .NumInitElements = kNumInitDrawCommands,
-                    .Flags =
-                        EGpuStorageFlags::ShaderReadWrite |
-                        EGpuStorageFlags::EnableUavCounter |
-                        EGpuStorageFlags::EnableLinearAllocation});
-        }
+        drawInstanceCmdStorage = MakePtr<GpuStorage>(
+            renderContext,
+            GpuStorageDesc{
+                .DebugName = String(std::format("DrawRenderableCmdBuffer")),
+                .ElementSize = (U32)sizeof(DrawInstance),
+                .NumInitElements = kNumInitDrawCommands,
+                .Flags =
+                    EGpuStorageFlags::ShaderReadWrite |
+                    EGpuStorageFlags::EnableUavCounter |
+                    EGpuStorageFlags::EnableLinearAllocation});
 
         CommandSignatureDesc commandSignatureDesc{};
         commandSignatureDesc.AddConstant(0, 0, 5)
@@ -96,30 +93,30 @@ namespace ig
         params = newParams;
     }
 
-    void GenerateMeshLodDrawCommandsPass::PreExecute(const LocalFrameIndex localFrameIdx)
+    void GenerateMeshLodDrawCommandsPass::PreExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
-        IG_CHECK(drawInstanceCmdStorage[localFrameIdx] != nullptr &&
-                 drawInstanceCmdStorage[localFrameIdx]->IsLinearAllocator());
+        IG_CHECK(drawInstanceCmdStorage != nullptr &&
+                 drawInstanceCmdStorage->IsLinearAllocator());
 
-        drawInstanceCmdStorage[localFrameIdx]->Allocate((Size)params.NumInstancing * StaticMesh::kMaxNumLods);
+        drawInstanceCmdStorage->Allocate((Size)params.NumInstancing * StaticMesh::kMaxNumLods);
     }
 
-    void GenerateMeshLodDrawCommandsPass::OnExecute(const LocalFrameIndex localFrameIdx)
+    void GenerateMeshLodDrawCommandsPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(bindlessRootSignature != nullptr);
         IG_CHECK(pso != nullptr);
-        IG_CHECK(drawInstanceCmdStorage[localFrameIdx]->GetNumAllocatedElements() == ((Size)params.NumInstancing * StaticMesh::kMaxNumLods));
+        IG_CHECK(drawInstanceCmdStorage->GetNumAllocatedElements() == ((Size)params.NumInstancing * StaticMesh::kMaxNumLods));
 
         const GpuView* cullingDataBufferSrvPtr = renderContext->Lookup(params.CullingDataBufferSrv);
         IG_CHECK(cullingDataBufferSrvPtr != nullptr);
 
-        GpuBuffer* drawInstanceStorageBufferPtr = renderContext->Lookup(drawInstanceCmdStorage[localFrameIdx]->GetGpuBuffer());
+        GpuBuffer* drawInstanceStorageBufferPtr = renderContext->Lookup(drawInstanceCmdStorage->GetGpuBuffer());
         IG_CHECK(drawInstanceStorageBufferPtr != nullptr);
         const GpuBufferDesc& drawInstanceStorageBufferDesc = drawInstanceStorageBufferPtr->GetDesc();
         IG_CHECK(drawInstanceStorageBufferDesc.IsUavCounterEnabled());
-        const GpuView* drawInstanceStorageUavPtr = renderContext->Lookup(drawInstanceCmdStorage[localFrameIdx]->GetUnorderedResourceView());
+        const GpuView* drawInstanceStorageUavPtr = renderContext->Lookup(drawInstanceCmdStorage->GetUnorderedResourceView());
         IG_CHECK(drawInstanceStorageUavPtr != nullptr);
 
         const GenerateDrawInstanceConstants generateInstanceDrawConstants{

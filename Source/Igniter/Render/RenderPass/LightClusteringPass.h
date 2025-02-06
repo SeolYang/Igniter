@@ -85,10 +85,10 @@ namespace ig
 
         void SetParams(const LightClusteringPassParams& newParams);
 
-        [[nodiscard]] RenderHandle<GpuView> GetLightIdxListSrv(const LocalFrameIndex localFrameIdx) const noexcept { return lightIdxListBufferPackage[localFrameIdx].Srv; }
-        [[nodiscard]] RenderHandle<GpuView> GetTilesBufferSrv(const LocalFrameIndex localFrameIdx) const noexcept { return tileDwordsBufferPackage[localFrameIdx].Srv; }
+        [[nodiscard]] RenderHandle<GpuView> GetLightIdxListSrv() const noexcept { return lightIdxListBufferPackage.Srv; }
+        [[nodiscard]] RenderHandle<GpuView> GetTilesBufferSrv() const noexcept { return tileDwordsBufferPackage.Srv; }
         [[nodiscard]] RenderHandle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
-        [[nodiscard]] RenderHandle<GpuView> GetDepthBinsBufferSrv(const LocalFrameIndex localFrameIdx) const noexcept { return depthBinsBufferPackage[localFrameIdx].Srv; }
+        [[nodiscard]] RenderHandle<GpuView> GetDepthBinsBufferSrv() const noexcept { return depthBinsBufferPackage.Srv; }
 
       protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
@@ -117,15 +117,15 @@ namespace ig
         Vector<std::pair<U16, float>> lightProxyIdxViewZList;
         InFlightFramesResource<RenderHandle<GpuBuffer>> lightIdxListStagingBuffer;
         InFlightFramesResource<U32*> mappedLightIdxListStagingBuffer;
-        InFlightFramesResource<BufferPackage> lightIdxListBufferPackage;
+        BufferPackage lightIdxListBufferPackage;
 
         // Screen Width/kTileSize * Height/kTileSize * kNumDwordsPerTile
         Size numTileX = 0;
         Size numTileY = 0;
         Size tileDwordsStride = 0;
         Size numTileDwords = 0;
-        InFlightFramesResource<BufferPackage> tileDwordsBufferPackage;
-        InFlightFramesResource<BufferPackage> depthBinsBufferPackage;
+        BufferPackage tileDwordsBufferPackage;
+        BufferPackage depthBinsBufferPackage;
         RenderHandle<GpuBuffer> depthBinInitBuffer;
 
         LightClusteringPassParams params;

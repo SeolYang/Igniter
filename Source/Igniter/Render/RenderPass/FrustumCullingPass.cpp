@@ -52,38 +52,29 @@ namespace ig
 
         GpuBufferDesc cullingDataBufferDesc{};
         cullingDataBufferDesc.AsStructuredBuffer<CullingData>(1, true);
-        for (const LocalFrameIndex localFrameIdx : LocalFramesView)
-        {
-            cullingDataBufferDesc.DebugName = std::format("CullingDataBuffer.{}", localFrameIdx);
-            cullingDataBuffer[localFrameIdx] = renderContext.CreateBuffer(cullingDataBufferDesc);
-            cullingDataBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(cullingDataBuffer[localFrameIdx]);
-            cullingDataBufferUav[localFrameIdx] = renderContext.CreateUnorderedAccessView(cullingDataBuffer[localFrameIdx]);
-        }
+        cullingDataBufferDesc.DebugName = std::format("CullingDataBuffer");
+        cullingDataBuffer = renderContext.CreateBuffer(cullingDataBufferDesc);
+        cullingDataBufferSrv = renderContext.CreateShaderResourceView(cullingDataBuffer);
+        cullingDataBufferUav = renderContext.CreateUnorderedAccessView(cullingDataBuffer);
 
         constexpr EGpuStorageFlags meshLodInstanceStorageFlags =
             EGpuStorageFlags::ShaderReadWrite |
             EGpuStorageFlags::EnableUavCounter |
             EGpuStorageFlags::EnableLinearAllocation;
-        for (const LocalFrameIndex localFrameIdx : LocalFramesView)
-        {
-            meshLodInstanceStorage[localFrameIdx] = MakePtr<GpuStorage>(
-                renderContext,
-                GpuStorageDesc{
-                    .DebugName = String(std::format("MeshLodInstanceStorage.{}", localFrameIdx)),
-                    .ElementSize = (U32)sizeof(StaticMeshLodInstance),
-                    .NumInitElements = kNumInitMeshLodInstances,
-                    .Flags = meshLodInstanceStorageFlags});
-        }
+        meshLodInstanceStorage = MakePtr<GpuStorage>(
+            renderContext,
+            GpuStorageDesc{
+                .DebugName = String(std::format("MeshLodInstanceStorage")),
+                .ElementSize = (U32)sizeof(StaticMeshLodInstance),
+                .NumInitElements = kNumInitMeshLodInstances,
+                .Flags = meshLodInstanceStorageFlags});
     }
 
     FrustumCullingPass::~FrustumCullingPass()
     {
-        for (const LocalFrameIndex localFrameIdx : LocalFramesView)
-        {
-            renderContext->DestroyGpuView(cullingDataBufferSrv[localFrameIdx]);
-            renderContext->DestroyGpuView(cullingDataBufferUav[localFrameIdx]);
-            renderContext->DestroyBuffer(cullingDataBuffer[localFrameIdx]);
-        }
+        renderContext->DestroyGpuView(cullingDataBufferSrv);
+        renderContext->DestroyGpuView(cullingDataBufferUav);
+        renderContext->DestroyBuffer(cullingDataBuffer);
     }
 
     void FrustumCullingPass::SetParams(const FrustumCullingPassParams& newParams)
@@ -95,32 +86,31 @@ namespace ig
         params = newParams;
     }
 
-    void FrustumCullingPass::PreExecute(const LocalFrameIndex localFrameIdx)
+    void FrustumCullingPass::PreExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
-        IG_CHECK(meshLodInstanceStorage[localFrameIdx] != nullptr &&
-                 meshLodInstanceStorage[localFrameIdx]->IsLinearAllocator());
-
-        meshLodInstanceStorage[localFrameIdx]->Allocate(params.NumRenderables);
+        IG_CHECK(meshLodInstanceStorage != nullptr &&
+                 meshLodInstanceStorage->IsLinearAllocator());
+        meshLodInstanceStorage->Allocate(params.NumRenderables);
     }
 
-    void FrustumCullingPass::OnExecute(const LocalFrameIndex localFrameIdx)
+    void FrustumCullingPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(bindlessRootSignature != nullptr);
         IG_CHECK(pso != nullptr);
-        IG_CHECK(meshLodInstanceStorage[localFrameIdx]->GetNumAllocatedElements() == params.NumRenderables);
+        IG_CHECK(meshLodInstanceStorage->GetNumAllocatedElements() == params.NumRenderables);
 
-        GpuBuffer* meshLodInstanceStorageBufferPtr = renderContext->Lookup(meshLodInstanceStorage[localFrameIdx]->GetGpuBuffer());
+        GpuBuffer* meshLodInstanceStorageBufferPtr = renderContext->Lookup(meshLodInstanceStorage->GetGpuBuffer());
         IG_CHECK(meshLodInstanceStorageBufferPtr != nullptr);
         const GpuBufferDesc& meshLodInstanceStorageBufferDesc = meshLodInstanceStorageBufferPtr->GetDesc();
         IG_CHECK(meshLodInstanceStorageBufferDesc.IsUavCounterEnabled());
-        const GpuView* meshLodInstanceStorageUavPtr = renderContext->Lookup(meshLodInstanceStorage[localFrameIdx]->GetUnorderedResourceView());
+        const GpuView* meshLodInstanceStorageUavPtr = renderContext->Lookup(meshLodInstanceStorage->GetUnorderedResourceView());
         IG_CHECK(meshLodInstanceStorageUavPtr != nullptr);
 
-        GpuBuffer* cullingDataBufferPtr = renderContext->Lookup(cullingDataBuffer[localFrameIdx]);
+        GpuBuffer* cullingDataBufferPtr = renderContext->Lookup(cullingDataBuffer);
         IG_CHECK(cullingDataBufferPtr != nullptr);
-        const GpuView* cullingDataBufferUavPtr = renderContext->Lookup(cullingDataBufferUav[localFrameIdx]);
+        const GpuView* cullingDataBufferUavPtr = renderContext->Lookup(cullingDataBufferUav);
         IG_CHECK(cullingDataBufferUavPtr != nullptr);
 
         const FrustumCullingConstants frustumCullingConstants{

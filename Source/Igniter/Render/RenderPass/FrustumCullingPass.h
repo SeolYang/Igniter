@@ -34,9 +34,9 @@ namespace ig
 
         void SetParams(const FrustumCullingPassParams& newParams);
 
-        [[nodiscard]] RenderHandle<GpuView> GetMeshLodInstanceStorageUav(const LocalFrameIndex localFrameIdx) const noexcept { return meshLodInstanceStorage[localFrameIdx]->GetUnorderedResourceView(); }
-        [[nodiscard]] RenderHandle<GpuBuffer> GetCullingDataBuffer(const LocalFrameIndex localFrameIdx) const noexcept { return cullingDataBuffer[localFrameIdx]; }
-        [[nodiscard]] RenderHandle<GpuView> GetCullingDataBufferSrv(const LocalFrameIndex localFrameIdx) const noexcept { return cullingDataBufferSrv[localFrameIdx]; }
+        [[nodiscard]] RenderHandle<GpuView> GetMeshLodInstanceStorageUav() const noexcept { return meshLodInstanceStorage->GetUnorderedResourceView(); }
+        [[nodiscard]] RenderHandle<GpuBuffer> GetCullingDataBuffer() const noexcept { return cullingDataBuffer; }
+        [[nodiscard]] RenderHandle<GpuView> GetCullingDataBufferSrv() const noexcept { return cullingDataBufferSrv; }
 
       protected:
         void PreExecute(const LocalFrameIndex localFrameIdx) override;
@@ -55,10 +55,10 @@ namespace ig
         Ptr<ShaderBlob> shader;
         Ptr<PipelineState> pso;
 
-        InFlightFramesResource<Ptr<GpuStorage>> meshLodInstanceStorage;
+        Ptr<GpuStorage> meshLodInstanceStorage;
 
-        InFlightFramesResource<RenderHandle<GpuBuffer>> cullingDataBuffer;
-        InFlightFramesResource<RenderHandle<GpuView>> cullingDataBufferSrv;
-        InFlightFramesResource<RenderHandle<GpuView>> cullingDataBufferUav;
+        RenderHandle<GpuBuffer> cullingDataBuffer;
+        RenderHandle<GpuView> cullingDataBufferSrv;
+        RenderHandle<GpuView> cullingDataBufferUav;
     };
 } // namespace ig

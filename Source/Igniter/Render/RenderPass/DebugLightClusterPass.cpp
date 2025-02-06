@@ -46,29 +46,21 @@ namespace ig
         constexpr DXGI_FORMAT kOutputTexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
         GpuTextureDesc outputTexDesc{};
         outputTexDesc.AsTexture2D((U32)mainViewport.width, (U32)mainViewport.height,
-                                     1, kOutputTexFormat, true);
+                                  1, kOutputTexFormat, true);
         outputTexDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
-        for (const auto localFrameIdx : LocalFramesView)
-        {
-            outputTexDesc.DebugName = String(std::format("DebugLightClusterPassOutputTex.{}", localFrameIdx));
+        outputTexDesc.DebugName = String(std::format("DebugLightClusterPassOutputTex"));
 
-            const RenderHandle<GpuTexture> newOutputTex = renderContext.CreateTexture(outputTexDesc);
-            outputTex[localFrameIdx] = newOutputTex;
-            outputTexUav[localFrameIdx] =
-                renderContext.CreateUnorderedAccessView(newOutputTex,
-                                                        D3D12_TEX2D_UAV{.MipSlice = 0, .PlaneSlice = 0},
-                                                        kOutputTexFormat);
-        }
+        outputTex = renderContext.CreateTexture(outputTexDesc);
+        outputTexUav = renderContext.CreateUnorderedAccessView(outputTex,
+                                                    D3D12_TEX2D_UAV{.MipSlice = 0, .PlaneSlice = 0},
+                                                    kOutputTexFormat);
     }
 
     DebugLightClusterPass::~DebugLightClusterPass()
     {
-        for (const auto localFrameIdx : LocalFramesView)
-        {
-            renderContext->DestroyGpuView(outputTexUav[localFrameIdx]);
-            renderContext->DestroyTexture(outputTex[localFrameIdx]);
-        }
+        renderContext->DestroyGpuView(outputTexUav);
+        renderContext->DestroyTexture(outputTex);
     }
 
     void DebugLightClusterPass::SetParams(const DebugLightClusterPassParams& newParams)
@@ -79,7 +71,7 @@ namespace ig
         params = newParams;
     }
 
-    void DebugLightClusterPass::OnExecute(const LocalFrameIndex localFrameIdx)
+    void DebugLightClusterPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(bindlessRootSignature != nullptr);
@@ -90,9 +82,9 @@ namespace ig
         IG_CHECK(inputTexPtr != nullptr);
         const GpuView* inputTexSrvPtr = renderContext->Lookup(params.InputTexSrv);
         IG_CHECK(inputTexSrvPtr != nullptr);
-        GpuTexture* outputTexPtr = renderContext->Lookup(outputTex[localFrameIdx]);
+        GpuTexture* outputTexPtr = renderContext->Lookup(outputTex);
         IG_CHECK(outputTexPtr != nullptr);
-        const GpuView* outputTexUavPtr = renderContext->Lookup(outputTexUav[localFrameIdx]);
+        const GpuView* outputTexUavPtr = renderContext->Lookup(outputTexUav);
         IG_CHECK(outputTexUavPtr != nullptr);
 
         CommandList& cmdList = *params.CmdList;

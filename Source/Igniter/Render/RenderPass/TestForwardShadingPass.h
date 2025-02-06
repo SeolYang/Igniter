@@ -41,14 +41,14 @@ namespace ig
         void SetParams(const TestForwardShadingPassParams newParams);
 
         [[nodiscard]]
-        RenderHandle<GpuTexture> GetOutputTex(const LocalFrameIndex localFrameIdx) const noexcept
+        RenderHandle<GpuTexture> GetOutputTex() const noexcept
         {
-            return outputTex[localFrameIdx];
+            return outputTex;
         }
         [[nodiscard]]
-        RenderHandle<GpuView> GetOutputTexSrv(const LocalFrameIndex localFrameIdx) const noexcept
+        RenderHandle<GpuView> GetOutputTexSrv() const noexcept
         {
-            return outputTexSrv[localFrameIdx];
+            return outputTexSrv;
         }
 
       protected:
@@ -64,8 +64,8 @@ namespace ig
         Ptr<ShaderBlob> ps;
         Ptr<PipelineState> pso;
 
-        InFlightFramesResource<RenderHandle<GpuTexture>> outputTex;
-        InFlightFramesResource<RenderHandle<GpuView>> outputTexRtv;
-        InFlightFramesResource<RenderHandle<GpuView>> outputTexSrv;
+        RenderHandle<GpuTexture> outputTex;
+        RenderHandle<GpuView> outputTexRtv;
+        RenderHandle<GpuView> outputTexSrv;
     };
 } // namespace ig
