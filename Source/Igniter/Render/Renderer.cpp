@@ -99,13 +99,9 @@ namespace ig
         depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT, true);
         depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
 
-        for (const LocalFrameIndex localFrameIdx : LocalFramesView)
-        {
-            depthStencils[localFrameIdx] = renderContext.CreateTexture(depthStencilDesc);
-            dsvs[localFrameIdx] =
-                renderContext.CreateDepthStencilView(depthStencils[localFrameIdx],
-                                                     D3D12_TEX2D_DSV{.MipSlice = 0});
-        }
+        depthStencil = renderContext.CreateTexture(depthStencilDesc);
+        dsv = renderContext.CreateDepthStencilView(depthStencil,
+                                                 D3D12_TEX2D_DSV{.MipSlice = 0});
 
         GpuBufferDesc zeroFilledBufferDesc{};
         zeroFilledBufferDesc.AsUploadBuffer(kZeroFilledBufferSize);
@@ -127,11 +123,8 @@ namespace ig
 
     Renderer::~Renderer()
     {
-        for (const auto localFrameIdx : LocalFramesView)
-        {
-            renderContext->DestroyGpuView(dsvs[localFrameIdx]);
-            renderContext->DestroyTexture(depthStencils[localFrameIdx]);
-        }
+        renderContext->DestroyGpuView(dsv);
+        renderContext->DestroyTexture(depthStencil);
     }
 
     void Renderer::PreRender(const LocalFrameIndex localFrameIdx)
@@ -283,8 +276,8 @@ namespace ig
             renderCmdList->FlushBarriers();
 
             renderCmdList->ClearRenderTarget(*backBufferRtv);
-            GpuView* dsv = renderContext->Lookup(dsvs[localFrameIdx]);
-            renderCmdList->ClearDepth(*dsv, 0.f);
+            GpuView* dsvPtr = renderContext->Lookup(dsv);
+            renderCmdList->ClearDepth(*dsvPtr, 0.f);
             renderCmdList->AddPendingTextureBarrier(
                 *backBuffer,
                 D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
@@ -407,8 +400,8 @@ namespace ig
                                          generateMeshLodDrawCmdsPass->GetCommandSignature(),
                                      .DrawInstanceCmdStorageBuffer =
                                          generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
-                                     .DepthTex = depthStencils[localFrameIdx],
-                                     .Dsv = dsvs[localFrameIdx],
+                                     .DepthTex = depthStencil,
+                                     .Dsv = dsv,
                                      .MainViewport = mainViewport});
 
                 zPrePass->Execute(localFrameIdx);
@@ -425,8 +418,8 @@ namespace ig
                                                        generateMeshLodDrawCmdsPass->GetCommandSignature(),
                                                    .DrawInstanceCmdStorageBuffer =
                                                        generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(localFrameIdx),
-                                                   .DepthTex = depthStencils[localFrameIdx],
-                                                   .Dsv = dsvs[localFrameIdx],
+                                                   .DepthTex = depthStencil,
+                                                   .Dsv = dsv,
                                                    .MainViewport = mainViewport});
                 testForwardShadingPass->Execute(localFrameIdx);
 

@@ -50,8 +50,8 @@ namespace ig
         Viewport mainViewport{};
 
         Ptr<RootSignature> bindlessRootSignature; // #sy_todo render context로 이동시키는게 더 나아보임
-        eastl::array<RenderHandle<GpuTexture>, NumFramesInFlight> depthStencils;
-        eastl::array<RenderHandle<GpuView>, NumFramesInFlight> dsvs;
+        RenderHandle<GpuTexture> depthStencil;
+        RenderHandle<GpuView> dsv;
 
         constexpr static Size kZeroFilledBufferSize = 512Ui64;
         Ptr<GpuBuffer> zeroFilledBuffer;
