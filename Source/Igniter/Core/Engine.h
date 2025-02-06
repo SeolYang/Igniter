@@ -1,6 +1,7 @@
 #pragma once
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/String.h"
+#include "Igniter/Render/Common.h"
 #include "Igniter/D3D12/GpuSyncPoint.h"
 
 namespace ig
@@ -60,7 +61,8 @@ namespace ig
         bool bInitialized = false;
         bool bShouldExit = false;
 
-        eastl::array<GpuSyncPoint, NumFramesInFlight> localFrameSyncs{};
+        InFlightFramesResource<GpuSyncPoint> localFrameSyncs{};
+        LocalFrameIndex prevLocalFrameIdx = 0;
 
         tf::Executor taskExecutor{};
         Ptr<Timer> timer;
