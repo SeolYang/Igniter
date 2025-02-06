@@ -18,6 +18,11 @@ struct PixelShaderInput
     float3 aWorldPos : WORLD_POS;
 };
 
+uint BitfieldMask(uint width, uint min)
+{
+    return (uint(0xFFFFFFFF) >> width) << min;
+}
+
 [earlydepthstencil]
 float4 main(PixelShaderInput input) : SV_TARGET
 {
@@ -45,65 +50,73 @@ float4 main(PixelShaderInput input) : SV_TARGET
     const uint numTileX = uint(2560.f * INV_TILE_SIZE);
     const uint tileDwordOffset = ((numTileX * tileY) + tileX) * NUM_U32_PER_TILE;
     float3 illuminance = float3(0.f, 0.f, 0.f);
-
-    // !!!!!! Baseline !!!!!
-    //for (uint lightIdxListIdx = depthBin.x; lightIdxListIdx <= depthBin.y; ++lightIdxListIdx)
+    //uint lightIdxListIdx = WaveActiveMin(depthBin.x);
+    //const uint lastLightIdxListIdx = WaveActiveMax(depthBin.y);
+    //while (lightIdxListIdx <= lastLightIdxListIdx)
     //{
-    //    const uint s_lightDword = (uint(1) << (lightIdxListIdx % 32));
-    //    const uint lightDwordOffset = tileDwordOffset + (lightIdxListIdx / 32);
-    //    if ((tileBitfields[lightDwordOffset] & s_lightDword) == 0)
+    //    ++lightIdxListIdx;
+        
+    //    if (lightIdxListIdx >= depthBin.x && lightIdxListIdx <= depthBin.y)
     //    {
-    //        continue;
+    //        const uint s_lightDword = (uint(1) << (lightIdxListIdx % 32));
+    //        const uint s_lightDwordOffset = lightIdxListIdx / 32;
+            
+    //        const uint v_tileBitfield = tileBitfields.Load(tileDwordOffset + s_lightDwordOffset);
+    //        bool bIsVisibleLight = (s_lightDword & v_tileBitfield) != 0;
+    //        if (!bIsVisibleLight)
+    //        {
+    //            continue;
+    //        }
+            
+    //        uint s_lightIdx;
+    //        Light s_light;
+    //        if (WaveIsFirstLane())
+    //        {
+    //            s_lightIdx = lightIdxList[lightIdxListIdx];
+    //            s_light = lightStorage[s_lightIdx];
+    //        }
+    //        s_light.WorldPos = WaveReadLaneFirst(s_light.WorldPos);
+    //        s_light.Radius = WaveReadLaneFirst(s_light.Radius);
+    //        s_light.Color = WaveReadLaneFirst(s_light.Color);
+    //        s_light.Intensity = WaveReadLaneFirst(s_light.Intensity);
+        
+    //        const float3 toLight = s_light.WorldPos - input.aWorldPos;
+    //        const float distSquared = dot(toLight, toLight);
+    //        const float lightinvRadius = 1.f / (s_light.Radius * s_light.Radius);
+    //        const float factor = distSquared * lightinvRadius;
+    //        const float smoothFactor = max(1.0 - factor * factor, 0.0);
+    //        const float att = (smoothFactor * smoothFactor) / max(distSquared, 1e-4);
+    //        illuminance += s_light.Color * s_light.Intensity * att * saturate(dot(normalize(toLight), normal));
     //    }
-       
-    //    const uint s_lightIdx = lightIdxList[lightIdxListIdx];
-    //    Light s_light = lightStorage[s_lightIdx];
-    //    const float3 toLight = s_light.WorldPos - input.aWorldPos;
-    //    const float distSquared = dot(toLight, toLight);
-    //    const float lightinvRadius = 1.f / s_light.Radius;
-    //    const float factor = distSquared * lightinvRadius * lightinvRadius;
-    //    const float smoothFactor = max(1.0 - factor * factor, 0.0);
-    //    const float att = (smoothFactor * smoothFactor) / max(distSquared, 1e-4);
-    //    illuminance += s_light.Color * s_light.Intensity * att * saturate(dot(normalize(toLight), normal));
     //}
     
-    uint lightIdxListIdx = WaveActiveMin(depthBin.x);
-    const uint lastLightIdxListIdx = WaveActiveMax(depthBin.y);
-    while (lightIdxListIdx <= lastLightIdxListIdx)
+    uint mergedMinIdx = WaveActiveMin(depthBin.x);
+    uint mergedMaxIdx = WaveActiveMax(depthBin.y);
+    uint wordMin = max(mergedMinIdx / 32, 0);
+    uint wordMax = min(mergedMaxIdx / 32, NUM_U32_PER_TILE - 1);
+    uint maskWidth = clamp((int) depthBin.y - (int) depthBin.x + 1, 0, 32);
+    for (uint wordIdx = wordMin; wordIdx <= wordMax; ++wordIdx)
     {
-        ++lightIdxListIdx;
-        
-        if (lightIdxListIdx >= depthBin.x && lightIdxListIdx <= depthBin.y)
+        uint mask = tileBitfields[tileDwordOffset + wordIdx];
+        uint localMin = clamp((int) depthBin.x - (int) (wordIdx * 32), 0, 31);
+        uint zBinMask = maskWidth == 32 ? 0xFFFFFFFF : BitfieldMask(maskWidth, localMin);
+        mask &= zBinMask;
+        uint mergedMask = WaveActiveBitOr(mask);
+        while (mergedMask != 0)
         {
-            const uint s_lightDword = (uint(1) << (lightIdxListIdx % 32));
-            const uint s_lightDwordOffset = lightIdxListIdx / 32;
+            uint bitIdx = firstbitlow(mergedMask);
+            mergedMask ^= (1 << bitIdx);
+            uint lightIdxListIdx = 32 * wordIdx + bitIdx;
             
-            const uint v_tileBitfield = tileBitfields.Load(tileDwordOffset + s_lightDwordOffset);
-            bool bIsVisibleLight = (s_lightDword & v_tileBitfield) != 0;
-            if (!bIsVisibleLight)
-            {
-                continue;
-            }
-            
-            uint s_lightIdx;
-            Light s_light;
-            if (WaveIsFirstLane())
-            {
-                s_lightIdx = lightIdxList[lightIdxListIdx];
-                s_light = lightStorage[s_lightIdx];
-            }
-            s_light.WorldPos = WaveReadLaneFirst(s_light.WorldPos);
-            s_light.Radius = WaveReadLaneFirst(s_light.Radius);
-            s_light.Color = WaveReadLaneFirst(s_light.Color);
-            s_light.Intensity = WaveReadLaneFirst(s_light.Intensity);
-        
-            const float3 toLight = s_light.WorldPos - input.aWorldPos;
+            uint lightIdx = lightIdxList[lightIdxListIdx];
+            Light light = lightStorage[lightIdx];
+            const float3 toLight = light.WorldPos - input.aWorldPos;
             const float distSquared = dot(toLight, toLight);
-            const float lightinvRadius = 1.f / (s_light.Radius * s_light.Radius);
+            const float lightinvRadius = 1.f / (light.Radius * light.Radius);
             const float factor = distSquared * lightinvRadius;
             const float smoothFactor = max(1.0 - factor * factor, 0.0);
             const float att = (smoothFactor * smoothFactor) / max(distSquared, 1e-4);
-            illuminance += s_light.Color * s_light.Intensity * att * saturate(dot(normalize(toLight), normal));
+            illuminance += light.Color * light.Intensity * att * saturate(dot(normalize(toLight), normal));
         }
     }
     
