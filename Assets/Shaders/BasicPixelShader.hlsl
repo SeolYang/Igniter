@@ -20,7 +20,7 @@ struct PixelShaderInput
 
 uint BitfieldMask(uint width, uint min)
 {
-    return (uint(0xFFFFFFFF) >> width) << min;
+    return (uint(0xFFFFFFFF) >> (32 - width)) << min;
 }
 
 [earlydepthstencil]
@@ -90,22 +90,32 @@ float4 main(PixelShaderInput input) : SV_TARGET
     //    }
     //}
     
+    // 이전 방식과 가장 큰 차이점은 word를 한번 읽어와서 그 안에 있는 light idx들을 zBinMask와 한번에 비교해서
+    // 최대 32개의 라이트에 대한 bitfield체크를 한번에 수행 한다는 점.
+    // 이전 방식에서는 light idx 당 한번 씩 체크 했었음.
+    // 이론상 최대 32배의 성능 차이가 날 수 있을 것 같음.
     uint mergedMinIdx = WaveActiveMin(depthBin.x);
     uint mergedMaxIdx = WaveActiveMax(depthBin.y);
     uint wordMin = max(mergedMinIdx / 32, 0);
     uint wordMax = min(mergedMaxIdx / 32, NUM_U32_PER_TILE - 1);
-    uint maskWidth = clamp((int) depthBin.y - (int) depthBin.x + 1, 0, 32);
     for (uint wordIdx = wordMin; wordIdx <= wordMax; ++wordIdx)
     {
         uint mask = tileBitfields[tileDwordOffset + wordIdx];
+        // wordIdx * 32 = 결국 현재 시점에서의 lightidxlistidx
         uint localMin = clamp((int) depthBin.x - (int) (wordIdx * 32), 0, 31);
-        uint zBinMask = maskWidth == 32 ? 0xFFFFFFFF : BitfieldMask(maskWidth, localMin);
+        uint maskWidth = clamp((int) depthBin.y - (int) (wordIdx * 32) + 1, 0, 32);
+        // depthbin의 범위에 따라, 현재 word(또는 window)에서의 어떤 영역을 선택 할 것인지 알아내는 것이다
+        uint zBinMask = BitfieldMask(maskWidth, localMin);
+        // 아래가 기존 코드
+        //uint maskWidth = clamp((int)depthBin.y - (int)depthBin.x + 1, 0, 32);
+        //uint zBinMask = maskWidth == 32 ? 0xFFFFFFFF : BitfieldMask(maskWidth, localMin);
         mask &= zBinMask;
+        // 이 시점에서 merged Mask는 Wave가 word 내에서 처리해야할 전체 광원에 대한 비트를 가지고 잇음
         uint mergedMask = WaveActiveBitOr(mask);
         while (mergedMask != 0)
         {
             uint bitIdx = firstbitlow(mergedMask);
-            mergedMask ^= (1 << bitIdx);
+            mergedMask ^= (uint(1) << bitIdx);
             uint lightIdxListIdx = 32 * wordIdx + bitIdx;
             
             uint lightIdx = lightIdxList[lightIdxListIdx];
