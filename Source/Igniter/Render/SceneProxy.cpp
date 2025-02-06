@@ -28,71 +28,68 @@ namespace ig
         GpuBufferDesc renderableIndicesBufferDesc;
         renderableIndicesBufferDesc.AsStructuredBuffer<U32>(kNumInitRenderableIndices);
 
-        for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
-        {
-            transformProxyPackage.Storage[localFrameIdx] =
-                MakePtr<GpuStorage>(
-                    renderContext,
-                    GpuStorageDesc{
-                        String(std::format("TransformStorage{}", localFrameIdx)),
-                        TransformProxy::kDataSize,
-                        kNumInitTransformElements});
+        transformProxyPackage.Storage =
+            MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    String(std::format("TransformStorage")),
+                    TransformProxy::kDataSize,
+                    kNumInitTransformElements});
 
-            materialProxyPackage.Storage[localFrameIdx] =
-                MakePtr<GpuStorage>(
-                    renderContext,
-                    GpuStorageDesc{
-                        String(std::format("MaterialDataStorage{}", localFrameIdx)),
-                        MaterialProxy::kDataSize,
-                        kNumInitMaterialElements});
+        materialProxyPackage.Storage =
+            MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    String(std::format("MaterialDataStorage")),
+                    MaterialProxy::kDataSize,
+                    kNumInitMaterialElements});
 
-            meshProxyPackage.Storage[localFrameIdx] =
-                MakePtr<GpuStorage>(
-                    renderContext,
-                    GpuStorageDesc{
-                        String(std::format("MeshDataStorage{}", localFrameIdx)),
-                        MeshProxy::kDataSize,
-                        kNumInitMeshElements});
+        meshProxyPackage.Storage =
+            MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    String(std::format("MeshDataStorage")),
+                    MeshProxy::kDataSize,
+                    kNumInitMeshElements});
 
-            instancingPackage.InstancingDataStorage[localFrameIdx] =
-                MakePtr<GpuStorage>(
-                    renderContext,
-                    GpuStorageDesc{
-                        String(std::format("InstancingDataStorage{}", localFrameIdx)),
-                        (U32)sizeof(InstancingGpuData),
-                        kNumInitStaticMeshInstances,
-                        EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
+        instancingPackage.InstancingDataStorage =
+            MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    String(std::format("InstancingDataStorage")),
+                    (U32)sizeof(InstancingGpuData),
+                    kNumInitStaticMeshInstances,
+                    EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
 
-            instancingPackage.IndirectTransformStorage[localFrameIdx] =
-                MakePtr<GpuStorage>(
-                    renderContext,
-                    GpuStorageDesc{
-                        String(std::format("IndirectTransformStorage{}", localFrameIdx)),
-                        (U32)sizeof(U32),
-                        kNumInitStaticMeshInstances,
-                        EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
+        instancingPackage.IndirectTransformStorage =
+            MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    String(std::format("IndirectTransformStorage")),
+                    (U32)sizeof(U32),
+                    kNumInitStaticMeshInstances,
+                    EGpuStorageFlags::ShaderReadWrite | EGpuStorageFlags::EnableLinearAllocation});
 
-            renderableProxyPackage.Storage[localFrameIdx] =
-                MakePtr<GpuStorage>(
-                    renderContext,
-                    GpuStorageDesc{
-                        String(std::format("RenderableStorage{}", localFrameIdx)),
-                        RenderableProxy::kDataSize,
-                        kNumInitRenderableElements});
+        renderableProxyPackage.Storage =
+            MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    String(std::format("RenderableStorage")),
+                    RenderableProxy::kDataSize,
+                    kNumInitRenderableElements});
 
-            lightProxyPackage.Storage[localFrameIdx] =
-                MakePtr<GpuStorage>(
-                    renderContext,
-                    GpuStorageDesc{
-                        String(std::format("LightDataStorage{}", localFrameIdx)),
-                        LightProxy::kDataSize,
-                        kNumInitLightElements});
+        lightProxyPackage.Storage =
+            MakePtr<GpuStorage>(
+                renderContext,
+                GpuStorageDesc{
+                    String(std::format("LightDataStorage")),
+                    LightProxy::kDataSize,
+                    kNumInitLightElements});
 
-            renderableIndicesBufferSize[localFrameIdx] = kNumInitRenderableIndices;
-            renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
-            renderableIndicesBuffer[localFrameIdx] = renderContext.CreateBuffer(renderableIndicesBufferDesc);
-            renderableIndicesBufferSrv[localFrameIdx] = renderContext.CreateShaderResourceView(renderableIndicesBuffer[localFrameIdx]);
-        }
+        renderableIndicesBufferSize = kNumInitRenderableIndices;
+        renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer"));
+        renderableIndicesBuffer = renderContext.CreateBuffer(renderableIndicesBufferDesc);
+        renderableIndicesBufferSrv = renderContext.CreateShaderResourceView(renderableIndicesBuffer);
 
         meshProxyPackage.PendingReplicationGroups.resize(numWorker);
         meshProxyPackage.WorkGroupStagingBufferRanges.resize(numWorker);
@@ -128,16 +125,17 @@ namespace ig
 
     SceneProxy::~SceneProxy()
     {
-        for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
-        {
-            transformProxyPackage.Storage[localFrameIdx]->ForceReset();
-            materialProxyPackage.Storage[localFrameIdx]->ForceReset();
-            meshProxyPackage.Storage[localFrameIdx]->ForceReset();
-            renderableProxyPackage.Storage[localFrameIdx]->ForceReset();
-            lightProxyPackage.Storage[localFrameIdx]->ForceReset();
+        transformProxyPackage.Storage->ForceReset();
+        materialProxyPackage.Storage->ForceReset();
+        meshProxyPackage.Storage->ForceReset();
+        renderableProxyPackage.Storage->ForceReset();
+        lightProxyPackage.Storage->ForceReset();
 
-            renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
-            renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
+        renderContext->DestroyGpuView(renderableIndicesBufferSrv);
+        renderContext->DestroyBuffer(renderableIndicesBuffer);
+
+        for (auto localFrameIdx : LocalFramesView)
+        {
             renderContext->DestroyBuffer(renderableIndicesStagingBuffer[localFrameIdx]);
         }
     }
@@ -158,23 +156,23 @@ namespace ig
 
         tf::Taskflow rootTaskFlow{};
         tf::Task updateTransformTask = rootTaskFlow.emplace(
-            [this, localFrameIdx, &registry](tf::Subflow& subflow)
+            [this, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("UpdateTransformProxy");
-                UpdateTransformProxy(subflow, localFrameIdx, registry);
+                UpdateTransformProxy(subflow, registry);
                 subflow.join();
             });
 
         tf::Task updateLightTask = rootTaskFlow.emplace(
-            [this, localFrameIdx, &registry](tf::Subflow& subflow)
+            [this, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("UpdateLightProxy");
-                UpdateLightProxy(subflow, localFrameIdx, registry);
+                UpdateLightProxy(subflow, registry);
                 subflow.join();
             });
 
         tf::Task updateMaterialTask = rootTaskFlow.emplace(
-            [this, localFrameIdx]()
+            [this]()
             {
                 // Material의 경우 분산 처리하기에는 상대적으로 그 수가 매우 작을 수 있기 때문에
                 // 별도의 분산처리는 하지 않는다.
@@ -183,32 +181,32 @@ namespace ig
                 // 현재 스레드의 로그를 잠시 막을 수 있지만, 만약 work stealing이 일어난다면
                 // 다른 부분에서 발생하는 로그가 기록되지 않는 현상이 일어 날 수도 있음.
                 Logger::GetInstance().SuppressLogInCurrentThread();
-                UpdateMaterialProxy(localFrameIdx);
+                UpdateMaterialProxy();
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
             });
 
         tf::Task updateMeshTask = rootTaskFlow.emplace(
-            [this, localFrameIdx]()
+            [this]()
             {
                 ZoneScopedN("UpdateMeshProxy");
                 Logger::GetInstance().SuppressLogInCurrentThread();
-                UpdateMeshProxy(localFrameIdx);
+                UpdateMeshProxy();
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
             });
 
         tf::Task buildInstancingData = rootTaskFlow.emplace(
-            [this, localFrameIdx, &registry](tf::Subflow& subflow)
+            [this, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("BuildInstancingData");
-                BuildInstancingData(subflow, localFrameIdx, registry);
+                BuildInstancingData(subflow, registry);
                 subflow.join();
             });
 
         tf::Task updateRenderableTask = rootTaskFlow.emplace(
-            [this, localFrameIdx, &registry](tf::Subflow& subflow)
+            [this, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("UpdateRenderableProxy");
-                UpdateRenderableProxy(subflow, localFrameIdx, registry);
+                UpdateRenderableProxy(subflow);
                 subflow.join();
             });
 
@@ -298,7 +296,7 @@ namespace ig
             {
                 ZoneScopedN("InvalidateNextFrameTransformProxy");
                 subflow.for_each(
-                    transformProxyPackage.ProxyMap[nextLocalFrameIdx].begin(), transformProxyPackage.ProxyMap[nextLocalFrameIdx].end(),
+                    transformProxyPackage.ProxyMap.begin(), transformProxyPackage.ProxyMap.end(),
                     [](auto& keyValuePair)
                     {
                         keyValuePair.second.bMightBeDestroyed = true;
@@ -311,7 +309,7 @@ namespace ig
             {
                 ZoneScopedN("InvalidateNextFrameLightProxy");
                 subflow.for_each(
-                    lightProxyPackage.ProxyMap[nextLocalFrameIdx].begin(), lightProxyPackage.ProxyMap[nextLocalFrameIdx].end(),
+                    lightProxyPackage.ProxyMap.begin(), lightProxyPackage.ProxyMap.end(),
                     [](auto& keyValuePair)
                     {
                         keyValuePair.second.bMightBeDestroyed = true;
@@ -323,7 +321,7 @@ namespace ig
             [this, nextLocalFrameIdx]()
             {
                 ZoneScopedN("InvalidateNextFrameMeshProxy");
-                for (auto& [staticMesh, proxy] : meshProxyPackage.ProxyMap[nextLocalFrameIdx])
+                for (auto& [staticMesh, proxy] : meshProxyPackage.ProxyMap)
                 {
                     IG_CHECK(staticMesh);
                     proxy.bMightBeDestroyed = true;
@@ -334,7 +332,7 @@ namespace ig
             [this, nextLocalFrameIdx]()
             {
                 ZoneScopedN("InvalidateNextFrameMaterialProxy");
-                for (auto& [material, proxy] : materialProxyPackage.ProxyMap[nextLocalFrameIdx])
+                for (auto& [material, proxy] : materialProxyPackage.ProxyMap)
                 {
                     IG_CHECK(material);
                     proxy.bMightBeDestroyed = true;
@@ -346,7 +344,7 @@ namespace ig
             {
                 ZoneScopedN("InvalidateNextFrameRenderableProxy");
                 subflow.for_each(
-                    renderableProxyPackage.ProxyMap[nextLocalFrameIdx].begin(), renderableProxyPackage.ProxyMap[nextLocalFrameIdx].end(),
+                    renderableProxyPackage.ProxyMap.begin(), renderableProxyPackage.ProxyMap.end(),
                     [](auto& keyValuePair)
                     {
                         keyValuePair.second.bMightBeDestroyed = true;
@@ -358,8 +356,8 @@ namespace ig
             [this, nextLocalFrameIdx]()
             {
                 ZoneScopedN("PartiallyInvalidateNextFrameInstancingData");
-                instancingPackage.InstancingDataStorage[nextLocalFrameIdx]->ForceReset();
-                instancingPackage.IndirectTransformStorage[nextLocalFrameIdx]->ForceReset();
+                instancingPackage.InstancingDataStorage->ForceReset();
+                instancingPackage.IndirectTransformStorage->ForceReset();
                 for (InstancingMap& threadLocalMap : instancingPackage.ThreadLocalInstancingMaps)
                 {
                     threadLocalMap.clear();
@@ -369,12 +367,12 @@ namespace ig
         invalidationFuture[nextLocalFrameIdx] = taskExecutor->run(std::move(prepareNextFrameFlow));
     }
 
-    void SceneProxy::UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::UpdateTransformProxy(tf::Subflow& subflow, const Registry& registry)
     {
         IG_CHECK(transformProxyPackage.PendingDestructions.empty());
 
-        auto& entityProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
-        auto& storage = *transformProxyPackage.Storage[localFrameIdx];
+        auto& entityProxyMap = transformProxyPackage.ProxyMap;
+        auto& storage = *transformProxyPackage.Storage;
         const auto transformView = registry.view<const TransformComponent, RenderableTag>();
 
         tf::Task updateTransformProxy = subflow.for_each(
@@ -428,7 +426,7 @@ namespace ig
             });
 
         tf::Task commitDestructions = subflow.emplace(
-            [this, &entityProxyMap, &storage, localFrameIdx]()
+            [this, &entityProxyMap, &storage]()
             {
                 for (auto& [entity, proxy] : entityProxyMap)
                 {
@@ -440,7 +438,7 @@ namespace ig
 
                 for (const Entity entity : transformProxyPackage.PendingDestructions)
                 {
-                    const auto extractedElement = transformProxyPackage.ProxyMap[localFrameIdx].extract(entity);
+                    const auto extractedElement = transformProxyPackage.ProxyMap.extract(entity);
                     IG_CHECK(extractedElement.has_value());
                     IG_CHECK(extractedElement->second.StorageSpace.IsValid());
                     storage.Deallocate(extractedElement->second.StorageSpace);
@@ -452,12 +450,12 @@ namespace ig
         commitPendingProxyTask.precede(commitDestructions);
     }
 
-    void SceneProxy::UpdateLightProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::UpdateLightProxy(tf::Subflow& subflow  , const Registry& registry)
     {
         IG_CHECK(lightProxyPackage.PendingDestructions.empty());
 
-        auto& entityProxyMap = lightProxyPackage.ProxyMap[localFrameIdx];
-        auto& storage = *lightProxyPackage.Storage[localFrameIdx];
+        auto& entityProxyMap = lightProxyPackage.ProxyMap;
+        auto& storage = *lightProxyPackage.Storage;
         const auto lightView = registry.view<const LightComponent, const TransformComponent>();
 
         tf::Task updateLightProxy = subflow.for_each(
@@ -511,7 +509,7 @@ namespace ig
             });
 
         tf::Task commitDestructions = subflow.emplace(
-            [this, &entityProxyMap, &storage, localFrameIdx]()
+            [this, &entityProxyMap, &storage]()
             {
                 for (auto& [entity, proxy] : entityProxyMap)
                 {
@@ -523,7 +521,7 @@ namespace ig
 
                 for (const Entity entity : lightProxyPackage.PendingDestructions)
                 {
-                    const auto extractedElement = lightProxyPackage.ProxyMap[localFrameIdx].extract(entity);
+                    const auto extractedElement = lightProxyPackage.ProxyMap.extract(entity);
                     IG_CHECK(extractedElement.has_value());
                     IG_CHECK(extractedElement->second.StorageSpace.IsValid());
                     storage.Deallocate(extractedElement->second.StorageSpace);
@@ -535,7 +533,7 @@ namespace ig
         commitPendingProxyTask.precede(commitDestructions);
     }
 
-    void SceneProxy::BuildInstancingData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry)
+    void SceneProxy::BuildInstancingData(tf::Subflow& subflow, const Registry& registry)
     {
         const auto staticMeshEntityView = registry.view<const StaticMeshComponent, const MaterialComponent, const TransformComponent>();
 
@@ -544,7 +542,7 @@ namespace ig
 
         tf::Task buildLocalInstancingDataMaps = subflow.for_each(
             staticMeshEntityView.begin(), staticMeshEntityView.end(),
-            [this, localFrameIdx, staticMeshEntityView](const Entity entity)
+            [this, staticMeshEntityView](const Entity entity)
             {
                 IG_CHECK(entity != NullEntity);
                 const StaticMeshComponent& staticMeshComponent = staticMeshEntityView.get<const StaticMeshComponent>(entity);
@@ -562,8 +560,8 @@ namespace ig
                 IG_CHECK(workerId < instancingPackage.ThreadLocalInstancingMaps.size());
                 InstancingMap& threadLocalMap = instancingPackage.ThreadLocalInstancingMaps[workerId];
 
-                const MaterialProxy& materialProxy = materialProxyPackage.ProxyMap[localFrameIdx].at(materialComponent.Instance);
-                const MeshProxy& staticMeshProxy = meshProxyPackage.ProxyMap[localFrameIdx].at(staticMeshComponent.Mesh);
+                const MaterialProxy& materialProxy = materialProxyPackage.ProxyMap.at(materialComponent.Instance);
+                const MeshProxy& staticMeshProxy = meshProxyPackage.ProxyMap.at(staticMeshComponent.Mesh);
                 const U64 instancingKey = InstancingPackage::MakeInstancingMapKey(staticMeshProxy, materialProxy);
                 auto foundItr = threadLocalMap.find(instancingKey);
                 if (foundItr == threadLocalMap.end())
@@ -580,7 +578,7 @@ namespace ig
             });
 
         tf::Task buildGlobalInstancingDataMap = subflow.emplace(
-            [this, localFrameIdx]()
+            [this]()
             {
                 OrderedInstancingMap& globalInstanceMap = instancingPackage.GlobalInstancingMap;
                 for (InstancingMap& localInstanceMap : instancingPackage.ThreadLocalInstancingMaps)
@@ -608,7 +606,7 @@ namespace ig
             });
 
         tf::Task allocateSpace = subflow.emplace(
-            [this, localFrameIdx]()
+            [this]()
             {
                 const Size numInstancing = instancingPackage.GlobalInstancingMap.size();
                 if (numInstancing == 0)
@@ -617,14 +615,14 @@ namespace ig
                 }
 
                 instancingPackage.InstancingDataSpace =
-                    instancingPackage.InstancingDataStorage[localFrameIdx]->Allocate(numInstancing);
+                    instancingPackage.InstancingDataStorage->Allocate(numInstancing);
                 instancingPackage.IndirectTransformSpace =
-                    instancingPackage.IndirectTransformStorage[localFrameIdx]->Allocate(instancingPackage.NumInstances);
+                    instancingPackage.IndirectTransformStorage->Allocate(instancingPackage.NumInstances);
             });
 
         // 결국 transform offset을 정할려면 linear 하게 돌아야 하나?
         tf::Task finalizeGlobalInstancingDataMap = subflow.emplace(
-            [this, localFrameIdx]()
+            [this]()
             {
                 U32 instancingId = 0;
                 U32 transformOffset = 0;
@@ -646,13 +644,13 @@ namespace ig
         allocateSpace.precede(finalizeGlobalInstancingDataMap);
     }
 
-    void SceneProxy::UpdateMeshProxy(const LocalFrameIndex localFrameIdx)
+    void SceneProxy::UpdateMeshProxy()
     {
         IG_CHECK(meshProxyPackage.PendingReplicationGroups[0].empty());
         IG_CHECK(meshProxyPackage.PendingDestructions.empty());
 
-        auto& proxyMap = meshProxyPackage.ProxyMap[localFrameIdx];
-        auto& storage = *meshProxyPackage.Storage[localFrameIdx];
+        auto& proxyMap = meshProxyPackage.ProxyMap;
+        auto& storage = *meshProxyPackage.Storage;
 
         Vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::StaticMesh, true)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
@@ -710,7 +708,7 @@ namespace ig
 
         for (const ManagedAsset<StaticMesh> mesh : meshProxyPackage.PendingDestructions)
         {
-            const auto extractedElement = meshProxyPackage.ProxyMap[localFrameIdx].extract(mesh);
+            const auto extractedElement = meshProxyPackage.ProxyMap.extract(mesh);
             IG_CHECK(extractedElement.has_value());
             IG_CHECK(extractedElement->second.StorageSpace.IsValid());
             storage.Deallocate(extractedElement->second.StorageSpace);
@@ -718,13 +716,13 @@ namespace ig
         meshProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateMaterialProxy(const LocalFrameIndex localFrameIdx)
+    void SceneProxy::UpdateMaterialProxy()
     {
         IG_CHECK(materialProxyPackage.PendingReplicationGroups[0].empty());
         IG_CHECK(materialProxyPackage.PendingDestructions.empty());
 
-        auto& proxyMap = materialProxyPackage.ProxyMap[localFrameIdx];
-        auto& storage = *materialProxyPackage.Storage[localFrameIdx];
+        auto& proxyMap = materialProxyPackage.ProxyMap;
+        auto& storage = *materialProxyPackage.Storage;
 
         Vector<AssetManager::Snapshot> snapshots{assetManager->TakeSnapshots(EAssetCategory::Material, true)};
         for (const AssetManager::Snapshot& snapshot : snapshots)
@@ -778,7 +776,7 @@ namespace ig
 
         for (const ManagedAsset<Material> material : materialProxyPackage.PendingDestructions)
         {
-            const auto extractedElement = materialProxyPackage.ProxyMap[localFrameIdx].extract(material);
+            const auto extractedElement = materialProxyPackage.ProxyMap.extract(material);
             IG_CHECK(extractedElement.has_value());
             IG_CHECK(extractedElement->second.StorageSpace.IsValid());
             storage.Deallocate(extractedElement->second.StorageSpace);
@@ -786,13 +784,13 @@ namespace ig
         materialProxyPackage.PendingDestructions.clear();
     }
 
-    void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, [[maybe_unused]] const Registry& registry)
+    void SceneProxy::UpdateRenderableProxy(tf::Subflow& subflow)
     {
         IG_CHECK(renderableProxyPackage.PendingDestructions.empty());
 
-        auto& renderableProxyMap = renderableProxyPackage.ProxyMap[localFrameIdx];
-        auto& renderableStorage = *renderableProxyPackage.Storage[localFrameIdx];
-        const auto& transformProxyMap = transformProxyPackage.ProxyMap[localFrameIdx];
+        auto& renderableProxyMap = renderableProxyPackage.ProxyMap;
+        auto& renderableStorage = *renderableProxyPackage.Storage;
+        const auto& transformProxyMap = transformProxyPackage.ProxyMap;
 
         tf::Task buildStaticMeshRenderables = subflow.for_each_index(
             0, (I32)numWorker, 1,
@@ -946,7 +944,7 @@ namespace ig
             });
 
         // SceneProxy가 Storage를 소유하고 있기때문에 작업 실행 중에 해제되지 않음이 보장됨.
-        const RenderHandle<GpuBuffer> storageBuffer = proxyPackage.Storage[localFrameIdx]->GetGpuBuffer();
+        const RenderHandle<GpuBuffer> storageBuffer = proxyPackage.Storage->GetGpuBuffer();
         GpuBuffer* storageBufferPtr = renderContext->Lookup(storageBuffer);
         IG_CHECK(storageBufferPtr != nullptr);
         tf::Task recordReplicateDataCmd = subflow.for_each_index(
@@ -963,9 +961,9 @@ namespace ig
                 uploadInfos.reserve(pendingReplications.size());
                 for (const Owner owner : pendingReplications)
                 {
-                    IG_CHECK(proxyPackage.ProxyMap[localFrameIdx].contains(owner));
+                    IG_CHECK(proxyPackage.ProxyMap.contains(owner));
 
-                    const Proxy& proxy = proxyPackage.ProxyMap[localFrameIdx][owner];
+                    const Proxy& proxy = proxyPackage.ProxyMap[owner];
                     uploadInfos.emplace_back(
                         typename Proxy::UploadInfo{
                             .StorageSpaceRef = CRef{proxy.StorageSpace},
@@ -1095,7 +1093,7 @@ namespace ig
         }
 
         GpuBuffer* instanceStorageBuffer =
-            renderContext->Lookup(instancingPackage.InstancingDataStorage[localFrameIdx]->GetGpuBuffer());
+            renderContext->Lookup(instancingPackage.InstancingDataStorage->GetGpuBuffer());
         IG_CHECK(instanceStorageBuffer != nullptr);
 
         CommandListPool& copyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
@@ -1164,22 +1162,22 @@ namespace ig
             return;
         }
 
-        if (renderableIndicesBufferSize[localFrameIdx] < numRenderables)
+        if (renderableIndicesBufferSize < numRenderables)
         {
-            renderContext->DestroyGpuView(renderableIndicesBufferSrv[localFrameIdx]);
-            renderContext->DestroyBuffer(renderableIndicesBuffer[localFrameIdx]);
+            renderContext->DestroyGpuView(renderableIndicesBufferSrv);
+            renderContext->DestroyBuffer(renderableIndicesBuffer);
 
-            const U32 newBufferSize = std::max(numRenderables, renderableIndicesBufferSize[localFrameIdx] * 2);
+            const U32 newBufferSize = std::max(numRenderables, renderableIndicesBufferSize * 2);
             GpuBufferDesc renderableIndicesBufferDesc;
             renderableIndicesBufferDesc.AsStructuredBuffer<U32>(newBufferSize);
-            renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer{}", localFrameIdx));
-            renderableIndicesBuffer[localFrameIdx] = renderContext->CreateBuffer(renderableIndicesBufferDesc);
-            renderableIndicesBufferSrv[localFrameIdx] = renderContext->CreateShaderResourceView(renderableIndicesBuffer[localFrameIdx]);
+            renderableIndicesBufferDesc.DebugName = String(std::format("RenderableIndicesBuffer"));
+            renderableIndicesBuffer = renderContext->CreateBuffer(renderableIndicesBufferDesc);
+            renderableIndicesBufferSrv = renderContext->CreateShaderResourceView(renderableIndicesBuffer);
 
-            renderableIndicesBufferSize[localFrameIdx] = newBufferSize;
+            renderableIndicesBufferSize = newBufferSize;
         }
 
-        GpuBuffer* renderableIndicesBufferPtr = renderContext->Lookup(renderableIndicesBuffer[localFrameIdx]);
+        GpuBuffer* renderableIndicesBufferPtr = renderContext->Lookup(renderableIndicesBuffer);
         IG_CHECK(renderableIndicesBufferPtr != nullptr);
 
         GpuBuffer* stagingBufferPtr = renderContext->Lookup(renderableIndicesStagingBuffer[localFrameIdx]);

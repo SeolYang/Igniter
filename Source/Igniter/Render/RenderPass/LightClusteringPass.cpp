@@ -155,7 +155,7 @@ namespace ig
         IG_CHECK(sceneProxy != nullptr);
 
         // Sorting Lights / Upload ight Idx List
-        const auto& lightProxyMapValues = sceneProxy->GetLightProxyMap(localFrameIdx).values();
+        const auto& lightProxyMapValues = sceneProxy->GetLightProxyMap().values();
         const U32 numLights = (U32)std::min((Size)kMaxNumLights, lightProxyMapValues.size());
         lightProxyIdxViewZList.resize(numLights);
 
@@ -209,7 +209,7 @@ namespace ig
             lightIdxListCopyCmdList.Close();
         }
 
-        const GpuView* lightStorageBufferSrvPtr = renderContext->Lookup(sceneProxy->GetLightStorageSrv(localFrameIdx));
+        const GpuView* lightStorageBufferSrvPtr = renderContext->Lookup(sceneProxy->GetLightStorageSrv());
         IG_CHECK(lightStorageBufferSrvPtr != nullptr);
         const GpuView* lightIdxListBufferSrvPtr = renderContext->Lookup(lightIdxListBufferPackage[localFrameIdx].Srv);
         IG_CHECK(lightIdxListBufferSrvPtr != nullptr);

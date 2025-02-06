@@ -205,42 +205,42 @@ namespace ig
         IG_CHECK(vertexIndexStorageSrv != nullptr && vertexIndexStorageSrv->IsValid());
         perFrameConstants.VertexIndexStorageSrv = vertexIndexStorageSrv->Index;
 
-        const GpuView* transformStorageSrv = renderContext->Lookup(sceneProxy->GetTransformProxyStorageSrv(localFrameIdx));
+        const GpuView* transformStorageSrv = renderContext->Lookup(sceneProxy->GetTransformProxyStorageSrv());
         IG_CHECK(transformStorageSrv != nullptr && transformStorageSrv->IsValid());
         perFrameConstants.TransformStorageSrv = transformStorageSrv->Index;
 
-        const GpuView* materialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv(localFrameIdx));
+        const GpuView* materialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv());
         IG_CHECK(materialStorageSrv != nullptr && materialStorageSrv->IsValid());
         perFrameConstants.MaterialStorageSrv = materialStorageSrv->Index;
 
-        const GpuView* meshProxyStorageSrv = renderContext->Lookup(sceneProxy->GetMeshProxySrv(localFrameIdx));
+        const GpuView* meshProxyStorageSrv = renderContext->Lookup(sceneProxy->GetMeshProxySrv());
         IG_CHECK(meshProxyStorageSrv != nullptr && meshProxyStorageSrv->IsValid());
         perFrameConstants.MeshStorageSrv = meshProxyStorageSrv->Index;
 
-        const GpuView* instancingStorageSrv = renderContext->Lookup(sceneProxy->GetInstancingStorageSrv(localFrameIdx));
-        const GpuView* instancingStorageUav = renderContext->Lookup(sceneProxy->GetInstancingStorageUav(localFrameIdx));
+        const GpuView* instancingStorageSrv = renderContext->Lookup(sceneProxy->GetInstancingStorageSrv());
+        const GpuView* instancingStorageUav = renderContext->Lookup(sceneProxy->GetInstancingStorageUav());
         IG_CHECK(instancingStorageSrv != nullptr && instancingStorageSrv->IsValid());
         IG_CHECK(instancingStorageUav != nullptr && instancingStorageUav->IsValid());
         perFrameConstants.InstancingDataStorageSrv = instancingStorageSrv->Index;
         perFrameConstants.InstancingDataStorageUav = instancingStorageUav->Index;
 
-        const GpuView* indirectTransformStorageSrv = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageSrv(localFrameIdx));
-        const GpuView* indirectTransformStorageUav = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageUav(localFrameIdx));
+        const GpuView* indirectTransformStorageSrv = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageSrv());
+        const GpuView* indirectTransformStorageUav = renderContext->Lookup(sceneProxy->GetIndirectTransformStorageUav());
         IG_CHECK(indirectTransformStorageSrv != nullptr && indirectTransformStorageSrv->IsValid());
         IG_CHECK(indirectTransformStorageUav != nullptr && indirectTransformStorageUav->IsValid());
         perFrameConstants.IndirectTransformStorageSrv = indirectTransformStorageSrv->Index;
         perFrameConstants.IndirectTransformStorageUav = indirectTransformStorageUav->Index;
 
-        const GpuView* renderableStorageSrv = renderContext->Lookup(sceneProxy->GetRenderableProxyStorageSrv(localFrameIdx));
+        const GpuView* renderableStorageSrv = renderContext->Lookup(sceneProxy->GetRenderableProxyStorageSrv());
         IG_CHECK(renderableStorageSrv != nullptr && renderableStorageSrv->IsValid());
         perFrameConstants.RenderableStorageSrv = renderableStorageSrv->Index;
 
-        const GpuView* renderableIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetRenderableIndicesSrv(localFrameIdx));
+        const GpuView* renderableIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetRenderableIndicesSrv());
         IG_CHECK(renderableIndicesBufferSrv != nullptr && renderableIndicesBufferSrv->IsValid());
         perFrameConstants.RenderableIndicesBufferSrv = renderableIndicesBufferSrv->Index;
-        perFrameConstants.NumMaxRenderables = sceneProxy->GetNumRenderables(localFrameIdx);
+        perFrameConstants.NumMaxRenderables = sceneProxy->GetNumRenderables();
 
-        const GpuView* lightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv(localFrameIdx));
+        const GpuView* lightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv());
         IG_CHECK(lightStorageSrv != nullptr);
         perFrameConstants.LightStorageSrv = lightStorageSrv->Index;
 
@@ -271,7 +271,7 @@ namespace ig
         GpuFence& mainGfxFence = renderContext->GetMainGfxFence();
         CommandListPool& mainGfxCmdListPool = renderContext->GetMainGfxCommandListPool();
         auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
-        if (sceneProxy->GetNumRenderables(localFrameIdx) == 0 || !bMainCameraExists)
+        if (sceneProxy->GetNumRenderables() == 0 || !bMainCameraExists)
         {
             renderCmdList->Open();
 
@@ -355,7 +355,7 @@ namespace ig
                                                .ZeroFilledBufferPtr = zeroFilledBuffer.get(),
                                                .PerFrameCbvPtr = perFrameCbv,
                                                .NumRenderables =
-                                                   sceneProxy->GetNumRenderables(localFrameIdx)});
+                                                   sceneProxy->GetNumRenderables()});
                 frustumCullingPass->Execute(localFrameIdx);
 
                 CommandList* cmdLists[]{frustumCullingCmdList};
@@ -373,7 +373,7 @@ namespace ig
                                                         .CullingDataBufferSrvHandle =
                                                             frustumCullingPass->GetCullingDataBufferSrv(localFrameIdx),
                                                         .NumRenderables =
-                                                            sceneProxy->GetNumRenderables(localFrameIdx)});
+                                                            sceneProxy->GetNumRenderables()});
                 compactMeshLodInstancesPass->Execute(localFrameIdx);
 
                 CommandList* cmdLists[]{compactMeshLodInstancesCmdList};
@@ -442,7 +442,7 @@ namespace ig
             {
                 debugLightClusterPass->SetParams({.CmdList = debugLightClusterPassCmdList,
                                                   .MainViewport = mainViewport,
-                                                  .NumLights = sceneProxy->GetNumLights(localFrameIdx),
+                                                  .NumLights = sceneProxy->GetNumLights(),
                                                   .PerFrameDataCbv = perFrameCbv,
                                                   .TileDwordsBufferSrv = lightClusteringPass->GetTilesBufferSrv(localFrameIdx),
                                                   .InputTex = testForwardShadingPass->GetOutputTex(localFrameIdx),

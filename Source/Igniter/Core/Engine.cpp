@@ -165,6 +165,9 @@ namespace ig
                 ZoneScopedN("Engine: PreRender");
                 renderContext->PreRender(localFrameIdx);
                 meshStorage->PreRender(localFrameIdx);
+                // #sy_todo 좀더 적절한 위치에서 이뤄지도록 수정 필요
+                CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+                asyncCopyQueue.Wait(localFrameSyncs[(localFrameIdx + 1) % NumFramesInFlight]);
                 replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
                 sceneProxy->PrepareNextFrame(localFrameIdx);
                 renderer->PreRender(localFrameIdx);

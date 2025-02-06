@@ -100,8 +100,8 @@ namespace ig
         {
             using ProxyMapType = UnorderedMap<Owner, Proxy>;
 
-            InFlightFramesResource<Ptr<GpuStorage>> Storage;
-            InFlightFramesResource<ProxyMapType> ProxyMap;
+            Ptr<GpuStorage> Storage;
+            ProxyMapType ProxyMap;
             Vector<Owner> PendingDestructions; // Deprecated
 
             InFlightFramesResource<Ptr<GpuBuffer>> StagingBuffer;
@@ -139,8 +139,8 @@ namespace ig
             }
 
           public:
-            InFlightFramesResource<Ptr<GpuStorage>> InstancingDataStorage;
-            InFlightFramesResource<Ptr<GpuStorage>> IndirectTransformStorage;
+            Ptr<GpuStorage> InstancingDataStorage;
+            Ptr<GpuStorage> IndirectTransformStorage;
             Vector<InstancingMap> ThreadLocalInstancingMaps;
             OrderedInstancingMap GlobalInstancingMap;
             U32 NumInstances{0};
@@ -171,92 +171,92 @@ namespace ig
         // 여기서 렌더링 전 필요한 Scene 정보를 모두 모으고, GPU 메모리에 변경점 들을 반영해주어야 한다
         [[nodiscard]] GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
         void PrepareNextFrame(const LocalFrameIndex localFrameIdx);
-
-        [[nodiscard]] RenderHandle<GpuView> GetTransformProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
+        
+        [[nodiscard]] RenderHandle<GpuView> GetTransformProxyStorageSrv() const
         {
-            return transformProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+            return transformProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetMaterialProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetMaterialProxyStorageSrv() const
         {
-            return materialProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+            return materialProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetMeshProxySrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetMeshProxySrv() const
         {
-            return meshProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+            return meshProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetInstancingStorageBuffer(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuBuffer> GetInstancingStorageBuffer() const
         {
-            return instancingPackage.InstancingDataStorage[localFrameIdx]->GetGpuBuffer();
+            return instancingPackage.InstancingDataStorage->GetGpuBuffer();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetInstancingStorageSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetInstancingStorageSrv() const
         {
-            return instancingPackage.InstancingDataStorage[localFrameIdx]->GetShaderResourceView();
+            return instancingPackage.InstancingDataStorage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetInstancingStorageUav(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetInstancingStorageUav() const
         {
-            return instancingPackage.InstancingDataStorage[localFrameIdx]->GetUnorderedResourceView();
+            return instancingPackage.InstancingDataStorage->GetUnorderedResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetIndirectTransformStorageBuffer(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuBuffer> GetIndirectTransformStorageBuffer() const
         {
-            return instancingPackage.IndirectTransformStorage[localFrameIdx]->GetGpuBuffer();
+            return instancingPackage.IndirectTransformStorage->GetGpuBuffer();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageSrv() const
         {
-            return instancingPackage.IndirectTransformStorage[localFrameIdx]->GetShaderResourceView();
+            return instancingPackage.IndirectTransformStorage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageUav(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageUav() const
         {
-            return instancingPackage.IndirectTransformStorage[localFrameIdx]->GetUnorderedResourceView();
+            return instancingPackage.IndirectTransformStorage->GetUnorderedResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetRenderableProxyStorageSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetRenderableProxyStorageSrv() const
         {
-            return renderableProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+            return renderableProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetRenderableIndicesSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetRenderableIndicesSrv() const
         {
-            return renderableIndicesBufferSrv[localFrameIdx];
+            return renderableIndicesBufferSrv;
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetLightStorageSrv(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuView> GetLightStorageSrv() const
         {
-            return lightProxyPackage.Storage[localFrameIdx]->GetShaderResourceView();
+            return lightProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetLightStorageBuffer(const LocalFrameIndex localFrameIdx) const
+        [[nodiscard]] RenderHandle<GpuBuffer> GetLightStorageBuffer() const
         {
-            return lightProxyPackage.Storage[localFrameIdx]->GetGpuBuffer();
+            return lightProxyPackage.Storage->GetGpuBuffer();
         }
 
-        [[nodiscard]] U32 GetNumRenderables([[maybe_unused]] const LocalFrameIndex localFrameIdx) const noexcept
+        [[nodiscard]] U32 GetNumRenderables() const noexcept
         {
             return (U32)renderableIndices.size();
         }
 
         [[nodiscard]] U32 GetNumInstancing() const noexcept { return (U32)instancingPackage.GlobalInstancingMap.size(); }
 
-        [[nodiscard]] U16 GetNumLights(const LocalFrameIndex localFrameIdx) const noexcept { return (U16)lightProxyPackage.ProxyMap[localFrameIdx].size(); }
+        [[nodiscard]] U16 GetNumLights() const noexcept { return (U16)lightProxyPackage.ProxyMap.size(); }
 
-        [[nodiscard]] const auto& GetLightProxyMap(const LocalFrameIndex localFrameIdx) const noexcept { return lightProxyPackage.ProxyMap[localFrameIdx]; }
+        [[nodiscard]] const auto& GetLightProxyMap() const noexcept { return lightProxyPackage.ProxyMap; }
 
       private:
-        void UpdateMaterialProxy(const LocalFrameIndex localFrameIdx);
-        void UpdateMeshProxy(const LocalFrameIndex localFrameIdx);
-        void UpdateTransformProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
-        void UpdateLightProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateMaterialProxy();
+        void UpdateMeshProxy();
+        void UpdateTransformProxy(tf::Subflow& subflow, const Registry& registry);
+        void UpdateLightProxy(tf::Subflow& subflow, const Registry& registry);
 
-        void BuildInstancingData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void BuildInstancingData(tf::Subflow& subflow,const Registry& registry);
 
-        void UpdateRenderableProxy(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, const Registry& registry);
+        void UpdateRenderableProxy(tf::Subflow& subflow);
 
         template <typename Proxy, typename Owner>
         void ReplicateProxyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
@@ -295,9 +295,9 @@ namespace ig
 
         /* 현재 버퍼가 수용 할 수 있는 최대 수, 만약 부족하다면 새로 할당 필요! */
         constexpr static U32 kNumInitRenderableIndices = kNumInitRenderableElements;
-        InFlightFramesResource<U32> renderableIndicesBufferSize;
-        InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesBuffer;
-        InFlightFramesResource<RenderHandle<GpuView>> renderableIndicesBufferSrv;
+        U32 renderableIndicesBufferSize;
+        RenderHandle<GpuBuffer> renderableIndicesBuffer;
+        RenderHandle<GpuView> renderableIndicesBufferSrv;
         Vector<Vector<U32>> renderableIndicesGroups;
         Vector<U32> renderableIndices;
         // #sy_todo 나중에 StagingBuffer로 묶어서 간략하게 리팩토링하기
