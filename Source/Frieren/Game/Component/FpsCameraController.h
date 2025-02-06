@@ -35,8 +35,8 @@ namespace fe
 
         float CurrentYaw = 0.f;   /* Degrees */
         float CurrentPitch = 0.f; /* Degrees */
-        constexpr static float MinPitchDegrees = -45.f;
-        constexpr static float MaxPitchDegrees = 45.f;
+        constexpr static float MinPitchDegrees = -90.f + 0.01f;
+        constexpr static float MaxPitchDegrees = 90.f - 0.01f;
     };
 
     IG_DECLARE_META(FpsCameraController);

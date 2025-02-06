@@ -139,10 +139,10 @@ void main(uint3 DTid : SV_DispatchThreadID)
         const uint v_lastTileY = uint(v_aabbScreen.w);
         const uint s_numTileX = uint(params.ViewportWidth * INV_TILE_SIZE);
     
-    // 그룹내 스레드는 항상 최악의 경우를 상정한다. 최악의 경우
-    // v_tileY = 0 ~ Max, v_tileX = 0~Max를 모든 스레드가 실행한다
-    // 이걸 최소화 할려면? 같은 v_tileY과 v_tileX를 가지는 thread를 모아서 한번에 처리하자
-    // 그러면 InterlockedOr의 비율이 1/NumThreads로 줄어들지 않을까?
+        // 그룹내 스레드는 항상 최악의 경우를 상정한다. 최악의 경우
+        // v_tileY = 0 ~ Max, v_tileX = 0~Max를 모든 스레드가 실행한다
+        // 이걸 최소화 할려면? 같은 v_tileY과 v_tileX를 가지는 thread를 모아서 한번에 처리하자
+        // 그러면 InterlockedOr의 비율이 1/NumThreads로 줄어들지 않을까?
         const uint mergedFirstTileX = WaveActiveMin(v_firstTileX);
         const uint mergedFirstTileY = WaveActiveMin(v_firstTileY);
         const uint mergedLastTileX = WaveActiveMax(v_lastTileX);
