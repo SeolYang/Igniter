@@ -18,7 +18,7 @@ namespace ig
 
 namespace ig
 {
-    TestForwardShadingPass::TestForwardShadingPass(RenderContext& renderContext, RootSignature& bindlessRootSignature, const Viewport& mainViewport)
+    TestForwardShadingPass::TestForwardShadingPass(RenderContext& renderContext, RootSignature& bindlessRootSignature)
         : renderContext(&renderContext)
         , bindlessRootSignature(&bindlessRootSignature)
     {
@@ -49,7 +49,7 @@ namespace ig
         psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
         pso = MakePtr<PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
 
-        constexpr DXGI_FORMAT kOutputTexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+        /*constexpr DXGI_FORMAT kOutputTexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
         GpuTextureDesc outputTexDesc{};
         outputTexDesc.AsRenderTarget((U32)mainViewport.width, (U32)mainViewport.height,
                                      1, kOutputTexFormat);
@@ -60,22 +60,20 @@ namespace ig
                                                             D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0},
                                                             kOutputTexFormat);
         outputTexSrv = renderContext.CreateShaderResourceView(outputTex,
-                                                              D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1, .PlaneSlice = 0});
+                                                              D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1, .PlaneSlice = 0});*/
     }
 
     TestForwardShadingPass::~TestForwardShadingPass()
     {
-        renderContext->DestroyGpuView(outputTexRtv);
-        renderContext->DestroyGpuView(outputTexSrv);
-        renderContext->DestroyTexture(outputTex);
+        //renderContext->DestroyGpuView(outputTexRtv);
+        //renderContext->DestroyGpuView(outputTexSrv);
+        //renderContext->DestroyTexture(outputTex);
     }
 
     void TestForwardShadingPass::SetParams(const TestForwardShadingPassParams newParams)
     {
         IG_CHECK(newParams.CmdList != nullptr);
         IG_CHECK(newParams.DrawInstanceCmdSignature != nullptr);
-        IG_CHECK(newParams.DrawInstanceCmdStorageBuffer);
-        IG_CHECK(newParams.Dsv);
         IG_CHECK(newParams.MainViewport.width > 0.f && newParams.MainViewport.height > 0.f);
         params = newParams;
     }
@@ -90,9 +88,9 @@ namespace ig
         GpuBuffer* drawInstanceCmdStorageBuffer = renderContext->Lookup(params.DrawInstanceCmdStorageBuffer);
         IG_CHECK(drawInstanceCmdStorageBuffer != nullptr);
 
-        GpuTexture* outputTexPtr = renderContext->Lookup(outputTex);
+        GpuTexture* outputTexPtr = renderContext->Lookup(params.BackBuffer);
         IG_CHECK(outputTexPtr != nullptr);
-        const GpuView* outputTexRtvPtr = renderContext->Lookup(outputTexRtv);
+        const GpuView* outputTexRtvPtr = renderContext->Lookup(params.BackBufferRtv);
         IG_CHECK(outputTexRtvPtr != nullptr);
 
         GpuTexture* depthTex = renderContext->Lookup(params.DepthTex);
@@ -111,7 +109,7 @@ namespace ig
             *outputTexPtr,
             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-            D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
+            D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
         cmdList.AddPendingBufferBarrier(
             *drawInstanceCmdStorageBuffer,
             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_EXECUTE_INDIRECT,
@@ -129,13 +127,6 @@ namespace ig
         cmdList.SetScissorRect(params.MainViewport);
         cmdList.SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         cmdList.ExecuteIndirect(*params.DrawInstanceCmdSignature, *drawInstanceCmdStorageBuffer);
-
-        cmdList.AddPendingTextureBarrier(
-            *outputTexPtr,
-            D3D12_BARRIER_SYNC_RENDER_TARGET, D3D12_BARRIER_SYNC_NONE,
-            D3D12_BARRIER_ACCESS_RENDER_TARGET, D3D12_BARRIER_ACCESS_NO_ACCESS,
-            D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
-        cmdList.FlushBarriers();
 
         cmdList.Close();
     }

@@ -101,7 +101,7 @@ namespace ig
 
         depthStencil = renderContext.CreateTexture(depthStencilDesc);
         dsv = renderContext.CreateDepthStencilView(depthStencil,
-                                                 D3D12_TEX2D_DSV{.MipSlice = 0});
+                                                   D3D12_TEX2D_DSV{.MipSlice = 0});
 
         GpuBufferDesc zeroFilledBufferDesc{};
         zeroFilledBufferDesc.AsUploadBuffer(kZeroFilledBufferSize);
@@ -116,8 +116,7 @@ namespace ig
         compactMeshLodInstancesPass = MakePtr<CompactMeshLodInstancesPass>(renderContext, *bindlessRootSignature);
         generateMeshLodDrawCmdsPass = MakePtr<GenerateMeshLodDrawCommandsPass>(renderContext, *bindlessRootSignature);
         zPrePass = MakePtr<ZPrePass>(renderContext, *bindlessRootSignature);
-        testForwardShadingPass = MakePtr<TestForwardShadingPass>(renderContext, *bindlessRootSignature, mainViewport);
-        debugLightClusterPass = MakePtr<DebugLightClusterPass>(renderContext, *bindlessRootSignature, mainViewport);
+        testForwardShadingPass = MakePtr<TestForwardShadingPass>(renderContext, *bindlessRootSignature);
         imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);
     }
 
@@ -339,7 +338,6 @@ namespace ig
                 asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
                 asyncComputeQueue.ExecuteCommandLists(lightClusteringCmdLists);
             }
-            // GpuSyncPoint lightClusteringSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
 
             auto frustumCullingCmdList =
                 asyncComputeCmdListPool.Request(localFrameIdx, "FrustumCullingCmdList"_fs);
@@ -418,6 +416,8 @@ namespace ig
                                                        generateMeshLodDrawCmdsPass->GetCommandSignature(),
                                                    .DrawInstanceCmdStorageBuffer =
                                                        generateMeshLodDrawCmdsPass->GetDrawInstanceCmdStorageBuffer(),
+                                                   .BackBuffer = swapchain.GetBackBuffer(),
+                                                   .BackBufferRtv = swapchain.GetBackBufferRtv(),
                                                    .DepthTex = depthStencil,
                                                    .Dsv = dsv,
                                                    .MainViewport = mainViewport});
@@ -427,65 +427,6 @@ namespace ig
                 GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
                 mainGfxQueue.Wait(prevPassSyncPoint);
                 CommandList* cmdLists[]{testForwardPassCmdList};
-                mainGfxQueue.ExecuteCommandLists(cmdLists);
-            }
-
-            auto debugLightClusterPassCmdList =
-                asyncComputeCmdListPool.Request(localFrameIdx, "DebugLightCluster"_fs);
-            {
-                debugLightClusterPass->SetParams({.CmdList = debugLightClusterPassCmdList,
-                                                  .MainViewport = mainViewport,
-                                                  .NumLights = sceneProxy->GetNumLights(),
-                                                  .PerFrameDataCbv = perFrameCbv,
-                                                  .TileDwordsBufferSrv = lightClusteringPass->GetTilesBufferSrv(),
-                                                  .InputTex = testForwardShadingPass->GetOutputTex(),
-                                                  .InputTexSrv = testForwardShadingPass->GetOutputTexSrv()});
-                debugLightClusterPass->Execute(localFrameIdx);
-
-                GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
-                asyncComputeQueue.Wait(prevPassSyncPoint);
-                CommandList* cmdLists[]{debugLightClusterPassCmdList};
-                asyncComputeQueue.ExecuteCommandLists(cmdLists);
-            }
-
-            auto copyFinalOutputToBackbuffer =
-                mainGfxCmdListPool.Request(localFrameIdx, "CopyFinalOutputToBackbuffer"_fs);
-            {
-                GpuTexture* debugLightClusterPassOutput = renderContext->Lookup(debugLightClusterPass->GetOutputTex());
-
-                copyFinalOutputToBackbuffer->Open();
-
-                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
-                    *debugLightClusterPassOutput,
-                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE,
-                    D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS, D3D12_BARRIER_LAYOUT_COPY_SOURCE);
-                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
-                    *backBuffer,
-                    D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-                    D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST,
-                    D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_COPY_DEST);
-                copyFinalOutputToBackbuffer->FlushBarriers();
-
-                copyFinalOutputToBackbuffer->CopyTextureSimple(*debugLightClusterPassOutput, *backBuffer);
-
-                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
-                    *debugLightClusterPassOutput,
-                    D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_COPY_SOURCE, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                    D3D12_BARRIER_LAYOUT_COPY_SOURCE, D3D12_BARRIER_LAYOUT_COMMON);
-                copyFinalOutputToBackbuffer->AddPendingTextureBarrier(
-                    *backBuffer,
-                    D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
-                    D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                    D3D12_BARRIER_LAYOUT_COPY_DEST, D3D12_BARRIER_LAYOUT_COMMON);
-                copyFinalOutputToBackbuffer->FlushBarriers();
-
-                copyFinalOutputToBackbuffer->Close();
-
-                GpuSyncPoint prevPassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal(asyncComputeFence);
-                mainGfxQueue.Wait(prevPassSyncPoint);
-                CommandList* cmdLists[]{copyFinalOutputToBackbuffer};
                 mainGfxQueue.ExecuteCommandLists(cmdLists);
             }
         }
