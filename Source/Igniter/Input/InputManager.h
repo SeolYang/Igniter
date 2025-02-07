@@ -57,13 +57,13 @@ namespace ig
       private:
         struct ActionMapping
         {
-            Handle<Action, InputManager> ActionHandle{};
+            Handle<Action> ActionHandle{};
             EInput MappedInput{EInput::None};
         };
 
         struct AxisMapping
         {
-            Handle<Axis, InputManager> AxisHandle{};
+            Handle<Axis> AxisHandle{};
             EInput MappedInput{EInput::None};
         };
 
@@ -89,11 +89,11 @@ namespace ig
         void UnmapAxis(const String name);
         void SetScale(const String name, const F32 newScale);
 
-        [[nodiscard]] Handle<Action, InputManager> QueryAction(const String name) const;
-        [[nodiscard]] Handle<Axis, InputManager> QueryAxis(const String name) const;
+        [[nodiscard]] Handle<Action> QueryAction(const String name) const;
+        [[nodiscard]] Handle<Axis> QueryAxis(const String name) const;
 
-        [[nodiscard]] Action GetAction(const Handle<Action, InputManager> action) const;
-        [[nodiscard]] Axis GetAxis(const Handle<Axis, InputManager> axis) const;
+        [[nodiscard]] Action GetAction(const Handle<Action> action) const;
+        [[nodiscard]] Axis GetAxis(const Handle<Axis> axis) const;
 
         bool HandleEvent(const U32 message, const WPARAM wParam, const LPARAM lParam);
 
@@ -112,15 +112,15 @@ namespace ig
         void PollRawMouseInput();
 
       private:
-        HandleStorage<Action, InputManager> actionRegistry;
-        HandleStorage<Axis, InputManager> axisRegistry;
+        HandleStorage<Action> actionRegistry;
+        HandleStorage<Axis> axisRegistry;
 
         UnorderedMap<String, ActionMapping> nameActionTable{};
         UnorderedMap<String, AxisMapping> nameAxisTable{};
 
         constexpr static Size NumScopedInputs = magic_enum::enum_count<EInput>();
-        eastl::array<UnorderedSet<Handle<Action, InputManager>>, NumScopedInputs> actionSets;
-        eastl::array<UnorderedSet<Handle<Axis, InputManager>>, NumScopedInputs> axisSets;
+        eastl::array<UnorderedSet<Handle<Action>>, NumScopedInputs> actionSets;
+        eastl::array<UnorderedSet<Handle<Axis>>, NumScopedInputs> axisSets;
 
         UnorderedSet<EInput> processedInputs;
 

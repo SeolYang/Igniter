@@ -104,7 +104,7 @@ namespace ig
                     return;
                 }
 
-                ManagedAsset<StaticMesh> selectedAsset = assetManager.Load<StaticMesh>(selectedGuid);
+                Handle<StaticMesh> selectedAsset = assetManager.Load<StaticMesh>(selectedGuid);
                 if (staticMeshComponent.Mesh && (selectedAsset != staticMeshComponent.Mesh))
                 {
                     assetManager.Unload(staticMeshComponent.Mesh);

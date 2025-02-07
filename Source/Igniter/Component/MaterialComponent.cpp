@@ -30,7 +30,7 @@ namespace ig
     {
     }
 
-    MaterialComponent::MaterialComponent(const ManagedAsset<Material> ownedInstance)
+    MaterialComponent::MaterialComponent(const Handle<Material> ownedInstance)
         : Instance(ownedInstance)
     {
     }
@@ -114,7 +114,7 @@ namespace ig
                     return;
                 }
 
-                ManagedAsset<Material> selectedAsset = assetManager.Load<Material>(selectedGuid);
+                Handle<Material> selectedAsset = assetManager.Load<Material>(selectedGuid);
                 if (materialComponent.Instance && (selectedAsset != materialComponent.Instance))
                 {
                     assetManager.Unload(materialComponent.Instance);

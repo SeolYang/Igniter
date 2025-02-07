@@ -74,8 +74,8 @@ namespace ig
         using Desc = AssetDesc<Texture>;
 
       public:
-        Texture(RenderContext& renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv,
-                const RenderHandle<GpuView> sampler);
+        Texture(RenderContext& renderContext, const Desc& snapshot, const Handle<GpuTexture> gpuTexture, const Handle<GpuView> srv,
+                const Handle<GpuView> sampler);
         Texture(const Texture&) = delete;
         Texture(Texture&&) noexcept = default;
         ~Texture();
@@ -84,9 +84,9 @@ namespace ig
         Texture& operator=(Texture&& rhs) noexcept;
 
         [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
-        [[nodiscard]] RenderHandle<GpuTexture> GetGpuTexture() const { return gpuTexture; }
-        [[nodiscard]] RenderHandle<GpuView> GetShaderResourceView() const { return srv; }
-        [[nodiscard]] RenderHandle<GpuView> GetSampler() const { return sampler; }
+        [[nodiscard]] Handle<GpuTexture> GetGpuTexture() const { return gpuTexture; }
+        [[nodiscard]] Handle<GpuView> GetShaderResourceView() const { return srv; }
+        [[nodiscard]] Handle<GpuView> GetSampler() const { return sampler; }
 
       private:
         void Destroy();
@@ -100,9 +100,9 @@ namespace ig
       private:
         RenderContext* renderContext{nullptr};
         Desc snapshot{};
-        RenderHandle<GpuTexture> gpuTexture{};
-        RenderHandle<GpuView> srv{};
-        RenderHandle<GpuView> sampler{};
+        Handle<GpuTexture> gpuTexture{};
+        Handle<GpuView> srv{};
+        Handle<GpuView> sampler{};
     };
 } // namespace ig
 

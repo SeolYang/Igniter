@@ -64,7 +64,7 @@ namespace ig
         {
             lightIdxListStagingBufferDesc.DebugName = String(std::format("LightIdxListStaging.{}", localFrameIdx));
 
-            const RenderHandle<GpuBuffer> newLightIdxListStagingBuffer = renderContext.CreateBuffer(lightIdxListStagingBufferDesc);
+            const Handle<GpuBuffer> newLightIdxListStagingBuffer = renderContext.CreateBuffer(lightIdxListStagingBufferDesc);
             lightIdxListStagingBuffer[localFrameIdx] = newLightIdxListStagingBuffer;
             GpuBuffer* newLightIdxListStagingBufferPtr = renderContext.Lookup(newLightIdxListStagingBuffer);
             mappedLightIdxListStagingBuffer[localFrameIdx] = reinterpret_cast<U32*>(newLightIdxListStagingBufferPtr->Map());
@@ -85,12 +85,12 @@ namespace ig
         tileDwordsBufferDesc.DebugName = String(std::format("TileDwordsBuffer"));
         depthBinsBufferDesc.DebugName = String(std::format("DepthBinsBuffer"));
 
-        const RenderHandle<GpuBuffer> newTileDwordsBuffer = renderContext.CreateBuffer(tileDwordsBufferDesc);
+        const Handle<GpuBuffer> newTileDwordsBuffer = renderContext.CreateBuffer(tileDwordsBufferDesc);
         tileDwordsBufferPackage.Buffer = newTileDwordsBuffer;
         tileDwordsBufferPackage.Srv = renderContext.CreateShaderResourceView(newTileDwordsBuffer);
         tileDwordsBufferPackage.Uav = renderContext.CreateUnorderedAccessView(newTileDwordsBuffer);
 
-        const RenderHandle<GpuBuffer> newDepthBinsBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
+        const Handle<GpuBuffer> newDepthBinsBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
         depthBinsBufferPackage.Buffer = newDepthBinsBuffer;
         depthBinsBufferPackage.Srv = renderContext.CreateShaderResourceView(newDepthBinsBuffer);
         depthBinsBufferPackage.Uav = renderContext.CreateUnorderedAccessView(newDepthBinsBuffer);

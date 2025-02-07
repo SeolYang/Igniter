@@ -79,9 +79,9 @@ namespace ig
         [[nodiscard]] GpuFence& GetStorageFence() noexcept { return fence; }
         [[nodiscard]] bool IsLinearAllocator() const noexcept { return bIsLinearAllocEnabled; }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
-        [[nodiscard]] RenderHandle<GpuView> GetShaderResourceView() const noexcept { return srv; }
-        [[nodiscard]] RenderHandle<GpuView> GetUnorderedResourceView() const noexcept { return uav; }
+        [[nodiscard]] Handle<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
+        [[nodiscard]] Handle<GpuView> GetShaderResourceView() const noexcept { return srv; }
+        [[nodiscard]] Handle<GpuView> GetUnorderedResourceView() const noexcept { return uav; }
 
       private:
         [[nodiscard]] GpuBufferDesc CreateBufferDesc(const U32 numElements) const noexcept;
@@ -110,10 +110,10 @@ namespace ig
 
         GpuFence fence;
 
-        RenderHandle<GpuBuffer> gpuBuffer;
+        Handle<GpuBuffer> gpuBuffer;
         eastl::vector<Block> blocks;
 
-        RenderHandle<GpuView> srv;
-        RenderHandle<GpuView> uav;
+        Handle<GpuView> srv;
+        Handle<GpuView> uav;
     };
 } // namespace ig

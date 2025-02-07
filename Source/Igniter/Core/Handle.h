@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    template <typename Ty, typename Dependency>
+    template <typename Ty>
     struct Handle final
     {
       public:
@@ -40,9 +40,9 @@ namespace ig
     };
 } // namespace ig
 
-template <typename Ty, typename Tag>
-struct std::hash<ig::Handle<Ty, Tag>>
+template <typename Ty>
+struct std::hash<ig::Handle<Ty>>
 {
   public:
-    ig::Size operator()(const ig::Handle<Ty, Tag>& handle) const noexcept { return handle.GetHash(); }
+    ig::Size operator()(const ig::Handle<Ty>& handle) const noexcept { return handle.GetHash(); }
 };

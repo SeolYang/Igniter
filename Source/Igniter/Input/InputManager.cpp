@@ -158,7 +158,7 @@ namespace ig
             return;
         }
 
-        const Handle<Action, InputManager> newHandle = actionRegistry.Create();
+        const Handle<Action> newHandle = actionRegistry.Create();
         nameActionTable[name] = ActionMapping{.ActionHandle = newHandle, .MappedInput = input};
         IG_CHECK(!actionSets[ToUnderlying(input)].contains(newHandle));
         actionSets[ToUnderlying(input)].insert(newHandle);
@@ -200,7 +200,7 @@ namespace ig
             return;
         }
 
-        const Handle<Axis, InputManager> newHandle = axisRegistry.Create(scale);
+        const Handle<Axis> newHandle = axisRegistry.Create(scale);
         nameAxisTable[name] = AxisMapping{.AxisHandle = newHandle, .MappedInput = input};
         IG_CHECK(!axisSets[ToUnderlying(input)].contains(newHandle));
         axisSets[ToUnderlying(input)].insert(newHandle);
@@ -235,7 +235,7 @@ namespace ig
         axisPtr->Scale = newScale;
     }
 
-    Handle<Action, InputManager> InputManager::QueryAction(const String name) const
+    Handle<Action> InputManager::QueryAction(const String name) const
     {
         const auto mappingItr = nameActionTable.find(name);
         if (mappingItr != nameActionTable.cend())
@@ -244,10 +244,10 @@ namespace ig
         }
 
         IG_LOG(InputManagerLog, Error, "Action {} does not exists.", name);
-        return Handle<Action, InputManager>{};
+        return Handle<Action>{};
     }
 
-    Handle<Axis, InputManager> InputManager::QueryAxis(const String name) const
+    Handle<Axis> InputManager::QueryAxis(const String name) const
     {
         const auto mappingItr = nameAxisTable.find(name);
         if (mappingItr != nameAxisTable.cend())
@@ -256,10 +256,10 @@ namespace ig
         }
 
         IG_LOG(InputManagerLog, Error, "Axis {} does not exists.", name);
-        return Handle<Axis, InputManager>{};
+        return Handle<Axis>{};
     }
 
-    Action InputManager::GetAction(const Handle<Action, InputManager> action) const
+    Action InputManager::GetAction(const Handle<Action> action) const
     {
         const Action* actionPtr = actionRegistry.Lookup(action);
         if (actionPtr == nullptr)
@@ -271,7 +271,7 @@ namespace ig
         return *actionPtr;
     }
 
-    Axis InputManager::GetAxis(const Handle<Axis, InputManager> axis) const
+    Axis InputManager::GetAxis(const Handle<Axis> axis) const
     {
         const Axis* axisPtr = axisRegistry.Lookup(axis);
         if (axisPtr == nullptr)
@@ -342,7 +342,7 @@ namespace ig
         ZoneScoped;
         for (const EInput input : processedInputs)
         {
-            for (const Handle<Action, InputManager> actionHandle : actionSets[ToUnderlying(input)])
+            for (const Handle<Action> actionHandle : actionSets[ToUnderlying(input)])
             {
                 Action* actionPtr = actionRegistry.Lookup(actionHandle);
                 IG_CHECK(actionPtr != nullptr);
@@ -361,7 +361,7 @@ namespace ig
                 }
             }
 
-            for (const Handle<Axis, InputManager> axisHandle : axisSets[ToUnderlying(input)])
+            for (const Handle<Axis> axisHandle : axisSets[ToUnderlying(input)])
             {
                 Axis* axisPtr = axisRegistry.Lookup(axisHandle);
                 IG_CHECK(axisPtr != nullptr);
@@ -391,7 +391,7 @@ namespace ig
     bool InputManager::HandlePressAction(const EInput input)
     {
         bool bAnyPress = false;
-        for (const Handle<Action, InputManager> action : actionSets[ToUnderlying(input)])
+        for (const Handle<Action> action : actionSets[ToUnderlying(input)])
         {
             Action* actionPtr = actionRegistry.Lookup(action);
             IG_CHECK(actionPtr != nullptr);
@@ -412,7 +412,7 @@ namespace ig
 
     bool InputManager::HandleReleaseAction(const EInput input)
     {
-        for (const Handle<Action, InputManager> action : actionSets[ToUnderlying(input)])
+        for (const Handle<Action> action : actionSets[ToUnderlying(input)])
         {
             Action* actionPtr = actionRegistry.Lookup(action);
             IG_CHECK(actionPtr != nullptr);
@@ -426,7 +426,7 @@ namespace ig
     {
         ZoneScoped;
         bool bAnyAxisHandled = false;
-        for (const Handle<Axis, InputManager> axis : axisSets[ToUnderlying(input)])
+        for (const Handle<Axis> axis : axisSets[ToUnderlying(input)])
         {
             Axis* axisPtr = axisRegistry.Lookup(axis);
             IG_CHECK(axisPtr != nullptr);

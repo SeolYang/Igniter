@@ -17,8 +17,8 @@ namespace ig
     struct ImGuiRenderPassParams
     {
         CommandList* CmdList = nullptr;
-        RenderHandle<GpuTexture> BackBuffer;
-        RenderHandle<GpuView> BackBufferRtv;
+        Handle<GpuTexture> BackBuffer;
+        Handle<GpuView> BackBufferRtv;
         Viewport MainViewport;
     };
 

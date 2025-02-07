@@ -79,9 +79,9 @@ namespace ig
         StaticMesh(
             RenderContext& renderContext, AssetManager& assetManager,
             const Desc& snapshot,
-            const MeshStorage::Handle<VertexSM> vertexSpace,
+            const Handle<MeshStorage::Space<VertexSM>> vertexSpace,
             const U8 numLods,
-            const Array<MeshStorage::Handle<U32>, kMaxNumLods> vertexIndexSpacePerLod);
+            const Array<Handle<MeshStorage::Space<U32>>, kMaxNumLods> vertexIndexSpacePerLod);
 
         StaticMesh(const StaticMesh&) = delete;
         StaticMesh(StaticMesh&& other) noexcept;
@@ -91,9 +91,9 @@ namespace ig
         StaticMesh& operator=(StaticMesh&& rhs) noexcept;
 
         [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
-        [[nodiscard]] MeshStorage::Handle<VertexSM> GetVertexSpace() const noexcept { return vertexSpace; }
+        [[nodiscard]] Handle<MeshStorage::Space<VertexSM>> GetVertexSpace() const noexcept { return vertexSpace; }
         [[nodiscard]] U8 GetNumLods() const noexcept { return numLods; }
-        [[nodiscard]] MeshStorage::Handle<U32> GetIndexSpace(const U8 lod) const noexcept
+        [[nodiscard]] Handle<MeshStorage::Space<U32>> GetIndexSpace(const U8 lod) const noexcept
         {
             if (lod >= numLods)
             {
@@ -111,9 +111,9 @@ namespace ig
         AssetManager* assetManager{nullptr};
         Desc snapshot{}; // desc snapshot
 
-        MeshStorage::Handle<VertexSM> vertexSpace{};
+        Handle<MeshStorage::Space<VertexSM>> vertexSpace{};
 
         U8 numLods = 1; // least 1
-        Array<MeshStorage::Handle<U32>, kMaxNumLods> vertexIndexSpacePerLod;
+        Array<Handle<MeshStorage::Space<U32>>, kMaxNumLods> vertexIndexSpacePerLod;
     };
 } // namespace ig

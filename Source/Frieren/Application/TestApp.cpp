@@ -54,9 +54,9 @@ namespace fe
         cameraComponent.bIsMainCamera = true;
 
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+        ig::Handle<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
         IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        ig::ManagedAsset<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
+        ig::Handle<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
         IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
 
         for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
@@ -120,7 +120,7 @@ namespace fe
 
         // constexpr ig::Size kNumLights = 12;
         // ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        // ig::ManagedAsset<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);
+        // ig::Handle<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("Axe_Axe_0"_fs);
         // assetManager.Clone(axeStaticMesh, (ig::U32)kNumLights - 1);
 
         // constexpr ig::F32 kLightRadius = 5.f;

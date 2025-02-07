@@ -26,7 +26,7 @@ namespace ig::details
 
 namespace ig
 {
-    template <typename Ty, typename Dependency>
+    template <typename Ty>
         requires(sizeof(Ty) >= sizeof(U32))
     class HandleStorage final
     {
@@ -77,15 +77,15 @@ namespace ig
         [[nodiscard]] Size GetNumAllocated() const { return slotCapacity - freeSlots.size(); }
 
         template <typename... Args>
-        Handle<Ty, Dependency> Create(Args&&... args)
+        Handle<Ty> Create(Args&&... args)
         {
             if (freeSlots.empty() && !GrowChunks())
             {
-                return Handle<Ty, Dependency>{};
+                return Handle<Ty>{};
             }
             IG_CHECK(!freeSlots.empty());
 
-            Handle<Ty, Dependency> newHandle{0};
+            Handle<Ty> newHandle{0};
             const SlotType newSlot = freeSlots.back();
             freeSlots.pop_back();
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
@@ -113,7 +113,7 @@ namespace ig
          * 하지만 여전히 실제로 해제된 핸들에 대한 데이터 접근을 불가능 하다.
          * 이러한 매커니즘을 통해 지연된 리소스 해제와 같은 추가적인 기능을 구현 가능하다.
          */
-        void MarkAsDestroy(const Handle<Ty, Dependency> handle)
+        void MarkAsDestroy(const Handle<Ty> handle)
         {
             if (handle.IsNull())
             {
@@ -141,7 +141,7 @@ namespace ig
             reservedToDestroyFlags[slot] = true;
         }
 
-        void Destroy(const Handle<Ty, Dependency> handle)
+        void Destroy(const Handle<Ty> handle)
         {
             if (handle.IsNull())
             {
@@ -181,7 +181,7 @@ namespace ig
         }
 
         // Destroy 예약 마킹이 되어있어도 데이터를 가져옴
-        Ty* LookupUnsafe(const Handle<Ty, Dependency> handle)
+        Ty* LookupUnsafe(const Handle<Ty> handle)
         {
             if (handle.IsNull())
             {
@@ -208,7 +208,7 @@ namespace ig
             return CalcAddressOfSlot(slot);
         }
 
-        const Ty* LookupUnsafe(const Handle<Ty, Dependency> handle) const
+        const Ty* LookupUnsafe(const Handle<Ty> handle) const
         {
             if (handle.IsNull())
             {
@@ -235,7 +235,7 @@ namespace ig
             return CalcAddressOfSlot(slot);
         }
 
-        Ty* Lookup(const Handle<Ty, Dependency> handle)
+        Ty* Lookup(const Handle<Ty> handle)
         {
             Ty* const ptr = LookupUnsafe(handle);
             if (const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);
@@ -247,7 +247,7 @@ namespace ig
             return ptr;
         }
 
-        const Ty* Lookup(const Handle<Ty, Dependency> handle) const
+        const Ty* Lookup(const Handle<Ty> handle) const
         {
             const Ty* const ptr = LookupUnsafe(handle);
             if (const SlotType slot = MaskBits<0, SlotSizeInBits, SlotType>(handle.Value);

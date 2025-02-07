@@ -35,7 +35,7 @@ namespace ig
 
       private:
         RenderContext& renderContext;
-        Handle<GpuView, RenderContext> fontSrv{};
+        Handle<GpuView> fontSrv{};
         bool bInputEnabled = true;
     };
 } // namespace ig

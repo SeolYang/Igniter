@@ -128,9 +128,9 @@ namespace ig
         return *guidOpt;
     }
 
-    ManagedAsset<Texture> AssetManager::LoadTexture(const Guid& guid, const bool bShouldSuppressDirty)
+    Handle<Texture> AssetManager::LoadTexture(const Guid& guid, const bool bShouldSuppressDirty)
     {
-        ManagedAsset<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader, bShouldSuppressDirty)};
+        Handle<Texture> cachedTex{LoadImpl<Texture>(guid, *textureLoader, bShouldSuppressDirty)};
         if (!cachedTex)
         {
             return LoadImpl<Texture>(Guid{DefaultTextureGuid}, *textureLoader, bShouldSuppressDirty);
@@ -139,7 +139,7 @@ namespace ig
         return cachedTex;
     }
 
-    ManagedAsset<Texture> AssetManager::LoadTexture(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<Texture> AssetManager::LoadTexture(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -173,23 +173,23 @@ namespace ig
         return output;
     }
 
-    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty)
+    Handle<StaticMesh> AssetManager::LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty)
     {
         return LoadImpl<StaticMesh>(guid, *staticMeshLoader, bShouldSuppressDirty);
     }
 
-    ManagedAsset<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
             IG_LOG(AssetManagerLog, Error, "Load Static Mesh: Invalid Virtual Path {}", virtualPath);
-            return ManagedAsset<StaticMesh>{};
+            return Handle<StaticMesh>{};
         }
 
         if (!assetMonitor->Contains(EAssetCategory::StaticMesh, virtualPath))
         {
             IG_LOG(AssetManagerLog, Error, "Static mesh \"{}\" is invisible to asset manager.", virtualPath);
-            return ManagedAsset<StaticMesh>{};
+            return Handle<StaticMesh>{};
         }
 
         return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader, bShouldSuppressDirty);
@@ -213,9 +213,9 @@ namespace ig
         return *guidOpt;
     }
 
-    ManagedAsset<Material> AssetManager::LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty)
+    Handle<Material> AssetManager::LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty)
     {
-        ManagedAsset<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader, bShouldSuppressDirty)};
+        Handle<Material> cachedMat{LoadImpl<Material>(guid, *materialLoader, bShouldSuppressDirty)};
         if (!cachedMat)
         {
             return LoadImpl<Material>(Guid{DefaultMaterialGuid}, *materialLoader, bShouldSuppressDirty);
@@ -224,7 +224,7 @@ namespace ig
         return cachedMat;
     }
 
-    ManagedAsset<Material> AssetManager::LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<Material> AssetManager::LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -259,9 +259,9 @@ namespace ig
         return *guidOpt;
     }
 
-    ManagedAsset<Map> AssetManager::LoadMap(const Guid& guid, const bool bShouldSuppressDirty)
+    Handle<Map> AssetManager::LoadMap(const Guid& guid, const bool bShouldSuppressDirty)
     {
-        ManagedAsset<Map> cachedMap{LoadImpl<Map>(guid, *mapLoader, bShouldSuppressDirty)};
+        Handle<Map> cachedMap{LoadImpl<Map>(guid, *mapLoader, bShouldSuppressDirty)};
         if (!cachedMap)
         {
             IG_LOG(AssetManagerLog, Error, "Failed to load map {}.", guid);
@@ -270,7 +270,7 @@ namespace ig
         return cachedMap;
     }
 
-    ManagedAsset<Map> AssetManager::LoadMap(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<Map> AssetManager::LoadMap(const String virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {

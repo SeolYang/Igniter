@@ -19,11 +19,11 @@ namespace ig
     {
         CommandList* CmdList = nullptr;
         CommandSignature* DrawInstanceCmdSignature = nullptr;
-        RenderHandle<GpuBuffer> DrawInstanceCmdStorageBuffer;
-        RenderHandle<GpuTexture> BackBuffer;
-        RenderHandle<GpuView> BackBufferRtv;
-        RenderHandle<GpuTexture> DepthTex;
-        RenderHandle<GpuView> Dsv;
+        Handle<GpuBuffer> DrawInstanceCmdStorageBuffer;
+        Handle<GpuTexture> BackBuffer;
+        Handle<GpuView> BackBufferRtv;
+        Handle<GpuTexture> DepthTex;
+        Handle<GpuView> Dsv;
         Viewport MainViewport;
     };
 

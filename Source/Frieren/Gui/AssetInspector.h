@@ -42,7 +42,7 @@ namespace fe
         int mainTableSelectedIdx{-1};
         bool bIsMainSelectionDirty = false;
 
-        ig::ManagedAsset<ig::Texture> previewTexture{};
+        ig::Handle<ig::Texture> previewTexture{};
 
         int selectorTableSelectedIdx{-1};
         bool bOpenSelectorPopup = false;

@@ -658,7 +658,7 @@ namespace ig
             IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::StaticMesh);
             IG_CHECK(snapshot.IsCached());
 
-            ManagedAsset<StaticMesh> cachedStaticMesh = ManagedAsset<StaticMesh>{snapshot.HandleHash};
+            Handle<StaticMesh> cachedStaticMesh = Handle<StaticMesh>{snapshot.HandleHash};
             IG_CHECK(cachedStaticMesh);
 
             if (!proxyMap.contains(cachedStaticMesh))
@@ -706,7 +706,7 @@ namespace ig
             }
         }
 
-        for (const ManagedAsset<StaticMesh> mesh : meshProxyPackage.PendingDestructions)
+        for (const Handle<StaticMesh> mesh : meshProxyPackage.PendingDestructions)
         {
             const auto extractedElement = meshProxyPackage.ProxyMap.extract(mesh);
             IG_CHECK(extractedElement.has_value());
@@ -730,7 +730,7 @@ namespace ig
             IG_CHECK(snapshot.Info.GetCategory() == EAssetCategory::Material);
             IG_CHECK(snapshot.IsCached());
 
-            ManagedAsset<Material> cachedMaterial{snapshot.HandleHash};
+            Handle<Material> cachedMaterial{snapshot.HandleHash};
             IG_CHECK(cachedMaterial);
 
             if (!proxyMap.contains(cachedMaterial))
@@ -774,7 +774,7 @@ namespace ig
             }
         }
 
-        for (const ManagedAsset<Material> material : materialProxyPackage.PendingDestructions)
+        for (const Handle<Material> material : materialProxyPackage.PendingDestructions)
         {
             const auto extractedElement = materialProxyPackage.ProxyMap.extract(material);
             IG_CHECK(extractedElement.has_value());
@@ -944,7 +944,7 @@ namespace ig
             });
 
         // SceneProxy가 Storage를 소유하고 있기때문에 작업 실행 중에 해제되지 않음이 보장됨.
-        const RenderHandle<GpuBuffer> storageBuffer = proxyPackage.Storage->GetGpuBuffer();
+        const Handle<GpuBuffer> storageBuffer = proxyPackage.Storage->GetGpuBuffer();
         GpuBuffer* storageBufferPtr = renderContext->Lookup(storageBuffer);
         IG_CHECK(storageBufferPtr != nullptr);
         tf::Task recordReplicateDataCmd = subflow.for_each_index(

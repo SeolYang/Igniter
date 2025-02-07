@@ -34,9 +34,9 @@ namespace ig
 
         void SetParams(const FrustumCullingPassParams& newParams);
 
-        [[nodiscard]] RenderHandle<GpuView> GetMeshLodInstanceStorageUav() const noexcept { return meshLodInstanceStorage->GetUnorderedResourceView(); }
-        [[nodiscard]] RenderHandle<GpuBuffer> GetCullingDataBuffer() const noexcept { return cullingDataBuffer; }
-        [[nodiscard]] RenderHandle<GpuView> GetCullingDataBufferSrv() const noexcept { return cullingDataBufferSrv; }
+        [[nodiscard]] Handle<GpuView> GetMeshLodInstanceStorageUav() const noexcept { return meshLodInstanceStorage->GetUnorderedResourceView(); }
+        [[nodiscard]] Handle<GpuBuffer> GetCullingDataBuffer() const noexcept { return cullingDataBuffer; }
+        [[nodiscard]] Handle<GpuView> GetCullingDataBufferSrv() const noexcept { return cullingDataBufferSrv; }
 
       protected:
         void PreExecute(const LocalFrameIndex localFrameIdx) override;
@@ -57,8 +57,8 @@ namespace ig
 
         Ptr<GpuStorage> meshLodInstanceStorage;
 
-        RenderHandle<GpuBuffer> cullingDataBuffer;
-        RenderHandle<GpuView> cullingDataBufferSrv;
-        RenderHandle<GpuView> cullingDataBufferUav;
+        Handle<GpuBuffer> cullingDataBuffer;
+        Handle<GpuView> cullingDataBufferSrv;
+        Handle<GpuView> cullingDataBufferUav;
     };
 } // namespace ig

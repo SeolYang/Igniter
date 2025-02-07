@@ -84,9 +84,9 @@ namespace ig
     StaticMesh::StaticMesh(
         RenderContext& renderContext, AssetManager& assetManager,
         const Desc& snapshot,
-        const MeshStorage::Handle<VertexSM> vertexSpace,
+        const Handle<MeshStorage::Space<VertexSM>> vertexSpace,
         const U8 numLods,
-        const Array<MeshStorage::Handle<U32>, kMaxNumLods> vertexIndexSpacePerLod)
+        const Array<Handle<MeshStorage::Space<U32>>, kMaxNumLods> vertexIndexSpacePerLod)
         : renderContext(&renderContext)
         , assetManager(&assetManager)
         , snapshot(snapshot)

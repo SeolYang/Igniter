@@ -718,7 +718,7 @@
     <None Include="..\..\Assets\Shaders\Constants.hlsl">
       <Filter>Source\Shaders</Filter>
     </None>
-    <None Include="..\..\Assets\Shaders\BxDFs.hlsl">
+    <None Include="..\..\Assets\Shaders\BRDF.hlsl">
       <Filter>Source\Shaders</Filter>
     </None>
   </ItemGroup>

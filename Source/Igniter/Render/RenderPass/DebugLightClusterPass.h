@@ -23,9 +23,9 @@ namespace ig
         U32 NumLights = 0;
 
         const GpuView* PerFrameDataCbv = nullptr;
-        RenderHandle<GpuView> TileDwordsBufferSrv;
-        RenderHandle<GpuTexture> InputTex; // LAYOUT:RENDER_TARGET->SHADER_RESOURCE->COMMON
-        RenderHandle<GpuView> InputTexSrv;
+        Handle<GpuView> TileDwordsBufferSrv;
+        Handle<GpuTexture> InputTex; // LAYOUT:RENDER_TARGET->SHADER_RESOURCE->COMMON
+        Handle<GpuView> InputTexSrv;
     };
 
     class DebugLightClusterPass : public RenderPass
@@ -42,7 +42,7 @@ namespace ig
         void SetParams(const DebugLightClusterPassParams& newParams);
 
         [[nodiscard]]
-        RenderHandle<GpuTexture> GetOutputTex() const noexcept
+        Handle<GpuTexture> GetOutputTex() const noexcept
         {
             return outputTex;
         }
@@ -59,7 +59,7 @@ namespace ig
         Ptr<ShaderBlob> shader;
         Ptr<PipelineState> pso;
 
-        RenderHandle<GpuTexture> outputTex;
-        RenderHandle<GpuView> outputTexUav;
+        Handle<GpuTexture> outputTex;
+        Handle<GpuView> outputTexUav;
     };
 } // namespace ig

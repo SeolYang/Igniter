@@ -21,16 +21,16 @@ namespace fe
       private:
         bool bIgnoreInput = false;
 
-        ig::Handle<ig::Action, ig::InputManager> moveLeftActionHandle;
-        ig::Handle<ig::Action, ig::InputManager> moveRightActionHandle;
-        ig::Handle<ig::Action, ig::InputManager> moveForwardActionHandle;
-        ig::Handle<ig::Action, ig::InputManager> moveBackwardActionHandle;
-        ig::Handle<ig::Action, ig::InputManager> moveUpActionHandle;
-        ig::Handle<ig::Action, ig::InputManager> moveDownActionHandle;
+        ig::Handle<ig::Action> moveLeftActionHandle;
+        ig::Handle<ig::Action> moveRightActionHandle;
+        ig::Handle<ig::Action> moveForwardActionHandle;
+        ig::Handle<ig::Action> moveBackwardActionHandle;
+        ig::Handle<ig::Action> moveUpActionHandle;
+        ig::Handle<ig::Action> moveDownActionHandle;
 
-        ig::Handle<ig::Axis, ig::InputManager> turnYawAxisHandle;
-        ig::Handle<ig::Axis, ig::InputManager> turnPitchAxisHandle;
+        ig::Handle<ig::Axis> turnYawAxisHandle;
+        ig::Handle<ig::Axis> turnPitchAxisHandle;
 
-        ig::Handle<ig::Action, ig::InputManager> sprintActionHandle;
+        ig::Handle<ig::Action> sprintActionHandle;
     };
 } // namespace fe

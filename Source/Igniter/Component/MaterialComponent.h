@@ -9,7 +9,7 @@ namespace ig
     {
       public:
         MaterialComponent();
-        MaterialComponent(const ManagedAsset<Material> ownedInstance);
+        MaterialComponent(const Handle<Material> ownedInstance);
         MaterialComponent(const MaterialComponent& other);
         MaterialComponent(MaterialComponent&& other) noexcept;
         ~MaterialComponent();
@@ -22,7 +22,7 @@ namespace ig
         static void OnInspector(Registry* registry, const Entity entity);
 
       public:
-        ManagedAsset<Material> Instance{};
+        Handle<Material> Instance{};
 
       private:
         void Destroy();

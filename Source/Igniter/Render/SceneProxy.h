@@ -172,67 +172,67 @@ namespace ig
         [[nodiscard]] GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
         void PrepareNextFrame(const LocalFrameIndex localFrameIdx);
         
-        [[nodiscard]] RenderHandle<GpuView> GetTransformProxyStorageSrv() const
+        [[nodiscard]] Handle<GpuView> GetTransformProxyStorageSrv() const
         {
             return transformProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetMaterialProxyStorageSrv() const
+        [[nodiscard]] Handle<GpuView> GetMaterialProxyStorageSrv() const
         {
             return materialProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetMeshProxySrv() const
+        [[nodiscard]] Handle<GpuView> GetMeshProxySrv() const
         {
             return meshProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetInstancingStorageBuffer() const
+        [[nodiscard]] Handle<GpuBuffer> GetInstancingStorageBuffer() const
         {
             return instancingPackage.InstancingDataStorage->GetGpuBuffer();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetInstancingStorageSrv() const
+        [[nodiscard]] Handle<GpuView> GetInstancingStorageSrv() const
         {
             return instancingPackage.InstancingDataStorage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetInstancingStorageUav() const
+        [[nodiscard]] Handle<GpuView> GetInstancingStorageUav() const
         {
             return instancingPackage.InstancingDataStorage->GetUnorderedResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetIndirectTransformStorageBuffer() const
+        [[nodiscard]] Handle<GpuBuffer> GetIndirectTransformStorageBuffer() const
         {
             return instancingPackage.IndirectTransformStorage->GetGpuBuffer();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageSrv() const
+        [[nodiscard]] Handle<GpuView> GetIndirectTransformStorageSrv() const
         {
             return instancingPackage.IndirectTransformStorage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetIndirectTransformStorageUav() const
+        [[nodiscard]] Handle<GpuView> GetIndirectTransformStorageUav() const
         {
             return instancingPackage.IndirectTransformStorage->GetUnorderedResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetRenderableProxyStorageSrv() const
+        [[nodiscard]] Handle<GpuView> GetRenderableProxyStorageSrv() const
         {
             return renderableProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetRenderableIndicesSrv() const
+        [[nodiscard]] Handle<GpuView> GetRenderableIndicesSrv() const
         {
             return renderableIndicesBufferSrv;
         }
 
-        [[nodiscard]] RenderHandle<GpuView> GetLightStorageSrv() const
+        [[nodiscard]] Handle<GpuView> GetLightStorageSrv() const
         {
             return lightProxyPackage.Storage->GetShaderResourceView();
         }
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetLightStorageBuffer() const
+        [[nodiscard]] Handle<GpuBuffer> GetLightStorageBuffer() const
         {
             return lightProxyPackage.Storage->GetGpuBuffer();
         }
@@ -279,10 +279,10 @@ namespace ig
         ProxyPackage<TransformProxy> transformProxyPackage;
 
         constexpr static U32 kNumInitMaterialElements = 128u;
-        ProxyPackage<MaterialProxy, ManagedAsset<Material>> materialProxyPackage;
+        ProxyPackage<MaterialProxy, Handle<Material>> materialProxyPackage;
 
         constexpr static U32 kNumInitMeshElements = 256u;
-        ProxyPackage<MeshProxy, ManagedAsset<StaticMesh>> meshProxyPackage;
+        ProxyPackage<MeshProxy, Handle<StaticMesh>> meshProxyPackage;
 
         constexpr static U32 kNumInitStaticMeshInstances = 256u;
         InstancingPackage instancingPackage;
@@ -296,12 +296,12 @@ namespace ig
         /* 현재 버퍼가 수용 할 수 있는 최대 수, 만약 부족하다면 새로 할당 필요! */
         constexpr static U32 kNumInitRenderableIndices = kNumInitRenderableElements;
         U32 renderableIndicesBufferSize;
-        RenderHandle<GpuBuffer> renderableIndicesBuffer;
-        RenderHandle<GpuView> renderableIndicesBufferSrv;
+        Handle<GpuBuffer> renderableIndicesBuffer;
+        Handle<GpuView> renderableIndicesBufferSrv;
         Vector<Vector<U32>> renderableIndicesGroups;
         Vector<U32> renderableIndices;
         // #sy_todo 나중에 StagingBuffer로 묶어서 간략하게 리팩토링하기
-        InFlightFramesResource<RenderHandle<GpuBuffer>> renderableIndicesStagingBuffer;
+        InFlightFramesResource<Handle<GpuBuffer>> renderableIndicesStagingBuffer;
         InFlightFramesResource<U8*> mappedRenderableIndicesStagingBuffer;
         InFlightFramesResource<Size> renderableIndicesStagingBufferSize;
     };

@@ -17,8 +17,8 @@ namespace ig
     {
         CommandList* CmdList = nullptr;
         const GpuView* PerFrameCbvPtr = nullptr;
-        RenderHandle<GpuView> MeshLodInstanceStorageUavHandle{};
-        RenderHandle<GpuView> CullingDataBufferSrvHandle{};
+        Handle<GpuView> MeshLodInstanceStorageUavHandle{};
+        Handle<GpuView> CullingDataBufferSrvHandle{};
         U32 NumRenderables = 0;
     };
 

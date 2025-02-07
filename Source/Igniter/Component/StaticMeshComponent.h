@@ -24,7 +24,7 @@ namespace ig
         static void OnInspector(Registry* registry, const Entity entity);
 
       public:
-        ManagedAsset<StaticMesh> Mesh{};
+        Handle<StaticMesh> Mesh{};
 
       private:
         void Destroy();

@@ -62,7 +62,7 @@ namespace ig
     void TempConstantBufferAllocator::Reset(const LocalFrameIndex localFrameIdx)
     {
         UniqueLock lock{mutexes[localFrameIdx]};
-        for (const RenderHandle<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
+        for (const Handle<GpuView> gpuViewHandle : allocatedViews[localFrameIdx])
         {
             renderContext->DestroyGpuView(gpuViewHandle);
         }

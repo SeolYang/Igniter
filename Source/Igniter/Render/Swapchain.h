@@ -24,10 +24,10 @@ namespace ig
 
         bool IsTearingSupport() const { return bTearingEnabled; }
 
-        RenderHandle<GpuTexture> GetBackBuffer() const { return backBuffers[(LocalFrameIndex)swapchain->GetCurrentBackBufferIndex()]; }
-        RenderHandle<GpuView> GetBackBufferRtv() const { return rtv[(LocalFrameIndex)swapchain->GetCurrentBackBufferIndex()]; }
-        InFlightFramesResource<RenderHandle<GpuTexture>> GetBackBuffers() const { return backBuffers; }
-        InFlightFramesResource<RenderHandle<GpuView>> GetBackBufferRenderTargetViews() const { return rtv; }
+        Handle<GpuTexture> GetBackBuffer() const { return backBuffers[(LocalFrameIndex)swapchain->GetCurrentBackBufferIndex()]; }
+        Handle<GpuView> GetBackBufferRtv() const { return rtv[(LocalFrameIndex)swapchain->GetCurrentBackBufferIndex()]; }
+        InFlightFramesResource<Handle<GpuTexture>> GetBackBuffers() const { return backBuffers; }
+        InFlightFramesResource<Handle<GpuView>> GetBackBufferRenderTargetViews() const { return rtv; }
 
         // #sy_todo Impl Resize Swapchain!
         // void Resize(const U32 width, const U32 height);
@@ -45,7 +45,7 @@ namespace ig
         ComPtr<IDXGISwapChain4> swapchain;
         const bool bVSyncEnabled;
         bool bTearingEnabled = false;
-        InFlightFramesResource<RenderHandle<GpuTexture>> backBuffers;
-        InFlightFramesResource<RenderHandle<GpuView>> rtv;
+        InFlightFramesResource<Handle<GpuTexture>> backBuffers;
+        InFlightFramesResource<Handle<GpuView>> rtv;
     };
 } // namespace ig

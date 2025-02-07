@@ -115,9 +115,6 @@ namespace ig
         T::LoadDesc LoadDescriptor;
     };
 
-    template <typename T>
-    using ManagedAsset = Handle<T, class AssetManager>;
-
     /* Refer to {ResourcePath}.metadata */
     Path MakeResourceMetadataPath(Path resPath);
 

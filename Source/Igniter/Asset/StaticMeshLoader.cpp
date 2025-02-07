@@ -74,7 +74,7 @@ namespace ig
 
         GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
         MeshStorage& meshStorage = Engine::GetMeshStorage();
-        const MeshStorage::Handle<VertexSM> vertexSpace = meshStorage.CreateStaticMeshVertexSpace(loadDesc.NumVertices);
+        const Handle<MeshStorage::Space<VertexSM>> vertexSpace = meshStorage.CreateStaticMeshVertexSpace(loadDesc.NumVertices);
         if (!vertexSpace)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedCreateVertexSpace>();
@@ -92,7 +92,7 @@ namespace ig
                                                                 loadDesc.CompressedVerticesSizeInBytes);
             if (decodeResult == 0)
             {
-                const RenderHandle<GpuBuffer> vertexStorageBuffer = meshStorage.GetStaticMeshVertexStorageBuffer();
+                const Handle<GpuBuffer> vertexStorageBuffer = meshStorage.GetStaticMeshVertexStorageBuffer();
                 GpuBuffer* vertexStorageBufferPtr = renderContext.Lookup(vertexStorageBuffer);
                 IG_CHECK(vertexStorageBufferPtr != nullptr);
                 verticesUploadCtx.CopyBuffer(0, vertexSpacePtr->Allocation.AllocSize,
@@ -105,7 +105,7 @@ namespace ig
 
         // 여기를 NumLOD에 맞게 만들어 줘야함
         bool bIndexBufferDecodeSucceed = false;
-        Array<MeshStorage::Handle<U32>, StaticMesh::kMaxNumLods> lodIndexSpaces{};
+        Array<Handle<MeshStorage::Space<U32>>, StaticMesh::kMaxNumLods> lodIndexSpaces{};
         Array<Option<GpuSyncPoint>, StaticMesh::kMaxNumLods> lodIndicesUploadSyncs{};
         for (Index lod = 0; lod < loadDesc.NumLods; ++lod)
         {
@@ -116,7 +116,7 @@ namespace ig
             }
         }
 
-        const RenderHandle<GpuBuffer> vertexIndexStorageBuffer = meshStorage.GetIndexStorageBuffer();
+        const Handle<GpuBuffer> vertexIndexStorageBuffer = meshStorage.GetIndexStorageBuffer();
         GpuBuffer* vertexIndexStorageBufferPtr = renderContext.Lookup(vertexIndexStorageBuffer);
         IG_CHECK(vertexIndexStorageBufferPtr != nullptr);
         Size compressedIndicesOffset = loadDesc.CompressedVerticesSizeInBytes;

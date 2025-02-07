@@ -74,23 +74,23 @@ namespace ig
          */
 
         Guid Import(const String resPath, const TextureImportDesc& desc, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<Texture> LoadTexture(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Texture> LoadTexture(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Texture> LoadTexture(const String virtualPath, const bool bShouldSuppressDirty = false);
 
         Vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<StaticMesh> LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty = false);
 
         Guid Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<Material> LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Material> LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Material> LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty = false);
 
         Guid Import(const String virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<Map> LoadMap(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] ManagedAsset<Map> LoadMap(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Map> LoadMap(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Map> LoadMap(const String virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
-        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid, const bool bShouldSuppressDirty = false)
+        [[nodiscard]] Handle<T> Load(const Guid& guid, const bool bShouldSuppressDirty = false)
         {
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
@@ -115,7 +115,7 @@ namespace ig
         }
 
         template <typename T>
-        [[nodiscard]] ManagedAsset<T> Load(const String virtualPath, const bool bShouldSuppressDirty = false)
+        [[nodiscard]] Handle<T> Load(const String virtualPath, const bool bShouldSuppressDirty = false)
         {
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
@@ -176,7 +176,7 @@ namespace ig
         void Delete(const EAssetCategory assetType, const String virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
-        bool Clone(const ManagedAsset<T> handle, const U32 numClones = 1, const bool bShouldSuppressDirty = false)
+        bool Clone(const Handle<T> handle, const U32 numClones = 1, const bool bShouldSuppressDirty = false)
         {
             if (!handle)
             {
@@ -206,19 +206,19 @@ namespace ig
         }
 
         template <typename T>
-        T* Lookup(const ManagedAsset<T> handle)
+        T* Lookup(const Handle<T> handle)
         {
             return GetCache<T>().Lookup(handle);
         }
 
         template <typename T>
-        const T* Lookup(const ManagedAsset<T> handle) const
+        const T* Lookup(const Handle<T> handle) const
         {
             return GetCache<T>().Lookup(handle);
         }
 
         template <typename T>
-        void Unload(const ManagedAsset<T> handle, const bool bShouldSuppressDirty = false)
+        void Unload(const Handle<T> handle, const bool bShouldSuppressDirty = false)
         {
             /* #sy_todo not thread safe... make it safe! */
             details::AssetCache<T>& cache = GetCache<T>();
@@ -372,12 +372,12 @@ namespace ig
         }
 
         template <typename T, typename AssetLoader>
-        [[nodiscard]] ManagedAsset<T> LoadImpl(const Guid& guid, AssetLoader& loader, const bool bShouldSuppressDirty)
+        [[nodiscard]] Handle<T> LoadImpl(const Guid& guid, AssetLoader& loader, const bool bShouldSuppressDirty)
         {
             if (!assetMonitor->Contains(guid))
             {
                 IG_LOG(AssetManagerLog, Error, "{} asset \"{}\" is invisible to asset manager.", AssetCategoryOf<T>, guid);
-                return ManagedAsset<T>{};
+                return Handle<T>{};
             }
 
             AssetLock assetLock{GetAssetMutex(guid)};
@@ -391,7 +391,7 @@ namespace ig
                 {
                     IG_LOG(AssetManagerLog, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
                            desc.Info.GetVirtualPath(), guid);
-                    return ManagedAsset<T>{};
+                    return Handle<T>{};
                 }
 
                 assetCache.Cache(guid, result.Take());
@@ -432,7 +432,7 @@ namespace ig
                 return false;
             }
 
-            ManagedAsset<T> cachedAsset{assetCache.Load(guid, false)};
+            Handle<T> cachedAsset{assetCache.Load(guid, false)};
             if (cachedAsset)
             {
                 T* cachedAssetPtr = assetCache.Lookup(cachedAsset);

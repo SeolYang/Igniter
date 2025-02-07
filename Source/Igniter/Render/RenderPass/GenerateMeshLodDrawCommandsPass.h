@@ -19,7 +19,7 @@ namespace ig
     {
         CommandList* CmdList = nullptr;
         const GpuView* PerFrameCbvPtr = nullptr;
-        RenderHandle<GpuView> CullingDataBufferSrv;
+        Handle<GpuView> CullingDataBufferSrv;
         GpuBuffer* ZeroFilledBufferPtr = nullptr;
         U32 NumInstancing = 0;
     };
@@ -37,7 +37,7 @@ namespace ig
 
         void SetParams(const GenerateMeshLodDrawCommandsPassParams& newParams);
 
-        [[nodiscard]] RenderHandle<GpuBuffer> GetDrawInstanceCmdStorageBuffer() const noexcept { return drawInstanceCmdStorage->GetGpuBuffer(); }
+        [[nodiscard]] Handle<GpuBuffer> GetDrawInstanceCmdStorageBuffer() const noexcept { return drawInstanceCmdStorage->GetGpuBuffer(); }
         [[nodiscard]] CommandSignature* GetCommandSignature() noexcept { return cmdSignature.get(); }
 
       protected:

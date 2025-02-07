@@ -57,7 +57,7 @@ namespace ig::details
             InvalidateUnsafe(guid);
         }
 
-        [[nodiscard]] ManagedAsset<T> Load(const Guid& guid, const bool bShouldIncreaseRefCounter = true)
+        [[nodiscard]] Handle<T> Load(const Guid& guid, const bool bShouldIncreaseRefCounter = true)
         {
             ReadWriteLock rwLock{mutex};
             return LoadUnsafe(guid, bShouldIncreaseRefCounter);
@@ -81,13 +81,13 @@ namespace ig::details
             return IsCachedUnsafe(guid);
         }
 
-        [[nodiscard]] T* Lookup(const ManagedAsset<T> handle)
+        [[nodiscard]] T* Lookup(const Handle<T> handle)
         {
             ReadOnlyLock lock{mutex};
             return registry.Lookup(handle);
         }
 
-        [[nodiscard]] const T* Lookup(const ManagedAsset<T> handle) const
+        [[nodiscard]] const T* Lookup(const Handle<T> handle) const
         {
             ReadOnlyLock lock{mutex};
             return registry.Lookup(handle);
@@ -136,7 +136,7 @@ namespace ig::details
             return cachedAssets.contains(guid) && refCounterTable.contains(guid);
         }
 
-        [[nodiscard]] ManagedAsset<T> LoadUnsafe(const Guid& guid, const bool bShouldIncreaseRefCounter = true)
+        [[nodiscard]] Handle<T> LoadUnsafe(const Guid& guid, const bool bShouldIncreaseRefCounter = true)
         {
             IG_CHECK(guid.isValid());
             IG_CHECK(cachedAssets.contains(guid));
@@ -166,8 +166,8 @@ namespace ig::details
 
       private:
         mutable SharedMutex mutex;
-        HandleStorage<T, class AssetManager> registry;
-        UnorderedMap<Guid, ManagedAsset<T>> cachedAssets{};
+        HandleStorage<T> registry;
+        UnorderedMap<Guid, Handle<T>> cachedAssets{};
         UnorderedMap<Guid, U32> refCounterTable{};
     };
 } // namespace ig::details

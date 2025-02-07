@@ -62,7 +62,7 @@ namespace ig
         return archive;
     }
 
-    Texture::Texture(RenderContext& renderContext, const Desc& snapshot, const RenderHandle<GpuTexture> gpuTexture, const RenderHandle<GpuView> srv, const RenderHandle<GpuView> sampler)
+    Texture::Texture(RenderContext& renderContext, const Desc& snapshot, const Handle<GpuTexture> gpuTexture, const Handle<GpuView> srv, const Handle<GpuView> sampler)
         : renderContext(&renderContext)
         , snapshot(snapshot)
         , gpuTexture(gpuTexture)

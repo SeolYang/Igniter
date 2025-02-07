@@ -193,7 +193,7 @@ namespace ig
         IG_CHECK(newBufferSize > 0);
         IG_CHECK((newBufferSize - bufferSize) > 0);
 
-        const RenderHandle<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(CreateBufferDesc((U32)newBufferSize / elementSize));
+        const Handle<GpuBuffer> newGpuBuffer = renderContext.CreateBuffer(CreateBufferDesc((U32)newBufferSize / elementSize));
         if (!newGpuBuffer)
         {
             return false;

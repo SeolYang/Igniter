@@ -18,7 +18,7 @@ namespace ig
         }
     }
 
-    MeshStorage::Handle<VertexSM> MeshStorage::CreateStaticMeshVertexSpace(const U32 numVertices)
+    Handle<MeshStorage::Space<VertexSM>> MeshStorage::CreateStaticMeshVertexSpace(const U32 numVertices)
     {
         IG_CHECK(numVertices > 0);
         ReadWriteLock storageMutex{staticMeshVertexSpacePackage.StorageMutex};
@@ -26,13 +26,13 @@ namespace ig
         const Space<VertexSM> newVertexSpace{staticMeshVertexGpuStorage.Allocate(numVertices)};
         if (!newVertexSpace.Allocation.IsValid())
         {
-            return MeshStorage::Handle<VertexSM>{};
+            return Handle<MeshStorage::Space<VertexSM>>{};
         }
 
         return staticMeshVertexSpacePackage.Storage.Create(newVertexSpace);
     }
 
-    MeshStorage::Handle<unsigned> MeshStorage::CreateVertexIndexSpace(const U32 numIndices)
+    Handle<MeshStorage::Space<U32>> MeshStorage::CreateVertexIndexSpace(const U32 numIndices)
     {
         IG_CHECK(numIndices > 0);
         ReadWriteLock storageMutex{vertexIndexSpacePackage.StorageMutex};
@@ -40,13 +40,13 @@ namespace ig
         const Space<U32> newIndexSpace{vertexIndexGpuStorage.Allocate(numIndices)};
         if (!newIndexSpace.Allocation.IsValid())
         {
-            return MeshStorage::Handle<U32>{};
+            return Handle<MeshStorage::Space<U32>>{};
         }
 
         return vertexIndexSpacePackage.Storage.Create(newIndexSpace);
     }
 
-    void MeshStorage::Destroy(const Handle<VertexSM> staticMeshVertexSpace)
+    void MeshStorage::Destroy(const Handle<MeshStorage::Space<VertexSM>> staticMeshVertexSpace)
     {
         IG_CHECK(currentLocalFrameIdx < NumFramesInFlight);
         if (!staticMeshVertexSpace)
@@ -59,7 +59,7 @@ namespace ig
         staticMeshVertexSpacePackage.Storage.MarkAsDestroy(staticMeshVertexSpace);
     }
 
-    void MeshStorage::Destroy(const Handle<U32> vertexIndexSpace)
+    void MeshStorage::Destroy(const Handle<MeshStorage::Space<U32>> vertexIndexSpace)
     {
         IG_CHECK(currentLocalFrameIdx < NumFramesInFlight);
         if (!vertexIndexSpace)
@@ -72,13 +72,13 @@ namespace ig
         vertexIndexSpacePackage.Storage.MarkAsDestroy(vertexIndexSpace);
     }
 
-    const MeshStorage::Space<VertexSM>* MeshStorage::Lookup(const Handle<VertexSM> handle) const
+    const MeshStorage::Space<VertexSM>* MeshStorage::Lookup(const Handle<MeshStorage::Space<VertexSM>> handle) const
     {
         ReadOnlyLock storageMutex{staticMeshVertexSpacePackage.StorageMutex};
         return staticMeshVertexSpacePackage.Storage.Lookup(handle);
     }
 
-    const MeshStorage::Space<unsigned>* MeshStorage::Lookup(const Handle<U32> handle) const
+    const MeshStorage::Space<unsigned>* MeshStorage::Lookup(const Handle<MeshStorage::Space<U32>> handle) const
     {
         ReadOnlyLock storageMutex{vertexIndexSpacePackage.StorageMutex};
         return vertexIndexSpacePackage.Storage.Lookup(handle);

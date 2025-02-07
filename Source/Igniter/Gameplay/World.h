@@ -15,7 +15,7 @@ namespace ig
     {
       public:
         World() = default;
-        World(AssetManager& assetManager, const Handle<Map, AssetManager> map);
+        World(AssetManager& assetManager, const Handle<Map> map);
         World(const World&) = delete;
         World(World&&) noexcept = default;
         virtual ~World();
@@ -35,7 +35,7 @@ namespace ig
         constexpr static std::string_view ComponentNameHintKey = "NameHint";
 
         AssetManager* assetManager = nullptr;
-        Handle<Map, AssetManager> map{};
+        Handle<Map> map{};
         Registry registry{};
     };
 } // namespace ig

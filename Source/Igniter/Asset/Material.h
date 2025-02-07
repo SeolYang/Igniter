@@ -34,7 +34,7 @@ namespace ig
         friend class AssetManager;
 
       public:
-        Material(AssetManager& assetManager, const Desc& snapshot, const ManagedAsset<Texture> diffuse);
+        Material(AssetManager& assetManager, const Desc& snapshot, const Handle<Texture> diffuse);
         Material(const Material&) = delete;
         Material(Material&&) noexcept = default;
         ~Material();
@@ -43,7 +43,7 @@ namespace ig
         Material& operator=(Material&& rhs) noexcept;
 
         [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
-        [[nodiscard]] ManagedAsset<Texture> GetDiffuse() const { return diffuse; }
+        [[nodiscard]] Handle<Texture> GetDiffuse() const { return diffuse; }
 
       private:
         void Destroy();
@@ -55,6 +55,6 @@ namespace ig
       private:
         AssetManager* assetManager{nullptr};
         Desc snapshot{};
-        ManagedAsset<Texture> diffuse{};
+        Handle<Texture> diffuse{};
     };
 } // namespace ig

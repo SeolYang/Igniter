@@ -69,9 +69,9 @@ namespace ig
 
         struct BufferPackage
         {
-            RenderHandle<GpuBuffer> Buffer;
-            RenderHandle<GpuView> Srv;
-            RenderHandle<GpuView> Uav;
+            Handle<GpuBuffer> Buffer;
+            Handle<GpuView> Srv;
+            Handle<GpuView> Uav;
         };
 
       public:
@@ -85,10 +85,10 @@ namespace ig
 
         void SetParams(const LightClusteringPassParams& newParams);
 
-        [[nodiscard]] RenderHandle<GpuView> GetLightIdxListSrv() const noexcept { return lightIdxListBufferPackage.Srv; }
-        [[nodiscard]] RenderHandle<GpuView> GetTilesBufferSrv() const noexcept { return tileDwordsBufferPackage.Srv; }
-        [[nodiscard]] RenderHandle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
-        [[nodiscard]] RenderHandle<GpuView> GetDepthBinsBufferSrv() const noexcept { return depthBinsBufferPackage.Srv; }
+        [[nodiscard]] Handle<GpuView> GetLightIdxListSrv() const noexcept { return lightIdxListBufferPackage.Srv; }
+        [[nodiscard]] Handle<GpuView> GetTilesBufferSrv() const noexcept { return tileDwordsBufferPackage.Srv; }
+        [[nodiscard]] Handle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
+        [[nodiscard]] Handle<GpuView> GetDepthBinsBufferSrv() const noexcept { return depthBinsBufferPackage.Srv; }
 
       protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
@@ -115,7 +115,7 @@ namespace ig
         Ptr<PipelineState> lightClusteringPso;
 
         Vector<std::pair<U16, float>> lightProxyIdxViewZList;
-        InFlightFramesResource<RenderHandle<GpuBuffer>> lightIdxListStagingBuffer;
+        InFlightFramesResource<Handle<GpuBuffer>> lightIdxListStagingBuffer;
         InFlightFramesResource<U32*> mappedLightIdxListStagingBuffer;
         BufferPackage lightIdxListBufferPackage;
 
@@ -126,7 +126,7 @@ namespace ig
         Size numTileDwords = 0;
         BufferPackage tileDwordsBufferPackage;
         BufferPackage depthBinsBufferPackage;
-        RenderHandle<GpuBuffer> depthBinInitBuffer;
+        Handle<GpuBuffer> depthBinInitBuffer;
 
         LightClusteringPassParams params;
     };

@@ -12,7 +12,7 @@ IG_DEFINE_LOG_CATEGORY(WorldLog);
 
 namespace ig
 {
-    World::World(AssetManager& assetManager, const Handle<Map, AssetManager> map)
+    World::World(AssetManager& assetManager, const Handle<Map> map)
         : assetManager(&assetManager)
         , map(map)
     {

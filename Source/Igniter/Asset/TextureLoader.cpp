@@ -127,7 +127,7 @@ namespace ig
         texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
         /* Create Texture from GpuDevice */
-        const RenderHandle<GpuTexture> newTexture = renderContext.CreateTexture(texDesc);
+        const Handle<GpuTexture> newTexture = renderContext.CreateTexture(texDesc);
         if (!newTexture)
         {
             return MakeFail<Texture, ETextureLoaderStatus::FailedCreateTexture>();
@@ -178,7 +178,7 @@ namespace ig
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
-        const RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
+        const Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
                                                                                  D3D12_TEX2D_SRV{
                                                                                      .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f});
         if (!srv)
@@ -186,7 +186,7 @@ namespace ig
             return MakeFail<Texture, ETextureLoaderStatus::FailedCreateShaderResourceView>();
         }
 
-        const RenderHandle<GpuView> samplerView = renderContext.CreateSamplerView(D3D12_SAMPLER_DESC{
+        const Handle<GpuView> samplerView = renderContext.CreateSamplerView(D3D12_SAMPLER_DESC{
             .Filter = loadDesc.Filter,
             .AddressU = loadDesc.AddressModeU,
             .AddressV = loadDesc.AddressModeV,
@@ -239,7 +239,7 @@ namespace ig
         GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
-        RenderHandle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
+        Handle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
         if (!newTexture)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateTexture>();
@@ -283,7 +283,7 @@ namespace ig
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
-        RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
+        Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
                                                                            D3D12_TEX2D_SRV{
                                                                                .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f});
         if (!srv)
@@ -298,7 +298,7 @@ namespace ig
             .Filter = D3D12_FILTER_MIN_MAG_MIP_POINT,
         };
 
-        const RenderHandle<GpuView> samplerView = renderContext.CreateSamplerView(
+        const Handle<GpuView> samplerView = renderContext.CreateSamplerView(
             D3D12_SAMPLER_DESC{
                 .Filter = loadDesc.Filter,
                 .AddressU = loadDesc.AddressModeU,
@@ -339,7 +339,7 @@ namespace ig
         GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
         texDesc.DebugName = String(assetInfo.GetVirtualPath());
-        const RenderHandle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
+        const Handle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
         if (!newTexture)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateTexture>();
@@ -383,7 +383,7 @@ namespace ig
         GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
         barrierSync.WaitOnCpu();
 
-        const RenderHandle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
+        const Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
                                                                                  D3D12_TEX2D_SRV{
                                                                                      .MostDetailedMip = 0,
                                                                                      .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
