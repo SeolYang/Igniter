@@ -506,8 +506,6 @@ namespace ig
             mainGfxQueue.ExecuteCommandLists(cmdLists);
         }
 
-        PIXEndEvent();
-
         swapchain.Present();
         return mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
     }
