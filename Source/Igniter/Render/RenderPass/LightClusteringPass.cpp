@@ -161,11 +161,9 @@ namespace ig
             [this, &lightProxyMapValues](const Size idx)
             {
                 const SceneProxy::LightProxy& proxy = lightProxyMapValues[idx].second;
-                lightProxyIdxViewZList[idx] = std::make_pair((U16)idx,
-                                                             Vector4::Transform(
-                                                                 Vector4(proxy.GpuData.WorldPosition.x, proxy.GpuData.WorldPosition.y, proxy.GpuData.WorldPosition.z, 1.f),
-                                                                 params.ViewMat)
-                                                                 .z);
+                  lightProxyIdxViewZList[idx] = std::make_pair(
+                      (U16)idx,
+                    proxy.GpuData.WorldPosition.x * params.ViewMat._13 + proxy.GpuData.WorldPosition.y * params.ViewMat._23 + proxy.GpuData.WorldPosition.z * params.ViewMat._33);
             });
 
         tf::Task sortIntermediateList = buildLightIdxList.sort(
