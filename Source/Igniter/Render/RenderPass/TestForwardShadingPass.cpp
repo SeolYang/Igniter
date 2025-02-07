@@ -48,26 +48,10 @@ namespace ig
         psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
         psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
         pso = MakePtr<PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
-
-        /*constexpr DXGI_FORMAT kOutputTexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-        GpuTextureDesc outputTexDesc{};
-        outputTexDesc.AsRenderTarget((U32)mainViewport.width, (U32)mainViewport.height,
-                                     1, kOutputTexFormat);
-        outputTexDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
-        outputTexDesc.DebugName = String(std::format("ForwardShadingOutputTex"));
-        outputTex = renderContext.CreateTexture(outputTexDesc);
-        outputTexRtv = renderContext.CreateRenderTargetView(outputTex,
-                                                            D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0},
-                                                            kOutputTexFormat);
-        outputTexSrv = renderContext.CreateShaderResourceView(outputTex,
-                                                              D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = 1, .PlaneSlice = 0});*/
     }
 
     TestForwardShadingPass::~TestForwardShadingPass()
     {
-        //renderContext->DestroyGpuView(outputTexRtv);
-        //renderContext->DestroyGpuView(outputTexSrv);
-        //renderContext->DestroyTexture(outputTex);
     }
 
     void TestForwardShadingPass::SetParams(const TestForwardShadingPassParams newParams)
@@ -93,9 +77,7 @@ namespace ig
         const GpuView* outputTexRtvPtr = renderContext->Lookup(params.BackBufferRtv);
         IG_CHECK(outputTexRtvPtr != nullptr);
 
-        GpuTexture* depthTex = renderContext->Lookup(params.DepthTex);
         const GpuView* dsv = renderContext->Lookup(params.Dsv);
-        IG_CHECK(depthTex != nullptr);
         IG_CHECK(dsv != nullptr);
 
         CommandList& cmdList = *params.CmdList;
@@ -110,15 +92,6 @@ namespace ig
             D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
             D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
             D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-        cmdList.AddPendingBufferBarrier(
-            *drawInstanceCmdStorageBuffer,
-            D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_EXECUTE_INDIRECT,
-            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT);
-        cmdList.AddPendingTextureBarrier(
-            *depthTex,
-            D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
-            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_READ,
-            D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ);
         cmdList.FlushBarriers();
 
         cmdList.ClearRenderTarget(*outputTexRtvPtr);

@@ -51,8 +51,6 @@ namespace ig
 
         GpuBuffer* drawInstanceCmdStorageBuffer = renderContext->Lookup(params.DrawInstanceCmdStorageBuffer);
         IG_CHECK(drawInstanceCmdStorageBuffer != nullptr);
-        GpuTexture* depthTex = renderContext->Lookup(params.DepthTex);
-        IG_CHECK(depthTex != nullptr);
         const GpuView* dsv = renderContext->Lookup(params.Dsv);
         IG_CHECK(dsv != nullptr);
 
@@ -62,13 +60,6 @@ namespace ig
         auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
         cmdList.SetDescriptorHeaps(MakeSpan(descriptorHeaps));
         cmdList.SetRootSignature(*bindlessRootSignature);
-
-        cmdList.AddPendingTextureBarrier(
-            *depthTex,
-            D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_DEPTH_STENCIL,
-            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE,
-            D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
-        cmdList.FlushBarriers();
 
         cmdList.ClearDepth(*dsv, 0.f);
         cmdList.SetDepthOnlyTarget(*dsv);
