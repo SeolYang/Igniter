@@ -29,9 +29,10 @@ namespace ig
 
         swapchain.reset();
         /* Flush pending destroy list! */
+        GpuSyncPoint invalidSyncPoint{};
         for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
         {
-            PreRender(localFrameIdx);
+            PreRender(localFrameIdx, invalidSyncPoint);
         }
     }
 
@@ -366,7 +367,7 @@ namespace ig
         }
     }
 
-    void RenderContext::PreRender(const LocalFrameIndex localFrameIdx)
+    void RenderContext::PreRender(const LocalFrameIndex localFrameIdx, GpuSyncPoint& prevFrameLastSyncPoint)
     {
         this->currentLocalFrameIdx = localFrameIdx;
         mainGfxCmdListPool.PreRender(localFrameIdx);
@@ -415,6 +416,10 @@ namespace ig
             }
             gpuViewPackage.DeferredDestroyPendingList.Resources[localFrameIdx].clear();
         }
+
+        mainGfxQueue.Wait(prevFrameLastSyncPoint);
+        asyncComputeQueue.Wait(prevFrameLastSyncPoint);
+        asyncCopyQueue.Wait(prevFrameLastSyncPoint);
     }
 
     void RenderContext::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx)

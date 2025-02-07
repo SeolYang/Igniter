@@ -140,16 +140,12 @@ namespace ig
         }
     }
 
-    GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint& prevFrameSyncPoint)
+    GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
     {
         IG_CHECK(taskExecutor != nullptr);
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(assetManager != nullptr);
         ZoneScoped;
-
-        CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
-        asyncCopyQueue.Wait(prevFrameSyncPoint);
-        IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
 
         if (invalidationFuture[localFrameIdx].valid())
         {
@@ -284,6 +280,8 @@ namespace ig
         taskExecutor->run(rootTaskFlow).wait();
         // 현재 프레임 작업 완료
 
+        CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+        IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
         GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal(renderContext->GetAsyncCopyFence());
         return syncPoint;
     }

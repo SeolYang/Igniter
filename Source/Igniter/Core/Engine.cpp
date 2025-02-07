@@ -163,9 +163,9 @@ namespace ig
             GpuSyncPoint replicationSyncPoint;
             {
                 ZoneScopedN("Engine: PreRender");
-                renderContext->PreRender(localFrameIdx);
+                renderContext->PreRender(localFrameIdx, localFrameSyncs[prevLocalFrameIdx]);
                 meshStorage->PreRender(localFrameIdx);
-                replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world, localFrameSyncs[prevLocalFrameIdx]);
+                replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
                 sceneProxy->PrepareNextFrame(localFrameIdx);
                 renderer->PreRender(localFrameIdx);
                 application.PreRender(localFrameIdx);

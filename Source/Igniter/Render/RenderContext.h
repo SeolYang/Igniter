@@ -81,7 +81,7 @@ namespace ig
         [[nodiscard]] const GpuView* Lookup(const RenderHandle<GpuView> handle) const;
 
         void FlushQueues();
-        void PreRender(const LocalFrameIndex localFrameIdx);
+        void PreRender(const LocalFrameIndex localFrameIdx, GpuSyncPoint& prevFrameLastSyncPoint);
         void PostRender(const LocalFrameIndex localFrameIdx);
 
       private:
