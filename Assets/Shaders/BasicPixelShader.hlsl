@@ -47,7 +47,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
     int tileY = int(input.aPos.y * INV_TILE_SIZE);
     
     uint2 depthBin = depthBins[depthBinIdx];
-    const uint numTileX = uint(2560.f * INV_TILE_SIZE);
+    const uint numTileX = uint(perFrameData.ViewportWidth * INV_TILE_SIZE);
     const uint tileDwordOffset = ((numTileX * tileY) + tileX) * NUM_U32_PER_TILE;
     float3 illuminance = float3(0.f, 0.f, 0.f);
     //uint lightIdxListIdx = WaveActiveMin(depthBin.x);

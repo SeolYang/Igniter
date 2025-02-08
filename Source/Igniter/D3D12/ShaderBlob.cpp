@@ -83,7 +83,7 @@ namespace ig
             arguments.push_back(TEXT("-WX"));
         }
 
-#if defined(DEBUG) || defined(_DEBUG) || defined(REL_WITH_DEBINFO) || defined(ENABLE_PROFILING)
+#if defined(DEBUG) || defined(_DEBUG) || defined(REL_WITH_DEBINFO) || defined(ENABLE_PROFILE)
         const bool bEnableDebugInfo = true;
 #else
         const bool bEnableDebugInfo = desc.bForceEnableDebugInformation;

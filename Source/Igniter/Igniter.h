@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #pragma warning(disable : 4530)
 #include <array>
 #include <bitset>
@@ -124,7 +122,9 @@ using namespace entt::literals;
 #pragma warning(push)
 #pragma warning(disable : 26495)
 #pragma warning(disable : 6201)
+#ifdef ENABLE_PROFILE
 #define TRACY_ENABLE
+#endif
 #include <tracy/Tracy.hpp>
 #pragma warning(pop)
 

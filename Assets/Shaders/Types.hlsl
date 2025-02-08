@@ -1,3 +1,5 @@
+#ifndef _TYPES_H_
+#define _TYPES_H_
 #include "Constants.hlsl"
 
 struct PerFrameData
@@ -35,6 +37,9 @@ struct PerFrameData
     uint LightIdxListSrv;
     uint LightTileBitfieldBufferSrv;
     uint LightDepthBinBufferSrv;
+    
+    float ViewportWidth;
+    float ViewportHeight;
 };
 
 struct Light
@@ -125,3 +130,5 @@ struct VertexSM
     float3 Normal;
     float2 TexCoord0;
 };
+
+#endif

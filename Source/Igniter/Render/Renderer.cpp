@@ -81,6 +81,9 @@ namespace ig
         U32 LightIdxListSrv = IG_NUMERIC_MAX_OF(LightIdxListSrv);
         U32 LightTileBitfieldBufferSrv = IG_NUMERIC_MAX_OF(LightTileBitfieldBufferSrv);
         U32 LightDepthBinBufferSrv = IG_NUMERIC_MAX_OF(LightDepthBinBufferSrv);
+
+        float ViewportWidth;
+        float ViewportHeight;
     };
 
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy)
@@ -249,6 +252,8 @@ namespace ig
         perFrameConstants.LightDepthBinBufferSrv = lightDepthBinBufferSrv->Index;
 
         perFrameConstants.MinMeshLod = minMeshLod;
+        perFrameConstants.ViewportWidth = mainViewport.width;
+        perFrameConstants.ViewportHeight = mainViewport.height;
 
         TempConstantBuffer perFrameConstantBuffer = tempConstantBufferAllocator->Allocate<PerFrameConstants>(localFrameIdx);
         const GpuView* perFrameCbv = renderContext->Lookup(perFrameConstantBuffer.GetConstantBufferView());

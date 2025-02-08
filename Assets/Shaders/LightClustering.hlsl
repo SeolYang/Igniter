@@ -147,12 +147,14 @@ void main(uint3 DTid : SV_DispatchThreadID)
         const uint mergedFirstTileY = WaveActiveMin(v_firstTileY);
         const uint mergedLastTileX = WaveActiveMax(v_lastTileX);
         const uint mergedLastTileY = WaveActiveMax(v_lastTileY);
+        const uint lightOffset = DTid.x / 32;
         for (uint tileY = mergedFirstTileY; tileY <= mergedLastTileY; ++tileY)
         {
+            const uint tileYOffset = (s_numTileX * tileY) * NUM_U32_PER_TILE;
             for (uint tileX = mergedFirstTileX; tileX <= mergedLastTileX; ++tileX)
             {
-                const uint tileDwordOffset = ((s_numTileX * tileY) + tileX) * NUM_U32_PER_TILE;
-                const uint lightDwordOffset = tileDwordOffset + (DTid.x / 32);
+                const uint tileDwordOffset = tileYOffset + tileX * NUM_U32_PER_TILE;
+                const uint lightDwordOffset = tileDwordOffset + lightOffset;
                 const uint mask = WaveActiveBallot(
                         (tileX >= v_firstTileX && tileX <= v_lastTileX) &&
                         (tileY >= v_firstTileY && tileY <= v_lastTileY)).x;
