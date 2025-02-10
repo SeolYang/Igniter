@@ -47,6 +47,8 @@ namespace ig
             break;
         }
 
+        /* https://github.com/microsoft/DirectXShaderCompiler/wiki/16-Bit-Scalar-Types */
+        arguments.push_back(TEXT("-enable-16bit-types"));
         arguments.push_back(TEXT("-Qstrip_reflect"));
 
         if (desc.bPackMarticesInRowMajor)
