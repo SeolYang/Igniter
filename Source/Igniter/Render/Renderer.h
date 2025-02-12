@@ -21,7 +21,7 @@ namespace ig
     class Renderer final
     {
       public:
-        Renderer(const Window& window, RenderContext& renderContext, const MeshStorage& meshStorage, const SceneProxy& sceneProxy);
+        Renderer(const Window& window, RenderContext& renderContext, const SceneProxy& sceneProxy);
         Renderer(const Renderer&) = delete;
         Renderer(Renderer&&) noexcept = delete;
         ~Renderer();
@@ -41,7 +41,6 @@ namespace ig
       private:
         const Window* window = nullptr;
         RenderContext* renderContext = nullptr;
-        const MeshStorage* meshStorage = nullptr;
         const SceneProxy* sceneProxy = nullptr;
 
         // #sy_test
@@ -57,13 +56,6 @@ namespace ig
         Ptr<GpuBuffer> zeroFilledBuffer;
 
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
-
-        Ptr<class LightClusteringPass> lightClusteringPass;
-        Ptr<class FrustumCullingPass> frustumCullingPass;
-        Ptr<class CompactMeshLodInstancesPass> compactMeshLodInstancesPass;
-        Ptr<class GenerateMeshLodDrawCommandsPass> generateMeshLodDrawCmdsPass;
-        Ptr<class ZPrePass> zPrePass;
-        Ptr<class TestForwardShadingPass> testForwardShadingPass;
         Ptr<class ImGuiRenderPass> imguiRenderPass;
     };
 } // namespace ig

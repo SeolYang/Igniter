@@ -1,5 +1,6 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Core/Window.h"
+#include "Igniter/Render/UnifiedMeshStorage.h"
 #include "Igniter/Render/RenderContext.h"
 
 namespace ig
@@ -13,6 +14,7 @@ namespace ig
         , asyncCopyCmdListPool(gpuDevice, EQueueType::Copy)
         , gpuViewManager(gpuDevice)
         , gpuUploader(gpuDevice)
+        , unifiedMeshStorage(MakePtr<UnifiedMeshStorage>(*this))
         , swapchain(MakePtr<Swapchain>(window, *this))
     {
         for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
@@ -27,7 +29,9 @@ namespace ig
     {
         FlushQueues();
 
+        unifiedMeshStorage.reset();
         swapchain.reset();
+
         /* Flush pending destroy list! */
         GpuSyncPoint invalidSyncPoint{};
         for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))

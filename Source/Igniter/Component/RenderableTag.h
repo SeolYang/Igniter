@@ -2,6 +2,7 @@
 
 namespace ig
 {
+    /* Deprecated */
     struct RenderableTag
     {
     };

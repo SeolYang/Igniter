@@ -3,7 +3,7 @@
 #include "Igniter/Core/Memory.h"
 #include "Igniter/Core/Log.h"
 #include "Igniter/Core/Handle.h"
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
 #include "Igniter/Core/DebugTools.h"
 #endif
 
@@ -51,7 +51,7 @@ namespace ig
                         Ty* slotElementPtr = CalcAddressOfSlot(slot);
                         slotElementPtr->~Ty();
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
                         PrintToDebugger("*** Found Leaked Handle!!! ***\n");
                         PrintToDebugger(CallStack::Dump(lastCallStackTable[slot]));
                         PrintToDebugger("\n");
@@ -97,7 +97,7 @@ namespace ig
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
             IG_CHECK(!reservedToDestroyFlags[newSlot]);
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
             lastCallStackTable[newSlot] = CallStack::Capture();
 #endif
 
@@ -287,7 +287,7 @@ namespace ig
                 MarkAsFreeSlot(newSlot);
             }
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
             lastCallStackTable.resize(slotCapacity);
 #endif
 
@@ -374,7 +374,7 @@ namespace ig
         eastl::vector<VersionType> slotVersions{};
         eastl::bitvector<> reservedToDestroyFlags{};
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
         eastl::vector<DWORD> lastCallStackTable{};
 #endif
     };

@@ -21,6 +21,10 @@ namespace ig
     using I32 = int32_t;
     using I64 = int64_t;
     using Size = size_t;
+    using Bytes = Size;
+    using KiloBytes = Size;
+    using MegaBytes = Size;
+    using GigaBytes = Size;
     using Index = Size;
     constexpr Index InvalidIndex = 0xffffffffffffffffUi64;
     constexpr U32 InvalidIndexU32 = 0xffffffffU;

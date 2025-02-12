@@ -9,20 +9,28 @@ namespace ig
         Success,
         InvalidAssetInfo,
         AssetTypeMismatch,
-        InvalidArguments,
+        ZeroNumVertices,
+        ZeroCompressedVerticesSize,
+        ZeroNumLevelOfDetails,
+        ExceededNumLevelOfDetails,
+        ZeroNumMeshletVertexIndices,
+        ZeroNumMeshletTriangles,
+        ZeroNumMeshlets,
         FileDoesNotExists,
         EmptyBlob,
         BlobSizeMismatch,
         InvalidCompressedVerticesSize,
         InvalidCompressedIndicesSize,
-        FailedCreateVertexSpace,
-        FailedCreateVertexIndexSpace,
+        FailedAllocateVertexSpace,
+        FailedAllocateIndexSpace,
+        FailedAllocateTriangleSpace,
+        FailedAllocateMeshletSpace,
         FailedDecodeVertexBuffer,
-        FailedDecodeIndexBuffer,
     };
 
     class AssetManager;
     class RenderContext;
+    class UnifiedMeshStorage;
 
     class StaticMeshLoader final
     {
@@ -39,7 +47,7 @@ namespace ig
         StaticMeshLoader& operator=(StaticMeshLoader&&) noexcept = delete;
 
       private:
-        Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc) const;
+        [[nodiscard]] Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc) const;
 
       private:
         RenderContext& renderContext;

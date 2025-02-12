@@ -130,6 +130,7 @@
     <ClInclude Include="Render\GpuViewManager.h" />
     <ClInclude Include="Render\Common.h" />
     <ClInclude Include="Render\Light.h" />
+    <ClInclude Include="Render\Mesh.h" />
     <ClInclude Include="Render\MeshStorage.h" />
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
@@ -145,10 +146,12 @@
     <ClInclude Include="Render\SceneProxy.h" />
     <ClInclude Include="Render\Swapchain.h" />
     <ClInclude Include="Render\TempConstantBufferAllocator.h" />
+    <ClInclude Include="Render\UnifiedMeshStorage.h" />
     <ClInclude Include="Render\Utils.h" />
     <ClInclude Include="Render\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Assets\Shaders\NewTypes.hlsl" />
     <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -242,6 +245,7 @@
     <ClCompile Include="Render\SceneProxy.cpp" />
     <ClCompile Include="Render\Swapchain.cpp" />
     <ClCompile Include="Render\TempConstantBufferAllocator.cpp" />
+    <ClCompile Include="Render\UnifiedMeshStorage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Assets\Shaders\BRDF.hlsl">

@@ -24,7 +24,6 @@ namespace fe
             ImGui::Checkbox("Make Left Handed", &config.bMakeLeftHanded);
             ImGui::Checkbox("Flip UV Coordinates", &config.bFlipUVs);
             ImGui::Checkbox("Flip Winding Order", &config.bFlipWindingOrder);
-            ImGui::Checkbox("Generate Normals", &config.bGenerateNormals);
             ImGui::Checkbox("Split Large Meshes", &config.bSplitLargeMeshes);
             ImGui::Checkbox("Pre-Transform Vertices", &config.bPreTransformVertices);
             ImGui::Checkbox("Improve Cache Locality", &config.bImproveCacheLocality);
@@ -32,21 +31,6 @@ namespace fe
             ImGui::Checkbox("Generate Bounding Boxes", &config.bGenerateBoundingBoxes);
             ImGui::Checkbox("Import Materials", &config.bImportMaterials);
             ImGui::Checkbox("Generate LODs", &config.bGenerateLODs);
-
-            if (config.bGenerateLODs)
-            {
-                int numLods = (int)config.NumLods;
-                if (ImGui::SliderInt("Num LODs",
-                                     &numLods,
-                                     2, (int)ig::StaticMeshImportDesc::kMaxNumLods))
-                {
-                    config.NumLods = (ig::U8)numLods;
-                }
-
-                ImGui::SliderFloat("Max Simplification Factor",
-                                   &config.MaxSimplificationFactor,
-                                   0.01f, 1.0f);
-            }
 
             if (ImGui::Button("Import"))
             {

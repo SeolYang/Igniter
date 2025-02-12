@@ -21,6 +21,7 @@ namespace ig
     class GpuTexture;
     class GpuTextureDesc;
     class PipelineState;
+    class UnifiedMeshStorage;
 
     class RenderContext final
     {
@@ -45,6 +46,7 @@ namespace ig
         [[nodiscard]] GpuFence& GetAsyncComputeFence() { return *asyncComputeFence.Resources[currentLocalFrameIdx]; }
         [[nodiscard]] GpuFence& GetAsyncCopyFence() { return *asyncCopyFence.Resources[currentLocalFrameIdx]; }
         [[nodiscard]] GpuUploader& GetGpuUploader() { return gpuUploader; }
+        [[nodiscard]] UnifiedMeshStorage& GetUnifiedMeshStorage() { return *unifiedMeshStorage; }
         [[nodiscard]] Swapchain& GetSwapchain() { return *swapchain; }
         [[nodiscard]] const Swapchain& GetSwapchain() const { return *swapchain; }
         [[nodiscard]] auto& GetCbvSrvUavDescriptorHeap() { return gpuViewManager.GetCbvSrvUavDescHeap(); }
@@ -106,6 +108,7 @@ namespace ig
 
         GpuViewManager gpuViewManager;
         GpuUploader gpuUploader;
+        Ptr<UnifiedMeshStorage> unifiedMeshStorage;
 
         Ptr<Swapchain> swapchain;
     };

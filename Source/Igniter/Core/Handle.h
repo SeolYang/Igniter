@@ -8,7 +8,7 @@ namespace ig
     {
       public:
         Handle() noexcept = default;
-        Handle(const uint64_t newValue)
+        explicit Handle(const uint64_t newValue)
             : Value(newValue)
         {
         }

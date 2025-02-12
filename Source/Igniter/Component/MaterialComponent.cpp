@@ -43,7 +43,10 @@ namespace ig
     MaterialComponent& MaterialComponent::operator=(const MaterialComponent& rhs)
     {
         Destroy();
-        Instance = Engine::GetAssetManager().Clone(rhs.Instance);
+        if (Engine::GetAssetManager().Clone(rhs.Instance))
+        {
+            Instance = rhs.Instance;
+        }
         return *this;
     }
 

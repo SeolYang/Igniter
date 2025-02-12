@@ -17,7 +17,6 @@ namespace ig
     class Window;
     class RenderContext;
     class ImGuiContext;
-    class MeshStorage;
     class InputManager;
     class AssetManager;
     class World;
@@ -41,7 +40,6 @@ namespace ig
         [[nodiscard]] static Window& GetWindow();
         [[nodiscard]] static InputManager& GetInputManager();
         [[nodiscard]] static RenderContext& GetRenderContext();
-        [[nodiscard]] static MeshStorage& GetMeshStorage();
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static ImGuiContext& GetImGuiContext();
         [[nodiscard]] static World& GetWorld();
@@ -70,8 +68,6 @@ namespace ig
         Ptr<InputManager> inputManager;
 
         Ptr<RenderContext> renderContext;
-
-        Ptr<MeshStorage> meshStorage;
 
         Ptr<AssetManager> assetManager;
         Ptr<ImGuiContext> imguiContext;

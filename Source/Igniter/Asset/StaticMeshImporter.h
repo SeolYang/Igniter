@@ -1,5 +1,6 @@
 #pragma once
 #include "Igniter/Asset/StaticMesh.h"
+#include "Igniter/Render/Mesh.h"
 
 namespace ig
 {
@@ -20,6 +21,25 @@ namespace ig
     {
         friend class AssetManager;
 
+        /* New API! */
+        struct MeshLod
+        {
+            Vector<U32> Indices;
+            Vector<U32> MeshletVertexIndices;
+            Vector<U32> MeshletTriangles;
+            Vector<Meshlet> Meshlets;
+        };
+
+        struct MeshData
+        {
+            Vector<VertexSM> Vertices;
+            Vector<U8> CompressedVertices;
+            Array<MeshLod, Mesh::kMaxMeshLevelOfDetails> LevelOfDetails;
+            U8 NumLevelOfDetails = 1; // assert (>=1); LOD 생성을 concurrent 하게 한다 치면 atomic으로?
+            AABB BoundingBox;
+        };
+
+        //////////////// Deprecated ///////////////
         struct StaticMeshData
         {
             Vector<VertexSM> Vertices;
@@ -44,15 +64,24 @@ namespace ig
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
       private:
+        Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> _Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
         Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
 
         static U32 MakeAssimpImportFlagsFromDesc(const StaticMesh::ImportDesc& desc);
         static Size ImportMaterialsFromScene(AssetManager& assetManager, const aiScene& scene);
-        static StaticMeshData ProcessMeshData(const aiMesh& mesh);
-        static void OptimizeMeshData(StaticMeshData& meshData, const StaticMeshImportDesc& desc);
-        static void GenerateLODs(StaticMeshData& meshData, const U8 numLods, const F32 maxSimplificationFactor);
-        static CompressedStaticMeshData CompressMeshData(const StaticMeshData& meshData);
-        static Result<StaticMesh::Desc, EStaticMeshImportStatus> SaveAsAsset(const std::string_view meshName, const StaticMeshData& meshData, const CompressedStaticMeshData& compressedMeshData);
+
+        /* New API! */
+        /* Load LOD0 (+ Remap Vertices & Indices) */
+        static void ProcessMeshLod0(const aiMesh& mesh, MeshData& meshData);
+        /* Generate LOD 1~LOD (MaxLOD-1): 최대한 많은 LOD 생성 */
+        static void GenerateLevelOfDetails(MeshData& meshData);
+        /* 각 LOD별로 Meshlet 데이터(Meshlet, Triangles, MeshletVertexIndices) 생성 */
+        static void BuildMeshlets(MeshData& meshData);
+        /* Mesh의 Vertices 압축 */
+        static void CompressMeshVertices(MeshData& meshData);
+
+        /* #sy_todo 추후 AssetDesc를 반환하도록 조정되야함!! */
+        static Result<StaticMesh::Desc, EStaticMeshImportStatus> ExportToFile(const std::string_view meshName, const MeshData& meshData);
 
       private:
         AssetManager& assetManager;

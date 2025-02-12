@@ -5,23 +5,36 @@
 namespace ig
 {
     inline constexpr uint64_t InvalidHashVal = 0xffffffffffffffffUi64;
+    inline constexpr U64 kFnvOffsetBasis = 2166136261u;
 
     template <typename Ty>
-    inline U64 HashInstance(const Ty& instance)
+    inline U64 HashInstance(const Ty& instance, const U64 hashInitialVal = kFnvOffsetBasis)
     {
         static_assert(sizeof(Ty)%8 == 0);
         constexpr U64 FnvPrime = 16777619u;
-        constexpr U64 FnvOffsetBasis = 2166136261u;
         constexpr Size NumChunks = sizeof(Ty) / 8;
 
         const U64* ptr = reinterpret_cast<const U64*>(&instance);
-        U64 hash = FnvOffsetBasis;
+        U64 hash = hashInitialVal;
         for (Index idx = 0; idx < NumChunks; ++idx)
         {
             hash = FnvPrime * hash ^ ptr[idx];
         }
 
         return hash ^ 0xFFFFFFFFFFFFFFFFllu;
+    }
+
+    template <typename Ty>
+    inline U64 HashInstances(const Ty& instance)
+    {
+        return HashInstance(instance);
+    }
+
+    template<typename Ty, typename... Args>
+    inline U64 HashInstances(const Ty& instance, const Args&... args)
+    {
+        const U64 hashVal = HashInstances(args...);
+        return HashInstance(instance, hashVal);
     }
 
     inline uint64_t HashRange(const U32* const begin, const U32* const end, uint64_t hash)

@@ -11,7 +11,6 @@
 #include "Igniter/Input/InputManager.h"
 #include "Igniter/D3D12/GpuSyncPoint.h"
 #include "Igniter/Render/RenderContext.h"
-#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/SceneProxy.h"
 #include "Igniter/Render/Renderer.h"
 #include "Igniter/Asset/AssetManager.h"
@@ -53,18 +52,15 @@ namespace ig
         renderContext = MakePtr<RenderContext>(*window);
         IG_LOG(EngineLog, Info, "OnImGui Context Initialized.");
 
-        meshStorage = MakePtr<MeshStorage>(*renderContext);
-        IG_LOG(EngineLog, Info, "Mesh Storage Initialized.");
-
         assetManager = MakePtr<AssetManager>(*renderContext);
         IG_LOG(EngineLog, Info, "Asset Manager Initialized.");
         imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
         IG_LOG(EngineLog, Info, "ImGui Context Initialized.");
 
-        sceneProxy = MakePtr<SceneProxy>(taskExecutor, *renderContext, *meshStorage, *assetManager);
+        sceneProxy = MakePtr<SceneProxy>(taskExecutor, *renderContext, *assetManager);
         IG_LOG(EngineLog, Info, "Scene Proxy Initialized.");
 
-        renderer = MakePtr<Renderer>(*window, *renderContext, *meshStorage, *sceneProxy);
+        renderer = MakePtr<Renderer>(*window, *renderContext, *sceneProxy);
         IG_LOG(EngineLog, Info, "Renderer Initialized.");
 
         world = MakePtr<World>();
@@ -91,9 +87,6 @@ namespace ig
         IG_LOG(EngineLog, Info, "ImGui Context Deinitialized.");
         assetManager.reset();
         IG_LOG(EngineLog, Info, "Asset Manager Deinitialized.");
-
-        meshStorage.reset();
-        IG_LOG(EngineLog, Info, "Mesh Storage Deinitialized.");
 
         renderContext.reset();
         IG_LOG(EngineLog, Info, "OnImGui Context Deinitialized.");
@@ -164,7 +157,6 @@ namespace ig
             {
                 ZoneScopedN("Engine: PreRender");
                 renderContext->PreRender(localFrameIdx, localFrameSyncs[prevLocalFrameIdx]);
-                meshStorage->PreRender(localFrameIdx);
                 replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
                 sceneProxy->PrepareNextFrame(localFrameIdx);
                 renderer->PreRender(localFrameIdx);
@@ -220,12 +212,6 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->renderContext;
-    }
-
-    MeshStorage& Engine::GetMeshStorage()
-    {
-        IG_CHECK(instance != nullptr);
-        return *instance->meshStorage;
     }
 
     InputManager& Engine::GetInputManager()

@@ -33,15 +33,19 @@ namespace fe
         constexpr static ig::U32 kAxeGridSizeX = 10;
         constexpr static ig::U32 kAxeGridSizeY = 10;
         constexpr static ig::U32 kAxeGridSizeZ = 10;
+        constexpr static ig::U32 kLightGridSizeX = 10;
+        constexpr static ig::U32 kLightGridSizeY = 10;
+        constexpr static ig::U32 kLightGridSizeZ = 10;
 #else
         constexpr static ig::U32 kAxeGridSizeX = 40;
         constexpr static ig::U32 kAxeGridSizeY = 40;
         constexpr static ig::U32 kAxeGridSizeZ = 40;
-#endif
-
         constexpr static ig::U32 kLightGridSizeX = 30;
         constexpr static ig::U32 kLightGridSizeY = 30;
         constexpr static ig::U32 kLightGridSizeZ = 30;
+#endif
+
+
 
         constexpr static ig::U32 kNumAxes = kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ;
         constexpr static ig::F32 kAxeSpaceInterval = 15.f;

@@ -56,4 +56,11 @@ namespace ig
         float FalloffRadius = 1.f;
         Vector3 Color = Vector3{1.f, 1.f, 1.f};
     };
+
+    struct GpuLight
+    {
+        Light Property;
+        Vector3 WorldPosition;
+        Vector3 Forward;
+    };
 } // namespace ig

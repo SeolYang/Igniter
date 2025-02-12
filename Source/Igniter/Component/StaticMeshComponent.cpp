@@ -17,8 +17,10 @@ namespace ig
     StaticMeshComponent::StaticMeshComponent(const StaticMeshComponent& other)
     {
         AssetManager& assetManager = Engine::GetAssetManager();
-        Mesh = assetManager.Clone(other.Mesh);
-        IG_CHECK(Mesh == other.Mesh);
+        if (assetManager.Clone(other.Mesh))
+        {
+            Mesh = other.Mesh;
+        }
     }
 
     StaticMeshComponent::StaticMeshComponent(StaticMeshComponent&& other) noexcept
@@ -35,8 +37,10 @@ namespace ig
     {
         this->Destroy();
         AssetManager& assetManager = Engine::GetAssetManager();
-        Mesh = assetManager.Clone(rhs.Mesh);
-        IG_CHECK(Mesh == rhs.Mesh);
+        if (assetManager.Clone(rhs.Mesh))
+        {
+            Mesh = rhs.Mesh;
+        }
         return *this;
     }
 

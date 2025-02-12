@@ -61,60 +61,44 @@ namespace ig
             /* Import Static Meshes */
             const std::string modelName = resPath.filename().replace_extension().string();
             results.resize(scene->mNumMeshes);
-            Vector<StaticMeshData> staticMeshes{scene->mNumMeshes};
-            Vector<CompressedStaticMeshData> compressedStaticMeshes{scene->mNumMeshes};
+            Vector<MeshData> staticMeshes{scene->mNumMeshes};
 
             tf::Executor& taskExecutor = Engine::GetTaskExecutor();
             tf::Taskflow meshImportFlow;
-
-            tf::Task processStaticMeshData = meshImportFlow.for_each_index(
+            tf::Task procMeshes = meshImportFlow.for_each_index(
                 0, (I32)scene->mNumMeshes, 1,
-                [scene, &results, &staticMeshes, &compressedStaticMeshes, &desc, &modelName](const Index meshIdx)
+                [scene, &results, &staticMeshes, &desc, &modelName](const Index meshIdx)
                 {
                     const aiMesh& mesh = *scene->mMeshes[meshIdx];
-                    staticMeshes[meshIdx] = ProcessMeshData(mesh);
+                    ProcessMeshLod0(mesh, staticMeshes[meshIdx]);
 
                     if (staticMeshes[meshIdx].Vertices.empty())
                     {
                         results[meshIdx] = MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::EmptyVertices>();
                         return;
                     }
-                    if (staticMeshes[meshIdx].IndicesPerLod[0].empty())
+                    if (staticMeshes[meshIdx].LevelOfDetails[0].Indices.empty())
                     {
                         results[meshIdx] = MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::EmptyIndices>();
                         return;
                     }
 
-                    OptimizeMeshData(staticMeshes[meshIdx], desc);
-
                     if (desc.bGenerateLODs)
                     {
-                        GenerateLODs(staticMeshes[meshIdx],
-                                     std::clamp(desc.NumLods, (U8)2, StaticMesh::kMaxNumLods),
-                                     desc.MaxSimplificationFactor);
+                        GenerateLevelOfDetails(staticMeshes[meshIdx]);
                     }
-                    IG_CHECK(staticMeshes[meshIdx].NumLods >= 1 && staticMeshes[meshIdx].NumLods <= StaticMesh::kMaxNumLods);
+                    IG_CHECK(staticMeshes[meshIdx].NumLevelOfDetails >= 1 && staticMeshes[meshIdx].NumLevelOfDetails <= StaticMesh::kMaxNumLods);
 
-                    compressedStaticMeshes[meshIdx] = CompressMeshData(staticMeshes[meshIdx]);
+                    BuildMeshlets(staticMeshes[meshIdx]);
+                    CompressMeshVertices(staticMeshes[meshIdx]);
 
                     const std::string meshName = std::format("{}_{}_{}", modelName, mesh.mName.C_Str(), meshIdx);
-                    results[meshIdx] = SaveAsAsset(meshName, staticMeshes[meshIdx], compressedStaticMeshes[meshIdx]);
+                    results[meshIdx] = ExportToFile(meshName, staticMeshes[meshIdx]);
                 });
-
             taskExecutor.run(meshImportFlow).wait();
         }
         importer.FreeScene();
 
-        const ResourceInfo resInfo{.Category = EAssetCategory::StaticMesh};
-        Json resMetadata{};
-        resMetadata << resInfo << desc;
-        const Path resMetaPath = MakeResourceMetadataPath(resPath);
-        if (!SaveJsonToFile(resMetaPath, resMetadata))
-        {
-            IG_LOG(StaticMeshImporterLog, Warning, "Failed to save resource metadata to {}.", resMetaPath.string());
-        }
-
-        IG_CHECK(results.size() > 0);
         return results;
     }
 
@@ -126,7 +110,7 @@ namespace ig
         importFlags |= desc.bFlipWindingOrder ? aiProcess_FlipWindingOrder : 0;
         importFlags |= desc.bSplitLargeMeshes ? aiProcess_SplitLargeMeshes : 0;
         importFlags |= desc.bPreTransformVertices ? aiProcess_PreTransformVertices : 0;
-        importFlags |= desc.bGenerateNormals ? aiProcess_GenSmoothNormals : 0;
+        importFlags |= aiProcess_GenSmoothNormals;
         importFlags |= desc.bGenerateUVCoords ? aiProcess_GenUVCoords : 0;
         importFlags |= desc.bGenerateBoundingBoxes ? aiProcess_GenBoundingBoxes : 0;
         return importFlags;
@@ -145,11 +129,10 @@ namespace ig
         return numImportedMaterials;
     }
 
-    StaticMeshImporter::StaticMeshData StaticMeshImporter::ProcessMeshData(const aiMesh& mesh)
+    void StaticMeshImporter::ProcessMeshLod0(const aiMesh& mesh, MeshData& meshData)
     {
-        StaticMeshData newData{};
-        newData.Vertices.reserve(mesh.mNumVertices);
-        newData.IndicesPerLod[0].reserve(mesh.mNumFaces * NumIndicesPerFace);
+        meshData.Vertices.reserve(mesh.mNumVertices);
+        meshData.LevelOfDetails[0].Indices.reserve((Size)mesh.mNumFaces * Mesh::kNumVertexPerTriangle);
 
         for (Size vertexIdx = 0; vertexIdx < mesh.mNumVertices; ++vertexIdx)
         {
@@ -157,14 +140,15 @@ namespace ig
             const aiVector3D& normal = mesh.mNormals[vertexIdx];
             const aiVector3D& uvCoords = mesh.mTextureCoords[0][vertexIdx];
 
-            newData.BoundingVolume.Min.x = std::min(newData.BoundingVolume.Min.x, position.x);
-            newData.BoundingVolume.Min.y = std::min(newData.BoundingVolume.Min.y, position.y);
-            newData.BoundingVolume.Min.z = std::min(newData.BoundingVolume.Min.z, position.z);
-            newData.BoundingVolume.Max.x = std::max(newData.BoundingVolume.Max.x, position.x);
-            newData.BoundingVolume.Max.y = std::max(newData.BoundingVolume.Max.y, position.y);
-            newData.BoundingVolume.Max.z = std::max(newData.BoundingVolume.Max.z, position.z);
+            meshData.BoundingBox.Min.x = std::min(meshData.BoundingBox.Min.x, position.x);
+            meshData.BoundingBox.Min.y = std::min(meshData.BoundingBox.Min.y, position.y);
+            meshData.BoundingBox.Min.z = std::min(meshData.BoundingBox.Min.z, position.z);
+            meshData.BoundingBox.Max.x = std::max(meshData.BoundingBox.Max.x, position.x);
+            meshData.BoundingBox.Max.y = std::max(meshData.BoundingBox.Max.y, position.y);
+            meshData.BoundingBox.Max.z = std::max(meshData.BoundingBox.Max.z, position.z);
 
-            newData.Vertices.emplace_back(
+            /* #sy_todo 정점을 VertexSM 타입에서 Vertex 타입으로 최종적으로 변경 */
+            meshData.Vertices.emplace_back(
                 Vector3{position.x, position.y, position.z},
                 Vector3{normal.x, normal.y, normal.z},
                 Vector2{uvCoords.x, uvCoords.y});
@@ -174,115 +158,73 @@ namespace ig
         {
             const aiFace& face = mesh.mFaces[faceIdx];
             IG_CHECK(face.mNumIndices == NumIndicesPerFace);
-            newData.IndicesPerLod[0].emplace_back(face.mIndices[0]);
-            newData.IndicesPerLod[0].emplace_back(face.mIndices[1]);
-            newData.IndicesPerLod[0].emplace_back(face.mIndices[2]);
+            meshData.LevelOfDetails[0].Indices.emplace_back(face.mIndices[0]);
+            meshData.LevelOfDetails[0].Indices.emplace_back(face.mIndices[1]);
+            meshData.LevelOfDetails[0].Indices.emplace_back(face.mIndices[2]);
         }
 
-        return newData;
+        IG_CHECK(meshData.Vertices.size() == mesh.mNumVertices);
+        IG_CHECK(meshData.LevelOfDetails[0].Indices.size() == ((Size)mesh.mNumFaces * Mesh::kNumVertexPerTriangle));
+        IG_CHECK(meshData.NumLevelOfDetails == 1);
     }
 
-    void StaticMeshImporter::OptimizeMeshData(StaticMeshData& meshData, const StaticMeshImportDesc& desc)
+    void StaticMeshImporter::GenerateLevelOfDetails(MeshData& meshData)
     {
-        Vector<VertexSM>& vertices = meshData.Vertices;
-        Vector<U32>& indices = meshData.IndicesPerLod[0];
+        IG_CHECK(meshData.NumLevelOfDetails == 1);
 
-        Vector<U32> remap(indices.size());
-        const Size remappedVertexCount =
-            meshopt_generateVertexRemap(
-                remap.data(),
-                indices.data(), indices.size(),
-                vertices.data(), indices.size(),
-                sizeof(VertexSM));
-
-        Vector<U32> remappedIndices(indices.size());
-        Vector<VertexSM> remappedVertices(remappedVertexCount);
-
-        meshopt_remapIndexBuffer(
-            remappedIndices.data(),
-            indices.data(), indices.size(),
-            remap.data());
-
-        meshopt_remapVertexBuffer(
-            remappedVertices.data(),
-            vertices.data(), vertices.size(),
-            sizeof(VertexSM),
-            remap.data());
-
-        meshopt_optimizeVertexCache(
-            remappedIndices.data(), remappedIndices.data(), remappedIndices.size(),
-            remappedVertices.size());
-
-        meshopt_optimizeOverdraw(
-            remappedIndices.data(), remappedIndices.data(), remappedIndices.size(),
-            &remappedVertices[0].Position.x, remappedVertices.size(), sizeof(VertexSM),
-            desc.OverdrawOptimizerThreshold);
-
-        meshopt_optimizeVertexFetch(
-            remappedVertices.data(), remappedIndices.data(), remappedIndices.size(),
-            remappedVertices.data(), remappedVertices.size(), sizeof(VertexSM));
-    }
-
-    void ig::StaticMeshImporter::GenerateLODs(StaticMeshData& meshData, const U8 numLods, const F32 maxSimplificationFactor)
-    {
-        IG_CHECK(numLods >= 2 && numLods <= StaticMesh::kMaxNumLods);
-        meshData.NumLods = 1;
-
-        const Vector<VertexSM>& rootLodVertices = meshData.Vertices;
-        const Vector<U32>& rootLodIndices = meshData.IndicesPerLod[0];
-        // LOD 0 (최소 1개 LOD)는 LOD 생성에서 제외(원본)
-        const F32 simplificationFactorStride = maxSimplificationFactor / (F32)numLods;
-        for (Index lod = 1; lod < numLods; ++lod)
+        const Vector<VertexSM>& verticesLod0 = meshData.Vertices;
+        const Vector<U32>& indicesLod0 = meshData.LevelOfDetails[0].Indices;
+        for (Index lod = 1; lod < Mesh::kMaxMeshLevelOfDetails; ++lod)
         {
-            const Size previousLodNumIndices = meshData.IndicesPerLod[lod - 1].size();
-            const Size targetNumIndices = std::max(3llu, (Size)((F32)rootLodIndices.size() * (1.f - (simplificationFactorStride * (F32)lod))));
-            Vector<U32>& lodIndices = meshData.IndicesPerLod[lod];
-            lodIndices.resize(rootLodIndices.size());
+            const Size previousLodNumIndices = meshData.LevelOfDetails[lod - 1].Indices.size();
+            const Size targetNumIndices = (Size)((F32)previousLodNumIndices * 0.7f);
+            if (targetNumIndices == 0)
+            {
+                break;
+            }
 
-            // 1. Simplify 함수로 error value 0.02(2% deviation); 이전 대비 최소 5% 이상 감소시 통과
+            Vector<U32>& lodIndices = meshData.LevelOfDetails[lod].Indices;
+            lodIndices.resize(indicesLod0.size());
+            const F32 tLod = lod / (F32)Mesh::kMaxMeshLevelOfDetails;
+            const float targetError = (1.f - tLod) * 0.05f + tLod * 0.95f;
+
             Size numSimplifiedIndices = meshopt_simplify(
                 lodIndices.data(),
-                rootLodIndices.data(), rootLodIndices.size(),
-                &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
-                targetNumIndices, 0.02f,
+                indicesLod0.data(), indicesLod0.size(),
+                &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
+                targetNumIndices, targetError,
                 0, nullptr);
 
-            const Size simplifyOptThreshold = (Size)(previousLodNumIndices * 0.95f);
-            const Size simplifySloppyOptThreshold = (Size)(previousLodNumIndices * 0.9f);
-            bool simplifyPass = numSimplifiedIndices <= simplifyOptThreshold;
+            bool simplifyPass = numSimplifiedIndices <= targetNumIndices;
+            if (!simplifyPass)
+            {
+                numSimplifiedIndices = meshopt_simplifySloppy(
+                    lodIndices.data(),
+                    indicesLod0.data(), indicesLod0.size(),
+                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
+                    targetNumIndices, targetError, nullptr);
 
-            // 2. Simplify 함수로 error value 무제한; 이전 대비 최소 5% 이상 감소시 통과
+                simplifyPass = numSimplifiedIndices <= targetNumIndices;
+            }
+
             if (!simplifyPass)
             {
                 numSimplifiedIndices = meshopt_simplify(
                     lodIndices.data(),
-                    rootLodIndices.data(), rootLodIndices.size(),
-                    &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
+                    indicesLod0.data(), indicesLod0.size(),
+                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
                     targetNumIndices, FLT_MAX,
                     0, nullptr);
 
-                simplifyPass = numSimplifiedIndices <= simplifyOptThreshold;
+                simplifyPass = numSimplifiedIndices <= targetNumIndices;
             }
 
-            // 3. SimplifySloppy 함수로 error value 0.05(5% deviation); 이전 대비 최소 10% 이상 감소시 통과;
             if (!simplifyPass)
             {
                 numSimplifiedIndices = meshopt_simplifySloppy(
                     lodIndices.data(),
-                    rootLodIndices.data(), rootLodIndices.size(),
-                    &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
-                    targetNumIndices, 0.1f, nullptr);
-
-                simplifyPass = numSimplifiedIndices <= simplifySloppyOptThreshold;
-            }
-
-            // 4. SimplifySloppy 함수로 error value 무제한; 이전 대비 감소 없을 시, 이 이상의 lod 생성은 불가능 판단, 생성 종료
-            if (!simplifyPass)
-            {
-                numSimplifiedIndices = meshopt_simplifySloppy(
-                    lodIndices.data(),
-                    rootLodIndices.data(), rootLodIndices.size(),
-                    &rootLodVertices[0].Position.x, rootLodVertices.size(), sizeof(VertexSM),
+                    indicesLod0.data(), indicesLod0.size(),
+                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
                     targetNumIndices, FLT_MAX, nullptr);
 
                 simplifyPass = numSimplifiedIndices < previousLodNumIndices;
@@ -293,88 +235,161 @@ namespace ig
                 lodIndices.clear();
                 break;
             }
-
-            ++meshData.NumLods;
             lodIndices.resize(numSimplifiedIndices);
-            meshopt_optimizeVertexCache(lodIndices.data(), lodIndices.data(), lodIndices.size(), rootLodVertices.size());
+            if (numSimplifiedIndices == 0)
+            {
+                break;
+            }
+
+            ++meshData.NumLevelOfDetails;
         }
     }
 
-    StaticMeshImporter::CompressedStaticMeshData StaticMeshImporter::CompressMeshData(const StaticMeshData& meshData)
+    void StaticMeshImporter::BuildMeshlets(MeshData& meshData)
     {
-        CompressedStaticMeshData newCompressedData{};
+        IG_CHECK(meshData.NumLevelOfDetails >= 1);
+        IG_CHECK(!meshData.Vertices.empty());
 
-        /* Vertex/Index buffer compression */
+        constexpr F32 kConeWeight = 0.f;
+        Vector<meshopt_Meshlet> meshlets;
+        Vector<U8> triangles;
+        for (U8 lod = 0; lod < meshData.NumLevelOfDetails; ++lod)
+        {
+            MeshLod& meshLod = meshData.LevelOfDetails[lod];
+            const Size maxMeshlets = meshopt_buildMeshletsBound(
+                meshLod.Indices.size(),
+                Meshlet::kMaxVertices,
+                Meshlet::kMaxTriangles);
+            meshlets.resize(maxMeshlets);
+            meshLod.MeshletVertexIndices.resize(maxMeshlets * Meshlet::kMaxVertices);
+            triangles.resize(maxMeshlets * Meshlet::kMaxTriangles * Mesh::kNumVertexPerTriangle);
+
+            const Size numMeshlets = meshopt_buildMeshlets(
+                meshlets.data(),
+                meshLod.MeshletVertexIndices.data(),
+                triangles.data(),
+                meshLod.Indices.data(), meshLod.Indices.size(),
+                &meshData.Vertices[0].Position.x, meshData.Vertices.size(), sizeof(VertexSM),
+                Meshlet::kMaxVertices, Meshlet::kMaxTriangles, kConeWeight);
+
+            Size numIndices = 0;
+            U32 numTriangles = 0;
+            meshLod.Meshlets.resize(numMeshlets);
+            meshLod.MeshletTriangles.reserve(numMeshlets * Meshlet::kMaxTriangles);
+            for (Index meshletIdx = 0; meshletIdx < numMeshlets; ++meshletIdx)
+            {
+                const meshopt_Meshlet& meshOptMeshlet = meshlets[meshletIdx];
+                meshopt_optimizeMeshlet(
+                    meshLod.MeshletVertexIndices.data() + meshOptMeshlet.vertex_offset,
+                    triangles.data() + meshOptMeshlet.triangle_offset,
+                    meshOptMeshlet.triangle_count,
+                    meshOptMeshlet.vertex_count);
+
+                const meshopt_Bounds meshletBounds = meshopt_computeMeshletBounds(
+                    meshLod.MeshletVertexIndices.data() + meshOptMeshlet.vertex_offset,
+                    triangles.data() + meshOptMeshlet.triangle_offset, meshOptMeshlet.triangle_count,
+                    &meshData.Vertices[0].Position.x, meshData.Vertices.size(), sizeof(VertexSM));
+
+                Meshlet& meshlet = meshLod.Meshlets[meshletIdx];
+                meshlet.IndexOffset = meshOptMeshlet.vertex_offset;
+                meshlet.NumIndices = meshOptMeshlet.vertex_count;
+                numIndices += meshOptMeshlet.vertex_count;
+
+                meshlet.TriangleOffset = numTriangles;
+                meshlet.NumTriangles = meshOptMeshlet.triangle_count;
+                for (Index triangleIdx = 0; triangleIdx < meshOptMeshlet.triangle_count; ++triangleIdx)
+                {
+                    meshLod.MeshletTriangles.emplace_back(
+                        EncodeTriangleU32(
+                            triangles[meshOptMeshlet.triangle_offset + triangleIdx * Mesh::kNumVertexPerTriangle + 0],
+                            triangles[meshOptMeshlet.triangle_offset + triangleIdx * Mesh::kNumVertexPerTriangle + 1],
+                            triangles[meshOptMeshlet.triangle_offset + triangleIdx * Mesh::kNumVertexPerTriangle + 2]));
+                }
+                numTriangles += meshOptMeshlet.triangle_count;
+
+                meshlet.BoundingVolume = BoundingSphere{
+                    Vector3{meshletBounds.center[0], meshletBounds.center[1], meshletBounds.center[2]},
+                    meshletBounds.radius};
+                /* #sy_todo 추후에 양자화 버전으로 변경 */
+                meshlet.NormalConeAxis = Vector3{
+                    meshletBounds.cone_axis[0], meshletBounds.cone_axis[1], meshletBounds.cone_axis[2]};
+                meshlet.NormalConeCutoff = meshletBounds.cone_cutoff;
+            }
+
+            meshLod.MeshletVertexIndices.resize(numIndices);
+        }
+    }
+
+    void StaticMeshImporter::CompressMeshVertices(MeshData& meshData)
+    {
+        IG_CHECK(meshData.NumLevelOfDetails >= 1);
+        IG_CHECK(!meshData.Vertices.empty());
+
         meshopt_encodeVertexVersion(0);
         meshopt_encodeIndexVersion(1);
 
-        newCompressedData.CompressedVertices.resize(
+        meshData.CompressedVertices.resize(
             meshopt_encodeVertexBufferBound(meshData.Vertices.size(), sizeof(VertexSM)));
-        newCompressedData.CompressedVertices.resize(
-            meshopt_encodeVertexBuffer(
-                newCompressedData.CompressedVertices.data(), newCompressedData.CompressedVertices.size(),
-                meshData.Vertices.data(), meshData.Vertices.size(), sizeof(VertexSM)));
-
-        for (Index lod = 0; lod < meshData.NumLods; ++lod)
-        {
-            const Vector<U32>& indices{meshData.IndicesPerLod[lod]};
-            Vector<U8>& compressedIndices{newCompressedData.CompressedIndicesPerLod[lod]};
-
-            compressedIndices.resize(
-                meshopt_encodeIndexBufferBound(indices.size(), meshData.Vertices.size()));
-            compressedIndices.resize(meshopt_encodeIndexBuffer(
-                compressedIndices.data(), compressedIndices.size(),
-                indices.data(), indices.size()));
-        }
-
-        return newCompressedData;
+        meshData.CompressedVertices.resize(
+            meshopt_encodeVertexBuffer(meshData.CompressedVertices.data(),
+                                       meshData.CompressedVertices.size(),
+                                       meshData.Vertices.data(),
+                                       meshData.Vertices.size(),
+                                       sizeof(VertexSM)));
     }
 
-    Result<StaticMesh::Desc, EStaticMeshImportStatus> StaticMeshImporter::SaveAsAsset(const std::string_view meshName, const StaticMeshData& meshData, const CompressedStaticMeshData& compressedMeshData)
+    Result<StaticMesh::Desc, EStaticMeshImportStatus> StaticMeshImporter::ExportToFile(const std::string_view meshName, const MeshData& meshData)
     {
         const AssetInfo assetInfo{MakeVirtualPathPreferred(meshName), EAssetCategory::StaticMesh};
 
-        StaticMeshLoadDesc newLoadConfig{
-            .NumVertices = (U32)meshData.Vertices.size(),
-            .CompressedVerticesSizeInBytes = compressedMeshData.CompressedVertices.size(),
-            .NumLods = meshData.NumLods,
-            .AABB = meshData.BoundingVolume};
-
-        for (Index lod = 0; lod < meshData.NumLods; ++lod)
+        StaticMeshLoadDesc newLoadDesc{};
+        newLoadDesc.NumVertices = (U32)meshData.Vertices.size();
+        newLoadDesc.CompressedVerticesSize = (U32)meshData.CompressedVertices.size();
+        newLoadDesc.NumLevelOfDetails = meshData.NumLevelOfDetails;
+        for (U8 lod = 0; lod < meshData.NumLevelOfDetails; ++lod)
         {
-            newLoadConfig.NumIndicesPerLod[lod] =
-                (U32)meshData.IndicesPerLod[lod].size();
-
-            newLoadConfig.CompressedIndicesSizePerLod[lod] =
-                (U32)compressedMeshData.CompressedIndicesPerLod[lod].size();
+            const MeshLod& meshLod = meshData.LevelOfDetails[lod];
+            newLoadDesc.NumMeshletVertexIndices[lod] = (U32)meshLod.MeshletVertexIndices.size();
+            newLoadDesc.NumMeshletTriangles[lod] = (U32)meshLod.MeshletTriangles.size();
+            newLoadDesc.NumMeshlets[lod] = (U32)meshLod.Meshlets.size();
         }
+        newLoadDesc.BoundingBox = meshData.BoundingBox;
 
         const Path newMetaPath = MakeAssetMetadataPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
 
         Json assetMetadata{};
-        assetMetadata << assetInfo << newLoadConfig;
+        assetMetadata << assetInfo << newLoadDesc;
         if (!SaveJsonToFile(newMetaPath, assetMetadata))
         {
             return MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FailedSaveMetadataToFile>();
         }
 
         const Path assetPath = MakeAssetPath(EAssetCategory::StaticMesh, assetInfo.GetGuid());
-        Array<std::span<const U8>, StaticMesh::kMaxNumLods + 1> blobs{
-            std::span<const U8>{compressedMeshData.CompressedVertices},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[0]},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[1]},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[2]},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[3]},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[4]},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[5]},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[6]},
-            std::span<const U8>{compressedMeshData.CompressedIndicesPerLod[7]}};
+        constexpr Size kNumBlobPerLod = 3;     /* MeshletVertexIndices, MeshletTriangles, Meshlets */
+        constexpr Size kNumAdditionalBlob = 1; /* CompressedVertices */
+        constexpr Size kNumBlobs = (kNumBlobPerLod * Mesh::kMaxMeshLevelOfDetails) + kNumAdditionalBlob;
+        Array<std::span<const U8>, kNumBlobs> blobs{};
+        blobs[0] = std::span<const U8>{meshData.CompressedVertices};
+        for (U8 lod = 0; lod < meshData.NumLevelOfDetails; ++lod)
+        {
+            const MeshLod& meshLod = meshData.LevelOfDetails[lod];
+            const Index blobOffset = kNumAdditionalBlob + (lod * kNumBlobPerLod);
+            blobs[blobOffset + 0] = std::span<const U8>{
+                reinterpret_cast<const U8*>(meshLod.MeshletVertexIndices.data()),
+                sizeof(U32) * meshLod.MeshletVertexIndices.size()};
+            blobs[blobOffset + 1] = std::span<const U8>{
+                reinterpret_cast<const U8*>(meshLod.MeshletTriangles.data()),
+                sizeof(U32) * meshLod.MeshletTriangles.size()};
+            blobs[blobOffset + 2] = std::span<const U8>{
+                reinterpret_cast<const U8*>(meshLod.Meshlets.data()),
+                sizeof(Meshlet) * meshLod.Meshlets.size()};
+        }
         if (!SaveBlobsToFile(assetPath, blobs))
         {
             return MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FailedSaveAssetToFile>();
         }
 
         IG_CHECK(assetInfo.IsValid());
-        return MakeSuccess<StaticMesh::Desc, EStaticMeshImportStatus>(assetInfo, newLoadConfig);
+        return MakeSuccess<StaticMesh::Desc, EStaticMeshImportStatus>(assetInfo, newLoadDesc);
     }
 } // namespace ig

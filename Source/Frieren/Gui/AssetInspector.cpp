@@ -340,12 +340,18 @@ namespace fe
         }
         ImGui::Text("Num Vertices: %u", loadDescOpt->NumVertices);
 
-        for (ig::U8 lod = 0; lod < loadDescOpt->NumLods; ++lod)
+        for (ig::U8 lod = 0; lod < loadDescOpt->NumLevelOfDetails; ++lod)
         {
-            ImGui::Text("LOD%u Num Indices: %u", (ig::U32)lod, loadDescOpt->NumIndicesPerLod[lod]);
+            if (ImGui::TreeNodeEx(std::format("LOD {}", lod).c_str(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::Text("Num Meshlet Vertices: %u", (ig::U32)loadDescOpt->NumMeshletVertexIndices[lod]);
+                ImGui::Text("Num Meshlet Triangles: %u", (ig::U32)loadDescOpt->NumMeshletTriangles[lod]);
+                ImGui::Text("Num Meshlets: %u", (ig::U32)loadDescOpt->NumMeshlets[lod]);
+                ImGui::TreePop();
+            }
         }
 
-        ig::AABB aabb = loadDescOpt->AABB;
+        ig::AABB aabb = loadDescOpt->BoundingBox;
         ImGui::Text("AABB(Min) ");
         ImGui::SameLine();
         ig::ImGuiX::EditVector3("AABB(Min)", aabb.Min, 0.f, "%.4f", true);

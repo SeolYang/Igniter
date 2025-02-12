@@ -146,22 +146,29 @@ namespace ig
     {
         IG_CHECK(bufferType != EGpuBufferType::Unknown);
         D3D12MA::ALLOCATION_DESC desc{.HeapType = D3D12_HEAP_TYPE_DEFAULT};
-        switch (bufferType)
+        if (HeapType != kAutoHeapType)
         {
-        case EGpuBufferType::ConstantBuffer:
-            desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
-            break;
-        case EGpuBufferType::UploadBuffer:
-            desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
-            break;
-        case EGpuBufferType::GpuUploadBuffer:
-            desc.HeapType = D3D12_HEAP_TYPE_GPU_UPLOAD;
-            break;
-        case EGpuBufferType::ReadbackBuffer:
-            desc.HeapType = D3D12_HEAP_TYPE_READBACK;
-            break;
-        default:
-            break;
+            desc.HeapType = HeapType;
+        }
+        else
+        {
+            switch (bufferType)
+            {
+            case EGpuBufferType::ConstantBuffer:
+                desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+                break;
+            case EGpuBufferType::UploadBuffer:
+                desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+                break;
+            case EGpuBufferType::GpuUploadBuffer:
+                desc.HeapType = D3D12_HEAP_TYPE_GPU_UPLOAD;
+                break;
+            case EGpuBufferType::ReadbackBuffer:
+                desc.HeapType = D3D12_HEAP_TYPE_READBACK;
+                break;
+            default:
+                break;
+            }
         }
 
         return desc;

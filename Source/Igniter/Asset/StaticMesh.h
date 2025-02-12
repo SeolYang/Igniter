@@ -3,6 +3,7 @@
 #include "Igniter/Core/BoundingVolume.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/Render/MeshStorage.h"
+#include "Igniter/Render/Mesh.h"
 #include "Igniter/Asset/Common.h"
 #include "Igniter/Asset/Material.h"
 
@@ -22,7 +23,6 @@ namespace ig
         bool bMakeLeftHanded = true;
         bool bFlipUVs = true;
         bool bFlipWindingOrder = true;
-        bool bGenerateNormals = false;
         bool bSplitLargeMeshes = false;
         bool bPreTransformVertices = false;
         bool bGenerateUVCoords = false;
@@ -31,19 +31,20 @@ namespace ig
         bool bImportMaterials = false; /* Only if materials does not exist or not imported before. */
 
         bool bGenerateLODs = true;
-        // 1 <= NumLods <= kMaxNumLods, bGenerateLods && 2 <= NumLods => Generate New Lods
-        U8 NumLods = 1;
-        // LOD (NumLods-1) 에서 보존될 인덱스 수에 대한 계수
-        // 값에 따라 최소 (1.0-MaxSimplificationFactor) * (NumIndices[LOD0])까지 타겟 인덱스 수를 설정 한다.
-        F32 MaxSimplificationFactor = 0.5f;
-
-        bool bOptimizeVertexCache = true;
-        bool bOptimizeOverdraw = true;
-        /* Overdraw Optimization으로 인해 생길 수 있는 정점 캐시 효율 하락을 얼마만큼 허용 할 지(1.05 == 5%) */
-        F32 OverdrawOptimizerThreshold = 1.05f;
-        bool bOptimizeVertexFetch = true;
     };
 
+    /*
+     * Static Mesh Binary Layout
+     * Begin->
+     * CompressedVertices => [0, CompressedVerticesSize)
+     * LOD0.CompressedMeshletVertexIndices => [CompressedVerticesSize, CompressedVerticesSize + LOD0.CompressedMeshletVertexIndicesSize)
+     * LOD0.Triangles => [PrevLast, PrevLast+sizeof(U32)*LOD0.NumMeshletTriangles)
+     * LOD0.Meshlets => [PrevLast, PrevLast+sizeof(Meshlet)*LOD0.NumMeshlets)
+     * ...
+     * LOD(N-1).Meshlets => [PrevLast, PrevLast+sizeof(Meshlet)*LOD(N-1).NumMeshlets)
+     * <-End
+     * assert(N-1 == Mesh.NumLevelOfDetails)
+     */
     struct StaticMeshLoadDesc
     {
       public:
@@ -52,12 +53,12 @@ namespace ig
 
       public:
         U32 NumVertices{0};
-        Size CompressedVerticesSizeInBytes{0};
-
-        U8 NumLods{1};
-        Array<U32, StaticMeshImportDesc::kMaxNumLods> NumIndicesPerLod;
-        Array<Size, StaticMeshImportDesc::kMaxNumLods> CompressedIndicesSizePerLod;
-        AABB AABB{};
+        Bytes CompressedVerticesSize{0};
+        U8 NumLevelOfDetails = 1; // assert(>=1)
+        Array<U32, Mesh::kMaxMeshLevelOfDetails> NumMeshletVertexIndices{0};
+        Array<U32, Mesh::kMaxMeshLevelOfDetails> NumMeshletTriangles{0};
+        Array<U32, Mesh::kMaxMeshLevelOfDetails> NumMeshlets{0};
+        AABB BoundingBox;
     };
 
     class GpuBuffer;
@@ -76,12 +77,11 @@ namespace ig
         using Desc = AssetDesc<StaticMesh>;
 
       public:
+        /* New API! */
         StaticMesh(
             RenderContext& renderContext, AssetManager& assetManager,
             const Desc& snapshot,
-            const Handle<MeshStorage::Space<VertexSM>> vertexSpace,
-            const U8 numLods,
-            const Array<Handle<MeshStorage::Space<U32>>, kMaxNumLods> vertexIndexSpacePerLod);
+            const Mesh& newMesh);
 
         StaticMesh(const StaticMesh&) = delete;
         StaticMesh(StaticMesh&& other) noexcept;
@@ -90,18 +90,8 @@ namespace ig
         StaticMesh& operator=(const StaticMesh&) = delete;
         StaticMesh& operator=(StaticMesh&& rhs) noexcept;
 
-        [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
-        [[nodiscard]] Handle<MeshStorage::Space<VertexSM>> GetVertexSpace() const noexcept { return vertexSpace; }
-        [[nodiscard]] U8 GetNumLods() const noexcept { return numLods; }
-        [[nodiscard]] Handle<MeshStorage::Space<U32>> GetIndexSpace(const U8 lod) const noexcept
-        {
-            if (lod >= numLods)
-            {
-                return {};
-            }
-
-            return vertexIndexSpacePerLod[lod];
-        }
+        [[nodiscard]] const Desc& GetSnapshot() const noexcept { return snapshot; }
+        [[nodiscard]] const Mesh& GetMesh() const noexcept { return mesh; }
 
       private:
         void Destroy();
@@ -109,11 +99,8 @@ namespace ig
       private:
         RenderContext* renderContext{nullptr};
         AssetManager* assetManager{nullptr};
-        Desc snapshot{}; // desc snapshot
+        Desc snapshot{};
 
-        Handle<MeshStorage::Space<VertexSM>> vertexSpace{};
-
-        U8 numLods = 1; // least 1
-        Array<Handle<MeshStorage::Space<U32>>, kMaxNumLods> vertexIndexSpacePerLod;
+        Mesh mesh;
     };
 } // namespace ig

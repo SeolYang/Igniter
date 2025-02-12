@@ -15,9 +15,9 @@ namespace ig
     {
         constexpr float kInvFactor = 1.f / 127.5f;
         return Vector3{
-            ((encodedNormal & 0xFF) * kInvFactor) - 1.f,
-            (((encodedNormal >> 8) & 0xFF) * kInvFactor) - 1.f,
-            (((encodedNormal >> 16) & 0xFF) * kInvFactor) - 1.f};
+            ((F32)(encodedNormal & 0xFF) * kInvFactor) - 1.f,
+            ((F32)((encodedNormal >> 8) & 0xFF) * kInvFactor) - 1.f,
+            ((F32)((encodedNormal >> 16) & 0xFF) * kInvFactor) - 1.f};
     }
 
     /* [-1, 1] -> [0, 1023] */
@@ -32,11 +32,12 @@ namespace ig
     {
         constexpr float kInvFactor = 1.f / 511.5f;
         return Vector3{
-            ((encodedNormal & 0x3FF) * kInvFactor) - 1.f,
-            (((encodedNormal >> 10) & 0x3FF) * kInvFactor) - 1.f,
-            (((encodedNormal >> 20) & 0x3FF) * kInvFactor) - 1.f};
+            ((F32)(encodedNormal & 0x3FF) * kInvFactor) - 1.f,
+            ((F32)((encodedNormal >> 10) & 0x3FF) * kInvFactor) - 1.f,
+            ((F32)((encodedNormal >> 20) & 0x3FF) * kInvFactor) - 1.f};
     }
 
+    /* Deprecated! */
     struct VertexSM
     {
         Vector3 Position;

@@ -175,8 +175,10 @@ namespace ig
         using UavCounter = U32;
         constexpr static Size kUavCounterSize = sizeof(UavCounter);
         String DebugName = String{"Unknown Buffer"};
+        D3D12_HEAP_TYPE HeapType = kAutoHeapType;
 
       private:
+        constexpr static D3D12_HEAP_TYPE kAutoHeapType = D3D12_HEAP_TYPE(0xFFFFFFFF);
         U32 structureByteStride = 1;
         U32 numElements = 1;
         EGpuBufferType bufferType = EGpuBufferType::Unknown;

@@ -462,6 +462,12 @@
     <ClInclude Include="Component\RenderableTag.h">
       <Filter>Source\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Render\UnifiedMeshStorage.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Mesh.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -697,6 +703,9 @@
     </ClCompile>
     <ClCompile Include="Render\RenderPass\ZPrePass.cpp">
       <Filter>Source\Render\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\UnifiedMeshStorage.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

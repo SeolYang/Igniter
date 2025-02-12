@@ -18,37 +18,53 @@ namespace ig
     struct MeshLod
     {
       public:
-        Handle<Meshlet> MeshletStorageAlloc;
-        Handle<MeshIndex> IndexStorageAlloc;
-        Handle<MeshTriangle> TriangleStorageAlloc;
+        Handle<Meshlet> MeshletStorageAlloc{};
+        Handle<MeshIndex> IndexStorageAlloc{};
+        Handle<MeshTriangle> TriangleStorageAlloc{};
     };
 
-    constexpr U8 kNumVertexPerTriangle = 3;
-    constexpr U8 kMaxMeshLevelOfDetails = 8;
+    enum class EMeshType : U32
+    {
+        Static = 0,
+        Skeletal = 1
+    };
+
     struct Mesh
     {
       public:
-        Handle<MeshVertex> VertexStorageAlloc;
-        AABB BoundingBox;
+        constexpr static U8 kNumVertexPerTriangle = 3;
+        constexpr static U8 kMaxMeshLevelOfDetails = 8;
 
+      public:
+        Handle<MeshVertex> VertexStorageAlloc{};
+        U8 NumLevelOfDetails = 0;
         MeshLod LevelOfDetails[kMaxMeshLevelOfDetails];
+        AABB BoundingBox{};
     };
 
     /* Meshlet의 경우 단순 데이터이기 때문에, 별도의 CPU/GPU 간 데이터 레이아웃의 차이가 없다 */
     struct Meshlet
     {
       public:
+        /*
+         * https://developer.nvidia.com/blog/introduction-turing-mesh-shaders/
+         * https://www.youtube.com/watch?v=EtX7WnFhxtQ  (AW2)
+         */
+        constexpr static Size kMaxVertices = 64;
+        constexpr static Size kMaxTriangles = 64;
+
+      public:
         /* MeshLod::IndexStorageAlloc 내에서의 IndexOffset */
-        U32 IndexOffset;
-        U32 NumIndices;
+        U32 IndexOffset = 0;
+        U32 NumIndices = 0;
         /* MeshLod::TriangleStorageAlloc 내에서의 TriangleOffset */
-        U32 TriangleOffset;
-        U32 NumTriangles;
+        U32 TriangleOffset = 0;
+        U32 NumTriangles = 0;
 
-        BoundingSphere ClusterBoundingSphere;
+        BoundingSphere BoundingVolume{};
 
-        Vector3 NormalConeAxis;
-        float NormalConeCutoff;
+        Vector3 NormalConeAxis{};
+        float NormalConeCutoff = 0.f;
         // U8 QuantizedNormalConeAxis[3];
         // U8 QuantizedNormalConeCutoff;
     };
@@ -56,18 +72,33 @@ namespace ig
     struct GpuMeshLod
     {
       public:
-        U32 MeshletStorageOffset;
-        U32 NumMeshlets;
-        U32 IndexStorageOffset;
-        U32 TriangleStorageOffset;
+        U32 MeshletStorageOffset = 0;
+        U32 NumMeshlets = 0;
+        U32 IndexStorageOffset = 0;
+        U32 TriangleStorageOffset = 0;
     };
 
     struct GpuMesh
     {
       public:
-        U32 VertexStorageByteOffset;
-        BoundingSphere MeshBoundingSphere;
+        U32 VertexStorageByteOffset = 0;
+        U32 NumLevelOfDetails = 0;
+        GpuMeshLod LevelOfDetails[Mesh::kMaxMeshLevelOfDetails];
 
-        GpuMeshLod LevelOfDetails[kMaxMeshLevelOfDetails];
+        BoundingSphere MeshBoundingSphere{};
+
+        U64 Padding = 0xFFFFFFFFFFFFFFFFUi64;
+    };
+
+    struct GpuMeshInstance
+    {
+      public:
+        EMeshType MeshType = EMeshType::Static;
+        U32 MeshProxyIdx = 0;
+        U32 MaterialProxyIdx = 0;
+
+        Vector4 ToWorld[3];
+
+        U32 Padding = 0xFFFFFFFF;
     };
 } // namespace ig

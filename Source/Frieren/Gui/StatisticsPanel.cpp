@@ -126,33 +126,6 @@ namespace fe
 
             ImGui::TreePop();
         }
-
-        ImGui::NewLine();
-
-        if (ImGui::TreeNodeEx("Mesh Storage", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            const ig::MeshStorage& meshStorage = ig::Engine::GetMeshStorage();
-            const ig::MeshStorage::Statistics meshStorageStatistics = meshStorage.GetStatistics();
-
-            const double staticMeshVertexStorageUsageInMB = ig::BytesToMegaBytes(meshStorageStatistics.StaticMeshVertexStorageUsage);
-            const double staticMeshVertexStorageSizeInMB = ig::BytesToMegaBytes(meshStorageStatistics.StaticMeshVertexStorageSize);
-            const float staticMeshVertexStorageOccupacny = static_cast<float>(staticMeshVertexStorageUsageInMB / staticMeshVertexStorageSizeInMB);
-            ImGui::Text("Static Mesh Vertex Storage: %lf MB/%.01lf MB", staticMeshVertexStorageUsageInMB, staticMeshVertexStorageSizeInMB);
-            ImGui::Text("Num Vertices: %lld", meshStorageStatistics.NumStaticMeshVertices);
-            ImGui::ProgressBar(staticMeshVertexStorageOccupacny, ImVec2(0, 0));
-
-            const double vertexIndexStorageUsageInMB = ig::BytesToMegaBytes(meshStorageStatistics.VertexIndexStorageUsage);
-            const double vertexIndexStorageSizeInMB = ig::BytesToMegaBytes(meshStorageStatistics.VertexIndexStorageSize);
-            const float vertexIndexStorageOccupacny = static_cast<float>(vertexIndexStorageUsageInMB / vertexIndexStorageSizeInMB);
-            ImGui::Text("Vertex Index Storage: %lf MB/%.01lf MB", vertexIndexStorageUsageInMB, vertexIndexStorageSizeInMB);
-            ImGui::Text("Num Indices: %lld", meshStorageStatistics.NumVertexIndices);
-            ImGui::ProgressBar(vertexIndexStorageOccupacny, ImVec2(0, 0));
-
-            ImGui::TreePop();
-        }
-
-        ImGui::NewLine();
-
         ++pollingStep;
     }
 } // namespace fe

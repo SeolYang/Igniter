@@ -57,4 +57,10 @@ namespace ig
         Desc snapshot{};
         Handle<Texture> diffuse{};
     };
+
+    struct GpuMaterial
+    {
+        U32 DiffuseTextureSrv = IG_NUMERIC_MAX_OF(DiffuseTextureSrv);
+        U32 DiffuseTextureSampler = IG_NUMERIC_MAX_OF(DiffuseTextureSampler);
+    };
 } // namespace ig

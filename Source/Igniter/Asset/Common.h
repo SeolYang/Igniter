@@ -115,6 +115,13 @@ namespace ig
         T::LoadDesc LoadDescriptor;
     };
 
+    template <typename T, typename LoadDescType>
+    struct TempAssetDesc
+    {
+        AssetInfo Info;
+        LoadDescType LoadDescriptor;
+    };
+
     /* Refer to {ResourcePath}.metadata */
     Path MakeResourceMetadataPath(Path resPath);
 
