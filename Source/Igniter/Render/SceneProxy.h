@@ -15,13 +15,15 @@ namespace ig
     class Material;
     class CommandList;
     class MeshStorage;
+    class GpuStagingBuffer;
+
     class SceneProxy
     {
-      public:
+    public:
         template <typename GpuDataType>
         struct GpuProxy
         {
-          public:
+        public:
             struct UploadInfo
             {
                 CRef<GpuStorage::Allocation> StorageSpaceRef;
@@ -30,7 +32,7 @@ namespace ig
 
             using GpuData_t = GpuDataType;
 
-          public:
+        public:
             constexpr static U32 kDataSize = (U32)sizeof(GpuDataType);
 
             GpuStorage::Allocation StorageSpace{};
@@ -47,9 +49,9 @@ namespace ig
         template <typename Proxy, typename Owner = Entity>
         struct ProxyPackage
         {
-          public:
-            ProxyPackage(RenderContext& renderContext, const GpuStorageDesc& storageDesc, const Size numWorkers) :
-                Storage(MakePtr<GpuStorage>(renderContext, storageDesc))
+        public:
+            ProxyPackage(RenderContext& renderContext, const GpuStorageDesc& storageDesc, const Size numWorkers)
+                : Storage(MakePtr<GpuStorage>(renderContext, storageDesc))
             {
                 IG_CHECK(numWorkers > 0);
                 PendingReplicationGroups.resize(numWorkers);
@@ -63,7 +65,7 @@ namespace ig
                 Storage->ForceReset();
             }
 
-          public:
+        public:
             using ProxyMapType = UnorderedMap<Owner, Proxy>;
 
             Ptr<GpuStorage> Storage;
@@ -82,7 +84,7 @@ namespace ig
             Vector<CommandList*> WorkGroupCmdLists;
         };
 
-      public:
+    public:
         explicit SceneProxy(tf::Executor& taskExecutor, RenderContext& renderContext, AssetManager& assetManager);
         SceneProxy(const SceneProxy&) = delete;
         SceneProxy(SceneProxy&&) noexcept = delete;
@@ -110,11 +112,12 @@ namespace ig
             return lightProxyPackage.Storage->GetGpuBuffer();
         }
 
+        [[nodiscard]] U32 GetNumMeshInstances() const noexcept { return numMeshInstances; }
         [[nodiscard]] U16 GetNumLights() const noexcept { return (U16)lightProxyPackage.ProxyMap.size(); }
 
         [[nodiscard]] const auto& GetLightProxyMap() const noexcept { return lightProxyPackage.ProxyMap; }
 
-      private:
+    private:
         void UpdateLightProxy(tf::Subflow& subflow, const Registry& registry);
         void UpdateMaterialProxy();
         void UpdateStaticMeshProxy(tf::Subflow& subflow);
@@ -124,14 +127,17 @@ namespace ig
         template <typename Proxy, typename Owner>
         void ReplicateProxyData(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx, ProxyPackage<Proxy, Owner>& proxyPackage);
 
-      private:
+        void ResizeMeshInstanceIndicesBuffer(const Size numMeshIndices);
+        void UploadMeshInstanceIndices(tf::Subflow& subflow, const LocalFrameIndex localFrameIdx);
+
+    private:
         tf::Executor* taskExecutor = nullptr;
         RenderContext* renderContext = nullptr;
         AssetManager* assetManager = nullptr;
 
         InFlightFramesResource<tf::Future<void>> invalidationFuture;
 
-        U32 numWorker{1};
+        U32 numWorkers{1};
 
         constexpr static U32 kNumInitLightElements = kMaxNumLights;
         ProxyPackage<LightProxy> lightProxyPackage;
@@ -142,5 +148,14 @@ namespace ig
         //ProxyPackage<MeshProxy, Handle<class SkeletalMesh>> skeletalMeshProxyPackage;
 
         ProxyPackage<MeshInstanceProxy> meshInstanceProxyPackage;
+
+        constexpr static Size kInitNumMeshInstanceIndices = 16'384;
+        Vector<Vector<U32>> meshInstanceIndicesGroups;
+        U32 numMeshInstances{0};
+        /* First: OffsetBytes, Second: MeshInstanceIndicesGroupsIdx */
+        Vector<std::pair<U32, Index>> meshInstanceIndicesUploadInfos;
+        Bytes meshInstanceIndicesBufferSize = 0;
+        Handle<GpuBuffer> meshInstanceIndicesBuffer{};
+        Ptr<GpuStagingBuffer> meshInstanceIndicesStagingBuffer{nullptr};
     };
 } // namespace ig

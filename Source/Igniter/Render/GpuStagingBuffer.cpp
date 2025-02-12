@@ -25,7 +25,6 @@ namespace ig
     {
         if (renderCtx == nullptr)
         {
-            IG_CHECK(!buffer);
             return;
         }
 
