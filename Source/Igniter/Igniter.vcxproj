@@ -125,6 +125,7 @@
     <ClInclude Include="ImGui\TextureView.h" />
     <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="Render\CommandListPool.h" />
+    <ClInclude Include="Render\GpuStagingBuffer.h" />
     <ClInclude Include="Render\GpuStorage.h" />
     <ClInclude Include="Render\GpuUploader.h" />
     <ClInclude Include="Render\GpuViewManager.h" />
@@ -227,6 +228,7 @@
     <ClCompile Include="ImGui\ImGuiExtensions.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="Render\CommandListPool.cpp" />
+    <ClCompile Include="Render\GpuStagingBuffer.cpp" />
     <ClCompile Include="Render\GpuStorage.cpp" />
     <ClCompile Include="Render\GpuUploader.cpp" />
     <ClCompile Include="Render\GpuViewManager.cpp" />
