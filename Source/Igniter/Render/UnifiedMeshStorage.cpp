@@ -71,6 +71,7 @@ namespace ig
             return {};
         }
 
+        numAllocVertices += numVertices;
         return Handle<MeshVertex>{newHandle.Value};
     }
 
@@ -96,6 +97,7 @@ namespace ig
             return {};
         }
 
+        numAllocIndices += numIndices;
         return Handle<MeshIndex>{newHandle.Value};
     }
 
@@ -121,6 +123,7 @@ namespace ig
             return {};
         }
 
+        numAllocTriangles += numTriangles;
         return Handle<MeshTriangle>{newHandle.Value};
     }
 
@@ -146,6 +149,7 @@ namespace ig
             return {};
         }
 
+        numAllocMeshlets += numMeshlets;
         return Handle<Meshlet>{newHandle.Value};
     }
 
