@@ -14,6 +14,7 @@
 #include "Igniter/Render/Utils.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
 #include "Igniter/Render/MeshStorage.h"
+#include "Igniter/Render/UnifiedMeshStorage.h"
 #include "Igniter/Render/SceneProxy.h"
 #include "Igniter/Render/RenderPass/LightClusteringPass.h"
 #include "Igniter/Render/RenderPass/FrustumCullingPass.h"
@@ -87,6 +88,60 @@ namespace ig
     //    float ViewportHeight;
     //};
 
+    struct PerFrameParams
+    {
+        U32 VertexStorageSrv;
+        U32 IndexStorageSrv;
+        U32 TriangleStorageSrv;
+        U32 MeshletStorageSrv;
+
+        U32 LightStorageSrv;
+        U32 MaterialStorageSrv;
+        U32 StaticMeshStorageSrv;
+        U32 MeshInstanceStorageSrv;
+
+        U32 LightIdxListSrv;
+        U32 LightTileBitfieldBufferSrv;
+        U32 LightDepthBinBufferSrv;
+
+        Matrix View;
+        Matrix ViewProj;
+
+        /* (x,y,z): cam pos, w: inv aspect ratio */
+        Vector4 CamPosInvAspectRatio;
+        /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
+        Vector4 ViewFrustumParams;
+    };
+
+    struct DispatchMeshInstancePayload
+    {
+        U32 MeshInstanceIdx;
+        U32 TargetLevelOfDetail;
+        U32 PersistentParamsCbv;
+        U32 PerFrameParamsCbv;
+        U32 ScreenParamsCbv;
+    };
+
+    struct DispatchMeshInstance
+    {
+        DispatchMeshInstancePayload Payload;
+        U32 ThreadGroupCountX;
+        U32 ThreadGroupCountY;
+        U32 ThreadGroupCountZ;
+    };
+
+    struct MeshInstancePassParams
+    {
+        U32 PerFrameParamsCbv;
+        U32 MeshInstanceIndicesBufferSrv;
+        U32 NumMeshInstances;
+
+        U32 OpaqueMeshInstanceDispatchBufferUav;
+        U32 TransparentMeshInstanceDispatchBufferUav;
+
+        U32 ManualLod;
+    };
+
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const SceneProxy& sceneProxy)
         : window(&window)
         , renderContext(&renderContext)
@@ -126,7 +181,19 @@ namespace ig
         meshInstancePassPsoDesc.SetComputeShader(*meshInstancePassShader);
         meshInstancePassPsoDesc.SetRootSignature(*bindlessRootSignature);
         meshInstancePassPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(meshInstancePassPsoDesc).value());
-        ResizeDispatchBuffer(kInitDispatchBufferCapacity);
+
+        GpuStorageDesc meshInstanceDispatchStorageDesc{};
+        meshInstanceDispatchStorageDesc.ElementSize = sizeof(DispatchMeshInstance);
+        meshInstanceDispatchStorageDesc.NumInitElements = kInitDispatchBufferCapacity;
+        meshInstanceDispatchStorageDesc.Flags = EGpuStorageFlags::ShaderReadWrite |
+            EGpuStorageFlags::EnableUavCounter |
+            EGpuStorageFlags::EnableLinearAllocation;
+
+        meshInstanceDispatchStorageDesc.DebugName = "OpaqueMeshInstanceDispatchStorage"_fs;
+        opaqueMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, meshInstanceDispatchStorageDesc);
+
+        meshInstanceDispatchStorageDesc.DebugName = "TransparentMeshInstanceDispatchStorage"_fs;
+        transparentMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, meshInstanceDispatchStorageDesc);
     }
 
     Renderer::~Renderer()
@@ -144,7 +211,17 @@ namespace ig
     void Renderer::PreRender(const LocalFrameIndex localFrameIdx)
     {
         tempConstantBufferAllocator->Reset(localFrameIdx);
-        ResizeDispatchBuffer(sceneProxy->GetNumMeshInstances());
+
+        const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
+        if (numMeshInstances == 0)
+        {
+            return;
+        }
+
+        [[maybe_unused]] const auto opaqueMeshInstanceDispatchAlloc =
+            opaqueMeshInstanceDispatchStorage->Allocate(numMeshInstances);
+        [[maybe_unused]] const auto transparentMeshInstanceDispatchAlloc =
+            transparentMeshInstanceDispatchStorage->Allocate(numMeshInstances);
     }
 
     GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, [[maybe_unused]] const World& world, [[maybe_unused]] GpuSyncPoint sceneProxyRepSyncPoint)
@@ -153,16 +230,83 @@ namespace ig
         IG_CHECK(sceneProxy != nullptr);
         ZoneScoped;
 
+        PerFrameParams perFrameParams{};
+        TempConstantBuffer perFrameParamsCb = tempConstantBufferAllocator->Allocate<PerFrameParams>(localFrameIdx);
+        {
+            const UnifiedMeshStorage& unifiedMeshStorage = renderContext->GetUnifiedMeshStorage();
+            perFrameParams.VertexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetVertexStorageSrv())->Index;
+            perFrameParams.IndexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetIndexStorageSrv())->Index;
+            perFrameParams.TriangleStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetTriangleStorageSrv())->Index;
+            perFrameParams.MeshletStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetMeshletStorageSrv())->Index;
+
+            perFrameParams.LightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv())->Index;
+            perFrameParams.MaterialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv())->Index;
+            perFrameParams.StaticMeshStorageSrv = renderContext->Lookup(sceneProxy->GetStaticMeshProxyStorageSrv())->Index;
+        }
+        perFrameParamsCb.Write(perFrameParams);
+
+        CommandQueue& mainGfxQueue = renderContext->GetMainGfxQueue();
+        CommandListPool& mainGfxCmdListPool = renderContext->GetMainGfxCommandListPool();
+        CommandQueue& asyncComputeQueue = renderContext->GetAsyncComputeQueue();
+        CommandListPool& asyncComputeCmdListPool = renderContext->GetAsyncComputeCommandListPool();
+
         Swapchain& swapchain = renderContext->GetSwapchain();
         GpuTexture* backBuffer = renderContext->Lookup(swapchain.GetBackBuffer());
         const GpuView* backBufferRtv = renderContext->Lookup(swapchain.GetBackBufferRtv());
 
-        CommandQueue& mainGfxQueue = renderContext->GetMainGfxQueue();
-        CommandListPool& mainGfxCmdListPool = renderContext->GetMainGfxCommandListPool();
-        // CommandQueue& asyncComputeQueue = renderContext->GetAsyncComputeQueue();
-        // GpuFence& asyncComputeFence = renderContext->GetAsyncComputeFence();
-        // CommandListPool& asyncComputeCmdListPool = renderContext->GetAsyncComputeCommandListPool();
-        
+        const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
+        GpuSyncPoint meshInstancePassSyncPoint{};
+        if (numMeshInstances > 0)
+        {
+            MeshInstancePassParams meshInstancePassParams{};
+            meshInstancePassParams.PerFrameParamsCbv = renderContext->Lookup(perFrameParamsCb.GetConstantBufferView())->Index;
+            meshInstancePassParams.MeshInstanceIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceIndicesBufferSrv())->Index;
+            meshInstancePassParams.NumMeshInstances = sceneProxy->GetNumMeshInstances();
+            meshInstancePassParams.OpaqueMeshInstanceDispatchBufferUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUnorderedResourceView())->Index;
+            meshInstancePassParams.TransparentMeshInstanceDispatchBufferUav = renderContext->Lookup(transparentMeshInstanceDispatchStorage->GetUnorderedResourceView())->Index;
+            meshInstancePassParams.ManualLod = minMeshLod;
+
+            auto meshInstancePassCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "MeshInstancePass"_fs);
+            meshInstancePassCmdList->Open(meshInstancePassPso.get());
+
+            GpuBuffer* opaqueMeshInstanceDispatchBufferPtr = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
+            const GpuBufferDesc& opaqueMeshInstanceDispatchBufferDesc = opaqueMeshInstanceDispatchBufferPtr->GetDesc();
+            meshInstancePassCmdList->AddPendingBufferBarrier(
+                *zeroFilledBuffer,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
+            meshInstancePassCmdList->AddPendingBufferBarrier(
+                *opaqueMeshInstanceDispatchBufferPtr,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
+            meshInstancePassCmdList->FlushBarriers();
+            
+            meshInstancePassCmdList->CopyBuffer(
+                *zeroFilledBuffer, 0, GpuBufferDesc::kUavCounterSize,
+                *opaqueMeshInstanceDispatchBufferPtr, opaqueMeshInstanceDispatchBufferDesc.GetUavCounterOffset());
+            
+            meshInstancePassCmdList->AddPendingBufferBarrier(
+                *opaqueMeshInstanceDispatchBufferPtr,
+                D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
+                D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
+            meshInstancePassCmdList->FlushBarriers();
+            
+            auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
+            meshInstancePassCmdList->SetDescriptorHeaps(MakeSpan(descriptorHeaps));
+            meshInstancePassCmdList->SetRootSignature(*bindlessRootSignature);
+            meshInstancePassCmdList->SetRoot32BitConstants(0, meshInstancePassParams, 0);
+
+            constexpr U32 kNumThreadsPerGroup = 32;
+            const U32 numDispatchX = (meshInstancePassParams.NumMeshInstances + kNumThreadsPerGroup - 1) / kNumThreadsPerGroup;
+            meshInstancePassCmdList->Dispatch(numDispatchX, 1, 1);
+            meshInstancePassCmdList->Close();
+
+            CommandList* cmdLists[]{meshInstancePassCmdList};
+            asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
+            asyncComputeQueue.ExecuteCommandLists(cmdLists);
+            meshInstancePassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
+        }
+
         auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
         renderCmdList->Open();
 
@@ -174,30 +318,28 @@ namespace ig
         renderCmdList->FlushBarriers();
 
         renderCmdList->ClearRenderTarget(*backBufferRtv);
-        GpuView* dsvPtr = renderContext->Lookup(dsv);
+        const GpuView* dsvPtr = renderContext->Lookup(dsv);
         renderCmdList->ClearDepth(*dsvPtr, 0.f);
 
         renderCmdList->Close();
         CommandList* renderCmdLists[]{renderCmdList};
+        mainGfxQueue.Wait(meshInstancePassSyncPoint);
         mainGfxQueue.ExecuteCommandLists(renderCmdLists);
 
         IG_CHECK(imguiRenderPass != nullptr);
-        auto imguiRenderCmdList =
-            mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList"_fs);
-        {
-            imguiRenderPass->SetParams({
-                .CmdList = imguiRenderCmdList,
-                .BackBuffer = swapchain.GetBackBuffer(),
-                .BackBufferRtv = swapchain.GetBackBufferRtv(),
-                .MainViewport = mainViewport
-            });
-            imguiRenderPass->Execute(localFrameIdx);
+        auto imguiRenderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList"_fs);
+        imguiRenderPass->SetParams({
+            .CmdList = imguiRenderCmdList,
+            .BackBuffer = swapchain.GetBackBuffer(),
+            .BackBufferRtv = swapchain.GetBackBufferRtv(),
+            .MainViewport = mainViewport
+        });
+        imguiRenderPass->Execute(localFrameIdx);
 
-            CommandList* cmdLists[]{imguiRenderCmdList};
-            GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
-            mainGfxQueue.Wait(prevPassSyncPoint);
-            mainGfxQueue.ExecuteCommandLists(cmdLists);
-        }
+        CommandList* cmdLists[]{imguiRenderCmdList};
+        GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
+        mainGfxQueue.Wait(prevPassSyncPoint);
+        mainGfxQueue.ExecuteCommandLists(cmdLists);
 
         swapchain.Present();
         return mainGfxQueue.MakeSyncPointWithSignal();

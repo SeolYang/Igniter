@@ -121,6 +121,10 @@ namespace ig
             return lightProxyPackage.Storage->GetGpuBuffer();
         }
 
+        [[nodiscard]] Handle<GpuView> GetStaticMeshProxyStorageSrv() const { return staticMeshProxyPackage.Storage->GetShaderResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetMeshInstanceProxyStorageSrv() const { return meshInstanceProxyPackage.Storage->GetShaderResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetMeshInstanceIndicesBufferSrv() const { return meshInstanceIndicesBufferSrv; }
+
         [[nodiscard]] U32 GetNumMeshInstances() const noexcept { return numMeshInstances; }
         [[nodiscard]] U16 GetNumLights() const noexcept { return (U16)lightProxyPackage.ProxyMap.size(); }
 
@@ -165,6 +169,7 @@ namespace ig
         Vector<std::pair<U32, Index>> meshInstanceIndicesUploadInfos;
         Bytes meshInstanceIndicesBufferSize = 0;
         Handle<GpuBuffer> meshInstanceIndicesBuffer{};
+        Handle<GpuView> meshInstanceIndicesBufferSrv{};
         Ptr<GpuStagingBuffer> meshInstanceIndicesStagingBuffer{nullptr};
     };
 } // namespace ig

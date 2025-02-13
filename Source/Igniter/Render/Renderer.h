@@ -41,9 +41,6 @@ namespace ig
         [[nodiscard]] const TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
 
     private:
-        void ResizeDispatchBuffer([[maybe_unused]] const U32 newCapacity) {}
-        
-    private:
         const Window* window = nullptr;
         RenderContext* renderContext = nullptr;
         const SceneProxy* sceneProxy = nullptr;
@@ -67,9 +64,8 @@ namespace ig
         Ptr<ShaderBlob> meshInstancePassShader;
         Ptr<PipelineState> meshInstancePassPso;
         constexpr static U32 kInitDispatchBufferCapacity = 8192Ui64;
-        U32 dispatchBufferCapacity = 0;
-        Handle<GpuBuffer> opaqueMeshInstanceDispatchBuffer;
-        Handle<GpuBuffer> transparentMeshInstanceDispatchBuffer;
+        Ptr<GpuStorage> opaqueMeshInstanceDispatchStorage;
+        Ptr<GpuStorage> transparentMeshInstanceDispatchStorage;
         /* @pending 별도로 각 타입별로 분리된 Mesh Instance의 Indices를 저장 */
         //Handle<GpuBuffer> opaqueMeshInstanceBucket;
         //Handle<GpuBuffer> transparentMeshInstanceBucket;

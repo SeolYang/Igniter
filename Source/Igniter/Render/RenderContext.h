@@ -43,6 +43,7 @@ namespace ig
         [[nodiscard]] CommandListPool& GetMainGfxCommandListPool() { return mainGfxCmdListPool; }
         [[nodiscard]] CommandListPool& GetAsyncComputeCommandListPool() { return asyncComputeCmdListPool; }
         [[nodiscard]] CommandListPool& GetAsyncCopyCommandListPool() { return asyncCopyCmdListPool; }
+        [[nodiscard]] GpuUploader& GetFrameCriticalGpuUploader() { return frameCriticalGpuUploader; }
         [[nodiscard]] GpuUploader& GetNonFrameCriticalGpuUploader() { return nonFrameCriticalGpuUploader; }
         [[nodiscard]] UnifiedMeshStorage& GetUnifiedMeshStorage() { return *unifiedMeshStorage; }
         [[nodiscard]] Swapchain& GetSwapchain() { return *swapchain; }

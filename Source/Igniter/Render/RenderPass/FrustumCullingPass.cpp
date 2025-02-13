@@ -90,7 +90,7 @@ namespace ig
     {
         IG_CHECK(meshLodInstanceStorage != nullptr &&
                  meshLodInstanceStorage->IsLinearAllocator());
-        meshLodInstanceStorage->Allocate(params.NumRenderables);
+        [[maybe_unused]] const auto linearAlloc = meshLodInstanceStorage->Allocate(params.NumRenderables);
     }
 
     void FrustumCullingPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)

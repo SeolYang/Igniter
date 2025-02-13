@@ -7,7 +7,7 @@
 
 namespace ig
 {
-    enum class EGpuStorageFlags
+    enum class EGpuStorageFlags : U8
     {
         None = 0,
         ShaderReadWrite = 1 << 0,
@@ -68,7 +68,7 @@ namespace ig
         GpuStorage& operator=(const GpuStorage&) = delete;
         GpuStorage& operator=(GpuStorage&&) noexcept = delete;
 
-        Allocation Allocate(const Size numElements);
+        [[nodiscard]] Allocation Allocate(const Size numElements);
         void Deallocate(const Allocation& allocation);
 
         void ForceReset();

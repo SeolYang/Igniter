@@ -1,7 +1,7 @@
 #ifndef NEW_TYPE_H
 #define NEW_TYPE_H
 
-struct PersistentParams
+struct PerFrameParams
 {
     uint VertexStorageSrv;
     uint IndexStorageSrv;
@@ -10,11 +10,13 @@ struct PersistentParams
 
     uint LightStorageSrv;
     uint MaterialStorageSrv;
-    uint MeshStorageSrv;
-};
+    uint StaticMeshStorageSrv;
+    uint MeshInstanceStorageSrv;
 
-struct PerFrameParams
-{
+    uint LightIdxListSrv;
+    uint LightTileBitfieldBufferSrv;
+    uint LightDepthBinBufferSrv;
+    
     float4x4 View;
     float4x4 ViewProj;
 
@@ -28,13 +30,6 @@ struct ScreenParams
 {
     uint Width;
     uint Height;
-};
-
-struct ClusteredRenderingParams
-{
-    uint LightIdxListSrv;
-    uint LightTileBitfieldBufferSrv;
-    uint LightDepthBinBufferSrv;
 };
 
 struct Light
@@ -122,19 +117,15 @@ struct MeshInstance
     uint Padding;
 };
 
-struct DispatchMeshInstancePayload
-{
-    uint MeshInstanceIdx;
-    uint TargetLevelOfDetail;
-    uint PersistentParamsCbv;
-    uint PerFrameParamsCbv;
-    uint ScreenParamsCbv;
-    uint ClusteredRenderingParamsCbv;
-};
-
 struct DispatchMeshInstance
 {
-    DispatchMeshInstancePayload Payload;
+    /* Payload */
+    uint MeshInstanceIdx;
+    uint TargetLevelOfDetail;
+    uint PerFrameParamsCbv;
+    uint ScreenParamsCbv;
+    /***********/
+    
     uint ThreadGroupCountX;
     uint ThreadGroupCountY;
     uint ThreadGroupCountZ;

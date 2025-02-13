@@ -44,6 +44,11 @@ namespace ig
         {
             renderContext->DestroyBuffer(meshInstanceIndicesBuffer);
         }
+
+        if (meshInstanceIndicesBufferSrv)
+        {
+            renderContext->DestroyGpuView(meshInstanceIndicesBufferSrv);
+        }
     }
 
     GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
@@ -767,6 +772,7 @@ namespace ig
         meshInstanceIndicesBufferDesc.DebugName = "MeshInstanceIndicesBuffer(SceneProxy)";
         meshInstanceIndicesBufferDesc.AsStructuredBuffer<U32>((U32)newNumMeshIndices);
         meshInstanceIndicesBuffer = renderContext->CreateBuffer(meshInstanceIndicesBufferDesc);
+        meshInstanceIndicesBufferSrv = renderContext->CreateShaderResourceView(meshInstanceIndicesBuffer);
 
         meshInstanceIndicesStagingBuffer = MakePtr<GpuStagingBuffer>(
             *renderContext,

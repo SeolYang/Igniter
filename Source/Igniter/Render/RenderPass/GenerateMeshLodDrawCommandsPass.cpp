@@ -98,7 +98,7 @@ namespace ig
         IG_CHECK(drawInstanceCmdStorage != nullptr &&
                  drawInstanceCmdStorage->IsLinearAllocator());
 
-        drawInstanceCmdStorage->Allocate((Size)params.NumInstancing * StaticMesh::kMaxNumLods);
+        [[maybe_unused]] const auto linearAlloc = drawInstanceCmdStorage->Allocate((Size)params.NumInstancing * StaticMesh::kMaxNumLods);
     }
 
     void GenerateMeshLodDrawCommandsPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
