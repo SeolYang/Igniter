@@ -56,6 +56,7 @@ namespace ig
         Handle<GpuTexture> CreateTexture(GpuTexture gpuTexture);
         Handle<PipelineState> CreatePipelineState(const GraphicsPipelineStateDesc& desc);
         Handle<PipelineState> CreatePipelineState(const ComputePipelineStateDesc& desc);
+        Handle<PipelineState> CreatePipelineState(const MeshShaderPipelineStateDesc& desc);
         Handle<GpuView> CreateConstantBufferView(const Handle<GpuBuffer> buffer);
         Handle<GpuView> CreateConstantBufferView(const Handle<GpuBuffer> buffer, const Size offset, const Size sizeInBytes);
         Handle<GpuView> CreateShaderResourceView(const Handle<GpuBuffer> buffer);

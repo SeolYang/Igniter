@@ -380,7 +380,8 @@ namespace ig
 
         ComPtr<ID3D12PipelineState> newPipelineState{};
 
-        if (const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState)); !SUCCEEDED(result))
+        if (const HRESULT result = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
+            !SUCCEEDED(result))
         {
             IG_LOG(GpuDeviceLog, Error, "Failed to create graphics pipeline state. HRESULT: {:#X}", result);
             return {};
@@ -396,7 +397,8 @@ namespace ig
         IG_CHECK(device);
 
         ComPtr<ID3D12PipelineState> newPipelineState{};
-        if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState)); !SUCCEEDED(result))
+        if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
+            !SUCCEEDED(result))
         {
             IG_LOG(GpuDeviceLog, Error, "Failed to create compute pipeline state. HRESULT: {:#X}", result);
             return {};
@@ -405,6 +407,28 @@ namespace ig
         IG_CHECK(newPipelineState);
         SetObjectName(newPipelineState.Get(), desc.Name);
         return PipelineState{std::move(newPipelineState), false};
+    }
+
+    Option<PipelineState> GpuDevice::CreateMeshShaderPipelineState(const MeshShaderPipelineStateDesc& desc)
+    {
+        IG_CHECK(device);
+
+        auto psoStream = CD3DX12_PIPELINE_MESH_STATE_STREAM(desc);
+        D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc{};
+        pipelineStateStreamDesc.pPipelineStateSubobjectStream = &psoStream;
+        pipelineStateStreamDesc.SizeInBytes = sizeof(psoStream);
+
+        ComPtr<ID3D12PipelineState> newPipelineState{};
+        if (const HRESULT result = device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&newPipelineState));
+            !SUCCEEDED(result))
+        {
+            IG_LOG(GpuDeviceLog, Error, "Failed to create mesh shader pipeline state. HRESULT: {:#X}", result);
+            return {};
+        }
+
+        IG_CHECK(newPipelineState);
+        SetObjectName(newPipelineState.Get(), desc.Name);
+        return PipelineState{std::move(newPipelineState), true};
     }
 
     Option<DescriptorHeap> GpuDevice::CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const U32 numDescriptors)

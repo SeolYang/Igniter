@@ -14,6 +14,7 @@ namespace ig
     class GpuTexture;
     class GraphicsPipelineStateDesc;
     class ComputePipelineStateDesc;
+    class MeshShaderPipelineStateDesc;
     class PipelineState;
     class RootSignature;
     class GpuFence;
@@ -22,7 +23,7 @@ namespace ig
 
     class GpuDevice final
     {
-      public:
+    public:
         struct Statistics
         {
             String DeviceName{};
@@ -43,7 +44,7 @@ namespace ig
             Size SharedVideoMemAllocSize{0};
         };
 
-      public:
+    public:
         GpuDevice();
         ~GpuDevice();
 
@@ -66,6 +67,7 @@ namespace ig
         [[nodiscard]] Option<RootSignature> CreateBindlessRootSignature();
         [[nodiscard]] Option<PipelineState> CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc);
         [[nodiscard]] Option<PipelineState> CreateComputePipelineState(const ComputePipelineStateDesc& desc);
+        [[nodiscard]] Option<PipelineState> CreateMeshShaderPipelineState(const MeshShaderPipelineStateDesc& desc);
         [[nodiscard]] Option<GpuBuffer> CreateBuffer(const GpuBufferDesc& bufferDesc);
         [[nodiscard]] Option<GpuTexture> CreateTexture(const GpuTextureDesc& textureDesc);
         [[nodiscard]] Option<DescriptorHeap> CreateDescriptorHeap(const std::string_view debugName, const EDescriptorHeapType descriptorHeapType, const U32 numDescriptors);
@@ -91,7 +93,7 @@ namespace ig
         void DestroyRenderTargetView(const GpuView& gpuView);
         void DestroyDepthStencilView(const GpuView& gpuView);
 
-      private:
+    private:
         bool AcquireAdapterFromFactory();
         void AcquireAdapterInfo();
         bool CreateDevice();
@@ -100,7 +102,7 @@ namespace ig
         void CacheDescriptorHandleIncrementSize();
         bool CreateMemoryAllocator();
 
-      private:
+    private:
         ComPtr<IDXGIAdapter> adapter;
         String name{};
 

@@ -9,7 +9,7 @@ namespace ig
 
     class GraphicsPipelineStateDesc final : public D3D12_GRAPHICS_PIPELINE_STATE_DESC
     {
-      public:
+    public:
         GraphicsPipelineStateDesc()
             : Name("GraphicsPSO")
         {
@@ -47,13 +47,13 @@ namespace ig
         void SetGeometryShader(ShaderBlob& geometryShader);
         void SetRootSignature(RootSignature& rootSignature);
 
-      public:
+    public:
         String Name;
     };
 
     class ComputePipelineStateDesc : public D3D12_COMPUTE_PIPELINE_STATE_DESC
     {
-      public:
+    public:
         ComputePipelineStateDesc()
             : Name("ComputePSO")
         {
@@ -67,7 +67,39 @@ namespace ig
         void SetComputeShader(ShaderBlob& computeShader);
         void SetRootSignature(RootSignature& rootSignature);
 
-      public:
+    public:
+        String Name;
+    };
+
+    class MeshShaderPipelineStateDesc : public D3DX12_MESH_SHADER_PIPELINE_STATE_DESC
+    {
+    public:
+        MeshShaderPipelineStateDesc()
+            : Name("UnnamedMeshShaderPSO")
+        {
+            this->pRootSignature = nullptr;
+            this->AS = CD3DX12_PIPELINE_STATE_STREAM_AS();
+            this->MS = CD3DX12_PIPELINE_STATE_STREAM_MS();
+            this->PS = CD3DX12_PIPELINE_STATE_STREAM_PS();
+            this->BlendState = CD3DX12_BLEND_DESC(CD3DX12_DEFAULT());
+            this->SampleMask = 0xFFFFFFFFu;
+            this->RasterizerState = CD3DX12_RASTERIZER_DESC(CD3DX12_DEFAULT());
+            this->DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC();
+            this->PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            this->NumRenderTargets = 0;
+            this->DSVFormat = DXGI_FORMAT_UNKNOWN;
+            this->SampleDesc = CD3DX12_PIPELINE_STATE_STREAM_SAMPLE_DESC();
+            this->NodeMask = 0;
+            this->CachedPSO = CD3DX12_PIPELINE_STATE_STREAM_CACHED_PSO();
+            this->Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+        }
+
+        void SetRootSignature(RootSignature& rootSignature);
+        void SetAmplificationShader(ShaderBlob& amplitificationShader);
+        void SetMeshShader(ShaderBlob& meshShader);
+        void SetPixelShader(ShaderBlob& pixelShader);
+
+    public:
         String Name;
     };
 } // namespace ig

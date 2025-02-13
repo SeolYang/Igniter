@@ -76,4 +76,40 @@ namespace ig
         IG_CHECK(rootSignature);
         this->pRootSignature = &rootSignature.GetNative();
     }
+
+    void MeshShaderPipelineStateDesc::SetRootSignature(RootSignature& rootSignature)
+    {
+        IG_CHECK(rootSignature);
+        this->pRootSignature = &rootSignature.GetNative();
+    }
+    
+    void MeshShaderPipelineStateDesc::SetAmplificationShader(ShaderBlob& amplitificationShader)
+    {
+        IG_CHECK(amplitificationShader.GetType() == EShaderType::Amplification);
+
+        auto& nativeBlob = amplitificationShader.GetNative();
+        IG_CHECK(nativeBlob.GetBufferPointer() != nullptr);
+        IG_CHECK(nativeBlob.GetBufferSize() > 0);
+        this->AS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
+    }
+    
+    void MeshShaderPipelineStateDesc::SetMeshShader(ShaderBlob& meshShader)
+    {
+        IG_CHECK(meshShader.GetType() == EShaderType::Mesh);
+
+        auto& nativeBlob = meshShader.GetNative();
+        IG_CHECK(nativeBlob.GetBufferPointer() != nullptr);
+        IG_CHECK(nativeBlob.GetBufferSize() > 0);
+        this->MS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
+    }
+    
+    void MeshShaderPipelineStateDesc::SetPixelShader(ShaderBlob& pixelShader)
+    {
+        IG_CHECK(pixelShader.GetType() == EShaderType::Pixel);
+
+        auto& nativeBlob = pixelShader.GetNative();
+        IG_CHECK(nativeBlob.GetBufferPointer() != nullptr);
+        IG_CHECK(nativeBlob.GetBufferSize() > 0);
+        this->PS = CD3DX12_SHADER_BYTECODE(nativeBlob.GetBufferPointer(), nativeBlob.GetBufferSize());
+    }
 } // namespace ig

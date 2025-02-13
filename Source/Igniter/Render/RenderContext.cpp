@@ -89,6 +89,18 @@ namespace ig
         return pipelineStatePackage.Storage.Create(std::move(newPipelineState).value());
     }
 
+    Handle<PipelineState> RenderContext::CreatePipelineState(const MeshShaderPipelineStateDesc& desc)
+    {
+        Option<PipelineState> newPipelineState = gpuDevice.CreateMeshShaderPipelineState(desc);
+        if (!newPipelineState)
+        {
+            return Handle<PipelineState>{};
+        }
+
+        ReadWriteLock pipelineStateStorageLock{pipelineStatePackage.StorageMutex};
+        return pipelineStatePackage.Storage.Create(std::move(newPipelineState).value());
+    }
+
     Handle<GpuView> RenderContext::CreateConstantBufferView(const Handle<GpuBuffer> buffer)
     {
         ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
