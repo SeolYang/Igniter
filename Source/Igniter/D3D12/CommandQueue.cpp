@@ -2,22 +2,20 @@
 #include "Igniter/Core/ContainerUtils.h"
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/CommandList.h"
-#include "Igniter/D3D12/GpuDevice.h"
-#include "Igniter/D3D12/GpuFence.h"
 
 namespace ig
 {
-    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType)
-        : native(std::move(newNativeQueue))
-        , type(specifiedType)
-    {
-    }
+    CommandQueue::CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, GpuFence fence, const EQueueType specifiedType)
+        : type(specifiedType)
+        , native(std::move(newNativeQueue))
+        , fence(std::move(fence))
+    {}
 
     CommandQueue::CommandQueue(CommandQueue&& other) noexcept
-        : native(std::move(other.native))
-        , type(other.type)
-    {
-    }
+        : type(other.type)
+        , native(std::move(other.native))
+        , fence(std::move(other.fence))
+    {}
 
     CommandQueue::~CommandQueue() {}
 
@@ -27,10 +25,14 @@ namespace ig
         IG_CHECK(!cmdLists.empty());
 
         auto toNative = views::all(cmdLists) |
-                        views::filter([](CommandList* cmdList)
-                                      { return cmdList != nullptr; }) |
-                        views::transform([](CommandList* cmdList)
-                                         { return &cmdList->GetNative(); });
+            views::filter([](CommandList* cmdList)
+            {
+                return cmdList != nullptr;
+            }) |
+            views::transform([](CommandList* cmdList)
+            {
+                return &cmdList->GetNative();
+            });
 
         Vector<CommandList::NativeType*> natives = ToVector(toNative);
         native->ExecuteCommandLists(static_cast<U32>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
@@ -50,11 +52,11 @@ namespace ig
         return true;
     }
 
-    GpuSyncPoint CommandQueue::MakeSyncPointWithSignal(GpuFence& fence)
+    GpuSyncPoint CommandQueue::MakeSyncPointWithSignal(GpuFence& externalFence)
     {
         IG_CHECK(native);
-        IG_CHECK(fence);
-        GpuSyncPoint syncPoint{fence.MakeSyncPoint()};
+        IG_CHECK(externalFence);
+        GpuSyncPoint syncPoint{externalFence.MakeSyncPoint()};
         if (!syncPoint.IsValid())
         {
             return GpuSyncPoint::Invalid();

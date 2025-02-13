@@ -147,7 +147,7 @@ namespace ig
         }
 
         // COMMON Layout 인 상태에서 텍스처가 GPU 메모리 상에서 어떻게 배치되어있는지
-        GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
 
         const GpuCopyableFootprints destCopyableFootprints =
             renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, static_cast<U32>(numSubresources), 0);
@@ -162,7 +162,6 @@ namespace ig
         texUploadSync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        GpuFence& mainGfxFence = renderContext.GetMainGfxFence();
         auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
         {
             cmdList->Open();
@@ -175,7 +174,7 @@ namespace ig
         }
         CommandList* cmdLists[1] = {(CommandList*)cmdList};
         mainGfxQueue.ExecuteCommandLists(cmdLists);
-        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
+        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal()};
         barrierSync.WaitOnCpu();
 
         const Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -255,7 +254,7 @@ namespace ig
             .SlicePitch = SlicePitch,
         };
 
-        GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
         const GpuCopyableFootprints dstCopyableFootprints{renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0)};
         UploadContext uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
         GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
@@ -267,7 +266,6 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        GpuFence& mainGfxFence = renderContext.GetMainGfxFence();
         auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
             cmdList->Open();
@@ -280,7 +278,7 @@ namespace ig
         }
         CommandList* cmdLists[1] = {(CommandList*)cmdList};
         mainGfxQueue.ExecuteCommandLists(cmdLists);
-        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
+        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal()};
         barrierSync.WaitOnCpu();
 
         Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
@@ -357,7 +355,7 @@ namespace ig
         };
         Vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
 
-        GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
         const GpuCopyableFootprints dstCopyableFootprints{renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0)};
         UploadContext uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);
@@ -366,7 +364,6 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        GpuFence& mainGfxFence = renderContext.GetMainGfxFence();
         auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
         {
             cmdList->Open();
@@ -380,7 +377,7 @@ namespace ig
 
         CommandList* cmdLists[1]{(CommandList*)cmdList};
         mainGfxQueue.ExecuteCommandLists(cmdLists);
-        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence)};
+        GpuSyncPoint barrierSync{mainGfxQueue.MakeSyncPointWithSignal()};
         barrierSync.WaitOnCpu();
 
         const Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,

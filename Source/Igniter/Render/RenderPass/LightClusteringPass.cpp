@@ -98,7 +98,7 @@ namespace ig
         depthBinsBufferDesc.DebugName = "DepthBinInitBuffer"_fs;
         depthBinInitBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
         GpuBuffer* depthBinInitBufferPtr = renderContext.Lookup(depthBinInitBuffer);
-        GpuUploader& gpuUploader = renderContext.GetGpuUploader();
+        GpuUploader& gpuUploader = renderContext.GetNonCriticalUploader();
         UploadContext uploadCtx = gpuUploader.Reserve(depthBinsBufferDesc.GetSizeAsBytes());
         DepthBin* uploadDataPtr = reinterpret_cast<DepthBin*>(uploadCtx.GetOffsettedCpuAddress());
         for (Index idx = 0; idx < kNumDepthBins; ++idx)

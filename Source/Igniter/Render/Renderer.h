@@ -2,6 +2,7 @@
 #include "Igniter/D3D12/GpuSyncPoint.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/Render/GpuStorage.h"
+#include "Igniter/Render/Mesh.h"
 
 namespace ig
 {
@@ -20,7 +21,7 @@ namespace ig
 
     class Renderer final
     {
-      public:
+    public:
         Renderer(const Window& window, RenderContext& renderContext, const SceneProxy& sceneProxy);
         Renderer(const Renderer&) = delete;
         Renderer(Renderer&&) noexcept = delete;
@@ -32,18 +33,22 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx);
         GpuSyncPoint Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint);
 
+        /* @test */
         [[nodiscard]] U8 GetMinMeshLod() const noexcept { return minMeshLod; }
-        void SetMinMeshLod(U8 newMinMeshLod) { minMeshLod = newMinMeshLod; }
+        void SetMinMeshLod(const U8 newMinMeshLod) { minMeshLod = std::min(newMinMeshLod, Mesh::kMaxMeshLevelOfDetails); }
 
         /* #sy_todo 내용을 직접 밖으로 노출하지 말고, Statistics struct를 만들어서 채워서 내보내기 */
         [[nodiscard]] const TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
 
-      private:
+    private:
+        void ResizeDispatchBuffer([[maybe_unused]] const U32 newCapacity) {}
+        
+    private:
         const Window* window = nullptr;
         RenderContext* renderContext = nullptr;
         const SceneProxy* sceneProxy = nullptr;
 
-        // #sy_test
+        /* @test */
         U8 minMeshLod = 0;
 
         Viewport mainViewport{};
@@ -57,5 +62,20 @@ namespace ig
 
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
         Ptr<class ImGuiRenderPass> imguiRenderPass;
+
+        /* @test Mesh Instance Indices를 통한 Culling/LOD 선택/IndirectCommandArguments 생성 테스트 */
+        Ptr<ShaderBlob> meshInstancePassShader;
+        Ptr<PipelineState> meshInstancePassPso;
+        constexpr static U32 kInitDispatchBufferCapacity = 8192Ui64;
+        U32 dispatchBufferCapacity = 0;
+        Handle<GpuBuffer> opaqueMeshInstanceDispatchBuffer;
+        Handle<GpuBuffer> transparentMeshInstanceDispatchBuffer;
+        /* @pending 별도로 각 타입별로 분리된 Mesh Instance의 Indices를 저장 */
+        //Handle<GpuBuffer> opaqueMeshInstanceBucket;
+        //Handle<GpuBuffer> transparentMeshInstanceBucket;
+        ////////////////////////////////////////////////////////////////
+        /* HLSL.DispatchMeshInstance 및 HLSL.DispatchMeshInstancePayload 구조체 참고 */
+        Ptr<CommandSignature> meshInstanceDispatchCmdSignature;
+        /************************************/
     };
 } // namespace ig

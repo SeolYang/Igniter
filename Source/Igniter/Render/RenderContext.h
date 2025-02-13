@@ -42,10 +42,7 @@ namespace ig
         [[nodiscard]] CommandListPool& GetMainGfxCommandListPool() { return mainGfxCmdListPool; }
         [[nodiscard]] CommandListPool& GetAsyncComputeCommandListPool() { return asyncComputeCmdListPool; }
         [[nodiscard]] CommandListPool& GetAsyncCopyCommandListPool() { return asyncCopyCmdListPool; }
-        [[nodiscard]] GpuFence& GetMainGfxFence() { return *mainGfxFence.Resources[currentLocalFrameIdx]; }
-        [[nodiscard]] GpuFence& GetAsyncComputeFence() { return *asyncComputeFence.Resources[currentLocalFrameIdx]; }
-        [[nodiscard]] GpuFence& GetAsyncCopyFence() { return *asyncCopyFence.Resources[currentLocalFrameIdx]; }
-        [[nodiscard]] GpuUploader& GetGpuUploader() { return gpuUploader; }
+        [[nodiscard]] GpuUploader& GetNonCriticalUploader() { return nonCriticalPathGpuUploader; }
         [[nodiscard]] UnifiedMeshStorage& GetUnifiedMeshStorage() { return *unifiedMeshStorage; }
         [[nodiscard]] Swapchain& GetSwapchain() { return *swapchain; }
         [[nodiscard]] const Swapchain& GetSwapchain() const { return *swapchain; }
@@ -93,13 +90,10 @@ namespace ig
 
         CommandQueue mainGfxQueue;
         CommandListPool mainGfxCmdListPool;
-        InFlightFramesResource<Ptr<GpuFence>> mainGfxFence;
         CommandQueue asyncComputeQueue;
         CommandListPool asyncComputeCmdListPool;
-        InFlightFramesResource<Ptr<GpuFence>> asyncComputeFence;
         CommandQueue asyncCopyQueue;
         CommandListPool asyncCopyCmdListPool;
-        InFlightFramesResource<Ptr<GpuFence>> asyncCopyFence;
 
         DeferredResourceManagePackage<GpuBuffer> bufferPackage;
         DeferredResourceManagePackage<GpuTexture> texturePackage;
@@ -107,7 +101,7 @@ namespace ig
         DeferredResourceManagePackage<GpuView> gpuViewPackage;
 
         GpuViewManager gpuViewManager;
-        GpuUploader gpuUploader;
+        GpuUploader nonCriticalPathGpuUploader;
         Ptr<UnifiedMeshStorage> unifiedMeshStorage;
 
         Ptr<Swapchain> swapchain;

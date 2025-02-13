@@ -13,11 +13,6 @@ namespace ig
         : gpuDevice(gpuDevice)
         , copyQueue(MakePtr<CommandQueue>(gpuDevice.CreateCommandQueue("GpuUploader_CopyQueue", EQueueType::Copy).value()))
     {
-        for (LocalFrameIndex frameIdx = 0; frameIdx < NumFramesInFlight; ++frameIdx)
-        {
-            copyFence.Resources[frameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("GpuUploaderFence{}", frameIdx)));
-        }
-
         ResizeUnsafe(InitialBufferCapacity);
         for (Size idx = 0; idx < RequestCapacity; ++idx)
         {
@@ -161,7 +156,7 @@ namespace ig
 
         CommandList* cmdListPtrs[] = {request.CmdList.get()};
         copyQueue->ExecuteCommandLists(cmdListPtrs);
-        request.Sync = copyQueue->MakeSyncPointWithSignal(*copyFence.Resources[currentLocalFrameIdx]);
+        request.Sync = copyQueue->MakeSyncPointWithSignal();
         IG_CHECK(request.Sync.IsValid());
         context.Reset();
         reservedThreadID.store(InvalidThreadID, std::memory_order::release);
@@ -235,11 +230,7 @@ namespace ig
 
     void GpuUploader::FlushQueue()
     {
-        for (Ptr<GpuFence>& fence : copyFence.Resources)
-        {
-            GpuSyncPoint copyQueueFlushSync = copyQueue->MakeSyncPointWithSignal(*fence);
-            copyQueueFlushSync.WaitOnCpu();
-        }
+        copyQueue->MakeSyncPointWithSignal().WaitOnCpu();
     }
 
     void UploadContext::WriteData(

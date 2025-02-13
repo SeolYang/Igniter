@@ -13,16 +13,10 @@ namespace ig
         , asyncCopyQueue(*gpuDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy))
         , asyncCopyCmdListPool(gpuDevice, EQueueType::Copy)
         , gpuViewManager(gpuDevice)
-        , gpuUploader(gpuDevice)
+        , nonCriticalPathGpuUploader(gpuDevice)
         , unifiedMeshStorage(MakePtr<UnifiedMeshStorage>(*this))
         , swapchain(MakePtr<Swapchain>(window, *this))
     {
-        for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
-        {
-            mainGfxFence.Resources[localFrameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("MainGfxFence{}", localFrameIdx)));
-            asyncComputeFence.Resources[localFrameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("AsyncComputeFence{}", localFrameIdx)));
-            asyncCopyFence.Resources[localFrameIdx] = MakePtr<GpuFence>(*gpuDevice.CreateFence(std::format("AsyncCopyFence{}", localFrameIdx)));
-        }
     }
 
     RenderContext::~RenderContext()
@@ -363,12 +357,9 @@ namespace ig
 
     void RenderContext::FlushQueues()
     {
-        for (LocalFrameIndex localFrameIdx = 0; localFrameIdx < NumFramesInFlight; ++localFrameIdx)
-        {
-            mainGfxQueue.MakeSyncPointWithSignal(*mainGfxFence.Resources[localFrameIdx]).WaitOnCpu();
-            asyncComputeQueue.MakeSyncPointWithSignal(*asyncComputeFence.Resources[localFrameIdx]).WaitOnCpu();
-            asyncCopyQueue.MakeSyncPointWithSignal(*asyncCopyFence.Resources[localFrameIdx]).WaitOnCpu();
-        }
+        mainGfxQueue.MakeSyncPointWithSignal().WaitOnCpu();
+        asyncComputeQueue.MakeSyncPointWithSignal().WaitOnCpu();
+        asyncCopyQueue.MakeSyncPointWithSignal().WaitOnCpu();
     }
 
     void RenderContext::PreRender(const LocalFrameIndex localFrameIdx, GpuSyncPoint& prevFrameLastSyncPoint)
@@ -377,7 +368,7 @@ namespace ig
         mainGfxCmdListPool.PreRender(localFrameIdx);
         asyncComputeCmdListPool.PreRender(localFrameIdx);
         asyncCopyCmdListPool.PreRender(localFrameIdx);
-        gpuUploader.PreRender(localFrameIdx);
+        nonCriticalPathGpuUploader.PreRender(localFrameIdx);
 
         /* Flush Buffer Package [local frame] pending destroy */
         {

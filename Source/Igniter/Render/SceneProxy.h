@@ -60,28 +60,37 @@ namespace ig
                 WorkGroupCmdLists.resize(numWorkers);
             }
 
+            ProxyPackage(const ProxyPackage&) = delete;
+            ProxyPackage(ProxyPackage&&) noexcept = delete;
+
             ~ProxyPackage()
             {
-                Storage->ForceReset();
+                if (Storage != nullptr)
+                {
+                    Storage->ForceReset();
+                }
             }
+
+            ProxyPackage& operator=(const ProxyPackage&) = delete;
+            ProxyPackage& operator=(ProxyPackage&&) noexcept = delete;
 
         public:
             using ProxyMapType = UnorderedMap<Owner, Proxy>;
 
-            Ptr<GpuStorage> Storage;
-            ProxyMapType ProxyMap;
-            Vector<Owner> PendingDestructions;
+            Ptr<GpuStorage> Storage{};
+            ProxyMapType ProxyMap{};
+            Vector<Owner> PendingDestructions{};
 
-            InFlightFramesResource<Ptr<GpuBuffer>> StagingBuffer;
-            InFlightFramesResource<U8*> MappedStagingBuffer;
-            InFlightFramesResource<Size> StagingBufferSize;
+            InFlightFramesResource<Ptr<GpuBuffer>> StagingBuffer{};
+            InFlightFramesResource<U8*> MappedStagingBuffer{};
+            InFlightFramesResource<Size> StagingBufferSize{};
 
-            Vector<Vector<std::pair<Owner, Proxy>>> PendingProxyGroups;
-            Vector<Vector<Owner>> PendingReplicationGroups;
+            Vector<Vector<std::pair<Owner, Proxy>>> PendingProxyGroups{};
+            Vector<Vector<Owner>> PendingReplicationGroups{};
 
             // Temporary per replication!
-            Vector<std::pair<Size, Size>> WorkGroupStagingBufferRanges; // <Offset, Size>
-            Vector<CommandList*> WorkGroupCmdLists;
+            Vector<std::pair<Size, Size>> WorkGroupStagingBufferRanges{}; // <Offset, Size>
+            Vector<CommandList*> WorkGroupCmdLists{};
         };
 
     public:

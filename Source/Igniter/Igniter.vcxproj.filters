@@ -468,6 +468,7 @@
     <ClInclude Include="Render\Mesh.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GpuStagingBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -707,6 +708,7 @@
     <ClCompile Include="Render\UnifiedMeshStorage.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GpuStagingBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
@@ -728,6 +730,9 @@
       <Filter>Source\Shaders</Filter>
     </None>
     <None Include="..\..\Assets\Shaders\BRDF.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </None>
+    <None Include="..\..\Assets\Shaders\NewTypes.hlsli">
       <Filter>Source\Shaders</Filter>
     </None>
   </ItemGroup>
@@ -772,6 +777,9 @@
       <Filter>Source\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\QuadVertexShader.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\MeshInstancePass.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

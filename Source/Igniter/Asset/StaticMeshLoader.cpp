@@ -103,7 +103,7 @@ namespace ig
 
         meshopt_encodeVertexVersion(0);
 
-        GpuUploader& gpuUploader{renderContext.GetGpuUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
         UnifiedMeshStorage& unifiedMeshStorage = renderContext.GetUnifiedMeshStorage();
 
         const auto kDeleter = [&unifiedMeshStorage](Mesh* mesh)

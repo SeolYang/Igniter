@@ -8,13 +8,12 @@ namespace ig
 {
     class GpuDevice;
     class CommandList;
-    class GpuFence;
 
     class CommandQueue final
     {
         friend class GpuDevice;
 
-      public:
+    public:
         CommandQueue(const CommandQueue&) = delete;
         CommandQueue(CommandQueue&& other) noexcept;
         ~CommandQueue();
@@ -31,17 +30,20 @@ namespace ig
 
         void ExecuteCommandLists(const std::span<CommandList*> cmdLists);
         bool Signal(GpuSyncPoint& syncPoint);
-        GpuSyncPoint MakeSyncPointWithSignal(GpuFence& fence);
+        GpuSyncPoint MakeSyncPointWithSignal() { return MakeSyncPointWithSignal(fence);}
         void Wait(GpuSyncPoint& syncPoint);
 
-      private:
-        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, const EQueueType specifiedType);
+    private:
+        CommandQueue(ComPtr<ID3D12CommandQueue> newNativeQueue, GpuFence fence, const EQueueType specifiedType);
+        /* @note 추후 별도의 외부 Fence를 사용할 상황을 대비해 남겨둠. */
+        GpuSyncPoint MakeSyncPointWithSignal(GpuFence& externalFence);
 
-      private:
+    private:
         static constexpr Size RecommendedMinNumCommandLists = 16;
 
-      private:
+    private:
+        EQueueType type;
         ComPtr<ID3D12CommandQueue> native;
-        const EQueueType type;
+        GpuFence fence;
     };
 } // namespace ig

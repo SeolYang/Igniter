@@ -17,6 +17,7 @@
 #include "Igniter/D3D12/CommandSignatureDesc.h"
 
 IG_DECLARE_LOG_CATEGORY(GpuDeviceLog);
+
 IG_DEFINE_LOG_CATEGORY(GpuDeviceLog);
 
 namespace ig
@@ -301,7 +302,7 @@ namespace ig
 
         IG_CHECK(newCmdQueue);
         SetObjectName(newCmdQueue.Get(), debugName);
-        return CommandQueue{std::move(newCmdQueue), queueType};
+        return CommandQueue{std::move(newCmdQueue), CreateFence(std::format("{}.Fence", debugName)).value(), queueType};
     }
 
     Option<CommandList> GpuDevice::CreateCommandList(const std::string_view debugName, const EQueueType targetQueueType)
@@ -339,14 +340,16 @@ namespace ig
         const D3D12_ROOT_PARAMETER rootParam{
             .ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
             .Constants = {.ShaderRegister = 0, .RegisterSpace = 0, .Num32BitValues = NumReservedConstants},
-            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL};
+            .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL
+        };
 
         const D3D12_ROOT_SIGNATURE_DESC desc{
             .NumParameters = 1,
             .pParameters = &rootParam,
             .NumStaticSamplers = 0,
             .pStaticSamplers = nullptr,
-            .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED};
+            .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED
+        };
 
         ComPtr<ID3DBlob> errorBlob;
         ComPtr<ID3DBlob> rootSignatureBlob;
@@ -417,7 +420,8 @@ namespace ig
             .Type = targetDescriptorHeapType,
             .NumDescriptors = numDescriptors,
             .Flags = bIsShaderVisibleDescriptorHeap ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-            .NodeMask = 0};
+            .NodeMask = 0
+        };
 
         ComPtr<ID3D12DescriptorHeap> newDescriptorHeap;
         if (const HRESULT result = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap)); !SUCCEEDED(result))
@@ -430,7 +434,8 @@ namespace ig
         SetObjectName(newDescriptorHeap.Get(), debugName);
         return DescriptorHeap{
             descriptorHeapType, std::move(newDescriptorHeap), bIsShaderVisibleDescriptorHeap, numDescriptors,
-            GetDescriptorHandleIncrementSize(descriptorHeapType)};
+            GetDescriptorHandleIncrementSize(descriptorHeapType)
+        };
     }
 
     Option<GpuFence> GpuDevice::CreateFence(const std::string_view debugName)
@@ -480,7 +485,7 @@ namespace ig
         ComPtr<D3D12MA::Allocation> allocation{};
         ComPtr<ID3D12Resource> resource{};
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &bufferDesc, D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr, 0, nullptr,
-                                                              allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+                allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDeviceLog, Error, "Failed to create buffer resource. HRESULT: {:#X}", result);
@@ -517,7 +522,7 @@ namespace ig
         ComPtr<ID3D12Resource> resource{};
         IG_CHECK(textureDesc.InitialLayout != D3D12_BARRIER_LAYOUT_UNDEFINED);
         if (const HRESULT result = allocator->CreateResource3(&allocationDesc, &textureDesc, textureDesc.InitialLayout,
-                                                              clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
+                clearValue ? &clearValue.value() : nullptr, 0, nullptr, allocation.GetAddressOf(), IID_PPV_ARGS(&resource));
             !SUCCEEDED(result))
         {
             IG_LOG(GpuDeviceLog, Error, "Failed to create texture resource. HRESULT: {:#X}", result);
@@ -609,7 +614,8 @@ namespace ig
         IG_CHECK((offset + sizeInBytes) < buffer.GetDesc().GetSizeAsBytes());
 
         const D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{
-            .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<U32>(sizeInBytes)};
+            .BufferLocation = buffer.GetNative().GetGPUVirtualAddress() + offset, .SizeInBytes = static_cast<U32>(sizeInBytes)
+        };
 
         device->CreateConstantBufferView(&cbvDesc, gpuView.CpuHandle);
     }
@@ -716,7 +722,8 @@ namespace ig
             .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
             .ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
             .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-            .Texture2D = {.MipLevels = 1}};
+            .Texture2D = {.MipLevels = 1}
+        };
         device->CreateShaderResourceView(nullptr, &srvDesc, gpuView.CpuHandle);
     }
 

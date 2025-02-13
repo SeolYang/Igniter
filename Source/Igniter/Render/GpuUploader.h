@@ -126,7 +126,6 @@ namespace ig
       private:
         GpuDevice& gpuDevice;
         Ptr<CommandQueue> copyQueue{};
-        InFlightFramesResource<Ptr<GpuFence>> copyFence{};
 
         LocalFrameIndex currentLocalFrameIdx;
 

@@ -151,7 +151,7 @@ namespace ig
 
         CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
         IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
-        GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal(renderContext->GetAsyncCopyFence());
+        GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal();
         return syncPoint;
     }
 

@@ -103,8 +103,7 @@ namespace ig
         depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
 
         depthStencil = renderContext.CreateTexture(depthStencilDesc);
-        dsv = renderContext.CreateDepthStencilView(depthStencil,
-            D3D12_TEX2D_DSV{.MipSlice = 0});
+        dsv = renderContext.CreateDepthStencilView(depthStencil, D3D12_TEX2D_DSV{.MipSlice = 0});
 
         GpuBufferDesc zeroFilledBufferDesc{};
         zeroFilledBufferDesc.AsUploadBuffer(kZeroFilledBufferSize);
@@ -115,17 +114,37 @@ namespace ig
         zeroFilledBuffer->Unmap();
 
         imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);
+
+        const ShaderCompileDesc meshInstancePassShaderDesc
+        {
+            .SourcePath = "Assets/Shaders/MeshInstancePass.hlsl"_fs,
+            .Type = EShaderType::Compute,
+        };
+        meshInstancePassShader = MakePtr<ShaderBlob>(meshInstancePassShaderDesc);
+        ComputePipelineStateDesc meshInstancePassPsoDesc{};
+        meshInstancePassPsoDesc.Name = "MeshInstancePassPSO"_fs;
+        meshInstancePassPsoDesc.SetComputeShader(*meshInstancePassShader);
+        meshInstancePassPsoDesc.SetRootSignature(*bindlessRootSignature);
+        meshInstancePassPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(meshInstancePassPsoDesc).value());
+        ResizeDispatchBuffer(kInitDispatchBufferCapacity);
     }
 
     Renderer::~Renderer()
     {
-        renderContext->DestroyGpuView(dsv);
-        renderContext->DestroyTexture(depthStencil);
+        if (dsv)
+        {
+            renderContext->DestroyGpuView(dsv);
+        }
+        if (depthStencil)
+        {
+            renderContext->DestroyTexture(depthStencil);
+        }
     }
 
     void Renderer::PreRender(const LocalFrameIndex localFrameIdx)
     {
         tempConstantBufferAllocator->Reset(localFrameIdx);
+        ResizeDispatchBuffer(sceneProxy->GetNumMeshInstances());
     }
 
     GpuSyncPoint Renderer::Render(const LocalFrameIndex localFrameIdx, [[maybe_unused]] const World& world, [[maybe_unused]] GpuSyncPoint sceneProxyRepSyncPoint)
@@ -138,9 +157,12 @@ namespace ig
         GpuTexture* backBuffer = renderContext->Lookup(swapchain.GetBackBuffer());
         const GpuView* backBufferRtv = renderContext->Lookup(swapchain.GetBackBufferRtv());
 
-        CommandQueue& mainGfxQueue{renderContext->GetMainGfxQueue()};
-        GpuFence& mainGfxFence = renderContext->GetMainGfxFence();
+        CommandQueue& mainGfxQueue = renderContext->GetMainGfxQueue();
         CommandListPool& mainGfxCmdListPool = renderContext->GetMainGfxCommandListPool();
+        // CommandQueue& asyncComputeQueue = renderContext->GetAsyncComputeQueue();
+        // GpuFence& asyncComputeFence = renderContext->GetAsyncComputeFence();
+        // CommandListPool& asyncComputeCmdListPool = renderContext->GetAsyncComputeCommandListPool();
+        
         auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
         renderCmdList->Open();
 
@@ -172,12 +194,12 @@ namespace ig
             imguiRenderPass->Execute(localFrameIdx);
 
             CommandList* cmdLists[]{imguiRenderCmdList};
-            GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
+            GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
             mainGfxQueue.Wait(prevPassSyncPoint);
             mainGfxQueue.ExecuteCommandLists(cmdLists);
         }
 
         swapchain.Present();
-        return mainGfxQueue.MakeSyncPointWithSignal(mainGfxFence);
+        return mainGfxQueue.MakeSyncPointWithSignal();
     }
 } // namespace ig
