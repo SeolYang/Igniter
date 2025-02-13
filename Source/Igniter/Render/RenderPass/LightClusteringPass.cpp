@@ -98,7 +98,7 @@ namespace ig
         depthBinsBufferDesc.DebugName = "DepthBinInitBuffer"_fs;
         depthBinInitBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
         GpuBuffer* depthBinInitBufferPtr = renderContext.Lookup(depthBinInitBuffer);
-        GpuUploader& gpuUploader = renderContext.GetNonCriticalUploader();
+        GpuUploader& gpuUploader = renderContext.GetNonFrameCriticalGpuUploader();
         UploadContext uploadCtx = gpuUploader.Reserve(depthBinsBufferDesc.GetSizeAsBytes());
         DepthBin* uploadDataPtr = reinterpret_cast<DepthBin*>(uploadCtx.GetOffsettedCpuAddress());
         for (Index idx = 0; idx < kNumDepthBins; ++idx)
@@ -106,7 +106,7 @@ namespace ig
             uploadDataPtr[idx] = DepthBin{.FirstLightIdx = 0xFFFFFFFF, .LastLightIdx = 0};
         }
         uploadCtx.CopyBuffer(0, depthBinsBufferDesc.GetSizeAsBytes(), *depthBinInitBufferPtr);
-        gpuUploader.Submit(uploadCtx)->WaitOnCpu();
+        gpuUploader.Submit(uploadCtx).WaitOnCpu();
     }
 
     LightClusteringPass::~LightClusteringPass()

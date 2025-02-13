@@ -25,7 +25,7 @@ namespace ig
 
     class RenderContext final
     {
-      public:
+    public:
         explicit RenderContext(const Window& window);
         ~RenderContext();
 
@@ -38,11 +38,12 @@ namespace ig
         [[nodiscard]] GpuDevice& GetGpuDevice() { return gpuDevice; }
         [[nodiscard]] CommandQueue& GetMainGfxQueue() { return mainGfxQueue; }
         [[nodiscard]] CommandQueue& GetAsyncComputeQueue() { return asyncComputeQueue; }
-        [[nodiscard]] CommandQueue& GetAsyncCopyQueue() { return asyncCopyQueue; }
+        [[nodiscard]] CommandQueue& GetFrameCriticalAsyncCopyQueue() { return frameCriticalAsyncCopyQueue; }
+        [[nodiscard]] CommandQueue& GetNonFrameCriticalAsyncCopyQueue() { return nonFrameCriticalAsyncCopyQueue; }
         [[nodiscard]] CommandListPool& GetMainGfxCommandListPool() { return mainGfxCmdListPool; }
         [[nodiscard]] CommandListPool& GetAsyncComputeCommandListPool() { return asyncComputeCmdListPool; }
         [[nodiscard]] CommandListPool& GetAsyncCopyCommandListPool() { return asyncCopyCmdListPool; }
-        [[nodiscard]] GpuUploader& GetNonCriticalUploader() { return nonCriticalPathGpuUploader; }
+        [[nodiscard]] GpuUploader& GetNonFrameCriticalGpuUploader() { return nonFrameCriticalGpuUploader; }
         [[nodiscard]] UnifiedMeshStorage& GetUnifiedMeshStorage() { return *unifiedMeshStorage; }
         [[nodiscard]] Swapchain& GetSwapchain() { return *swapchain; }
         [[nodiscard]] const Swapchain& GetSwapchain() const { return *swapchain; }
@@ -83,16 +84,16 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx, GpuSyncPoint& prevFrameLastSyncPoint);
         void PostRender(const LocalFrameIndex localFrameIdx);
 
-      private:
+    private:
         GpuDevice gpuDevice;
-
         LocalFrameIndex currentLocalFrameIdx{};
 
         CommandQueue mainGfxQueue;
         CommandListPool mainGfxCmdListPool;
         CommandQueue asyncComputeQueue;
         CommandListPool asyncComputeCmdListPool;
-        CommandQueue asyncCopyQueue;
+        CommandQueue frameCriticalAsyncCopyQueue;
+        CommandQueue nonFrameCriticalAsyncCopyQueue;
         CommandListPool asyncCopyCmdListPool;
 
         DeferredResourceManagePackage<GpuBuffer> bufferPackage;
@@ -101,7 +102,10 @@ namespace ig
         DeferredResourceManagePackage<GpuView> gpuViewPackage;
 
         GpuViewManager gpuViewManager;
-        GpuUploader nonCriticalPathGpuUploader;
+        constexpr static Size kFrameCriticalGpuUploaderInitSize = 64Ui64 * 1024Ui64; /* ~64KB */
+        GpuUploader frameCriticalGpuUploader;
+        constexpr static Size kNonFrameCriticalGpuUploaderInitSize = 64Ui64 * 1024Ui64 * 1024Ui64; /* ~64MB */
+        GpuUploader nonFrameCriticalGpuUploader;
         Ptr<UnifiedMeshStorage> unifiedMeshStorage;
 
         Ptr<Swapchain> swapchain;

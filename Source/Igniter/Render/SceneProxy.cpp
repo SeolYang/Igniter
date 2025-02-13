@@ -149,7 +149,7 @@ namespace ig
         taskExecutor->run(rootTaskFlow).wait();
         // 현재 프레임 작업 완료
 
-        CommandQueue& asyncCopyQueue = renderContext->GetAsyncCopyQueue();
+        CommandQueue& asyncCopyQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
         IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
         GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal();
         return syncPoint;
@@ -733,7 +733,7 @@ namespace ig
                     return;
                 }
 
-                CommandQueue& cmdQueue = renderContext->GetAsyncCopyQueue();
+                CommandQueue& cmdQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
                 IG_CHECK(cmdQueue.GetType() == EQueueType::Copy);
                 cmdQueue.ExecuteCommandLists(std::span{
                     compactedCmdLists.data(),
@@ -825,7 +825,7 @@ namespace ig
         IG_CHECK(bufferPtr != nullptr);
         GpuBuffer* stagingBufferPtr = renderContext->Lookup(meshInstanceIndicesStagingBuffer->GetBuffer(localFrameIdx));
         IG_CHECK(stagingBufferPtr != nullptr);
-        CommandQueue& copyQueue = renderContext->GetAsyncCopyQueue();
+        CommandQueue& copyQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
         IG_CHECK(copyQueue.GetType() == EQueueType::Copy);
         CommandListPool& copyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
         auto copyCmdList = copyCmdListPool.Request(localFrameIdx, "UploadMeshInstanceIndices"_fs);

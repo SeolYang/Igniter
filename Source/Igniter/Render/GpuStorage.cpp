@@ -207,7 +207,7 @@ namespace ig
         GpuSyncPoint newSyncPoint{};
         if (!bIsLinearAllocEnabled)
         {
-            CommandQueue& asyncCopyQueue = renderContext.GetAsyncCopyQueue();
+            CommandQueue& asyncCopyQueue = renderContext.GetFrameCriticalAsyncCopyQueue();
             CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
             auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
             copyCmdList->Open();

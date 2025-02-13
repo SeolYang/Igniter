@@ -147,7 +147,7 @@ namespace ig
         }
 
         // COMMON Layout 인 상태에서 텍스처가 GPU 메모리 상에서 어떻게 배치되어있는지
-        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonFrameCriticalGpuUploader()};
 
         const GpuCopyableFootprints destCopyableFootprints =
             renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, static_cast<U32>(numSubresources), 0);
@@ -254,7 +254,7 @@ namespace ig
             .SlicePitch = SlicePitch,
         };
 
-        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonFrameCriticalGpuUploader()};
         const GpuCopyableFootprints dstCopyableFootprints{renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0)};
         UploadContext uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
         GpuTexture* newTexturePtr = renderContext.Lookup(newTexture);
@@ -355,7 +355,7 @@ namespace ig
         };
         Vector<D3D12_SUBRESOURCE_DATA> subresources{subresource};
 
-        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonFrameCriticalGpuUploader()};
         const GpuCopyableFootprints dstCopyableFootprints{renderContext.GetGpuDevice().GetCopyableFootprints(texDesc, 0, 1, 0)};
         UploadContext uploadCtx{gpuUploader.Reserve(dstCopyableFootprints.RequiredSize)};
         uploadCtx.CopyTextureSimple(*newTexturePtr, dstCopyableFootprints, subresources);

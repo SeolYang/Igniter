@@ -10,14 +10,15 @@ namespace ig
         , mainGfxCmdListPool(gpuDevice, EQueueType::Graphics)
         , asyncComputeQueue(*gpuDevice.CreateCommandQueue("AsyncCompute", EQueueType::Compute))
         , asyncComputeCmdListPool(gpuDevice, EQueueType::Compute)
-        , asyncCopyQueue(*gpuDevice.CreateCommandQueue("AsyncCopy", EQueueType::Copy))
+        , frameCriticalAsyncCopyQueue(*gpuDevice.CreateCommandQueue("FrameCriticalAsyncCopyQueue", EQueueType::Copy))
+        , nonFrameCriticalAsyncCopyQueue(*gpuDevice.CreateCommandQueue("NonFrameCriticalAsyncCopyQueue", EQueueType::Copy))
         , asyncCopyCmdListPool(gpuDevice, EQueueType::Copy)
         , gpuViewManager(gpuDevice)
-        , nonCriticalPathGpuUploader(gpuDevice)
+        , frameCriticalGpuUploader("FrameCriticalUploader"_fs, gpuDevice, frameCriticalAsyncCopyQueue, kFrameCriticalGpuUploaderInitSize)
+        , nonFrameCriticalGpuUploader("NonFrameCriticalUploader"_fs, gpuDevice, nonFrameCriticalAsyncCopyQueue, kNonFrameCriticalGpuUploaderInitSize)
         , unifiedMeshStorage(MakePtr<UnifiedMeshStorage>(*this))
         , swapchain(MakePtr<Swapchain>(window, *this))
-    {
-    }
+    {}
 
     RenderContext::~RenderContext()
     {
@@ -359,7 +360,8 @@ namespace ig
     {
         mainGfxQueue.MakeSyncPointWithSignal().WaitOnCpu();
         asyncComputeQueue.MakeSyncPointWithSignal().WaitOnCpu();
-        asyncCopyQueue.MakeSyncPointWithSignal().WaitOnCpu();
+        frameCriticalAsyncCopyQueue.MakeSyncPointWithSignal().WaitOnCpu();
+        nonFrameCriticalAsyncCopyQueue.MakeSyncPointWithSignal().WaitOnCpu();
     }
 
     void RenderContext::PreRender(const LocalFrameIndex localFrameIdx, GpuSyncPoint& prevFrameLastSyncPoint)
@@ -368,7 +370,8 @@ namespace ig
         mainGfxCmdListPool.PreRender(localFrameIdx);
         asyncComputeCmdListPool.PreRender(localFrameIdx);
         asyncCopyCmdListPool.PreRender(localFrameIdx);
-        nonCriticalPathGpuUploader.PreRender(localFrameIdx);
+        frameCriticalGpuUploader.PreRender(localFrameIdx);
+        nonFrameCriticalGpuUploader.PreRender(localFrameIdx);
 
         /* Flush Buffer Package [local frame] pending destroy */
         {
@@ -414,10 +417,9 @@ namespace ig
 
         mainGfxQueue.Wait(prevFrameLastSyncPoint);
         asyncComputeQueue.Wait(prevFrameLastSyncPoint);
-        asyncCopyQueue.Wait(prevFrameLastSyncPoint);
+        frameCriticalAsyncCopyQueue.Wait(prevFrameLastSyncPoint);
     }
 
     void RenderContext::PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx)
-    {
-    }
+    {}
 } // namespace ig

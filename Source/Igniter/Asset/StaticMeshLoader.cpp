@@ -103,7 +103,7 @@ namespace ig
 
         meshopt_encodeVertexVersion(0);
 
-        GpuUploader& gpuUploader{renderContext.GetNonCriticalUploader()};
+        GpuUploader& gpuUploader{renderContext.GetNonFrameCriticalGpuUploader()};
         UnifiedMeshStorage& unifiedMeshStorage = renderContext.GetUnifiedMeshStorage();
 
         const auto kDeleter = [&unifiedMeshStorage](Mesh* mesh)
@@ -171,7 +171,7 @@ namespace ig
                 bVerticesDecodeSucceed = true;
             }
         }
-        GpuSyncPoint verticesUploadSync = gpuUploader.Submit(verticesUploadCtx).value_or(GpuSyncPoint{});
+        GpuSyncPoint verticesUploadSync = gpuUploader.Submit(verticesUploadCtx);
 
         GpuBuffer* indexStorageBufferPtr = renderContext.Lookup(unifiedMeshStorage.GetIndexStorageBuffer());
         IG_CHECK(indexStorageBufferPtr != nullptr);
@@ -233,7 +233,7 @@ namespace ig
             blobOffset += meshletStorageAllocPtr->AllocSize;
 
             IG_CHECK(uploadCtxOffset == requiredUploadCtxSize);
-            lodUploadSyncPoints[lod] = gpuUploader.Submit(lodUploadCtx).value_or(GpuSyncPoint{});
+            lodUploadSyncPoints[lod] = gpuUploader.Submit(lodUploadCtx);
         }
 
         verticesUploadSync.WaitOnCpu();

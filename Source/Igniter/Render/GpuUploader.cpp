@@ -3,28 +3,30 @@
 #include "Igniter/D3D12/CommandQueue.h"
 #include "Igniter/D3D12/CommandList.h"
 #include "Igniter/D3D12/GpuBuffer.h"
-#include "Igniter/D3D12/GpuTexture.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/Render/GpuUploader.h"
 
 namespace ig
 {
-    GpuUploader::GpuUploader(GpuDevice& gpuDevice)
-        : gpuDevice(gpuDevice)
-        , copyQueue(MakePtr<CommandQueue>(gpuDevice.CreateCommandQueue("GpuUploader_CopyQueue", EQueueType::Copy).value()))
+    GpuUploader::GpuUploader(const String name, GpuDevice& gpuDevice, CommandQueue& copyQueue, const Size initRingBufferSize)
+        : name(name)
+        , gpuDevice(&gpuDevice)
+        , copyQueue(&copyQueue)
     {
-        ResizeUnsafe(InitialBufferCapacity);
+        IG_CHECK(copyQueue.GetType() == EQueueType::Copy);
+        IG_CHECK(initRingBufferSize > 0);
+        ResizeUnsafe(initRingBufferSize);
         for (Size idx = 0; idx < RequestCapacity; ++idx)
         {
             uploadRequests[idx].Reset();
             uploadRequests[idx].CmdList =
-                MakePtr<CommandList>(gpuDevice.CreateCommandList(std::format("Gpu Uploader CmdList{}", idx), EQueueType::Copy).value());
+                MakePtr<CommandList>(gpuDevice.CreateCommandList(
+                    std::format("{}.CmdList ({})", name, idx), EQueueType::Copy).value());
         }
     }
 
     GpuUploader::~GpuUploader()
     {
-        FlushQueue();
         if (buffer != nullptr)
         {
             buffer->Unmap();
@@ -136,7 +138,7 @@ namespace ig
         return UploadContext{buffer.get(), bufferCpuAddr, newRequest};
     }
 
-    std::optional<GpuSyncPoint> GpuUploader::Submit(UploadContext& context)
+    GpuSyncPoint GpuUploader::Submit(UploadContext& context)
     {
         const static thread_local Size tuid = ThreadUIDGenerator::GetUID();
         if (reservedThreadID.load(std::memory_order::acquire) != tuid)
@@ -198,7 +200,7 @@ namespace ig
 
     void GpuUploader::ResizeUnsafe(const Size newSize)
     {
-        const Size alignedNewSize = AlignTo(newSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
+        const Size alignedNewSize = AlignTo(newSize + newSize / 2, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
         if (alignedNewSize > bufferCapacity)
         {
             FlushQueue();
@@ -208,11 +210,10 @@ namespace ig
                 bufferCpuAddr = nullptr;
             }
 
-            static const auto UploadBufferName = String("Async Upload Buffer");
             GpuBufferDesc bufferDesc{};
             bufferDesc.AsUploadBuffer(static_cast<U32>(alignedNewSize));
-            bufferDesc.DebugName = UploadBufferName;
-            buffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(bufferDesc).value());
+            bufferDesc.DebugName = String(std::format("{}.Buffer", name));
+            buffer = MakePtr<GpuBuffer>(gpuDevice->CreateBuffer(bufferDesc).value());
 
             bufferCapacity = alignedNewSize;
             bufferHead = 0;
@@ -300,7 +301,7 @@ namespace ig
 
                     const Size dstOffset = dstCopyableFootprints.Layouts[idx].Offset + dstSliceOffset + dstRowOffset;
                     const Size srcOffset = srcSliceOffset + srcRowOffset;
-                    WriteData(reinterpret_cast<const uint8_t*>(srcSubresource.pData), srcOffset, dstOffset, rowSizesInBytes);
+                    WriteData(static_cast<const uint8_t*>(srcSubresource.pData), srcOffset, dstOffset, rowSizesInBytes);
                 }
             }
 
