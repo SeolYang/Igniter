@@ -25,8 +25,7 @@ namespace fe
         , textureImportPanel(ig::MakePtr<TextureImportPanel>())
         , staticMeshImportPanel(ig::MakePtr<StaticMeshImportPanel>())
         , assetInspector(ig::MakePtr<AssetInspector>())
-    {
-    }
+    {}
 
     EditorCanvas::~EditorCanvas() {}
 
@@ -62,8 +61,7 @@ namespace fe
                 }
 
                 if (ImGui::MenuItem("Editor Camera", nullptr, nullptr, false))
-                {
-                }
+                {}
 
                 ImGui::EndMenu();
             }
@@ -129,6 +127,18 @@ namespace fe
             }
 
             ImGui::EndMainMenuBar();
+        }
+
+        /* @test */
+        if (ImGui::Begin("LOD", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ig::Renderer& renderer = ig::Engine::GetRenderer();
+            int lod = renderer.GetMinMeshLod();
+            if (ImGui::SliderInt("LOD", &lod, 0, ig::Mesh::kMaxMeshLevelOfDetails - 1))
+            {
+                renderer.SetMinMeshLod((ig::U8)lod);
+            }
+            ImGui::End();
         }
 
         if (bStatisticsPanelOpend)
