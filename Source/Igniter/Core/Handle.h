@@ -6,17 +6,19 @@ namespace ig
     template <typename Ty>
     struct Handle final
     {
-      public:
+    public:
         Handle() noexcept = default;
+
         explicit Handle(const uint64_t newValue)
             : Value(newValue)
-        {
-        }
+        {}
+
         Handle(const Handle&) noexcept = default;
+
         Handle(Handle&& other) noexcept
             : Value(std::exchange(other.Value, NullValue))
-        {
-        }
+        {}
+
         ~Handle() = default;
 
         Handle& operator=(const Handle&) noexcept = default;
@@ -32,10 +34,10 @@ namespace ig
         [[nodiscard]] bool IsNull() const noexcept { return Value == NullValue; }
         [[nodiscard]] U64 GetHash() const noexcept { return Value; }
 
-      private:
+    private:
         constexpr static uint64_t NullValue{std::numeric_limits<uint64_t>::max()};
 
-      public:
+    public:
         uint64_t Value{NullValue};
     };
 } // namespace ig
@@ -43,6 +45,6 @@ namespace ig
 template <typename Ty>
 struct std::hash<ig::Handle<Ty>>
 {
-  public:
+public:
     ig::Size operator()(const ig::Handle<Ty>& handle) const noexcept { return handle.GetHash(); }
 };

@@ -12,9 +12,7 @@
 
 /* Private Structures */
 namespace ig
-{
-
-} // namespace ig
+{} // namespace ig
 
 namespace ig
 {
@@ -26,11 +24,13 @@ namespace ig
 
         const ShaderCompileDesc vsDesc{
             .SourcePath = "Assets/Shaders/BasicVertexShader.hlsl"_fs,
-            .Type = EShaderType::Vertex};
+            .Type = EShaderType::Vertex
+        };
 
         const ShaderCompileDesc psDesc{
             .SourcePath = "Assets/Shaders/BasicPixelShader.hlsl"_fs,
-            .Type = EShaderType::Pixel};
+            .Type = EShaderType::Pixel
+        };
 
         vs = MakePtr<ShaderBlob>(vsDesc);
         ps = MakePtr<ShaderBlob>(psDesc);
@@ -51,8 +51,7 @@ namespace ig
     }
 
     TestForwardShadingPass::~TestForwardShadingPass()
-    {
-    }
+    {}
 
     void TestForwardShadingPass::SetParams(const TestForwardShadingPassParams newParams)
     {

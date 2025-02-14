@@ -400,7 +400,7 @@ namespace ig
         IG_CHECK(device);
         IG_CHECK(desc.pRootSignature != nullptr);
         IG_CHECK(desc.CS.pShaderBytecode != nullptr && desc.CS.BytecodeLength > 0);
-        
+
         ComPtr<ID3D12PipelineState> newPipelineState{};
         if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
             !SUCCEEDED(result))
@@ -420,7 +420,7 @@ namespace ig
         IG_CHECK(desc.pRootSignature != nullptr);
         IG_CHECK(desc.AS.pShaderBytecode != nullptr && desc.AS.BytecodeLength > 0);
         IG_CHECK(desc.MS.pShaderBytecode != nullptr && desc.MS.BytecodeLength > 0);
-        
+
         auto psoStream = CD3DX12_PIPELINE_MESH_STATE_STREAM(desc);
         const D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc{
             .SizeInBytes = sizeof(psoStream),

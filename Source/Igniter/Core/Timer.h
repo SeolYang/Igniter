@@ -6,7 +6,7 @@ namespace ig
     // @dependency	None
     class Timer final
     {
-      public:
+    public:
         Timer() = default;
         Timer(const Timer&) = delete;
         Timer(Timer&&) noexcept = delete;
@@ -54,7 +54,7 @@ namespace ig
             return std::chrono::duration_cast<T>(std::chrono::system_clock::now().time_since_epoch()).count();
         }
 
-      private:
+    private:
         std::chrono::steady_clock::time_point begin = std::chrono::high_resolution_clock::now();
         std::chrono::nanoseconds deltaTime = std::chrono::nanoseconds(0);
 
@@ -65,11 +65,11 @@ namespace ig
 
     struct TempTimer
     {
-      public:
+    public:
         void Begin() { begin = Timer::Now(); }
         Size End() const { return Timer::Now() - begin; }
 
-      public:
+    public:
         Size begin = 0;
     };
 } // namespace ig

@@ -7,8 +7,8 @@ namespace ig
     inline U32 EncodeNormalX8Y8Z8(const Vector3& normal)
     {
         return (U32)((normal.x + 1.f) * 127.5f) |
-               ((U32)((normal.y + 1.f) * 127.5f) << 8) |
-               ((U32)((normal.z + 1.f) * 127.5f) << 16);
+            ((U32)((normal.y + 1.f) * 127.5f) << 8) |
+            ((U32)((normal.z + 1.f) * 127.5f) << 16);
     }
 
     inline Vector3 DecodeNormalX8Y8Z8(const U32 encodedNormal)
@@ -17,15 +17,16 @@ namespace ig
         return Vector3{
             ((F32)(encodedNormal & 0xFF) * kInvFactor) - 1.f,
             ((F32)((encodedNormal >> 8) & 0xFF) * kInvFactor) - 1.f,
-            ((F32)((encodedNormal >> 16) & 0xFF) * kInvFactor) - 1.f};
+            ((F32)((encodedNormal >> 16) & 0xFF) * kInvFactor) - 1.f
+        };
     }
 
     /* [-1, 1] -> [0, 1023] */
     inline U32 EncodeNormalX10Y10Z10(const Vector3& normal)
     {
         return (U32)((normal.x + 1.f) * 511.5f) |
-               ((U32)((normal.y + 1.f) * 511.5f) << 10) |
-               ((U32)((normal.z + 1.f) * 511.5f) << 20);
+            ((U32)((normal.y + 1.f) * 511.5f) << 10) |
+            ((U32)((normal.z + 1.f) * 511.5f) << 20);
     }
 
     inline Vector3 DecodeNormalX10Y10Z10(const U32 encodedNormal)
@@ -34,7 +35,8 @@ namespace ig
         return Vector3{
             ((F32)(encodedNormal & 0x3FF) * kInvFactor) - 1.f,
             ((F32)((encodedNormal >> 10) & 0x3FF) * kInvFactor) - 1.f,
-            ((F32)((encodedNormal >> 20) & 0x3FF) * kInvFactor) - 1.f};
+            ((F32)((encodedNormal >> 20) & 0x3FF) * kInvFactor) - 1.f
+        };
     }
 
     /* Deprecated! */

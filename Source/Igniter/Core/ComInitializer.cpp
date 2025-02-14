@@ -5,17 +5,16 @@ namespace ig
 {
     class CoInitializer final
     {
-      public:
+    public:
         CoInitializer()
             : result(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE))
-        {
-        }
+        {}
 
         ~CoInitializer() { CoUninitialize(); }
 
         HRESULT GetResult() const { return result; }
 
-      private:
+    private:
         HRESULT result;
     };
 

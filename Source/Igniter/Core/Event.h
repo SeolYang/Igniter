@@ -11,7 +11,7 @@ namespace ig
         using DelegateType = std::function<void(Params...)>;
         using SubscriberType = std::pair<Identifier, DelegateType>;
 
-      public:
+    public:
         Event() = default;
         Event(const Event&) = default;
         Event(Event&&) noexcept = default;
@@ -43,7 +43,7 @@ namespace ig
 
         void Clear() { subscribeTable.clear(); }
 
-      private:
+    private:
         UnorderedMap<Identifier, DelegateType> subscribeTable{};
     };
 } // namespace ig

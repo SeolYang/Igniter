@@ -15,7 +15,7 @@ namespace ig
 
     class Application
     {
-      public:
+    public:
         Application(const Application&) = delete;
         Application(Application&&) noexcept = delete;
         virtual ~Application();
@@ -34,10 +34,10 @@ namespace ig
         virtual void PreRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
         virtual void PostRender([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
 
-      protected:
+    protected:
         Application(const AppDesc& desc);
 
-      private:
+    private:
         Ptr<Engine> engine;
     };
 } // namespace ig

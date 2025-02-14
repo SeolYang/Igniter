@@ -70,16 +70,14 @@ namespace ig
         , assetManager(&assetManager)
         , snapshot(snapshot)
         , mesh(newMesh)
-    {
-    }
+    {}
 
     StaticMesh::StaticMesh(StaticMesh&& other) noexcept
         : renderContext(std::exchange(other.renderContext, nullptr))
         , assetManager(std::exchange(other.assetManager, nullptr))
         , snapshot(std::exchange(other.snapshot, {}))
         , mesh(std::exchange(other.mesh, {}))
-    {
-    }
+    {}
 
     StaticMesh::~StaticMesh()
     {

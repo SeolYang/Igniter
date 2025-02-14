@@ -30,11 +30,11 @@ namespace ig
         requires(sizeof(Ty) >= sizeof(U32))
     class HandleStorage final
     {
-      private:
+    private:
         using SlotType = U32;
         using VersionType = U32;
 
-      public:
+    public:
         HandleStorage() { GrowChunks(); }
         HandleStorage(const HandleStorage&) = delete;
         HandleStorage(HandleStorage&&) noexcept = delete;
@@ -91,7 +91,7 @@ namespace ig
             IG_CHECK(IsMarkedAsFreeSlot(newSlot));
 
             Ty* const slotElementPtr = CalcAddressOfSlot(newSlot);
-            ::new (slotElementPtr) Ty(std::forward<Args>(args)...);
+            ::new(slotElementPtr) Ty(std::forward<Args>(args)...);
 
             newHandle.Value = SetBits<0, SlotSizeInBits>(newHandle.Value, newSlot);
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
@@ -259,7 +259,7 @@ namespace ig
             return ptr;
         }
 
-      private:
+    private:
         bool GrowChunks()
         {
             const Size newChunkCapacity = GetNewChunkCapacity();
@@ -344,7 +344,7 @@ namespace ig
             return *freeSlotMagicNumberPtr == FreeSlotMagicNumber;
         }
 
-      private:
+    private:
         constexpr static Size ChunkSizeInBytes = details::GetHeuristicOptimalChunkSize<Ty>();
 
         /*

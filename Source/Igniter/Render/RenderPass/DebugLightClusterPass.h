@@ -30,7 +30,7 @@ namespace ig
 
     class DebugLightClusterPass : public RenderPass
     {
-      public:
+    public:
         DebugLightClusterPass(RenderContext& renderContext, RootSignature& bindlessRootSignature, const Viewport& mainViewport);
         DebugLightClusterPass(const DebugLightClusterPass&) = delete;
         DebugLightClusterPass(DebugLightClusterPass&&) noexcept = delete;
@@ -47,10 +47,10 @@ namespace ig
             return outputTex;
         }
 
-      protected:
+    protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      private:
+    private:
         RenderContext* renderContext;
         RootSignature* bindlessRootSignature;
 

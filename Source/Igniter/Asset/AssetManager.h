@@ -39,26 +39,26 @@ namespace ig
     // ex. EAssetManagerOptionFlag, SuppressLog, SuppressDirty etc..
     class AssetManager final
     {
-      private:
+    private:
         using VirtualPathGuidTable = UnorderedMap<String, Guid>;
         using AssetMutex = Mutex;
         using AssetLock = UniqueLock;
 
-      public:
+    public:
         using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
 
         struct Snapshot
         {
-          public:
+        public:
             bool IsCached() const { return RefCount > 0 || Info.GetScope() == EAssetScope::Static || Info.GetScope() == EAssetScope::Engine; }
 
-          public:
+        public:
             AssetInfo Info{};
             U32 RefCount{};
             Size HandleHash{IG_NUMERIC_MAX_OF(HandleHash)};
         };
 
-      public:
+    public:
         AssetManager(RenderContext& renderContext);
         AssetManager(const AssetManager&) = delete;
         AssetManager(AssetManager&&) noexcept = delete;
@@ -198,9 +198,9 @@ namespace ig
             const AssetInfo& assetInfo = asset->GetSnapshot().Info;
             cache.Clone(assetInfo.GetGuid(), numClones);
             IG_LOG(AssetManagerLog, Info, "<{}:{}> {}({}) cloned({}).",
-                   assetInfo.GetCategory(), assetInfo.GetScope(),
-                   assetInfo.GetVirtualPath(), assetInfo.GetGuid(),
-                   numClones);
+                assetInfo.GetCategory(), assetInfo.GetScope(),
+                assetInfo.GetVirtualPath(), assetInfo.GetGuid(),
+                numClones);
 
             return true;
         }
@@ -275,7 +275,7 @@ namespace ig
 
         void DispatchEvent();
 
-      private:
+    private:
         template <typename T>
         details::AssetCache<T>& GetCache()
         {
@@ -318,7 +318,7 @@ namespace ig
                 if (oldAssetInfo.GetScope() == EAssetScope::Engine)
                 {
                     IG_LOG(AssetManagerLog, Error, "{}: Failed to import \"{}\". Given virtual path {} was reserved by engine.", AssetType, resPath,
-                           virtualPath);
+                        virtualPath);
 
                     return std::nullopt;
                 }
@@ -390,7 +390,7 @@ namespace ig
                 if (!result.HasOwnership())
                 {
                     IG_LOG(AssetManagerLog, Error, "Failed({}) to load {} asset {} ({}).", AssetCategoryOf<T>, result.GetStatus(),
-                           desc.Info.GetVirtualPath(), guid);
+                        desc.Info.GetVirtualPath(), guid);
                     return Handle<T>{};
                 }
 
@@ -462,7 +462,7 @@ namespace ig
             if (!assetResult.HasOwnership())
             {
                 IG_LOG(AssetManagerLog, Error, "{}: Failed({}) to create engine default asset {}.", AssetCategoryOf<T>, assetResult.GetStatus(),
-                       requiredVirtualPath);
+                    requiredVirtualPath);
                 return;
             }
 
@@ -493,7 +493,7 @@ namespace ig
         void ClearTempAssets();
         void RestoreTempAssets();
 
-      private:
+    private:
         Ptr<details::AssetMonitor> assetMonitor;
         Vector<Ptr<details::TypelessAssetCache>> assetCaches;
 

@@ -3,6 +3,7 @@
 #include "Igniter/Input/InputManager.h"
 
 IG_DECLARE_LOG_CATEGORY(InputManagerLog);
+
 IG_DEFINE_LOG_CATEGORY(InputManagerLog);
 
 namespace ig
@@ -118,7 +119,8 @@ namespace ig
                 rawMouse.dwFlags |= RIDEV_REMOVE;
                 RegisterRawInputDevices(&rawMouse, 1, sizeof(rawMouse));
                 DestroyWindow(window);
-            }};
+            }
+        };
     }
 
     InputManager::~InputManager()

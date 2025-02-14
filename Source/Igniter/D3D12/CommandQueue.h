@@ -30,7 +30,7 @@ namespace ig
 
         void ExecuteCommandLists(const std::span<CommandList*> cmdLists);
         bool Signal(GpuSyncPoint& syncPoint);
-        GpuSyncPoint MakeSyncPointWithSignal() { return MakeSyncPointWithSignal(fence);}
+        GpuSyncPoint MakeSyncPointWithSignal() { return MakeSyncPointWithSignal(fence); }
         void Wait(GpuSyncPoint& syncPoint);
 
     private:

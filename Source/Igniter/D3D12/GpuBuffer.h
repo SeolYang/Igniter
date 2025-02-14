@@ -10,7 +10,7 @@ namespace ig
     {
         friend class GpuDevice;
 
-      public:
+    public:
         GpuBuffer(ComPtr<ID3D12Resource> bufferResource);
         GpuBuffer(const GpuBuffer&) = delete;
         GpuBuffer(GpuBuffer&& other) noexcept;
@@ -49,7 +49,8 @@ namespace ig
                 view = D3D12_VERTEX_BUFFER_VIEW{
                     .BufferLocation = resource->GetGPUVirtualAddress(),
                     .SizeInBytes = static_cast<U32>(desc.GetSizeAsBytes()),
-                    .StrideInBytes = desc.GetStructureByteStride()};
+                    .StrideInBytes = desc.GetStructureByteStride()
+                };
             }
 
             return view;
@@ -63,16 +64,17 @@ namespace ig
                 view = D3D12_INDEX_BUFFER_VIEW{
                     .BufferLocation = resource->GetGPUVirtualAddress(),
                     .SizeInBytes = static_cast<U32>(desc.GetSizeAsBytes()),
-                    .Format = desc.GetIndexFormat()};
+                    .Format = desc.GetIndexFormat()
+                };
             }
 
             return view;
         }
 
-      private:
+    private:
         GpuBuffer(const GpuBufferDesc& newDesc, ComPtr<D3D12MA::Allocation> newAllocation, ComPtr<ID3D12Resource> newResource);
 
-      private:
+    private:
         GpuBufferDesc desc;
         ComPtr<D3D12MA::Allocation> allocation;
         ComPtr<ID3D12Resource> resource;

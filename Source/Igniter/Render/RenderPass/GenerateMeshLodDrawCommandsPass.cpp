@@ -62,20 +62,21 @@ namespace ig
                 .ElementSize = (U32)sizeof(DrawInstance),
                 .NumInitElements = kNumInitDrawCommands,
                 .Flags =
-                    EGpuStorageFlags::ShaderReadWrite |
-                    EGpuStorageFlags::EnableUavCounter |
-                    EGpuStorageFlags::EnableLinearAllocation});
+                EGpuStorageFlags::ShaderReadWrite |
+                EGpuStorageFlags::EnableUavCounter |
+                EGpuStorageFlags::EnableLinearAllocation
+            });
 
         CommandSignatureDesc commandSignatureDesc{};
         commandSignatureDesc.AddConstant(0, 0, 5)
-            .AddDrawArgument()
-            .SetCommandByteStride<DrawInstance>();
+                            .AddDrawArgument()
+                            .SetCommandByteStride<DrawInstance>();
         cmdSignature = MakePtr<CommandSignature>(
             gpuDevice.CreateCommandSignature(
                          "DrawInstanceCmdSignature",
                          commandSignatureDesc,
                          bindlessRootSignature)
-                .value());
+                     .value());
     }
 
     GenerateMeshLodDrawCommandsPass::~GenerateMeshLodDrawCommandsPass()
@@ -96,7 +97,7 @@ namespace ig
     void GenerateMeshLodDrawCommandsPass::PreExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(drawInstanceCmdStorage != nullptr &&
-                 drawInstanceCmdStorage->IsLinearAllocator());
+            drawInstanceCmdStorage->IsLinearAllocator());
 
         [[maybe_unused]] const auto linearAlloc = drawInstanceCmdStorage->Allocate((Size)params.NumInstancing * StaticMesh::kMaxNumLods);
     }
@@ -122,7 +123,8 @@ namespace ig
         const GenerateDrawInstanceConstants generateInstanceDrawConstants{
             .PerFrameCbv = params.PerFrameCbvPtr->Index,
             .CullingDataBufferSrv = cullingDataBufferSrvPtr->Index,
-            .DrawInstanceBufferUav = drawInstanceStorageUavPtr->Index};
+            .DrawInstanceBufferUav = drawInstanceStorageUavPtr->Index
+        };
 
         CommandList& cmdList = *params.CmdList;
         cmdList.Open(pso.get());

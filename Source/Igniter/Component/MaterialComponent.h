@@ -5,9 +5,10 @@
 namespace ig
 {
     class Material;
+
     class MaterialComponent
     {
-      public:
+    public:
         MaterialComponent();
         MaterialComponent(const Handle<Material> ownedInstance);
         MaterialComponent(const MaterialComponent& other);
@@ -21,13 +22,13 @@ namespace ig
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
-      public:
+    public:
         Handle<Material> Instance{};
 
-      private:
+    private:
         void Destroy();
 
-      private:
+    private:
         constexpr static std::string_view ContainerKey{"MaterialComponent"};
         constexpr static std::string_view MeshGuidKey{"MaterialGuid"};
     };

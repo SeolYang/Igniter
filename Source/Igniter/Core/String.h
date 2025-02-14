@@ -44,7 +44,7 @@ namespace ig
      */
     class String final
     {
-      public:
+    public:
         String() noexcept = default;
         String(const String&) noexcept = default;
         String(String&&) noexcept = default;
@@ -87,13 +87,13 @@ namespace ig
 
         static Vector<std::pair<uint64_t, std::string_view>> GetCachedStrings();
 
-      private:
+    private:
         using HashStringMap = StableUnorderedMap<uint64_t, std::string>;
         [[nodiscard]] static HashStringMap& GetHashStringMap();
         [[nodiscard]] static SharedMutex& GetHashStringMapMutex();
         [[nodiscard]] static U64 CalculateHash(const std::string_view str);
 
-      private:
+    private:
         U64 hashOfString{0};
     };
 
@@ -115,14 +115,14 @@ namespace ig
 template <>
 struct std::hash<ig::String>
 {
-  public:
+public:
     [[nodiscard]] ig::Size operator()(const ig::String& str) const noexcept { return str.GetHash(); }
 };
 
 template <>
 struct std::formatter<ig::String>
 {
-  public:
+public:
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FrameContext>

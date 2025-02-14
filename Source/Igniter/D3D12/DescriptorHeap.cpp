@@ -32,8 +32,7 @@ namespace ig
         , gpuDescriptorHandleForHeapStart(std::exchange(other.gpuDescriptorHandleForHeapStart, {}))
         , bIsShaderVisible(other.bIsShaderVisible)
         , descriptorIdxPool(std::move(other.descriptorIdxPool))
-    {
-    }
+    {}
 
     DescriptorHeap::~DescriptorHeap()
     {
@@ -53,18 +52,18 @@ namespace ig
     GpuView DescriptorHeap::Allocate(const EGpuViewType desiredType)
     {
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
-                 (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV &&
-                  (desiredType == EGpuViewType::ConstantBufferView || desiredType == EGpuViewType::ShaderResourceView ||
-                   desiredType == EGpuViewType::UnorderedAccessView)));
+            (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV &&
+                (desiredType == EGpuViewType::ConstantBufferView || desiredType == EGpuViewType::ShaderResourceView ||
+                    desiredType == EGpuViewType::UnorderedAccessView)));
 
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::Sampler ||
-                 (descriptorHeapType == EDescriptorHeapType::Sampler && (desiredType == EGpuViewType::Sampler)));
+            (descriptorHeapType == EDescriptorHeapType::Sampler && (desiredType == EGpuViewType::Sampler)));
 
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::RTV ||
-                 (descriptorHeapType == EDescriptorHeapType::RTV && (desiredType == EGpuViewType::RenderTargetView)));
+            (descriptorHeapType == EDescriptorHeapType::RTV && (desiredType == EGpuViewType::RenderTargetView)));
 
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::DSV ||
-                 (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EGpuViewType::DepthStencilView)));
+            (descriptorHeapType == EDescriptorHeapType::DSV && (desiredType == EGpuViewType::DepthStencilView)));
 
         if (descriptorIdxPool.empty())
         {
@@ -78,24 +77,25 @@ namespace ig
             .Type = desiredType,
             .Index = newDescriptorIdx,
             .CpuHandle = GetIndexedCPUDescriptorHandle(newDescriptorIdx),
-            .GpuHandle = GetIndexedGPUDescriptorHandle(newDescriptorIdx)};
+            .GpuHandle = GetIndexedGPUDescriptorHandle(newDescriptorIdx)
+        };
     }
 
     void DescriptorHeap::Deallocate(const GpuView& gpuView)
     {
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::CBV_SRV_UAV ||
-                 (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV &&
-                  (gpuView.Type == EGpuViewType::ConstantBufferView || gpuView.Type == EGpuViewType::ShaderResourceView ||
-                   gpuView.Type == EGpuViewType::UnorderedAccessView)));
+            (descriptorHeapType == EDescriptorHeapType::CBV_SRV_UAV &&
+                (gpuView.Type == EGpuViewType::ConstantBufferView || gpuView.Type == EGpuViewType::ShaderResourceView ||
+                    gpuView.Type == EGpuViewType::UnorderedAccessView)));
 
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::Sampler ||
-                 (descriptorHeapType == EDescriptorHeapType::Sampler && (gpuView.Type == EGpuViewType::Sampler)));
+            (descriptorHeapType == EDescriptorHeapType::Sampler && (gpuView.Type == EGpuViewType::Sampler)));
 
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::RTV ||
-                 (descriptorHeapType == EDescriptorHeapType::RTV && (gpuView.Type == EGpuViewType::RenderTargetView)));
+            (descriptorHeapType == EDescriptorHeapType::RTV && (gpuView.Type == EGpuViewType::RenderTargetView)));
 
         IG_CHECK(descriptorHeapType != EDescriptorHeapType::DSV ||
-                 (descriptorHeapType == EDescriptorHeapType::DSV && (gpuView.Type == EGpuViewType::DepthStencilView)));
+            (descriptorHeapType == EDescriptorHeapType::DSV && (gpuView.Type == EGpuViewType::DepthStencilView)));
 
         IG_CHECK(gpuView.Index < numInitialDescriptors);
         IG_CHECK(gpuView.Index != std::numeric_limits<decltype(GpuView::Index)>::max());

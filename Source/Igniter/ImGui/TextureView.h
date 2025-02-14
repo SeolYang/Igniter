@@ -9,6 +9,5 @@ namespace ig::ImGuiX
     // 기본적으로 포함되어 있음. 다만, 현재 RenderContext의 GPU 리소스 관리 로직에 따르면 자체적으로 이미
     // 해제를 지연 시키고 있기 때문에. 현재로서는 크게 문제 없을 것으로 판단 됨.
     class TextureView final
-    {
-    };
+    {};
 } // namespace ig::ImGuiX

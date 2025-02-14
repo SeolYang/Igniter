@@ -8,6 +8,7 @@
 #include "Igniter/Asset/AssetMonitor.h"
 
 IG_DECLARE_LOG_CATEGORY(AssetMonitorLog);
+
 IG_DEFINE_LOG_CATEGORY(AssetMonitorLog);
 
 namespace ig::details
@@ -100,9 +101,9 @@ namespace ig::details
                     if (guidFromPath != guid)
                     {
                         IG_LOG(AssetMonitorLog, Error,
-                               "{}: Asset {} ignored. The guid from filename does not match asset info guid."
-                               " Which was {}.",
-                               assetInfo.GetCategory(), entry.path().string(), guid);
+                            "{}: Asset {} ignored. The guid from filename does not match asset info guid."
+                            " Which was {}.",
+                            assetInfo.GetCategory(), entry.path().string(), guid);
                         ++directoryItr;
                         continue;
                     }
@@ -110,7 +111,7 @@ namespace ig::details
                     if (virtualPathGuidTable.contains(virtualPath))
                     {
                         IG_LOG(AssetMonitorLog, Error, "{}: Asset {} ({}) ignored. Which has duplicated virtual path.", assetInfo.GetCategory(),
-                               virtualPath, guid);
+                            virtualPath, guid);
                         ++directoryItr;
                         continue;
                     }
@@ -118,7 +119,7 @@ namespace ig::details
                     if (assetInfo.GetScope() == EAssetScope::Engine)
                     {
                         IG_LOG(AssetMonitorLog, Warning, "{}: Found invalid asset scope Asset {} ({}). Assumes as Managed.", assetInfo.GetCategory(),
-                               virtualPath, guid);
+                            virtualPath, guid);
                         assetInfo.SetScope(EAssetScope::Managed);
                         serializedMetadata << assetInfo;
                     }

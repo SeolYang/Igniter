@@ -6,9 +6,10 @@
 namespace ig
 {
     struct TransformComponent;
+
     struct CameraComponent
     {
-      public:
+    public:
         [[nodiscard]] Matrix CreatePerspective() const
         {
             const F32 aspectRatio = CameraViewport.AspectRatio();
@@ -29,7 +30,7 @@ namespace ig
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
-      public:
+    public:
         Viewport CameraViewport{0.f, 0.f, 1280.f, 720.f};
         F32 NearZ = 0.1f;
         F32 FarZ = 1000.f;

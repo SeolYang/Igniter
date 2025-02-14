@@ -7,15 +7,13 @@ namespace ig
         : desc(newDesc)
         , allocation(std::move(newAllocation))
         , resource(std::move(newResource))
-    {
-    }
+    {}
 
     GpuBuffer::GpuBuffer(GpuBuffer&& other) noexcept
         : desc(other.desc)
         , allocation(std::move(other.allocation))
         , resource(std::move(other.resource))
-    {
-    }
+    {}
 
     GpuBuffer::GpuBuffer(ComPtr<ID3D12Resource> bufferResource)
         : resource(std::move(bufferResource))
@@ -65,6 +63,7 @@ namespace ig
             {
                 if (ptr != nullptr)
                     Unmap();
-            }};
+            }
+        };
     }
 } // namespace ig

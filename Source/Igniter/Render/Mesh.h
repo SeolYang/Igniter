@@ -17,7 +17,7 @@ namespace ig
 
     struct MeshLod
     {
-      public:
+    public:
         Handle<Meshlet> MeshletStorageAlloc{};
         Handle<MeshIndex> IndexStorageAlloc{};
         Handle<MeshTriangle> TriangleStorageAlloc{};
@@ -25,17 +25,17 @@ namespace ig
 
     enum class EMeshType : U32
     {
-        Static = 0,
+        Static   = 0,
         Skeletal = 1
     };
 
     struct Mesh
     {
-      public:
+    public:
         constexpr static U8 kNumVertexPerTriangle = 3;
         constexpr static U8 kMaxMeshLevelOfDetails = 8;
 
-      public:
+    public:
         Handle<MeshVertex> VertexStorageAlloc{};
         U8 NumLevelOfDetails = 0;
         MeshLod LevelOfDetails[kMaxMeshLevelOfDetails];
@@ -45,7 +45,7 @@ namespace ig
     /* Meshlet의 경우 단순 데이터이기 때문에, 별도의 CPU/GPU 간 데이터 레이아웃의 차이가 없다 */
     struct Meshlet
     {
-      public:
+    public:
         /*
          * https://developer.nvidia.com/blog/introduction-turing-mesh-shaders/
          * https://www.youtube.com/watch?v=EtX7WnFhxtQ  (AW2)
@@ -53,7 +53,7 @@ namespace ig
         constexpr static Size kMaxVertices = 64;
         constexpr static Size kMaxTriangles = 64;
 
-      public:
+    public:
         /* MeshLod::IndexStorageAlloc 내에서의 IndexOffset */
         U32 IndexOffset = 0;
         U32 NumIndices = 0;
@@ -71,7 +71,7 @@ namespace ig
 
     struct GpuMeshLod
     {
-      public:
+    public:
         U32 MeshletStorageOffset = 0;
         U32 NumMeshlets = 0;
         U32 IndexStorageOffset = 0;
@@ -80,7 +80,7 @@ namespace ig
 
     struct GpuMesh
     {
-      public:
+    public:
         U32 VertexStorageByteOffset = 0;
         U32 NumLevelOfDetails = 0;
         GpuMeshLod LevelOfDetails[Mesh::kMaxMeshLevelOfDetails];
@@ -92,7 +92,7 @@ namespace ig
 
     struct GpuMeshInstance
     {
-      public:
+    public:
         EMeshType MeshType = EMeshType::Static;
         U32 MeshProxyIdx = 0;
         U32 MaterialProxyIdx = 0;

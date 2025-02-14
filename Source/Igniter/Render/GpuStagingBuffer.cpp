@@ -10,7 +10,7 @@ namespace ig
         : renderCtx(&renderCtx)
     {
         IG_CHECK(desc.BufferSize < 0xFFFFFFFFUi32);
-        
+
         GpuBufferDesc bufferDesc;
         bufferDesc.AsUploadBuffer((U32)desc.BufferSize, false);
         for (const LocalFrameIndex localFrameIdx : LocalFramesView)

@@ -12,8 +12,7 @@ namespace ig
         , samplerHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerSamplerHeap", EDescriptorHeapType::Sampler, numSamplerDescriptors).value()))
         , rtvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerRtvHeap", EDescriptorHeapType::RTV, numRtvDescriptors).value()))
         , dsvHeap(MakePtr<DescriptorHeap>(gpuDevice.CreateDescriptorHeap("GpuViewManagerDsvHeap", EDescriptorHeapType::DSV, numDsvDescriptors).value()))
-    {
-    }
+    {}
 
     GpuViewManager::~GpuViewManager()
     {

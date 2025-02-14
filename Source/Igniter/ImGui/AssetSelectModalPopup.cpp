@@ -39,7 +39,9 @@ namespace ig::ImGuiX
         }
 
         std::sort(cachedAssetInfos.begin(), cachedAssetInfos.end(), [](const AssetInfo& lhs, const AssetInfo& rhs)
-                  { return (lhs.Snapshot.Info.GetVirtualPath().Compare(rhs.Snapshot.Info.GetVirtualPath())) < 0; });
+        {
+            return (lhs.Snapshot.Info.GetVirtualPath().Compare(rhs.Snapshot.Info.GetVirtualPath())) < 0;
+        });
     }
 
     bool AssetSelectModalPopup::Begin()
@@ -53,9 +55,9 @@ namespace ig::ImGuiX
         ImGui::Separator();
 
         if (ImGui::BeginChild(assetInfoChildLabel.ToCString(),
-                              ImVec2{-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8.f},
-                              ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY,
-                              ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar))
+            ImVec2{-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8.f},
+            ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY,
+            ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar))
         {
             for (const AssetInfo& cachedAssetInfo : cachedAssetInfos)
             {

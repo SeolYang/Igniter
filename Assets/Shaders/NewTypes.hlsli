@@ -5,7 +5,7 @@ struct PerFrameParams
 {
     float4x4 View;
     float4x4 ViewProj;
-    
+
     uint VertexStorageSrv;
     uint IndexStorageSrv;
     uint TriangleStorageSrv;
@@ -50,11 +50,11 @@ struct VertexSM
 struct Vertex
 {
     float3 Position;
-    uint QuantizedNormal; /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
-    uint QuantizedTangent; /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
-    uint QuantizedBitangent; /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
+    uint QuantizedNormal;                    /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
+    uint QuantizedTangent;                   /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
+    uint QuantizedBitangent;                 /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
     vector<float16_t, 2> QuantizedTexCoords; /* (F32, F32) -> (F16, F16) = HLSL(float16_t, float16_t); https://github.com/zeux/meshoptimizer/blob/master/src/quantization.cpp*/
-    uint ColorRGBA8; /* R8G8B8A8_UINT */
+    uint ColorRGBA8;                         /* R8G8B8A8_UINT */
 };
 
 struct BoundingSphere
@@ -65,6 +65,7 @@ struct BoundingSphere
 
 #define MESHLET_MAX_INDICES 64
 #define MESHLET_MAX_TRIANGLES 64
+
 struct Meshlet
 {
     uint IndexOffset;
@@ -88,6 +89,7 @@ struct MeshLod
 };
 
 #define MAX_MESH_LEVEL_OF_DETAILS 8
+
 struct Mesh
 {
     uint VertexStorageByteOffset;
@@ -99,6 +101,7 @@ struct Mesh
 
 #define MESH_TYPE_STATIC 0
 #define MESH_TYPE_SKELETAL 1
+
 struct MeshInstance
 {
     uint MeshType;

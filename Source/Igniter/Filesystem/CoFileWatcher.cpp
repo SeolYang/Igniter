@@ -3,6 +3,7 @@
 #include "Igniter/Core/Log.h"
 
 IG_DECLARE_LOG_CATEGORY(CoFileWatcherLog);
+
 IG_DEFINE_LOG_CATEGORY(CoFileWatcherLog);
 
 namespace ig
@@ -10,12 +11,11 @@ namespace ig
     CoFileWatcher::CoFileWatcher(const String directoryPathStr, const EFileWatchFilterFlags filters, const bool bWatchRecursively /*= true*/)
         : directoryPath(directoryPathStr.ToStringView())
         , directory(CreateFile(directoryPath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
-                               FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, nullptr))
+            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, nullptr))
         , filters(filters)
         , bWatchRecursively(bWatchRecursively)
         , task(CoFileWatcher::Watch(this))
-    {
-    }
+    {}
 
     CoFileWatcher::~CoFileWatcher()
     {
@@ -51,7 +51,7 @@ namespace ig
 
             const bool bRequestSucceeded =
                 ReadDirectoryChangesExW(watcher->directory, rawBuffer.data(), ReservedRawBufferSizeInBytes, watcher->bWatchRecursively,
-                                        static_cast<DWORD>(watcher->filters), nullptr, &overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
+                    static_cast<DWORD>(watcher->filters), nullptr, &overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
 
             if (bRequestSucceeded)
             {
@@ -97,7 +97,8 @@ namespace ig
                                 watcher->directoryPath / fileNameBuffer, static_cast<uint64_t>(notifyInfo->CreationTime.QuadPart),
                                 static_cast<uint64_t>(notifyInfo->LastModificationTime.QuadPart),
                                 static_cast<uint64_t>(notifyInfo->LastChangeTime.QuadPart),
-                                static_cast<uint64_t>(notifyInfo->LastAccessTime.QuadPart), static_cast<uint64_t>(notifyInfo->FileSize.QuadPart)});
+                                static_cast<uint64_t>(notifyInfo->LastAccessTime.QuadPart), static_cast<uint64_t>(notifyInfo->FileSize.QuadPart)
+                            });
                         }
 
                         if (notifyInfo->NextEntryOffset > 0)

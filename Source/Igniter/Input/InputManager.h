@@ -35,26 +35,26 @@ namespace ig
 
     struct Action final
     {
-      public:
+    public:
         [[nodiscard]] bool IsAnyPressing() const noexcept { return State == ig::EInputState::Pressed || State == EInputState::OnPressing; }
 
-      public:
+    public:
         EInputState State = EInputState::None;
     };
 
     struct Axis final
     {
-      public:
+    public:
         [[nodiscard]] F32 GetScaledValue() const noexcept { return Value * Scale; }
 
-      public:
+    public:
         F32 Scale = 1.f;
         F32 Value = 0.0f;
     };
 
     class InputManager final
     {
-      private:
+    private:
         struct ActionMapping
         {
             Handle<Action> ActionHandle{};
@@ -73,7 +73,7 @@ namespace ig
             F32 DeltaY = 0.f;
         };
 
-      public:
+    public:
         InputManager();
         InputManager(const InputManager&) = delete;
         InputManager(InputManager&&) noexcept = delete;
@@ -100,7 +100,7 @@ namespace ig
         void HandleRawMouseInput();
         void PostUpdate();
 
-      private:
+    private:
         void HandleKeyDown(const WPARAM wParam, const bool bIsMouse);
         void HandleKeyUp(const WPARAM wParam, const bool bIsMouse);
 
@@ -111,7 +111,7 @@ namespace ig
 
         void PollRawMouseInput();
 
-      private:
+    private:
         HandleStorage<Action> actionRegistry;
         HandleStorage<Axis> axisRegistry;
 

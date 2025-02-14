@@ -9,8 +9,7 @@ namespace ig
 {
     ImGuiRenderPass::ImGuiRenderPass(RenderContext& renderContext)
         : renderContext(&renderContext)
-    {
-    }
+    {}
 
     ImGuiRenderPass::~ImGuiRenderPass()
     {

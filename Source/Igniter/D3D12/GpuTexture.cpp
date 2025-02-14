@@ -7,8 +7,7 @@ namespace ig
         : desc(newDesc)
         , allocation(std::move(newAllocation))
         , resource(std::move(newResource))
-    {
-    }
+    {}
 
     GpuTexture::GpuTexture(ComPtr<ID3D12Resource> textureResource)
         : resource(std::move(textureResource))
@@ -22,8 +21,7 @@ namespace ig
         : desc(other.desc)
         , allocation(std::move(other.allocation))
         , resource(std::move(other.resource))
-    {
-    }
+    {}
 
     GpuTexture& GpuTexture::operator=(GpuTexture&& other) noexcept
     {

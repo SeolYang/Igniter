@@ -4,7 +4,8 @@
 namespace ig
 {
     template <typename T>
-    concept ResultStatus = requires {
+    concept ResultStatus = requires
+    {
         {
             T::Success
         };
@@ -25,7 +26,7 @@ namespace ig
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T>
     class [[nodiscard]] Result final
     {
-      public:
+    public:
         Result() = default;
 
         Result(const Result&) = delete;
@@ -36,7 +37,7 @@ namespace ig
         {
             if (!other.bOwnershipTransferred)
             {
-                ::new (&value) T(std::move(other.value));
+                ::new(&value) T(std::move(other.value));
             }
             bOwnershipTransferred = std::exchange(other.bOwnershipTransferred, true);
         }
@@ -54,6 +55,7 @@ namespace ig
         }
 
         Result& operator=(const Result&) = delete;
+
         Result& operator=(Result&& rhs) noexcept
         {
             IG_CHECK((!IsSuccess() || bOwnershipTransferred) && "Result doesn't handled.");
@@ -67,7 +69,7 @@ namespace ig
 
             if (!rhs.bOwnershipTransferred)
             {
-                ::new (&value) T(std::move(rhs.value));
+                ::new(&value) T(std::move(rhs.value));
             }
             bOwnershipTransferred = std::exchange(rhs.bOwnershipTransferred, true);
             status = rhs.status;
@@ -94,7 +96,7 @@ namespace ig
         [[nodiscard]] bool IsSuccess() const noexcept { return status == E::Success; }
         [[nodiscard]] E GetStatus() const noexcept { return status; }
 
-      private:
+    private:
         template <typename Ty, ResultStatus En, typename... Args>
         friend Result<Ty, En> MakeSuccess(Args&&... args);
 
@@ -105,8 +107,7 @@ namespace ig
         Result(const E newStatus)
             : dummy{}
             , status(newStatus)
-        {
-        }
+        {}
 
         template <typename... Args>
         Result(Args&&... args)
@@ -114,10 +115,10 @@ namespace ig
             , status(E::Success)
             , bOwnershipTransferred(false)
         {
-            ::new (&value) T(std::forward<Args>(args)...);
+            ::new(&value) T(std::forward<Args>(args)...);
         }
 
-      private:
+    private:
         union
         {
             struct NonTrivialDummy

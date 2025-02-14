@@ -16,7 +16,7 @@ namespace ig
     {
         friend class AssetManager;
 
-      public:
+    public:
         MapLoader() = default;
         MapLoader(const MapLoader&) = delete;
         MapLoader(MapLoader&&) noexcept = delete;
@@ -25,7 +25,7 @@ namespace ig
         MapLoader& operator=(const MapLoader&) = delete;
         MapLoader& operator=(MapLoader&&) noexcept = delete;
 
-      private:
+    private:
         Result<Map, EMapLoadStatus> Load(const Map::Desc& desc);
     };
 } // namespace ig

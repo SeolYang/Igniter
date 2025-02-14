@@ -9,7 +9,7 @@ namespace ig
     {
         friend class GpuFence;
 
-      public:
+    public:
         GpuSyncPoint() = default;
         GpuSyncPoint(const GpuSyncPoint&) = default;
         GpuSyncPoint(GpuSyncPoint&&) noexcept = default;
@@ -44,10 +44,10 @@ namespace ig
 
         static GpuSyncPoint Invalid() { return {}; }
 
-      private:
+    private:
         GpuSyncPoint(ID3D12Fence& fence, const Size syncPoint);
 
-      private:
+    private:
         ID3D12Fence* fence = nullptr;
         Size syncPoint = 0;
     };

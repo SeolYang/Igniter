@@ -10,16 +10,17 @@
 namespace ig
 {
     class StaticMesh;
+
     struct StaticMeshImportDesc
     {
-      public:
+    public:
         constexpr static U8 kMaxNumLods = 8;
 
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-      public:
+    public:
         bool bMakeLeftHanded = true;
         bool bFlipUVs = true;
         bool bFlipWindingOrder = true;
@@ -47,11 +48,11 @@ namespace ig
      */
     struct StaticMeshLoadDesc
     {
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-      public:
+    public:
         U32 NumVertices{0};
         Bytes CompressedVerticesSize{0};
         U8 NumLevelOfDetails = 1; // assert(>=1)
@@ -66,17 +67,18 @@ namespace ig
     class Material;
     class RenderContext;
     class AssetManager;
+
     class StaticMesh final
     {
-      public:
+    public:
         constexpr static U8 kMaxNumLods = StaticMeshImportDesc::kMaxNumLods;
 
-      public:
+    public:
         using ImportDesc = StaticMeshImportDesc;
         using LoadDesc = StaticMeshLoadDesc;
         using Desc = AssetDesc<StaticMesh>;
 
-      public:
+    public:
         /* New API! */
         StaticMesh(
             RenderContext& renderContext, AssetManager& assetManager,
@@ -93,10 +95,10 @@ namespace ig
         [[nodiscard]] const Desc& GetSnapshot() const noexcept { return snapshot; }
         [[nodiscard]] const Mesh& GetMesh() const noexcept { return mesh; }
 
-      private:
+    private:
         void Destroy();
 
-      private:
+    private:
         RenderContext* renderContext{nullptr};
         AssetManager* assetManager{nullptr};
         Desc snapshot{};

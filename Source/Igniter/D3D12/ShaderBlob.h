@@ -28,7 +28,7 @@ namespace ig
     // #sy_todo 매크로 정의 지원
     class ShaderCompileDesc final
     {
-      public:
+    public:
         String SourcePath;
         EShaderType Type;
         bool bPackMarticesInRowMajor = false;                                      // -Zpr
@@ -40,14 +40,14 @@ namespace ig
 
     class ShaderBlob final
     {
-      public:
+    public:
         ShaderBlob(const ShaderCompileDesc& desc);
         ~ShaderBlob() = default;
 
         EShaderType GetType() const { return type; }
         auto& GetNative() { return *shader.Get(); }
 
-      private:
+    private:
         const EShaderType type;
         ComPtr<IDxcResult> compiledResult;
         ComPtr<IDxcBlob> shader;

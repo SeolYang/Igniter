@@ -7,7 +7,7 @@ namespace ig
 
     class CallStack
     {
-      private:
+    private:
         constexpr static uint16_t MaxNumBackTraceCapture = 16;
 
         struct CapturedFrames
@@ -16,7 +16,7 @@ namespace ig
             uint16_t NumCapturedFrames{0};
         };
 
-      public:
+    public:
         CallStack(const CallStack&) = delete;
         CallStack(CallStack&&) noexcept = delete;
         CallStack& operator=(const CallStack&) = delete;
@@ -25,12 +25,12 @@ namespace ig
         static U32 Capture();
         static std::string_view Dump(const DWORD captureHash);
 
-      private:
+    private:
         CallStack();
         ~CallStack();
         static CallStack& GetCallStack();
 
-      private:
+    private:
         HANDLE procHandle{nullptr};
 
         Mutex mutex{};

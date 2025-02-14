@@ -21,7 +21,8 @@ namespace ig::ImGuiX
         {
             return ImRect{
                 ImVec2{cursorPos.x + offset, cursorPos.y + labelSize.y * 0.35f},
-                ImVec2{cursorPos.x + offset + width, cursorPos.y + labelSize.y * 0.65f + framePadding.y * 2.f}};
+                ImVec2{cursorPos.x + offset + width, cursorPos.y + labelSize.y * 0.65f + framePadding.y * 2.f}
+            };
         };
 
         ImGuiContext& g = *GImGui;

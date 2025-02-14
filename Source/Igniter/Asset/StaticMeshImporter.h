@@ -54,7 +54,7 @@ namespace ig
             Array<Vector<U8>, StaticMesh::kMaxNumLods> CompressedIndicesPerLod;
         };
 
-      public:
+    public:
         explicit StaticMeshImporter(AssetManager& assetManager);
         StaticMeshImporter(const StaticMeshImporter&) = delete;
         StaticMeshImporter(StaticMeshImporter&&) noexcept = delete;
@@ -63,7 +63,7 @@ namespace ig
         StaticMeshImporter& operator=(const StaticMeshImporter&) = delete;
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
-      private:
+    private:
         Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> _Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
         Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
 
@@ -83,7 +83,7 @@ namespace ig
         /* #sy_todo 추후 AssetDesc를 반환하도록 조정되야함!! */
         static Result<StaticMesh::Desc, EStaticMeshImportStatus> ExportToFile(const std::string_view meshName, const MeshData& meshData);
 
-      private:
+    private:
         AssetManager& assetManager;
     };
 } // namespace ig

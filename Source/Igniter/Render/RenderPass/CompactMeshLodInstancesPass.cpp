@@ -16,7 +16,6 @@ namespace ig
         U32 MeshLodInstanceStorageUav;
         U32 CullingDataBufferSrv;
     };
-
 } // namespace ig
 
 namespace ig
@@ -70,7 +69,8 @@ namespace ig
         const CompactMeshLodInstancesConstants comapctMeshLodInstancesConstants{
             .PerFrameCbv = params.PerFrameCbvPtr->Index,
             .MeshLodInstanceStorageUav = meshLodInstanceStorageUavPtr->Index,
-            .CullingDataBufferSrv = cullingDataBufferSrvPtr->Index};
+            .CullingDataBufferSrv = cullingDataBufferSrvPtr->Index
+        };
 
         CommandList& cmdList = *params.CmdList;
         cmdList.Open(pso.get());

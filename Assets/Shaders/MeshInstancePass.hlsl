@@ -15,13 +15,13 @@ struct MeshInstancePassParams
 ConstantBuffer<MeshInstancePassParams> gMeshInstanceParams : register(b0);
 
 [numthreads(32, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+void main(uint3 DTid : SV_DispatchThreadID)
 {
     if (DTid.x >= gMeshInstanceParams.NumMeshInstances)
     {
         return;
     }
-    
+
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gMeshInstanceParams.PerFrameParamsCbv];
     StructuredBuffer<uint> meshInstanceIndicesBuffer = ResourceDescriptorHeap[gMeshInstanceParams.MeshInstanceIndicesBufferSrv];
     StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[perFrameParams.MeshInstanceStorageSrv];
@@ -31,7 +31,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     const MeshInstance meshInstance = meshInstanceStorage[meshInstanceIdx];
 
     Mesh mesh = staticMeshStorage[meshInstance.MeshProxyIdx];
-    uint targetLevelOfDetail = min(gMeshInstanceParams.ManualLod, mesh.NumLevelOfDetails-1);
+    uint targetLevelOfDetail = min(gMeshInstanceParams.ManualLod, mesh.NumLevelOfDetails - 1);
     MeshLod meshLod = mesh.LevelOfDetails[targetLevelOfDetail];
 
     DispatchMeshInstance newDispatchMeshInstance;
@@ -39,7 +39,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     newDispatchMeshInstance.Params.TargetLevelOfDetail = targetLevelOfDetail;
     newDispatchMeshInstance.Params.PerFrameParamsCbv = gMeshInstanceParams.PerFrameParamsCbv;
     newDispatchMeshInstance.Params.ScreenParamsCbv = 0xFFFFFFFF;
-    newDispatchMeshInstance.ThreadGroupCountX = (meshLod.NumMeshlets + 31)/32;
+    newDispatchMeshInstance.ThreadGroupCountX = (meshLod.NumMeshlets + 31) / 32;
     newDispatchMeshInstance.ThreadGroupCountY = 1;
     newDispatchMeshInstance.ThreadGroupCountZ = 1;
 

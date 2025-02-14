@@ -43,7 +43,7 @@ namespace ig
     {
         friend class AssetManager;
 
-      public:
+    public:
         TextureLoader(RenderContext& renderContext);
         TextureLoader(const TextureLoader&) = delete;
         TextureLoader(TextureLoader&&) noexcept = delete;
@@ -52,12 +52,12 @@ namespace ig
         TextureLoader& operator=(const TextureLoader&) = delete;
         TextureLoader& operator=(TextureLoader&&) noexcept = delete;
 
-      private:
+    private:
         Result<Texture, ETextureLoaderStatus> Load(const Texture::Desc& desc);
         Result<Texture, details::EMakeDefaultTexStatus> MakeDefault(const AssetInfo& assetInfo);
         Result<Texture, details::EMakeDefaultTexStatus> MakeMonochrome(const AssetInfo& assetInfo, const Color& color);
 
-      private:
+    private:
         RenderContext& renderContext;
     };
 } // namespace ig

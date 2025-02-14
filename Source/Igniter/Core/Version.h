@@ -10,4 +10,4 @@ namespace ig
         constexpr uint8_t Patch = 0;
         constexpr std::string_view Version = "0.2.0";
     } // namespace version
-} // namespace ig
+}     // namespace ig

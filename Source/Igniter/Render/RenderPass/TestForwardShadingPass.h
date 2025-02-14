@@ -29,9 +29,10 @@ namespace ig
 
     class ShaderBlob;
     class PipelineState;
+
     class TestForwardShadingPass : public RenderPass
     {
-      public:
+    public:
         TestForwardShadingPass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
         TestForwardShadingPass(const TestForwardShadingPass&) = delete;
         TestForwardShadingPass(TestForwardShadingPass&&) noexcept = delete;
@@ -42,10 +43,10 @@ namespace ig
 
         void SetParams(const TestForwardShadingPassParams newParams);
 
-      protected:
+    protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      private:
+    private:
         RenderContext* renderContext = nullptr;
         RootSignature* bindlessRootSignature = nullptr;
 

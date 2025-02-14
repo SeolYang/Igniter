@@ -14,9 +14,10 @@ namespace ig
 
     class RenderContext;
     class GpuStorage;
+
     class UnifiedMeshStorage
     {
-      public:
+    public:
         explicit UnifiedMeshStorage(RenderContext& renderCtx);
         UnifiedMeshStorage(const UnifiedMeshStorage&) = delete;
         UnifiedMeshStorage(UnifiedMeshStorage&&) noexcept = delete;
@@ -32,6 +33,7 @@ namespace ig
             static_assert(sizeof(VertexType) % 4 == 0);
             return AllocateVertices(numVertices, sizeof(VertexType) / 4);
         }
+
         Handle<MeshIndex> AllocateIndices(const Size numIndices);
         Handle<MeshTriangle> AllocateTriangles(const Size numTriangles);
         Handle<Meshlet> AllocateMeshlets(const Size numMeshlets);
@@ -62,10 +64,10 @@ namespace ig
         [[nodiscard]] Size GetNumAllocatedTrianglesHint() const noexcept { return numAllocTriangles; }
         [[nodiscard]] Size GetNumAllocatedMeshletsHint() const noexcept { return numAllocMeshlets; }
 
-      private:
+    private:
         Handle<MeshVertex> AllocateVertices(const Size numVertices, const Size numDwordsPerVertex);
 
-      private:
+    private:
         RenderContext* renderCtx = nullptr;
 
         LocalFrameIndex currentLocalFrameIdx = 0;

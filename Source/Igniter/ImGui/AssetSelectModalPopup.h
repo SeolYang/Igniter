@@ -11,7 +11,7 @@ namespace ig::ImGuiX
     // 단순히, 열린 순간에 로드 가능한 에셋의 리스트만 뽑아내면 된다.
     class AssetSelectModalPopup final
     {
-      private:
+    private:
         using AssetSnapshot = ig::AssetManager::Snapshot;
 
         struct AssetInfo
@@ -20,7 +20,7 @@ namespace ig::ImGuiX
             ig::String SelectableLabel;
         };
 
-      public:
+    public:
         AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter);
         AssetSelectModalPopup(const AssetSelectModalPopup&) = delete;
         AssetSelectModalPopup(AssetSelectModalPopup&&) noexcept = delete;
@@ -36,10 +36,10 @@ namespace ig::ImGuiX
         [[nodiscard]] bool IsAssetSelected() const { return bAssetSelected; }
         ig::Guid GetSelectedAssetGuid() const { return selectedGuid; }
 
-      private:
+    private:
         void TakeAssetSnapshotsFromManager();
 
-      private:
+    private:
         ig::String label;
         ig::String assetInfoChildLabel;
         ig::EAssetCategory assetCategoryToFilter = ig::EAssetCategory::Unknown;

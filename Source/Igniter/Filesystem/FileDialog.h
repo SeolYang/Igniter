@@ -23,7 +23,7 @@ namespace ig
 
     class OpenFileDialog final
     {
-      public:
+    public:
         static Result<String, EOpenFileDialogStatus> Show(
             const HWND parentWindowHandle, const String dialogTitle, const std::span<const DialogFilter> filters);
     };

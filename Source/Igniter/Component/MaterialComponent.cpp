@@ -17,23 +17,19 @@ namespace ig
 
     MaterialComponent::MaterialComponent()
         : Instance(Engine::GetAssetManager().LoadMaterial(Guid{DefaultMaterialGuid}))
-    {
-    }
+    {}
 
     MaterialComponent::MaterialComponent(const MaterialComponent& other)
         : Instance(Engine::GetAssetManager().Clone(other.Instance))
-    {
-    }
+    {}
 
     MaterialComponent::MaterialComponent(MaterialComponent&& other) noexcept
         : Instance(std::exchange(other.Instance, {}))
-    {
-    }
+    {}
 
     MaterialComponent::MaterialComponent(const Handle<Material> ownedInstance)
         : Instance(ownedInstance)
-    {
-    }
+    {}
 
     MaterialComponent::~MaterialComponent()
     {

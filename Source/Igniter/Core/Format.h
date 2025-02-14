@@ -5,7 +5,7 @@ template <typename Enumeration>
     requires std::is_enum_v<Enumeration>
 struct std::formatter<Enumeration>
 {
-  public:
+public:
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FrameContext>
@@ -18,7 +18,7 @@ struct std::formatter<Enumeration>
 template <>
 struct std::formatter<ig::Guid>
 {
-  public:
+public:
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FrameContext>

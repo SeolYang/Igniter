@@ -9,14 +9,13 @@ namespace ig
         friend class GpuDevice;
         friend class CommandQueue;
 
-      public:
+    public:
         GpuFence(const GpuFence& other) = delete;
 
         GpuFence(GpuFence&& other) noexcept
             : counter(other.counter.exchange(1))
             , fence(std::move(other.fence))
-        {
-        }
+        {}
 
         ~GpuFence() = default;
 
@@ -41,13 +40,12 @@ namespace ig
             return GpuSyncPoint{*fence.Get(), syncPointCounter};
         }
 
-      private:
+    private:
         GpuFence(ComPtr<ID3D12Fence> fence)
             : fence(std::move(fence))
-        {
-        }
+        {}
 
-      private:
+    private:
         std::atomic_uint64_t counter{1};
         ComPtr<ID3D12Fence> fence;
     };

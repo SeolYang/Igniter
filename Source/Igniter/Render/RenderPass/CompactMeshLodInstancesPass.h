@@ -24,7 +24,7 @@ namespace ig
 
     class CompactMeshLodInstancesPass : public RenderPass
     {
-      public:
+    public:
         CompactMeshLodInstancesPass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
         CompactMeshLodInstancesPass(const CompactMeshLodInstancesPass&) = delete;
         CompactMeshLodInstancesPass(CompactMeshLodInstancesPass&&) noexcept = delete;
@@ -35,13 +35,13 @@ namespace ig
 
         void SetParams(const CompactMeshLodInstancesPassParams newParams);
 
-      protected:
+    protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      public:
+    public:
         constexpr static U32 kNumThreadsPerGroup = 32;
 
-      private:
+    private:
         RenderContext* renderContext = nullptr;
         RootSignature* bindlessRootSignature = nullptr;
 

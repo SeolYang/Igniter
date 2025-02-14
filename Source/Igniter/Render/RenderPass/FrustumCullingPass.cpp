@@ -67,7 +67,8 @@ namespace ig
                 .DebugName = String(std::format("MeshLodInstanceStorage")),
                 .ElementSize = (U32)sizeof(StaticMeshLodInstance),
                 .NumInitElements = kNumInitMeshLodInstances,
-                .Flags = meshLodInstanceStorageFlags});
+                .Flags = meshLodInstanceStorageFlags
+            });
     }
 
     FrustumCullingPass::~FrustumCullingPass()
@@ -89,7 +90,7 @@ namespace ig
     void FrustumCullingPass::PreExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(meshLodInstanceStorage != nullptr &&
-                 meshLodInstanceStorage->IsLinearAllocator());
+            meshLodInstanceStorage->IsLinearAllocator());
         [[maybe_unused]] const auto linearAlloc = meshLodInstanceStorage->Allocate(params.NumRenderables);
     }
 
@@ -116,7 +117,8 @@ namespace ig
         const FrustumCullingConstants frustumCullingConstants{
             .PerFrameCbv = params.PerFrameCbvPtr->Index,
             .MeshLodInstanceStorageUav = meshLodInstanceStorageUavPtr->Index,
-            .CullingDataBufferUav = cullingDataBufferUavPtr->Index};
+            .CullingDataBufferUav = cullingDataBufferUavPtr->Index
+        };
 
         CommandList& cmdList = *params.CmdList;
         cmdList.Open(pso.get());

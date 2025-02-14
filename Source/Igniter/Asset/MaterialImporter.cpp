@@ -6,14 +6,14 @@
 #include "Igniter/Asset/MaterialImporter.h"
 
 IG_DECLARE_LOG_CATEGORY(MaterialImporter);
+
 //IG_DEFINE_LOG_CATEGORY(MaterialImporter);
 
 namespace ig
 {
     MaterialImporter::MaterialImporter(AssetManager& assetManager)
         : assetManager(assetManager)
-    {
-    }
+    {}
 
     Result<Material::Desc, EMaterialAssetImportStatus> MaterialImporter::Import(const AssetInfo& assetInfo, const MaterialAssetCreateDesc& desc)
     {

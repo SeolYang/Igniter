@@ -5,15 +5,14 @@
 namespace ig
 {
     struct NonSerializable
-    {
-    };
+    {};
 
     class Map;
     class AssetManager;
 
     class World
     {
-      public:
+    public:
         World() = default;
         World(AssetManager& assetManager, const Handle<Map> map);
         World(const World&) = delete;
@@ -30,7 +29,7 @@ namespace ig
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-      private:
+    private:
         constexpr static std::string_view EntitiesDataKey = "Entities";
         constexpr static std::string_view ComponentNameHintKey = "NameHint";
 

@@ -8,6 +8,7 @@
 #include "Igniter/Asset/StaticMeshImporter.h"
 
 IG_DECLARE_LOG_CATEGORY(StaticMeshImporterLog);
+
 IG_DEFINE_LOG_CATEGORY(StaticMeshImporterLog);
 
 namespace ig
@@ -16,8 +17,7 @@ namespace ig
 
     StaticMeshImporter::StaticMeshImporter(AssetManager& assetManager)
         : assetManager(assetManager)
-    {
-    }
+    {}
 
     static bool CheckAssimpSceneLoadingSucceed(const String resPathStr, const Assimp::Importer& importer, const aiScene* scene)
     {
@@ -123,7 +123,7 @@ namespace ig
         {
             const aiMaterial& material = *scene.mMaterials[materialIdx];
             const Guid importedGuid = assetManager.Import(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
-                                                          MaterialAssetCreateDesc{.DiffuseVirtualPath = Texture::EngineDefault});
+                MaterialAssetCreateDesc{.DiffuseVirtualPath = Texture::EngineDefault});
             numImportedMaterials = importedGuid.isValid() ? (numImportedMaterials + 1) : numImportedMaterials;
         }
         return numImportedMaterials;
@@ -309,10 +309,12 @@ namespace ig
 
                 meshlet.BoundingVolume = BoundingSphere{
                     Vector3{meshletBounds.center[0], meshletBounds.center[1], meshletBounds.center[2]},
-                    meshletBounds.radius};
+                    meshletBounds.radius
+                };
                 /* #sy_todo 추후에 양자화 버전으로 변경 */
                 meshlet.NormalConeAxis = Vector3{
-                    meshletBounds.cone_axis[0], meshletBounds.cone_axis[1], meshletBounds.cone_axis[2]};
+                    meshletBounds.cone_axis[0], meshletBounds.cone_axis[1], meshletBounds.cone_axis[2]
+                };
                 meshlet.NormalConeCutoff = meshletBounds.cone_cutoff;
             }
 
@@ -332,10 +334,10 @@ namespace ig
             meshopt_encodeVertexBufferBound(meshData.Vertices.size(), sizeof(VertexSM)));
         meshData.CompressedVertices.resize(
             meshopt_encodeVertexBuffer(meshData.CompressedVertices.data(),
-                                       meshData.CompressedVertices.size(),
-                                       meshData.Vertices.data(),
-                                       meshData.Vertices.size(),
-                                       sizeof(VertexSM)));
+                meshData.CompressedVertices.size(),
+                meshData.Vertices.data(),
+                meshData.Vertices.size(),
+                sizeof(VertexSM)));
     }
 
     Result<StaticMesh::Desc, EStaticMeshImportStatus> StaticMeshImporter::ExportToFile(const std::string_view meshName, const MeshData& meshData)
@@ -376,13 +378,16 @@ namespace ig
             const Index blobOffset = kNumAdditionalBlob + (lod * kNumBlobPerLod);
             blobs[blobOffset + 0] = std::span<const U8>{
                 reinterpret_cast<const U8*>(meshLod.MeshletVertexIndices.data()),
-                sizeof(U32) * meshLod.MeshletVertexIndices.size()};
+                sizeof(U32) * meshLod.MeshletVertexIndices.size()
+            };
             blobs[blobOffset + 1] = std::span<const U8>{
                 reinterpret_cast<const U8*>(meshLod.MeshletTriangles.data()),
-                sizeof(U32) * meshLod.MeshletTriangles.size()};
+                sizeof(U32) * meshLod.MeshletTriangles.size()
+            };
             blobs[blobOffset + 2] = std::span<const U8>{
                 reinterpret_cast<const U8*>(meshLod.Meshlets.data()),
-                sizeof(Meshlet) * meshLod.Meshlets.size()};
+                sizeof(Meshlet) * meshLod.Meshlets.size()
+            };
         }
         if (!SaveBlobsToFile(assetPath, blobs))
         {

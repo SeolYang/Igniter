@@ -36,7 +36,7 @@ namespace ig
     {
         friend class AssetManager;
 
-      public:
+    public:
         StaticMeshLoader(RenderContext& renderContext, AssetManager& assetManager);
 
         StaticMeshLoader(const StaticMeshLoader&) = delete;
@@ -46,10 +46,10 @@ namespace ig
         StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
         StaticMeshLoader& operator=(StaticMeshLoader&&) noexcept = delete;
 
-      private:
+    private:
         [[nodiscard]] Result<StaticMesh, EStaticMeshLoadStatus> Load(const StaticMesh::Desc& desc) const;
 
-      private:
+    private:
         RenderContext& renderContext;
         AssetManager& assetManager;
     };

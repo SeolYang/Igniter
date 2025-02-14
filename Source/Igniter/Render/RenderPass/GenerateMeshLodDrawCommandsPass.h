@@ -26,7 +26,7 @@ namespace ig
 
     class GenerateMeshLodDrawCommandsPass : public RenderPass
     {
-      public:
+    public:
         GenerateMeshLodDrawCommandsPass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
         GenerateMeshLodDrawCommandsPass(const GenerateMeshLodDrawCommandsPass&) = delete;
         GenerateMeshLodDrawCommandsPass(GenerateMeshLodDrawCommandsPass&&) noexcept = delete;
@@ -40,14 +40,14 @@ namespace ig
         [[nodiscard]] Handle<GpuBuffer> GetDrawInstanceCmdStorageBuffer() const noexcept { return drawInstanceCmdStorage->GetGpuBuffer(); }
         [[nodiscard]] CommandSignature* GetCommandSignature() noexcept { return cmdSignature.get(); }
 
-      protected:
+    protected:
         void PreExecute(const LocalFrameIndex localFrameIdx) override;
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      public:
+    public:
         constexpr static U32 kNumInitDrawCommands = 128;
 
-      private:
+    private:
         RenderContext* renderContext = nullptr;
         RootSignature* bindlessRootSignature = nullptr;
 

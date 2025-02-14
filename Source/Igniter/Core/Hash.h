@@ -10,7 +10,7 @@ namespace ig
     template <typename Ty>
     inline U64 HashInstance(const Ty& instance, const U64 hashInitialVal = kFnvOffsetBasis)
     {
-        static_assert(sizeof(Ty)%8 == 0);
+        static_assert(sizeof(Ty) % 8 == 0);
         constexpr U64 FnvPrime = 16777619u;
         constexpr Size NumChunks = sizeof(Ty) / 8;
 
@@ -30,7 +30,7 @@ namespace ig
         return HashInstance(instance);
     }
 
-    template<typename Ty, typename... Args>
+    template <typename Ty, typename... Args>
     inline U64 HashInstances(const Ty& instance, const Args&... args)
     {
         const U64 hashVal = HashInstances(args...);

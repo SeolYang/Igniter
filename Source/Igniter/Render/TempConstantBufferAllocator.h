@@ -10,12 +10,12 @@ namespace ig
 
     struct TempConstantBuffer final
     {
-      public:
+    public:
         TempConstantBuffer(const Handle<GpuView> cbv, uint8_t* const mappedPtr)
             : cbv(cbv)
             , mappedPtr(mappedPtr)
-        {
-        }
+        {}
+
         ~TempConstantBuffer() = default;
 
         template <typename T>
@@ -29,7 +29,7 @@ namespace ig
 
         [[nodiscard]] Handle<GpuView> GetConstantBufferView() const { return cbv; }
 
-      private:
+    private:
         uint8_t* mappedPtr{nullptr};
         Handle<GpuView> cbv{};
     };
@@ -41,7 +41,7 @@ namespace ig
 
     class TempConstantBufferAllocator final
     {
-      public:
+    public:
         TempConstantBufferAllocator(RenderContext& renderContext, const Size reservedBufferSizeInBytes = DefaultReservedBufferSizeInBytes);
         TempConstantBufferAllocator(const TempConstantBufferAllocator&) = delete;
         TempConstantBufferAllocator(TempConstantBufferAllocator&&) noexcept = delete;
@@ -66,11 +66,11 @@ namespace ig
         [[nodiscard]] Size GetUsedSizeInBytes(const LocalFrameIndex localFrameIdx) const noexcept { return allocatedSizeInBytes[localFrameIdx]; }
         [[nodiscard]] Size GetReservedSizeInBytesPerFrame() const noexcept { return reservedSizeInBytesPerFrame; }
 
-      public:
+    public:
         // 실제 메모리 사용량을 프로파일링을 통해, 상황에 맞게 최적화된 값으로 설정하는 것이 좋다. (기본 값: 4 MB)
         static constexpr Size DefaultReservedBufferSizeInBytes = 4194304;
 
-      private:
+    private:
         RenderContext* renderContext;
 
         Size reservedSizeInBytesPerFrame;

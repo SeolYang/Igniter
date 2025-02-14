@@ -22,7 +22,8 @@ namespace ig
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         const ShaderCompileDesc vsDesc{
             .SourcePath = "Assets/Shaders/ZPrePass.hlsl"_fs,
-            .Type = EShaderType::Vertex};
+            .Type = EShaderType::Vertex
+        };
 
         vs = MakePtr<ShaderBlob>(vsDesc);
 

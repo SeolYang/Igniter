@@ -18,7 +18,7 @@ namespace ig
     {
         friend class AssetManager;
 
-      public:
+    public:
         MaterialImporter(AssetManager& assetManager);
         MaterialImporter(const MaterialImporter&) = delete;
         MaterialImporter(MaterialImporter&&) noexcept = delete;
@@ -27,10 +27,10 @@ namespace ig
         MaterialImporter& operator=(const MaterialImporter&) = delete;
         MaterialImporter& operator=(MaterialImporter&&) noexcept = delete;
 
-      private:
+    private:
         Result<Material::Desc, EMaterialAssetImportStatus> Import(const AssetInfo& assetInfo, const MaterialAssetCreateDesc& desc);
 
-      private:
+    private:
         AssetManager& assetManager;
     };
 } // namespace ig

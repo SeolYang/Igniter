@@ -164,21 +164,21 @@ namespace ig
     bool IsDepthStencilFormat(const DXGI_FORMAT format)
     {
         return format == DXGI_FORMAT_D16_UNORM || format == DXGI_FORMAT_D24_UNORM_S8_UINT || format == DXGI_FORMAT_D32_FLOAT ||
-               format == DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+            format == DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
     }
 
     bool IsTypelessFormat(const DXGI_FORMAT format)
     {
         return format == DXGI_FORMAT_R32G32B32A32_TYPELESS || format == DXGI_FORMAT_R32G32B32_TYPELESS ||
-               format == DXGI_FORMAT_R16G16B16A16_TYPELESS || format == DXGI_FORMAT_R32G32_TYPELESS || format == DXGI_FORMAT_R32G8X24_TYPELESS ||
-               format == DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS || format == DXGI_FORMAT_X32_TYPELESS_G8X24_UINT ||
-               format == DXGI_FORMAT_R10G10B10A2_TYPELESS || format == DXGI_FORMAT_R8G8B8A8_TYPELESS || format == DXGI_FORMAT_R16G16_TYPELESS ||
-               format == DXGI_FORMAT_R32_TYPELESS || format == DXGI_FORMAT_R24G8_TYPELESS || format == DXGI_FORMAT_R24_UNORM_X8_TYPELESS ||
-               format == DXGI_FORMAT_X24_TYPELESS_G8_UINT || format == DXGI_FORMAT_R8G8_TYPELESS || format == DXGI_FORMAT_R16_TYPELESS ||
-               format == DXGI_FORMAT_R8_TYPELESS || format == DXGI_FORMAT_BC1_TYPELESS || format == DXGI_FORMAT_BC2_TYPELESS ||
-               format == DXGI_FORMAT_BC3_TYPELESS || format == DXGI_FORMAT_BC4_TYPELESS || format == DXGI_FORMAT_BC5_TYPELESS ||
-               format == DXGI_FORMAT_R8G8B8A8_TYPELESS || format == DXGI_FORMAT_B8G8R8X8_TYPELESS || format == DXGI_FORMAT_BC6H_TYPELESS ||
-               format == DXGI_FORMAT_BC7_TYPELESS;
+            format == DXGI_FORMAT_R16G16B16A16_TYPELESS || format == DXGI_FORMAT_R32G32_TYPELESS || format == DXGI_FORMAT_R32G8X24_TYPELESS ||
+            format == DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS || format == DXGI_FORMAT_X32_TYPELESS_G8X24_UINT ||
+            format == DXGI_FORMAT_R10G10B10A2_TYPELESS || format == DXGI_FORMAT_R8G8B8A8_TYPELESS || format == DXGI_FORMAT_R16G16_TYPELESS ||
+            format == DXGI_FORMAT_R32_TYPELESS || format == DXGI_FORMAT_R24G8_TYPELESS || format == DXGI_FORMAT_R24_UNORM_X8_TYPELESS ||
+            format == DXGI_FORMAT_X24_TYPELESS_G8_UINT || format == DXGI_FORMAT_R8G8_TYPELESS || format == DXGI_FORMAT_R16_TYPELESS ||
+            format == DXGI_FORMAT_R8_TYPELESS || format == DXGI_FORMAT_BC1_TYPELESS || format == DXGI_FORMAT_BC2_TYPELESS ||
+            format == DXGI_FORMAT_BC3_TYPELESS || format == DXGI_FORMAT_BC4_TYPELESS || format == DXGI_FORMAT_BC5_TYPELESS ||
+            format == DXGI_FORMAT_R8G8B8A8_TYPELESS || format == DXGI_FORMAT_B8G8R8X8_TYPELESS || format == DXGI_FORMAT_BC6H_TYPELESS ||
+            format == DXGI_FORMAT_BC7_TYPELESS;
     }
 
     void GpuTextureDesc::AsTexture1D(const U32 width, const uint16_t mipLevels, const DXGI_FORMAT format, const bool bEnableShaderReadWrite,
@@ -994,7 +994,8 @@ namespace ig
                     result.emplace_back(D3D12_SUBRESOURCE_DATA{
                         .pData = reinterpret_cast<const void*>(ptr),
                         .RowPitch = static_cast<LONG_PTR>(rowPitch),
-                        .SlicePitch = static_cast<LONG_PTR>(slicePitch)});
+                        .SlicePitch = static_cast<LONG_PTR>(slicePitch)
+                    });
 
                     ptr += slicePitch;
                     if (width > 1)
@@ -1025,7 +1026,8 @@ namespace ig
                     result.emplace_back(D3D12_SUBRESOURCE_DATA{
                         .pData = reinterpret_cast<const void*>(ptr),
                         .RowPitch = static_cast<LONG_PTR>(rowPitch),
-                        .SlicePitch = static_cast<LONG_PTR>(slicePitch)});
+                        .SlicePitch = static_cast<LONG_PTR>(slicePitch)
+                    });
                     ptr += slicePitch;
                 }
 

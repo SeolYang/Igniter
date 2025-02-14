@@ -19,6 +19,7 @@
 #include "Igniter/Gameplay/World.h"
 
 IG_DECLARE_LOG_CATEGORY(EngineLog);
+
 IG_DEFINE_LOG_CATEGORY(EngineLog);
 
 namespace ig

@@ -6,8 +6,7 @@ namespace ig
 {
     MaterialLoader::MaterialLoader(AssetManager& assetManager)
         : assetManager(assetManager)
-    {
-    }
+    {}
 
     Result<Material, EMaterialLoadStatus> MaterialLoader::Load(const Material::Desc& desc)
     {

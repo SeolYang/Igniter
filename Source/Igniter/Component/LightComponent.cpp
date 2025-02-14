@@ -41,7 +41,7 @@ namespace ig
 
         bool bLightColorEdited = ImGuiX::EditColor3("Color", light.Property.Color);
         ImGui::SameLine();
-        bLightColorEdited |= ImGuiX::EditVector3("Color", light.Property.Color, 0.001f, "%.03f"); 
+        bLightColorEdited |= ImGuiX::EditVector3("Color", light.Property.Color, 0.001f, "%.03f");
         if (bLightColorEdited)
         {
             light.Property.Color.x = std::clamp<float>(light.Property.Color.x, 0.f, 1.f);

@@ -9,12 +9,13 @@ namespace ig
 {
     enum class EGpuStorageFlags : U8
     {
-        None = 0,
-        ShaderReadWrite = 1 << 0,
-        EnableUavCounter = 1 << 1,
+        None                   = 0,
+        ShaderReadWrite        = 1 << 0,
+        EnableUavCounter       = 1 << 1,
         EnableLinearAllocation = 1 << 2,
-        RawBuffer = 1 << 3,
+        RawBuffer              = 1 << 3,
     };
+
     IG_ENUM_FLAGS(EGpuStorageFlags);
 
     struct GpuStorageDesc
@@ -36,14 +37,14 @@ namespace ig
     // 알고리즘을 구현 할 수도 있을 것 같음.
     class GpuStorage final
     {
-      public:
+    public:
         struct Allocation
         {
-          public:
+        public:
             [[nodiscard]] bool IsValid() const noexcept { return VirtualAllocation.AllocHandle != 0 && AllocSize > 0 && BlockIndex != InvalidIndex; }
             static Allocation Invalid() { return Allocation{}; }
 
-          public:
+        public:
             Index BlockIndex = InvalidIndex;
             D3D12MA::VirtualAllocation VirtualAllocation{};
 
@@ -53,14 +54,14 @@ namespace ig
             Size NumElements = 0;
         };
 
-      private:
+    private:
         struct Block
         {
             D3D12MA::VirtualBlock* VirtualBlock = nullptr;
             Size Offset = 0;
         };
 
-      public:
+    public:
         GpuStorage(RenderContext& renderContext, const GpuStorageDesc& desc);
         GpuStorage(const GpuStorage&) = delete;
         GpuStorage(GpuStorage&&) noexcept = delete;
@@ -84,13 +85,13 @@ namespace ig
         [[nodiscard]] Handle<GpuView> GetShaderResourceView() const noexcept { return srv; }
         [[nodiscard]] Handle<GpuView> GetUnorderedResourceView() const noexcept { return uav; }
 
-      private:
+    private:
         [[nodiscard]] GpuBufferDesc CreateBufferDesc(const U32 numElements) const noexcept;
 
         bool AllocateWithBlock(const Size allocSize, const Index blockIdx, Allocation& allocation);
         bool Grow(const Size newAllocSize);
 
-      private:
+    private:
         // 새롭게 할당 될 버퍼의 크기는 최소 (최소 버퍼 크기 + 할당 요청 크기)
         // NextBufferSize = max(previousBufferSize + NewAllocSize, previousBufferSize * GrowthMultiplier);
         // 내부적으로 fragmentation이 발생 할 가능성이 있음.

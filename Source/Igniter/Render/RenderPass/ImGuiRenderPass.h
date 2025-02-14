@@ -24,7 +24,7 @@ namespace ig
 
     class ImGuiRenderPass : public RenderPass
     {
-      public:
+    public:
         ImGuiRenderPass(RenderContext& renderContext);
         ImGuiRenderPass(const ImGuiRenderPass&) = delete;
         ImGuiRenderPass(ImGuiRenderPass&&) noexcept = delete;
@@ -35,10 +35,10 @@ namespace ig
 
         void SetParams(const ImGuiRenderPassParams& newParams);
 
-      protected:
+    protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      private:
+    private:
         RenderContext* renderContext = nullptr;
 
         ImGuiRenderPassParams params;

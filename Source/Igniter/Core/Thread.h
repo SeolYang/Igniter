@@ -5,13 +5,13 @@ namespace ig
 {
     class ThreadUIDGenerator final
     {
-      public:
+    public:
         static Size GetUID();
     };
 
     class ThreadInfo final
     {
-      public:
+    public:
         static void RegisterMainThreadID();
         static bool IsMainThread();
     };

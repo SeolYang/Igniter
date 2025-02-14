@@ -6,13 +6,13 @@ struct PerFrameData
 {
     float4x4 ToView;
     float4x4 ToViewProj;
-    
-	/* (x,y,z): cam pos, w: inv aspect ratio */
+
+    /* (x,y,z): cam pos, w: inv aspect ratio */
     float4 CamPosInvAspectRatio;
-	/* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
+    /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
     float4 ViewFrustumParams;
     uint EnableFrustumCulling;
-	// test purpose
+    // test purpose
     uint MinMeshLod;
 
     uint StaticMeshVertexStorageSrv;
@@ -24,7 +24,7 @@ struct PerFrameData
 
     uint InstancingDataStorageSrv;
     uint InstancingDataStorageUav;
-	
+
     uint IndirectTransformStorageSrv;
     uint IndirectTransformStorageUav;
 
@@ -32,12 +32,12 @@ struct PerFrameData
 
     uint RenderableIndicesBufferSrv;
     uint NumMaxRenderables;
-    
+
     uint LightStorageSrv;
     uint LightIdxListSrv;
     uint LightTileBitfieldBufferSrv;
     uint LightDepthBinBufferSrv;
-    
+
     float ViewportWidth;
     float ViewportHeight;
 };
@@ -68,7 +68,7 @@ struct Mesh
 {
     uint VertexOffset;
     uint NumVertices;
-	
+
     uint NumLods;
     MeshLod Lods[MAX_MESH_LOD];
 

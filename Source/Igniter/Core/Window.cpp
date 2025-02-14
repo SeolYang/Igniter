@@ -17,7 +17,8 @@ namespace ig
         IG_CHECK(description.Width > 0 && description.Height > 0);
         windowClass = {
             sizeof(WNDCLASSEX), CS_OWNDC, WindowProc, 0L, 0L, GetModuleHandle(NULL), NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL,
-            windowTitle.c_str(), NULL};
+            windowTitle.c_str(), NULL
+        };
 
         IG_VERIFY(SUCCEEDED(RegisterClassEx(&windowClass)));
         const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -31,7 +32,7 @@ namespace ig
 
         windowHandle =
             CreateWindowEx(exWindowStyle, windowClass.lpszClassName, windowClass.lpszClassName, windowStyle, (screenWidth - description.Width) / 2,
-                           (screenHeight - description.Height) / 2, rect.right - rect.left, rect.top - rect.bottom, NULL, NULL, windowClass.hInstance, NULL);
+                (screenHeight - description.Height) / 2, rect.right - rect.left, rect.top - rect.bottom, NULL, NULL, windowClass.hInstance, NULL);
 
         viewport.width = static_cast<F32>(rect.right - rect.left);
         viewport.height = static_cast<F32>(rect.top - rect.bottom);

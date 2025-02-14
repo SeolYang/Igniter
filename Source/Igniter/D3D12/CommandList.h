@@ -16,10 +16,10 @@ namespace ig
     {
         friend class GpuDevice;
 
-      public:
+    public:
         using NativeType = ID3D12GraphicsCommandList7;
 
-      public:
+    public:
         CommandList(const CommandList&) = delete;
         CommandList(CommandList&& other) noexcept;
         ~CommandList() = default;
@@ -77,6 +77,7 @@ namespace ig
         void SetScissorRect(const Viewport& viewport);
         void SetRoot32BitConstants(const U32 registerSlot, const U32 num32BitValuesToSet,
                                    const void* srcData, const U32 destOffsetIn32BitValues);
+
         template <typename T>
             requires(std::is_pod_v<T>)
         void SetRoot32BitConstants(const U32 registerSlot, const T& data, const U32 destOffsetIn32BitValues)
@@ -90,13 +91,13 @@ namespace ig
         void Dispatch(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ);
 
         void DispatchMesh(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ);
-        
+
         void ExecuteIndirect(CommandSignature& cmdSignature, GpuBuffer& cmdBuffer);
 
-      private:
+    private:
         CommandList(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList, const EQueueType targetQueueType);
 
-      private:
+    private:
         ComPtr<ID3D12CommandAllocator> cmdAllocator;
         ComPtr<NativeType> cmdList;
         EQueueType cmdListTargetQueueType;

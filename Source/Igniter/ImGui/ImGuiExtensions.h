@@ -41,7 +41,7 @@ namespace ig::ImGuiX
         {
             enumValue = magic_enum::enum_value<E>(selected);
         }
-       return bSuccuess;
+        return bSuccuess;
     }
 
     inline void EndEnumCombo()

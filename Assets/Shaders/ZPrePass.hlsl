@@ -8,6 +8,7 @@ struct PerDrawData
     uint VertexIdxOffset;
     uint IndirectTransformOffset;
 };
+
 ConstantBuffer<PerDrawData> perDrawData : register(b0);
 
 struct VertexShaderOutput

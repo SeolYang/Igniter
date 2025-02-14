@@ -7,7 +7,7 @@ namespace ig::details
 {
     class TypelessAssetDescMap
     {
-      public:
+    public:
         virtual ~TypelessAssetDescMap() = default;
 
         virtual void Insert(const Json& serializedMetadata) = 0;
@@ -24,7 +24,7 @@ namespace ig::details
     template <typename T>
     class AssetDescMap : public TypelessAssetDescMap
     {
-      public:
+    public:
         AssetDescMap() = default;
         ~AssetDescMap() = default;
 
@@ -79,7 +79,7 @@ namespace ig::details
 
         bool IsEmpty() const override { return container.empty(); }
 
-      private:
+    private:
         UnorderedMap<Guid, typename T::Desc> container{};
     };
 
@@ -87,7 +87,7 @@ namespace ig::details
     {
         using VirtualPathGuidTable = UnorderedMap<String, Guid>;
 
-      public:
+    public:
         AssetMonitor();
         ~AssetMonitor();
 
@@ -168,7 +168,7 @@ namespace ig::details
 
         [[nodiscard]] Vector<AssetInfo> TakeSnapshots(const EAssetCategory filter) const;
 
-      private:
+    private:
         void InitAssetDescTables();
         void InitVirtualPathGuidTables();
         void ParseAssetDirectory();
@@ -225,7 +225,7 @@ namespace ig::details
         void ReflectRemainedToFilesUnsafe();
         void CleanupOrphanFiles();
 
-      private:
+    private:
         mutable SharedMutex mutex;
         Vector<std::pair<EAssetCategory, VirtualPathGuidTable>> virtualPathGuidTables;
         Vector<std::pair<EAssetCategory, Ptr<TypelessAssetDescMap>>> guidDescTables;

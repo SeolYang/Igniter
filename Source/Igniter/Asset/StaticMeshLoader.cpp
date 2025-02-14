@@ -13,6 +13,7 @@
 #include "Igniter/Asset/StaticMeshLoader.h"
 
 IG_DECLARE_LOG_CATEGORY(StaticMeshLoaderLog);
+
 IG_DEFINE_LOG_CATEGORY(StaticMeshLoaderLog);
 
 namespace ig
@@ -20,8 +21,7 @@ namespace ig
     StaticMeshLoader::StaticMeshLoader(RenderContext& renderContext, AssetManager& assetManager)
         : renderContext(renderContext)
         , assetManager(assetManager)
-    {
-    }
+    {}
 
     Result<StaticMesh, EStaticMeshLoadStatus> StaticMeshLoader::Load(const StaticMesh::Desc& desc) const
     {
@@ -93,9 +93,9 @@ namespace ig
         }
 
         const Size expectedBlobSize = loadDesc.CompressedVerticesSize +
-                                      sizeof(U32) * expectedNumIndices +
-                                      sizeof(U32) * expectedNumTriangles +
-                                      sizeof(Meshlet) * expectedNumMeshlets;
+            sizeof(U32) * expectedNumIndices +
+            sizeof(U32) * expectedNumTriangles +
+            sizeof(Meshlet) * expectedNumMeshlets;
         if (blob.size() != expectedBlobSize)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::BlobSizeMismatch>();
@@ -158,16 +158,16 @@ namespace ig
         UploadContext verticesUploadCtx = gpuUploader.Reserve(meshVertexAllocPtr->Alloc.AllocSize);
         {
             const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(),
-                                                                loadDesc.NumVertices,
-                                                                sizeof(VertexSM),
-                                                                blob.data(),
-                                                                loadDesc.CompressedVerticesSize);
+                loadDesc.NumVertices,
+                sizeof(VertexSM),
+                blob.data(),
+                loadDesc.CompressedVerticesSize);
             if (decodeResult == 0)
             {
                 GpuBuffer* vertexStorageBufferPtr = renderContext.Lookup(unifiedMeshStorage.GetVertexStorageBuffer());
                 IG_CHECK(vertexStorageBufferPtr != nullptr);
                 verticesUploadCtx.CopyBuffer(0, meshVertexAllocPtr->Alloc.AllocSize,
-                                             *vertexStorageBufferPtr, meshVertexAllocPtr->Alloc.Offset);
+                    *vertexStorageBufferPtr, meshVertexAllocPtr->Alloc.Offset);
                 bVerticesDecodeSucceed = true;
             }
         }
@@ -206,8 +206,8 @@ namespace ig
             UploadContext lodUploadCtx = gpuUploader.Reserve(requiredUploadCtxSize);
 
             std::memcpy(lodUploadCtx.GetOffsettedCpuAddress() + uploadCtxOffset,
-                        blob.data() + blobOffset,
-                        indexStorageAllocPtr->AllocSize);
+                blob.data() + blobOffset,
+                indexStorageAllocPtr->AllocSize);
             lodUploadCtx.CopyBuffer(
                 uploadCtxOffset,
                 indexStorageAllocPtr->AllocSize, *indexStorageBufferPtr, indexStorageAllocPtr->Offset);
@@ -215,8 +215,8 @@ namespace ig
             blobOffset += indexStorageAllocPtr->AllocSize;
 
             std::memcpy(lodUploadCtx.GetOffsettedCpuAddress() + uploadCtxOffset,
-                        blob.data() + blobOffset,
-                        triangleStorageAllocPtr->AllocSize);
+                blob.data() + blobOffset,
+                triangleStorageAllocPtr->AllocSize);
             lodUploadCtx.CopyBuffer(
                 uploadCtxOffset,
                 triangleStorageAllocPtr->AllocSize, *triangleStorageBufferPtr, triangleStorageAllocPtr->Offset);
@@ -224,8 +224,8 @@ namespace ig
             blobOffset += triangleStorageAllocPtr->AllocSize;
 
             std::memcpy(lodUploadCtx.GetOffsettedCpuAddress() + uploadCtxOffset,
-                        blob.data() + blobOffset,
-                        meshletStorageAllocPtr->AllocSize);
+                blob.data() + blobOffset,
+                meshletStorageAllocPtr->AllocSize);
             lodUploadCtx.CopyBuffer(
                 uploadCtxOffset,
                 meshletStorageAllocPtr->AllocSize, *meshletStorageBufferPtr, meshletStorageAllocPtr->Offset);

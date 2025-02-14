@@ -136,7 +136,8 @@ namespace ig
                 [](auto&& element)
                 {
                     return String{std::string_view{&*element.begin(), static_cast<Size>(ranges::distance(element))}};
-                })};
+                })
+        };
 
         // results의 크기를 미리 reserve 할 수 있는 방법이 없을까?
         Vector<String> results{};
@@ -163,7 +164,9 @@ namespace ig
         spacedStr = RegexReplace(spacedStr, NumberSpacingRegex, ReplacePattern);
         std::string value{spacedStr.ToStandard()};
         std::transform(value.begin(), value.begin() + 1, value.begin(), [](const char character)
-                       { return (char)std::toupper((int)character); });
+        {
+            return (char)std::toupper((int)character);
+        });
         return String{value};
     }
 

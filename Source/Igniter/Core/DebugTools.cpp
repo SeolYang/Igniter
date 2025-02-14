@@ -9,14 +9,14 @@ namespace ig::details
     template <U32 BufferSize = 256>
     struct SymbolInfo : public SYMBOL_INFO
     {
-      public:
+    public:
         SymbolInfo()
         {
             MaxNameLen = BufferSize;
             SizeOfStruct = sizeof(SYMBOL_INFO);
         }
 
-      private:
+    private:
         char buffer[BufferSize]{};
     };
 } // namespace ig::details

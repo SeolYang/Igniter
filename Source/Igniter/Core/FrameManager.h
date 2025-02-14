@@ -5,7 +5,7 @@ namespace ig
 {
     class FrameManager final
     {
-      public:
+    public:
         FrameManager(const FrameManager&) = delete;
         FrameManager(FrameManager&&) noexcept = delete;
         ~FrameManager() = default;
@@ -22,7 +22,7 @@ namespace ig
             frameManager.localFrameIdx = frameManager.globalFrameIdx % NumFramesInFlight;
         }
 
-      private:
+    private:
         FrameManager() = default;
 
         static FrameManager& GetInstance()
@@ -31,7 +31,7 @@ namespace ig
             return frameManager;
         }
 
-      private:
+    private:
         GlobalFrameIndex globalFrameIdx = 0;
         LocalFrameIndex localFrameIdx = 0;
     };

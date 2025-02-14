@@ -11,7 +11,7 @@ namespace ig
 
     class GpuTextureDesc final : public D3D12_RESOURCE_DESC1
     {
-      public:
+    public:
         /* #sy_todo 기본 값 설정 */
         GpuTextureDesc() = default;
         virtual ~GpuTextureDesc() = default;
@@ -75,7 +75,7 @@ namespace ig
         /* #sy_note 간단한 format(비압축/RGBA)과 간단한 구조(Array, Slice)에 대한 subresource 정보만 생성 */
         Vector<D3D12_SUBRESOURCE_DATA> GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const;
 
-      public:
+    public:
         String DebugName = String{"Unknown Texture"};
         D3D12_BARRIER_LAYOUT InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
@@ -83,7 +83,7 @@ namespace ig
         U8 ClearStencilValue = 0;
         Color ClearColorValue = Color{0.f, 0.f, 0.f, 1.f};
 
-      private:
+    private:
         bool bIsArray = false;
         bool bIsMSAAEnabled = false;
         bool bIsCubemap = false;

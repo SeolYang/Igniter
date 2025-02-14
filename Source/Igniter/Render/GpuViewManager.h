@@ -13,7 +13,7 @@ namespace ig
 
     class GpuViewManager final
     {
-      public:
+    public:
         GpuViewManager(GpuDevice& gpuDevice,
                        const U32 numCbvSrvUavDescriptors = DefaultNumCbvSrvUavDescriptors,
                        const U32 numSamplerDescriptors = DefaultNumSamplerDescriptors,
@@ -46,7 +46,7 @@ namespace ig
         DescriptorHeap& GetRtvDescHeap();
         DescriptorHeap& GetDsvDescHeap();
 
-      private:
+    private:
         constexpr static U32 DefaultNumCbvSrvUavDescriptors = 4096;
         constexpr static U32 DefaultNumSamplerDescriptors = 64;
         constexpr static U32 DefaultNumRtvDescriptors = 512;

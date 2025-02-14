@@ -3,6 +3,7 @@
 #include "Igniter/D3D12/ShaderBlob.h"
 
 IG_DECLARE_LOG_CATEGORY(ShaderBlobLog);
+
 IG_DEFINE_LOG_CATEGORY(ShaderBlobLog);
 
 namespace ig
@@ -109,7 +110,7 @@ namespace ig
 
         ComPtr<IDxcLibrary> library;
         IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
-        
+
         U32 codePage = CP_UTF8;
         const std::wstring wideSourcePath = desc.SourcePath.ToWideString();
         ComPtr<IDxcBlobEncoding> sourceBlob;
@@ -121,7 +122,7 @@ namespace ig
         const DxcBuffer buffer{.Ptr = sourceBlob->GetBufferPointer(), .Size = sourceBlob->GetBufferSize(), .Encoding = codePage};
 
         IG_VERIFY_SUCCEEDED(compiler->Compile(&buffer, arguments.data(), static_cast<U32>(arguments.size()), defaultIncludeHandler.Get(),
-                                              IID_PPV_ARGS(compiledResult.GetAddressOf())));
+            IID_PPV_ARGS(compiledResult.GetAddressOf())));
 
         ComPtr<IDxcBlobUtf8> errors;
         compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);

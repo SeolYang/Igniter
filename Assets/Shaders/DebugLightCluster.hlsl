@@ -5,11 +5,11 @@ struct DebugLightClustersConstants
     uint PerFrameDataCbv;
     uint ViewportWidth;
     uint ViewportHeight;
-    
+
     uint NumLights;
 
     uint TileDwordsBufferSrv;
-    
+
     uint InputTexSrv;
     uint OutputTexUav;
 };
@@ -31,11 +31,11 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID)
     {
         return;
     }
-    
+
     Texture2D inputTex = ResourceDescriptorHeap[gConstants.InputTexSrv];
     RWTexture2D<float4> outputTex = ResourceDescriptorHeap[gConstants.OutputTexUav];
     StructuredBuffer<uint> tileDwords = ResourceDescriptorHeap[gConstants.TileDwordsBufferSrv];
-    
+
     //const uint2 tileIdx = DTid.xy / TILE_SIZE_UINT;
     //const uint tileStride = uint(gConstants.ViewportWidth * INV_TILE_SIZE);
     //const uint tileDwordOffset = ((tileStride * tileIdx.y) + tileIdx.x) * NUM_U32_PER_TILE;
@@ -49,7 +49,7 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID)
     //        ++numLightsInTile;
     //    }
     //}
-    
+
     //float3 srcColor = inputTex[DTid.xy].rgb;
     //float3 debugColor;
     //if (numLightsInTile == 0)
@@ -76,7 +76,7 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 Gid : SV_GroupID)
     //{
     //    debugColor = ReallyHighDensityTileColor;
     //}
-    
+
     //float3 dstColor = srcColor * debugColor;
     //outputTex[DTid.xy] = float4(debugColor, 1.f);
     //outputTex[DTid.xy] = float4(dstColor, 1.f);

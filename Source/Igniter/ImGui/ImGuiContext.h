@@ -9,7 +9,7 @@ namespace ig
 
     class ImGuiContext final
     {
-      public:
+    public:
         ImGuiContext(Window& window, RenderContext& renderContext);
         ImGuiContext(const ImGuiContext&) = delete;
         ImGuiContext(ImGuiContext&&) noexcept = delete;
@@ -33,7 +33,7 @@ namespace ig
 
         bool HandleWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-      private:
+    private:
         RenderContext& renderContext;
         Handle<GpuView> fontSrv{};
         bool bInputEnabled = true;

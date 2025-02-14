@@ -27,7 +27,7 @@ namespace ig
     {
         friend class AssetManager;
 
-      public:
+    public:
         MaterialLoader(AssetManager& assetManager);
         MaterialLoader(const MaterialLoader&) = delete;
         MaterialLoader(MaterialLoader&&) noexcept = delete;
@@ -36,11 +36,11 @@ namespace ig
         MaterialLoader& operator=(const MaterialLoader&) = delete;
         MaterialLoader& operator=(MaterialLoader&&) noexcept = delete;
 
-      private:
+    private:
         Result<Material, EMaterialLoadStatus> Load(const Material::Desc& desc);
         Result<Material, details::EMakeDefaultMatStatus> MakeDefault(const AssetInfo& assetInfo);
 
-      private:
+    private:
         AssetManager& assetManager;
     };
 } // namespace ig

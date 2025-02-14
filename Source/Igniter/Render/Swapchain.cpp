@@ -7,6 +7,7 @@
 #include "Igniter/Render/Swapchain.h"
 
 IG_DECLARE_LOG_CATEGORY(SwapchainLog);
+
 IG_DEFINE_LOG_CATEGORY(SwapchainLog);
 
 namespace ig
@@ -60,7 +61,7 @@ namespace ig
             backBuffers[localFrameIdx] = renderContext.CreateTexture(GpuTexture{resource});
             rtv[localFrameIdx] =
                 renderContext.CreateRenderTargetView(backBuffers[localFrameIdx],
-                                                     D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
+                    D3D12_TEX2D_RTV{.MipSlice = 0, .PlaneSlice = 0});
         }
     }
 
@@ -95,7 +96,7 @@ namespace ig
         {
             char buff[64] = {};
             sprintf_s(buff, "Device Lost on Present: Reason code 0x%08X\n",
-                      static_cast<unsigned int>((result == DXGI_ERROR_DEVICE_REMOVED) ? renderContext.GetGpuDevice().GetDeviceRemovedReason() : result));
+                static_cast<unsigned int>((result == DXGI_ERROR_DEVICE_REMOVED) ? renderContext.GetGpuDevice().GetDeviceRemovedReason() : result));
             IG_LOG(SwapchainLog, Fatal, "Present Failed: Device removed({})", buff);
         }
     }

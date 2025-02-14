@@ -50,7 +50,6 @@ namespace ig::meta
         return IsReflectedType(type) && bHasComponentIdentity;
     }
 
-
     template <typename T>
     [[nodiscard]] bool IsComponent()
     {

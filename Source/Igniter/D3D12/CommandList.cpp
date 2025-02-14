@@ -21,15 +21,13 @@ namespace ig
         , pendingGlobalBarriers(std::move(other.pendingGlobalBarriers))
         , pendingTextureBarriers(std::move(other.pendingTextureBarriers))
         , pendingBufferBarriers(std::move(other.pendingBufferBarriers))
-    {
-    }
+    {}
 
     CommandList::CommandList(ComPtr<ID3D12CommandAllocator> newCmdAllocator, ComPtr<NativeType> newCmdList, const EQueueType targetQueueType)
         : cmdAllocator(std::move(newCmdAllocator))
         , cmdList(std::move(newCmdList))
         , cmdListTargetQueueType(targetQueueType)
-    {
-    }
+    {}
 
     CommandList& CommandList::operator=(CommandList&& other) noexcept
     {
@@ -82,7 +80,8 @@ namespace ig
                 .LayoutAfter = layoutAfter,
                 .pResource = &targetTexture.GetNative(),
                 .Subresources = subresourceRange,
-                .Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE});
+                .Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE
+            });
     }
 
     void CommandList::AddPendingBufferBarrier(GpuBuffer& targetBuffer,
@@ -102,7 +101,8 @@ namespace ig
                 .AccessAfter = accessAfter,
                 .pResource = &targetBuffer.GetNative(),
                 .Offset = offset,
-                .Size = sizeAsBytes});
+                .Size = sizeAsBytes
+            });
     }
 
     void CommandList::FlushBarriers()
@@ -117,7 +117,8 @@ namespace ig
                 D3D12_BARRIER_GROUP{
                     .Type = D3D12_BARRIER_TYPE_GLOBAL,
                     .NumBarriers = static_cast<U32>(pendingGlobalBarriers.size()),
-                    .pGlobalBarriers = pendingGlobalBarriers.data()});
+                    .pGlobalBarriers = pendingGlobalBarriers.data()
+                });
         }
 
         if (!pendingTextureBarriers.empty())
@@ -126,7 +127,8 @@ namespace ig
                 D3D12_BARRIER_GROUP{
                     .Type = D3D12_BARRIER_TYPE_TEXTURE,
                     .NumBarriers = static_cast<U32>(pendingTextureBarriers.size()),
-                    .pTextureBarriers = pendingTextureBarriers.data()});
+                    .pTextureBarriers = pendingTextureBarriers.data()
+                });
         }
 
         if (!pendingBufferBarriers.empty())
@@ -135,7 +137,8 @@ namespace ig
                 D3D12_BARRIER_GROUP{
                     .Type = D3D12_BARRIER_TYPE_BUFFER,
                     .NumBarriers = static_cast<U32>(pendingBufferBarriers.size()),
-                    .pBufferBarriers = pendingBufferBarriers.data()});
+                    .pBufferBarriers = pendingBufferBarriers.data()
+                });
         }
 
         cmdList->Barrier((UINT32)barrierGroups.size(), barrierGroups.data());
@@ -247,10 +250,14 @@ namespace ig
         IG_CHECK(IsValid());
         IG_CHECK(cmdListTargetQueueType == EQueueType::Graphics || cmdListTargetQueueType == EQueueType::Compute);
         auto toNative = views::all(descriptorHeaps) |
-                        views::filter([](DescriptorHeap* ptr)
-                                      { return ptr != nullptr; }) |
-                        views::transform([](DescriptorHeap* ptr)
-                                         { return &ptr->GetNative(); });
+            views::filter([](DescriptorHeap* ptr)
+            {
+                return ptr != nullptr;
+            }) |
+            views::transform([](DescriptorHeap* ptr)
+            {
+                return &ptr->GetNative();
+            });
         auto nativePtrs = ToVector(toNative);
         cmdList->SetDescriptorHeaps(static_cast<U32>(nativePtrs.size()), nativePtrs.data());
     }
@@ -316,8 +323,8 @@ namespace ig
     void CommandList::SetViewport(const Viewport& viewport)
     {
         SetViewport(viewport.x, viewport.y,
-                    viewport.width, viewport.height,
-                    viewport.minDepth, viewport.maxDepth);
+            viewport.width, viewport.height,
+            viewport.minDepth, viewport.maxDepth);
     }
 
     void CommandList::SetScissorRect(const long left, const long top, const long right, const long bottom)
@@ -359,8 +366,8 @@ namespace ig
         ID3D12CommandSignature& nativeCmdSignature = cmdSignature.GetNative();
         ID3D12Resource& nativeCmdBuffer = cmdBuffer.GetNative();
         cmdList->ExecuteIndirect(&nativeCmdSignature,
-                                 cmdBufferDesc.GetNumElements(), &nativeCmdBuffer, 0,
-                                 &nativeCmdBuffer, cmdBufferDesc.GetUavCounterOffset());
+            cmdBufferDesc.GetNumElements(), &nativeCmdBuffer, 0,
+            &nativeCmdBuffer, cmdBufferDesc.GetUavCounterOffset());
     }
 
     void CommandList::SetRoot32BitConstants(const U32 registerSlot,

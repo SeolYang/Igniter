@@ -37,9 +37,9 @@ namespace ig
             if (snapshot.IsCached())
             {
                 IG_LOG(AssetManagerLog,
-                       Fatal,
-                       "Asset {} still cached(alived) with ref count: {}. Please Checks Load-Unload call pair.", snapshot.Info,
-                       snapshot.RefCount);
+                    Fatal,
+                    "Asset {} still cached(alived) with ref count: {}. Please Checks Load-Unload call pair.", snapshot.Info,
+                    snapshot.RefCount);
             }
         }
 
@@ -388,9 +388,11 @@ namespace ig
                 for (const AssetInfo& assetInfo : assetInfoSnapshots)
                 {
                     const details::TypelessAssetCache::Snapshot cacheSnapshot = assetCachePtr->TakeSnapshot(assetInfo.GetGuid());
-                    const Snapshot snapshot{assetInfo,
-                                            cacheSnapshot.RefCount,
-                                            cacheSnapshot.HandleHash};
+                    const Snapshot snapshot{
+                        assetInfo,
+                        cacheSnapshot.RefCount,
+                        cacheSnapshot.HandleHash
+                    };
 
                     if (!bOnlyTakeCached || snapshot.IsCached())
                     {
@@ -409,8 +411,8 @@ namespace ig
                     {
                         const details::TypelessAssetCache::Snapshot cacheSnapshot = assetCache->TakeSnapshot(assetInfo.GetGuid());
                         snapshots.emplace_back(assetInfo,
-                                               cacheSnapshot.RefCount,
-                                               cacheSnapshot.HandleHash);
+                            cacheSnapshot.RefCount,
+                            cacheSnapshot.HandleHash);
                         break;
                     }
                 }
@@ -467,8 +469,8 @@ namespace ig
 
             std::error_code errorCode{};
             fs::copy(GetTempAssetDirectoryPath(category), GetAssetDirectoryPath(category),
-                     fs::copy_options::recursive | fs::copy_options::overwrite_existing,
-                     errorCode);
+                fs::copy_options::recursive | fs::copy_options::overwrite_existing,
+                errorCode);
 
             if (!errorCode)
             {
@@ -482,5 +484,4 @@ namespace ig
             fs::remove_all(tempAssetDirPath);
         }
     }
-
 } // namespace ig

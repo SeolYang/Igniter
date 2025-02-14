@@ -23,7 +23,7 @@ namespace ig
 
     class FrustumCullingPass : public RenderPass
     {
-      public:
+    public:
         FrustumCullingPass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
         FrustumCullingPass(const FrustumCullingPass&) = delete;
         FrustumCullingPass(FrustumCullingPass&&) noexcept = delete;
@@ -38,15 +38,15 @@ namespace ig
         [[nodiscard]] Handle<GpuBuffer> GetCullingDataBuffer() const noexcept { return cullingDataBuffer; }
         [[nodiscard]] Handle<GpuView> GetCullingDataBufferSrv() const noexcept { return cullingDataBufferSrv; }
 
-      protected:
+    protected:
         void PreExecute(const LocalFrameIndex localFrameIdx) override;
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      public:
+    public:
         constexpr static Size kNumInitMeshLodInstances = 256;
         constexpr static U32 kNumThreadsPerGroup = 32;
 
-      private:
+    private:
         RenderContext* renderContext = nullptr;
         RootSignature* bindlessRootSignature = nullptr;
 

@@ -15,7 +15,7 @@ namespace ig
     }
 
     Vector<String> RegexMatchN(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags
-                                    /*= std::regex_constants::match_default*/)
+                               /*= std::regex_constants::match_default*/)
     {
         Vector<String> result{};
         if (str.IsValid())

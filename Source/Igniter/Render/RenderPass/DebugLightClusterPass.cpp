@@ -46,15 +46,15 @@ namespace ig
         constexpr DXGI_FORMAT kOutputTexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
         GpuTextureDesc outputTexDesc{};
         outputTexDesc.AsTexture2D((U32)mainViewport.width, (U32)mainViewport.height,
-                                  1, kOutputTexFormat, true);
+            1, kOutputTexFormat, true);
         outputTexDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
         outputTexDesc.DebugName = String(std::format("DebugLightClusterPassOutputTex"));
 
         outputTex = renderContext.CreateTexture(outputTexDesc);
         outputTexUav = renderContext.CreateUnorderedAccessView(outputTex,
-                                                    D3D12_TEX2D_UAV{.MipSlice = 0, .PlaneSlice = 0},
-                                                    kOutputTexFormat);
+            D3D12_TEX2D_UAV{.MipSlice = 0, .PlaneSlice = 0},
+            kOutputTexFormat);
     }
 
     DebugLightClusterPass::~DebugLightClusterPass()
@@ -94,13 +94,15 @@ namespace ig
         cmdList.SetDescriptorHeaps(MakeSpan(bindlessDescHeaps));
         cmdList.SetRootSignature(*bindlessRootSignature);
 
-        const DebugLightClustersConstants constants{.PerFrameDataCbv = params.PerFrameDataCbv->Index,
-                                                    .ViewportWidth = (U32)params.MainViewport.width,
-                                                    .ViewportHeight = (U32)params.MainViewport.height,
-                                                    .NumLights = params.NumLights,
-                                                    .TileDwordsBufferSrv = tileDwordsBufferSrvPtr->Index,
-                                                    .InputTexSrv = inputTexSrvPtr->Index,
-                                                    .OutputTexUav = outputTexUavPtr->Index};
+        const DebugLightClustersConstants constants{
+            .PerFrameDataCbv = params.PerFrameDataCbv->Index,
+            .ViewportWidth = (U32)params.MainViewport.width,
+            .ViewportHeight = (U32)params.MainViewport.height,
+            .NumLights = params.NumLights,
+            .TileDwordsBufferSrv = tileDwordsBufferSrvPtr->Index,
+            .InputTexSrv = inputTexSrvPtr->Index,
+            .OutputTexUav = outputTexUavPtr->Index
+        };
         cmdList.SetRoot32BitConstants(0, constants, 0);
 
         cmdList.AddPendingTextureBarrier(

@@ -60,7 +60,7 @@ namespace ig
      */
     class LightClusteringPass : public RenderPass
     {
-      private:
+    private:
         struct DepthBin
         {
             U32 FirstLightIdx = 0;
@@ -74,7 +74,7 @@ namespace ig
             Handle<GpuView> Uav;
         };
 
-      public:
+    public:
         LightClusteringPass(RenderContext& renderContext, const SceneProxy& sceneProxy, RootSignature& bindlessRootSignature, const Viewport& mainViewport);
         LightClusteringPass(const LightClusteringPass&) = delete;
         LightClusteringPass(LightClusteringPass&&) noexcept = delete;
@@ -90,10 +90,10 @@ namespace ig
         [[nodiscard]] Handle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
         [[nodiscard]] Handle<GpuView> GetDepthBinsBufferSrv() const noexcept { return depthBinsBufferPackage.Srv; }
 
-      protected:
+    protected:
         void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      private:
+    private:
         RenderContext* renderContext = nullptr;
         const SceneProxy* sceneProxy = nullptr;
 

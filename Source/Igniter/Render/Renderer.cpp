@@ -92,7 +92,7 @@ namespace ig
     {
         Matrix View;
         Matrix ViewProj;
-        
+
         U32 VertexStorageSrv;
         U32 IndexStorageSrv;
         U32 TriangleStorageSrv;
@@ -352,7 +352,7 @@ namespace ig
             asyncComputeQueue.ExecuteCommandLists(cmdLists);
             meshInstancePassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
         }
-            
+
         auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
         renderCmdList->Open(forwardMeshInstancePso.get());
         auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
@@ -372,7 +372,7 @@ namespace ig
         renderCmdList->SetRenderTarget(*backBufferRtv, *dsvPtr);
         renderCmdList->SetViewport(mainViewport);
         renderCmdList->SetScissorRect(mainViewport);
-        
+
         GpuBuffer* opaqueMeshInstanceDispatchStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
         renderCmdList->ExecuteIndirect(*forwardMeshInstanceCmdSignature, *opaqueMeshInstanceDispatchStorageBuffer);
 

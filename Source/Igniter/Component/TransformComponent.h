@@ -6,7 +6,7 @@ namespace ig
 {
     struct TransformComponent
     {
-      public:
+    public:
         [[nodiscard]] Matrix CreateTransformation() const
         {
             // TRS -> Column Vector ; SRT -> Row Vector
@@ -35,7 +35,7 @@ namespace ig
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
-      public:
+    public:
         Vector3 Position{};
         Vector3 Scale{1.f, 1.f, 1.f};
         Quaternion Rotation;

@@ -93,15 +93,17 @@ namespace ig
     /* #sy_todo 기본 값 설정 */
     class GpuBufferDesc final : public D3D12_RESOURCE_DESC1
     {
-      public:
+    public:
         void AsConstantBuffer(const U32 sizeOfBufferInBytes);
         void AsStructuredBuffer(const U32 sizeOfElementInBytes, const U32 numOfElements, const bool bShouldEnableShaderReadWrite = false, const bool bShouldEnableUavCounter = false);
         void AsUploadBuffer(const U32 sizeOfBufferInBytes, const bool bIsShaderResource = false);
+
         void AsGpuUploadBuffer(const U32 sizeOfBufferInBytes, const bool bShouldEnableShaderReadWrite = false)
         {
             AsUploadBuffer(sizeOfBufferInBytes);
             Flags = bShouldEnableShaderReadWrite ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
         }
+
         void AsReadbackBuffer(const U32 sizeOfBufferInBytes);
 
         template <typename T>
@@ -155,6 +157,7 @@ namespace ig
         [[nodiscard]] U32 GetStructureByteStride() const noexcept { return structureByteStride; }
         [[nodiscard]] U32 GetNumElements() const noexcept { return numElements; }
         [[nodiscard]] uint64_t GetSizeAsBytes() const noexcept { return Width; }
+
         [[nodiscard]] Size GetUavCounterOffset() const noexcept
         {
             return bIsUavCounterEnabled ? (Width - kUavCounterSize) : 0Ui64;
@@ -167,18 +170,18 @@ namespace ig
 
         void From(const D3D12_RESOURCE_DESC& desc);
 
-      private:
+    private:
         void AsVertexBuffer(const U32 sizeOfVertexInBytes, const U32 numVertices);
         void AsIndexBuffer(const U32 sizeOfIndexInBytes, const U32 numIndices);
 
-      public:
+    public:
         using UavCounter = U32;
         constexpr static Size kUavCounterSize = sizeof(UavCounter);
         String DebugName = String{"Unknown Buffer"};
         D3D12_HEAP_TYPE HeapType = kAutoHeapType;
         bool bIsRawBuffer = false;
 
-      private:
+    private:
         constexpr static D3D12_HEAP_TYPE kAutoHeapType = D3D12_HEAP_TYPE(0xFFFFFFFF);
         U32 structureByteStride = 1;
         U32 numElements = 1;

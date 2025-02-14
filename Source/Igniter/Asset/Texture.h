@@ -25,11 +25,11 @@ namespace ig
 
     struct TextureImportDesc
     {
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-      public:
+    public:
         ETextureCompressionMode CompressionMode = ETextureCompressionMode::None;
         bool bGenerateMips = false;
 
@@ -41,13 +41,13 @@ namespace ig
 
     struct TextureLoadDesc
     {
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
         [[nodiscard]] bool IsArray() const { return Dimension != ETextureDimension::Tex3D && DepthOrArrayLength > 1; }
 
-      public:
+    public:
         DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
         ETextureDimension Dimension = ETextureDimension::Tex2D;
         U32 Width = 1;
@@ -68,12 +68,12 @@ namespace ig
 
     class Texture final
     {
-      public:
+    public:
         using ImportDesc = TextureImportDesc;
         using LoadDesc = TextureLoadDesc;
         using Desc = AssetDesc<Texture>;
 
-      public:
+    public:
         Texture(RenderContext& renderContext, const Desc& snapshot, const Handle<GpuTexture> gpuTexture, const Handle<GpuView> srv,
                 const Handle<GpuView> sampler);
         Texture(const Texture&) = delete;
@@ -88,16 +88,16 @@ namespace ig
         [[nodiscard]] Handle<GpuView> GetShaderResourceView() const { return srv; }
         [[nodiscard]] Handle<GpuView> GetSampler() const { return sampler; }
 
-      private:
+    private:
         void Destroy();
 
-      public:
+    public:
         /* #sy_wip Common으로 이동 */
         static constexpr std::string_view EngineDefault = "Engine\\Default";
         static constexpr std::string_view EngineDefaultWhite = "Engine\\White";
         static constexpr std::string_view EngineDefaultBlack = "Engine\\Black";
 
-      private:
+    private:
         RenderContext* renderContext{nullptr};
         Desc snapshot{};
         Handle<GpuTexture> gpuTexture{};

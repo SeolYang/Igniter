@@ -97,5 +97,4 @@ namespace ig
     {
         return SaveBlobsToFile(path, std::span{blobs.data(), N});
     }
-
 } // namespace ig

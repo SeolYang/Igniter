@@ -17,7 +17,7 @@ namespace ig
      */
     class GameSystem
     {
-      public:
+    public:
         GameSystem() = default;
         GameSystem(const GameSystem&) = delete;
         GameSystem(GameSystem&&) noexcept = delete;

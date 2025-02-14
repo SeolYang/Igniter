@@ -8,6 +8,7 @@
 #include "Igniter/Gameplay/World.h"
 
 IG_DECLARE_LOG_CATEGORY(WorldLog);
+
 IG_DEFINE_LOG_CATEGORY(WorldLog);
 
 namespace ig
@@ -95,7 +96,7 @@ namespace ig
                 if (!resolvedType)
                 {
                     IG_LOG(WorldLog, Warning, "Ignored Component {}({}): {} does not registered to meta registry.", nameProperty.value().cast<String>(),
-                           componentID);
+                        componentID);
                     continue;
                 }
 
@@ -103,7 +104,7 @@ namespace ig
                 if (!addComponent)
                 {
                     IG_LOG(WorldLog, Warning, "Ignored Type ID: {} add component meta function does not registered to meta registry.",
-                           nameProperty.value().cast<String>());
+                        nameProperty.value().cast<String>());
                     continue;
                 }
 
@@ -117,7 +118,7 @@ namespace ig
                 if (!deserializeJson)
                 {
                     IG_LOG(WorldLog, Warning, "Ignored component {}({}) deserialization. The deserialize meta function does not registered.",
-                           nameProperty.value().cast<String>(), componentID);
+                        nameProperty.value().cast<String>(), componentID);
                     continue;
                 }
 

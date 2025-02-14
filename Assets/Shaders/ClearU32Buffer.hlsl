@@ -13,7 +13,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     {
         return;
     }
-    
+
     RWStructuredBuffer<uint> buffer = ResourceDescriptorHeap[gClearParams.TargetBufferUav];
     buffer[DTid.x] = 0;
 }

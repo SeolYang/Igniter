@@ -161,15 +161,17 @@ namespace ig
             [this, &lightProxyMapValues](const Size idx)
             {
                 const SceneProxy::LightProxy& proxy = lightProxyMapValues[idx].second;
-                  lightProxyIdxViewZList[idx] = std::make_pair(
-                      (U16)idx,
+                lightProxyIdxViewZList[idx] = std::make_pair(
+                    (U16)idx,
                     proxy.GpuData.WorldPosition.x * params.ViewMat._13 + proxy.GpuData.WorldPosition.y * params.ViewMat._23 + proxy.GpuData.WorldPosition.z * params.ViewMat._33);
             });
 
         tf::Task sortIntermediateList = buildLightIdxList.sort(
             lightProxyIdxViewZList.begin(), lightProxyIdxViewZList.end(),
             [](const std::pair<U16, float>& lhs, const std::pair<U16, float>& rhs)
-            { return lhs.second < rhs.second; });
+            {
+                return lhs.second < rhs.second;
+            });
 
         tf::Task updateToStagingBuffer = buildLightIdxList.for_each_index(
             0i32, (I32)numLights, 1i32,
@@ -241,7 +243,8 @@ namespace ig
                 .LightStorageBufferSrv = lightStorageBufferSrvPtr->Index,
                 .LightIdxListBufferSrv = lightIdxListBufferSrvPtr->Index,
                 .TileDwordsBufferUav = tileDwordsBufferUavPtr->Index,
-                .DepthBinsBufferUav = depthBinsBufferUavPtr->Index};
+                .DepthBinsBufferUav = depthBinsBufferUavPtr->Index
+            };
             params.GpuParamsConstantBuffer->Write(gpuParams);
 
             const GpuView* gpuParamsCbvPtr = renderContext->Lookup(params.GpuParamsConstantBuffer->GetConstantBufferView());
@@ -255,7 +258,8 @@ namespace ig
 
             const LightClusteringConstants gpuConstants{
                 .PerFrameDataCbv = params.PerFrameCbvPtr->Index,
-                .LightClusteringParamsCbv = gpuParamsCbvPtr->Index};
+                .LightClusteringParamsCbv = gpuParamsCbvPtr->Index
+            };
             lightClusteringCmdList.SetRoot32BitConstants(0, gpuConstants, 0);
 
             constexpr U32 NumThreads = 32;

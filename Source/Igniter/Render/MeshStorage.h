@@ -11,7 +11,7 @@ namespace ig
 
     class MeshStorage final
     {
-      public:
+    public:
         template <typename Ty>
         struct Space
         {
@@ -28,7 +28,7 @@ namespace ig
             Size NumVertexIndices;
         };
 
-      public:
+    public:
         explicit MeshStorage(RenderContext& renderContext);
         MeshStorage(const MeshStorage&) = delete;
         MeshStorage(MeshStorage&&) = delete;
@@ -57,7 +57,7 @@ namespace ig
 
         [[nodiscard]] Statistics GetStatistics() const;
 
-      private:
+    private:
         LocalFrameIndex currentLocalFrameIdx = 0;
         RenderContext& renderContext;
         DeferredResourceManagePackage<Space<VertexSM>> staticMeshVertexSpacePackage;

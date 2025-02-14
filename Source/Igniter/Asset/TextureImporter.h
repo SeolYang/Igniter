@@ -28,7 +28,7 @@ namespace ig
     {
         friend class AssetManager;
 
-      public:
+    public:
         TextureImporter();
         TextureImporter(const TextureImporter&) = delete;
         TextureImporter(TextureImporter&&) noexcept = delete;
@@ -37,10 +37,10 @@ namespace ig
         TextureImporter& operator=(const TextureImporter&) = delete;
         TextureImporter& operator=(TextureImporter&&) noexcept = delete;
 
-      private:
+    private:
         Result<Texture::Desc, ETextureImportStatus> Import(const String resPathStr, TextureImportDesc config);
 
-      private:
+    private:
         Mutex compressionMutex{};
         ID3D11Device* d3d11Device{nullptr};
     };

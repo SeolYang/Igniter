@@ -6,12 +6,12 @@ namespace ig
 {
     struct NameComponent
     {
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
-      public:
+    public:
         String Name{"New Entity"};
     };
 

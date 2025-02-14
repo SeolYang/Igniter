@@ -36,6 +36,7 @@ namespace ig
         Material,
         Map,
     };
+
     template <typename T>
     inline constexpr EAssetCategory AssetCategoryOf = EAssetCategory::Unknown;
 
@@ -50,11 +51,11 @@ namespace ig
 
     struct ResourceInfo
     {
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-      public:
+    public:
         EAssetCategory Category = EAssetCategory::Unknown;
     };
 
@@ -70,7 +71,7 @@ namespace ig
     {
         friend class AssetManager;
 
-      public:
+    public:
         AssetInfo() = default;
         AssetInfo(const AssetInfo&) = default;
         AssetInfo(AssetInfo&&) noexcept = default;
@@ -94,12 +95,12 @@ namespace ig
         void SetVirtualPath(const String newVirtualPath);
         void SetScope(const EAssetScope newScope) { scope = (newScope == EAssetScope::Engine) ? EAssetScope::Static : newScope; }
 
-      private:
+    private:
         AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope);
         void ConstructVirtualPathHierarchy();
         void SetGuid(const Guid& newGuid) { this->guid = newGuid; }
 
-      private:
+    private:
         uint64_t creationTime = 0;
         Guid guid{};
         String virtualPath{};
@@ -156,7 +157,7 @@ namespace ig
 template <>
 struct std::formatter<ig::AssetInfo>
 {
-  public:
+public:
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FrameContext>

@@ -5,22 +5,22 @@ namespace ig
 {
     struct AABB
     {
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-      public:
+    public:
         Vector3 Min{};
         Vector3 Max{};
     };
 
     struct BoundingSphere
     {
-      public:
+    public:
         Json& Serialize(Json& archive) const;
         const Json& Deserialize(const Json& archive);
 
-      public:
+    public:
         Vector3 Centroid{};
         F32 Radius = 0.f;
     };
@@ -32,7 +32,7 @@ namespace ig
 
     struct Frustum
     {
-      public:
+    public:
         Plane Near;
         Plane Far;
         Plane Left;

@@ -24,8 +24,7 @@ namespace ig
         : assetManager(&assetManager)
         , snapshot(snapshot)
         , diffuse(diffuse)
-    {
-    }
+    {}
 
     Material::~Material()
     {

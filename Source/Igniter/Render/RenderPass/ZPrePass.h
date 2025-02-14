@@ -28,7 +28,7 @@ namespace ig
 
     class ZPrePass : public RenderPass
     {
-      public:
+    public:
         ZPrePass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
         ZPrePass(const ZPrePass&) = delete;
         ZPrePass(ZPrePass&&) noexcept = delete;
@@ -38,10 +38,10 @@ namespace ig
 
         void SetParams(const ZPrePassParams& newParams);
 
-      protected:
-       void OnExecute(const LocalFrameIndex localFrameIdx) override;
+    protected:
+        void OnExecute(const LocalFrameIndex localFrameIdx) override;
 
-      private:
+    private:
         RenderContext* renderContext = nullptr;
         RootSignature* bindlessRootSignature = nullptr;
 

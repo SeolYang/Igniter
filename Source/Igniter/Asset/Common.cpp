@@ -20,8 +20,7 @@ namespace ig
 
     AssetInfo::AssetInfo(const String virtualPath, const EAssetCategory category)
         : AssetInfo(xg::newGuid(), virtualPath, category, EAssetScope::Managed)
-    {
-    }
+    {}
 
     AssetInfo::AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope)
         : creationTime(Timer::Now())
@@ -105,7 +104,7 @@ namespace ig
             return Path{details::MaterialAssetRootPath};
         case EAssetCategory::Map:
             return Path{details::MapAssetRootPath};
-        [[unlikely]] default:
+            [[unlikely]] default:
             IG_CHECK_NO_ENTRY();
             return Path{};
         }
@@ -159,8 +158,10 @@ namespace ig
     {
         std::string extension = resPath.extension().string();
         std::transform(extension.begin(), extension.end(), extension.begin(),
-                       [](const char character)
-                       { return static_cast<char>(::tolower(static_cast<int>(character))); });
+            [](const char character)
+            {
+                return static_cast<char>(::tolower(static_cast<int>(character)));
+            });
 
         return extension == details::MetadataExt;
     }

@@ -18,8 +18,7 @@ namespace ig
 {
     TextureLoader::TextureLoader(RenderContext& renderContext)
         : renderContext(renderContext)
-    {
-    }
+    {}
 
     Result<Texture, ETextureLoaderStatus> TextureLoader::Load(const Texture::Desc& desc)
     {
@@ -166,9 +165,9 @@ namespace ig
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
-                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
             cmdList->Close();
         }
@@ -178,8 +177,9 @@ namespace ig
         barrierSync.WaitOnCpu();
 
         const Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
-                                                                                 D3D12_TEX2D_SRV{
-                                                                                     .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f});
+            D3D12_TEX2D_SRV{
+                .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f
+            });
         if (!srv)
         {
             return MakeFail<Texture, ETextureLoaderStatus::FailedCreateShaderResourceView>();
@@ -196,7 +196,8 @@ namespace ig
             .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE /* #sy_todo if filter == comparison, setup comparison func */,
             .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
             .MinLOD = 0.f,
-            .MaxLOD = 0.f});
+            .MaxLOD = 0.f
+        });
         if (!samplerView)
         {
             return MakeFail<Texture, ETextureLoaderStatus::FailedCreateSamplerView>();
@@ -270,9 +271,9 @@ namespace ig
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
-                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
             cmdList->Close();
         }
@@ -282,8 +283,9 @@ namespace ig
         barrierSync.WaitOnCpu();
 
         Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
-                                                                           D3D12_TEX2D_SRV{
-                                                                               .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f});
+            D3D12_TEX2D_SRV{
+                .MostDetailedMip = 0, .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels), .PlaneSlice = 0, .ResourceMinLODClamp = 0.f
+            });
         if (!srv)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateShaderResourceView>();
@@ -307,7 +309,8 @@ namespace ig
                 .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE,
                 .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
                 .MinLOD = 0.f,
-                .MaxLOD = 0.f});
+                .MaxLOD = 0.f
+            });
         if (!samplerView)
         {
             return MakeFail<Texture, details::EMakeDefaultTexStatus::FailedCreateSamplerView>();
@@ -368,9 +371,9 @@ namespace ig
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
-                                              D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
-                                              D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
-                                              D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
             cmdList->FlushBarriers();
             cmdList->Close();
         }
@@ -381,11 +384,12 @@ namespace ig
         barrierSync.WaitOnCpu();
 
         const Handle<GpuView> srv = renderContext.CreateShaderResourceView(newTexture,
-                                                                                 D3D12_TEX2D_SRV{
-                                                                                     .MostDetailedMip = 0,
-                                                                                     .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
-                                                                                     .PlaneSlice = 0,
-                                                                                     .ResourceMinLODClamp = 0.f});
+            D3D12_TEX2D_SRV{
+                .MostDetailedMip = 0,
+                .MipLevels = IG_NUMERIC_MAX_OF(D3D12_TEX2D_SRV::MipLevels),
+                .PlaneSlice = 0,
+                .ResourceMinLODClamp = 0.f
+            });
 
         if (!srv)
         {
@@ -409,7 +413,8 @@ namespace ig
             .ComparisonFunc = D3D12_COMPARISON_FUNC_NONE,
             .BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
             .MinLOD = 0.f,
-            .MaxLOD = 0.f});
+            .MaxLOD = 0.f
+        });
 
         if (!samplerView)
         {

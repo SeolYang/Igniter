@@ -11,7 +11,7 @@ namespace ig
     {
         friend class GpuDevice;
 
-      public:
+    public:
         DescriptorHeap(const DescriptorHeap&) = delete;
         DescriptorHeap(DescriptorHeap&& other) noexcept;
         ~DescriptorHeap();
@@ -31,11 +31,11 @@ namespace ig
         GpuView Allocate(const EGpuViewType desiredType);
         void Deallocate(const GpuView& gpuView);
 
-      private:
+    private:
         DescriptorHeap(const EDescriptorHeapType newDescriptorHeapType, ComPtr<ID3D12DescriptorHeap> newDescriptorHeap,
                        const bool bIsShaderVisibleHeap, const U32 numDescriptorsInHeap, const U32 descriptorHandleIncSizeInHeap);
 
-      private:
+    private:
         EDescriptorHeapType descriptorHeapType;
         ComPtr<ID3D12DescriptorHeap> descriptorHeap;
         U32 descriptorHandleIncrementSize = 0;
