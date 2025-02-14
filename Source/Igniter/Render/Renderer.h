@@ -70,8 +70,12 @@ namespace ig
         //Handle<GpuBuffer> opaqueMeshInstanceBucket;
         //Handle<GpuBuffer> transparentMeshInstanceBucket;
         ////////////////////////////////////////////////////////////////
-        /* HLSL.DispatchMeshInstance 및 HLSL.DispatchMeshInstancePayload 구조체 참고 */
-        Ptr<CommandSignature> meshInstanceDispatchCmdSignature;
+        /* HLSL.DispatchMeshInstance 구조체 참고 */
+        Ptr<CommandSignature> forwardMeshInstanceCmdSignature;
+        Ptr<ShaderBlob> forwardMeshInstanceAS;
+        Ptr<ShaderBlob> forwardMeshInstanceMS;
+        Ptr<ShaderBlob> forwardMeshInstancePS;
+        Ptr<PipelineState> forwardMeshInstancePso;
         /************************************/
     };
 } // namespace ig

@@ -35,11 +35,11 @@ void main( uint3 DTid : SV_DispatchThreadID )
     MeshLod meshLod = mesh.LevelOfDetails[targetLevelOfDetail];
 
     DispatchMeshInstance newDispatchMeshInstance;
-    newDispatchMeshInstance.MeshInstanceIdx = meshInstanceIdx;
-    newDispatchMeshInstance.TargetLevelOfDetail = targetLevelOfDetail;
-    newDispatchMeshInstance.PerFrameParamsCbv = gMeshInstanceParams.PerFrameParamsCbv;
-    newDispatchMeshInstance.ScreenParamsCbv = 0xFFFFFFFF;
-    newDispatchMeshInstance.ThreadGroupCountX = meshLod.NumMeshlets;
+    newDispatchMeshInstance.Params.MeshInstanceIdx = meshInstanceIdx;
+    newDispatchMeshInstance.Params.TargetLevelOfDetail = targetLevelOfDetail;
+    newDispatchMeshInstance.Params.PerFrameParamsCbv = gMeshInstanceParams.PerFrameParamsCbv;
+    newDispatchMeshInstance.Params.ScreenParamsCbv = 0xFFFFFFFF;
+    newDispatchMeshInstance.ThreadGroupCountX = (meshLod.NumMeshlets + 31)/32;
     newDispatchMeshInstance.ThreadGroupCountY = 1;
     newDispatchMeshInstance.ThreadGroupCountZ = 1;
 

@@ -136,9 +136,9 @@ namespace ig
 
         for (Size vertexIdx = 0; vertexIdx < mesh.mNumVertices; ++vertexIdx)
         {
-            const aiVector3D& position = mesh.mVertices[vertexIdx];
-            const aiVector3D& normal = mesh.mNormals[vertexIdx];
-            const aiVector3D& uvCoords = mesh.mTextureCoords[0][vertexIdx];
+            const aiVector3D position = mesh.mVertices[vertexIdx];
+            const aiVector3D normal = mesh.HasNormals() ? mesh.mNormals[vertexIdx] : aiVector3D(0.f, 0.f, 0.f);
+            const aiVector3D uvCoords = mesh.HasTextureCoords(0) ? mesh.mTextureCoords[0][vertexIdx] : aiVector3D(0.f, 0.f, 0.f);
 
             meshData.BoundingBox.Min.x = std::min(meshData.BoundingBox.Min.x, position.x);
             meshData.BoundingBox.Min.y = std::min(meshData.BoundingBox.Min.y, position.y);

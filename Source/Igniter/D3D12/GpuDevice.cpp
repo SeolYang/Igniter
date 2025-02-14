@@ -377,6 +377,9 @@ namespace ig
     Option<PipelineState> GpuDevice::CreateGraphicsPipelineState(const GraphicsPipelineStateDesc& desc)
     {
         IG_CHECK(device);
+        IG_CHECK(desc.pRootSignature != nullptr);
+        IG_CHECK(desc.VS.pShaderBytecode != nullptr && desc.VS.BytecodeLength > 0);
+        IG_CHECK(desc.PS.pShaderBytecode != nullptr && desc.PS.BytecodeLength > 0);
 
         ComPtr<ID3D12PipelineState> newPipelineState{};
 
@@ -395,7 +398,9 @@ namespace ig
     Option<PipelineState> GpuDevice::CreateComputePipelineState(const ComputePipelineStateDesc& desc)
     {
         IG_CHECK(device);
-
+        IG_CHECK(desc.pRootSignature != nullptr);
+        IG_CHECK(desc.CS.pShaderBytecode != nullptr && desc.CS.BytecodeLength > 0);
+        
         ComPtr<ID3D12PipelineState> newPipelineState{};
         if (const HRESULT result = device->CreateComputePipelineState(&desc, IID_PPV_ARGS(&newPipelineState));
             !SUCCEEDED(result))
@@ -412,11 +417,15 @@ namespace ig
     Option<PipelineState> GpuDevice::CreateMeshShaderPipelineState(const MeshShaderPipelineStateDesc& desc)
     {
         IG_CHECK(device);
-
+        IG_CHECK(desc.pRootSignature != nullptr);
+        IG_CHECK(desc.AS.pShaderBytecode != nullptr && desc.AS.BytecodeLength > 0);
+        IG_CHECK(desc.MS.pShaderBytecode != nullptr && desc.MS.BytecodeLength > 0);
+        
         auto psoStream = CD3DX12_PIPELINE_MESH_STATE_STREAM(desc);
-        D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc{};
-        pipelineStateStreamDesc.pPipelineStateSubobjectStream = &psoStream;
-        pipelineStateStreamDesc.SizeInBytes = sizeof(psoStream);
+        const D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc{
+            .SizeInBytes = sizeof(psoStream),
+            .pPipelineStateSubobjectStream = &psoStream
+        };
 
         ComPtr<ID3D12PipelineState> newPipelineState{};
         if (const HRESULT result = device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&newPipelineState));

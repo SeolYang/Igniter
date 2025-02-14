@@ -89,6 +89,8 @@ namespace ig
 
         void Dispatch(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ);
 
+        void DispatchMesh(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ);
+        
         void ExecuteIndirect(CommandSignature& cmdSignature, GpuBuffer& cmdBuffer);
 
       private:

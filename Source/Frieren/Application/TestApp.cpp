@@ -47,16 +47,22 @@ namespace fe
         gameSystem = std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>());
         /************************************/
 
-        //ig::World& worldInstance = ig::Engine::GetWorld();
-        //ig::Registry& registry = worldInstance.GetRegistry();
-        //const ig::Entity mainCam = FpsCameraArchetype::Create(&registry);
-        //auto& cameraComponent = registry.get<ig::CameraComponent>(mainCam);
-        //cameraComponent.bIsMainCamera = true;
+        ig::World& worldInstance = ig::Engine::GetWorld();
+        ig::Registry& registry = worldInstance.GetRegistry();
+        const ig::Entity mainCam = FpsCameraArchetype::Create(&registry);
+        auto& cameraComponent = registry.get<ig::CameraComponent>(mainCam);
+        cameraComponent.bIsMainCamera = true;
 
-        //ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        //ig::Handle<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+        ig::Handle<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+        ig::Entity sphere = ig::StaticMeshArchetype::Create(&registry);
+        ig::StaticMeshComponent& smc = registry.get<ig::StaticMeshComponent>(sphere);
+        ig::TransformComponent& tc = registry.get<ig::TransformComponent>(sphere);
+        tc.Position.z = 20.f;
+        smc.Mesh = axeStaticMesh;
+        
         //IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        //ig::Handle<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
+        
         //IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
 
         //for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)

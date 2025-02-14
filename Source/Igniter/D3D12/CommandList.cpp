@@ -345,6 +345,12 @@ namespace ig
         cmdList->Dispatch(threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ);
     }
 
+    void CommandList::DispatchMesh(U32 threadGroupSizeX, U32 threadGroupSizeY, U32 threadGroupSizeZ)
+    {
+        IG_CHECK(IsValid());
+        cmdList->DispatchMesh(threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ);
+    }
+
     void CommandList::ExecuteIndirect(CommandSignature& cmdSignature, GpuBuffer& cmdBuffer)
     {
         IG_CHECK(IsValid());

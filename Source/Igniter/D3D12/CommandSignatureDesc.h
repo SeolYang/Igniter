@@ -7,7 +7,7 @@ namespace ig
     // https://learn.microsoft.com/en-us/windows/win32/direct3d12/indirect-drawing
     class CommandSignatureDesc
     {
-      public:
+    public:
         CommandSignatureDesc() = default;
         CommandSignatureDesc(const CommandSignatureDesc&) = default;
         CommandSignatureDesc(CommandSignatureDesc&&) noexcept = default;
@@ -31,6 +31,12 @@ namespace ig
         CommandSignatureDesc& AddDispatchArgument()
         {
             arguments.emplace_back(D3D12_INDIRECT_ARGUMENT_DESC{.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH});
+            return *this;
+        }
+
+        CommandSignatureDesc& AddDispatchMeshArgument()
+        {
+            arguments.emplace_back(D3D12_INDIRECT_ARGUMENT_DESC{.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH});
             return *this;
         }
 
@@ -73,7 +79,7 @@ namespace ig
             return desc;
         }
 
-      private:
+    private:
         Vector<D3D12_INDIRECT_ARGUMENT_DESC> arguments;
         U32 byteStride = 0;
     };

@@ -488,6 +488,7 @@ namespace ig
         auto& entityProxyMap = meshInstanceProxyPackage.ProxyMap;
         auto& storage = *meshInstanceProxyPackage.Storage;
 
+        numMeshInstances = 0;
         for (Vector<U32>& meshInstanceIndices : meshInstanceIndicesGroups)
         {
             meshInstanceIndices.clear();

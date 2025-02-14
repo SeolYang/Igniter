@@ -3,6 +3,9 @@
 
 struct PerFrameParams
 {
+    float4x4 View;
+    float4x4 ViewProj;
+    
     uint VertexStorageSrv;
     uint IndexStorageSrv;
     uint TriangleStorageSrv;
@@ -12,18 +15,6 @@ struct PerFrameParams
     uint MaterialStorageSrv;
     uint StaticMeshStorageSrv;
     uint MeshInstanceStorageSrv;
-
-    uint LightIdxListSrv;
-    uint LightTileBitfieldBufferSrv;
-    uint LightDepthBinBufferSrv;
-    
-    float4x4 View;
-    float4x4 ViewProj;
-
-    /* (x,y,z): cam pos, w: inv aspect ratio */
-    float4 CamPosInvAspectRatio;
-    /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
-    float4 ViewFrustumParams;
 };
 
 struct ScreenParams
@@ -72,6 +63,8 @@ struct BoundingSphere
     float Radius;
 };
 
+#define MESHLET_MAX_INDICES 64
+#define MESHLET_MAX_TRIANGLES 64
 struct Meshlet
 {
     uint IndexOffset;
@@ -117,15 +110,17 @@ struct MeshInstance
     uint Padding;
 };
 
-struct DispatchMeshInstance
+struct DispatchMeshInstanceParams
 {
-    /* Payload */
     uint MeshInstanceIdx;
     uint TargetLevelOfDetail;
     uint PerFrameParamsCbv;
     uint ScreenParamsCbv;
-    /***********/
-    
+};
+
+struct DispatchMeshInstance
+{
+    DispatchMeshInstanceParams Params;
     uint ThreadGroupCountX;
     uint ThreadGroupCountY;
     uint ThreadGroupCountZ;

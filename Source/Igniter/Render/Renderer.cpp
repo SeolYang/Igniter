@@ -90,6 +90,9 @@ namespace ig
 
     struct PerFrameParams
     {
+        Matrix View;
+        Matrix ViewProj;
+        
         U32 VertexStorageSrv;
         U32 IndexStorageSrv;
         U32 TriangleStorageSrv;
@@ -99,32 +102,19 @@ namespace ig
         U32 MaterialStorageSrv;
         U32 StaticMeshStorageSrv;
         U32 MeshInstanceStorageSrv;
-
-        U32 LightIdxListSrv;
-        U32 LightTileBitfieldBufferSrv;
-        U32 LightDepthBinBufferSrv;
-
-        Matrix View;
-        Matrix ViewProj;
-
-        /* (x,y,z): cam pos, w: inv aspect ratio */
-        Vector4 CamPosInvAspectRatio;
-        /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
-        Vector4 ViewFrustumParams;
     };
 
-    struct DispatchMeshInstancePayload
+    struct DispatchMeshInstanceParams
     {
         U32 MeshInstanceIdx;
         U32 TargetLevelOfDetail;
-        U32 PersistentParamsCbv;
         U32 PerFrameParamsCbv;
         U32 ScreenParamsCbv;
     };
 
     struct DispatchMeshInstance
     {
-        DispatchMeshInstancePayload Payload;
+        DispatchMeshInstanceParams Params;
         U32 ThreadGroupCountX;
         U32 ThreadGroupCountY;
         U32 ThreadGroupCountZ;
@@ -194,6 +184,51 @@ namespace ig
 
         meshInstanceDispatchStorageDesc.DebugName = "TransparentMeshInstanceDispatchStorage"_fs;
         transparentMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, meshInstanceDispatchStorageDesc);
+
+        CommandSignatureDesc forwardMeshInstanceMeshSignDesc{};
+        forwardMeshInstanceMeshSignDesc.SetCommandByteStride<DispatchMeshInstance>();
+        forwardMeshInstanceMeshSignDesc.AddConstant(0, 0, 4);
+        forwardMeshInstanceMeshSignDesc.AddDispatchMeshArgument();
+        forwardMeshInstanceCmdSignature = MakePtr<CommandSignature>(
+            gpuDevice.CreateCommandSignature(
+                "ForwardMeshInstanceCmdSignature",
+                forwardMeshInstanceMeshSignDesc,
+                Ref{*bindlessRootSignature}).value());
+
+        ShaderCompileDesc forwardMeshInstanceAmpShaderDesc
+        {
+            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassAS.hlsl"_fs,
+            .Type = EShaderType::Amplification
+        };
+        forwardMeshInstanceAS = MakePtr<ShaderBlob>(forwardMeshInstanceAmpShaderDesc);
+
+        ShaderCompileDesc forwardMeshInstanceMeshShaderDesc
+        {
+            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassMS.hlsl"_fs,
+            .Type = EShaderType::Mesh
+        };
+        forwardMeshInstanceMS = MakePtr<ShaderBlob>(forwardMeshInstanceMeshShaderDesc);
+
+        ShaderCompileDesc forwardMeshInstancePixelShaderDesc
+        {
+            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassPS.hlsl"_fs,
+            .Type = EShaderType::Pixel
+        };
+        forwardMeshInstancePS = MakePtr<ShaderBlob>(forwardMeshInstancePixelShaderDesc);
+
+        MeshShaderPipelineStateDesc forwardMeshInstancePipelineDesc{};
+        forwardMeshInstancePipelineDesc.Name = "ForwardMeshInstancePSO"_fs;
+        forwardMeshInstancePipelineDesc.SetRootSignature(*bindlessRootSignature);
+        forwardMeshInstancePipelineDesc.NumRenderTargets = 1;
+        forwardMeshInstancePipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        forwardMeshInstancePipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+        forwardMeshInstancePipelineDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC{CD3DX12_DEFAULT{}};
+        forwardMeshInstancePipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+        forwardMeshInstancePipelineDesc.SetRootSignature(*bindlessRootSignature);
+        forwardMeshInstancePipelineDesc.SetAmplificationShader(*forwardMeshInstanceAS);
+        forwardMeshInstancePipelineDesc.SetMeshShader(*forwardMeshInstanceMS);
+        forwardMeshInstancePipelineDesc.SetPixelShader(*forwardMeshInstancePS);
+        forwardMeshInstancePso = MakePtr<PipelineState>(gpuDevice.CreateMeshShaderPipelineState(forwardMeshInstancePipelineDesc).value());
     }
 
     Renderer::~Renderer()
@@ -230,18 +265,27 @@ namespace ig
         IG_CHECK(sceneProxy != nullptr);
         ZoneScoped;
 
+        const Registry& registry = world.GetRegistry();
+
         PerFrameParams perFrameParams{};
         TempConstantBuffer perFrameParamsCb = tempConstantBufferAllocator->Allocate<PerFrameParams>(localFrameIdx);
-        {
-            const UnifiedMeshStorage& unifiedMeshStorage = renderContext->GetUnifiedMeshStorage();
-            perFrameParams.VertexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetVertexStorageSrv())->Index;
-            perFrameParams.IndexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetIndexStorageSrv())->Index;
-            perFrameParams.TriangleStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetTriangleStorageSrv())->Index;
-            perFrameParams.MeshletStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetMeshletStorageSrv())->Index;
+        const UnifiedMeshStorage& unifiedMeshStorage = renderContext->GetUnifiedMeshStorage();
+        perFrameParams.VertexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetVertexStorageSrv())->Index;
+        perFrameParams.IndexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetIndexStorageSrv())->Index;
+        perFrameParams.TriangleStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetTriangleStorageSrv())->Index;
+        perFrameParams.MeshletStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetMeshletStorageSrv())->Index;
 
-            perFrameParams.LightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv())->Index;
-            perFrameParams.MaterialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv())->Index;
-            perFrameParams.StaticMeshStorageSrv = renderContext->Lookup(sceneProxy->GetStaticMeshProxyStorageSrv())->Index;
+        perFrameParams.LightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv())->Index;
+        perFrameParams.MaterialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv())->Index;
+        perFrameParams.StaticMeshStorageSrv = renderContext->Lookup(sceneProxy->GetStaticMeshProxyStorageSrv())->Index;
+        perFrameParams.MeshInstanceStorageSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceProxyStorageSrv())->Index;
+
+        const auto camView = registry.view<const TransformComponent, const CameraComponent>();
+        for (const auto& [entity, transform, camera] : camView.each())
+        {
+            const Matrix view = transform.CreateView();
+            perFrameParams.View = ConvertToShaderSuitableForm(view);
+            perFrameParams.ViewProj = ConvertToShaderSuitableForm(view * camera.CreatePerspectiveForReverseZ());
         }
         perFrameParamsCb.Write(perFrameParams);
 
@@ -256,7 +300,6 @@ namespace ig
 
         const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
         GpuSyncPoint meshInstancePassSyncPoint{};
-        if (numMeshInstances > 0)
         {
             MeshInstancePassParams meshInstancePassParams{};
             meshInstancePassParams.PerFrameParamsCbv = renderContext->Lookup(perFrameParamsCb.GetConstantBufferView())->Index;
@@ -280,25 +323,28 @@ namespace ig
                 D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
                 D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
             meshInstancePassCmdList->FlushBarriers();
-            
+
             meshInstancePassCmdList->CopyBuffer(
                 *zeroFilledBuffer, 0, GpuBufferDesc::kUavCounterSize,
                 *opaqueMeshInstanceDispatchBufferPtr, opaqueMeshInstanceDispatchBufferDesc.GetUavCounterOffset());
-            
+
             meshInstancePassCmdList->AddPendingBufferBarrier(
                 *opaqueMeshInstanceDispatchBufferPtr,
                 D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
                 D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
             meshInstancePassCmdList->FlushBarriers();
-            
+
             auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
             meshInstancePassCmdList->SetDescriptorHeaps(MakeSpan(descriptorHeaps));
             meshInstancePassCmdList->SetRootSignature(*bindlessRootSignature);
             meshInstancePassCmdList->SetRoot32BitConstants(0, meshInstancePassParams, 0);
 
-            constexpr U32 kNumThreadsPerGroup = 32;
-            const U32 numDispatchX = (meshInstancePassParams.NumMeshInstances + kNumThreadsPerGroup - 1) / kNumThreadsPerGroup;
-            meshInstancePassCmdList->Dispatch(numDispatchX, 1, 1);
+            if (numMeshInstances > 0)
+            {
+                constexpr U32 kNumThreadsPerGroup = 32;
+                const U32 numDispatchX = (meshInstancePassParams.NumMeshInstances + kNumThreadsPerGroup - 1) / kNumThreadsPerGroup;
+                meshInstancePassCmdList->Dispatch(numDispatchX, 1, 1);
+            }
             meshInstancePassCmdList->Close();
 
             CommandList* cmdLists[]{meshInstancePassCmdList};
@@ -306,9 +352,12 @@ namespace ig
             asyncComputeQueue.ExecuteCommandLists(cmdLists);
             meshInstancePassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
         }
-
+            
         auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
-        renderCmdList->Open();
+        renderCmdList->Open(forwardMeshInstancePso.get());
+        auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
+        renderCmdList->SetDescriptorHeaps(MakeSpan(descriptorHeaps));
+        renderCmdList->SetRootSignature(*bindlessRootSignature);
 
         renderCmdList->AddPendingTextureBarrier(
             *backBuffer,
@@ -320,6 +369,12 @@ namespace ig
         renderCmdList->ClearRenderTarget(*backBufferRtv);
         const GpuView* dsvPtr = renderContext->Lookup(dsv);
         renderCmdList->ClearDepth(*dsvPtr, 0.f);
+        renderCmdList->SetRenderTarget(*backBufferRtv, *dsvPtr);
+        renderCmdList->SetViewport(mainViewport);
+        renderCmdList->SetScissorRect(mainViewport);
+        
+        GpuBuffer* opaqueMeshInstanceDispatchStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
+        renderCmdList->ExecuteIndirect(*forwardMeshInstanceCmdSignature, *opaqueMeshInstanceDispatchStorageBuffer);
 
         renderCmdList->Close();
         CommandList* renderCmdLists[]{renderCmdList};

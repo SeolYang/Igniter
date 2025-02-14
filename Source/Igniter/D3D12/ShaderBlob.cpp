@@ -109,7 +109,7 @@ namespace ig
 
         ComPtr<IDxcLibrary> library;
         IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
-
+        
         U32 codePage = CP_UTF8;
         const std::wstring wideSourcePath = desc.SourcePath.ToWideString();
         ComPtr<IDxcBlobEncoding> sourceBlob;

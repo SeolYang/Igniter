@@ -225,7 +225,7 @@ namespace ig
             T* ptr = cache.Lookup(handle);
             if (ptr != nullptr)
             {
-                const T::Desc& desc = ptr->GetSnapshot();
+                const T::Desc desc = ptr->GetSnapshot();
                 AssetLock assetLock{GetAssetMutex(desc.Info.GetGuid())};
                 cache.Unload(desc.Info);
 

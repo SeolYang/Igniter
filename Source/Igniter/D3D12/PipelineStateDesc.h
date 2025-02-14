@@ -87,6 +87,7 @@ namespace ig
             this->DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC();
             this->PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
             this->NumRenderTargets = 0;
+            ZeroMemory(this->RTVFormats, sizeof(this->RTVFormats));
             this->DSVFormat = DXGI_FORMAT_UNKNOWN;
             this->SampleDesc = CD3DX12_PIPELINE_STATE_STREAM_SAMPLE_DESC();
             this->NodeMask = 0;

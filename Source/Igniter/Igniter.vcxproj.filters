@@ -468,7 +468,9 @@
     <ClInclude Include="Render\Mesh.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GpuStagingBuffer.h" />
+    <ClInclude Include="Render\GpuStagingBuffer.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -708,7 +710,9 @@
     <ClCompile Include="Render\UnifiedMeshStorage.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GpuStagingBuffer.cpp" />
+    <ClCompile Include="Render\GpuStagingBuffer.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
@@ -733,6 +737,18 @@
       <Filter>Source\Shaders</Filter>
     </None>
     <None Include="..\..\Assets\Shaders\NewTypes.hlsli">
+      <Filter>Source\Shaders</Filter>
+    </None>
+    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassPS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </None>
+    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePass.hlsli">
+      <Filter>Source\Shaders</Filter>
+    </None>
+    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassAS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </None>
+    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassMS.hlsl">
       <Filter>Source\Shaders</Filter>
     </None>
   </ItemGroup>
