@@ -88,6 +88,7 @@ namespace ig
 
     StaticMesh& StaticMesh::operator=(StaticMesh&& rhs) noexcept
     {
+        Destroy();
         renderContext = std::exchange(rhs.renderContext, nullptr);
         assetManager = std::exchange(rhs.assetManager, nullptr);
         snapshot = std::exchange(rhs.snapshot, {});
