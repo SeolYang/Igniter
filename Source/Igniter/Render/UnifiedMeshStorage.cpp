@@ -9,7 +9,7 @@ namespace ig
             .DebugName = "VertexStorage(UnifiedMeshStorage)"_fs,
             .ElementSize = sizeof(U32),
             .NumInitElements = 65'536Ui32,
-            .Flags = EGpuStorageFlags::None
+            .Flags = EGpuStorageFlags::RawBuffer
         })
         , indexStorage(renderCtx, GpuStorageDesc{
             .DebugName = "IndexStorage(UnifiedMeshStorage)"_fs,
@@ -33,11 +33,6 @@ namespace ig
 
     UnifiedMeshStorage::~UnifiedMeshStorage()
     {
-        for (const LocalFrameIndex localFrameIdx : LocalFramesView)
-        {
-            PreRender(localFrameIdx);
-        }
-
         IG_CHECK(numAllocVertices == 0);
         IG_CHECK(numAllocIndices == 0);
         IG_CHECK(numAllocTriangles == 0);

@@ -12,7 +12,8 @@ namespace ig
         None = 0,
         ShaderReadWrite = 1 << 0,
         EnableUavCounter = 1 << 1,
-        EnableLinearAllocation = 1 << 2
+        EnableLinearAllocation = 1 << 2,
+        RawBuffer = 1 << 3,
     };
     IG_ENUM_FLAGS(EGpuStorageFlags);
 
@@ -107,6 +108,7 @@ namespace ig
         bool bIsShaderReadWritable = false;
         bool bIsUavCounterEnabled = false;
         bool bIsLinearAllocEnabled = false;
+        bool bIsRawBuffer = false;
 
         GpuFence fence;
 

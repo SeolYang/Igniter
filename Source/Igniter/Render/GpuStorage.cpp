@@ -15,6 +15,7 @@ namespace ig
         , bIsShaderReadWritable(ContainsFlags(desc.Flags, EGpuStorageFlags::ShaderReadWrite))
         , bIsUavCounterEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableUavCounter))
         , bIsLinearAllocEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableLinearAllocation))
+        , bIsRawBuffer(ContainsFlags(desc.Flags, EGpuStorageFlags::RawBuffer))
         , fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
     {
         IG_CHECK(desc.NumInitElements > 0);
@@ -151,6 +152,7 @@ namespace ig
         GpuBufferDesc bufferDesc{};
         bufferDesc.DebugName = debugName;
         bufferDesc.AsStructuredBuffer(elementSize, numElements, bIsShaderReadWritable, bIsUavCounterEnabled);
+        bufferDesc.bIsRawBuffer = bIsRawBuffer;
         return bufferDesc;
     }
 
@@ -173,7 +175,8 @@ namespace ig
                 .Offset = storageOffset,
                 .OffsetIndex = storageOffset / elementSize,
                 .AllocSize = allocSize,
-                .NumElements = allocSize / elementSize};
+                .NumElements = allocSize / elementSize
+            };
 
             return true;
         }

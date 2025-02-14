@@ -12,7 +12,7 @@ struct MeshInstancePassPayload
 
 struct VertexOutput
 {
-    float4 Position : SV_Position;;
+    float4 Position : SV_Position;
     uint MeshletIdx : Color0;
 };
 

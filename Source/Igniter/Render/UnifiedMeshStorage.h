@@ -28,6 +28,7 @@ namespace ig
         template <typename VertexType>
         Handle<MeshVertex> AllocateVertices(const Size numVertices)
         {
+            static_assert(sizeof(VertexType) > 0);
             static_assert(sizeof(VertexType) % 4 == 0);
             return AllocateVertices(numVertices, sizeof(VertexType) / 4);
         }

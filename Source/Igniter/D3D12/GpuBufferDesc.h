@@ -176,6 +176,7 @@ namespace ig
         constexpr static Size kUavCounterSize = sizeof(UavCounter);
         String DebugName = String{"Unknown Buffer"};
         D3D12_HEAP_TYPE HeapType = kAutoHeapType;
+        bool bIsRawBuffer = false;
 
       private:
         constexpr static D3D12_HEAP_TYPE kAutoHeapType = D3D12_HEAP_TYPE(0xFFFFFFFF);

@@ -24,6 +24,10 @@ namespace ig
     {
         FlushQueues();
 
+        for (const LocalFrameIndex localFrameIdx : views::iota(0Ui8, NumFramesInFlight))
+        {
+            unifiedMeshStorage->PreRender(localFrameIdx);
+        }
         unifiedMeshStorage.reset();
         swapchain.reset();
 
@@ -384,6 +388,10 @@ namespace ig
         asyncCopyCmdListPool.PreRender(localFrameIdx);
         frameCriticalGpuUploader.PreRender(localFrameIdx);
         nonFrameCriticalGpuUploader.PreRender(localFrameIdx);
+        if (unifiedMeshStorage != nullptr)
+        {
+            unifiedMeshStorage->PreRender(localFrameIdx);
+        }
 
         /* Flush Buffer Package [local frame] pending destroy */
         {

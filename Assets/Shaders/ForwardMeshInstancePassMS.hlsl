@@ -30,7 +30,6 @@ void main(
     {
         const uint indexStorageIdx = meshLod.IndexStorageOffset + meshlet.IndexOffset + groupThreadId;
         const uint vertexIdx = indexStorage[indexStorageIdx];
-        /* ?HLSL 에서 sizeof 연산자 작동하나? */
         const uint vertexByteOffset = mad(sizeof(VertexSM), vertexIdx, mesh.VertexStorageByteOffset);
         const VertexSM vertex = vertexStorage.Load<VertexSM>(vertexByteOffset);
         VertexOutput vertexOutput;

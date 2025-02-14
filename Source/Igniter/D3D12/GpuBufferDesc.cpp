@@ -195,10 +195,16 @@ namespace ig
         if (IsShaderResourceViewCompatible(bufferType))
         {
             desc = D3D12_SHADER_RESOURCE_VIEW_DESC{
-                .Format = DXGI_FORMAT_UNKNOWN,
+                .Format = bIsRawBuffer  ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN,
                 .ViewDimension = D3D12_SRV_DIMENSION_BUFFER,
                 .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-                .Buffer = {.FirstElement = 0, .NumElements = numElements, .StructureByteStride = structureByteStride}};
+                .Buffer = {
+                    .FirstElement = 0,
+                    .NumElements = numElements,
+                    .StructureByteStride = bIsRawBuffer ? 0Ui32 : structureByteStride,
+                    .Flags = bIsRawBuffer ? D3D12_BUFFER_SRV_FLAG_RAW : D3D12_BUFFER_SRV_FLAG_NONE
+                }
+            };
         }
 
         return desc;
@@ -215,12 +221,14 @@ namespace ig
                 .Format = DXGI_FORMAT_UNKNOWN,
                 .ViewDimension = D3D12_UAV_DIMENSION_BUFFER,
                 .Buffer =
-                    {
-                        .FirstElement = 0,
-                        .NumElements = numElements,
-                        .StructureByteStride = structureByteStride,
-                        .CounterOffsetInBytes = GetUavCounterOffset(),
-                        .Flags = D3D12_BUFFER_UAV_FLAG_NONE}};
+                {
+                    .FirstElement = 0,
+                    .NumElements = numElements,
+                    .StructureByteStride = structureByteStride,
+                    .CounterOffsetInBytes = GetUavCounterOffset(),
+                    .Flags = D3D12_BUFFER_UAV_FLAG_NONE
+                }
+            };
         }
 
         return desc;

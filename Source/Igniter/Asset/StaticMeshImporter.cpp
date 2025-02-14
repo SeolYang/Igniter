@@ -185,7 +185,7 @@ namespace ig
 
             Vector<U32>& lodIndices = meshData.LevelOfDetails[lod].Indices;
             lodIndices.resize(indicesLod0.size());
-            const F32 tLod = lod / (F32)Mesh::kMaxMeshLevelOfDetails;
+            const F32 tLod = (F32)lod / (F32)Mesh::kMaxMeshLevelOfDetails;
             const float targetError = (1.f - tLod) * 0.05f + tLod * 0.95f;
 
             Size numSimplifiedIndices = meshopt_simplify(

@@ -31,7 +31,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     const MeshInstance meshInstance = meshInstanceStorage[meshInstanceIdx];
 
     Mesh mesh = staticMeshStorage[meshInstance.MeshProxyIdx];
-    uint targetLevelOfDetail = min(gMeshInstanceParams.ManualLod, mesh.NumLevelOfDetails);
+    uint targetLevelOfDetail = min(gMeshInstanceParams.ManualLod, mesh.NumLevelOfDetails-1);
     MeshLod meshLod = mesh.LevelOfDetails[targetLevelOfDetail];
 
     DispatchMeshInstance newDispatchMeshInstance;
