@@ -1,5 +1,5 @@
 #include "ForwardMeshInstancePass.hlsli"
-#include "Utils.hlsl"
+#include "Utils.hlsli"
 
 ConstantBuffer<DispatchMeshInstanceParams> gParams : register(b0);
 
@@ -36,7 +36,10 @@ void main(
         float4x4 world = transpose(float4x4(meshInstance.ToWorld[0], meshInstance.ToWorld[1], meshInstance.ToWorld[2], float4(0.f, 0.f, 0.f, 1.f)));
         float4x4 worldViewProj = mul(world, perFrameParams.ViewProj);
         vertexOutput.Position = mul(float4(vertex.Position, 1.f), worldViewProj);
-        vertexOutput.MeshletIdx = groupId;
+        vertexOutput.Normal = mul(float4(vertex.Normal, 0.f), worldViewProj).xyz;
+        vertexOutput.TexCoord0 = vertex.TexCoords;
+        vertexOutput.WorldPosition = mul(float4(vertex.Position, 1.f), world).xyz;
+        vertexOutput.MeshletIndex = meshLod.MeshletStorageOffset + payload.MeshletIndices[groupId];
         verts[groupThreadId] = vertexOutput;
     }
 

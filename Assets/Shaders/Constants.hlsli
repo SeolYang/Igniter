@@ -23,4 +23,16 @@
 #define INV_TILE_SIZE 1.f/TILE_SIZE_F32
 #define NUM_U32_PER_TILE (MAX_LIGHTS / 32)
 
+static const float4 kAabbCornerOffsets[8] =
+{
+    float4(-1.f, -1.f, -1.f, 0.f),
+    float4(-1.f, 1.f, -1.f, 0.f),
+    float4(1.f, 1.f, -1.f, 0.f),
+    float4(1.f, -1.f, -1.f, 0.f),
+    float4(-1.f, 1.f, 1.f, 0.f),
+    float4(1.f, 1.f, 1.f, 0.f),
+    float4(1.f, -1.f, 1.f, 0.f),
+    float4(-1.f, -1.f, 1.f, 0.f)
+};
+
 #endif

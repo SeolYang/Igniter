@@ -129,18 +129,6 @@ namespace fe
             ImGui::EndMainMenuBar();
         }
 
-        /* @test */
-        if (ImGui::Begin("LOD", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ig::Renderer& renderer = ig::Engine::GetRenderer();
-            int lod = renderer.GetMinMeshLod();
-            if (ImGui::SliderInt("LOD", &lod, 0, ig::Mesh::kMaxMeshLevelOfDetails - 1))
-            {
-                renderer.SetMinMeshLod((ig::U8)lod);
-            }
-            ImGui::End();
-        }
-
         if (bStatisticsPanelOpend)
         {
             if (ImGui::Begin("Statistics", &bStatisticsPanelOpend))

@@ -33,10 +33,6 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx);
         GpuSyncPoint Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint);
 
-        /* @test */
-        [[nodiscard]] U8 GetMinMeshLod() const noexcept { return minMeshLod; }
-        void SetMinMeshLod(const U8 newMinMeshLod) { minMeshLod = std::min(newMinMeshLod, Mesh::kMaxMeshLevelOfDetails); }
-
         /* #sy_todo 내용을 직접 밖으로 노출하지 말고, Statistics struct를 만들어서 채워서 내보내기 */
         [[nodiscard]] const TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
 
@@ -44,9 +40,6 @@ namespace ig
         const Window* window = nullptr;
         RenderContext* renderContext = nullptr;
         const SceneProxy* sceneProxy = nullptr;
-
-        /* @test */
-        U8 minMeshLod = 0;
 
         Viewport mainViewport{};
 

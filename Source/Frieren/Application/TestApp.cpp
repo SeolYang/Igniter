@@ -54,15 +54,27 @@ namespace fe
         cameraComponent.bIsMainCamera = true;
 
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        ig::Handle<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
-        ig::Entity sphere = ig::StaticMeshArchetype::Create(&registry);
-        ig::StaticMeshComponent& smc = registry.get<ig::StaticMeshComponent>(sphere);
-        ig::TransformComponent& tc = registry.get<ig::TransformComponent>(sphere);
-        tc.Position.z = 20.f;
-        smc.Mesh = axeStaticMesh;
-        
+        {
+            ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
+            const ig::Entity bunny = ig::StaticMeshArchetype::Create(&registry);
+            ig::StaticMeshComponent& smc = registry.get<ig::StaticMeshComponent>(bunny);
+            ig::TransformComponent& tc = registry.get<ig::TransformComponent>(bunny);
+            tc.Position.z = 20.f;
+            smc.Mesh = bunnySM;
+        }
+
+        {
+            ig::Handle<ig::StaticMesh> sphereSM = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+            const ig::Entity sphere = ig::StaticMeshArchetype::Create(&registry);
+            ig::StaticMeshComponent& smc = registry.get<ig::StaticMeshComponent>(sphere);
+            ig::TransformComponent& tc = registry.get<ig::TransformComponent>(sphere);
+            tc.Position.x = -5.f;
+            tc.Position.z = 20.f;
+            smc.Mesh = sphereSM;
+        }
+
         //IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        
+
         //IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
 
         //for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)

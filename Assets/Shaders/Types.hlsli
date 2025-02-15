@@ -4,6 +4,7 @@
 struct PerFrameParams
 {
     float4x4 View;
+    float4x4 Proj;
     float4x4 ViewProj;
 
     uint VertexStorageSrv;
@@ -15,6 +16,11 @@ struct PerFrameParams
     uint MaterialStorageSrv;
     uint StaticMeshStorageSrv;
     uint MeshInstanceStorageSrv;
+
+    /* (x,y,z): cam pos, w: inv aspect ratio */
+    float4 CamWorldPosInvAspectRatio;
+    /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
+    float4 ViewFrustumParams;
 };
 
 struct ScreenParams
@@ -36,7 +42,7 @@ struct Light
 struct Material
 {
     uint DiffuseTexSrv;
-    uint DiffuseTexSamplerSrv;
+    uint DiffuseTexSampler;
 };
 
 /* Deprecated! */

@@ -91,6 +91,7 @@ namespace ig
     struct PerFrameParams
     {
         Matrix View;
+        Matrix Proj;
         Matrix ViewProj;
 
         U32 VertexStorageSrv;
@@ -102,6 +103,11 @@ namespace ig
         U32 MaterialStorageSrv;
         U32 StaticMeshStorageSrv;
         U32 MeshInstanceStorageSrv;
+
+        /* (x,y,z): cam pos, w: inv aspect ratio */
+        Vector4 CamWorldPosInvAspectRatio;
+        /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
+        Vector4 ViewFrustumParams;
     };
 
     struct DispatchMeshInstanceParams
@@ -128,8 +134,6 @@ namespace ig
 
         U32 OpaqueMeshInstanceDispatchBufferUav;
         U32 TransparentMeshInstanceDispatchBufferUav;
-
-        U32 ManualLod;
     };
 
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const SceneProxy& sceneProxy)
@@ -284,8 +288,18 @@ namespace ig
         for (const auto& [entity, transform, camera] : camView.each())
         {
             const Matrix view = transform.CreateView();
+            const Matrix proj = camera.CreatePerspectiveForReverseZ();
             perFrameParams.View = ConvertToShaderSuitableForm(view);
-            perFrameParams.ViewProj = ConvertToShaderSuitableForm(view * camera.CreatePerspectiveForReverseZ());
+            perFrameParams.Proj = ConvertToShaderSuitableForm(proj);
+            perFrameParams.ViewProj = ConvertToShaderSuitableForm(view * proj);
+            perFrameParams.CamWorldPosInvAspectRatio = Vector4{
+                transform.Position.x, transform.Position.y, transform.Position.z,
+                1.f / mainViewport.AspectRatio()
+            };
+
+            const float cosHalfFovY = std::cos(Deg2Rad(camera.Fov * 0.5f));
+            const float sinHalfFovY = std::sin(Deg2Rad(camera.Fov * 0.5f));
+            perFrameParams.ViewFrustumParams = Vector4{cosHalfFovY, sinHalfFovY, camera.NearZ, camera.FarZ};
         }
         perFrameParamsCb.Write(perFrameParams);
 
@@ -307,7 +321,6 @@ namespace ig
             meshInstancePassParams.NumMeshInstances = sceneProxy->GetNumMeshInstances();
             meshInstancePassParams.OpaqueMeshInstanceDispatchBufferUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUnorderedResourceView())->Index;
             meshInstancePassParams.TransparentMeshInstanceDispatchBufferUav = renderContext->Lookup(transparentMeshInstanceDispatchStorage->GetUnorderedResourceView())->Index;
-            meshInstancePassParams.ManualLod = minMeshLod;
 
             auto meshInstancePassCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "MeshInstancePass"_fs);
             meshInstancePassCmdList->Open(meshInstancePassPso.get());
