@@ -48,7 +48,7 @@ float ExtractMaxAbsScale(float4x4 toWorld)
     float dx = dot(r0, r0);
     float dy = dot(r1, r1);
     float dz = dot(r2, r2);
-    return max(dx, max(dy, dz));
+    return sqrt(max(dx, max(dy, dz)));
 }
 
 BoundingSphere TransformBoundingSphere(BoundingSphere boundingSphere, float4x4 transform)

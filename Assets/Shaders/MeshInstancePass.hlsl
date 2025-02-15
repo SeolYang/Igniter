@@ -72,9 +72,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float4 aabbNdc = float4(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
     for (uint idx = 0; idx < 8; ++idx)
     {
-        float4 aabbCornerLocal = float4(viewBoundingSphere.Center, 1.f) + (viewBoundingSphere.Radius * kAabbCornerOffsets[idx]);
-        aabbCornerLocal.z = clamp(aabbCornerLocal.z, perFrameParams.ViewFrustumParams.z, perFrameParams.ViewFrustumParams.w);
-        float4 aabbCornerNdc = mul(aabbCornerLocal, perFrameParams.Proj);
+        float4 aabbCornerLocal = float4(mesh.BoundingVolume.Center, 1.f) + (mesh.BoundingVolume.Radius * kAabbCornerOffsets[idx]);
+        float4 aabbCornerNdc = mul(aabbCornerLocal, worldViewProj);
         // Perspective Division: Clip -> NDC
         aabbCornerNdc /= aabbCornerNdc.w;
 
