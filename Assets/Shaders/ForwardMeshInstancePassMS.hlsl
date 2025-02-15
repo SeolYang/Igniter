@@ -22,7 +22,7 @@ void main(
     MeshInstance meshInstance = meshInstanceStorage[gParams.MeshInstanceIdx];
     Mesh mesh = staticMeshStorage[meshInstance.MeshProxyIdx];
     MeshLod meshLod = mesh.LevelOfDetails[gParams.TargetLevelOfDetail];
-    Meshlet meshlet = meshletStorage[payload.MeshletIndices[groupId]];
+    Meshlet meshlet = meshletStorage[meshLod.MeshletStorageOffset + payload.MeshletIndices[groupId]];
 
     SetMeshOutputCounts(meshlet.NumIndices, meshlet.NumTriangles);
 
