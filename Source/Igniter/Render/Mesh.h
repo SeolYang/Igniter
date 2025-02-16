@@ -87,7 +87,10 @@ namespace ig
 
         BoundingSphere MeshBoundingSphere{};
 
-        U64 Padding = 0xFFFFFFFFFFFFFFFFUi64;
+        U32 bOverrideLodScreenCoverageThreshold = false;
+        F32 LodScreenCoverageThresholds[Mesh::kMaxMeshLevelOfDetails];
+
+        U32 Padding = 0xFFFFFFFF;
     };
 
     struct GpuMeshInstance

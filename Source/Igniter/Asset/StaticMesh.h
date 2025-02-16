@@ -60,6 +60,9 @@ namespace ig
         Array<U32, Mesh::kMaxMeshLevelOfDetails> NumMeshletTriangles{0};
         Array<U32, Mesh::kMaxMeshLevelOfDetails> NumMeshlets{0};
         AABB BoundingBox;
+
+        bool bOverrideLodScreenCoverageThresholds = false;
+        Array<F32, Mesh::kMaxMeshLevelOfDetails> LodScreenCoverageThresholds{0.f,};
     };
 
     class GpuBuffer;

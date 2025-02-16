@@ -18,10 +18,10 @@ namespace fe
         ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         ig::AssetManager::ModifiedEvent& modifiedEvent{assetManager.GetModifiedEvent()};
         modifiedEvent.Subscribe("AssetInspector"_fs,
-                                [this]([[maybe_unused]] const ig::CRef<ig::AssetManager> assetManagerRef)
-                                {
-                                    bIsDirty = true;
-                                });
+            [this]([[maybe_unused]] const ig::CRef<ig::AssetManager> assetManagerRef)
+            {
+                bIsDirty = true;
+            });
 
         snapshots = assetManager.TakeSnapshots();
     }
@@ -93,7 +93,7 @@ namespace fe
 
         ImGui::SameLine();
         ImGui::BeginChild("Inspector", ImVec2{width * InspectorRatio - ig::ImGuiX::GetFramePadding().x, 0.f}, ImGuiChildFlags_Border,
-                          ImGuiWindowFlags_HorizontalScrollbar);
+            ImGuiWindowFlags_HorizontalScrollbar);
         RenderInspector();
         ImGui::EndChild();
         ImGui::EndGroup();
@@ -116,17 +116,19 @@ namespace fe
 
             ImGui::Text(
                 std::format("#Imported {}: {}\t#Cached {}: {}", mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelected),
-                            mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
-                    .c_str());
+                    mainTableAssetFilter, std::count_if(snapshots.begin(), snapshots.end(), IsSelectedCached))
+                .c_str());
         }
         else
         {
             const auto IsCached = [](const ig::AssetManager::Snapshot& snapshot)
-            { return snapshot.IsCached(); };
+            {
+                return snapshot.IsCached();
+            };
 
             ImGui::Text(
                 std::format("#Imported Assets: {}\t#Cached Assets: {}", snapshots.size(), std::count_if(snapshots.begin(), snapshots.end(), IsCached))
-                    .c_str());
+                .c_str());
         }
     }
 
@@ -158,38 +160,40 @@ namespace fe
                 const int16_t selectedColumn{sortSpecs->Specs[0].ColumnIndex};
                 const bool bAscendingRequired{sortDirection == ImGuiSortDirection_Ascending};
                 std::sort(snapshots.begin(), snapshots.end(),
-                          [selectedColumn, bAscendingRequired](const ig::AssetManager::Snapshot& lhs, const ig::AssetManager::Snapshot& rhs)
-                          {
-                              int comp{};
-                              switch (selectedColumn)
-                              {
-                              case 0:
-                                  return bAscendingRequired ? lhs.Info.GetCategory() < rhs.Info.GetCategory() : lhs.Info.GetCategory() > rhs.Info.GetCategory();
+                    [selectedColumn, bAscendingRequired](const ig::AssetManager::Snapshot& lhs, const ig::AssetManager::Snapshot& rhs)
+                    {
+                        int comp{};
+                        switch (selectedColumn)
+                        {
+                        case 0:
+                            return bAscendingRequired ? lhs.Info.GetCategory() < rhs.Info.GetCategory() : lhs.Info.GetCategory() > rhs.Info.GetCategory();
 
-                              case 1:
-                                  return bAscendingRequired ? lhs.Info.GetGuid().bytes() < rhs.Info.GetGuid().bytes() : lhs.Info.GetGuid().bytes() > rhs.Info.GetGuid().bytes();
-                              case 2:
-                                  comp = lhs.Info.GetVirtualPath().Compare(rhs.Info.GetVirtualPath());
-                                  return bAscendingRequired ? comp < 0 : comp > 0;
+                        case 1:
+                            return bAscendingRequired ? lhs.Info.GetGuid().bytes() < rhs.Info.GetGuid().bytes() : lhs.Info.GetGuid().bytes() > rhs.Info.GetGuid().bytes();
+                        case 2:
+                            comp = lhs.Info.GetVirtualPath().Compare(rhs.Info.GetVirtualPath());
+                            return bAscendingRequired ? comp < 0 : comp > 0;
 
-                              case 3:
-                                  return bAscendingRequired ? lhs.Info.GetScope() < rhs.Info.GetScope() : lhs.Info.GetScope() > rhs.Info.GetScope();
-                              case 4:
-                                  return bAscendingRequired ? lhs.RefCount < rhs.RefCount : lhs.RefCount > rhs.RefCount;
+                        case 3:
+                            return bAscendingRequired ? lhs.Info.GetScope() < rhs.Info.GetScope() : lhs.Info.GetScope() > rhs.Info.GetScope();
+                        case 4:
+                            return bAscendingRequired ? lhs.RefCount < rhs.RefCount : lhs.RefCount > rhs.RefCount;
 
-                              default:
-                                  IG_CHECK_NO_ENTRY();
-                                  return false;
-                              };
-                          });
+                        default:
+                            IG_CHECK_NO_ENTRY();
+                            return false;
+                        };
+                    });
 
                 const ig::Guid lastSelectedGuid{mainTableSelectedIdx != -1 ? snapshots[mainTableSelectedIdx].Info.GetGuid() : ig::Guid{}};
                 mainTableSelectedIdx = -1;
                 if (lastSelectedGuid.isValid())
                 {
                     const auto foundItr = std::find_if(snapshots.cbegin(), snapshots.cend(),
-                                                       [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot)
-                                                       { return snapshot.Info.GetGuid() == lastSelectedGuid; });
+                        [lastSelectedGuid](const ig::AssetManager::Snapshot& snapshot)
+                        {
+                            return snapshot.Info.GetGuid() == lastSelectedGuid;
+                        });
 
                     mainTableSelectedIdx = foundItr != snapshots.cend() ? static_cast<int>(foundItr - snapshots.cbegin()) : -1;
                 }
@@ -210,7 +214,7 @@ namespace fe
                     ImGui::Text(ToCStr(snapshot.Info.GetCategory()));
                     ImGui::TableNextColumn();
                     if (ImGui::Selectable(std::format("{}", snapshot.Info.GetGuid()).c_str(), (selectedIdx == idx),
-                                          ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
+                        ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
                     {
                         selectedIdx = idx;
                         if (bSelectionDirtyFlagPtr != nullptr)
@@ -338,19 +342,10 @@ namespace fe
             ImGui::Text("Invalid Static Mesh!");
             return;
         }
-        ImGui::Text("Num Vertices: %u", loadDescOpt->NumVertices);
 
-        for (ig::U8 lod = 0; lod < loadDescOpt->NumLevelOfDetails; ++lod)
-        {
-            if (ImGui::TreeNodeEx(std::format("LOD {}", lod).c_str(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                ImGui::Text("Num Meshlet Vertices: %u", (ig::U32)loadDescOpt->NumMeshletVertexIndices[lod]);
-                ImGui::Text("Num Meshlet Triangles: %u", (ig::U32)loadDescOpt->NumMeshletTriangles[lod]);
-                ImGui::Text("Num Meshlets: %u", (ig::U32)loadDescOpt->NumMeshlets[lod]);
-                ImGui::TreePop();
-            }
-        }
+        ImGui::Text("Num Unique Vertices: %u", loadDescOpt->NumVertices);
 
+        ig::ImGuiX::SeparatorText("Mesh");
         ig::AABB aabb = loadDescOpt->BoundingBox;
         ImGui::Text("AABB(Min) ");
         ImGui::SameLine();
@@ -358,6 +353,35 @@ namespace fe
         ImGui::Text("AABB(Max) ");
         ImGui::SameLine();
         ig::ImGuiX::EditVector3("AABB(Max)", aabb.Max, 0.f, "%.4f", true);
+
+        ig::ImGuiX::SeparatorText("Level Of Details");
+        bool bIsChanged = ImGui::Checkbox("Override Default LOD Threshold", &loadDescOpt->bOverrideLodScreenCoverageThresholds);
+        for (ig::U8 lod = 0; lod < loadDescOpt->NumLevelOfDetails; ++lod)
+        {
+            if (ImGui::TreeNodeEx(std::format("LOD {}", lod).c_str(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                if (loadDescOpt->bOverrideLodScreenCoverageThresholds)
+                {
+                    float inputFloat = loadDescOpt->LodScreenCoverageThresholds[lod] * 100.f;
+                    if (ImGui::InputFloat(std::format("Screen Coverage Threshold", lod).c_str(), &inputFloat, 0.001f, 0.01f,
+                        "%.7f %%"))
+                    {
+                        loadDescOpt->LodScreenCoverageThresholds[lod] = std::clamp(inputFloat, 0.f, 100.f) * 0.01f;
+                        bIsChanged = true;
+                    }
+                }
+
+                ImGui::Text("Num Meshlet Vertices: %u", loadDescOpt->NumMeshletVertexIndices[lod]);
+                ImGui::Text("Num Meshlet Triangles: %u", loadDescOpt->NumMeshletTriangles[lod]);
+                ImGui::Text("Num Meshlets: %u", loadDescOpt->NumMeshlets[lod]);
+                ImGui::TreePop();
+            }
+        }
+
+        if (bIsChanged)
+        {
+            assetManager.UpdateLoadDesc<ig::StaticMesh>(assetInfo.GetGuid(), *loadDescOpt);
+        }
     }
 
     void AssetInspector::RenderAssetInfo(const ig::AssetInfo& assetInfo)

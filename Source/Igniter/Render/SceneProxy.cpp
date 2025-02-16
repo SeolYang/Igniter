@@ -406,8 +406,12 @@ namespace ig
 
                     const StaticMesh* staticMeshPtr = assetManager->Lookup(cachedStaticMesh);
                     IG_CHECK(staticMeshPtr != nullptr);
+                    /* 더 좋은 방식을 생각해야 할 필요성이 있음. 예시. Runtime 데이터를 따로 두고, Unload나 Save시 AssetManager 단에서 반영 */
+                    std::optional<StaticMesh::LoadDesc> latestLoadDesc =
+                        assetManager->GetLoadDesc<StaticMesh>(staticMeshPtr->GetSnapshot().Info.GetGuid());
+                    IG_CHECK(latestLoadDesc.has_value());
 
-                    if (const U64 currentDataHashValue = HashInstance(*staticMeshPtr);
+                    if (const U64 currentDataHashValue = HashInstances(*staticMeshPtr, latestLoadDesc.value());
                         proxy.DataHashValue != currentDataHashValue)
                     {
                         const Mesh& mesh = staticMeshPtr->GetMesh();
@@ -416,6 +420,7 @@ namespace ig
                         IG_CHECK(vertexAllocPtr != nullptr);
                         proxy.GpuData.VertexStorageByteOffset = (U32)vertexAllocPtr->Alloc.Offset;
                         proxy.GpuData.NumLevelOfDetails = mesh.NumLevelOfDetails;
+                        proxy.GpuData.bOverrideLodScreenCoverageThreshold = latestLoadDesc->bOverrideLodScreenCoverageThresholds;
                         for (U8 lod = 0; lod < proxy.GpuData.NumLevelOfDetails; ++lod)
                         {
                             const MeshLod& meshLod = mesh.LevelOfDetails[lod];
@@ -431,6 +436,8 @@ namespace ig
                             gpuMeshLod.TriangleStorageOffset = (U32)triangleStorageAllocPtr->OffsetIndex;
                             gpuMeshLod.MeshletStorageOffset = (U32)meshletStorageAllocPtr->OffsetIndex;
                             gpuMeshLod.NumMeshlets = (U32)meshletStorageAllocPtr->NumElements;
+
+                            proxy.GpuData.LodScreenCoverageThresholds[lod] = latestLoadDesc->LodScreenCoverageThresholds[lod];
                         }
                         proxy.GpuData.MeshBoundingSphere = ToBoundingSphere(mesh.BoundingBox);
 

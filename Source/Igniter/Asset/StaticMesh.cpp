@@ -49,6 +49,8 @@ namespace ig
         IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumMeshletTriangles);
         IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, NumMeshlets);
         IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, BoundingBox);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, bOverrideLodScreenCoverageThresholds);
+        IG_SERIALIZE_TO_JSON(StaticMeshLoadDesc, archive, LodScreenCoverageThresholds);
         return archive;
     }
 
@@ -62,6 +64,8 @@ namespace ig
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumMeshletTriangles);
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, NumMeshlets);
         IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, BoundingBox);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, bOverrideLodScreenCoverageThresholds);
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshLoadDesc, archive, LodScreenCoverageThresholds);
         return archive;
     }
 

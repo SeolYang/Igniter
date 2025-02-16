@@ -102,7 +102,10 @@ struct Mesh
     uint NumLevelOfDetails;
     MeshLod LevelOfDetails[MAX_MESH_LEVEL_OF_DETAILS];
     BoundingSphere BoundingVolume;
-    uint2 Padding;
+
+    uint bOverrideLodScreenCoverageThreshold;
+    float LodScreenCoverageThresholds[MAX_MESH_LEVEL_OF_DETAILS];;
+    uint Padding;
 };
 
 #define MESH_TYPE_STATIC 0

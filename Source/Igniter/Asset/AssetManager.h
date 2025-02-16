@@ -240,6 +240,12 @@ namespace ig
 
         [[nodiscard]] std::optional<AssetInfo> GetAssetInfo(const Guid& guid) const;
 
+        /*
+         * 에셋 인스턴스 내부에 저장되어있는 'Snapshot'은, 인스턴스가 로딩(또는 리로딩) 된 시점에서의 에셋 정보를 담고 있다.
+         * 만약, 최신 정보를 얻고싶다면 'AssetManager'를 통해 데이터를 얻어와야만 한다.
+         * 마찬가지로, 기본적으로 에셋 인스턴스 내부에 있는 'Snapshot'은 상수로 취급되어야 한다.
+         * 그에따라, 에셋 매니저의 최신 데이터를 갱신 시키기 위해선 UploadLoadDesc를 사용하여야 한다. 
+         */
         template <typename T>
         [[nodiscard]] std::optional<typename T::LoadDesc> GetLoadDesc(const Guid& guid) const
         {
