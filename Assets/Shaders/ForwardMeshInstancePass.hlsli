@@ -2,6 +2,8 @@
 #define _FORWARD_MESH_INSTANCE_PASS_H_
 
 #include "Types.hlsli"
+#include "Utils.hlsli"
+#include "Constants.hlsli"
 
 #define MESH_INSTANCE_PASS_AS_GROUP_SIZE 32
 

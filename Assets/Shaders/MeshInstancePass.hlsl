@@ -82,7 +82,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
         aabbNdc.z = max(aabbCornerNdc.x, aabbNdc.z);
         aabbNdc.w = max(aabbCornerNdc.y, aabbNdc.w);
     }
-    aabbNdc += 1.f; // [-1, 1]->[0,2]
     const float screenCoverage = saturate(((aabbNdc.z - aabbNdc.x) * (aabbNdc.w - aabbNdc.y)) * 0.25f);
     uint targetLevelOfDetail = MapScreenCoverageToLodAuto(screenCoverage);
     MeshLod meshLod = mesh.LevelOfDetails[targetLevelOfDetail];

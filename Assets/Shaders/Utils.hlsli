@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 float LinearizeDepth(float d, float zNearPlane, float zFarPlane)
 {
     return -(zFarPlane * zNearPlane) / (d * (zFarPlane - zNearPlane) - zFarPlane);
@@ -104,3 +107,5 @@ uint MapScreenCoverageToLodAuto(float screenCoverage)
 
     return MAX_MESH_LEVEL_OF_DETAILS - 1;
 }
+
+#endif
