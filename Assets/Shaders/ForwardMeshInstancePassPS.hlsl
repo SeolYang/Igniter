@@ -5,12 +5,6 @@ ConstantBuffer<DispatchMeshInstanceParams> gParams : register(b0);
 [earlydepthstencil]
 float4 main(VertexOutput input) : SV_Target
 {
-    return float4(
-    clamp(float(input.MeshletIndex & 7) / 8.f, 0.1f, 1.f),
-    clamp(float(input.MeshletIndex & 15) / 16.f, 0.1f, 1.f),
-    clamp(float(input.MeshletIndex & 31) / 32.f, 0.2f, 1.f),
-    1.f);
-    
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gParams.PerFrameParamsCbv];
     ConstantBuffer<LightClusterParams> lightClusterParams = ResourceDescriptorHeap[perFrameParams.LightClusterParamsCbv];
     StructuredBuffer<uint> lightIdxList = ResourceDescriptorHeap[lightClusterParams.LightIdxListSrv];
