@@ -40,5 +40,9 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
     }
 
     const uint numVisibleMeshlets = WaveActiveCountBits(bIsVisible);
+    if (numVisibleMeshlets == 0)
+    {
+        gPayload.MeshletIndices[0] = 0xFFFFFFFF;
+    }
     DispatchMesh(numVisibleMeshlets, 1, 1, gPayload);
 }

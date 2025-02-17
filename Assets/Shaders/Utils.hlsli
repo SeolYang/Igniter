@@ -84,7 +84,7 @@ bool IntersectFrustum(float invAspectRatio, float4 viewFrusumParams, BoundingSph
         topPlaneSignedDist > -viewBoundingSphere.Radius;
 }
 
-uint MapScreenCoverageToLodAuto(float screenCoverage)
+uint MapScreenCoverageToLodAuto(float screenCoverage, uint numLevelOfDetails)
 {
     const static float kTable[MAX_MESH_LEVEL_OF_DETAILS] = {
         0.0008f,    /* Screen Coverage >= 0.08% */
@@ -97,7 +97,7 @@ uint MapScreenCoverageToLodAuto(float screenCoverage)
         0.00015f,  /* 0.02% > Screen Coverage >= 0.015% */
     };
 
-    for (uint lod = 0; lod < MAX_MESH_LEVEL_OF_DETAILS; ++lod)
+    for (uint lod = 0; lod < numLevelOfDetails; ++lod)
     {
         if (screenCoverage >= kTable[lod])
         {
@@ -105,7 +105,7 @@ uint MapScreenCoverageToLodAuto(float screenCoverage)
         }
     }
 
-    return MAX_MESH_LEVEL_OF_DETAILS - 1;
+    return numLevelOfDetails - 1;
 }
 
 #endif

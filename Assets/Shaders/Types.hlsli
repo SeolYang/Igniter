@@ -140,7 +140,6 @@ struct DispatchMeshInstanceParams
     uint MeshInstanceIdx;
     uint TargetLevelOfDetail;
     uint PerFrameParamsCbv;
-    uint ScreenParamsCbv;
 };
 
 struct DispatchMeshInstance

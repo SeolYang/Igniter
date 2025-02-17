@@ -121,7 +121,6 @@ namespace ig
         U32 MeshInstanceIdx;
         U32 TargetLevelOfDetail;
         U32 PerFrameParamsCbv;
-        U32 ScreenParamsCbv;
     };
 
     struct DispatchMeshInstance
@@ -197,7 +196,7 @@ namespace ig
 
         CommandSignatureDesc forwardMeshInstanceMeshSignDesc{};
         forwardMeshInstanceMeshSignDesc.SetCommandByteStride<DispatchMeshInstance>();
-        forwardMeshInstanceMeshSignDesc.AddConstant(0, 0, 4);
+        forwardMeshInstanceMeshSignDesc.AddConstant(0, 0, 3);
         forwardMeshInstanceMeshSignDesc.AddDispatchMeshArgument();
         forwardMeshInstanceCmdSignature = MakePtr<CommandSignature>(
             gpuDevice.CreateCommandSignature(

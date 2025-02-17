@@ -16,7 +16,6 @@ namespace ig
     }
 
     MaterialComponent::MaterialComponent()
-        : Instance(Engine::GetAssetManager().LoadMaterial(Guid{DefaultMaterialGuid}))
     {}
 
     MaterialComponent::MaterialComponent(const MaterialComponent& other)

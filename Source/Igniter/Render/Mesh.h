@@ -84,12 +84,10 @@ namespace ig
         U32 VertexStorageByteOffset = 0;
         U32 NumLevelOfDetails = 0;
         GpuMeshLod LevelOfDetails[Mesh::kMaxMeshLevelOfDetails];
-
         BoundingSphere MeshBoundingSphere{};
 
         U32 bOverrideLodScreenCoverageThreshold = false;
         F32 LodScreenCoverageThresholds[Mesh::kMaxMeshLevelOfDetails];
-
         U32 Padding = 0xFFFFFFFF;
     };
 

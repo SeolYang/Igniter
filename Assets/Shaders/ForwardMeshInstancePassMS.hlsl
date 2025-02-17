@@ -22,11 +22,20 @@ void main(
     MeshInstance meshInstance = meshInstanceStorage[gParams.MeshInstanceIdx];
     Mesh mesh = staticMeshStorage[meshInstance.MeshProxyIdx];
     MeshLod meshLod = mesh.LevelOfDetails[gParams.TargetLevelOfDetail];
-    Meshlet meshlet = meshletStorage[meshLod.MeshletStorageOffset + payload.MeshletIndices[groupId]];
+    Meshlet meshlet;
 
-    SetMeshOutputCounts(meshlet.NumIndices, meshlet.NumTriangles);
+    uint numIndices = 0;
+    uint numTriangles = 0;
+    if (payload.MeshletIndices[0] != 0xFFFFFFFF)
+    {
+        meshlet = meshletStorage[meshLod.MeshletStorageOffset + payload.MeshletIndices[groupId]];
+        numIndices = meshlet.NumIndices;
+        numTriangles = meshlet.NumTriangles;
+    }
 
-    if (groupThreadId < meshlet.NumIndices)
+    SetMeshOutputCounts(numIndices, numTriangles);
+
+    if (groupThreadId < numIndices)
     {
         const uint indexStorageIdx = meshLod.IndexStorageOffset + meshlet.IndexOffset + groupThreadId;
         const uint vertexIdx = indexStorage[indexStorageIdx];
@@ -42,7 +51,7 @@ void main(
         verts[groupThreadId] = vertexOutput;
     }
 
-    if (groupThreadId < meshlet.NumTriangles)
+    if (groupThreadId < numTriangles)
     {
         const uint triangleStorageIdx = meshLod.TriangleStorageOffset + meshlet.TriangleOffset + groupThreadId;
         const uint encodedTriangle = triangleStorage[triangleStorageIdx];

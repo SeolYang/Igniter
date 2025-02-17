@@ -86,7 +86,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint targetLevelOfDetail;
     if (mesh.bOverrideLodScreenCoverageThreshold)
     {
-        for (uint lod = 0; lod < MAX_MESH_LEVEL_OF_DETAILS; ++lod)
+        for (uint lod = 0; lod < mesh.NumLevelOfDetails; ++lod)
         {
             if (screenCoverage >= mesh.LodScreenCoverageThresholds[lod])
             {
@@ -97,14 +97,15 @@ void main(uint3 DTid : SV_DispatchThreadID)
     }
     else
     {
-        targetLevelOfDetail = MapScreenCoverageToLodAuto(screenCoverage);
+        targetLevelOfDetail = MapScreenCoverageToLodAuto(screenCoverage, mesh.NumLevelOfDetails);
     }
+    targetLevelOfDetail = min(targetLevelOfDetail, mesh.NumLevelOfDetails - 1);
+    
     MeshLod meshLod = mesh.LevelOfDetails[targetLevelOfDetail];
     DispatchMeshInstance newDispatchMeshInstance;
     newDispatchMeshInstance.Params.MeshInstanceIdx = meshInstanceIdx;
     newDispatchMeshInstance.Params.TargetLevelOfDetail = targetLevelOfDetail;
     newDispatchMeshInstance.Params.PerFrameParamsCbv = gMeshInstanceParams.PerFrameParamsCbv;
-    newDispatchMeshInstance.Params.ScreenParamsCbv = 0xFFFFFFFF;
     newDispatchMeshInstance.ThreadGroupCountX = (meshLod.NumMeshlets + 31) / 32;
     newDispatchMeshInstance.ThreadGroupCountY = 1;
     newDispatchMeshInstance.ThreadGroupCountZ = 1;

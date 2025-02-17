@@ -54,60 +54,40 @@ namespace fe
         cameraComponent.bIsMainCamera = true;
 
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+       ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
+        IG_VERIFY(assetManager.Clone(bunnySM, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
+        ig::Handle<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
+        IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
+        for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
         {
-            ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
-            const ig::Entity bunny = ig::StaticMeshArchetype::Create(&registry);
-            ig::StaticMeshComponent& smc = registry.get<ig::StaticMeshComponent>(bunny);
-            ig::TransformComponent& tc = registry.get<ig::TransformComponent>(bunny);
-            tc.Position.z = 20.f;
-            smc.Mesh = bunnySM;
-        }
+            for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)
+            {
+                for (ig::U32 axeGridZ = 0; axeGridZ < kAxeGridSizeZ; ++axeGridZ)
+                {
+                    ig::Entity newAxeEntity = ig::StaticMeshArchetype::Create(&registry);
+                    ig::TransformComponent& transform = registry.get<ig::TransformComponent>(newAxeEntity);
+                    transform.Scale = ig::Vector3{1.f, 1.0f, 1.f};
+                    transform.Position = kAxeOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)axeGridX, (ig::F32)axeGridY, (ig::F32)axeGridZ});
+                    ig::StaticMeshComponent& staticMeshComponent = registry.get<ig::StaticMeshComponent>(newAxeEntity);
+                    staticMeshComponent.Mesh = bunnySM;
+                    ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
+                    nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
+                    ig::MaterialComponent& matComp = registry.get<ig::MaterialComponent>(newAxeEntity);
+                    matComp.Instance = axeMaterial;
         
-        {
-            ig::Handle<ig::StaticMesh> sphereSM = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
-            const ig::Entity sphere = ig::StaticMeshArchetype::Create(&registry);
-            ig::StaticMeshComponent& smc = registry.get<ig::StaticMeshComponent>(sphere);
-            ig::TransformComponent& tc = registry.get<ig::TransformComponent>(sphere);
-            tc.Position.x = -5.f;
-            tc.Position.z = 20.f;
-            smc.Mesh = sphereSM;
+                    RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
+                    // randComp.MoveDirection = ig::Vector3{
+                    //     ig::Random(-1.f, 1.f),
+                    //     ig::Random(-1.f, 1.f),
+                    //     ig::Random(-1.f, 1.f)};
+                    // randComp.MoveDirection.Normalize();
+                    // randComp.MoveSpeed = ig::Random(0.1f, 1.5f);
+        
+                    randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
+                    randComp.RotateSpeed = ig::Random(0.f, 15.f);
+                }
+            }
         }
-        //
-        // ig::Handle<ig::StaticMesh> axeStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
-        // IG_VERIFY(assetManager.Clone(axeStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        // ig::Handle<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
-        // IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        //
-        // for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
-        // {
-        //     for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)
-        //     {
-        //         for (ig::U32 axeGridZ = 0; axeGridZ < kAxeGridSizeZ; ++axeGridZ)
-        //         {
-        //             ig::Entity newAxeEntity = registry.create();
-        //             ig::TransformComponent& transform = registry.emplace<ig::TransformComponent>(newAxeEntity);
-        //             transform.Scale = ig::Vector3{1.f, 1.0f, 1.f};
-        //             transform.Position = kAxeOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)axeGridX, (ig::F32)axeGridY, (ig::F32)axeGridZ});
-        //             ig::StaticMeshComponent& staticMeshComponent = registry.emplace<ig::StaticMeshComponent>(newAxeEntity);
-        //             staticMeshComponent.Mesh = axeStaticMesh;
-        //             registry.emplace<ig::MaterialComponent>(newAxeEntity, axeMaterial);
-        //             ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
-        //             nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
-        //             registry.emplace<ig::RenderableTag>(newAxeEntity);
-        //
-        //             RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
-        //             // randComp.MoveDirection = ig::Vector3{
-        //             //     ig::Random(-1.f, 1.f),
-        //             //     ig::Random(-1.f, 1.f),
-        //             //     ig::Random(-1.f, 1.f)};
-        //             // randComp.MoveDirection.Normalize();
-        //             // randComp.MoveSpeed = ig::Random(0.1f, 1.5f);
-        //
-        //             randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
-        //             randComp.RotateSpeed = ig::Random(0.f, 15.f);
-        //         }
-        //     }
-        // }
 
         for (ig::U32 lightGridX = 0; lightGridX < kLightGridSizeX; ++lightGridX)
         {
