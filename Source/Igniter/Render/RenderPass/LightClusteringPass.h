@@ -25,7 +25,7 @@ namespace ig
 
         const GpuView* PerFrameParamsCbvPtr = nullptr;
     };
-    
+
     struct LightClusteringConstants
     {
         U32 PerFrameParamsCbv;
@@ -35,7 +35,14 @@ namespace ig
 
         U32 NumLights;
     };
-    
+
+    struct LightClusterParams
+    {
+        U32 LightIdxListSrv = IG_NUMERIC_MAX_OF(LightIdxListSrv);
+        U32 TileBitfieldsSrv = IG_NUMERIC_MAX_OF(TileBitfieldsSrv);
+        U32 DepthBinsSrv = IG_NUMERIC_MAX_OF(DepthBinsSrv);
+    };
+
     /*
      * 주의할점:
      * 1. TileDwordsBuffer, DepthBinsBuffer에서 다뤄지는 idx들은
@@ -76,9 +83,11 @@ namespace ig
         void SetParams(const LightClusteringPassParams& newParams);
 
         [[nodiscard]] Handle<GpuView> GetLightIdxListSrv() const noexcept { return lightIdxListBufferPackage.Srv; }
-        [[nodiscard]] Handle<GpuView> GetTileBitfieldsSrv() const noexcept { return tileBitfieldsBufferPackage.Srv; }
+        [[nodiscard]] Handle<GpuView> GetTileBitfieldsSrv() const noexcept { return lightTileBitfieldsBufferPackage.Srv; }
         [[nodiscard]] Handle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
         [[nodiscard]] Handle<GpuView> GetDepthBinsSrv() const noexcept { return depthBinsBufferPackage.Srv; }
+
+        [[nodiscard]] LightClusterParams GetLightClusterParams() const;
 
     protected:
         void OnRecord(const LocalFrameIndex localFrameIdx) override;
@@ -114,7 +123,7 @@ namespace ig
         Size numTileY = 0;
         Size tileDwordsStride = 0;
         Size numTileDwords = 0;
-        BufferPackage tileBitfieldsBufferPackage;
+        BufferPackage lightTileBitfieldsBufferPackage;
         BufferPackage depthBinsBufferPackage;
         Handle<GpuBuffer> depthBinInitBuffer;
 

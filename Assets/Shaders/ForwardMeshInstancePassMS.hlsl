@@ -39,7 +39,6 @@ void main(
         vertexOutput.Normal = mul(float4(vertex.Normal, 0.f), worldViewProj).xyz;
         vertexOutput.TexCoord0 = vertex.TexCoords;
         vertexOutput.WorldPosition = mul(float4(vertex.Position, 1.f), world).xyz;
-        vertexOutput.MeshletIndex = meshLod.MeshletStorageOffset + payload.MeshletIndices[groupId];
         verts[groupThreadId] = vertexOutput;
     }
 

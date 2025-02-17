@@ -14,9 +14,7 @@ struct LightClusteringConstants
 
 ConstantBuffer<LightClusteringConstants> gConstants;
 
-#define NUM_THREADS 32
-
-[numthreads(NUM_THREADS, 1, 1)]
+[numthreads(32, 1, 1)]
 void main(uint lightIdxListIdx : SV_DispatchThreadID)
 {
     if (lightIdxListIdx >= gConstants.NumLights)
@@ -27,7 +25,6 @@ void main(uint lightIdxListIdx : SV_DispatchThreadID)
     RWStructuredBuffer<uint> tileBitfields = ResourceDescriptorHeap[gConstants.TileBitfieldsUav];
 
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gConstants.PerFrameParamsCbv];
-    float4 s_camWorldPos = float4(perFrameParams.CamWorldPosInvAspectRatio.x, perFrameParams.CamWorldPosInvAspectRatio.y, perFrameParams.CamWorldPosInvAspectRatio.z, 1.f);
     float s_nearPlane = perFrameParams.ViewFrustumParams.z;
     float s_farPlane = perFrameParams.ViewFrustumParams.w;
     float s_invCamPlaneDist = 1.f / (s_farPlane - s_nearPlane);
@@ -71,9 +68,9 @@ void main(uint lightIdxListIdx : SV_DispatchThreadID)
     }
 
     // Depth Bin 채우기
+    RWStructuredBuffer<uint2> depthBins = ResourceDescriptorHeap[gConstants.DepthBinsUav];
     if (!bCulledByDepthBin)
     {
-        RWStructuredBuffer<uint2> depthBins = ResourceDescriptorHeap[gConstants.DepthBinsUav];
         int v_minDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_nearPointZView - s_nearPlane) * s_invCamPlaneDist));
         int v_maxDepthBinIdx = int(MAX_DEPTH_BIN_IDX_F32 * ((v_farPointZView - s_nearPlane) * s_invCamPlaneDist));
         v_minDepthBinIdx = clamp(v_minDepthBinIdx, 0, MAX_DEPTH_BIN_IDX);
@@ -101,7 +98,6 @@ void main(uint lightIdxListIdx : SV_DispatchThreadID)
     const bool bTileCullCond1 = v_aabbScreen.y > perFrameParams.ViewportHeight || v_aabbScreen.w < 0.f;
     const bool bTileCullCond2 = (v_aabbScreen.z - v_aabbScreen.x) < LIGHT_SIZE_EPSILON || (v_aabbScreen.w - v_aabbScreen.y) < LIGHT_SIZE_EPSILON;
     const bool bCulledByTile = bTileCullCond0 || bTileCullCond1 || bTileCullCond2;
-
     if (!bCulledByTile && (v_farPointZView >= s_nearPlane))
     {
         // Tile 채우기

@@ -69,17 +69,17 @@ namespace ig
 
         tileDwordsStride = kNumDwordsPerTile * numTileX;
         numTileDwords = tileDwordsStride * numTileY;
-        GpuBufferDesc tileDwordsBufferDesc{};
+        GpuBufferDesc lightTileBitfieldsBufferDesc{};
         GpuBufferDesc depthBinsBufferDesc{};
-        tileDwordsBufferDesc.AsStructuredBuffer<U32>((U32)numTileDwords, true);
+        lightTileBitfieldsBufferDesc.AsStructuredBuffer<U32>((U32)numTileDwords, true);
         depthBinsBufferDesc.AsStructuredBuffer<DepthBin>((U32)kNumDepthBins, true);
-        tileDwordsBufferDesc.DebugName = String(std::format("TileDwordsBuffer"));
-        depthBinsBufferDesc.DebugName = String(std::format("DepthBinsBuffer"));
+        lightTileBitfieldsBufferDesc.DebugName = String(std::format("LightTileBitfields"));
+        depthBinsBufferDesc.DebugName = String(std::format("DepthBins"));
 
-        const Handle<GpuBuffer> newTileDwordsBuffer = renderContext.CreateBuffer(tileDwordsBufferDesc);
-        tileBitfieldsBufferPackage.Buffer = newTileDwordsBuffer;
-        tileBitfieldsBufferPackage.Srv = renderContext.CreateShaderResourceView(newTileDwordsBuffer);
-        tileBitfieldsBufferPackage.Uav = renderContext.CreateUnorderedAccessView(newTileDwordsBuffer);
+        const Handle<GpuBuffer> newTileDwordsBuffer = renderContext.CreateBuffer(lightTileBitfieldsBufferDesc);
+        lightTileBitfieldsBufferPackage.Buffer = newTileDwordsBuffer;
+        lightTileBitfieldsBufferPackage.Srv = renderContext.CreateShaderResourceView(newTileDwordsBuffer);
+        lightTileBitfieldsBufferPackage.Uav = renderContext.CreateUnorderedAccessView(newTileDwordsBuffer);
 
         const Handle<GpuBuffer> newDepthBinsBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
         depthBinsBufferPackage.Buffer = newDepthBinsBuffer;
@@ -111,9 +111,9 @@ namespace ig
 
         renderContext->DestroyGpuView(lightIdxListBufferPackage.Srv);
         renderContext->DestroyBuffer(lightIdxListBufferPackage.Buffer);
-        renderContext->DestroyGpuView(tileBitfieldsBufferPackage.Srv);
-        renderContext->DestroyGpuView(tileBitfieldsBufferPackage.Uav);
-        renderContext->DestroyBuffer(tileBitfieldsBufferPackage.Buffer);
+        renderContext->DestroyGpuView(lightTileBitfieldsBufferPackage.Srv);
+        renderContext->DestroyGpuView(lightTileBitfieldsBufferPackage.Uav);
+        renderContext->DestroyBuffer(lightTileBitfieldsBufferPackage.Buffer);
 
         renderContext->DestroyGpuView(depthBinsBufferPackage.Srv);
         renderContext->DestroyGpuView(depthBinsBufferPackage.Uav);
@@ -126,9 +126,26 @@ namespace ig
         IG_CHECK(newParams.CopyLightIdxListCmdList != nullptr);
         IG_CHECK(newParams.ClearTileBitfieldsCmdList != nullptr);
         IG_CHECK(newParams.LightClusteringCmdList != nullptr);
-                IG_CHECK(newParams.TargetViewport.width > 0.f && newParams.TargetViewport.height > 0.f);
+        IG_CHECK(newParams.TargetViewport.width > 0.f && newParams.TargetViewport.height > 0.f);
         IG_CHECK(newParams.PerFrameParamsCbvPtr != nullptr);
         params = newParams;
+    }
+
+    LightClusterParams LightClusteringPass::GetLightClusterParams() const
+    {
+        IG_CHECK(renderContext != nullptr);
+
+        const GpuView* lightIdxListSrvPtr = renderContext->Lookup(lightIdxListBufferPackage.Srv);
+        IG_CHECK(lightIdxListSrvPtr != nullptr);
+        const GpuView* tileBitfieldsSrvPtr = renderContext->Lookup(lightTileBitfieldsBufferPackage.Srv);
+        IG_CHECK(tileBitfieldsSrvPtr != nullptr);
+        const GpuView* depthBinsSrvPtr = renderContext->Lookup(depthBinsBufferPackage.Srv);
+        IG_CHECK(depthBinsSrvPtr != nullptr);
+        return LightClusterParams{
+            .LightIdxListSrv = lightIdxListSrvPtr->Index,
+            .TileBitfieldsSrv = tileBitfieldsSrvPtr->Index,
+            .DepthBinsSrv = depthBinsSrvPtr->Index
+        };
     }
 
     void LightClusteringPass::OnRecord(const LocalFrameIndex localFrameIdx)
@@ -196,11 +213,9 @@ namespace ig
             lightIdxListCopyCmdList.Close();
         }
 
-        const GpuView* lightStorageSrvPtr = renderContext->Lookup(sceneProxy->GetLightStorageSrv());
-        IG_CHECK(lightStorageSrvPtr != nullptr);
         const GpuView* lghtIdxListSrvPtr = renderContext->Lookup(lightIdxListBufferPackage.Srv);
         IG_CHECK(lghtIdxListSrvPtr != nullptr);
-        const GpuView* tileBitfieldsUavPtr = renderContext->Lookup(tileBitfieldsBufferPackage.Uav);
+        const GpuView* tileBitfieldsUavPtr = renderContext->Lookup(lightTileBitfieldsBufferPackage.Uav);
         IG_CHECK(tileBitfieldsUavPtr != nullptr);
         const GpuView* depthBinsUavPtr = renderContext->Lookup(depthBinsBufferPackage.Uav);
         IG_CHECK(depthBinsUavPtr != nullptr);

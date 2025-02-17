@@ -17,6 +17,9 @@ struct PerFrameParams
     uint StaticMeshStorageSrv;
     uint MeshInstanceStorageSrv;
 
+    uint LightClusterParamsCbv;
+    uint3 Padding0;
+
     /* (x,y,z): cam pos, w: inv aspect ratio */
     float4 CamWorldPosInvAspectRatio;
     /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
@@ -24,6 +27,13 @@ struct PerFrameParams
 
     float ViewportWidth;
     float ViewportHeight;
+};
+
+struct LightClusterParams
+{
+    uint LightIdxListSrv;
+    uint TileBitfieldsSrv;
+    uint DepthBinsSrv;
 };
 
 struct ScreenParams

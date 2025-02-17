@@ -104,6 +104,9 @@ namespace ig
         U32 StaticMeshStorageSrv;
         U32 MeshInstanceStorageSrv;
 
+        U32 LightClusterParamsCbv;
+        U32 Padding[3];
+
         /* (x,y,z): cam pos, w: inv aspect ratio */
         Vector4 CamWorldPosInvAspectRatio;
         /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
@@ -310,6 +313,10 @@ namespace ig
         }
         perFrameParams.ViewportWidth = mainViewport.width;
         perFrameParams.ViewportHeight = mainViewport.height;
+
+        TempConstantBuffer lightClusterParamsCb = tempConstantBufferAllocator->Allocate<LightClusterParams>(localFrameIdx);
+        perFrameParams.LightClusterParamsCbv = renderContext->Lookup(lightClusterParamsCb.GetConstantBufferView())->Index;
+        
         perFrameParamsCb.Write(perFrameParams);
 
         CommandQueue& mainGfxQueue = renderContext->GetMainGfxQueue();
@@ -326,6 +333,7 @@ namespace ig
         const GpuView* perFrameParamsCbvPtr = renderContext->Lookup(perFrameParamsCb.GetConstantBufferView());
         IG_CHECK(perFrameParamsCbvPtr != nullptr);
 
+        /* Light Clustering Pass */
         {
             auto copyLightIdxListCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "LightClustering.CopyLightIdxList"_fs);
             auto clearTileBitfieldsCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClustering.ClearTileBitfields"_fs);
@@ -339,6 +347,7 @@ namespace ig
                 .PerFrameParamsCbvPtr = perFrameParamsCbvPtr});
 
             lightClusteringPass->Record(localFrameIdx);
+            lightClusterParamsCb.Write(lightClusteringPass->GetLightClusterParams());
 
             frameCritCopyQueue.ExecuteCommandList(*copyLightIdxListCmdList);
             GpuSyncPoint copyLightIdxSyncPoint = frameCritCopyQueue.MakeSyncPointWithSignal();
@@ -346,9 +355,13 @@ namespace ig
             GpuSyncPoint clearTileBitsSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
             asyncComputeQueue.Wait(copyLightIdxSyncPoint);
             asyncComputeQueue.Wait(clearTileBitsSyncPoint);
+            asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
             asyncComputeQueue.ExecuteCommandList(*lightClusteringCmdList);
         }
-
+        GpuSyncPoint lightClusteringSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
+        /*********************/
+        
+        /* Mesh Instance Pass */
         const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
         GpuSyncPoint meshInstancePassSyncPoint{};
         {
@@ -402,8 +415,10 @@ namespace ig
             asyncComputeQueue.ExecuteCommandLists(cmdLists);
             meshInstancePassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
         }
-
-        auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "MainGfxRender"_fs);
+        /*********************/
+        
+        /* Forward Mesh Instance Pass */
+        auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ForwardMeshInstance"_fs);
         renderCmdList->Open(forwardMeshInstancePso.get());
         auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
         renderCmdList->SetDescriptorHeaps(MakeSpan(descriptorHeaps));
@@ -429,8 +444,11 @@ namespace ig
         renderCmdList->Close();
         CommandList* renderCmdLists[]{renderCmdList};
         mainGfxQueue.Wait(meshInstancePassSyncPoint);
+        mainGfxQueue.Wait(lightClusteringSyncPoint);
         mainGfxQueue.ExecuteCommandLists(renderCmdLists);
+        /*********************/
 
+        /* ImGui Render Pass */
         IG_CHECK(imguiRenderPass != nullptr);
         auto imguiRenderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList"_fs);
         imguiRenderPass->SetParams({
@@ -448,5 +466,6 @@ namespace ig
 
         swapchain.Present();
         return mainGfxQueue.MakeSyncPointWithSignal();
+        /*********************/
     }
 } // namespace ig
