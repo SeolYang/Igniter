@@ -26,15 +26,15 @@ namespace ig
         [[nodiscard]] bool IsActivated() const { return bIsActivated; }
         void SetActivated(const bool bIsPassActivated) { bIsActivated = bIsPassActivated; }
 
-        virtual void Execute(const LocalFrameIndex localFrameIdx) final;
+        virtual void Record(const LocalFrameIndex localFrameIdx) final;
 
     protected:
-        virtual void PreExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
-        virtual void OnExecute(const LocalFrameIndex localFrameIdx) = 0;
-        virtual void PostExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
+        virtual void PreRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
+        virtual void OnRecord(const LocalFrameIndex localFrameIdx) = 0;
+        virtual void PostRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
         virtual void OnResize([[maybe_unused]] const U32 width, [[maybe_unused]] const U32 height) {}
 
-        virtual void ExecuteWhenInactive([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
+        virtual void RecordWhenInactive([[maybe_unused]] const LocalFrameIndex localFrameIdx) {}
 
     private:
         bool bIsActivated = true;

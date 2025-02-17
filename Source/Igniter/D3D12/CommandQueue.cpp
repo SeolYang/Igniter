@@ -38,6 +38,12 @@ namespace ig
         native->ExecuteCommandLists(static_cast<U32>(natives.size()), reinterpret_cast<ID3D12CommandList**>(natives.data()));
     }
 
+    void CommandQueue::ExecuteCommandList(CommandList& cmdList)
+    {
+        CommandList* cmdLists[]{&cmdList};
+        ExecuteCommandLists(cmdLists);
+    }
+
     bool CommandQueue::Signal(GpuSyncPoint& syncPoint)
     {
         IG_CHECK(native);

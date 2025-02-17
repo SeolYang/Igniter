@@ -16,36 +16,26 @@ namespace ig
 
     struct LightClusteringPassParams
     {
-        CommandList* InitCopyCmdList = nullptr;
-        CommandList* ClearTileDwordsBufferCmdList = nullptr;
+        CommandList* CopyLightIdxListCmdList = nullptr;
+        CommandList* ClearTileBitfieldsCmdList = nullptr;
         CommandList* LightClusteringCmdList = nullptr;
 
-        Vector3 CamWorldPos{};
-        Matrix ViewMat{};
-        Matrix ProjMat{};
-        // NearPlane < FarPlane => Reverse-Z를 사용하긴 하지만 Light Clustering엔 반대로 들어오지 않도록 Assertion으로 체크 할 것
-        float NearPlane = 0.f;
-        float FarPlane = 0.f;
+        Matrix View{};
         Viewport TargetViewport{};
 
-        const GpuView* PerFrameCbvPtr = nullptr;
-        TempConstantBuffer* GpuParamsConstantBuffer = nullptr;
+        const GpuView* PerFrameParamsCbvPtr = nullptr;
     };
-
-    struct LightClusteringPassGpuParams
+    
+    struct LightClusteringConstants
     {
-        Matrix ToProj;
-        float ViewportWidth;
-        float ViewportHeight;
+        U32 PerFrameParamsCbv;
+        U32 LightIdxListSrv;
+        U32 TileBitfieldsUav;
+        U32 DepthBinsUav;
 
         U32 NumLights;
-
-        U32 LightStorageBufferSrv;
-        U32 LightIdxListBufferSrv;
-        U32 TileDwordsBufferUav;
-        U32 DepthBinsBufferUav;
     };
-
+    
     /*
      * 주의할점:
      * 1. TileDwordsBuffer, DepthBinsBuffer에서 다뤄지는 idx들은
@@ -86,12 +76,12 @@ namespace ig
         void SetParams(const LightClusteringPassParams& newParams);
 
         [[nodiscard]] Handle<GpuView> GetLightIdxListSrv() const noexcept { return lightIdxListBufferPackage.Srv; }
-        [[nodiscard]] Handle<GpuView> GetTilesBufferSrv() const noexcept { return tileDwordsBufferPackage.Srv; }
+        [[nodiscard]] Handle<GpuView> GetTileBitfieldsSrv() const noexcept { return tileBitfieldsBufferPackage.Srv; }
         [[nodiscard]] Handle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
-        [[nodiscard]] Handle<GpuView> GetDepthBinsBufferSrv() const noexcept { return depthBinsBufferPackage.Srv; }
+        [[nodiscard]] Handle<GpuView> GetDepthBinsSrv() const noexcept { return depthBinsBufferPackage.Srv; }
 
     protected:
-        void OnExecute(const LocalFrameIndex localFrameIdx) override;
+        void OnRecord(const LocalFrameIndex localFrameIdx) override;
 
     private:
         RenderContext* renderContext = nullptr;
@@ -105,7 +95,7 @@ namespace ig
         constexpr static Size kNumPixelsPerTile = kTileSize * kTileSize;
         constexpr static float kInvTileSize = 1.f / (float)kTileSize;
         constexpr static Size kNumDepthBins = 4096;
-        constexpr static Size kNumDWordsPerTile = kMaxNumLights / BytesToBits(sizeof(U32));
+        constexpr static Size kNumDwordsPerTile = kMaxNumLights / BytesToBits(sizeof(U32));
         constexpr static Size kDepthBinsBufferSize = kNumDepthBins * sizeof(DepthBin);
 
         Ptr<ShaderBlob> clearU32BufferShader;
@@ -124,7 +114,7 @@ namespace ig
         Size numTileY = 0;
         Size tileDwordsStride = 0;
         Size numTileDwords = 0;
-        BufferPackage tileDwordsBufferPackage;
+        BufferPackage tileBitfieldsBufferPackage;
         BufferPackage depthBinsBufferPackage;
         Handle<GpuBuffer> depthBinInitBuffer;
 

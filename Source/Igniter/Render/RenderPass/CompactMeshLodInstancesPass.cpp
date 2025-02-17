@@ -53,7 +53,7 @@ namespace ig
         params = newParams;
     }
 
-    void CompactMeshLodInstancesPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void CompactMeshLodInstancesPass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);

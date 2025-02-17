@@ -45,7 +45,7 @@ namespace ig
         params = newParams;
     }
 
-    void ZPrePass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void ZPrePass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(pso != nullptr);

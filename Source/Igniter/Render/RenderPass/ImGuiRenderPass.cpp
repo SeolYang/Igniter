@@ -25,7 +25,7 @@ namespace ig
         params = newParams;
     }
 
-    void ImGuiRenderPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void ImGuiRenderPass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(renderContext != nullptr);
 

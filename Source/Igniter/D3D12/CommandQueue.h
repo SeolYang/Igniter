@@ -29,6 +29,7 @@ namespace ig
         EQueueType GetType() const { return type; }
 
         void ExecuteCommandLists(const std::span<CommandList*> cmdLists);
+        void ExecuteCommandList(CommandList& cmdList);
         bool Signal(GpuSyncPoint& syncPoint);
         GpuSyncPoint MakeSyncPointWithSignal() { return MakeSyncPointWithSignal(fence); }
         void Wait(GpuSyncPoint& syncPoint);

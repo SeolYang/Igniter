@@ -87,14 +87,14 @@ namespace ig
         params = newParams;
     }
 
-    void FrustumCullingPass::PreExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void FrustumCullingPass::PreRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(meshLodInstanceStorage != nullptr &&
             meshLodInstanceStorage->IsLinearAllocator());
         [[maybe_unused]] const auto linearAlloc = meshLodInstanceStorage->Allocate(params.NumRenderables);
     }
 
-    void FrustumCullingPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void FrustumCullingPass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);

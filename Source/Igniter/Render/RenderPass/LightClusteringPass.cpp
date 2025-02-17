@@ -19,15 +19,6 @@
 
 namespace ig
 {
-    struct LightClusteringConstants
-    {
-        U32 PerFrameDataCbv;
-        U32 LightClusteringParamsCbv;
-    };
-} // namespace ig
-
-namespace ig
-{
     LightClusteringPass::LightClusteringPass(RenderContext& renderContext, const SceneProxy& sceneProxy, RootSignature& bindlessRootSignature, const Viewport& mainViewport)
         : renderContext(&renderContext)
         , sceneProxy(&sceneProxy)
@@ -76,7 +67,7 @@ namespace ig
         lightIdxListBufferPackage.Buffer = renderContext.CreateBuffer(lightIdxListBufferDesc);
         lightIdxListBufferPackage.Srv = renderContext.CreateShaderResourceView(lightIdxListBufferPackage.Buffer);
 
-        tileDwordsStride = kNumDWordsPerTile * numTileX;
+        tileDwordsStride = kNumDwordsPerTile * numTileX;
         numTileDwords = tileDwordsStride * numTileY;
         GpuBufferDesc tileDwordsBufferDesc{};
         GpuBufferDesc depthBinsBufferDesc{};
@@ -86,9 +77,9 @@ namespace ig
         depthBinsBufferDesc.DebugName = String(std::format("DepthBinsBuffer"));
 
         const Handle<GpuBuffer> newTileDwordsBuffer = renderContext.CreateBuffer(tileDwordsBufferDesc);
-        tileDwordsBufferPackage.Buffer = newTileDwordsBuffer;
-        tileDwordsBufferPackage.Srv = renderContext.CreateShaderResourceView(newTileDwordsBuffer);
-        tileDwordsBufferPackage.Uav = renderContext.CreateUnorderedAccessView(newTileDwordsBuffer);
+        tileBitfieldsBufferPackage.Buffer = newTileDwordsBuffer;
+        tileBitfieldsBufferPackage.Srv = renderContext.CreateShaderResourceView(newTileDwordsBuffer);
+        tileBitfieldsBufferPackage.Uav = renderContext.CreateUnorderedAccessView(newTileDwordsBuffer);
 
         const Handle<GpuBuffer> newDepthBinsBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
         depthBinsBufferPackage.Buffer = newDepthBinsBuffer;
@@ -120,9 +111,9 @@ namespace ig
 
         renderContext->DestroyGpuView(lightIdxListBufferPackage.Srv);
         renderContext->DestroyBuffer(lightIdxListBufferPackage.Buffer);
-        renderContext->DestroyGpuView(tileDwordsBufferPackage.Srv);
-        renderContext->DestroyGpuView(tileDwordsBufferPackage.Uav);
-        renderContext->DestroyBuffer(tileDwordsBufferPackage.Buffer);
+        renderContext->DestroyGpuView(tileBitfieldsBufferPackage.Srv);
+        renderContext->DestroyGpuView(tileBitfieldsBufferPackage.Uav);
+        renderContext->DestroyBuffer(tileBitfieldsBufferPackage.Buffer);
 
         renderContext->DestroyGpuView(depthBinsBufferPackage.Srv);
         renderContext->DestroyGpuView(depthBinsBufferPackage.Uav);
@@ -132,17 +123,15 @@ namespace ig
 
     void LightClusteringPass::SetParams(const LightClusteringPassParams& newParams)
     {
-        IG_CHECK(newParams.InitCopyCmdList != nullptr);
-        IG_CHECK(newParams.ClearTileDwordsBufferCmdList != nullptr);
+        IG_CHECK(newParams.CopyLightIdxListCmdList != nullptr);
+        IG_CHECK(newParams.ClearTileBitfieldsCmdList != nullptr);
         IG_CHECK(newParams.LightClusteringCmdList != nullptr);
-        IG_CHECK(newParams.NearPlane < newParams.FarPlane);
-        IG_CHECK(newParams.TargetViewport.width > 0.f && newParams.TargetViewport.height > 0.f);
-        IG_CHECK(newParams.PerFrameCbvPtr != nullptr);
-        IG_CHECK(newParams.GpuParamsConstantBuffer != nullptr);
+                IG_CHECK(newParams.TargetViewport.width > 0.f && newParams.TargetViewport.height > 0.f);
+        IG_CHECK(newParams.PerFrameParamsCbvPtr != nullptr);
         params = newParams;
     }
 
-    void LightClusteringPass::OnExecute(const LocalFrameIndex localFrameIdx)
+    void LightClusteringPass::OnRecord(const LocalFrameIndex localFrameIdx)
     {
         ZoneScoped;
         IG_CHECK(renderContext != nullptr);
@@ -163,7 +152,7 @@ namespace ig
                 const SceneProxy::LightProxy& proxy = lightProxyMapValues[idx].second;
                 lightProxyIdxViewZList[idx] = std::make_pair(
                     (U16)idx,
-                    proxy.GpuData.WorldPosition.x * params.ViewMat._13 + proxy.GpuData.WorldPosition.y * params.ViewMat._23 + proxy.GpuData.WorldPosition.z * params.ViewMat._33);
+                    proxy.GpuData.WorldPosition.x * params.View._13 + proxy.GpuData.WorldPosition.y * params.View._23 + proxy.GpuData.WorldPosition.z * params.View._33);
             });
 
         tf::Task sortIntermediateList = buildLightIdxList.sort(
@@ -186,6 +175,7 @@ namespace ig
         sortIntermediateList.precede(updateToStagingBuffer);
         tf::Future<void> buildLightIdxListFut = taskExecutor.run(buildLightIdxList);
 
+        /* Light Idx List Copy (FrameCriticalCopyQueue) */
         {
             GpuBuffer* lightIdxListStagingBufferPtr = renderContext->Lookup(lightIdxListStagingBuffer[localFrameIdx]);
             IG_CHECK(lightIdxListStagingBufferPtr != nullptr);
@@ -196,75 +186,69 @@ namespace ig
             GpuBuffer* depthBinsBufferPtr = renderContext->Lookup(depthBinsBufferPackage.Buffer);
             IG_CHECK(depthBinsBufferPtr != nullptr);
 
-            CommandList& lightIdxListCopyCmdList = *params.InitCopyCmdList;
+            CommandList& lightIdxListCopyCmdList = *params.CopyLightIdxListCmdList;
             lightIdxListCopyCmdList.Open();
-            lightIdxListCopyCmdList.CopyBuffer(*lightIdxListStagingBufferPtr, 0, sizeof(U32) * lightProxyIdxViewZList.size(), *lightIdxListBufferPtr, 0);
-            lightIdxListCopyCmdList.CopyBuffer(*depthBinInitBufferPtr, *depthBinsBufferPtr);
+            if (!lightProxyIdxViewZList.empty())
+            {
+                lightIdxListCopyCmdList.CopyBuffer(*lightIdxListStagingBufferPtr, 0, sizeof(U32) * lightProxyIdxViewZList.size(), *lightIdxListBufferPtr, 0);
+                lightIdxListCopyCmdList.CopyBuffer(*depthBinInitBufferPtr, *depthBinsBufferPtr);
+            }
             lightIdxListCopyCmdList.Close();
         }
 
-        const GpuView* lightStorageBufferSrvPtr = renderContext->Lookup(sceneProxy->GetLightStorageSrv());
-        IG_CHECK(lightStorageBufferSrvPtr != nullptr);
-        const GpuView* lightIdxListBufferSrvPtr = renderContext->Lookup(lightIdxListBufferPackage.Srv);
-        IG_CHECK(lightIdxListBufferSrvPtr != nullptr);
-        const GpuView* tileDwordsBufferUavPtr = renderContext->Lookup(tileDwordsBufferPackage.Uav);
-        IG_CHECK(tileDwordsBufferUavPtr != nullptr);
-        const GpuView* depthBinsBufferUavPtr = renderContext->Lookup(depthBinsBufferPackage.Uav);
-        IG_CHECK(depthBinsBufferUavPtr != nullptr);
+        const GpuView* lightStorageSrvPtr = renderContext->Lookup(sceneProxy->GetLightStorageSrv());
+        IG_CHECK(lightStorageSrvPtr != nullptr);
+        const GpuView* lghtIdxListSrvPtr = renderContext->Lookup(lightIdxListBufferPackage.Srv);
+        IG_CHECK(lghtIdxListSrvPtr != nullptr);
+        const GpuView* tileBitfieldsUavPtr = renderContext->Lookup(tileBitfieldsBufferPackage.Uav);
+        IG_CHECK(tileBitfieldsUavPtr != nullptr);
+        const GpuView* depthBinsUavPtr = renderContext->Lookup(depthBinsBufferPackage.Uav);
+        IG_CHECK(depthBinsUavPtr != nullptr);
 
         auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
         const auto descriptorHeapsSpan = MakeSpan(descriptorHeaps);
 
-        // Clear TileDwordsBuffer
+        /* Clear TileBitfields (Compute Queue) */
         {
-            CommandList& tileDwordsBufferClearCmdList = *params.ClearTileDwordsBufferCmdList;
-            tileDwordsBufferClearCmdList.Open(clearU32BufferPso.get());
+            CommandList& clearTileBitfieldsCmdList = *params.ClearTileBitfieldsCmdList;
+            clearTileBitfieldsCmdList.Open(clearU32BufferPso.get());
 
-            tileDwordsBufferClearCmdList.SetDescriptorHeaps(descriptorHeapsSpan);
-            tileDwordsBufferClearCmdList.SetRootSignature(*bindlessRootSignature);
+            clearTileBitfieldsCmdList.SetDescriptorHeaps(descriptorHeapsSpan);
+            clearTileBitfieldsCmdList.SetRootSignature(*bindlessRootSignature);
 
-            const U64 clearParams = (numTileDwords << 32) | tileDwordsBufferUavPtr->Index;
-            tileDwordsBufferClearCmdList.SetRoot32BitConstants(0, clearParams, 0);
+            const U64 clearParams = (numTileDwords << 32) | tileBitfieldsUavPtr->Index;
+            clearTileBitfieldsCmdList.SetRoot32BitConstants(0, clearParams, 0);
 
-            constexpr U32 NumThreads = 1024;
-            const U32 numThreadGroup = ((U32)numTileDwords + NumThreads - 1) / NumThreads;
-            tileDwordsBufferClearCmdList.Dispatch(numThreadGroup, 1, 1);
+            constexpr U32 kNumThreads = 1024;
+            const U32 numThreadGroup = ((U32)numTileDwords + kNumThreads - 1) / kNumThreads;
+            clearTileBitfieldsCmdList.Dispatch(numThreadGroup, 1, 1);
 
-            tileDwordsBufferClearCmdList.Close();
+            clearTileBitfieldsCmdList.Close();
         }
 
-        // Light Clustering
+        /* Light Clustering (Compute Queue) */
         {
-            const LightClusteringPassGpuParams gpuParams{
-                .ToProj = ConvertToShaderSuitableForm(params.ProjMat),
-                .ViewportWidth = params.TargetViewport.width,
-                .ViewportHeight = params.TargetViewport.height,
-                .NumLights = (U32)numLights,
-                .LightStorageBufferSrv = lightStorageBufferSrvPtr->Index,
-                .LightIdxListBufferSrv = lightIdxListBufferSrvPtr->Index,
-                .TileDwordsBufferUav = tileDwordsBufferUavPtr->Index,
-                .DepthBinsBufferUav = depthBinsBufferUavPtr->Index
-            };
-            params.GpuParamsConstantBuffer->Write(gpuParams);
-
-            const GpuView* gpuParamsCbvPtr = renderContext->Lookup(params.GpuParamsConstantBuffer->GetConstantBufferView());
-            IG_CHECK(gpuParamsCbvPtr != nullptr);
-
             CommandList& lightClusteringCmdList = *params.LightClusteringCmdList;
             lightClusteringCmdList.Open(lightClusteringPso.get());
 
-            lightClusteringCmdList.SetDescriptorHeaps(descriptorHeapsSpan);
-            lightClusteringCmdList.SetRootSignature(*bindlessRootSignature);
+            if (numLights > 0)
+            {
+                lightClusteringCmdList.SetDescriptorHeaps(descriptorHeapsSpan);
+                lightClusteringCmdList.SetRootSignature(*bindlessRootSignature);
 
-            const LightClusteringConstants gpuConstants{
-                .PerFrameDataCbv = params.PerFrameCbvPtr->Index,
-                .LightClusteringParamsCbv = gpuParamsCbvPtr->Index
-            };
-            lightClusteringCmdList.SetRoot32BitConstants(0, gpuConstants, 0);
+                const LightClusteringConstants gpuConstants{
+                    .PerFrameParamsCbv = params.PerFrameParamsCbvPtr->Index,
+                    .LightIdxListSrv = lghtIdxListSrvPtr->Index,
+                    .TileBitfieldsUav = tileBitfieldsUavPtr->Index,
+                    .DepthBinsUav = depthBinsUavPtr->Index,
+                    .NumLights = numLights
+                };
+                lightClusteringCmdList.SetRoot32BitConstants(0, gpuConstants, 0);
 
-            constexpr U32 NumThreads = 32;
-            const U32 numThreadGroup = (numLights + NumThreads - 1) / NumThreads;
-            lightClusteringCmdList.Dispatch(numThreadGroup, 1, 1);
+                constexpr U32 kNumThreads = 32;
+                const U32 numThreadGroup = (numLights + kNumThreads - 1) / kNumThreads;
+                lightClusteringCmdList.Dispatch(numThreadGroup, 1, 1);
+            }
 
             lightClusteringCmdList.Close();
         }

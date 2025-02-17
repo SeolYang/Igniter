@@ -36,7 +36,7 @@ namespace ig
         void SetParams(const ImGuiRenderPassParams& newParams);
 
     protected:
-        void OnExecute(const LocalFrameIndex localFrameIdx) override;
+        void OnRecord(const LocalFrameIndex localFrameIdx) override;
 
     private:
         RenderContext* renderContext = nullptr;

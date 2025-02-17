@@ -21,6 +21,9 @@ struct PerFrameParams
     float4 CamWorldPosInvAspectRatio;
     /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
     float4 ViewFrustumParams;
+
+    float ViewportWidth;
+    float ViewportHeight;
 };
 
 struct ScreenParams

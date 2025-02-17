@@ -71,7 +71,7 @@ namespace ig
         params = newParams;
     }
 
-    void DebugLightClusterPass::OnExecute([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void DebugLightClusterPass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(bindlessRootSignature != nullptr);

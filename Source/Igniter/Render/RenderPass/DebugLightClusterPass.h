@@ -48,7 +48,7 @@ namespace ig
         }
 
     protected:
-        void OnExecute(const LocalFrameIndex localFrameIdx) override;
+        void OnRecord(const LocalFrameIndex localFrameIdx) override;
 
     private:
         RenderContext* renderContext;

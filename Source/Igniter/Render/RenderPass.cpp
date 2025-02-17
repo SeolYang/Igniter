@@ -3,17 +3,17 @@
 
 namespace ig
 {
-    void RenderPass::Execute(const LocalFrameIndex localFrameIdx)
+    void RenderPass::Record(const LocalFrameIndex localFrameIdx)
     {
         if (bIsActivated)
         {
-            PreExecute(localFrameIdx);
-            OnExecute(localFrameIdx);
-            PostExecute(localFrameIdx);
+            PreRecord(localFrameIdx);
+            OnRecord(localFrameIdx);
+            PostRecord(localFrameIdx);
         }
         else
         {
-            ExecuteWhenInactive(localFrameIdx);
+            RecordWhenInactive(localFrameIdx);
         }
     }
 } // namespace ig
