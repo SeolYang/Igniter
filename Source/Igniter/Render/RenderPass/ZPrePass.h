@@ -18,11 +18,10 @@ namespace ig
 
     struct ZPrePassParams
     {
-        CommandList* CmdList = nullptr;
-        CommandSignature* DrawInstanceCmdSignature = nullptr;
-        Handle<GpuBuffer> DrawInstanceCmdStorageBuffer;
-        Handle<GpuTexture> DepthTex;
-        Handle<GpuView> Dsv;
+        CommandList* GfxCmdList = nullptr;
+        CommandSignature* DispatchMeshInstanceCmdSignature = nullptr;
+        GpuBuffer* DispatchOpaqueMeshInstanceStorageBuffer = nullptr;
+        const GpuView* Dsv = nullptr;
         Viewport MainViewport;
     };
 
@@ -32,6 +31,7 @@ namespace ig
         ZPrePass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
         ZPrePass(const ZPrePass&) = delete;
         ZPrePass(ZPrePass&&) noexcept = delete;
+        ~ZPrePass();
 
         ZPrePass& operator=(const ZPrePass&) = delete;
         ZPrePass& operator=(ZPrePass&&) noexcept = delete;
@@ -47,7 +47,8 @@ namespace ig
 
         ZPrePassParams params;
 
-        Ptr<ShaderBlob> vs;
+        Ptr<ShaderBlob> as;
+        Ptr<ShaderBlob> ms;
         Ptr<PipelineState> pso;
     };
 } // namespace ig

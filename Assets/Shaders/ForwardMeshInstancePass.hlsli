@@ -18,6 +18,7 @@ struct VertexOutput
     float3 Normal : Normal;
     float2 TexCoord0 : TexCoord0;
     float3 WorldPosition : WorldPosition;
+    uint MeshletIndex : MeshletIdx;
 };
 
 #endif

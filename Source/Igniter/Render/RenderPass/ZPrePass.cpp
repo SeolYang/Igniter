@@ -21,26 +21,36 @@ namespace ig
 
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         const ShaderCompileDesc vsDesc{
-            .SourcePath = "Assets/Shaders/ZPrePass.hlsl"_fs,
-            .Type = EShaderType::Vertex
+            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassAS.hlsl"_fs,
+            .Type = EShaderType::Amplification
         };
+        as = MakePtr<ShaderBlob>(vsDesc);
 
-        vs = MakePtr<ShaderBlob>(vsDesc);
+        const ShaderCompileDesc msDesc{
+            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassMS.hlsl"_fs,
+            .Type = EShaderType::Mesh
+        };
+        ms = MakePtr<ShaderBlob>(msDesc);
 
-        GraphicsPipelineStateDesc psoDesc;
+        MeshShaderPipelineStateDesc psoDesc{};
         psoDesc.Name = "ZPrePassPSO"_fs;
-        psoDesc.SetVertexShader(*vs);
+        psoDesc.SetAmplificationShader(*as);
+        psoDesc.SetMeshShader(*ms);
         psoDesc.SetRootSignature(bindlessRootSignature);
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC{CD3DX12_DEFAULT{}};
         psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
-        pso = MakePtr<PipelineState>(gpuDevice.CreateGraphicsPipelineState(psoDesc).value());
+        pso = MakePtr<PipelineState>(gpuDevice.CreateMeshShaderPipelineState(psoDesc).value());
     }
+
+    ZPrePass::~ZPrePass() {}
 
     void ZPrePass::SetParams(const ZPrePassParams& newParams)
     {
-        IG_CHECK(newParams.CmdList != nullptr);
-        IG_CHECK(newParams.DrawInstanceCmdSignature != nullptr);
+        IG_CHECK(newParams.GfxCmdList != nullptr);
+        IG_CHECK(newParams.DispatchMeshInstanceCmdSignature != nullptr);
+        IG_CHECK(newParams.DispatchOpaqueMeshInstanceStorageBuffer != nullptr);
+        IG_CHECK(newParams.Dsv != nullptr);
         IG_CHECK(newParams.MainViewport.width > 0.f && newParams.MainViewport.height > 0.f);
         params = newParams;
     }
@@ -50,24 +60,18 @@ namespace ig
         ZoneScoped;
         IG_CHECK(pso != nullptr);
 
-        GpuBuffer* drawInstanceCmdStorageBuffer = renderContext->Lookup(params.DrawInstanceCmdStorageBuffer);
-        IG_CHECK(drawInstanceCmdStorageBuffer != nullptr);
-        const GpuView* dsv = renderContext->Lookup(params.Dsv);
-        IG_CHECK(dsv != nullptr);
-
-        CommandList& cmdList = *params.CmdList;
+        CommandList& cmdList = *params.GfxCmdList;
         cmdList.Open(pso.get());
 
         auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
         cmdList.SetDescriptorHeaps(MakeSpan(descriptorHeaps));
         cmdList.SetRootSignature(*bindlessRootSignature);
 
-        cmdList.ClearDepth(*dsv, 0.f);
-        cmdList.SetDepthOnlyTarget(*dsv);
+        cmdList.ClearDepth(*params.Dsv, 0.f);
+        cmdList.SetDepthOnlyTarget(*params.Dsv);
         cmdList.SetViewport(params.MainViewport);
         cmdList.SetScissorRect(params.MainViewport);
-        cmdList.SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        cmdList.ExecuteIndirect(*params.DrawInstanceCmdSignature, *drawInstanceCmdStorageBuffer);
+        cmdList.ExecuteIndirect(*params.DispatchMeshInstanceCmdSignature, *params.DispatchOpaqueMeshInstanceStorageBuffer);
 
         cmdList.Close();
     }

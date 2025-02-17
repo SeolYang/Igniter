@@ -233,7 +233,8 @@ namespace ig
         forwardMeshInstancePipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
         forwardMeshInstancePipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         forwardMeshInstancePipelineDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC{CD3DX12_DEFAULT{}};
-        forwardMeshInstancePipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+        forwardMeshInstancePipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
+        forwardMeshInstancePipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
         forwardMeshInstancePipelineDesc.SetRootSignature(*bindlessRootSignature);
         forwardMeshInstancePipelineDesc.SetAmplificationShader(*forwardMeshInstanceAS);
         forwardMeshInstancePipelineDesc.SetMeshShader(*forwardMeshInstanceMS);
@@ -241,6 +242,7 @@ namespace ig
         forwardMeshInstancePso = MakePtr<PipelineState>(gpuDevice.CreateMeshShaderPipelineState(forwardMeshInstancePipelineDesc).value());
 
         lightClusteringPass = MakePtr<LightClusteringPass>(renderContext, sceneProxy, *bindlessRootSignature, mainViewport);
+        zPrePass = MakePtr<ZPrePass>(renderContext, *bindlessRootSignature);
     }
 
     Renderer::~Renderer()
@@ -316,7 +318,7 @@ namespace ig
 
         TempConstantBuffer lightClusterParamsCb = tempConstantBufferAllocator->Allocate<LightClusterParams>(localFrameIdx);
         perFrameParams.LightClusterParamsCbv = renderContext->Lookup(lightClusterParamsCb.GetConstantBufferView())->Index;
-        
+
         perFrameParamsCb.Write(perFrameParams);
 
         CommandQueue& mainGfxQueue = renderContext->GetMainGfxQueue();
@@ -344,7 +346,8 @@ namespace ig
                 .LightClusteringCmdList = lightClusteringCmdList,
                 .View = camViewMat,
                 .TargetViewport = mainViewport,
-                .PerFrameParamsCbvPtr = perFrameParamsCbvPtr});
+                .PerFrameParamsCbvPtr = perFrameParamsCbvPtr
+            });
 
             lightClusteringPass->Record(localFrameIdx);
             lightClusterParamsCb.Write(lightClusteringPass->GetLightClusterParams());
@@ -360,7 +363,7 @@ namespace ig
         }
         GpuSyncPoint lightClusteringSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
         /*********************/
-        
+
         /* Mesh Instance Pass */
         const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
         GpuSyncPoint meshInstancePassSyncPoint{};
@@ -416,7 +419,25 @@ namespace ig
             meshInstancePassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
         }
         /*********************/
-        
+        GpuBuffer* opaqueMeshInstanceDispatchStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
+        const GpuView* dsvPtr = renderContext->Lookup(dsv);
+        /* Z-Pre Pass */
+        {
+            auto zPrePassCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ZPrePass"_fs);
+            zPrePass->SetParams(ZPrePassParams{
+                .GfxCmdList = zPrePassCmdList,
+                .DispatchMeshInstanceCmdSignature = forwardMeshInstanceCmdSignature.get(),
+                .DispatchOpaqueMeshInstanceStorageBuffer = opaqueMeshInstanceDispatchStorageBuffer,
+                .Dsv = dsvPtr,
+                .MainViewport = mainViewport
+            });
+            zPrePass->Record(localFrameIdx);
+
+            mainGfxQueue.Wait(meshInstancePassSyncPoint);
+            mainGfxQueue.ExecuteCommandList(*zPrePassCmdList);
+        }
+        GpuSyncPoint zPrePassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
+
         /* Forward Mesh Instance Pass */
         auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ForwardMeshInstance"_fs);
         renderCmdList->Open(forwardMeshInstancePso.get());
@@ -432,18 +453,15 @@ namespace ig
         renderCmdList->FlushBarriers();
 
         renderCmdList->ClearRenderTarget(*backBufferRtv);
-        const GpuView* dsvPtr = renderContext->Lookup(dsv);
-        renderCmdList->ClearDepth(*dsvPtr, 0.f);
         renderCmdList->SetRenderTarget(*backBufferRtv, *dsvPtr);
         renderCmdList->SetViewport(mainViewport);
         renderCmdList->SetScissorRect(mainViewport);
 
-        GpuBuffer* opaqueMeshInstanceDispatchStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
         renderCmdList->ExecuteIndirect(*forwardMeshInstanceCmdSignature, *opaqueMeshInstanceDispatchStorageBuffer);
 
         renderCmdList->Close();
         CommandList* renderCmdLists[]{renderCmdList};
-        mainGfxQueue.Wait(meshInstancePassSyncPoint);
+        mainGfxQueue.Wait(zPrePassSyncPoint);
         mainGfxQueue.Wait(lightClusteringSyncPoint);
         mainGfxQueue.ExecuteCommandLists(renderCmdLists);
         /*********************/

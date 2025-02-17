@@ -53,6 +53,7 @@ namespace ig
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
 
         Ptr<class LightClusteringPass> lightClusteringPass;
+        Ptr<class ZPrePass> zPrePass;
         Ptr<class ImGuiRenderPass> imguiRenderPass;
 
         /* @test Mesh Instance Indices를 통한 Culling/LOD 선택/IndirectCommandArguments 생성 테스트 */
