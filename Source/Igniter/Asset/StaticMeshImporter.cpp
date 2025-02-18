@@ -139,6 +139,9 @@ namespace ig
             const aiVector3D position = mesh.mVertices[vertexIdx];
             const aiVector3D normal = mesh.HasNormals() ? mesh.mNormals[vertexIdx] : aiVector3D(0.f, 0.f, 0.f);
             const aiVector3D uvCoords = mesh.HasTextureCoords(0) ? mesh.mTextureCoords[0][vertexIdx] : aiVector3D(0.f, 0.f, 0.f);
+            const aiVector3D tangent = mesh.HasTangentsAndBitangents() ? mesh.mTangents[vertexIdx] : aiVector3D(0.f, 0.f, 0.f);
+            const aiVector3D bitangent = mesh.HasTangentsAndBitangents() ? mesh.mBitangents[vertexIdx] : aiVector3D(0.f, 0.f, 0.f);
+            const aiColor4D vertexColor = mesh.HasVertexColors(0) ? mesh.mColors[0][vertexIdx] : aiColor4D(0.f, 0.f, 0.f, 1.f);
 
             meshData.BoundingBox.Min.x = std::min(meshData.BoundingBox.Min.x, position.x);
             meshData.BoundingBox.Min.y = std::min(meshData.BoundingBox.Min.y, position.y);
@@ -147,11 +150,15 @@ namespace ig
             meshData.BoundingBox.Max.y = std::max(meshData.BoundingBox.Max.y, position.y);
             meshData.BoundingBox.Max.z = std::max(meshData.BoundingBox.Max.z, position.z);
 
-            /* #sy_todo 정점을 VertexSM 타입에서 Vertex 타입으로 최종적으로 변경 */
-            meshData.Vertices.emplace_back(
-                Vector3{position.x, position.y, position.z},
-                Vector3{normal.x, normal.y, normal.z},
-                Vector2{uvCoords.x, uvCoords.y});
+            Vertex newVertex{};
+            newVertex.Position = Vector3{position.x, position.y, position.z};
+            newVertex.QuantizedNormal =EncodeNormalX10Y10Z10(Vector3{normal.x, normal.y, normal.z});
+            newVertex.QuantizedTangent = EncodeNormalX10Y10Z10(Vector3{tangent.x, tangent.y, tangent.z});
+            newVertex.QuantizedBitangent =EncodeNormalX10Y10Z10(Vector3{bitangent.x, bitangent.y, bitangent.z});
+            newVertex.QuantizedTexCoords[0] = meshopt_quantizeHalf(uvCoords.x);
+            newVertex.QuantizedTexCoords[1] = meshopt_quantizeHalf(uvCoords.y);
+            newVertex.ColorRGBA8_U32 = EncodeRGBA32F(Vector4{vertexColor.r, vertexColor.g, vertexColor.b, vertexColor.a});
+            meshData.Vertices.emplace_back(newVertex);
         }
 
         for (Size faceIdx = 0; faceIdx < mesh.mNumFaces; ++faceIdx)
@@ -172,7 +179,7 @@ namespace ig
     {
         IG_CHECK(meshData.NumLevelOfDetails == 1);
 
-        const Vector<VertexSM>& verticesLod0 = meshData.Vertices;
+        const Vector<Vertex>& verticesLod0 = meshData.Vertices;
         const Vector<U32>& indicesLod0 = meshData.LevelOfDetails[0].Indices;
         for (Index lod = 1; lod < Mesh::kMaxMeshLevelOfDetails; ++lod)
         {
@@ -191,7 +198,7 @@ namespace ig
             Size numSimplifiedIndices = meshopt_simplify(
                 lodIndices.data(),
                 indicesLod0.data(), indicesLod0.size(),
-                &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
+                &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(Vertex),
                 targetNumIndices, targetError,
                 0, nullptr);
 
@@ -201,7 +208,7 @@ namespace ig
                 numSimplifiedIndices = meshopt_simplifySloppy(
                     lodIndices.data(),
                     indicesLod0.data(), indicesLod0.size(),
-                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
+                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(Vertex),
                     targetNumIndices, targetError, nullptr);
 
                 simplifyPass = numSimplifiedIndices <= targetNumIndices;
@@ -212,7 +219,7 @@ namespace ig
                 numSimplifiedIndices = meshopt_simplify(
                     lodIndices.data(),
                     indicesLod0.data(), indicesLod0.size(),
-                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
+                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(Vertex),
                     targetNumIndices, FLT_MAX,
                     0, nullptr);
 
@@ -224,7 +231,7 @@ namespace ig
                 numSimplifiedIndices = meshopt_simplifySloppy(
                     lodIndices.data(),
                     indicesLod0.data(), indicesLod0.size(),
-                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(VertexSM),
+                    &verticesLod0[0].Position.x, verticesLod0.size(), sizeof(Vertex),
                     targetNumIndices, FLT_MAX, nullptr);
 
                 simplifyPass = numSimplifiedIndices < previousLodNumIndices;
@@ -269,7 +276,7 @@ namespace ig
                 meshLod.MeshletVertexIndices.data(),
                 triangles.data(),
                 meshLod.Indices.data(), meshLod.Indices.size(),
-                &meshData.Vertices[0].Position.x, meshData.Vertices.size(), sizeof(VertexSM),
+                &meshData.Vertices[0].Position.x, meshData.Vertices.size(), sizeof(Vertex),
                 Meshlet::kMaxVertices, Meshlet::kMaxTriangles, kConeWeight);
 
             Size numIndices = 0;
@@ -288,7 +295,7 @@ namespace ig
                 const meshopt_Bounds meshletBounds = meshopt_computeMeshletBounds(
                     meshLod.MeshletVertexIndices.data() + meshOptMeshlet.vertex_offset,
                     triangles.data() + meshOptMeshlet.triangle_offset, meshOptMeshlet.triangle_count,
-                    &meshData.Vertices[0].Position.x, meshData.Vertices.size(), sizeof(VertexSM));
+                    &meshData.Vertices[0].Position.x, meshData.Vertices.size(), sizeof(Vertex));
 
                 Meshlet& meshlet = meshLod.Meshlets[meshletIdx];
                 meshlet.IndexOffset = meshOptMeshlet.vertex_offset;
@@ -331,13 +338,13 @@ namespace ig
         meshopt_encodeIndexVersion(1);
 
         meshData.CompressedVertices.resize(
-            meshopt_encodeVertexBufferBound(meshData.Vertices.size(), sizeof(VertexSM)));
+            meshopt_encodeVertexBufferBound(meshData.Vertices.size(), sizeof(Vertex)));
         meshData.CompressedVertices.resize(
             meshopt_encodeVertexBuffer(meshData.CompressedVertices.data(),
                 meshData.CompressedVertices.size(),
                 meshData.Vertices.data(),
                 meshData.Vertices.size(),
-                sizeof(VertexSM)));
+                sizeof(Vertex)));
     }
 
     Result<StaticMesh::Desc, EStaticMeshImportStatus> StaticMeshImporter::ExportToFile(const std::string_view meshName, const MeshData& meshData)

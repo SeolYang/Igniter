@@ -27,16 +27,10 @@ void main(
     MeshInstance meshInstance = meshInstanceStorage[gParams.MeshInstanceIdx];
     Mesh mesh = staticMeshStorage[meshInstance.MeshProxyIdx];
     MeshLod meshLod = mesh.LevelOfDetails[gParams.TargetLevelOfDetail];
-    Meshlet meshlet;
 
-    uint numIndices = 0;
-    uint numTriangles = 0;
-    if (payload.MeshletIndices[0] != 0xFFFFFFFF)
-    {
-        meshlet = meshletStorage[meshLod.MeshletStorageOffset + payload.MeshletIndices[groupId]];
-        numIndices = meshlet.NumIndices;
-        numTriangles = meshlet.NumTriangles;
-    }
+    Meshlet meshlet = meshletStorage[meshLod.MeshletStorageOffset + payload.MeshletIndices[groupId]];
+    uint numIndices = meshlet.NumIndices;
+    uint numTriangles = meshlet.NumTriangles;
 
     SetMeshOutputCounts(numIndices, numTriangles);
 
@@ -44,8 +38,8 @@ void main(
     {
         const uint indexStorageIdx = meshLod.IndexStorageOffset + meshlet.IndexOffset + groupThreadId;
         const uint vertexIdx = indexStorage[indexStorageIdx];
-        const uint vertexByteOffset = mad(sizeof(VertexSM), vertexIdx, mesh.VertexStorageByteOffset);
-        const VertexSM vertex = vertexStorage.Load<VertexSM>(vertexByteOffset);
+        const uint vertexByteOffset = mad(sizeof(Vertex), vertexIdx, mesh.VertexStorageByteOffset);
+        const Vertex vertex = vertexStorage.Load<Vertex>(vertexByteOffset);
         ZPrePassVertexOutput vertexOutput;
         float4x4 world = transpose(float4x4(meshInstance.ToWorld[0], meshInstance.ToWorld[1], meshInstance.ToWorld[2], float4(0.f, 0.f, 0.f, 1.f)));
         float4x4 worldViewProj = mul(world, perFrameParams.ViewProj);

@@ -52,10 +52,10 @@ namespace fe
         const ig::Entity mainCam = FpsCameraArchetype::Create(&registry);
         auto& cameraComponent = registry.get<ig::CameraComponent>(mainCam);
         cameraComponent.bIsMainCamera = true;
-
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-       //ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
-        ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
+        //ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
+        ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+        //ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
         IG_VERIFY(assetManager.Clone(bunnySM, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
         ig::Handle<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
         IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
@@ -75,7 +75,7 @@ namespace fe
                     nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
                     ig::MaterialComponent& matComp = registry.get<ig::MaterialComponent>(newAxeEntity);
                     matComp.Instance = axeMaterial;
-        
+
                     RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
                     // randComp.MoveDirection = ig::Vector3{
                     //     ig::Random(-1.f, 1.f),
@@ -83,7 +83,7 @@ namespace fe
                     //     ig::Random(-1.f, 1.f)};
                     // randComp.MoveDirection.Normalize();
                     // randComp.MoveSpeed = ig::Random(0.1f, 1.5f);
-        
+
                     randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
                     randComp.RotateSpeed = ig::Random(0.f, 15.f);
                 }
@@ -111,7 +111,8 @@ namespace fe
                     randComp.MoveDirection = ig::Vector3{
                         ig::Random(-1.f, 1.f),
                         ig::Random(-1.f, 1.f),
-                        ig::Random(-1.f, 1.f)};
+                        ig::Random(-1.f, 1.f)
+                    };
                     randComp.MoveDirection.Normalize();
                     randComp.MoveSpeed = ig::Random(1.f, 5.5f);
                 }

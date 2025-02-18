@@ -30,7 +30,7 @@ namespace ig
 
         struct MeshData
         {
-            Vector<VertexSM> Vertices;
+            Vector<Vertex> Vertices;
             Vector<U8> CompressedVertices;
             Array<MeshLod, Mesh::kMaxMeshLevelOfDetails> LevelOfDetails;
             U8 NumLevelOfDetails = 1; // assert (>=1); LOD 생성을 concurrent 하게 한다 치면 atomic으로?

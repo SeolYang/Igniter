@@ -39,13 +39,14 @@ namespace ig
         };
     }
 
-    /* Deprecated! */
-    struct VertexSM
+    /* RGBA32F -> RGBA8_UINT */
+    inline U32 EncodeRGBA32F(const Vector4& rgba)
     {
-        Vector3 Position;
-        Vector3 Normal;
-        Vector2 UVCoords;
-    };
+        return (U32)(rgba.x * 255.f) |
+            ((U32)(rgba.y * 255.f) << 8) |
+            ((U32)(rgba.z * 255.f) << 16) |
+            ((U32)(rgba.w * 255.f) << 24);
+    }
 
     struct VertexBase
     {

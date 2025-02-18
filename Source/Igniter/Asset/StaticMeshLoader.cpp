@@ -123,7 +123,7 @@ namespace ig
 
         newMesh.NumLevelOfDetails = loadDesc.NumLevelOfDetails;
         newMesh.BoundingBox = loadDesc.BoundingBox;
-        newMesh.VertexStorageAlloc = unifiedMeshStorage.AllocateVertices<VertexSM>(loadDesc.NumVertices);
+        newMesh.VertexStorageAlloc = unifiedMeshStorage.AllocateVertices<Vertex>(loadDesc.NumVertices);
         if (!newMesh.VertexStorageAlloc)
         {
             return MakeFail<StaticMesh, EStaticMeshLoadStatus::FailedAllocateVertexSpace>();
@@ -153,13 +153,13 @@ namespace ig
         const MeshVertexAllocation* meshVertexAllocPtr = unifiedMeshStorage.Lookup(newMesh.VertexStorageAlloc);
         IG_CHECK(meshVertexAllocPtr != nullptr);
         IG_CHECK(meshVertexAllocPtr->NumVertices == loadDesc.NumVertices);
-        IG_CHECK(meshVertexAllocPtr->SizeOfVertex == sizeof(VertexSM));
+        IG_CHECK(meshVertexAllocPtr->SizeOfVertex == sizeof(Vertex));
         bool bVerticesDecodeSucceed = false;
         UploadContext verticesUploadCtx = gpuUploader.Reserve(meshVertexAllocPtr->Alloc.AllocSize);
         {
             const int decodeResult = meshopt_decodeVertexBuffer(verticesUploadCtx.GetOffsettedCpuAddress(),
                 loadDesc.NumVertices,
-                sizeof(VertexSM),
+                sizeof(Vertex),
                 blob.data(),
                 loadDesc.CompressedVerticesSize);
             if (decodeResult == 0)

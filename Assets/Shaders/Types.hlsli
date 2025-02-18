@@ -58,14 +58,6 @@ struct Material
     uint DiffuseTexSampler;
 };
 
-/* Deprecated! */
-struct VertexSM
-{
-    float3 Position;
-    float3 Normal;
-    float2 TexCoords;
-};
-
 struct Vertex
 {
     float3 Position;

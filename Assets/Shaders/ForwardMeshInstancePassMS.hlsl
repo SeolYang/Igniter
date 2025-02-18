@@ -33,14 +33,14 @@ void main(
     {
         const uint indexStorageIdx = meshLod.IndexStorageOffset + meshlet.IndexOffset + groupThreadId;
         const uint vertexIdx = indexStorage[indexStorageIdx];
-        const uint vertexByteOffset = mad(sizeof(VertexSM), vertexIdx, mesh.VertexStorageByteOffset);
-        const VertexSM vertex = vertexStorage.Load<VertexSM>(vertexByteOffset);
+        const uint vertexByteOffset = mad(sizeof(Vertex), vertexIdx, mesh.VertexStorageByteOffset);
+        const Vertex vertex = vertexStorage.Load<Vertex>(vertexByteOffset);
         VertexOutput vertexOutput;
         float4x4 world = transpose(float4x4(meshInstance.ToWorld[0], meshInstance.ToWorld[1], meshInstance.ToWorld[2], float4(0.f, 0.f, 0.f, 1.f)));
         float4x4 worldViewProj = mul(world, perFrameParams.ViewProj);
         vertexOutput.Position = mul(float4(vertex.Position, 1.f), worldViewProj);
-        vertexOutput.Normal = mul(float4(vertex.Normal, 0.f), world).xyz;
-        vertexOutput.TexCoord0 = vertex.TexCoords;
+        vertexOutput.Normal = mul(float4(DecodeNormalX10Y10Z10(vertex.QuantizedNormal), 0.f), world).xyz;
+        vertexOutput.TexCoord0 = vertex.QuantizedTexCoords;
         vertexOutput.WorldPosition = mul(float4(vertex.Position, 1.f), world).xyz;
         verts[groupThreadId] = vertexOutput;
     }
