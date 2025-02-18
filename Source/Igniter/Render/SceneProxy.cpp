@@ -651,7 +651,7 @@ namespace ig
         GpuBuffer* storageBufferPtr = renderContext->Lookup(storageBuffer);
         IG_CHECK(storageBufferPtr != nullptr);
         tf::Task recordReplicateDataCmd = subflow.for_each_index(
-            0, (I32)numWorkers, 1,
+            0, (S32)numWorkers, 1,
             [this, &proxyPackage, storageBufferPtr, localFrameIdx](int groupIdx)
             {
                 Vector<Owner>& pendingReplications = proxyPackage.PendingReplicationGroups[groupIdx];

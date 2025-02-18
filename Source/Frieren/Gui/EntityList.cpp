@@ -39,7 +39,7 @@ namespace fe
 
                 bool bShouldOpenEntityManagementPopup = false;
                 ImGuiListClipper clipper;
-                clipper.Begin((ig::I32)entites.size());
+                clipper.Begin((ig::S32)entites.size());
                 while (clipper.Step())
                 {
                     for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row)

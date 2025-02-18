@@ -95,8 +95,7 @@ struct Meshlet
 
     BoundingSphere BoundingVolume;
 
-    float3 NormalConeAxis;
-    float NormalConeCutoff;
+    uint EncodedNormalCone;
 };
 
 struct MeshLod

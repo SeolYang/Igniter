@@ -163,7 +163,7 @@ namespace ig
         tf::Taskflow buildLightIdxList{};
 
         tf::Task prepareIntermediateList = buildLightIdxList.for_each_index(
-            0i32, (I32)numLights, 1i32,
+            0i32, (S32)numLights, 1i32,
             [this, &lightProxyMapValues](const Size idx)
             {
                 const SceneProxy::LightProxy& proxy = lightProxyMapValues[idx].second;
@@ -180,7 +180,7 @@ namespace ig
             });
 
         tf::Task updateToStagingBuffer = buildLightIdxList.for_each_index(
-            0i32, (I32)numLights, 1i32,
+            0i32, (S32)numLights, 1i32,
             [this, &lightProxyMapValues, localFrameIdx](const Size lightIdxListIdx)
             {
                 const Size lightProxyIdx = lightProxyIdxViewZList[lightIdxListIdx].first;

@@ -20,7 +20,6 @@ namespace ig
     {
         friend class AssetManager;
 
-        /* New API! */
         struct MeshLod
         {
             Vector<U32> Indices;
@@ -48,13 +47,11 @@ namespace ig
         StaticMeshImporter& operator=(StaticMeshImporter&&) noexcept = delete;
 
     private:
-        Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> _Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
         Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> Import(const String resPathStr, const StaticMesh::ImportDesc& desc);
 
         static U32 MakeAssimpImportFlagsFromDesc(const StaticMesh::ImportDesc& desc);
         static Size ImportMaterialsFromScene(AssetManager& assetManager, const aiScene& scene);
 
-        /* New API! */
         /* Load LOD0 (+ Remap Vertices & Indices) */
         static void ProcessMeshLod0(const aiMesh& mesh, MeshData& meshData);
         /* Generate LOD 1~LOD (MaxLOD-1): 최대한 많은 LOD 생성 */
@@ -64,7 +61,6 @@ namespace ig
         /* Mesh의 Vertices 압축 */
         static void CompressMeshVertices(MeshData& meshData);
 
-        /* #sy_todo 추후 AssetDesc를 반환하도록 조정되야함!! */
         static Result<StaticMesh::Desc, EStaticMeshImportStatus> ExportToFile(const std::string_view meshName, const MeshData& meshData);
 
     private:

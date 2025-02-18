@@ -66,7 +66,7 @@ namespace ig
             tf::Executor& taskExecutor = Engine::GetTaskExecutor();
             tf::Taskflow meshImportFlow;
             tf::Task procMeshes = meshImportFlow.for_each_index(
-                0, (I32)scene->mNumMeshes, 1,
+                0, (S32)scene->mNumMeshes, 1,
                 [scene, &results, &staticMeshes, &desc, &modelName](const Index meshIdx)
                 {
                     const aiMesh& mesh = *scene->mMeshes[meshIdx];
@@ -311,11 +311,11 @@ namespace ig
                     Vector3{meshletBounds.center[0], meshletBounds.center[1], meshletBounds.center[2]},
                     meshletBounds.radius
                 };
-                /* #sy_todo 추후에 양자화 버전으로 변경 */
-                meshlet.NormalConeAxis = Vector3{
-                    meshletBounds.cone_axis[0], meshletBounds.cone_axis[1], meshletBounds.cone_axis[2]
-                };
-                meshlet.NormalConeCutoff = meshletBounds.cone_cutoff;
+
+                meshlet.QuantizedNormalConeAxis[0] = meshletBounds.cone_axis_s8[0];
+                meshlet.QuantizedNormalConeAxis[1] = meshletBounds.cone_axis_s8[1];
+                meshlet.QuantizedNormalConeAxis[2] = meshletBounds.cone_axis_s8[2];
+                meshlet.QuantizedNormalConeCutoff = meshletBounds.cone_cutoff_s8;
             }
 
             meshLod.MeshletVertexIndices.resize(numIndices);

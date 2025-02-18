@@ -16,10 +16,10 @@ namespace ig
     using U64 = uint64_t;
     using F32 = float;
     using F64 = double;
-    using I8 = int8_t;
-    using I16 = int16_t;
-    using I32 = int32_t;
-    using I64 = int64_t;
+    using S8 = int8_t;
+    using S16 = int16_t;
+    using S32 = int32_t;
+    using S64 = int64_t;
     using Size = size_t;
     using Bytes = Size;
     using KiloBytes = Size;

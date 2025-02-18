@@ -28,6 +28,24 @@ float3 DecodeNormalX8Y8Z8(uint encodedNormal)
         (float((encodedNormal >> 16) & 0xFF) * kInvFactor) - 1.f);
 }
 
+/*
+ * S8 Quantized [-1.f, 1.f]->[-127, 127]
+ * [0,7]: Axis.x
+ * [8, 15]: Axis.y
+ * [16, 23]: Axis.z
+ * [24, 31]: CutOff
+ */
+float4 DecodeNormalCone(uint encodedNormalCone)
+{
+    const static float kInvFactor = 1.f / 127.f;
+    const int3 coneAxis = int3(
+        (encodedNormalCone & 0xFF) | 0xFFFFFF00,
+        ((encodedNormalCone >> 8) & 0xFF) | 0xFFFFFF00,
+        ((encodedNormalCone >> 16) & 0xFF)) | 0xFFFFFF00;
+    const int coneCutoff = ((encodedNormalCone >> 24) & 0xFF) | 0XFFFFFF00;
+    return float4(float3(coneAxis), float(coneCutoff)) * kInvFactor;
+}
+
 float3 DecodeNormalX10Y10Z10(uint encodedNormal)
 {
     const static float kInvFactor = 1.f / 511.5f;
@@ -87,14 +105,14 @@ bool IntersectFrustum(float invAspectRatio, float4 viewFrusumParams, BoundingSph
 uint MapScreenCoverageToLodAuto(float screenCoverage, uint numLevelOfDetails)
 {
     const static float kTable[MAX_MESH_LEVEL_OF_DETAILS] = {
-        0.0008f,    /* Screen Coverage >= 0.08% */
-        0.0005f,   /* 0.1% > Screen Coverage >= 0.05% */
-        0.00035f,   /* 0.05% > Screen Coverage >= 0.035% */
+        0.0008f,  /* Screen Coverage >= 0.08% */
+        0.0005f,  /* 0.1% > Screen Coverage >= 0.05% */
+        0.00035f, /* 0.05% > Screen Coverage >= 0.035% */
         0.0003f,  /* 0.035% Screen Coverage >= 0.03% */
-        0.00028f,  /* 0.03% > Screen Coverage >= 0.028% */
-        0.00025f,  /* 0.028% > Screen Coverage >= 0.025%*/
-        0.0002f, /* 0.025% > Screen Coverage >= 0.02%*/
-        0.00015f,  /* 0.02% > Screen Coverage >= 0.015% */
+        0.00028f, /* 0.03% > Screen Coverage >= 0.028% */
+        0.00025f, /* 0.028% > Screen Coverage >= 0.025%*/
+        0.0002f,  /* 0.025% > Screen Coverage >= 0.02%*/
+        0.00015f, /* 0.02% > Screen Coverage >= 0.015% */
     };
 
     for (uint lod = 0; lod < numLevelOfDetails; ++lod)
