@@ -1,11 +1,8 @@
 #pragma once
-#include "Igniter/Core/Handle.h"
 #include "Igniter/Core/BoundingVolume.h"
-#include "Igniter/Render/Common.h"
-#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/Mesh.h"
+#include "Igniter/Render/Vertex.h"
 #include "Igniter/Asset/Common.h"
-#include "Igniter/Asset/Material.h"
 
 namespace ig
 {
