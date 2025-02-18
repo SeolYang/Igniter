@@ -294,15 +294,16 @@ namespace ig
         perFrameParams.MeshInstanceStorageSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceProxyStorageSrv())->Index;
 
         const auto camView = registry.view<const TransformComponent, const CameraComponent>();
-        Matrix camViewMat{};
+        Matrix cpuCamViewMat{};
+        Matrix gpuCamViewMat{};
         for (const auto& [entity, transform, camera] : camView.each())
         {
-            const Matrix view = transform.CreateView();
+            cpuCamViewMat = transform.CreateView();
             const Matrix proj = camera.CreatePerspectiveForReverseZ();
-            camViewMat = ConvertToShaderSuitableForm(view);
-            perFrameParams.View = camViewMat;
+            gpuCamViewMat = ConvertToShaderSuitableForm(cpuCamViewMat);
+            perFrameParams.View = gpuCamViewMat;
             perFrameParams.Proj = ConvertToShaderSuitableForm(proj);
-            perFrameParams.ViewProj = ConvertToShaderSuitableForm(view * proj);
+            perFrameParams.ViewProj = ConvertToShaderSuitableForm(cpuCamViewMat * proj);
             perFrameParams.CamWorldPosInvAspectRatio = Vector4{
                 transform.Position.x, transform.Position.y, transform.Position.z,
                 1.f / mainViewport.AspectRatio()
@@ -343,7 +344,7 @@ namespace ig
                 .CopyLightIdxListCmdList = copyLightIdxListCmdList,
                 .ClearTileBitfieldsCmdList = clearTileBitfieldsCmdList,
                 .LightClusteringCmdList = lightClusteringCmdList,
-                .View = camViewMat,
+                .View = cpuCamViewMat,
                 .TargetViewport = mainViewport,
                 .PerFrameParamsCbvPtr = perFrameParamsCbvPtr
             });
