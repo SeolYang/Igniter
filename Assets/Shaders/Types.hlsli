@@ -61,11 +61,11 @@ struct Material
 struct Vertex
 {
     float3 Position;
-    uint QuantizedNormal;                    /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
-    uint QuantizedTangent;                   /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
-    uint QuantizedBitangent;                 /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
-    vector<float16_t, 2> QuantizedTexCoords; /* (F32, F32) -> (F16, F16) = HLSL(float16_t, float16_t); https://github.com/zeux/meshoptimizer/blob/master/src/quantization.cpp*/
-    uint ColorRGBA8;                         /* R8G8B8A8_UINT */
+    uint QuantizedNormal;     /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
+    uint QuantizedTangent;    /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
+    uint QuantizedBitangent;  /* x: 10 Bits, y: 10 Bits, z: 10 Bits, Pad: 2 Bits, [-1, 1] -> [0, 1023] */
+    half2 QuantizedTexCoords; /* (F32, F32) -> (F16, F16) = HLSL(float16_t, float16_t); https://github.com/zeux/meshoptimizer/blob/master/src/quantization.cpp*/
+    uint ColorRGBA8;          /* R8G8B8A8_UINT */
 };
 
 struct BoundingSphere
