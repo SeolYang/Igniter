@@ -2,7 +2,6 @@
 #include "Igniter/Core/Json.h"
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Render/RenderContext.h"
-#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/UnifiedMeshStorage.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Asset/StaticMesh.h"

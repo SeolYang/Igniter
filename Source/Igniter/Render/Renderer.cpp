@@ -13,7 +13,6 @@
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/Utils.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
-#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/UnifiedMeshStorage.h"
 #include "Igniter/Render/SceneProxy.h"
 #include "Igniter/Render/RenderPass/LightClusteringPass.h"

@@ -4,7 +4,6 @@
 #include "Igniter/Core/Timer.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/Render/TempConstantBufferAllocator.h"
-#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/Renderer.h"
 #include "Frieren/Gui/StatisticsPanel.h"

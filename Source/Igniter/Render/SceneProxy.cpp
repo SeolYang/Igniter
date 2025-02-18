@@ -1,6 +1,5 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Render/RenderContext.h"
-#include "Igniter/Render/MeshStorage.h"
 #include "Igniter/Render/GpuStagingBuffer.h"
 #include "Igniter/Render/UnifiedMeshStorage.h"
 #include "Igniter/Asset/AssetManager.h"
