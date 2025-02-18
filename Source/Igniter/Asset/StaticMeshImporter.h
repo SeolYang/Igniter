@@ -38,21 +38,6 @@ namespace ig
             AABB BoundingBox;
         };
 
-        //////////////// Deprecated ///////////////
-        struct StaticMeshData
-        {
-            Vector<VertexSM> Vertices;
-            Array<Vector<U32>, StaticMesh::kMaxNumLods> IndicesPerLod;
-            AABB BoundingVolume;
-            U8 NumLods = 1;
-        };
-
-        struct CompressedStaticMeshData
-        {
-            Vector<U8> CompressedVertices;
-            Array<Vector<U8>, StaticMesh::kMaxNumLods> CompressedIndicesPerLod;
-        };
-
     public:
         explicit StaticMeshImporter(AssetManager& assetManager);
         StaticMeshImporter(const StaticMeshImporter&) = delete;

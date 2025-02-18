@@ -55,7 +55,7 @@ namespace fe
 
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
        //ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
-        ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+        ig::Handle<ig::StaticMesh> bunnySM = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
         IG_VERIFY(assetManager.Clone(bunnySM, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
         ig::Handle<ig::Material> axeMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
         IG_VERIFY(assetManager.Clone(axeMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
