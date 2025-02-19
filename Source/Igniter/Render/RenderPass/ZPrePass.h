@@ -31,7 +31,7 @@ namespace ig
         ZPrePass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
         ZPrePass(const ZPrePass&) = delete;
         ZPrePass(ZPrePass&&) noexcept = delete;
-        ~ZPrePass();
+        ~ZPrePass() override;
 
         ZPrePass& operator=(const ZPrePass&) = delete;
         ZPrePass& operator=(ZPrePass&&) noexcept = delete;

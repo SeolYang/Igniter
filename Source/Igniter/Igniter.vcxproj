@@ -144,6 +144,7 @@
     <ClInclude Include="Render\RenderPass\DebugLightClusterPass.h" />
     <ClInclude Include="Render\RenderPass\ForwardOpaqueMeshRenderPass.h" />
     <ClInclude Include="Render\RenderPass\LightClusteringPass.h" />
+    <ClInclude Include="Render\RenderPass\MeshInstancePass.h" />
     <ClInclude Include="Render\RenderPass\TestForwardShadingPass.h" />
     <ClInclude Include="Render\RenderPass\CompactMeshLodInstancesPass.h" />
     <ClInclude Include="Render\RenderPass\FrustumCullingPass.h" />
@@ -266,6 +267,7 @@
     <ClCompile Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.cpp" />
     <ClCompile Include="Render\RenderPass\ImGuiRenderPass.cpp" />
     <ClCompile Include="Render\RenderPass\LightClusteringPass.cpp" />
+    <ClCompile Include="Render\RenderPass\MeshInstancePass.cpp" />
     <ClCompile Include="Render\RenderPass\TestForwardShadingPass.cpp" />
     <ClCompile Include="Render\RenderPass\ZPrePass.cpp" />
     <ClCompile Include="Render\SceneProxy.cpp" />

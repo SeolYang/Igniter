@@ -16,7 +16,7 @@
 #include "Igniter/Render/UnifiedMeshStorage.h"
 #include "Igniter/Render/SceneProxy.h"
 #include "Igniter/Render/RenderPass/LightClusteringPass.h"
-#include "Igniter/Render/RenderPass/FrustumCullingPass.h"
+#include "Igniter/Render/RenderPass/MeshInstancePass.h"
 #include "Igniter/Render/RenderPass/ZPrePass.h"
 #include "Igniter/Render/RenderPass/ForwardOpaqueMeshRenderPass.h"
 #include "Igniter/Render/RenderPass/ImGuiRenderPass.h"
@@ -31,57 +31,6 @@ IG_DEFINE_LOG_CATEGORY(RendererLog);
 
 namespace ig
 {
-    // 나중에 여러 카메라에 대해 렌더링하게 되면 Per Frame은 아닐수도?
-    //struct PerFrameConstants
-    //{
-    //    Matrix View{};
-    //    Matrix ViewProj{};
-
-    //    // [1]: Real-Time Rendering 4th ed. 22.14.1 Frustum Plane Extraction
-    //    // [2]: https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
-    //    // [3]: https://iquilezles.org/articles/frustum/
-    //    // (CameraPos.xyz, InverseAspectRatio)
-    //    Vector4 CamPosInvAspectRatio{};
-    //    // (cos(fovy*0.5f), sin(fovy*0.5f), Near, Far)
-    //    // View Frustum (in view space) =>
-    //    // r = 1/aspect_ratio
-    //    // Left = (r*cos, 0, sin, 0)
-    //    // Right = (-r*cos, 0, sin, 0)
-    //    // Bottom = (0, cos, sin, 0)
-    //    // Top = (0, -cos, sin, 0)
-    //    // Near = (0, 0, 1, -N)
-    //    // Far = (0, 0, -1, F)
-    //    Vector4 ViewFrustumParams{};
-    //    U32 EnableFrustumCulling = true;
-    //    U32 MinMeshLod = 0;
-
-    //    U32 StaticMeshVertexStorageSrv = IG_NUMERIC_MAX_OF(StaticMeshVertexStorageSrv);
-    //    U32 VertexIndexStorageSrv = IG_NUMERIC_MAX_OF(VertexIndexStorageSrv);
-
-    //    U32 TransformStorageSrv = IG_NUMERIC_MAX_OF(TransformStorageSrv);
-    //    U32 MaterialStorageSrv = IG_NUMERIC_MAX_OF(MaterialStorageSrv);
-    //    U32 MeshStorageSrv = IG_NUMERIC_MAX_OF(MeshStorageSrv);
-
-    //    U32 InstancingDataStorageSrv = IG_NUMERIC_MAX_OF(InstancingDataStorageSrv);
-    //    U32 InstancingDataStorageUav = IG_NUMERIC_MAX_OF(InstancingDataStorageUav);
-
-    //    U32 IndirectTransformStorageSrv = IG_NUMERIC_MAX_OF(IndirectTransformStorageSrv);
-    //    U32 IndirectTransformStorageUav = IG_NUMERIC_MAX_OF(IndirectTransformStorageUav);
-
-    //    U32 RenderableStorageSrv = IG_NUMERIC_MAX_OF(RenderableStorageSrv);
-
-    //    U32 RenderableIndicesBufferSrv = IG_NUMERIC_MAX_OF(RenderableIndicesBufferSrv);
-    //    U32 NumMaxRenderables = IG_NUMERIC_MAX_OF(NumMaxRenderables);
-
-    //    U32 LightStorageSrv = IG_NUMERIC_MAX_OF(LightStorageSrv);
-    //    U32 LightIdxListSrv = IG_NUMERIC_MAX_OF(LightIdxListSrv);
-    //    U32 LightTileBitfieldBufferSrv = IG_NUMERIC_MAX_OF(LightTileBitfieldBufferSrv);
-    //    U32 LightDepthBinBufferSrv = IG_NUMERIC_MAX_OF(LightDepthBinBufferSrv);
-
-    //    float ViewportWidth;
-    //    float ViewportHeight;
-    //};
-
     struct PerFrameParams
     {
         Matrix View;
@@ -101,6 +50,19 @@ namespace ig
         U32 LightClusterParamsCbv;
         U32 Padding[3];
 
+        // [1]: Real-Time Rendering 4th ed. 22.14.1 Frustum Plane Extraction
+        // [2]: https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
+        // [3]: https://iquilezles.org/articles/frustum/
+        // (CameraPos.xyz, InverseAspectRatio)
+        // (cos(fovy*0.5f), sin(fovy*0.5f), Near, Far)
+        // View Frustum (in view space) =>
+        // r = 1/aspect_ratio
+        // Left = (r*cos, 0, sin, 0)
+        // Right = (-r*cos, 0, sin, 0)
+        // Bottom = (0, cos, sin, 0)
+        // Top = (0, -cos, sin, 0)
+        // Near = (0, 0, 1, -N)
+        // Far = (0, 0, -1, F)
         /* (x,y,z): cam pos, w: inv aspect ratio */
         Vector4 CamWorldPosInvAspectRatio;
         /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
@@ -108,31 +70,6 @@ namespace ig
 
         float ViewportWidth;
         float ViewportHeight;
-    };
-
-    struct DispatchMeshInstanceParams
-    {
-        U32 MeshInstanceIdx;
-        U32 TargetLevelOfDetail;
-        U32 PerFrameParamsCbv;
-    };
-
-    struct DispatchMeshInstance
-    {
-        DispatchMeshInstanceParams Params;
-        U32 ThreadGroupCountX;
-        U32 ThreadGroupCountY;
-        U32 ThreadGroupCountZ;
-    };
-
-    struct MeshInstancePassParams
-    {
-        U32 PerFrameParamsCbv;
-        U32 MeshInstanceIndicesBufferSrv;
-        U32 NumMeshInstances;
-
-        U32 OpaqueMeshInstanceDispatchBufferUav;
-        U32 TransparentMeshInstanceDispatchBufferUav;
     };
 
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const SceneProxy& sceneProxy)
@@ -161,32 +98,18 @@ namespace ig
         ZeroMemory(mappedZeroFilledBuffer, kZeroFilledBufferSize);
         zeroFilledBuffer->Unmap();
 
-        imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);
-
-        const ShaderCompileDesc meshInstancePassShaderDesc
-        {
-            .SourcePath = "Assets/Shaders/MeshInstancePass.hlsl"_fs,
-            .Type = EShaderType::Compute,
-        };
-        meshInstancePassShader = MakePtr<ShaderBlob>(meshInstancePassShaderDesc);
-        ComputePipelineStateDesc meshInstancePassPsoDesc{};
-        meshInstancePassPsoDesc.Name = "MeshInstancePassPSO"_fs;
-        meshInstancePassPsoDesc.SetComputeShader(*meshInstancePassShader);
-        meshInstancePassPsoDesc.SetRootSignature(*bindlessRootSignature);
-        meshInstancePassPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(meshInstancePassPsoDesc).value());
-
-        GpuStorageDesc meshInstanceDispatchStorageDesc{};
-        meshInstanceDispatchStorageDesc.ElementSize = sizeof(DispatchMeshInstance);
-        meshInstanceDispatchStorageDesc.NumInitElements = kInitDispatchBufferCapacity;
-        meshInstanceDispatchStorageDesc.Flags = EGpuStorageFlags::ShaderReadWrite |
+        GpuStorageDesc dispatchMeshInstanceStorageDesc{};
+        dispatchMeshInstanceStorageDesc.ElementSize = sizeof(DispatchMeshInstance);
+        dispatchMeshInstanceStorageDesc.NumInitElements = kInitDispatchBufferCapacity;
+        dispatchMeshInstanceStorageDesc.Flags = EGpuStorageFlags::ShaderReadWrite |
             EGpuStorageFlags::EnableUavCounter |
             EGpuStorageFlags::EnableLinearAllocation;
 
-        meshInstanceDispatchStorageDesc.DebugName = "OpaqueMeshInstanceDispatchStorage"_fs;
-        opaqueMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, meshInstanceDispatchStorageDesc);
+        dispatchMeshInstanceStorageDesc.DebugName = "DispatchOpaqueMeshInstanceStorage"_fs;
+        opaqueMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, dispatchMeshInstanceStorageDesc);
 
-        meshInstanceDispatchStorageDesc.DebugName = "TransparentMeshInstanceDispatchStorage"_fs;
-        transparentMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, meshInstanceDispatchStorageDesc);
+        dispatchMeshInstanceStorageDesc.DebugName = "DispatchTransparentMeshInstanceStorage"_fs;
+        transparentMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, dispatchMeshInstanceStorageDesc);
 
         CommandSignatureDesc dispatchMeshInstanceCmdSignatureDesc{};
         dispatchMeshInstanceCmdSignatureDesc.SetCommandByteStride<DispatchMeshInstance>();
@@ -199,8 +122,10 @@ namespace ig
                 Ref{*bindlessRootSignature}).value());
 
         lightClusteringPass = MakePtr<LightClusteringPass>(renderContext, sceneProxy, *bindlessRootSignature, mainViewport);
+        meshInstancePass = MakePtr<MeshInstancePass>(renderContext, *bindlessRootSignature);
         zPrePass = MakePtr<ZPrePass>(renderContext, *bindlessRootSignature);
         forwardOpaqueMeshRenderPass = MakePtr<ForwardOpaqueMeshRenderPass>(renderContext, *bindlessRootSignature, *dispatchMeshInstanceCmdSignature);
+        imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);
     }
 
     Renderer::~Renderer()
@@ -327,50 +252,21 @@ namespace ig
         const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
         GpuSyncPoint meshInstancePassSyncPoint{};
         {
-            MeshInstancePassParams meshInstancePassParams{};
-            meshInstancePassParams.PerFrameParamsCbv = perFrameParamsCbvPtr->Index;
-            meshInstancePassParams.MeshInstanceIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceIndicesBufferSrv())->Index;
-            meshInstancePassParams.NumMeshInstances = sceneProxy->GetNumMeshInstances();
-            meshInstancePassParams.OpaqueMeshInstanceDispatchBufferUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUnorderedResourceView())->Index;
-            meshInstancePassParams.TransparentMeshInstanceDispatchBufferUav = renderContext->Lookup(transparentMeshInstanceDispatchStorage->GetUnorderedResourceView())->Index;
-
             auto meshInstancePassCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "MeshInstancePass"_fs);
-            meshInstancePassCmdList->Open(meshInstancePassPso.get());
-
-            GpuBuffer* opaqueMeshInstanceDispatchBufferPtr = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
-            const GpuBufferDesc& opaqueMeshInstanceDispatchBufferDesc = opaqueMeshInstanceDispatchBufferPtr->GetDesc();
-            meshInstancePassCmdList->AddPendingBufferBarrier(
-                *zeroFilledBuffer,
-                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE);
-            meshInstancePassCmdList->AddPendingBufferBarrier(
-                *opaqueMeshInstanceDispatchBufferPtr,
-                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
-                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST);
-            meshInstancePassCmdList->FlushBarriers();
-
-            meshInstancePassCmdList->CopyBuffer(
-                *zeroFilledBuffer, 0, GpuBufferDesc::kUavCounterSize,
-                *opaqueMeshInstanceDispatchBufferPtr, opaqueMeshInstanceDispatchBufferDesc.GetUavCounterOffset());
-
-            meshInstancePassCmdList->AddPendingBufferBarrier(
-                *opaqueMeshInstanceDispatchBufferPtr,
-                D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_COMPUTE_SHADING,
-                D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_UNORDERED_ACCESS);
-            meshInstancePassCmdList->FlushBarriers();
-
-            auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
-            meshInstancePassCmdList->SetDescriptorHeaps(MakeSpan(descriptorHeaps));
-            meshInstancePassCmdList->SetRootSignature(*bindlessRootSignature);
-            meshInstancePassCmdList->SetRoot32BitConstants(0, meshInstancePassParams, 0);
-
-            if (numMeshInstances > 0)
-            {
-                constexpr U32 kNumThreadsPerGroup = 32;
-                const U32 numDispatchX = (meshInstancePassParams.NumMeshInstances + kNumThreadsPerGroup - 1) / kNumThreadsPerGroup;
-                meshInstancePassCmdList->Dispatch(numDispatchX, 1, 1);
-            }
-            meshInstancePassCmdList->Close();
+            meshInstancePass->SetParams(MeshInstancePassParams{
+                .ComputeCmdList = meshInstancePassCmdList,
+                .ZeroFilledBuffer = zeroFilledBuffer.get(),
+                .PerFrameParamsCbv = perFrameParamsCbvPtr,
+                .MeshInstanceIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceIndicesBufferSrv()),
+                .DispatchOpaqueMeshInstanceStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer()),
+                .DispatchOpaqueMeshInstanceStorageUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUnorderedResourceView()),
+                .DispatchTransparentMeshInstanceStorageBuffer = nullptr,
+                .DispatchTransparentMeshInstanceStorageUav = nullptr,
+                .NumMeshInstances = numMeshInstances,
+                .OpaqueMeshInstanceIndicesStorageUav = nullptr,
+                .TransparentMeshInstanceIndicesStorageUav = nullptr
+            });
+            meshInstancePass->Record(localFrameIdx);
 
             CommandList* cmdLists[]{meshInstancePassCmdList};
             asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
