@@ -54,9 +54,10 @@ namespace ig
 
         Ptr<class LightClusteringPass> lightClusteringPass;
         Ptr<class ZPrePass> zPrePass;
+        Ptr<class ForwardOpaqueMeshRenderPass> forwardOpaqueMeshRenderPass;
         Ptr<class ImGuiRenderPass> imguiRenderPass;
 
-        /* @test Mesh Instance Indices를 통한 Culling/LOD 선택/IndirectCommandArguments 생성 테스트 */
+        Ptr<CommandSignature> dispatchMeshInstanceCmdSignature;
         Ptr<ShaderBlob> meshInstancePassShader;
         Ptr<PipelineState> meshInstancePassPso;
         constexpr static U32 kInitDispatchBufferCapacity = 8192Ui64;
@@ -66,12 +67,5 @@ namespace ig
         //Handle<GpuBuffer> opaqueMeshInstanceBucket;
         //Handle<GpuBuffer> transparentMeshInstanceBucket;
         ////////////////////////////////////////////////////////////////
-        /* HLSL.DispatchMeshInstance 구조체 참고 */
-        Ptr<CommandSignature> forwardMeshInstanceCmdSignature;
-        Ptr<ShaderBlob> forwardMeshInstanceAS;
-        Ptr<ShaderBlob> forwardMeshInstanceMS;
-        Ptr<ShaderBlob> forwardMeshInstancePS;
-        Ptr<PipelineState> forwardMeshInstancePso;
-        /************************************/
     };
 } // namespace ig

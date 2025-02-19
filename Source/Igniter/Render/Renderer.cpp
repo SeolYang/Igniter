@@ -17,17 +17,12 @@
 #include "Igniter/Render/SceneProxy.h"
 #include "Igniter/Render/RenderPass/LightClusteringPass.h"
 #include "Igniter/Render/RenderPass/FrustumCullingPass.h"
-#include "Igniter/Render/RenderPass/CompactMeshLodInstancesPass.h"
-#include "Igniter/Render/RenderPass/GenerateMeshLodDrawCommandsPass.h"
 #include "Igniter/Render/RenderPass/ZPrePass.h"
-#include "Igniter/Render/RenderPass/TestForwardShadingPass.h"
+#include "Igniter/Render/RenderPass/ForwardOpaqueMeshRenderPass.h"
 #include "Igniter/Render/RenderPass/ImGuiRenderPass.h"
-#include "Igniter/Render/RenderPass/DebugLightClusterPass.h"
-#include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Component/CameraComponent.h"
-#include "Igniter/Component/StaticMeshComponent.h"
 #include "Igniter/Render/Renderer.h"
 
 IG_DECLARE_LOG_CATEGORY(RendererLog);
@@ -193,54 +188,19 @@ namespace ig
         meshInstanceDispatchStorageDesc.DebugName = "TransparentMeshInstanceDispatchStorage"_fs;
         transparentMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, meshInstanceDispatchStorageDesc);
 
-        CommandSignatureDesc forwardMeshInstanceMeshSignDesc{};
-        forwardMeshInstanceMeshSignDesc.SetCommandByteStride<DispatchMeshInstance>();
-        forwardMeshInstanceMeshSignDesc.AddConstant(0, 0, 3);
-        forwardMeshInstanceMeshSignDesc.AddDispatchMeshArgument();
-        forwardMeshInstanceCmdSignature = MakePtr<CommandSignature>(
+        CommandSignatureDesc dispatchMeshInstanceCmdSignatureDesc{};
+        dispatchMeshInstanceCmdSignatureDesc.SetCommandByteStride<DispatchMeshInstance>();
+        dispatchMeshInstanceCmdSignatureDesc.AddConstant(0, 0, 3);
+        dispatchMeshInstanceCmdSignatureDesc.AddDispatchMeshArgument();
+        dispatchMeshInstanceCmdSignature = MakePtr<CommandSignature>(
             gpuDevice.CreateCommandSignature(
-                "ForwardMeshInstanceCmdSignature",
-                forwardMeshInstanceMeshSignDesc,
+                "DispatchMeshInstanceCmdSignature",
+                dispatchMeshInstanceCmdSignatureDesc,
                 Ref{*bindlessRootSignature}).value());
-
-        ShaderCompileDesc forwardMeshInstanceAmpShaderDesc
-        {
-            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassAS.hlsl"_fs,
-            .Type = EShaderType::Amplification
-        };
-        forwardMeshInstanceAS = MakePtr<ShaderBlob>(forwardMeshInstanceAmpShaderDesc);
-
-        ShaderCompileDesc forwardMeshInstanceMeshShaderDesc
-        {
-            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassMS.hlsl"_fs,
-            .Type = EShaderType::Mesh
-        };
-        forwardMeshInstanceMS = MakePtr<ShaderBlob>(forwardMeshInstanceMeshShaderDesc);
-
-        ShaderCompileDesc forwardMeshInstancePixelShaderDesc
-        {
-            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassPS.hlsl"_fs,
-            .Type = EShaderType::Pixel
-        };
-        forwardMeshInstancePS = MakePtr<ShaderBlob>(forwardMeshInstancePixelShaderDesc);
-
-        MeshShaderPipelineStateDesc forwardMeshInstancePipelineDesc{};
-        forwardMeshInstancePipelineDesc.Name = "ForwardMeshInstancePSO"_fs;
-        forwardMeshInstancePipelineDesc.SetRootSignature(*bindlessRootSignature);
-        forwardMeshInstancePipelineDesc.NumRenderTargets = 1;
-        forwardMeshInstancePipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-        forwardMeshInstancePipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-        forwardMeshInstancePipelineDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC{CD3DX12_DEFAULT{}};
-        forwardMeshInstancePipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
-        forwardMeshInstancePipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-        forwardMeshInstancePipelineDesc.SetRootSignature(*bindlessRootSignature);
-        forwardMeshInstancePipelineDesc.SetAmplificationShader(*forwardMeshInstanceAS);
-        forwardMeshInstancePipelineDesc.SetMeshShader(*forwardMeshInstanceMS);
-        forwardMeshInstancePipelineDesc.SetPixelShader(*forwardMeshInstancePS);
-        forwardMeshInstancePso = MakePtr<PipelineState>(gpuDevice.CreateMeshShaderPipelineState(forwardMeshInstancePipelineDesc).value());
 
         lightClusteringPass = MakePtr<LightClusteringPass>(renderContext, sceneProxy, *bindlessRootSignature, mainViewport);
         zPrePass = MakePtr<ZPrePass>(renderContext, *bindlessRootSignature);
+        forwardOpaqueMeshRenderPass = MakePtr<ForwardOpaqueMeshRenderPass>(renderContext, *bindlessRootSignature, *dispatchMeshInstanceCmdSignature);
     }
 
     Renderer::~Renderer()
@@ -425,7 +385,7 @@ namespace ig
             auto zPrePassCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ZPrePass"_fs);
             zPrePass->SetParams(ZPrePassParams{
                 .GfxCmdList = zPrePassCmdList,
-                .DispatchMeshInstanceCmdSignature = forwardMeshInstanceCmdSignature.get(),
+                .DispatchMeshInstanceCmdSignature = dispatchMeshInstanceCmdSignature.get(),
                 .DispatchOpaqueMeshInstanceStorageBuffer = opaqueMeshInstanceDispatchStorageBuffer,
                 .Dsv = dsvPtr,
                 .MainViewport = mainViewport
@@ -438,31 +398,27 @@ namespace ig
         GpuSyncPoint zPrePassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
 
         /* Forward Mesh Instance Pass */
-        auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ForwardMeshInstance"_fs);
-        renderCmdList->Open(forwardMeshInstancePso.get());
-        auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
-        renderCmdList->SetDescriptorHeaps(MakeSpan(descriptorHeaps));
-        renderCmdList->SetRootSignature(*bindlessRootSignature);
+        {
+            auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ForwardMeshInstance"_fs);
 
-        renderCmdList->AddPendingTextureBarrier(
-            *backBuffer,
-            D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_RENDER_TARGET,
-            D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_RENDER_TARGET,
-            D3D12_BARRIER_LAYOUT_PRESENT, D3D12_BARRIER_LAYOUT_RENDER_TARGET);
-        renderCmdList->FlushBarriers();
+            forwardOpaqueMeshRenderPass->SetParams(
+                ForwardOpaqueMeshRenderPassParams{
+                    .MainGfxCmdList = renderCmdList,
+                    .DispatchOpaqueMeshInstanceStorageBuffer = opaqueMeshInstanceDispatchStorageBuffer,
+                    .RenderTarget = backBuffer,
+                    .RenderTargetView = backBufferRtv,
+                    .Dsv = dsvPtr,
+                    .TargetViewport = mainViewport
+                });
 
-        renderCmdList->ClearRenderTarget(*backBufferRtv);
-        renderCmdList->SetRenderTarget(*backBufferRtv, *dsvPtr);
-        renderCmdList->SetViewport(mainViewport);
-        renderCmdList->SetScissorRect(mainViewport);
+            forwardOpaqueMeshRenderPass->Record(localFrameIdx);
 
-        renderCmdList->ExecuteIndirect(*forwardMeshInstanceCmdSignature, *opaqueMeshInstanceDispatchStorageBuffer);
+            CommandList* renderCmdLists[]{renderCmdList};
+            mainGfxQueue.Wait(zPrePassSyncPoint);
+            mainGfxQueue.Wait(lightClusteringSyncPoint);
+            mainGfxQueue.ExecuteCommandLists(renderCmdLists);
+        }
 
-        renderCmdList->Close();
-        CommandList* renderCmdLists[]{renderCmdList};
-        mainGfxQueue.Wait(zPrePassSyncPoint);
-        mainGfxQueue.Wait(lightClusteringSyncPoint);
-        mainGfxQueue.ExecuteCommandLists(renderCmdLists);
         /*********************/
 
         /* ImGui Render Pass */
