@@ -63,8 +63,8 @@ namespace ig
 
         BoundingSphere BoundingVolume{};
 
-        S8 QuantizedNormalConeAxis[3];
-        S8 QuantizedNormalConeCutoff;
+        U8 QuantizedNormalConeAxis[3];
+        U8 QuantizedNormalConeCutoff;
     };
 
     struct GpuMeshLod

@@ -305,20 +305,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\CompactMeshLodInstances.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\Deprecated\BasicPixelShader.hlsl">
       <ObjectFileOutput>D:\Repository\Igniter\Binaries\x64_Profile\%(Filename).cso</ObjectFileOutput>
       <TrackerLogDirectory>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Profile\Igniter.tlog\</TrackerLogDirectory>
@@ -355,6 +341,18 @@
       <ShaderType>Compute</ShaderType>
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\CompactMeshLodInstances.hlsl">
+      <ObjectFileOutput>D:\Repository\Igniter\Binaries\x64_Profile\%(Filename).cso</ObjectFileOutput>
+      <TrackerLogDirectory>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Profile\Igniter.tlog\</TrackerLogDirectory>
+      <EntryPointName>main</EntryPointName>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ShaderModel>4.0</ShaderModel>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <DisableOptimizations>false</DisableOptimizations>
+      <EnableDebuggingInformation>false</EnableDebuggingInformation>
+      <ShaderType>Compute</ShaderType>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\Deprecated\DebugLightCluster.hlsl">
       <ObjectFileOutput>D:\Repository\Igniter\Binaries\x64_Profile\%(Filename).cso</ObjectFileOutput>
       <TrackerLogDirectory>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Profile\Igniter.tlog\</TrackerLogDirectory>
@@ -380,7 +378,7 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\Deprecated\GenerateDrawInstanceCommand.hlsl">
-      <ObjectFileOutput>D:\Repository\Igniter\Binaries\x64_Profile\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>D:\Repository\Igniter\Binaries\x64_Profile\GenerateDrawInstanceCommand.cso</ObjectFileOutput>
       <TrackerLogDirectory>D:\Repository\Igniter\Binaries\Intermediate\Igniter_x64_Profile\Igniter.tlog\</TrackerLogDirectory>
       <EntryPointName>main</EntryPointName>
       <SuppressStartupBanner>true</SuppressStartupBanner>

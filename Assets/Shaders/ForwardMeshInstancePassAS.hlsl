@@ -42,7 +42,7 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
         float3 boundingSphereDir = worldBoundingSphere.Center - perFrameParams.CamWorldPosInvAspectRatio.xyz;
         float boundingSphereDist = length(boundingSphereDir);
         float cutOff = mad(normalCone.w, boundingSphereDist, worldBoundingSphere.Radius);
-        bIsVisible &= dot(boundingSphereDir, worldNormalConeAxis) >= cutOff;
+        bIsVisible &= dot(boundingSphereDir, worldNormalConeAxis) <= cutOff;
     }
 
     /* Compaction */

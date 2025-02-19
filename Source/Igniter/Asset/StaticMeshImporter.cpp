@@ -152,9 +152,9 @@ namespace ig
 
             Vertex newVertex{};
             newVertex.Position = Vector3{position.x, position.y, position.z};
-            newVertex.QuantizedNormal =EncodeNormalX10Y10Z10(Vector3{normal.x, normal.y, normal.z});
+            newVertex.QuantizedNormal = EncodeNormalX10Y10Z10(Vector3{normal.x, normal.y, normal.z});
             newVertex.QuantizedTangent = EncodeNormalX10Y10Z10(Vector3{tangent.x, tangent.y, tangent.z});
-            newVertex.QuantizedBitangent =EncodeNormalX10Y10Z10(Vector3{bitangent.x, bitangent.y, bitangent.z});
+            newVertex.QuantizedBitangent = EncodeNormalX10Y10Z10(Vector3{bitangent.x, bitangent.y, bitangent.z});
             newVertex.QuantizedTexCoords[0] = meshopt_quantizeHalf(uvCoords.x);
             newVertex.QuantizedTexCoords[1] = meshopt_quantizeHalf(uvCoords.y);
             newVertex.ColorRGBA8_U32 = EncodeRGBA32F(Vector4{vertexColor.r, vertexColor.g, vertexColor.b, vertexColor.a});
@@ -319,10 +319,10 @@ namespace ig
                     meshletBounds.radius
                 };
 
-                meshlet.QuantizedNormalConeAxis[0] = meshletBounds.cone_axis_s8[0];
-                meshlet.QuantizedNormalConeAxis[1] = meshletBounds.cone_axis_s8[1];
-                meshlet.QuantizedNormalConeAxis[2] = meshletBounds.cone_axis_s8[2];
-                meshlet.QuantizedNormalConeCutoff = meshletBounds.cone_cutoff_s8;
+                meshlet.QuantizedNormalConeAxis[0] = (U8)(meshletBounds.cone_axis_s8[0] + 127);
+                meshlet.QuantizedNormalConeAxis[1] = (U8)(meshletBounds.cone_axis_s8[1] + 127);
+                meshlet.QuantizedNormalConeAxis[2] = (U8)(meshletBounds.cone_axis_s8[2] + 127);
+                meshlet.QuantizedNormalConeCutoff = (U8)(meshletBounds.cone_cutoff_s8 + 127);
             }
 
             meshLod.MeshletVertexIndices.resize(numIndices);

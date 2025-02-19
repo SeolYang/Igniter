@@ -38,12 +38,10 @@ float3 DecodeNormalX8Y8Z8(uint encodedNormal)
 float4 DecodeNormalCone(uint encodedNormalCone)
 {
     const static float kInvFactor = 1.f / 127.f;
-    const int3 coneAxis = int3(
-        (encodedNormalCone & 0xFF) | 0xFFFFFF00,
-        ((encodedNormalCone >> 8) & 0xFF) | 0xFFFFFF00,
-        ((encodedNormalCone >> 16) & 0xFF)) | 0xFFFFFF00;
-    const int coneCutoff = ((encodedNormalCone >> 24) & 0xFF) | 0XFFFFFF00;
-    return float4(float3(coneAxis), float(coneCutoff)) * kInvFactor;
+    return float4(float(encodedNormalCone & 0xFF) - 127.f,
+        float((encodedNormalCone >> 8) & 0xFF) - 127.f,
+        float((encodedNormalCone >> 16) & 0xFF) - 127.f,
+        float((encodedNormalCone >> 24) & 0xFF) - 127.f) * kInvFactor;
 }
 
 float3 DecodeNormalX10Y10Z10(uint encodedNormal)
