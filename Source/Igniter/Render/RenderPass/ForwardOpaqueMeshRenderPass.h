@@ -31,7 +31,7 @@ namespace ig
         ForwardOpaqueMeshRenderPass(RenderContext& renderContext, RootSignature& bindlessRootSignature, CommandSignature& dispatchMeshInstanceCmdSignature);
         ForwardOpaqueMeshRenderPass(const ForwardOpaqueMeshRenderPass&) = delete;
         ForwardOpaqueMeshRenderPass(ForwardOpaqueMeshRenderPass&&) noexcept = delete;
-        ~ForwardOpaqueMeshRenderPass();
+        ~ForwardOpaqueMeshRenderPass() override;
 
         ForwardOpaqueMeshRenderPass& operator=(const ForwardOpaqueMeshRenderPass&) = delete;
         ForwardOpaqueMeshRenderPass& operator=(ForwardOpaqueMeshRenderPass&&) noexcept = delete;
@@ -39,7 +39,7 @@ namespace ig
         void SetParams(const ForwardOpaqueMeshRenderPassParams& newParams);
 
     protected:
-        void OnRecord(const LocalFrameIndex localFrameIdx);
+        void OnRecord(const LocalFrameIndex localFrameIdx) override;
 
     private:
         RenderContext* renderContext = nullptr;
