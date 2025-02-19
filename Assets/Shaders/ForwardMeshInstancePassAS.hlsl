@@ -30,7 +30,7 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
         viewBoundingSphere.Radius = worldBoundingSphere.Radius + MESHLET_CONSERVATIVE_BOUDNING_RADIUS;
 
         /* Per Meshlet Frustum Culling */
-        bIsVisible |= IntersectFrustum(
+        bIsVisible = IntersectFrustum(
             perFrameParams.CamWorldPosInvAspectRatio.w,
             perFrameParams.ViewFrustumParams,
             viewBoundingSphere);
@@ -38,10 +38,11 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
         /* Per Meshlet Normal Cone Culling */
         /* normalCone.xyz: Axis, normalCone.w: Cutoff */
         float4 normalCone = DecodeNormalCone(meshlet.EncodedNormalCone);
+        float3 worldNormalConeAxis = normalize(mul(float4(normalCone.xyz, 0.f), worldMat)).xyz;
         float3 boundingSphereDir = worldBoundingSphere.Center - perFrameParams.CamWorldPosInvAspectRatio.xyz;
         float boundingSphereDist = length(boundingSphereDir);
         float cutOff = mad(normalCone.w, boundingSphereDist, worldBoundingSphere.Radius);
-        bIsVisible |= dot(boundingSphereDir, normalCone.xyz) >= cutOff;
+        bIsVisible &= dot(boundingSphereDir, worldNormalConeAxis) >= cutOff;
     }
 
     /* Compaction */
