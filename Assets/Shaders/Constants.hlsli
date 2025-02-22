@@ -23,16 +23,34 @@
 #define INV_TILE_SIZE 1.f/TILE_SIZE_F32
 #define NUM_U32_PER_TILE (MAX_LIGHTS / 32)
 
-static const float4 kAabbCornerOffsets[8] =
+#define NUM_AABB_VERTICES 8
+static const float3 kAabbCornerOffsets[NUM_AABB_VERTICES] =
 {
-    float4(-1.f, -1.f, -1.f, 0.f),
-    float4(-1.f, 1.f, -1.f, 0.f),
-    float4(1.f, 1.f, -1.f, 0.f),
-    float4(1.f, -1.f, -1.f, 0.f),
-    float4(-1.f, 1.f, 1.f, 0.f),
-    float4(1.f, 1.f, 1.f, 0.f),
-    float4(1.f, -1.f, 1.f, 0.f),
-    float4(-1.f, -1.f, 1.f, 0.f)
+    float3(-1.f, -1.f, -1.f),
+    float3(-1.f, 1.f, -1.f),
+    float3(1.f, 1.f, -1.f),
+    float3(1.f, -1.f, -1.f),
+    float3(1.f, 1.f, 1.f),
+    float3(1.f, -1.f, 1.f),
+    float3(-1.f, 1.f, 1.f),
+    float3(-1.f, -1.f, 1.f)
+};
+
+#define NUM_AABB_TRIANGLES 12
+static const uint3 kAabbTriangles[NUM_AABB_TRIANGLES] =
+{
+    uint3(0, 1, 2),
+    uint3(0, 2, 3),
+    uint3(3, 2, 4),
+    uint3(3, 4, 5),
+    uint3(5, 4, 6),
+    uint3(5, 6, 7),
+    uint3(7, 6, 0),
+    uint3(0, 6, 1),
+    uint3(1, 6, 2),
+    uint3(2, 6, 4),
+    uint3(0, 7, 3),
+    uint3(3, 7, 5)
 };
 
 #endif

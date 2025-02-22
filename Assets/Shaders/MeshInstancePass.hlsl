@@ -70,9 +70,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
     // 10. 그렇지 않다면 Scale로 전체 LOD를 Linear 하게 증가 시킨다. (Lerp(1.f - computedCoverage, 0, NumLevelOfDetails))
     /* xmin, ymin, xmax, ymax */
     float4 aabbNdc = float4(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
-    for (uint idx = 0; idx < 8; ++idx)
+    for (uint idx = 0; idx < NUM_AABB_VERTICES; ++idx)
     {
-        float4 aabbCornerLocal = float4(mesh.BoundingVolume.Center, 1.f) + (mesh.BoundingVolume.Radius * kAabbCornerOffsets[idx]);
+        float4 aabbCornerLocal = float4(mad(mesh.BoundingVolume.Radius, kAabbCornerOffsets[idx], mesh.BoundingVolume.Center), 1.f);
         float4 aabbCornerNdc = mul(aabbCornerLocal, worldViewProj);
         // Perspective Division: Clip -> NDC
         aabbCornerNdc /= aabbCornerNdc.w;

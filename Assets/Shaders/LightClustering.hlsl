@@ -47,7 +47,7 @@ void main(uint lightIdxListIdx : SV_DispatchThreadID)
     float4 v_aabbScreen = float4(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
     for (uint idx = 0; idx < 8; ++idx)
     {
-        float4 v_aabbCornerView = v_lightPosView + (v_light.FalloffRadius * kAabbCornerOffsets[idx]);
+        float4 v_aabbCornerView = float4(mad(v_light.FalloffRadius, kAabbCornerOffsets[idx], v_lightPosView.xyz), 1.f);
         //// *Corner Case!*: AABB를 z축에 따라 clipping
         v_aabbCornerView.z = clamp(v_aabbCornerView.z, s_nearPlane, s_farPlane);
 
