@@ -108,12 +108,12 @@ namespace ig
 
         [[nodiscard]] Handle<GpuView> GetMaterialProxyStorageSrv() const
         {
-            return materialProxyPackage.Storage->GetShaderResourceView();
+            return materialProxyPackage.Storage->GetSrv();
         }
 
         [[nodiscard]] Handle<GpuView> GetLightStorageSrv() const
         {
-            return lightProxyPackage.Storage->GetShaderResourceView();
+            return lightProxyPackage.Storage->GetSrv();
         }
 
         [[nodiscard]] Handle<GpuBuffer> GetLightStorageBuffer() const
@@ -121,8 +121,8 @@ namespace ig
             return lightProxyPackage.Storage->GetGpuBuffer();
         }
 
-        [[nodiscard]] Handle<GpuView> GetStaticMeshProxyStorageSrv() const { return staticMeshProxyPackage.Storage->GetShaderResourceView(); }
-        [[nodiscard]] Handle<GpuView> GetMeshInstanceProxyStorageSrv() const { return meshInstanceProxyPackage.Storage->GetShaderResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetStaticMeshProxyStorageSrv() const { return staticMeshProxyPackage.Storage->GetSrv(); }
+        [[nodiscard]] Handle<GpuView> GetMeshInstanceProxyStorageSrv() const { return meshInstanceProxyPackage.Storage->GetSrv(); }
         [[nodiscard]] Handle<GpuView> GetMeshInstanceIndicesBufferSrv() const { return meshInstanceIndicesBufferSrv; }
 
         [[nodiscard]] U32 GetNumMeshInstances() const noexcept { return numMeshInstances; }

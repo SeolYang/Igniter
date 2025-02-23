@@ -25,6 +25,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="..\..\Assets\Shaders\OccluderPass.hlsli" />
     <ClInclude Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.h" />
     <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\d3d12shader.h" />
     <ClInclude Include="..\..\Thirdparty\DirectXCompiler\include\dxc\dxcapi.h" />
@@ -178,6 +179,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\..\Assets\Shaders\ZPreMeshInstancePassMS.hlsl" />
+    <None Include="..\..\Assets\Shaders\OccluderPassAS.hlsl" />
     <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -448,6 +450,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Assets\Shaders\OccluderPassMS.hlsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -117,7 +117,7 @@ namespace ig
         IG_CHECK(drawInstanceStorageBufferPtr != nullptr);
         const GpuBufferDesc& drawInstanceStorageBufferDesc = drawInstanceStorageBufferPtr->GetDesc();
         IG_CHECK(drawInstanceStorageBufferDesc.IsUavCounterEnabled());
-        const GpuView* drawInstanceStorageUavPtr = renderContext->Lookup(drawInstanceCmdStorage->GetUnorderedResourceView());
+        const GpuView* drawInstanceStorageUavPtr = renderContext->Lookup(drawInstanceCmdStorage->GetUav());
         IG_CHECK(drawInstanceStorageUavPtr != nullptr);
 
         const GenerateDrawInstanceConstants generateInstanceDrawConstants{

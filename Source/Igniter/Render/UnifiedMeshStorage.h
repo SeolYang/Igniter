@@ -51,13 +51,13 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx);
 
         [[nodiscard]] Handle<GpuBuffer> GetVertexStorageBuffer() const noexcept { return vertexStorage.GetGpuBuffer(); }
-        [[nodiscard]] Handle<GpuView> GetVertexStorageSrv() const noexcept { return vertexStorage.GetShaderResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetVertexStorageSrv() const noexcept { return vertexStorage.GetSrv(); }
         [[nodiscard]] Handle<GpuBuffer> GetIndexStorageBuffer() const noexcept { return indexStorage.GetGpuBuffer(); }
-        [[nodiscard]] Handle<GpuView> GetIndexStorageSrv() const noexcept { return indexStorage.GetShaderResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetIndexStorageSrv() const noexcept { return indexStorage.GetSrv(); }
         [[nodiscard]] Handle<GpuBuffer> GetTriangleStorageBuffer() const noexcept { return triangleStorage.GetGpuBuffer(); }
-        [[nodiscard]] Handle<GpuView> GetTriangleStorageSrv() const noexcept { return triangleStorage.GetShaderResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetTriangleStorageSrv() const noexcept { return triangleStorage.GetSrv(); }
         [[nodiscard]] Handle<GpuBuffer> GetMeshletStorageBuffer() const noexcept { return meshletStorage.GetGpuBuffer(); }
-        [[nodiscard]] Handle<GpuView> GetMeshletStorageSrv() const noexcept { return meshletStorage.GetShaderResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetMeshletStorageSrv() const noexcept { return meshletStorage.GetSrv(); }
 
         [[nodiscard]] Size GetNumAllocatedVerticesHint() const noexcept { return numAllocVertices; }
         [[nodiscard]] Size GetNumAllocatedIndicesHint() const noexcept { return numAllocIndices; }

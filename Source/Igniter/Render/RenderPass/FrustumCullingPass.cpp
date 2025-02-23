@@ -106,7 +106,7 @@ namespace ig
         IG_CHECK(meshLodInstanceStorageBufferPtr != nullptr);
         const GpuBufferDesc& meshLodInstanceStorageBufferDesc = meshLodInstanceStorageBufferPtr->GetDesc();
         IG_CHECK(meshLodInstanceStorageBufferDesc.IsUavCounterEnabled());
-        const GpuView* meshLodInstanceStorageUavPtr = renderContext->Lookup(meshLodInstanceStorage->GetUnorderedResourceView());
+        const GpuView* meshLodInstanceStorageUavPtr = renderContext->Lookup(meshLodInstanceStorage->GetUav());
         IG_CHECK(meshLodInstanceStorageUavPtr != nullptr);
 
         GpuBuffer* cullingDataBufferPtr = renderContext->Lookup(cullingDataBuffer);

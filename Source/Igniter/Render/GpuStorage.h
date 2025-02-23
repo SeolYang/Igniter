@@ -13,7 +13,8 @@ namespace ig
         ShaderReadWrite        = 1 << 0,
         EnableUavCounter       = 1 << 1,
         EnableLinearAllocation = 1 << 2,
-        RawBuffer              = 1 << 3,
+        RawBuffer              = 1 << 3, /* GPU Buffer 자체를 RawBuffer로 사용. 이 경우 Srv 자체가 ByteAddressBuffer용 Srv */
+        CreateRawSrv           = 1 << 4, /* GPU Buffer 자체는 RawBuffer가 아님. 단 RawBuffer로 재해석하는 Srv를 별도로 생성 */
     };
 
     IG_ENUM_FLAGS(EGpuStorageFlags);
@@ -82,8 +83,9 @@ namespace ig
         [[nodiscard]] bool IsLinearAllocator() const noexcept { return bIsLinearAllocEnabled; }
 
         [[nodiscard]] Handle<GpuBuffer> GetGpuBuffer() const noexcept { return gpuBuffer; }
-        [[nodiscard]] Handle<GpuView> GetShaderResourceView() const noexcept { return srv; }
-        [[nodiscard]] Handle<GpuView> GetUnorderedResourceView() const noexcept { return uav; }
+        [[nodiscard]] Handle<GpuView> GetSrv() const noexcept { return srv; }
+        [[nodiscard]] Handle<GpuView> GetRawSrv() const noexcept { return rawSrv; }
+        [[nodiscard]] Handle<GpuView> GetUav() const noexcept { return uav; }
 
     private:
         [[nodiscard]] GpuBufferDesc CreateBufferDesc(const U32 numElements) const noexcept;
@@ -110,6 +112,7 @@ namespace ig
         bool bIsUavCounterEnabled = false;
         bool bIsLinearAllocEnabled = false;
         bool bIsRawBuffer = false;
+        bool bCreateRawSrv = false;
 
         GpuFence fence;
 
@@ -117,6 +120,7 @@ namespace ig
         eastl::vector<Block> blocks;
 
         Handle<GpuView> srv;
+        Handle<GpuView> rawSrv;
         Handle<GpuView> uav;
     };
 } // namespace ig

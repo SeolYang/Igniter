@@ -669,7 +669,7 @@ namespace ig
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
         const GpuBufferDesc& desc = buffer.GetDesc();
-        IG_CHECK(!desc.IsUavCounterEnabled() || uavDesc->Buffer.CounterOffsetInBytes != 0);
+        IG_CHECK(!desc.IsUavCounterEnabled() || uavDesc.Buffer.CounterOffsetInBytes != 0);
         ID3D12Resource& nativeBuffer = buffer.GetNative();
         device->CreateUnorderedAccessView(
             &nativeBuffer,

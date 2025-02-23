@@ -16,24 +16,12 @@ namespace ig
         , bIsUavCounterEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableUavCounter))
         , bIsLinearAllocEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableLinearAllocation))
         , bIsRawBuffer(ContainsFlags(desc.Flags, EGpuStorageFlags::RawBuffer))
+        , bCreateRawSrv(ContainsFlags(desc.Flags, EGpuStorageFlags::CreateRawSrv))
         , fence(renderContext.GetGpuDevice().CreateFence(debugName).value())
     {
         IG_CHECK(desc.NumInitElements > 0);
         IG_CHECK(elementSize > 0);
-
-        gpuBuffer = renderContext.CreateBuffer(CreateBufferDesc(desc.NumInitElements));
-        srv = renderContext.CreateShaderResourceView(gpuBuffer);
-
-        if (bIsShaderReadWritable)
-        {
-            uav = renderContext.CreateUnorderedAccessView(gpuBuffer);
-        }
-
-        const D3D12MA::VIRTUAL_BLOCK_DESC blockDesc{.Flags = bIsLinearAllocEnabled ? D3D12MA::VIRTUAL_BLOCK_FLAG_ALGORITHM_LINEAR : D3D12MA::VIRTUAL_BLOCK_FLAG_NONE, .Size = bufferSize};
-        D3D12MA::VirtualBlock* newVirtualBlock{nullptr};
-        [[maybe_unused]] const HRESULT hr = D3D12MA::CreateVirtualBlock(&blockDesc, &newVirtualBlock);
-        // 여기서 Virtual Block 할당 실패를 핸들 해야하나? 로그에 남겨야 하나?
-        blocks.emplace_back(Block{.VirtualBlock = newVirtualBlock, .Offset = 0});
+        Grow(elementSize * desc.NumInitElements);
     }
 
     GpuStorage::~GpuStorage()
@@ -47,6 +35,11 @@ namespace ig
         if (srv)
         {
             renderContext.DestroyGpuView(srv);
+        }
+
+        if (rawSrv)
+        {
+            renderContext.DestroyGpuView(rawSrv);
         }
 
         if (uav)
@@ -186,13 +179,10 @@ namespace ig
 
     bool GpuStorage::Grow(const Size newAllocSize)
     {
-        IG_CHECK(gpuBuffer);
-        IG_CHECK(bufferSize > 0);
         IG_CHECK(newAllocSize > 0);
         IG_CHECK((newAllocSize % elementSize) == 0);
-        IG_CHECK((bufferSize % elementSize) == 0);
 
-        const Size newBufferSize = std::max(bufferSize * kGrowthMultiplier, bufferSize + newAllocSize);
+        const Size newBufferSize = bufferSize == 0 ? newAllocSize : std::max(bufferSize * kGrowthMultiplier, bufferSize + newAllocSize);
         IG_CHECK(newBufferSize > 0);
         IG_CHECK((newBufferSize - bufferSize) > 0);
 
@@ -204,51 +194,70 @@ namespace ig
 
         GpuBuffer* gpuBufferPtr = renderContext.Lookup(gpuBuffer);
         GpuBuffer* newGpuBufferPtr = renderContext.Lookup(newGpuBuffer);
-        IG_CHECK(gpuBufferPtr != nullptr);
         IG_CHECK(newGpuBufferPtr != nullptr);
 
         GpuSyncPoint newSyncPoint{};
-        if (!bIsLinearAllocEnabled)
+        if (gpuBufferPtr != nullptr)
         {
-            CommandQueue& asyncCopyQueue = renderContext.GetFrameCriticalAsyncCopyQueue();
-            CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
-            auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
-            copyCmdList->Open();
+            if (!bIsLinearAllocEnabled)
             {
-                copyCmdList->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
-            }
-            copyCmdList->Close();
+                CommandQueue& asyncCopyQueue = renderContext.GetFrameCriticalAsyncCopyQueue();
+                CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
+                auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
+                copyCmdList->Open();
+                {
+                    copyCmdList->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);
+                }
+                copyCmdList->Close();
 
-            newSyncPoint = fence.MakeSyncPoint();
-            if (GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
-                prevSyncPoint)
+                newSyncPoint = fence.MakeSyncPoint();
+                if (GpuSyncPoint prevSyncPoint = newSyncPoint.Prev();
+                    prevSyncPoint)
+                {
+                    // 만약 버퍼에 대한 비동기 쓰기를 지원한다면 Write-After-Read Hazard 발생 가능성이 있음
+                    // 방지하기 위해선 GpuStorage가 별도의 Fence를 가지고 이를 사용해
+                    // ExecuteCommandLists 간의 명시적 동기화가 필요할것으로 보임
+                    asyncCopyQueue.Wait(prevSyncPoint);
+                }
+
+                ig::CommandList* copyCmdLists[] = {(ig::CommandList*)copyCmdList};
+                asyncCopyQueue.ExecuteCommandLists(copyCmdLists);
+                asyncCopyQueue.Signal(newSyncPoint);
+            }
+
+            if (srv)
             {
-                // 만약 버퍼에 대한 비동기 쓰기를 지원한다면 Write-After-Read Hazard 발생 가능성이 있음
-                // 방지하기 위해선 GpuStorage가 별도의 Fence를 가지고 이를 사용해
-                // ExecuteCommandLists 간의 명시적 동기화가 필요할것으로 보임
-                asyncCopyQueue.Wait(prevSyncPoint);
+                renderContext.DestroyGpuView(srv);
             }
-
-            ig::CommandList* copyCmdLists[] = {(ig::CommandList*)copyCmdList};
-            asyncCopyQueue.ExecuteCommandLists(copyCmdLists);
-            asyncCopyQueue.Signal(newSyncPoint);
-        }
-
-        if (srv)
-        {
-            renderContext.DestroyGpuView(srv);
-        }
-        if (uav)
-        {
-            renderContext.DestroyGpuView(uav);
-        }
-        if (gpuBuffer)
-        {
-            renderContext.DestroyBuffer(gpuBuffer);
+            if (rawSrv)
+            {
+                renderContext.DestroyGpuView(rawSrv);
+            }
+            if (uav)
+            {
+                renderContext.DestroyGpuView(uav);
+            }
+            if (gpuBuffer)
+            {
+                renderContext.DestroyBuffer(gpuBuffer);
+            }
         }
 
         gpuBuffer = newGpuBuffer;
         srv = renderContext.CreateShaderResourceView(gpuBuffer);
+        if (bCreateRawSrv)
+        {
+            D3D12_SHADER_RESOURCE_VIEW_DESC rawSrvDesc{};
+            rawSrvDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+            rawSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+            rawSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            rawSrvDesc.Buffer.FirstElement = 0;
+            rawSrvDesc.Buffer.NumElements = (U32)(newBufferSize / sizeof(U32)) + (bIsUavCounterEnabled ? 1 : 0);
+            rawSrvDesc.Buffer.StructureByteStride = 0;
+            rawSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
+            rawSrv = renderContext.CreateShaderResourceView(gpuBuffer, rawSrvDesc);
+        }
+
         if (bIsShaderReadWritable)
         {
             uav = renderContext.CreateUnorderedAccessView(gpuBuffer);

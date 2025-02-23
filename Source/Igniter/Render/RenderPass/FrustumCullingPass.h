@@ -34,7 +34,7 @@ namespace ig
 
         void SetParams(const FrustumCullingPassParams& newParams);
 
-        [[nodiscard]] Handle<GpuView> GetMeshLodInstanceStorageUav() const noexcept { return meshLodInstanceStorage->GetUnorderedResourceView(); }
+        [[nodiscard]] Handle<GpuView> GetMeshLodInstanceStorageUav() const noexcept { return meshLodInstanceStorage->GetUav(); }
         [[nodiscard]] Handle<GpuBuffer> GetCullingDataBuffer() const noexcept { return cullingDataBuffer; }
         [[nodiscard]] Handle<GpuView> GetCullingDataBufferSrv() const noexcept { return cullingDataBufferSrv; }
 
