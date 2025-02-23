@@ -653,35 +653,28 @@ namespace ig
         device->CreateConstantBufferView(&cbvDesc, gpuView.CpuHandle);
     }
 
-    void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer)
+    void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc)
     {
         IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
-        const GpuBufferDesc& desc = buffer.GetDesc();
-        const Option<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc = desc.ToShaderResourceViewDesc();
-        IG_CHECK(srvDesc);
-
-        device->CreateShaderResourceView(&buffer.GetNative(), &srvDesc.value(), gpuView.CpuHandle);
+        device->CreateShaderResourceView(&buffer.GetNative(), &srvDesc, gpuView.CpuHandle);
     }
 
-    void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer)
+    void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc)
     {
         IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(buffer);
         const GpuBufferDesc& desc = buffer.GetDesc();
-        const Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> uavDesc = desc.ToUnorderedAccessViewDesc();
-        IG_CHECK(uavDesc);
         IG_CHECK(!desc.IsUavCounterEnabled() || uavDesc->Buffer.CounterOffsetInBytes != 0);
-
         ID3D12Resource& nativeBuffer = buffer.GetNative();
         device->CreateUnorderedAccessView(
             &nativeBuffer,
             desc.IsUavCounterEnabled() ? &nativeBuffer : nullptr,
-            &uavDesc.value(),
+            &uavDesc,
             gpuView.CpuHandle);
     }
 

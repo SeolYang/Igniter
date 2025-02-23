@@ -145,14 +145,67 @@ namespace ig
 
     Handle<GpuView> RenderContext::CreateShaderResourceView(const Handle<GpuBuffer> buffer)
     {
-        ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        ScopedLock storageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
         if (bufferPtr == nullptr)
         {
             return Handle<GpuView>{};
         }
 
-        const GpuView newView = gpuViewManager.RequestShaderResourceView(*bufferPtr);
+        const Option<D3D12_SHADER_RESOURCE_VIEW_DESC> descOpt = bufferPtr->GetDesc().ToShaderResourceViewDesc();
+        if (!descOpt)
+        {
+            return Handle<GpuView>{};
+        }
+
+        return CreateShaderResourceViewUnsafe(*bufferPtr, descOpt.value());
+    }
+
+    Handle<GpuView> RenderContext::CreateShaderResourceView(const Handle<GpuBuffer> buffer, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc)
+    {
+        ScopedLock storageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
+        if (bufferPtr == nullptr)
+        {
+            return Handle<GpuView>{};
+        }
+
+        return CreateShaderResourceViewUnsafe(*bufferPtr, srvDesc);
+    }
+
+    Handle<GpuView> RenderContext::CreateUnorderedAccessView(const Handle<GpuBuffer> buffer)
+    {
+        ScopedLock storageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
+        if (bufferPtr == nullptr)
+        {
+            return Handle<GpuView>{};
+        }
+
+        const Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> descOpt = bufferPtr->GetDesc().ToUnorderedAccessViewDesc();
+        if (!descOpt)
+        {
+            return Handle<GpuView>{};
+        }
+
+        return CreateUnorderedAccessViewUnsafe(*bufferPtr, descOpt.value());
+    }
+
+    Handle<GpuView> RenderContext::CreateUnorderedAccessView(const Handle<GpuBuffer> buffer, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc)
+    {
+        ScopedLock storageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
+        GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
+        if (bufferPtr == nullptr)
+        {
+            return Handle<GpuView>{};
+        }
+
+        return CreateUnorderedAccessViewUnsafe(*bufferPtr, uavDesc);
+    }
+
+    Handle<GpuView> RenderContext::CreateShaderResourceViewUnsafe(GpuBuffer& buffer, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc)
+    {
+        const GpuView newView = gpuViewManager.RequestShaderResourceView(buffer, srvDesc);
         if (!newView)
         {
             return Handle<GpuView>{};
@@ -162,16 +215,9 @@ namespace ig
         return gpuViewPackage.Storage.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateUnorderedAccessView(const Handle<GpuBuffer> buffer)
+    Handle<GpuView> RenderContext::CreateUnorderedAccessViewUnsafe(GpuBuffer& buffer, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc)
     {
-        ScopedLock StorageLock{bufferPackage.StorageMutex, gpuViewPackage.StorageMutex};
-        GpuBuffer* const bufferPtr = bufferPackage.Storage.Lookup(buffer);
-        if (bufferPtr == nullptr)
-        {
-            return Handle<GpuView>{};
-        }
-
-        const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*bufferPtr);
+        const GpuView newView = gpuViewManager.RequestUnorderedAccessView(buffer, uavDesc);
         if (!newView)
         {
             return Handle<GpuView>{};

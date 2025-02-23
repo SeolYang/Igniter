@@ -30,9 +30,9 @@ namespace ig
 
         GpuView RequestConstantBufferView(GpuBuffer& gpuBuffer);
         GpuView RequestConstantBufferView(GpuBuffer& gpuBuffer, const uint64_t offset, const uint64_t sizeInBytes);
-        GpuView RequestShaderResourceView(GpuBuffer& gpuBuffer);
-        GpuView RequestUnorderedAccessView(GpuBuffer& gpuBuffer);
-
+        GpuView RequestShaderResourceView(GpuBuffer& gpuBuffer, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc);
+        GpuView RequestUnorderedAccessView(GpuBuffer& gpuBuffer, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc);
+        
         GpuView RequestShaderResourceView(GpuTexture& gpuTexture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         GpuView RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         GpuView RequestRenderTargetView(GpuTexture& gpuTexture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);

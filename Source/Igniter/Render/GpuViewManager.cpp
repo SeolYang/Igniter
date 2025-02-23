@@ -51,25 +51,25 @@ namespace ig
         return newCBV;
     }
 
-    GpuView GpuViewManager::RequestShaderResourceView(GpuBuffer& gpuBuffer)
+    GpuView GpuViewManager::RequestShaderResourceView(GpuBuffer& gpuBuffer, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc)
     {
         const GpuView newSRV = Allocate(EGpuViewType::ShaderResourceView);
         if (newSRV)
         {
             IG_CHECK(newSRV.Type == EGpuViewType::ShaderResourceView);
-            gpuDevice.CreateShaderResourceView(newSRV, gpuBuffer);
+            gpuDevice.CreateShaderResourceView(newSRV, gpuBuffer, srvDesc);
         }
 
         return newSRV;
     }
-
-    GpuView GpuViewManager::RequestUnorderedAccessView(GpuBuffer& gpuBuffer)
+    
+    GpuView GpuViewManager::RequestUnorderedAccessView(GpuBuffer& gpuBuffer, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc)
     {
         const GpuView newUAV = Allocate(EGpuViewType::UnorderedAccessView);
         if (newUAV)
         {
             IG_CHECK(newUAV.Type == EGpuViewType::UnorderedAccessView);
-            gpuDevice.CreateUnorderedAccessView(newUAV, gpuBuffer);
+            gpuDevice.CreateUnorderedAccessView(newUAV, gpuBuffer, uavDesc);
         }
 
         return newUAV;
