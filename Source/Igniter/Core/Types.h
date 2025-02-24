@@ -31,6 +31,27 @@ namespace ig
     using GlobalFrameIndex = Index;
     using LocalFrameIndex = U8;
 
+    struct Uint2
+    {
+        U32 X = 0;
+        U32 Y = 0;
+    };
+
+    struct Uint3
+    {
+        U32 X = 0;
+        U32 Y = 0;
+        U32 Z = 0;
+    };
+
+    struct Uint4
+    {
+        U32 X = 0;
+        U32 Y = 0;
+        U32 Z = 0;
+        U32 W = 0;
+    };
+
     template <typename T, typename Dx = std::default_delete<T>>
     using Ptr = std::unique_ptr<T, Dx>;
     template <typename T>
