@@ -227,7 +227,7 @@ namespace ig
         return gpuViewPackage.Storage.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateShaderResourceView(Handle<GpuTexture> texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    Handle<GpuView> RenderContext::CreateShaderResourceView(Handle<GpuTexture> texture, const GpuTextureSrvVariant& srvVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
@@ -236,7 +236,7 @@ namespace ig
             return Handle<GpuView>{};
         }
 
-        const GpuView newView = gpuViewManager.RequestShaderResourceView(*texturePtr, srvDesc, desireViewFormat);
+        const GpuView newView = gpuViewManager.RequestShaderResourceView(*texturePtr, srvVariant, desireViewFormat);
         if (!newView)
         {
             return Handle<GpuView>{};
@@ -246,7 +246,7 @@ namespace ig
         return gpuViewPackage.Storage.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateUnorderedAccessView(Handle<GpuTexture> texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    Handle<GpuView> RenderContext::CreateUnorderedAccessView(Handle<GpuTexture> texture, const GpuTextureUavVariant& uavVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
@@ -255,7 +255,7 @@ namespace ig
             return Handle<GpuView>{};
         }
 
-        const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*texturePtr, uavDesc, desireViewFormat);
+        const GpuView newView = gpuViewManager.RequestUnorderedAccessView(*texturePtr, uavVariant, desireViewFormat);
         if (!newView)
         {
             return Handle<GpuView>{};
@@ -265,7 +265,7 @@ namespace ig
         return gpuViewPackage.Storage.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateRenderTargetView(Handle<GpuTexture> texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    Handle<GpuView> RenderContext::CreateRenderTargetView(Handle<GpuTexture> texture, const GpuTextureRtvVariant& rtvVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
@@ -274,7 +274,7 @@ namespace ig
             return Handle<GpuView>{};
         }
 
-        const GpuView newView = gpuViewManager.RequestRenderTargetView(*texturePtr, rtvDesc, desireViewFormat);
+        const GpuView newView = gpuViewManager.RequestRenderTargetView(*texturePtr, rtvVariant, desireViewFormat);
         if (!newView)
         {
             return Handle<GpuView>{};
@@ -284,7 +284,7 @@ namespace ig
         return gpuViewPackage.Storage.Create(newView);
     }
 
-    Handle<GpuView> RenderContext::CreateDepthStencilView(Handle<GpuTexture> texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+    Handle<GpuView> RenderContext::CreateDepthStencilView(Handle<GpuTexture> texture, const GpuTextureDsvVariant& dsvVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         ScopedLock StorageLock{texturePackage.StorageMutex, gpuViewPackage.StorageMutex};
         GpuTexture* const texturePtr = texturePackage.Storage.Lookup(texture);
@@ -293,7 +293,7 @@ namespace ig
             return Handle<GpuView>{};
         }
 
-        const GpuView newView = gpuViewManager.RequestDepthStencilView(*texturePtr, dsvDesc, desireViewFormat);
+        const GpuView newView = gpuViewManager.RequestDepthStencilView(*texturePtr, dsvVariant, desireViewFormat);
         if (!newView)
         {
             return Handle<GpuView>{};

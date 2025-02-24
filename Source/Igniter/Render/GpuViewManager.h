@@ -33,10 +33,10 @@ namespace ig
         GpuView RequestShaderResourceView(GpuBuffer& gpuBuffer, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc);
         GpuView RequestUnorderedAccessView(GpuBuffer& gpuBuffer, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc);
         
-        GpuView RequestShaderResourceView(GpuTexture& gpuTexture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        GpuView RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        GpuView RequestRenderTargetView(GpuTexture& gpuTexture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        GpuView RequestDepthStencilView(GpuTexture& gpuTexture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        GpuView RequestShaderResourceView(GpuTexture& gpuTexture, const GpuTextureSrvVariant& srvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        GpuView RequestUnorderedAccessView(GpuTexture& gpuTexture, const GpuTextureUavVariant& uavVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        GpuView RequestRenderTargetView(GpuTexture& gpuTexture, const GpuTextureRtvVariant& rtvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        GpuView RequestDepthStencilView(GpuTexture& gpuTexture, const GpuTextureDsvVariant& dsvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
         GpuView RequestSampler(const D3D12_SAMPLER_DESC& desc);
 
         void Deallocate(const GpuView& gpuView);

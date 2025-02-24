@@ -678,53 +678,53 @@ namespace ig
             gpuView.CpuHandle);
     }
 
-    void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvVariant& srvVariant, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::ShaderResourceView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        const Option<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvDesc, desireViewFormat);
+        const Option<D3D12_SHADER_RESOURCE_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(srvVariant, desireViewFormat);
         IG_CHECK(nativeDesc);
 
         device->CreateShaderResourceView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavVariant& uavVariant, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::UnorderedAccessView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        const Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavDesc, desireViewFormat);
+        const Option<D3D12_UNORDERED_ACCESS_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(uavVariant, desireViewFormat);
         IG_CHECK(nativeDesc);
 
         device->CreateUnorderedAccessView(&texture.GetNative(), nullptr, &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::CreateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvVariant& rtvVariant, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::RenderTargetView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        const Option<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvDesc, desireViewFormat);
+        const Option<D3D12_RENDER_TARGET_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(rtvVariant, desireViewFormat);
         IG_CHECK(nativeDesc);
 
         device->CreateRenderTargetView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);
     }
 
-    void GpuDevice::CreateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat)
+    void GpuDevice::CreateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvVariant& dsvVariant, const DXGI_FORMAT desireViewFormat)
     {
         IG_CHECK(device);
         IG_CHECK(gpuView.Type == EGpuViewType::DepthStencilView);
         IG_CHECK(gpuView.IsValid() && gpuView.HasValidCpuHandle());
         IG_CHECK(texture);
         const GpuTextureDesc& desc = texture.GetDesc();
-        const Option<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvDesc, desireViewFormat);
+        const Option<D3D12_DEPTH_STENCIL_VIEW_DESC> nativeDesc = desc.ConvertToNativeDesc(dsvVariant, desireViewFormat);
         IG_CHECK(nativeDesc);
 
         device->CreateDepthStencilView(&texture.GetNative(), &nativeDesc.value(), gpuView.CpuHandle);

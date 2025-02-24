@@ -44,26 +44,26 @@ namespace ig
         bool IsDepthStencilCompatible() const;
         bool IsRenderTargetCompatible() const;
 
-        bool IsTexture1D() const { return Width > 0 && Height == 1 && DepthOrArraySize == 1; }
-        bool IsTexture2D() const { return Width > 0 && Height > 0 && DepthOrArraySize == 1; }
-        bool IsTexture3D() const { return Width > 0 && Height > 0 && DepthOrArraySize > 0; }
-        bool IsTextureArray() const { return bIsArray; }
-        bool IsTexture1DArray() const { return IsTextureArray() && Width > 0 && Height == 1 && DepthOrArraySize > 0; }
-        bool IsTexture2DArray() const { return IsTextureArray() && Width > 0 && Height > 0 && DepthOrArraySize > 0; }
-        bool IsTextureCube() const { return bIsCubemap; }
+        [[nodiscard]] bool IsTexture1D() const noexcept { return Width > 0 && Height == 1 && DepthOrArraySize == 1; }
+        [[nodiscard]] bool IsTexture2D() const noexcept { return Width > 0 && Height > 0 && DepthOrArraySize == 1; }
+        [[nodiscard]] bool IsTexture3D() const noexcept { return Width > 0 && Height > 0 && DepthOrArraySize > 0; }
+        [[nodiscard]] bool IsTextureArray() const noexcept { return bIsArray; }
+        [[nodiscard]] bool IsTexture1DArray() const noexcept { return IsTextureArray() && Width > 0 && Height == 1 && DepthOrArraySize > 0; }
+        [[nodiscard]] bool IsTexture2DArray() const noexcept { return IsTextureArray() && Width > 0 && Height > 0 && DepthOrArraySize > 0; }
+        [[nodiscard]] bool IsTextureCube() const noexcept { return bIsCubemap; }
 
-        bool IsMSAAEnabled() const { return bIsMSAAEnabled; }
-        bool IsAllowSimultaneousAccess() const { return bIsAllowSimultaneousAccess; }
+        [[nodiscard]] bool IsMSAAEnabled() const noexcept { return bIsMSAAEnabled; }
+        [[nodiscard]] bool IsAllowSimultaneousAccess() const noexcept { return bIsAllowSimultaneousAccess; }
 
-        D3D12MA::ALLOCATION_DESC GetAllocationDesc() const;
-        std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ConvertToNativeDesc(
-            const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
-        std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ConvertToNativeDesc(
-            const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
-        std::optional<D3D12_RENDER_TARGET_VIEW_DESC> ConvertToNativeDesc(
-            const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
-        std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> ConvertToNativeDesc(
-            const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) CONST;
+        [[nodiscard]] D3D12MA::ALLOCATION_DESC GetAllocationDesc() const;
+        [[nodiscard]] std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> ConvertToNativeDesc(
+            const GpuTextureSrvVariant& srvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
+        [[nodiscard]] std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> ConvertToNativeDesc(
+            const GpuTextureUavVariant& uavVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
+        [[nodiscard]] std::optional<D3D12_RENDER_TARGET_VIEW_DESC> ConvertToNativeDesc(
+            const GpuTextureRtvVariant& rtvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
+        [[nodiscard]] std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> ConvertToNativeDesc(
+            const GpuTextureDsvVariant& dsvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN) const;
 
         void From(const D3D12_RESOURCE_DESC& desc);
 

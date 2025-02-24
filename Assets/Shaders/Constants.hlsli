@@ -37,20 +37,5 @@ static const float3 kAabbCornerOffsets[NUM_AABB_VERTICES] =
 };
 
 #define NUM_AABB_TRIANGLES 12
-static const uint3 kAabbTriangles[NUM_AABB_TRIANGLES] =
-{
-    uint3(0, 1, 2),
-    uint3(0, 2, 3),
-    uint3(3, 2, 4),
-    uint3(3, 4, 5),
-    uint3(5, 4, 6),
-    uint3(5, 6, 7),
-    uint3(7, 6, 0),
-    uint3(0, 6, 1),
-    uint3(1, 6, 2),
-    uint3(2, 6, 4),
-    uint3(0, 7, 3),
-    uint3(3, 7, 5)
-};
 
 #endif

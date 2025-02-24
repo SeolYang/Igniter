@@ -76,52 +76,52 @@ namespace ig
     }
 
     GpuView GpuViewManager::RequestShaderResourceView(
-        GpuTexture& gpuTexture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureSrvVariant& srvVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         const GpuView newSRV = Allocate(EGpuViewType::ShaderResourceView);
         if (newSRV)
         {
             IG_CHECK(newSRV.Type == EGpuViewType::ShaderResourceView);
-            gpuDevice.CreateShaderResourceView(newSRV, gpuTexture, srvDesc, desireViewFormat);
+            gpuDevice.CreateShaderResourceView(newSRV, gpuTexture, srvVariant, desireViewFormat);
         }
 
         return newSRV;
     }
 
     GpuView GpuViewManager::RequestUnorderedAccessView(
-        GpuTexture& gpuTexture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureUavVariant& uavVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         const GpuView newUAV = Allocate(EGpuViewType::UnorderedAccessView);
         if (newUAV)
         {
             IG_CHECK(newUAV.Type == EGpuViewType::UnorderedAccessView);
-            gpuDevice.CreateUnorderedAccessView(newUAV, gpuTexture, uavDesc, desireViewFormat);
+            gpuDevice.CreateUnorderedAccessView(newUAV, gpuTexture, uavVariant, desireViewFormat);
         }
 
         return newUAV;
     }
 
     GpuView GpuViewManager::RequestRenderTargetView(
-        GpuTexture& gpuTexture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureRtvVariant& rtvVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         const GpuView newRTV = Allocate(EGpuViewType::RenderTargetView);
         if (newRTV)
         {
             IG_CHECK(newRTV.Type == EGpuViewType::RenderTargetView);
-            gpuDevice.CreateRenderTargetView(newRTV, gpuTexture, rtvDesc, desireViewFormat);
+            gpuDevice.CreateRenderTargetView(newRTV, gpuTexture, rtvVariant, desireViewFormat);
         }
 
         return newRTV;
     }
 
     GpuView GpuViewManager::RequestDepthStencilView(
-        GpuTexture& gpuTexture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
+        GpuTexture& gpuTexture, const GpuTextureDsvVariant& dsvVariant, const DXGI_FORMAT desireViewFormat /*= DXGI_FORMAT_UNKNOWN*/)
     {
         const GpuView newDSV = Allocate(EGpuViewType::DepthStencilView);
         if (newDSV)
         {
             IG_CHECK(newDSV.Type == EGpuViewType::DepthStencilView);
-            gpuDevice.CreateDepthStencilView(newDSV, gpuTexture, dsvDesc, desireViewFormat);
+            gpuDevice.CreateDepthStencilView(newDSV, gpuTexture, dsvVariant, desireViewFormat);
         }
 
         return newDSV;

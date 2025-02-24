@@ -424,7 +424,7 @@ namespace ig
     }
 
     std::optional<D3D12_SHADER_RESOURCE_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(
-        const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat) const
+        const GpuTextureSrvVariant& srvVariant, const DXGI_FORMAT desireViewFormat) const
     {
         if (Format == DXGI_FORMAT_UNKNOWN)
         {
@@ -443,7 +443,7 @@ namespace ig
         newDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
         /* Configure Shader Resource View Description */
-        if (std::holds_alternative<D3D12_TEX1D_SRV>(srvDesc))
+        if (std::holds_alternative<D3D12_TEX1D_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -452,9 +452,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
-            newDesc.Texture1D = std::get<D3D12_TEX1D_SRV>(srvDesc);
+            newDesc.Texture1D = std::get<D3D12_TEX1D_SRV>(srvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -463,9 +463,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-            newDesc.Texture2D = std::get<D3D12_TEX2D_SRV>(srvDesc);
+            newDesc.Texture2D = std::get<D3D12_TEX2D_SRV>(srvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
@@ -474,9 +474,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
-            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_SRV>(srvDesc);
+            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_SRV>(srvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX3D_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEX3D_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
             {
@@ -486,7 +486,7 @@ namespace ig
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
         }
-        else if (std::holds_alternative<D3D12_TEXCUBE_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEXCUBE_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsCubemap)
             {
@@ -501,9 +501,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-            newDesc.TextureCube = std::get<D3D12_TEXCUBE_SRV>(srvDesc);
+            newDesc.TextureCube = std::get<D3D12_TEXCUBE_SRV>(srvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -518,9 +518,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
-            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_SRV>(srvDesc);
+            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_SRV>(srvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -535,9 +535,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_SRV>(srvDesc);
+            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_SRV>(srvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
@@ -552,9 +552,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY;
-            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_SRV>(srvDesc);
+            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_SRV>(srvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEXCUBE_ARRAY_SRV>(srvDesc))
+        else if (std::holds_alternative<D3D12_TEXCUBE_ARRAY_SRV>(srvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsCubemap)
             {
@@ -569,7 +569,7 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
-            newDesc.TextureCubeArray = std::get<D3D12_TEXCUBE_ARRAY_SRV>(srvDesc);
+            newDesc.TextureCubeArray = std::get<D3D12_TEXCUBE_ARRAY_SRV>(srvVariant);
         }
         else
         {
@@ -581,7 +581,7 @@ namespace ig
     }
 
     std::optional<D3D12_UNORDERED_ACCESS_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(
-        const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat) const
+        const GpuTextureUavVariant& uavVariant, const DXGI_FORMAT desireViewFormat) const
     {
         if (!IsUnorderedAccessCompatible())
         {
@@ -604,7 +604,7 @@ namespace ig
         D3D12_UNORDERED_ACCESS_VIEW_DESC newDesc{};
         newDesc.Format = desireViewFormat;
 
-        if (std::holds_alternative<D3D12_TEX1D_UAV>(uavDesc))
+        if (std::holds_alternative<D3D12_TEX1D_UAV>(uavVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -613,9 +613,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
-            newDesc.Texture1D = std::get<D3D12_TEX1D_UAV>(uavDesc);
+            newDesc.Texture1D = std::get<D3D12_TEX1D_UAV>(uavVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_UAV>(uavDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_UAV>(uavVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -624,9 +624,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-            newDesc.Texture2D = std::get<D3D12_TEX2D_UAV>(uavDesc);
+            newDesc.Texture2D = std::get<D3D12_TEX2D_UAV>(uavVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_UAV>(uavDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_UAV>(uavVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
@@ -635,9 +635,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DMS;
-            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_UAV>(uavDesc);
+            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_UAV>(uavVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX3D_UAV>(uavDesc))
+        else if (std::holds_alternative<D3D12_TEX3D_UAV>(uavVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
             {
@@ -646,9 +646,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
-            newDesc.Texture3D = std::get<D3D12_TEX3D_UAV>(uavDesc);
+            newDesc.Texture3D = std::get<D3D12_TEX3D_UAV>(uavVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_UAV>(uavDesc))
+        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_UAV>(uavVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -663,9 +663,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
-            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_UAV>(uavDesc);
+            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_UAV>(uavVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_UAV>(uavDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_UAV>(uavVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -680,9 +680,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_UAV>(uavDesc);
+            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_UAV>(uavVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_UAV>(uavDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_UAV>(uavVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
@@ -697,7 +697,7 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DMSARRAY;
-            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_UAV>(uavDesc);
+            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_UAV>(uavVariant);
         }
         else
         {
@@ -709,7 +709,7 @@ namespace ig
     }
 
     std::optional<D3D12_RENDER_TARGET_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(
-        const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat) const
+        const GpuTextureRtvVariant& rtvVariant, const DXGI_FORMAT desireViewFormat) const
     {
         if (!IsRenderTargetCompatible())
         {
@@ -732,7 +732,7 @@ namespace ig
         D3D12_RENDER_TARGET_VIEW_DESC newDesc{};
         newDesc.Format = desireViewFormat;
 
-        if (std::holds_alternative<D3D12_TEX1D_RTV>(rtvDesc))
+        if (std::holds_alternative<D3D12_TEX1D_RTV>(rtvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -741,9 +741,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1D;
-            newDesc.Texture1D = std::get<D3D12_TEX1D_RTV>(rtvDesc);
+            newDesc.Texture1D = std::get<D3D12_TEX1D_RTV>(rtvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_RTV>(rtvDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_RTV>(rtvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -752,9 +752,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-            newDesc.Texture2D = std::get<D3D12_TEX2D_RTV>(rtvDesc);
+            newDesc.Texture2D = std::get<D3D12_TEX2D_RTV>(rtvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_RTV>(rtvDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_RTV>(rtvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D || !bIsMSAAEnabled)
             {
@@ -763,9 +763,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
-            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_RTV>(rtvDesc);
+            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_RTV>(rtvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX3D_RTV>(rtvDesc))
+        else if (std::holds_alternative<D3D12_TEX3D_RTV>(rtvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
             {
@@ -774,9 +774,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
-            newDesc.Texture3D = std::get<D3D12_TEX3D_RTV>(rtvDesc);
+            newDesc.Texture3D = std::get<D3D12_TEX3D_RTV>(rtvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_RTV>(rtvDesc))
+        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_RTV>(rtvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -791,9 +791,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1DARRAY;
-            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_RTV>(rtvDesc);
+            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_RTV>(rtvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_RTV>(rtvDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_RTV>(rtvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -808,9 +808,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_RTV>(rtvDesc);
+            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_RTV>(rtvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_RTV>(rtvDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_RTV>(rtvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
@@ -825,7 +825,7 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
-            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_RTV>(rtvDesc);
+            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_RTV>(rtvVariant);
         }
         else
         {
@@ -837,7 +837,7 @@ namespace ig
     }
 
     std::optional<D3D12_DEPTH_STENCIL_VIEW_DESC> GpuTextureDesc::ConvertToNativeDesc(
-        const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat) const
+        const GpuTextureDsvVariant& dsvVariant, const DXGI_FORMAT desireViewFormat) const
     {
         if (!IsDepthStencilCompatible())
         {
@@ -854,7 +854,7 @@ namespace ig
         D3D12_DEPTH_STENCIL_VIEW_DESC newDesc{};
         newDesc.Format = desireViewFormat;
 
-        if (std::holds_alternative<D3D12_TEX1D_DSV>(dsvDesc))
+        if (std::holds_alternative<D3D12_TEX1D_DSV>(dsvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -863,9 +863,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1D;
-            newDesc.Texture1D = std::get<D3D12_TEX1D_DSV>(dsvDesc);
+            newDesc.Texture1D = std::get<D3D12_TEX1D_DSV>(dsvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_DSV>(dsvDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_DSV>(dsvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -874,9 +874,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-            newDesc.Texture2D = std::get<D3D12_TEX2D_DSV>(dsvDesc);
+            newDesc.Texture2D = std::get<D3D12_TEX2D_DSV>(dsvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_DSV>(dsvDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_DSV>(dsvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !bIsMSAAEnabled)
             {
@@ -885,9 +885,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
-            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_DSV>(dsvDesc);
+            newDesc.Texture2DMS = std::get<D3D12_TEX2DMS_DSV>(dsvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_DSV>(dsvDesc))
+        else if (std::holds_alternative<D3D12_TEX1D_ARRAY_DSV>(dsvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -902,9 +902,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1DARRAY;
-            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_DSV>(dsvDesc);
+            newDesc.Texture1DArray = std::get<D3D12_TEX1D_ARRAY_DSV>(dsvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_DSV>(dsvDesc))
+        else if (std::holds_alternative<D3D12_TEX2D_ARRAY_DSV>(dsvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
             {
@@ -919,9 +919,9 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_DSV>(dsvDesc);
+            newDesc.Texture2DArray = std::get<D3D12_TEX2D_ARRAY_DSV>(dsvVariant);
         }
-        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_DSV>(dsvDesc))
+        else if (std::holds_alternative<D3D12_TEX2DMS_ARRAY_DSV>(dsvVariant))
         {
             if (Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE1D)
             {
@@ -936,7 +936,7 @@ namespace ig
             }
 
             newDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_DSV>(dsvDesc);
+            newDesc.Texture2DMSArray = std::get<D3D12_TEX2DMS_ARRAY_DSV>(dsvVariant);
         }
         else
         {

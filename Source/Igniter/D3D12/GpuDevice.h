@@ -82,10 +82,10 @@ namespace ig
         void CreateConstantBufferView(const GpuView& gpuView, GpuBuffer& buffer, const uint64_t offset, const uint64_t sizeInBytes);
         void CreateShaderResourceView(const GpuView& gpuView, GpuBuffer& buffer, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc);
         VOID CreateUnorderedAccessView(const GpuView& gpuView, GpuBuffer& buffer, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc);
-        void CreateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvDesc& srvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        void CreateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavDesc& uavDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        void CreateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvDesc& rtvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
-        void CreateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvDesc& dsvDesc, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        void CreateShaderResourceView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureSrvVariant& srvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        void CreateUnorderedAccessView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureUavVariant& uavVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        void CreateRenderTargetView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureRtvVariant& rtvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
+        void CreateDepthStencilView(const GpuView& gpuView, GpuTexture& texture, const GpuTextureDsvVariant& dsvVariant, const DXGI_FORMAT desireViewFormat = DXGI_FORMAT_UNKNOWN);
 
         void DestroyConstantBufferView(const GpuView& gpuView);
         void DestroyShaderResourceView(const GpuView& gpuView);
