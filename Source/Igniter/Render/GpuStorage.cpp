@@ -11,7 +11,6 @@ namespace ig
         : renderContext(renderContext)
         , debugName(desc.DebugName)
         , elementSize(desc.ElementSize)
-        , bufferSize((U64)desc.NumInitElements * desc.ElementSize)
         , bIsShaderReadWritable(ContainsFlags(desc.Flags, EGpuStorageFlags::ShaderReadWrite))
         , bIsUavCounterEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableUavCounter))
         , bIsLinearAllocEnabled(ContainsFlags(desc.Flags, EGpuStorageFlags::EnableLinearAllocation))
@@ -21,7 +20,7 @@ namespace ig
     {
         IG_CHECK(desc.NumInitElements > 0);
         IG_CHECK(elementSize > 0);
-        Grow(elementSize * desc.NumInitElements);
+        Grow((U64)elementSize * desc.NumInitElements);
     }
 
     GpuStorage::~GpuStorage()
