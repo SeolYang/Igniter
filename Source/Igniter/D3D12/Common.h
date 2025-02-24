@@ -3,6 +3,7 @@
 
 namespace ig
 {
+    /* Types */
     template <typename Ty>
     using ComPtr = Microsoft::WRL::ComPtr<Ty>;
 
@@ -20,8 +21,6 @@ namespace ig
         Copy
     };
 
-    D3D12_COMMAND_LIST_TYPE ToNativeCommandListType(const EQueueType type);
-
     enum class EDescriptorHeapType
     {
         CBV_SRV_UAV,
@@ -29,31 +28,6 @@ namespace ig
         RTV,
         DSV
     };
-
-    constexpr inline D3D12_DESCRIPTOR_HEAP_TYPE ToNativeDescriptorHeapType(const EDescriptorHeapType type)
-    {
-        switch (type)
-        {
-        case EDescriptorHeapType::CBV_SRV_UAV:
-            return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-
-        case EDescriptorHeapType::Sampler:
-            return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-
-        case EDescriptorHeapType::RTV:
-            return D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-
-        case EDescriptorHeapType::DSV:
-            return D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-        }
-
-        return D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
-    }
-
-    constexpr inline bool IsShaderVisibleDescriptorHeapType(const EDescriptorHeapType type)
-    {
-        return type == EDescriptorHeapType::CBV_SRV_UAV || type == EDescriptorHeapType::Sampler;
-    }
 
     enum class EGpuViewType : U8
     {
@@ -65,8 +39,6 @@ namespace ig
         DepthStencilView,
         Unknown
     };
-
-    bool IsSupportGpuView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType);
 
     using GpuTextureSrvVariant = std::variant<D3D12_TEX1D_SRV,
                                               D3D12_TEX2D_SRV, D3D12_TEX2DMS_SRV,
@@ -101,6 +73,38 @@ namespace ig
         Vector<U32> NumRows{};
         Vector<Size> RowSizesInBytes{};
     };
+
+    /**********************************/
+
+    /* Utils */
+    D3D12_COMMAND_LIST_TYPE ToNativeCommandListType(const EQueueType type);
+
+    constexpr inline D3D12_DESCRIPTOR_HEAP_TYPE ToNativeDescriptorHeapType(const EDescriptorHeapType type)
+    {
+        switch (type)
+        {
+        case EDescriptorHeapType::CBV_SRV_UAV:
+            return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+
+        case EDescriptorHeapType::Sampler:
+            return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+
+        case EDescriptorHeapType::RTV:
+            return D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+
+        case EDescriptorHeapType::DSV:
+            return D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+        }
+
+        return D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+    }
+
+    constexpr inline bool IsShaderVisibleDescriptorHeapType(const EDescriptorHeapType type)
+    {
+        return type == EDescriptorHeapType::CBV_SRV_UAV || type == EDescriptorHeapType::Sampler;
+    }
+
+    bool IsSupportGpuView(const EDescriptorHeapType descriptorHeapType, const EGpuViewType gpuViewType);
 
     constexpr inline bool IsGreyScaleFormat(const DXGI_FORMAT format)
     {
@@ -215,4 +219,10 @@ namespace ig
     }
 
     void SetObjectName(ID3D12Object* object, const std::string_view name);
+    /***************************/
+
+    /* Constants */
+    constexpr U32 kAllMipLevels = 0xFFFFFFFF;
+    
+    /*************/
 } // namespace ig
