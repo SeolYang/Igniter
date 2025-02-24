@@ -200,23 +200,34 @@ namespace ig
         cmdList->CopyBufferRegion(&dst.GetNative(), dstOffsetInBytes, &src.GetNative(), srcOffsetInBytes, numBytes);
     }
 
+
     void CommandList::CopyBuffer(GpuBuffer& src, GpuBuffer& dst)
     {
         const auto& srcDesc = src.GetDesc();
         CopyBuffer(src, 0, srcDesc.GetSizeAsBytes(), dst, 0);
     }
 
-    void CommandList::CopyTextureRegion(GpuBuffer& src, const Size srcOffsetInBytes, GpuTexture& dst, const U32 subresourceIdx,
-                                        const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout)
+    void CommandList::CopyTextureFromBuffer(GpuBuffer& srcBuffer, const Size srcOffsetInBytes, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& srcBufferFootprint, GpuTexture& dst,
+                                        const U32 dstSubresourceIdx)
+    {
+        IG_CHECK(srcBuffer);
+        IG_CHECK(dst);
+
+        D3D12_PLACED_SUBRESOURCE_FOOTPRINT offsetedLayout = srcBufferFootprint;
+        offsetedLayout.Offset += srcOffsetInBytes;
+
+        const CD3DX12_TEXTURE_COPY_LOCATION srcLocation(&srcBuffer.GetNative(), offsetedLayout);
+        const CD3DX12_TEXTURE_COPY_LOCATION dstLocation(&dst.GetNative(), dstSubresourceIdx);
+        cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
+    }
+    
+    void CommandList::CopyTextureRegion(GpuTexture& src, const U32 srcSubresourceIdx, GpuTexture& dst, const U32 dstSubresourceIdx)
     {
         IG_CHECK(src);
         IG_CHECK(dst);
 
-        D3D12_PLACED_SUBRESOURCE_FOOTPRINT offsetedLayout = layout;
-        offsetedLayout.Offset += srcOffsetInBytes;
-
-        const CD3DX12_TEXTURE_COPY_LOCATION srcLocation(&src.GetNative(), offsetedLayout);
-        const CD3DX12_TEXTURE_COPY_LOCATION dstLocation(&dst.GetNative(), subresourceIdx);
+        const CD3DX12_TEXTURE_COPY_LOCATION srcLocation(&src.GetNative(), srcSubresourceIdx);
+        const CD3DX12_TEXTURE_COPY_LOCATION dstLocation(&dst.GetNative(), dstSubresourceIdx);
         cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
     }
 

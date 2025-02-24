@@ -277,7 +277,7 @@ namespace ig
 
         IG_CHECK(request->CmdList != nullptr);
         CommandList& cmdList = *request->CmdList;
-        cmdList.CopyTextureRegion(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, dst, subresourceIdx, layout);
+        cmdList.CopyTextureFromBuffer(*uploadBuffer, request->OffsetInBytes + srcOffsetInBytes, layout, dst, subresourceIdx);
     }
 
     void UploadContext::CopyTextureSimple(
