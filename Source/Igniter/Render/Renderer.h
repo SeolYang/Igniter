@@ -44,8 +44,20 @@ namespace ig
         Viewport mainViewport{};
 
         Ptr<RootSignature> bindlessRootSignature; // #sy_todo render context로 이동시키는게 더 나아보임
-        Handle<GpuTexture> depthStencil;
-        Handle<GpuView> dsv;
+
+        GpuCopyableFootprints depthBufferFootprints;
+        Handle<GpuTexture> depthBuffer;
+        Handle<GpuView> depthBufferDsv;
+
+        Handle<GpuTexture> depthPyramid;
+        Vector<Uint2> depthPyramidExtents;
+        Handle<GpuView> depthPyramidSrv;
+        Vector<Handle<GpuView>> depthPyramidMipsUav;
+        Handle<GpuView> depthPyramidSampler;
+        GpuCopyableFootprints depthPyramidFootprints;
+
+        Ptr<ShaderBlob> generateDepthPyramidShader;
+        Ptr<PipelineState> generateDepthPyramidPso;
 
         constexpr static Size kZeroFilledBufferSize = 512Ui64;
         Ptr<GpuBuffer> zeroFilledBuffer;

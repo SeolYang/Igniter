@@ -72,6 +72,17 @@ namespace ig
         float ViewportHeight;
     };
 
+    struct GenerateDepthPyramidConstants
+    {
+        U32 PrevMipUav;
+        U32 CurrMipUav;
+
+        U32 PrevMipWidth;
+        U32 PrevMipHeight;
+        U32 CurrMipWidth;
+        U32 CurrMipHeight;
+    };
+
     Renderer::Renderer(const Window& window, RenderContext& renderContext, const SceneProxy& sceneProxy)
         : window(&window)
         , renderContext(&renderContext)
@@ -86,9 +97,46 @@ namespace ig
         depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
         depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT, true);
         depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+        depthBuffer = renderContext.CreateTexture(depthStencilDesc);
+        depthBufferDsv = renderContext.CreateDepthStencilView(depthBuffer, D3D12_TEX2D_DSV{.MipSlice = 0});
+        const GpuTexture* depthBufferPtr = renderContext.Lookup(depthBuffer);
+        depthBufferFootprints = gpuDevice.GetCopyableFootprints(depthBufferPtr->GetDesc(), 0, 1, 0);
 
-        depthStencil = renderContext.CreateTexture(depthStencilDesc);
-        dsv = renderContext.CreateDepthStencilView(depthStencil, D3D12_TEX2D_DSV{.MipSlice = 0});
+        /* @todo Depth Pyramid 클래스로 따로 빼내버리기 */
+        const float mainViewportLongestExtent = std::max(mainViewport.width, mainViewport.height);
+        /* MIP0을 포함 해야 하므로 +1 */
+        const U16 maxDepthPyramidMipLevels = (U16)std::log2(mainViewportLongestExtent) + 1;
+        IG_CHECK(maxDepthPyramidMipLevels > 0);
+        GpuTextureDesc depthPyramidDesc{};
+        depthPyramidDesc.DebugName = "DepthPyramid";
+        depthPyramidDesc.AsTexture2D((U32)mainViewport.width, (U32)mainViewport.height, maxDepthPyramidMipLevels, DXGI_FORMAT_R32_FLOAT, true);
+        depthPyramidDesc.InitialLayout = D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+        depthPyramid = renderContext.CreateTexture(depthPyramidDesc);
+
+        depthPyramidExtents.resize(maxDepthPyramidMipLevels);
+        depthPyramidMipsUav.resize(maxDepthPyramidMipLevels);
+
+        depthPyramidSrv = renderContext.CreateShaderResourceView(
+            depthPyramid,
+            D3D12_TEX2D_SRV{.MostDetailedMip = 0, .MipLevels = kAllMipLevels, .PlaneSlice = 0, .ResourceMinLODClamp = 0.f});
+
+        depthPyramidExtents[0] = {.X = (U32)mainViewport.width, .Y = (U32)mainViewport.height};
+        for (U16 depthPyramidMipLevel = 0; depthPyramidMipLevel < maxDepthPyramidMipLevels; ++depthPyramidMipLevel)
+        {
+            if (depthPyramidMipLevel > 0)
+            {
+                depthPyramidExtents[depthPyramidMipLevel] = {
+                    .X = std::max(1Ui32, depthPyramidExtents[depthPyramidMipLevel - 1].X >> 1),
+                    .Y = std::max(1Ui32, depthPyramidExtents[depthPyramidMipLevel - 1].Y >> 1)
+                };
+            }
+
+            depthPyramidMipsUav[depthPyramidMipLevel] = renderContext.CreateUnorderedAccessView(
+                depthPyramid,
+                D3D12_TEX2D_UAV{.MipSlice = depthPyramidMipLevel, .PlaneSlice = 0});
+        }
+        const GpuTexture* depthPyramidPtr = renderContext.Lookup(depthPyramid);
+        depthPyramidFootprints = gpuDevice.GetCopyableFootprints(depthPyramidPtr->GetDesc(), 0, maxDepthPyramidMipLevels, 0);
 
         GpuBufferDesc zeroFilledBufferDesc{};
         zeroFilledBufferDesc.AsUploadBuffer(kZeroFilledBufferSize);
@@ -126,17 +174,52 @@ namespace ig
         zPrePass = MakePtr<ZPrePass>(renderContext, *bindlessRootSignature);
         forwardOpaqueMeshRenderPass = MakePtr<ForwardOpaqueMeshRenderPass>(renderContext, *bindlessRootSignature, *dispatchMeshInstanceCmdSignature);
         imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);
+
+        ShaderCompileDesc genDepthPyramidShaderDesc{.SourcePath = "Assets/Shaders/GenerateDepthPyramid.hlsl", .Type = EShaderType::Compute};
+        generateDepthPyramidShader = MakePtr<ShaderBlob>(genDepthPyramidShaderDesc);
+
+        ComputePipelineStateDesc genDepthPyramidPsoDesc{};
+        genDepthPyramidPsoDesc.Name = "GenDepthPyramidPSO"_fs;
+        genDepthPyramidPsoDesc.SetRootSignature(*bindlessRootSignature);
+        genDepthPyramidPsoDesc.SetComputeShader(*generateDepthPyramidShader);
+        generateDepthPyramidPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(genDepthPyramidPsoDesc).value());
+
+        depthPyramidSampler = renderContext.CreateSamplerView(
+            D3D12_SAMPLER_DESC{
+                .Filter = D3D12_FILTER_MAXIMUM_MIN_MAG_LINEAR_MIP_POINT,
+                .AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                .AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                .AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                .MipLODBias = 0.f,
+                .MinLOD = 0.f, .MaxLOD = FLT_MAX
+            });
     }
 
     Renderer::~Renderer()
     {
-        if (dsv)
+        if (depthBufferDsv)
         {
-            renderContext->DestroyGpuView(dsv);
+            renderContext->DestroyGpuView(depthBufferDsv);
         }
-        if (depthStencil)
+        if (depthBuffer)
         {
-            renderContext->DestroyTexture(depthStencil);
+            renderContext->DestroyTexture(depthBuffer);
+        }
+        if (depthPyramidSrv)
+        {
+            renderContext->DestroyGpuView(depthPyramidSrv);
+        }
+        for (const Handle<GpuView>& depthPyramidMipUav : depthPyramidMipsUav)
+        {
+            renderContext->DestroyGpuView(depthPyramidMipUav);
+        }
+        if (depthPyramidSampler)
+        {
+            renderContext->DestroyGpuView(depthPyramidSampler);
+        }
+        if (depthPyramid)
+        {
+            renderContext->DestroyTexture(depthPyramid);
         }
     }
 
@@ -213,11 +296,128 @@ namespace ig
         CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
 
         Swapchain& swapchain = renderContext->GetSwapchain();
-        GpuTexture* backBuffer = renderContext->Lookup(swapchain.GetBackBuffer());
-        const GpuView* backBufferRtv = renderContext->Lookup(swapchain.GetBackBufferRtv());
+        GpuTexture* backBufferPtr = renderContext->Lookup(swapchain.GetBackBuffer());
+        const GpuView* backBufferRtvPtr = renderContext->Lookup(swapchain.GetBackBufferRtv());
 
         const GpuView* perFrameParamsCbvPtr = renderContext->Lookup(perFrameParamsCb.GetConstantBufferView());
         IG_CHECK(perFrameParamsCbvPtr != nullptr);
+
+        /* Copy Depth Buffer for Depth Pyramid gen at next frame. */
+        GpuTexture* depthBufferPtr = renderContext->Lookup(depthBuffer);
+        GpuTexture* depthPyramidPtr = renderContext->Lookup(depthPyramid);
+        {
+            /*
+             * 이 시점에 frameCritCopyQueue는 SceneProxy Replication 때문에 Busy한 상태
+             * 해당 작업과 DepthPyramid 생성의 Overlap 최대화와,
+             * Barrier 사용의 최소화(Queue 마다 호환되는 Layout set이 다르므로)를 위해
+             * MainGfxQueue에서 Copy 및 Layout Transition 진행.
+             * (GraphicsQueue는 모든 Layout의 전환이 가능하므로)
+             */
+            auto mainGfxCmdList = mainGfxCmdListPool.Request(localFrameIdx, "CopyDepthToDepthPyramidMip0"_fs);
+            mainGfxCmdList->Open();
+            mainGfxCmdList->AddPendingTextureBarrier(
+                *depthBufferPtr,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_SOURCE,
+                D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE, D3D12_BARRIER_LAYOUT_COPY_SOURCE);
+            /*
+             * 이후, Depth Pyramid 생성 과정에서 매 과정마다 필요한 Mip Level에 대해 Barrier를 삽입 하는게 더 빠를 것 인가.
+             * 아니면 Barrier를 최소화 하는게 더 빠를 것 인가.
+             * 생성 => SHADER_RESOURCE
+             * 복사 => COPY_DEST
+             * Depth Pyramid Gen => UNORDERED_ACCESS
+             * Occlusion Culling 사용 => SHADER_RESOURCE
+             */
+            mainGfxCmdList->AddPendingTextureBarrier(
+                *depthPyramidPtr,
+                D3D12_BARRIER_SYNC_NONE, D3D12_BARRIER_SYNC_COPY,
+                D3D12_BARRIER_ACCESS_NO_ACCESS, D3D12_BARRIER_ACCESS_COPY_DEST,
+                D3D12_BARRIER_LAYOUT_SHADER_RESOURCE, D3D12_BARRIER_LAYOUT_COPY_DEST);
+            mainGfxCmdList->FlushBarriers();
+
+            /* Depth Pyramid의 Mip 0에 이전 프레임의 Depth를 복사 */
+            mainGfxCmdList->CopyTextureRegion(
+                *depthBufferPtr, 0,
+                *depthPyramidPtr, 0);
+
+            /* Depth Buffer를 이후 과정에서 DCC의 혜택을 받을 수 있도록 미리 DEPTH_WRITE 상태로 변경 */
+            mainGfxCmdList->AddPendingTextureBarrier(
+                *depthBufferPtr,
+                D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_COPY_SOURCE, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_LAYOUT_COPY_SOURCE, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE);
+            mainGfxCmdList->AddPendingTextureBarrier(
+                *depthPyramidPtr,
+                D3D12_BARRIER_SYNC_COPY, D3D12_BARRIER_SYNC_NONE,
+                D3D12_BARRIER_ACCESS_COPY_DEST, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                D3D12_BARRIER_LAYOUT_COPY_DEST, D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS);
+            mainGfxCmdList->FlushBarriers();
+
+            mainGfxCmdList->Close();
+
+            mainGfxQueue.ExecuteCommandList(*mainGfxCmdList);
+        }
+        GpuSyncPoint copyDepthBufferSyncPoint = frameCritCopyQueue.MakeSyncPointWithSignal();
+
+        /* Hi-Z Occlusion Culling을 위한 Depth Pyramid를 생성 */
+        {
+            auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
+            const auto descriptorHeapsSpan = MakeSpan(descriptorHeaps);
+            // 가장 간단한 방법으론 DepthPyramid.MipLevels-1 번 만큼의 Dispatch가 필요..
+            // Dispatch를 최소화 하는 방법은?
+            // SPD는 어떻게 구현되어 있는걸까?
+            for (U16 depthPyramidMipLevel = 1; depthPyramidMipLevel < depthPyramidExtents.size(); ++depthPyramidMipLevel)
+            {
+                const GpuView* prevMipUav = renderContext->Lookup(depthPyramidMipsUav[depthPyramidMipLevel - 1]);
+                const GpuView* currMipUav = renderContext->Lookup(depthPyramidMipsUav[depthPyramidMipLevel]);
+
+                auto cmdList = asyncComputeCmdListPool.Request(localFrameIdx, String(std::format("GenDepthPyrmiad.{}", depthPyramidMipLevel)));
+                cmdList->Open(generateDepthPyramidPso.get());
+                cmdList->SetDescriptorHeaps(descriptorHeapsSpan);
+                cmdList->SetRootSignature(*bindlessRootSignature);
+
+                const Uint2 prevDepthPyramidMipExtent = depthPyramidExtents[depthPyramidMipLevel - 1];
+                const Uint2 currDepthPyramidMipExtent = depthPyramidExtents[depthPyramidMipLevel];
+                const GenerateDepthPyramidConstants constants
+                {
+                    .PrevMipUav = prevMipUav->Index,
+                    .CurrMipUav = currMipUav->Index,
+                    .PrevMipWidth = prevDepthPyramidMipExtent.X,
+                    .PrevMipHeight = prevDepthPyramidMipExtent.Y,
+                    .CurrMipWidth = currDepthPyramidMipExtent.X,
+                    .CurrMipHeight = currDepthPyramidMipExtent.Y
+                };
+                cmdList->SetRoot32BitConstants(0, constants, 0);
+
+                const Uint2 numThreadGroups{.X = (currDepthPyramidMipExtent.X + 7) / 8, .Y = (currDepthPyramidMipExtent.Y + 7) / 8};
+                cmdList->Dispatch(numThreadGroups.X, numThreadGroups.Y, 1);
+
+                // if depthPyramidMipLevel == last -> Barrier(UAV->SRV)
+                if (depthPyramidMipLevel == (depthPyramidExtents.size() - 1))
+                {
+                    cmdList->AddPendingTextureBarrier(
+                        *depthPyramidPtr,
+                        D3D12_BARRIER_SYNC_COMPUTE_SHADING, D3D12_BARRIER_SYNC_NONE,
+                        D3D12_BARRIER_ACCESS_UNORDERED_ACCESS, D3D12_BARRIER_ACCESS_NO_ACCESS,
+                        D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE);
+                    cmdList->FlushBarriers();
+                }
+
+                cmdList->Close();
+
+                if (depthPyramidMipLevel == 1)
+                {
+                    asyncComputeQueue.Wait(copyDepthBufferSyncPoint);
+                }
+                else
+                {
+                    GpuSyncPoint prevMipSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
+                    asyncComputeQueue.Wait(prevMipSyncPoint);
+                }
+                asyncComputeQueue.ExecuteCommandList(*cmdList);
+            }
+        }
+        GpuSyncPoint genDepthPyramidSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
 
         /* Light Clustering Pass */
         {
@@ -259,23 +459,30 @@ namespace ig
                 .PerFrameParamsCbv = perFrameParamsCbvPtr,
                 .MeshInstanceIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceIndicesBufferSrv()),
                 .DispatchOpaqueMeshInstanceStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer()),
-                .DispatchOpaqueMeshInstanceStorageUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUnorderedResourceView()),
+                .DispatchOpaqueMeshInstanceStorageUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUav()),
                 .DispatchTransparentMeshInstanceStorageBuffer = nullptr,
                 .DispatchTransparentMeshInstanceStorageUav = nullptr,
                 .NumMeshInstances = numMeshInstances,
                 .OpaqueMeshInstanceIndicesStorageUav = nullptr,
-                .TransparentMeshInstanceIndicesStorageUav = nullptr
+                .TransparentMeshInstanceIndicesStorageUav = nullptr,
+                .DepthPyramidSrv = renderContext->Lookup(depthPyramidSrv),
+                .DepthPyramidSampler = renderContext->Lookup(depthPyramidSampler),
+                .DepthPyramidWidth = depthPyramidExtents[0].X,
+                .DepthPyramidHeight = depthPyramidExtents[0].Y,
+                .NumDepthPyramidMips = (U32)depthPyramidExtents.size()
             });
             meshInstancePass->Record(localFrameIdx);
 
             CommandList* cmdLists[]{meshInstancePassCmdList};
             asyncComputeQueue.Wait(sceneProxyRepSyncPoint);
+            asyncComputeQueue.Wait(genDepthPyramidSyncPoint);
             asyncComputeQueue.ExecuteCommandLists(cmdLists);
             meshInstancePassSyncPoint = asyncComputeQueue.MakeSyncPointWithSignal();
         }
         /*********************/
+
         GpuBuffer* opaqueMeshInstanceDispatchStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
-        const GpuView* dsvPtr = renderContext->Lookup(dsv);
+        const GpuView* dsvPtr = renderContext->Lookup(depthBufferDsv);
         /* Z-Pre Pass */
         {
             auto zPrePassCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ZPrePass"_fs);
@@ -301,8 +508,8 @@ namespace ig
                 ForwardOpaqueMeshRenderPassParams{
                     .MainGfxCmdList = renderCmdList,
                     .DispatchOpaqueMeshInstanceStorageBuffer = opaqueMeshInstanceDispatchStorageBuffer,
-                    .RenderTarget = backBuffer,
-                    .RenderTargetView = backBufferRtv,
+                    .RenderTarget = backBufferPtr,
+                    .RenderTargetView = backBufferRtvPtr,
                     .Dsv = dsvPtr,
                     .TargetViewport = mainViewport
                 });
@@ -314,7 +521,7 @@ namespace ig
             mainGfxQueue.Wait(lightClusteringSyncPoint);
             mainGfxQueue.ExecuteCommandLists(renderCmdLists);
         }
-
+        GpuSyncPoint forwardOpaqueMeshRenderPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
         /*********************/
 
         /* ImGui Render Pass */
@@ -329,8 +536,7 @@ namespace ig
         imguiRenderPass->Record(localFrameIdx);
 
         CommandList* cmdLists[]{imguiRenderCmdList};
-        GpuSyncPoint prevPassSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
-        mainGfxQueue.Wait(prevPassSyncPoint);
+        mainGfxQueue.Wait(forwardOpaqueMeshRenderPassSyncPoint);
         mainGfxQueue.ExecuteCommandLists(cmdLists);
 
         swapchain.Present();

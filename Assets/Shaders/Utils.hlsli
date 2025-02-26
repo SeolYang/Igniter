@@ -124,4 +124,29 @@ uint MapScreenCoverageToLodAuto(float screenCoverage, uint numLevelOfDetails)
     return numLevelOfDetails - 1;
 }
 
+// 논문 직접 읽어서 정리하기
+// 2D Polyhedral Bounds of a Clipped, Perspective-Projected 3D Sphere. Michael Mara, Morgan McGuire. 2013
+bool ProjectSphere(float3 c, float r, float znear, float P00, float P11, out float4 aabb)
+{
+    if (c.z + r < znear)
+    {
+        return false;
+    }
+
+    float3 cr = c * r;
+    float czr2 = c.z * c.z + r * r;
+
+    float vx = sqrt(c.x * c.x + czr2);
+    float minx = (vx * c.x - cr.z) / (vx * c.z + cr.x);
+    float maxx = (vx * c.x + cr.z) / (vx * c.z - cr.x);
+
+    float vy = sqrt(c.y * c.y + czr2);
+    float miny = (vy * c.y - cr.z) / (vy * c.z + cr.y);
+    float maxy = (vy * c.y + cr.z) / (vy * c.z - cr.y);
+
+    aabb = float4(minx * P00, miny * P11, maxx * P00, maxy * P11);
+    aabb = aabb.xwzy * float4(0.5f, -0.5f, 0.5f, -0.5f) + 0.5f;
+
+    return true;
+}
 #endif

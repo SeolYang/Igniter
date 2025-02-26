@@ -29,7 +29,7 @@ namespace ig
     Engine::Engine(const IgniterDesc& desc)
         :
 #if defined(DEBUG) || defined(_DEBUG)
-        taskExecutor(2)
+        taskExecutor(1)
 #else
         taskExecutor(std::thread::hardware_concurrency())
 #endif

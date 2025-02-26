@@ -24,11 +24,11 @@ namespace fe
         static void OnInspector(ig::Registry* registry, const ig::Entity entity);
 
       public:
-        float MovementPower = 25.f;
+        float MovementPower = 8.f;
         float MovementPowerAttenuationTime = 0.65f; /* Seconds */
         float MouseYawSentisitivity = 0.03f;        /* Degrees */
         float MousePitchSentisitivity = 0.03f;      /* Degrees */
-        float SprintFactor = 4.f;
+        float SprintFactor = 8.f;
 
         ig::Vector3 LatestImpulse{};
         float ElapsedTimeAfterLatestImpulse = 0.f;

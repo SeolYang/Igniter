@@ -43,6 +43,9 @@ namespace ig
         IG_CHECK(newParams.DispatchTransparentMeshInstanceStorageUav == nullptr && "미구현");
         IG_CHECK(newParams.OpaqueMeshInstanceIndicesStorageUav == nullptr && "미구현");
         IG_CHECK(newParams.TransparentMeshInstanceIndicesStorageUav == nullptr && "미구현");
+        IG_CHECK(newParams.DepthPyramidSrv != nullptr);
+        IG_CHECK(newParams.DepthPyramidSampler != nullptr);
+        IG_CHECK(newParams.DepthPyramidWidth > 0 && newParams.DepthPyramidHeight > 0 && newParams.NumDepthPyramidMips > 0);
         params = newParams;
     }
 
@@ -60,7 +63,12 @@ namespace ig
             .MeshInstanceIndicesBufferSrv = params.MeshInstanceIndicesBufferSrv->Index,
             .NumMeshInstances = params.NumMeshInstances,
             .OpaqueMeshInstanceDispatchBufferUav = params.DispatchOpaqueMeshInstanceStorageUav->Index,
-            .TransparentMeshInstanceDispatchBufferUav = 0xFFFFFFFF
+            .TransparentMeshInstanceDispatchBufferUav = 0xFFFFFFFF,
+            .DepthPyramidSrv = params.DepthPyramidSrv->Index,
+            .DepthPyramidSampler = params.DepthPyramidSrv->Index,
+            .DepthPyramidWidth = params.DepthPyramidWidth,
+            .DepthPyramidHeight = params.DepthPyramidHeight,
+            .NumDepthPyramidMips = params.NumDepthPyramidMips,
         };
 
         CommandList& cmdList = *params.ComputeCmdList;

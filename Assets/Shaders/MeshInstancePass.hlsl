@@ -10,6 +10,13 @@ struct MeshInstancePassParams
 
     uint OpaqueMeshInstanceDispatchBufferUav;
     uint TransparentMeshInstanceDispatchBufferUav;
+
+    /* 나중에 별도로 빼내기 */
+    uint DepthPyramidSrv;
+    uint DepthPyramidSampler;
+    uint DepthPyramidWidth;
+    uint DepthPyramidHeight;
+    uint NumDepthPyramidMips;
 };
 
 ConstantBuffer<MeshInstancePassParams> gMeshInstanceParams : register(b0);
@@ -82,6 +89,41 @@ void main(uint3 DTid : SV_DispatchThreadID)
         aabbNdc.z = max(aabbCornerNdc.x, aabbNdc.z);
         aabbNdc.w = max(aabbCornerNdc.y, aabbNdc.w);
     }
+
+    Texture2D depthPyramid = ResourceDescriptorHeap[gMeshInstanceParams.DepthPyramidSrv];
+    float4 aabbScreenUv;
+    if (!ProjectSphere(
+        viewBoundingSphere.Center, viewBoundingSphere.Radius,
+        perFrameParams.ViewFrustumParams.z,
+        perFrameParams.Proj._m00, perFrameParams.Proj._m11,
+        aabbScreenUv))
+    {
+        return;
+    }
+
+    float rnear = perFrameParams.ViewFrustumParams.w;
+    float rfar = perFrameParams.ViewFrustumParams.z;
+
+    float boundingSphereWidth = (aabbScreenUv.z - aabbScreenUv.x) * gMeshInstanceParams.DepthPyramidWidth;
+    float boundingSphereHeight = (aabbScreenUv.w - aabbScreenUv.y) * gMeshInstanceParams.DepthPyramidHeight;
+    float targetDepthPyramidMipLevel = min(floor(log2(max(boundingSphereWidth, boundingSphereHeight))), gMeshInstanceParams.NumDepthPyramidMips - 1);
+    SamplerState depthPyramidSampler = ResourceDescriptorHeap[gMeshInstanceParams.DepthPyramidSampler];
+    float depth = depthPyramid.SampleLevel(depthPyramidSampler, (aabbScreenUv.xy + aabbScreenUv.zw) * 0.5f, targetDepthPyramidMipLevel).r;
+    float zSphere = max(perFrameParams.ViewFrustumParams.z, viewBoundingSphere.Center.z - viewBoundingSphere.Radius);
+    // 너무 가까운 물체들이 서로 컬링하지 않도록.. 좀더 괜찮은 방법 없을까?
+    // 이렇게 보정해주는 방식의 경우 지금 값 기준으로 가까이 있는 물체에 대해서 보정이 잘 되지만,
+    // near plane과 far plane 사이의 거리가 더 멀어지는 경우, 즉 물체간의 depth 차이가 더 덜나게 되는 경우
+    // 오히려 culling rate를 떨어트릴 수 있다.
+    // 가능한 해결 방안으로는.. correction factor = a/(b*log10(far-near))
+    const static float kCorrectionFactor = 8.f;
+    float depthSphere = (rfar * (zSphere - rnear)) / (zSphere * (rfar - rnear)) * kCorrectionFactor;
+    /* Reversed-Z!; Depth가 1.f에 가까울 수록 가깝고, 0.f에 가까울 수록 멀다 */
+    if (depth > depthSphere)
+    {
+        return;
+    }
+
+    aabbNdc = clamp(aabbNdc, -1.f, 1.f);
     const float screenCoverage = saturate(((aabbNdc.z - aabbNdc.x) * (aabbNdc.w - aabbNdc.y)) * 0.25f);
     uint targetLevelOfDetail;
     if (mesh.bOverrideLodScreenCoverageThreshold)
@@ -100,7 +142,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         targetLevelOfDetail = MapScreenCoverageToLodAuto(screenCoverage, mesh.NumLevelOfDetails);
     }
     targetLevelOfDetail = min(targetLevelOfDetail, mesh.NumLevelOfDetails - 1);
-    
+
     MeshLod meshLod = mesh.LevelOfDetails[targetLevelOfDetail];
     DispatchMeshInstance newDispatchMeshInstance;
     newDispatchMeshInstance.Params.MeshInstanceIdx = meshInstanceIdx;

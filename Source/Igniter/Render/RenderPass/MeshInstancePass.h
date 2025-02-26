@@ -44,6 +44,12 @@ namespace ig
         /* @todo 만약 Opaque/Transparent Mesh 정보가 개별적으로 필요한 경우 사용 할 수 있도록 준비 */
         const GpuView* OpaqueMeshInstanceIndicesStorageUav = nullptr;
         const GpuView* TransparentMeshInstanceIndicesStorageUav = nullptr;
+
+        const GpuView* DepthPyramidSrv = nullptr;
+        const GpuView* DepthPyramidSampler = nullptr;
+        U32 DepthPyramidWidth = 0;
+        U32 DepthPyramidHeight = 0;
+        U32 NumDepthPyramidMips = 0;
     };
 
     struct MeshInstancePassConstants
@@ -54,6 +60,12 @@ namespace ig
 
         U32 OpaqueMeshInstanceDispatchBufferUav;
         U32 TransparentMeshInstanceDispatchBufferUav;
+
+        U32 DepthPyramidSrv;
+        U32 DepthPyramidSampler;
+        U32 DepthPyramidWidth;
+        U32 DepthPyramidHeight;
+        U32 NumDepthPyramidMips;
     };
 
     class MeshInstancePass : public RenderPass

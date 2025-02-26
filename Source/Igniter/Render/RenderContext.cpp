@@ -480,7 +480,7 @@ namespace ig
             }
             gpuViewPackage.DeferredDestroyPendingList.Resources[localFrameIdx].clear();
         }
-
+        
         mainGfxQueue.Wait(prevFrameLastSyncPoint);
         asyncComputeQueue.Wait(prevFrameLastSyncPoint);
         frameCriticalAsyncCopyQueue.Wait(prevFrameLastSyncPoint);
