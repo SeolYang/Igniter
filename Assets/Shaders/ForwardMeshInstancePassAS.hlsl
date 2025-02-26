@@ -56,18 +56,37 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
         if (bIsVisible)
         {
             Texture2D depthPyramid = ResourceDescriptorHeap[depthPyramidParams.DepthPyramidSrv];
-            float rnear = perFrameParams.ViewFrustumParams.w;
-            float rfar = perFrameParams.ViewFrustumParams.z;
-
             float boundingSphereWidth = (aabbScreenUv.z - aabbScreenUv.x) * depthPyramidParams.DepthPyramidWidth;
             float boundingSphereHeight = (aabbScreenUv.w - aabbScreenUv.y) * depthPyramidParams.DepthPyramidHeight;
-            float targetDepthPyramidMipLevel = min(floor(log2(max(boundingSphereWidth, boundingSphereHeight))), depthPyramidParams.NumDepthPyramidMips - 1);
+            uint targetDepthPyramidMipLevel = min(floor(log2(max(boundingSphereWidth, boundingSphereHeight))), depthPyramidParams.NumDepthPyramidMips - 1);
             SamplerState depthPyramidSampler = ResourceDescriptorHeap[depthPyramidParams.DepthPyramidSampler];
-            float depth = depthPyramid.SampleLevel(depthPyramidSampler, (aabbScreenUv.xy + aabbScreenUv.zw) * 0.5f, targetDepthPyramidMipLevel).r;
+            float2 depthPyramidUv = (aabbScreenUv.xy + aabbScreenUv.zw) * 0.5f;
+            float depth = depthPyramid.SampleLevel(depthPyramidSampler, depthPyramidUv, targetDepthPyramidMipLevel).r;
             float zSphere = max(perFrameParams.ViewFrustumParams.z, viewBoundingSphere.Center.z - viewBoundingSphere.Radius);
-            const static float kCorrectionFactor = 16.f;
-            float depthSphere = (rfar * (zSphere - rnear)) / (zSphere * (rfar - rnear)) * kCorrectionFactor;
-            bIsVisible &= depthSphere >= depth;
+            const float kCalibrationCoefficient = max(1.f, 10.f / viewBoundingSphere.Radius);
+            float depthSphere = (perFrameParams.ViewFrustumParams.z / zSphere) * kCalibrationCoefficient;
+            if (depth > depthSphere)
+            {
+                bIsVisible = false;
+                /* Depth Discontinuity 대처 */
+                while (targetDepthPyramidMipLevel > 1)
+                {
+                    targetDepthPyramidMipLevel -= 1;
+                    float2 depthPyramidSamplePoint0 = aabbScreenUv.xy;
+                    float2 depthPyramidSamplePoint1 = aabbScreenUv.xw;
+                    float2 depthPyramidSamplePoint2 = aabbScreenUv.zy;
+                    float2 depthPyramidSamplePoint3 = aabbScreenUv.zw;
+                    float depth0 = depthPyramid.SampleLevel(depthPyramidSampler, depthPyramidSamplePoint0, targetDepthPyramidMipLevel).r;
+                    float depth1 = depthPyramid.SampleLevel(depthPyramidSampler, depthPyramidSamplePoint1, targetDepthPyramidMipLevel).r;
+                    float depth2 = depthPyramid.SampleLevel(depthPyramidSampler, depthPyramidSamplePoint2, targetDepthPyramidMipLevel).r;
+                    float depth3 = depthPyramid.SampleLevel(depthPyramidSampler, depthPyramidSamplePoint3, targetDepthPyramidMipLevel).r;
+                    if ((depth0 <= depthSphere) || (depth1 <= depthSphere) || (depth2 <= depthSphere) || (depth3 <= depthSphere))
+                    {
+                        bIsVisible = true;
+                        break;
+                    }
+                }
+            }
         }
     }
 
