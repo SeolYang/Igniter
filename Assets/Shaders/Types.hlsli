@@ -131,6 +131,7 @@ struct DispatchMeshInstanceParams
     uint MeshInstanceIdx;
     uint TargetLevelOfDetail;
     uint PerFrameParamsCbv;
+    uint DepthPyramidParamsCbv;
 };
 
 struct DispatchMeshInstance
@@ -139,6 +140,15 @@ struct DispatchMeshInstance
     uint ThreadGroupCountX;
     uint ThreadGroupCountY;
     uint ThreadGroupCountZ;
+};
+
+struct DepthPyramidParams
+{
+    uint DepthPyramidSrv;
+    uint DepthPyramidSampler;
+    uint DepthPyramidWidth;
+    uint DepthPyramidHeight;
+    uint NumDepthPyramidMips;
 };
 
 #endif

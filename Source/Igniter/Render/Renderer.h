@@ -19,6 +19,15 @@ namespace ig
     class TempConstantBufferAllocator;
     class World;
 
+    struct DepthPyramidConstants
+    {
+        U32 DepthPyramidSrv;
+        U32 DepthPyramidSampler;
+        U32 DepthPyramidWidth;
+        U32 DepthPyramidHeight;
+        U32 NumDepthPyramidMips;
+    };
+
     class Renderer final
     {
     public:
@@ -49,13 +58,17 @@ namespace ig
         Handle<GpuTexture> depthBuffer;
         Handle<GpuView> depthBufferDsv;
 
+        /* Hi-Z Occlusion Culling for Forward Shading Pass */
+        // @todo DepthPyramid 자체를 별도의 클래스로 빼내서 재사용 가능한 형태로 만들 것!
+        DepthPyramidConstants depthPyramidConstants; 
         Handle<GpuTexture> depthPyramid;
         Vector<Uint2> depthPyramidExtents;
         Handle<GpuView> depthPyramidSrv;
         Vector<Handle<GpuView>> depthPyramidMipsUav;
         Handle<GpuView> depthPyramidSampler;
         GpuCopyableFootprints depthPyramidFootprints;
-
+        /******************/
+        
         Ptr<ShaderBlob> generateDepthPyramidShader;
         Ptr<PipelineState> generateDepthPyramidPso;
 

@@ -8,6 +8,7 @@ groupshared MeshInstancePassPayload gPayload;
 void main(uint dispatchThreadId : SV_DispatchThreadID)
 {
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gParams.PerFrameParamsCbv];
+    ConstantBuffer<DepthPyramidParams> depthPyramidParams = ResourceDescriptorHeap[gParams.DepthPyramidParamsCbv];
     StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[perFrameParams.MeshInstanceStorageSrv];
     StructuredBuffer<Mesh> staticMeshStorage = ResourceDescriptorHeap[perFrameParams.StaticMeshStorageSrv];
     StructuredBuffer<Meshlet> meshletStorage = ResourceDescriptorHeap[perFrameParams.MeshletStorageSrv];
@@ -19,7 +20,7 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
         meshInstance.ToWorld[1],
         meshInstance.ToWorld[2],
         float4(0.f, 0.f, 0.f, 1.f)));
-    
+
     bool bIsVisible = dispatchThreadId < meshLod.NumMeshlets;
     if (bIsVisible)
     {
@@ -43,6 +44,31 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
         float boundingSphereDist = length(boundingSphereDir);
         float cutOff = mad(normalCone.w, boundingSphereDist, worldBoundingSphere.Radius);
         bIsVisible &= dot(boundingSphereDir, worldNormalConeAxis) <= cutOff;
+
+        /* Per Meshlet Hi-Z Occlusion Culling */
+        float4 aabbScreenUv;
+        bIsVisible &= ProjectSphere(
+            viewBoundingSphere.Center, viewBoundingSphere.Radius,
+            perFrameParams.ViewFrustumParams.z,
+            perFrameParams.Proj._m00, perFrameParams.Proj._m11,
+            aabbScreenUv);
+
+        if (bIsVisible)
+        {
+            Texture2D depthPyramid = ResourceDescriptorHeap[depthPyramidParams.DepthPyramidSrv];
+            float rnear = perFrameParams.ViewFrustumParams.w;
+            float rfar = perFrameParams.ViewFrustumParams.z;
+
+            float boundingSphereWidth = (aabbScreenUv.z - aabbScreenUv.x) * depthPyramidParams.DepthPyramidWidth;
+            float boundingSphereHeight = (aabbScreenUv.w - aabbScreenUv.y) * depthPyramidParams.DepthPyramidHeight;
+            float targetDepthPyramidMipLevel = min(floor(log2(max(boundingSphereWidth, boundingSphereHeight))), depthPyramidParams.NumDepthPyramidMips - 1);
+            SamplerState depthPyramidSampler = ResourceDescriptorHeap[depthPyramidParams.DepthPyramidSampler];
+            float depth = depthPyramid.SampleLevel(depthPyramidSampler, (aabbScreenUv.xy + aabbScreenUv.zw) * 0.5f, targetDepthPyramidMipLevel).r;
+            float zSphere = max(perFrameParams.ViewFrustumParams.z, viewBoundingSphere.Center.z - viewBoundingSphere.Radius);
+            const static float kCorrectionFactor = 16.f;
+            float depthSphere = (rfar * (zSphere - rnear)) / (zSphere * (rfar - rnear)) * kCorrectionFactor;
+            bIsVisible &= depthSphere >= depth;
+        }
     }
 
     /* Compaction */

@@ -138,6 +138,24 @@ namespace ig
         const GpuTexture* depthPyramidPtr = renderContext.Lookup(depthPyramid);
         depthPyramidFootprints = gpuDevice.GetCopyableFootprints(depthPyramidPtr->GetDesc(), 0, maxDepthPyramidMipLevels, 0);
 
+        depthPyramidSampler = renderContext.CreateSamplerView(
+            D3D12_SAMPLER_DESC{
+                .Filter = D3D12_FILTER_MAXIMUM_MIN_MAG_LINEAR_MIP_POINT,
+                .AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                .AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                .AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                .MipLODBias = 0.f,
+                .MinLOD = 0.f, .MaxLOD = FLT_MAX
+            });
+
+        depthPyramidConstants = DepthPyramidConstants{
+            .DepthPyramidSrv = renderContext.Lookup(depthPyramidSrv)->Index,
+            .DepthPyramidSampler = renderContext.Lookup(depthPyramidSampler)->Index,
+            .DepthPyramidWidth = depthPyramidExtents[0].X,
+            .DepthPyramidHeight = depthPyramidExtents[0].Y,
+            .NumDepthPyramidMips = (U32)depthPyramidExtents.size()
+        };
+
         GpuBufferDesc zeroFilledBufferDesc{};
         zeroFilledBufferDesc.AsUploadBuffer(kZeroFilledBufferSize);
         zeroFilledBufferDesc.DebugName = "ZeroFilledBuffer"_fs;
@@ -161,7 +179,7 @@ namespace ig
 
         CommandSignatureDesc dispatchMeshInstanceCmdSignatureDesc{};
         dispatchMeshInstanceCmdSignatureDesc.SetCommandByteStride<DispatchMeshInstance>();
-        dispatchMeshInstanceCmdSignatureDesc.AddConstant(0, 0, 3);
+        dispatchMeshInstanceCmdSignatureDesc.AddConstant(0, 0, 4);
         dispatchMeshInstanceCmdSignatureDesc.AddDispatchMeshArgument();
         dispatchMeshInstanceCmdSignature = MakePtr<CommandSignature>(
             gpuDevice.CreateCommandSignature(
@@ -183,16 +201,6 @@ namespace ig
         genDepthPyramidPsoDesc.SetRootSignature(*bindlessRootSignature);
         genDepthPyramidPsoDesc.SetComputeShader(*generateDepthPyramidShader);
         generateDepthPyramidPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(genDepthPyramidPsoDesc).value());
-
-        depthPyramidSampler = renderContext.CreateSamplerView(
-            D3D12_SAMPLER_DESC{
-                .Filter = D3D12_FILTER_MAXIMUM_MIN_MAG_LINEAR_MIP_POINT,
-                .AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-                .AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-                .AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-                .MipLODBias = 0.f,
-                .MinLOD = 0.f, .MaxLOD = FLT_MAX
-            });
     }
 
     Renderer::~Renderer()
@@ -246,6 +254,9 @@ namespace ig
         ZoneScoped;
 
         const Registry& registry = world.GetRegistry();
+
+        TempConstantBuffer depthPyramidCb = tempConstantBufferAllocator->Allocate<DepthPyramidConstants>(localFrameIdx);
+        depthPyramidCb.Write(depthPyramidConstants);
 
         PerFrameParams perFrameParams{};
         TempConstantBuffer perFrameParamsCb = tempConstantBufferAllocator->Allocate<PerFrameParams>(localFrameIdx);
@@ -465,11 +476,7 @@ namespace ig
                 .NumMeshInstances = numMeshInstances,
                 .OpaqueMeshInstanceIndicesStorageUav = nullptr,
                 .TransparentMeshInstanceIndicesStorageUav = nullptr,
-                .DepthPyramidSrv = renderContext->Lookup(depthPyramidSrv),
-                .DepthPyramidSampler = renderContext->Lookup(depthPyramidSampler),
-                .DepthPyramidWidth = depthPyramidExtents[0].X,
-                .DepthPyramidHeight = depthPyramidExtents[0].Y,
-                .NumDepthPyramidMips = (U32)depthPyramidExtents.size()
+                .DepthPyramidParamsCbv = renderContext->Lookup(depthPyramidCb.GetConstantBufferView())
             });
             meshInstancePass->Record(localFrameIdx);
 

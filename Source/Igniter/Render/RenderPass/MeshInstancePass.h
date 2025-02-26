@@ -20,6 +20,7 @@ namespace ig
         U32 MeshInstanceIdx;
         U32 TargetLevelOfDetail;
         U32 PerFrameParamsCbv;
+        U32 DepthPyramidParamsCbv;
     };
 
     struct DispatchMeshInstance
@@ -45,11 +46,7 @@ namespace ig
         const GpuView* OpaqueMeshInstanceIndicesStorageUav = nullptr;
         const GpuView* TransparentMeshInstanceIndicesStorageUav = nullptr;
 
-        const GpuView* DepthPyramidSrv = nullptr;
-        const GpuView* DepthPyramidSampler = nullptr;
-        U32 DepthPyramidWidth = 0;
-        U32 DepthPyramidHeight = 0;
-        U32 NumDepthPyramidMips = 0;
+        const GpuView* DepthPyramidParamsCbv = nullptr;
     };
 
     struct MeshInstancePassConstants
@@ -61,11 +58,7 @@ namespace ig
         U32 OpaqueMeshInstanceDispatchBufferUav;
         U32 TransparentMeshInstanceDispatchBufferUav;
 
-        U32 DepthPyramidSrv;
-        U32 DepthPyramidSampler;
-        U32 DepthPyramidWidth;
-        U32 DepthPyramidHeight;
-        U32 NumDepthPyramidMips;
+        U32 DepthPyramidParamsCbv;
     };
 
     class MeshInstancePass : public RenderPass
