@@ -35,7 +35,8 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
             perFrameParams.CamWorldPosInvAspectRatio.w,
             perFrameParams.ViewFrustumParams,
             viewBoundingSphere);
-
+        /**************************************/
+        
         /* Per Meshlet Normal Cone Culling */
         /* normalCone.xyz: Axis, normalCone.w: Cutoff */
         float4 normalCone = DecodeNormalCone(meshlet.EncodedNormalCone);
@@ -44,11 +45,13 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
         float boundingSphereDist = length(boundingSphereDir);
         float cutOff = mad(normalCone.w, boundingSphereDist, worldBoundingSphere.Radius);
         bIsVisible &= dot(boundingSphereDir, worldNormalConeAxis) <= cutOff;
+        /**************************************/
 
         /* Per Meshlet Hi-Z Occlusion Culling */
+        const static float kConservativeBoundingSphereRadiusFactor = 0.5f;
         float4 aabbScreenUv;
         bIsVisible &= ProjectSphere(
-            viewBoundingSphere.Center, viewBoundingSphere.Radius,
+            viewBoundingSphere.Center, viewBoundingSphere.Radius * kConservativeBoundingSphereRadiusFactor,
             perFrameParams.ViewFrustumParams.z,
             perFrameParams.Proj._m00, perFrameParams.Proj._m11,
             aabbScreenUv);
@@ -89,7 +92,8 @@ void main(uint dispatchThreadId : SV_DispatchThreadID)
             }
         }
     }
-
+    /**************************************/
+    
     /* Compaction */
     if (bIsVisible)
     {

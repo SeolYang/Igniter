@@ -53,32 +53,40 @@ namespace fe
         auto& cameraComponent = registry.get<ig::CameraComponent>(mainCam);
         cameraComponent.bIsMainCamera = true;
         auto& cameraTransform = registry.get<ig::TransformComponent>(mainCam);
-        cameraTransform.Position.z = -700.f;
+        cameraTransform.Position.z = 0.f;
+        auto& camController = registry.get<FpsCameraController>(mainCam);
+        camController.MovementPower = 1.f;
         
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
-        //ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+        //ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
+        ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
         //ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
         IG_VERIFY(assetManager.Clone(testStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ)));
         ig::Handle<ig::Material> testMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
         IG_VERIFY(assetManager.Clone(testMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ)));
 
+#define TEST_ENTITY
+#ifdef TEST_ENTITY
         ig::Entity newEntity = ig::StaticMeshArchetype::Create(&registry);
         ig::TransformComponent& transformComponent = registry.get<ig::TransformComponent>(newEntity);
-        transformComponent.Position.z = -450.f;
-        transformComponent.Scale = ig::Vector3{100.f, 100.f, 100.f};
+        transformComponent.Position.z = 0.f;
+        transformComponent.Scale = ig::Vector3{1.f, 1.f, 1.f};
         ig::StaticMeshComponent& meshComponent = registry.get<ig::StaticMeshComponent>(newEntity);
         meshComponent.Mesh = testStaticMesh;
         ig::MaterialComponent& materialComponent = registry.get<ig::MaterialComponent>(newEntity);
         materialComponent.Instance = testMaterial;
+#endif
 
+#ifdef TEST_LIGHT
         ig::Entity newLight = ig::PointLightArchetype::Create(&registry);
         ig::TransformComponent& testLightTransform = registry.get<ig::TransformComponent>(newLight);
         testLightTransform.Position.z = -650.f;
         ig::LightComponent& testLightComponent = registry.get<ig::LightComponent>(newLight);
         testLightComponent.Property.Intensity = 1000.f;
         testLightComponent.Property.FalloffRadius = 500.f;
-        
+#endif
+
+#if !defined(TEST_ENTITY) && !defined(TEST_LIGHT)
         for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
         {
             for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)
@@ -109,7 +117,8 @@ namespace fe
                 }
             }
         }
-
+#endif
+        
         for (ig::U32 lightGridX = 0; lightGridX < kLightGridSizeX; ++lightGridX)
         {
             for (ig::U32 lightGridY = 0; lightGridY < kLightGridSizeY; ++lightGridY)
