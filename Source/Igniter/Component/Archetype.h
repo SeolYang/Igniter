@@ -4,10 +4,10 @@
 namespace ig
 {
     template <typename... Ts>
-    struct TagComponentFilter;
+    struct ComponentClassifier;
 
     template <typename T>
-    struct TagComponentFilter<T>
+    struct ComponentClassifier<T>
     {
         using TagComponents = std::conditional_t<
             std::is_empty_v<T>,
@@ -20,10 +20,10 @@ namespace ig
     };
 
     template <typename T, typename... Ts>
-    struct TagComponentFilter<T, Ts...>
+    struct ComponentClassifier<T, Ts...>
     {
     private:
-        using Rest = TagComponentFilter<Ts...>;
+        using Rest = ComponentClassifier<Ts...>;
 
     public:
         using TagComponents = std::conditional_t<
@@ -40,6 +40,10 @@ namespace ig
     template <typename... Components>
     struct Archetype
     {
+    public:
+        using ClassifiedComponents = ComponentClassifier<Components...>;
+        constexpr static bool bHasTagComponents = !std::is_same_v<typename ClassifiedComponents::TagComponents, std::tuple<>>;
+        
     public:
         static Entity Create(Registry* registryPtr)
         {
@@ -77,7 +81,7 @@ namespace ig
         template <typename... Ts>
         static void EmplaceTagInternal(Registry* registry, const Entity entity, [[maybe_unused]] const std::tuple<Ts...>& tagComponentTuple)
         {
-            registry->emplace<Ts...>(entity);
+            (registry->emplace<Ts>(entity), ...);
         }
 
         template <typename... Ts>
@@ -90,14 +94,13 @@ namespace ig
         {
             IG_CHECK(regisry != nullptr);
             IG_CHECK(newEntity != NullEntity);
-            using FilteredComponents = TagComponentFilter<Components...>;
-            if constexpr (std::tuple_size_v<typename FilteredComponents::TagComponents> > 0)
+            if constexpr (std::tuple_size_v<typename ClassifiedComponents::TagComponents> > 0)
             {
-                static const auto kTagComponentsTuple = typename FilteredComponents::TagComponents();
+                static const auto kTagComponentsTuple = typename ClassifiedComponents::TagComponents();
                 EmplaceTagInternal(registry, newEntity, kTagComponentsTuple);
             }
-            static_assert(std::tuple_size_v<typename FilteredComponents::Components> > 0);
-            static const auto kComponentsTuple = typename FilteredComponents::Components();
+            static_assert(std::tuple_size_v<typename ClassifiedComponents::Components> > 0);
+            static const auto kComponentsTuple = typename ClassifiedComponents::Components();
             return EmplaceInternal(registry, newEntity, kComponentsTuple);
         }
     };
