@@ -45,7 +45,7 @@ namespace ig
         constexpr static bool bHasTagComponents = !std::is_same_v<typename ClassifiedComponents::TagComponents, std::tuple<>>;
         
     public:
-        static Entity Create(Registry* registryPtr)
+        [[nodiscard]] static Entity Create(Registry* registryPtr)
         {
             if (registryPtr == nullptr)
             {
@@ -57,24 +57,24 @@ namespace ig
             return newEntity;
         }
 
-        static Entity CreateRef(Registry& registry)
+        [[nodiscard]] static Entity CreateRef(Registry& registry)
         {
             return Create(&registry);
         }
 
-        static bool IsArchetype(const Entity entity, const Registry& registry)
+        [[nodiscard]] static bool IsArchetype(const Entity entity, const Registry& registry)
         {
             return registry.all_of<Components...>(entity);
         }
 
         template <typename... Exclude>
-        static auto View(Registry& registry)
+        [[nodiscard]] static auto View(Registry& registry)
         {
             return registry.view<Components...>(entt::exclude_t<Exclude...>());
         }
         
         template <typename... Exclude>
-        static auto ConstView(const Registry& registry)
+        [[nodiscard]] static auto ConstView(const Registry& registry)
         {
             return registry.view<Components...>(entt::exclude_t<Exclude...>());
         }
