@@ -67,14 +67,16 @@ namespace ig
             return registry.all_of<Components...>(entity);
         }
 
+        template <typename... Exclude>
         static auto View(Registry& registry)
         {
-            return registry.view<Components...>();
+            return registry.view<Components...>(entt::exclude_t<Exclude...>());
         }
-
+        
+        template <typename... Exclude>
         static auto ConstView(const Registry& registry)
         {
-            return registry.view<Components...>();
+            return registry.view<Components...>(entt::exclude_t<Exclude...>());
         }
 
     private:
