@@ -78,7 +78,7 @@ namespace ig
         Ptr<TempConstantBufferAllocator> tempConstantBufferAllocator;
 
         Ptr<class LightClusteringPass> lightClusteringPass;
-        Ptr<class MeshInstancePass> meshInstancePass;
+        Ptr<class PreMeshInstancePass> meshInstancePass;
         Ptr<class ZPrePass> zPrePass;
         Ptr<class ForwardOpaqueMeshRenderPass> forwardOpaqueMeshRenderPass;
         Ptr<class ImGuiRenderPass> imguiRenderPass;

@@ -64,16 +64,16 @@ namespace ig
         U32 DepthPyramidParamsCbv;
     };
 
-    class MeshInstancePass : public RenderPass
+    class PreMeshInstancePass : public RenderPass
     {
     public:
-        MeshInstancePass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
-        MeshInstancePass(const MeshInstancePass&) = delete;
-        MeshInstancePass(MeshInstancePass&&) noexcept = delete;
-        ~MeshInstancePass() override;
+        PreMeshInstancePass(RenderContext& renderContext, RootSignature& bindlessRootSignature);
+        PreMeshInstancePass(const PreMeshInstancePass&) = delete;
+        PreMeshInstancePass(PreMeshInstancePass&&) noexcept = delete;
+        ~PreMeshInstancePass() override;
 
-        MeshInstancePass& operator=(const MeshInstancePass&) = delete;
-        MeshInstancePass& operator=(MeshInstancePass&&) noexcept = delete;
+        PreMeshInstancePass& operator=(const PreMeshInstancePass&) = delete;
+        PreMeshInstancePass& operator=(PreMeshInstancePass&&) noexcept = delete;
 
         void SetParams(const MeshInstancePassParams& newParams);
 

@@ -21,7 +21,7 @@ namespace ig
 
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         const ShaderCompileDesc vsDesc{
-            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassAS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/MeshInstanceAS.hlsl"_fs,
             .Type = EShaderType::Amplification
         };
         as = MakePtr<ShaderBlob>(vsDesc);

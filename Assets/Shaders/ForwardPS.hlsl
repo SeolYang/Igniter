@@ -1,4 +1,4 @@
-#include "ForwardMeshInstancePass.hlsli"
+#include "MeshInstancePass.hlsli"
 
 ConstantBuffer<DispatchMeshInstanceParams> gParams : register(b0);
 

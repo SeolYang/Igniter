@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePass.hlsli">
+    <None Include="..\..\Assets\Shaders\MeshInstancePass.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -145,7 +145,7 @@
     <ClInclude Include="Render\RenderPass\DebugLightClusterPass.h" />
     <ClInclude Include="Render\RenderPass\ForwardOpaqueMeshRenderPass.h" />
     <ClInclude Include="Render\RenderPass\LightClusteringPass.h" />
-    <ClInclude Include="Render\RenderPass\MeshInstancePass.h" />
+    <ClInclude Include="Render\RenderPass\PreMeshInstancePass.h" />
     <ClInclude Include="Render\RenderPass\TestForwardShadingPass.h" />
     <ClInclude Include="Render\RenderPass\CompactMeshLodInstancesPass.h" />
     <ClInclude Include="Render\RenderPass\FrustumCullingPass.h" />
@@ -160,19 +160,19 @@
     <ClInclude Include="Render\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassAS.hlsl">
+    <None Include="..\..\Assets\Shaders\MeshInstanceAS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassMS.hlsl">
+    <None Include="..\..\Assets\Shaders\MeshInstanceMS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassPS.hlsl">
+    <None Include="..\..\Assets\Shaders\ForwardPS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -269,7 +269,7 @@
     <ClCompile Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.cpp" />
     <ClCompile Include="Render\RenderPass\ImGuiRenderPass.cpp" />
     <ClCompile Include="Render\RenderPass\LightClusteringPass.cpp" />
-    <ClCompile Include="Render\RenderPass\MeshInstancePass.cpp" />
+    <ClCompile Include="Render\RenderPass\PreMeshInstancePass.cpp" />
     <ClCompile Include="Render\RenderPass\TestForwardShadingPass.cpp" />
     <ClCompile Include="Render\RenderPass\ZPrePass.cpp" />
     <ClCompile Include="Render\SceneProxy.cpp" />
@@ -420,7 +420,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\MeshInstancePass.hlsl">
+    <FxCompile Include="..\..\Assets\Shaders\PreMeshInstanceCS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">Compute</ShaderType>

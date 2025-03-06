@@ -4,34 +4,34 @@
 #include "Igniter/D3D12/PipelineState.h"
 #include "Igniter/D3D12/GpuDevice.h"
 #include "Igniter/Render/RenderContext.h"
-#include "Igniter/Render/RenderPass/MeshInstancePass.h"
+#include "Igniter/Render/RenderPass/PreMeshInstancePass.h"
 
 namespace ig
 {
-    MeshInstancePass::MeshInstancePass(RenderContext& renderContext, RootSignature& bindlessRootSignature)
+    PreMeshInstancePass::PreMeshInstancePass(RenderContext& renderContext, RootSignature& bindlessRootSignature)
         : renderContext(&renderContext)
         , bindlessRootSignature(&bindlessRootSignature)
     {
         const ShaderCompileDesc meshInstancePassShaderDesc
         {
-            .SourcePath = "Assets/Shaders/MeshInstancePass.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/PreMeshInstanceCS.hlsl"_fs,
             .Type = EShaderType::Compute,
         };
         cs = MakePtr<ShaderBlob>(meshInstancePassShaderDesc);
         ComputePipelineStateDesc meshInstancePassPsoDesc{};
-        meshInstancePassPsoDesc.Name = "MeshInstancePassPSO"_fs;
+        meshInstancePassPsoDesc.Name = "PreMeshInstancePass"_fs;
         meshInstancePassPsoDesc.SetComputeShader(*cs);
         meshInstancePassPsoDesc.SetRootSignature(bindlessRootSignature);
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         pso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(meshInstancePassPsoDesc).value());
     }
 
-    MeshInstancePass::~MeshInstancePass()
+    PreMeshInstancePass::~PreMeshInstancePass()
     {
         /* Empty Here! */
     }
 
-    void MeshInstancePass::SetParams(const MeshInstancePassParams& newParams)
+    void PreMeshInstancePass::SetParams(const MeshInstancePassParams& newParams)
     {
         IG_CHECK(newParams.ComputeCmdList != nullptr);
         IG_CHECK(newParams.ZeroFilledBuffer != nullptr);
@@ -48,7 +48,7 @@ namespace ig
         params = newParams;
     }
 
-    void MeshInstancePass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
+    void PreMeshInstancePass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
         IG_CHECK(localFrameIdx < NumFramesInFlight);
         IG_CHECK(renderContext != nullptr);

@@ -16,7 +16,7 @@
 #include "Igniter/Render/UnifiedMeshStorage.h"
 #include "Igniter/Render/SceneProxy.h"
 #include "Igniter/Render/RenderPass/LightClusteringPass.h"
-#include "Igniter/Render/RenderPass/MeshInstancePass.h"
+#include "Igniter/Render/RenderPass/PreMeshInstancePass.h"
 #include "Igniter/Render/RenderPass/ZPrePass.h"
 #include "Igniter/Render/RenderPass/ForwardOpaqueMeshRenderPass.h"
 #include "Igniter/Render/RenderPass/ImGuiRenderPass.h"
@@ -183,7 +183,7 @@ namespace ig
                 Ref{*bindlessRootSignature}).value());
 
         lightClusteringPass = MakePtr<LightClusteringPass>(renderContext, sceneProxy, *bindlessRootSignature, mainViewport);
-        meshInstancePass = MakePtr<MeshInstancePass>(renderContext, *bindlessRootSignature);
+        meshInstancePass = MakePtr<PreMeshInstancePass>(renderContext, *bindlessRootSignature);
         zPrePass = MakePtr<ZPrePass>(renderContext, *bindlessRootSignature);
         forwardOpaqueMeshRenderPass = MakePtr<ForwardOpaqueMeshRenderPass>(renderContext, *bindlessRootSignature, *dispatchMeshInstanceCmdSignature);
         imguiRenderPass = MakePtr<ImGuiRenderPass>(renderContext);

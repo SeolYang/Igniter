@@ -1,4 +1,4 @@
-#include "ForwardMeshInstancePass.hlsli"
+#include "MeshInstancePass.hlsli"
 #define MESHLET_CONSERVATIVE_BOUDNING_RADIUS 0.1f;
 
 ConstantBuffer<DispatchMeshInstanceParams> gParams : register(b0);

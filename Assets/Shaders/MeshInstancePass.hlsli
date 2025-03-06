@@ -1,5 +1,5 @@
-#ifndef _FORWARD_MESH_INSTANCE_PASS_H_
-#define _FORWARD_MESH_INSTANCE_PASS_H_
+#ifndef _MESH_INSTANCE_PASS_H_
+#define _MESH_INSTANCE_PASS_H_
 
 #include "Types.hlsli"
 #include "Utils.hlsli"

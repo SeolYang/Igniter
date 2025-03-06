@@ -15,21 +15,21 @@ namespace ig
     {
         ShaderCompileDesc forwardMeshInstanceAmpShaderDesc
         {
-            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassAS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/MeshInstanceAS.hlsl"_fs,
             .Type = EShaderType::Amplification
         };
         as = MakePtr<ShaderBlob>(forwardMeshInstanceAmpShaderDesc);
 
         ShaderCompileDesc forwardMeshInstanceMeshShaderDesc
         {
-            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassMS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/MeshInstanceMS.hlsl"_fs,
             .Type = EShaderType::Mesh
         };
         ms = MakePtr<ShaderBlob>(forwardMeshInstanceMeshShaderDesc);
 
         ShaderCompileDesc forwardMeshInstancePixelShaderDesc
         {
-            .SourcePath = "Assets/Shaders/ForwardMeshInstancePassPS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/ForwardPS.hlsl"_fs,
             .Type = EShaderType::Pixel
         };
         ps = MakePtr<ShaderBlob>(forwardMeshInstancePixelShaderDesc);
