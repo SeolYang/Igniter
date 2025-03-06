@@ -7,7 +7,6 @@ namespace ig
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible = true;
         bufferType = EGpuBufferType::ConstantBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
@@ -31,7 +30,6 @@ namespace ig
         IG_VERIFY(numOfElements > 0);
         bIsShaderReadWritable = bShouldEnableShaderReadWrite;
         bIsUavCounterEnabled = bShouldEnableUavCounter;
-        bIsCpuAccessible = false;
         bufferType = EGpuBufferType::StructuredBuffer;
 
         structureByteStride = sizeOfElementInBytes;
@@ -58,7 +56,6 @@ namespace ig
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible = true;
         bufferType = EGpuBufferType::UploadBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
@@ -80,7 +77,6 @@ namespace ig
     {
         IG_VERIFY(sizeOfBufferInBytes > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible = true;
         bufferType = EGpuBufferType::ReadbackBuffer;
 
         structureByteStride = sizeOfBufferInBytes;
@@ -103,7 +99,6 @@ namespace ig
         IG_VERIFY(sizeOfVertexInBytes > 0);
         IG_VERIFY(numVertices > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible = false;
         bufferType = EGpuBufferType::VertexBuffer;
 
         structureByteStride = sizeOfVertexInBytes;
@@ -125,7 +120,6 @@ namespace ig
         IG_VERIFY(sizeOfIndexInBytes > 0);
         IG_VERIFY(numIndices > 0);
         bIsShaderReadWritable = false;
-        bIsCpuAccessible = false;
         bufferType = EGpuBufferType::IndexBuffer;
 
         structureByteStride = sizeOfIndexInBytes;
@@ -155,8 +149,6 @@ namespace ig
             switch (bufferType)
             {
             case EGpuBufferType::ConstantBuffer:
-                desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
-                break;
             case EGpuBufferType::UploadBuffer:
                 desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
                 break;

@@ -151,7 +151,6 @@ namespace ig
             }
         }
 
-        [[nodiscard]] bool IsCpuAccessible() const noexcept { return bIsCpuAccessible; }
         [[nodiscard]] bool IsUavCounterEnabled() const noexcept { return bIsUavCounterEnabled; }
         [[nodiscard]] EGpuBufferType GetBufferType() const noexcept { return bufferType; }
         [[nodiscard]] U32 GetStructureByteStride() const noexcept { return structureByteStride; }
@@ -187,7 +186,6 @@ namespace ig
         U32 numElements = 1;
         EGpuBufferType bufferType = EGpuBufferType::Unknown;
         bool bIsShaderReadWritable = false;
-        bool bIsCpuAccessible = false;
         bool bIsUavCounterEnabled = false;
         D3D12MA::Pool* customPool = nullptr;
     };
