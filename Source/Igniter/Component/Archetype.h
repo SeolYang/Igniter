@@ -94,7 +94,7 @@ namespace ig
 
         static auto CreateInternal(Registry* registry, const Entity newEntity)
         {
-            IG_CHECK(regisry != nullptr);
+            IG_CHECK(registry != nullptr);
             IG_CHECK(newEntity != NullEntity);
             if constexpr (std::tuple_size_v<typename ClassifiedComponents::TagComponents> > 0)
             {
