@@ -36,6 +36,7 @@ namespace ig
         IG_CHECK(newParams.ComputeCmdList != nullptr);
         IG_CHECK(newParams.ZeroFilledBuffer != nullptr);
         IG_CHECK(newParams.PerFrameParamsCbv != nullptr);
+        IG_CHECK(newParams.UnifiedMeshStorageConstantsCbv != nullptr);
         IG_CHECK(newParams.MeshInstanceIndicesBufferSrv != nullptr);
         IG_CHECK(newParams.DispatchOpaqueMeshInstanceStorageBuffer != nullptr);
         IG_CHECK(newParams.DispatchOpaqueMeshInstanceStorageUav != nullptr);
@@ -58,6 +59,7 @@ namespace ig
         const MeshInstancePassConstants meshInstancePassConstants
         {
             .PerFrameParamsCbv = params.PerFrameParamsCbv->Index,
+            .UnifiedMeshStorageConstantsCbv = params.UnifiedMeshStorageConstantsCbv->Index,
             .MeshInstanceIndicesBufferSrv = params.MeshInstanceIndicesBufferSrv->Index,
             .NumMeshInstances = params.NumMeshInstances,
             .OpaqueMeshInstanceDispatchBufferUav = params.DispatchOpaqueMeshInstanceStorageUav->Index,

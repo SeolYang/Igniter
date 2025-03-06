@@ -20,6 +20,7 @@ namespace ig
         U32 MeshInstanceIdx;
         U32 TargetLevelOfDetail;
         U32 PerFrameParamsCbv;
+        U32 UnifiedMeshStorageConstantsCbv;
         U32 DepthPyramidParamsCbv;
     };
 
@@ -36,6 +37,7 @@ namespace ig
         CommandList* ComputeCmdList = nullptr;
         GpuBuffer* ZeroFilledBuffer = nullptr;
         const GpuView* PerFrameParamsCbv = nullptr;
+        const GpuView* UnifiedMeshStorageConstantsCbv = nullptr;
         const GpuView* MeshInstanceIndicesBufferSrv = nullptr;
         GpuBuffer* DispatchOpaqueMeshInstanceStorageBuffer = nullptr;
         const GpuView* DispatchOpaqueMeshInstanceStorageUav = nullptr;
@@ -52,6 +54,7 @@ namespace ig
     struct MeshInstancePassConstants
     {
         U32 PerFrameParamsCbv;
+        U32 UnifiedMeshStorageConstantsCbv;
         U32 MeshInstanceIndicesBufferSrv;
         U32 NumMeshInstances;
 

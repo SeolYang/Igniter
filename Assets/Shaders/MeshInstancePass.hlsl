@@ -5,6 +5,7 @@
 struct MeshInstancePassParams
 {
     uint PerFrameParamsCbv;
+    uint UnifiedMeshStorageConstantsCbv;
     uint MeshInstanceIndicesBufferSrv;
     uint NumMeshInstances;
 
@@ -153,6 +154,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     newDispatchMeshInstance.Params.MeshInstanceIdx = meshInstanceIdx;
     newDispatchMeshInstance.Params.TargetLevelOfDetail = targetLevelOfDetail;
     newDispatchMeshInstance.Params.PerFrameParamsCbv = gMeshInstanceParams.PerFrameParamsCbv;
+    newDispatchMeshInstance.Params.UnifiedMeshStorageConstantsCbv = gMeshInstanceParams.UnifiedMeshStorageConstantsCbv;
     newDispatchMeshInstance.Params.DepthPyramidParamsCbv = gMeshInstanceParams.DepthPyramidParamsCbv;
     newDispatchMeshInstance.ThreadGroupCountX = (meshLod.NumMeshlets + 31) / 32;
     newDispatchMeshInstance.ThreadGroupCountY = 1;

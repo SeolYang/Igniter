@@ -1,35 +1,44 @@
 #include "Igniter/Igniter.h"
+#include "Igniter/Render/RenderContext.h"
+#include "Igniter/Render/GpuUploader.h"
 #include "Igniter/Render/UnifiedMeshStorage.h"
 
 namespace ig
 {
-    UnifiedMeshStorage::UnifiedMeshStorage(RenderContext& renderCtx)
-        : renderCtx(&renderCtx)
-        , vertexStorage(renderCtx, GpuStorageDesc{
+    UnifiedMeshStorage::UnifiedMeshStorage(RenderContext& renderContext)
+        : renderContext(&renderContext)
+        , vertexStorage(renderContext, GpuStorageDesc{
             .DebugName = "VertexStorage(UnifiedMeshStorage)"_fs,
             .ElementSize = sizeof(U32),
             .NumInitElements = 65'536Ui32,
             .Flags = EGpuStorageFlags::RawBuffer
         })
-        , indexStorage(renderCtx, GpuStorageDesc{
+        , indexStorage(renderContext, GpuStorageDesc{
             .DebugName = "IndexStorage(UnifiedMeshStorage)"_fs,
             .ElementSize = sizeof(U32),
             .NumInitElements = 32'768Ui32,
             .Flags = EGpuStorageFlags::None
         })
-        , triangleStorage(renderCtx, GpuStorageDesc{
+        , triangleStorage(renderContext, GpuStorageDesc{
             .DebugName = "TriangleStorage(UnifiedMeshStorage)"_fs,
             .ElementSize = sizeof(U32),
             .NumInitElements = 65'536Ui32 / 3Ui32,
             .Flags = EGpuStorageFlags::None
         })
-        , meshletStorage(renderCtx, GpuStorageDesc{
+        , meshletStorage(renderContext, GpuStorageDesc{
             .DebugName = "MeshletStorage(UnifiedMeshStorage)"_fs,
             .ElementSize = sizeof(Meshlet),
             .NumInitElements = 8192,
             .Flags = EGpuStorageFlags::None
         })
-    {}
+    {
+        GpuBufferDesc gpuStorageConstantsBufferDesc{};
+        gpuStorageConstantsBufferDesc.AsConstantBuffer<GpuStorageConstants>();
+        gpuStorageConstantsBufferDesc.DebugName = "UnifiedMeshStorageConstants"_fs;
+        gpuStorageConstantsBufferDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+        gpuStorageConstantsBuffer = renderContext.CreateBuffer(gpuStorageConstantsBufferDesc);
+        gpuStorageConstantsCbv = renderContext.CreateConstantBufferView(gpuStorageConstantsBuffer);
+    }
 
     UnifiedMeshStorage::~UnifiedMeshStorage()
     {
@@ -37,6 +46,15 @@ namespace ig
         IG_CHECK(numAllocIndices == 0);
         IG_CHECK(numAllocTriangles == 0);
         IG_CHECK(numAllocMeshlets == 0);
+
+        if (gpuStorageConstantsCbv)
+        {
+            renderContext->DestroyGpuView(gpuStorageConstantsCbv);
+        }
+        if (gpuStorageConstantsBuffer)
+        {
+            renderContext->DestroyBuffer(gpuStorageConstantsBuffer);
+        }
     }
 
     Handle<MeshVertex> UnifiedMeshStorage::AllocateVertices(const Size numVertices, const Size numDwordsPerVertex)
@@ -311,6 +329,46 @@ namespace ig
                 numAllocMeshlets -= alloc->NumElements;
             }
             meshletDeferredManagePackage.DeferredDestroyPendingList[currentLocalFrameIdx].clear();
+        }
+
+        bool bDirtyGpuStorageConstants = false;
+        const GpuView* vertexStorageSrv = renderContext->Lookup(vertexStorage.GetSrv());
+        IG_CHECK(vertexStorageSrv != nullptr);
+        if (gpuStorageConstants.VertexStorageSrv != vertexStorageSrv->Index)
+        {
+            gpuStorageConstants.VertexStorageSrv = vertexStorageSrv->Index;
+            bDirtyGpuStorageConstants = true;
+        }
+        const GpuView* indexStorageSrv = renderContext->Lookup(indexStorage.GetSrv());
+        if (gpuStorageConstants.IndexStorageSrv != indexStorageSrv->Index)
+        {
+            gpuStorageConstants.IndexStorageSrv = indexStorageSrv->Index;
+            bDirtyGpuStorageConstants = true;
+        }
+        const GpuView* triangleStorageSrv = renderContext->Lookup(triangleStorage.GetSrv());
+        if (gpuStorageConstants.TriangleStorageSrv != triangleStorageSrv->Index)
+        {
+            gpuStorageConstants.TriangleStorageSrv = triangleStorageSrv->Index;
+            bDirtyGpuStorageConstants = true;
+        }
+        const GpuView* meshletStorageSrv = renderContext->Lookup(meshletStorage.GetSrv());
+        if (gpuStorageConstants.MeshletStorageSrv != meshletStorageSrv->Index)
+        {
+            gpuStorageConstants.MeshletStorageSrv = meshletStorageSrv->Index;
+            bDirtyGpuStorageConstants = true;
+        }
+
+        if (bDirtyGpuStorageConstants)
+        {
+            GpuUploader& gpuUploader = renderContext->GetFrameCriticalGpuUploader();
+            GpuBuffer* gpuStorageConstantsBufferPtr = renderContext->Lookup(gpuStorageConstantsBuffer);
+            IG_CHECK(gpuStorageConstantsBufferPtr != nullptr);
+            
+            UploadContext uploadContext = gpuUploader.Reserve(sizeof(GpuStorageConstants));
+            const auto mappedWriteBuffer = reinterpret_cast<GpuStorageConstants*>(uploadContext.GetOffsettedCpuAddress());
+            *mappedWriteBuffer = gpuStorageConstants;
+            uploadContext.CopyBuffer(0, sizeof(GpuStorageConstants), *gpuStorageConstantsBufferPtr);
+            gpuUploader.Submit(uploadContext).WaitOnCpu();
         }
     }
 } // namespace ig

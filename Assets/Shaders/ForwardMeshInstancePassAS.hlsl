@@ -8,10 +8,11 @@ groupshared MeshInstancePassPayload gPayload;
 void main(uint dispatchThreadId : SV_DispatchThreadID)
 {
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gParams.PerFrameParamsCbv];
+    ConstantBuffer<UnifiedMeshStorageConstants> unifiedMeshStorageConstants = ResourceDescriptorHeap[gParams.UnifiedMeshStorageConstantsCbv];
     ConstantBuffer<DepthPyramidParams> depthPyramidParams = ResourceDescriptorHeap[gParams.DepthPyramidParamsCbv];
     StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[perFrameParams.MeshInstanceStorageSrv];
     StructuredBuffer<Mesh> staticMeshStorage = ResourceDescriptorHeap[perFrameParams.StaticMeshStorageSrv];
-    StructuredBuffer<Meshlet> meshletStorage = ResourceDescriptorHeap[perFrameParams.MeshletStorageSrv];
+    StructuredBuffer<Meshlet> meshletStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.MeshletStorageSrv];
     MeshInstance meshInstance = meshInstanceStorage[gParams.MeshInstanceIdx];
     Mesh mesh = staticMeshStorage[meshInstance.MeshProxyIdx];
     MeshLod meshLod = mesh.LevelOfDetails[gParams.TargetLevelOfDetail];

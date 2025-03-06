@@ -37,11 +37,6 @@ namespace ig
         Matrix Proj;
         Matrix ViewProj;
 
-        U32 VertexStorageSrv;
-        U32 IndexStorageSrv;
-        U32 TriangleStorageSrv;
-        U32 MeshletStorageSrv;
-
         U32 LightStorageSrv;
         U32 MaterialStorageSrv;
         U32 StaticMeshStorageSrv;
@@ -260,11 +255,6 @@ namespace ig
 
         PerFrameParams perFrameParams{};
         TempConstantBuffer perFrameParamsCb = tempConstantBufferAllocator->Allocate<PerFrameParams>(localFrameIdx);
-        const UnifiedMeshStorage& unifiedMeshStorage = renderContext->GetUnifiedMeshStorage();
-        perFrameParams.VertexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetVertexStorageSrv())->Index;
-        perFrameParams.IndexStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetIndexStorageSrv())->Index;
-        perFrameParams.TriangleStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetTriangleStorageSrv())->Index;
-        perFrameParams.MeshletStorageSrv = renderContext->Lookup(unifiedMeshStorage.GetMeshletStorageSrv())->Index;
 
         perFrameParams.LightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv())->Index;
         perFrameParams.MaterialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv())->Index;
@@ -461,6 +451,7 @@ namespace ig
 
         /* Mesh Instance Pass */
         const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
+        UnifiedMeshStorage& unifiedMeshStorage = renderContext->GetUnifiedMeshStorage();
         GpuSyncPoint meshInstancePassSyncPoint{};
         {
             auto meshInstancePassCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "MeshInstancePass"_fs);
@@ -468,6 +459,7 @@ namespace ig
                 .ComputeCmdList = meshInstancePassCmdList,
                 .ZeroFilledBuffer = zeroFilledBuffer.get(),
                 .PerFrameParamsCbv = perFrameParamsCbvPtr,
+                .UnifiedMeshStorageConstantsCbv = renderContext->Lookup(unifiedMeshStorage.GetStorageConstantsCbv()),
                 .MeshInstanceIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceIndicesBufferSrv()),
                 .DispatchOpaqueMeshInstanceStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer()),
                 .DispatchOpaqueMeshInstanceStorageUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUav()),

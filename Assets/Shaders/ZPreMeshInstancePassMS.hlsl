@@ -17,12 +17,13 @@ void main(
     out indices uint3 tris[MESHLET_MAX_TRIANGLES])
 {
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gParams.PerFrameParamsCbv];
+    ConstantBuffer<UnifiedMeshStorageConstants> unifiedMeshStorageConstants = ResourceDescriptorHeap[gParams.UnifiedMeshStorageConstantsCbv];
     StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[perFrameParams.MeshInstanceStorageSrv];
     StructuredBuffer<Mesh> staticMeshStorage = ResourceDescriptorHeap[perFrameParams.StaticMeshStorageSrv];
-    StructuredBuffer<Meshlet> meshletStorage = ResourceDescriptorHeap[perFrameParams.MeshletStorageSrv];
-    StructuredBuffer<uint> triangleStorage = ResourceDescriptorHeap[perFrameParams.TriangleStorageSrv];
-    StructuredBuffer<uint> indexStorage = ResourceDescriptorHeap[perFrameParams.IndexStorageSrv];
-    ByteAddressBuffer vertexStorage = ResourceDescriptorHeap[perFrameParams.VertexStorageSrv];
+    StructuredBuffer<Meshlet> meshletStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.MeshletStorageSrv];
+    StructuredBuffer<uint> triangleStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.TriangleStorageSrv];
+    StructuredBuffer<uint> indexStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.IndexStorageSrv];
+    ByteAddressBuffer vertexStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.VertexStorageSrv];
 
     MeshInstance meshInstance = meshInstanceStorage[gParams.MeshInstanceIdx];
     Mesh mesh = staticMeshStorage[meshInstance.MeshProxyIdx];

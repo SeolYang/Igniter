@@ -17,8 +17,17 @@ namespace ig
 
     class UnifiedMeshStorage
     {
+    private:
+        struct GpuStorageConstants
+        {
+            U32 VertexStorageSrv = IG_NUMERIC_MAX_OF(VertexStorageSrv);
+            U32 IndexStorageSrv = IG_NUMERIC_MAX_OF(IndexStorageSrv);
+            U32 TriangleStorageSrv = IG_NUMERIC_MAX_OF(TriangleStorageSrv);
+            U32 MeshletStorageSrv = IG_NUMERIC_MAX_OF(MeshletStorageSrv);
+        };
+
     public:
-        explicit UnifiedMeshStorage(RenderContext& renderCtx);
+        explicit UnifiedMeshStorage(RenderContext& renderContext);
         UnifiedMeshStorage(const UnifiedMeshStorage&) = delete;
         UnifiedMeshStorage(UnifiedMeshStorage&&) noexcept = delete;
         ~UnifiedMeshStorage();
@@ -64,11 +73,13 @@ namespace ig
         [[nodiscard]] Size GetNumAllocatedTrianglesHint() const noexcept { return numAllocTriangles; }
         [[nodiscard]] Size GetNumAllocatedMeshletsHint() const noexcept { return numAllocMeshlets; }
 
+        [[nodiscard]] Handle<GpuView> GetStorageConstantsCbv() const noexcept { return gpuStorageConstantsCbv; }
+
     private:
         Handle<MeshVertex> AllocateVertices(const Size numVertices, const Size numDwordsPerVertex);
 
     private:
-        RenderContext* renderCtx = nullptr;
+        RenderContext* renderContext = nullptr;
 
         LocalFrameIndex currentLocalFrameIdx = 0;
         /*
@@ -108,5 +119,9 @@ namespace ig
         GpuStorage meshletStorage;
         Size numAllocMeshlets = 0;
         DeferredResourceManagePackage<GpuStorage::Allocation> meshletDeferredManagePackage;
+
+        GpuStorageConstants gpuStorageConstants;
+        Handle<GpuBuffer> gpuStorageConstantsBuffer;
+        Handle<GpuView> gpuStorageConstantsCbv;
     };
 } // namespace ig
