@@ -11,6 +11,7 @@ namespace ig
     struct TempConstantBuffer final
     {
     public:
+        TempConstantBuffer() = default;
         TempConstantBuffer(const Handle<GpuView> cbv, uint8_t* const mappedPtr)
             : cbv(cbv)
             , mappedPtr(mappedPtr)
