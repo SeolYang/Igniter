@@ -27,7 +27,7 @@ namespace ig
         as = MakePtr<ShaderBlob>(vsDesc);
 
         const ShaderCompileDesc msDesc{
-            .SourcePath = "Assets/Shaders/ZPreMeshInstancePassMS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/DepthOnlyMeshInstanceMS.hlsl"_fs,
             .Type = EShaderType::Mesh
         };
         ms = MakePtr<ShaderBlob>(msDesc);

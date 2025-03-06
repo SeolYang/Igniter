@@ -178,7 +178,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="..\..\Assets\Shaders\ZPreMeshInstancePassMS.hlsl" />
+    <None Include="..\..\Assets\Shaders\DepthOnlyMeshInstanceMS.hlsl" />
     <None Include="..\..\Assets\Shaders\GenerateDepthPyramid.hlsl" />
     <ClCompile Include="..\..\Thirdparty\D3D12MemAlloc\D3D12MemAlloc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>

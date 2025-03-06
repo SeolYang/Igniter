@@ -44,7 +44,7 @@ struct SceneProxytGeometryStorageConstants
     uint MeshInstanceStorageSrv;
 };
 
-struct ViewParams
+struct ViewerParams
 {
     float4x4 View;
     float4x4 Proj;
