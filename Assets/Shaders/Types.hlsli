@@ -7,11 +7,6 @@ struct PerFrameParams
     float4x4 Proj;
     float4x4 ViewProj;
 
-    uint VertexStorageSrv;
-    uint IndexStorageSrv;
-    uint TriangleStorageSrv;
-    uint MeshletStorageSrv;
-
     uint LightStorageSrv;
     uint MaterialStorageSrv;
     uint StaticMeshStorageSrv;
@@ -20,6 +15,41 @@ struct PerFrameParams
     uint LightClusterParamsCbv;
     uint3 Padding0;
 
+    /* (x,y,z): cam pos, w: inv aspect ratio */
+    float4 CamWorldPosInvAspectRatio;
+    /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
+    float4 ViewFrustumParams;
+
+    float ViewportWidth;
+    float ViewportHeight;
+};
+
+struct UnifiedMeshStorageConstants
+{
+    uint VertexStorageSrv;
+    uint IndexStorageSrv;
+    uint TriangleStorageSrv;
+    uint MeshletStorageSrv;
+};
+
+struct SceneProxyLightStorageConstants
+{
+    uint LightStorageSrv;
+};
+
+struct SceneProxytGeometryStorageConstants
+{
+    uint MaterialStorageSrv;
+    uint StaticMeshStorageSrv;
+    uint MeshInstanceStorageSrv;
+};
+
+struct ViewParams
+{
+    float4x4 View;
+    float4x4 Proj;
+    float4x4 ViewProj;
+    
     /* (x,y,z): cam pos, w: inv aspect ratio */
     float4 CamWorldPosInvAspectRatio;
     /* x: cos(fovy/2), y: sin(fovy/2), z: near, w: far */
@@ -131,6 +161,7 @@ struct DispatchMeshInstanceParams
     uint MeshInstanceIdx;
     uint TargetLevelOfDetail;
     uint PerFrameParamsCbv;
+    uint UnifiedMeshStorageConstantsCbv;
     uint DepthPyramidParamsCbv;
 };
 
