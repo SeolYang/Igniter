@@ -158,7 +158,8 @@ namespace ig
             {
                 ZoneScopedN("Engine: PreRender");
                 renderContext->PreRender(localFrameIdx, localFrameSyncs[prevLocalFrameIdx]);
-                replicationSyncPoint = sceneProxy->Replicate(localFrameIdx, *world);
+                sceneProxy->Replicate(localFrameIdx, *world);
+                replicationSyncPoint = sceneProxy->GetReplicationSyncPoint();
                 sceneProxy->PrepareNextFrame(localFrameIdx);
                 renderer->PreRender(localFrameIdx);
                 application.PreRender(localFrameIdx);

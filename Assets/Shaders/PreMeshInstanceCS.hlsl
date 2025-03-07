@@ -6,7 +6,7 @@ struct MeshInstancePassParams
 {
     uint PerFrameParamsCbv;
     uint UnifiedMeshStorageConstantsCbv;
-    uint MeshInstanceIndicesBufferSrv;
+    uint SceneProxyConstantsCbv;
     uint NumMeshInstances;
 
     uint OpaqueMeshInstanceDispatchBufferUav;
@@ -26,10 +26,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
     }
 
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gMeshInstanceParams.PerFrameParamsCbv];
+    ConstantBuffer<SceneProxyConstants> sceneProxyConstants = ResourceDescriptorHeap[gMeshInstanceParams.SceneProxyConstantsCbv];
     ConstantBuffer<DepthPyramidParams> depthPyramidParams = ResourceDescriptorHeap[gMeshInstanceParams.DepthPyramidParamsCbv];
-    StructuredBuffer<uint> meshInstanceIndicesBuffer = ResourceDescriptorHeap[gMeshInstanceParams.MeshInstanceIndicesBufferSrv];
-    StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[perFrameParams.MeshInstanceStorageSrv];
-    StructuredBuffer<Mesh> staticMeshStorage = ResourceDescriptorHeap[perFrameParams.StaticMeshStorageSrv];
+    StructuredBuffer<uint> meshInstanceIndicesBuffer = ResourceDescriptorHeap[sceneProxyConstants.MeshInstanceIndicesBufferSrv];
+    StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[sceneProxyConstants.MeshInstanceStorageSrv];
+    StructuredBuffer<Mesh> staticMeshStorage = ResourceDescriptorHeap[sceneProxyConstants.StaticMeshStorageSrv];
 
     const uint meshInstanceIdx = meshInstanceIndicesBuffer[DTid.x];
     const MeshInstance meshInstance = meshInstanceStorage[meshInstanceIdx];
@@ -155,6 +156,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     newDispatchMeshInstance.Params.TargetLevelOfDetail = targetLevelOfDetail;
     newDispatchMeshInstance.Params.PerFrameParamsCbv = gMeshInstanceParams.PerFrameParamsCbv;
     newDispatchMeshInstance.Params.UnifiedMeshStorageConstantsCbv = gMeshInstanceParams.UnifiedMeshStorageConstantsCbv;
+    newDispatchMeshInstance.Params.SceneProxyConstantsCbv = gMeshInstanceParams.SceneProxyConstantsCbv;
     newDispatchMeshInstance.Params.DepthPyramidParamsCbv = gMeshInstanceParams.DepthPyramidParamsCbv;
     newDispatchMeshInstance.ThreadGroupCountX = (meshLod.NumMeshlets + 31) / 32;
     newDispatchMeshInstance.ThreadGroupCountY = 1;

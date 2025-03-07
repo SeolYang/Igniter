@@ -120,9 +120,12 @@ namespace ig
 
     void StaticMeshComponent::Destroy()
     {
-        AssetManager& assetManager = Engine::GetAssetManager();
-        assetManager.Unload(Mesh);
-        Mesh = {};
+        if (Mesh)
+        {
+            AssetManager& assetManager = Engine::GetAssetManager();
+            assetManager.Unload(Mesh);
+            Mesh = {};
+        }
     }
 
     IG_DEFINE_COMPONENT_META(StaticMeshComponent);

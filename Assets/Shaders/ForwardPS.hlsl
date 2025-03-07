@@ -6,13 +6,14 @@ ConstantBuffer<DispatchMeshInstanceParams> gParams : register(b0);
 float4 main(VertexOutput input) : SV_Target
 {
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gParams.PerFrameParamsCbv];
+    ConstantBuffer<SceneProxyConstants> sceneProxyConstants = ResourceDescriptorHeap[gParams.SceneProxyConstantsCbv];
     ConstantBuffer<LightClusterParams> lightClusterParams = ResourceDescriptorHeap[perFrameParams.LightClusterParamsCbv];
     StructuredBuffer<uint> lightIdxList = ResourceDescriptorHeap[lightClusterParams.LightIdxListSrv];
     StructuredBuffer<uint> tileBitfields = ResourceDescriptorHeap[lightClusterParams.TileBitfieldsSrv];
     StructuredBuffer<uint2> depthBins = ResourceDescriptorHeap[lightClusterParams.DepthBinsSrv];
-    StructuredBuffer<Light> lightStorage = ResourceDescriptorHeap[perFrameParams.LightStorageSrv];
-    StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[perFrameParams.MeshInstanceStorageSrv];
-    StructuredBuffer<Material> materialStorage = ResourceDescriptorHeap[perFrameParams.MaterialStorageSrv];
+    StructuredBuffer<Light> lightStorage = ResourceDescriptorHeap[sceneProxyConstants.LightStorageSrv];
+    StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[sceneProxyConstants.MeshInstanceStorageSrv];
+    StructuredBuffer<Material> materialStorage = ResourceDescriptorHeap[sceneProxyConstants.MaterialStorageSrv];
     
     MeshInstance meshInstance = meshInstanceStorage[gParams.MeshInstanceIdx];
     Material material = materialStorage[meshInstance.MaterialProxyIdx];

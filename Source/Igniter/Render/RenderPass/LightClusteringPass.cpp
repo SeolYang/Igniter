@@ -128,6 +128,7 @@ namespace ig
         IG_CHECK(newParams.LightClusteringCmdList != nullptr);
         IG_CHECK(newParams.TargetViewport.width > 0.f && newParams.TargetViewport.height > 0.f);
         IG_CHECK(newParams.PerFrameParamsCbvPtr != nullptr);
+        IG_CHECK(newParams.SceneProxyConstantsCbvPtr != nullptr);
         params = newParams;
     }
 
@@ -253,6 +254,7 @@ namespace ig
 
                 const LightClusteringConstants gpuConstants{
                     .PerFrameParamsCbv = params.PerFrameParamsCbvPtr->Index,
+                    .SceneProxyConstantsCbv = params.SceneProxyConstantsCbvPtr->Index,
                     .LightIdxListSrv = lghtIdxListSrvPtr->Index,
                     .TileBitfieldsUav = tileBitfieldsUavPtr->Index,
                     .DepthBinsUav = depthBinsUavPtr->Index,

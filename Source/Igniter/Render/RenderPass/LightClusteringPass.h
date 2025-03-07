@@ -24,11 +24,13 @@ namespace ig
         Viewport TargetViewport{};
 
         const GpuView* PerFrameParamsCbvPtr = nullptr;
+        const GpuView* SceneProxyConstantsCbvPtr = nullptr;
     };
 
     struct LightClusteringConstants
     {
         U32 PerFrameParamsCbv;
+        U32 SceneProxyConstantsCbv;
         U32 LightIdxListSrv;
         U32 TileBitfieldsUav;
         U32 DepthBinsUav;
@@ -87,6 +89,7 @@ namespace ig
         [[nodiscard]] Handle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
         [[nodiscard]] Handle<GpuView> GetDepthBinsSrv() const noexcept { return depthBinsBufferPackage.Srv; }
 
+        /* @todo 이 쪽도 그냥 바로 constant buffer로 관리 해버리기 */
         [[nodiscard]] LightClusterParams GetLightClusterParams() const;
 
     protected:

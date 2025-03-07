@@ -125,9 +125,12 @@ namespace ig
 
     void MaterialComponent::Destroy()
     {
-        AssetManager& assetManager = Engine::GetAssetManager();
-        assetManager.Unload(Instance);
-        Instance = {};
+        if (Instance)
+        {
+            AssetManager& assetManager = Engine::GetAssetManager();
+            assetManager.Unload(Instance);
+            Instance = {};
+        }
     }
 
     IG_DEFINE_COMPONENT_META(MaterialComponent);

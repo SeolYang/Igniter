@@ -61,11 +61,8 @@ namespace fe
         //ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
         ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
         //ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
-        IG_VERIFY(assetManager.Clone(testStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ)));
         ig::Handle<ig::Material> testMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
-        IG_VERIFY(assetManager.Clone(testMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ)));
 
-#define TEST_ENTITY
 #ifdef TEST_ENTITY
         ig::Entity newEntity = ig::StaticMeshArchetype::Create(&registry);
         ig::TransformComponent& transformComponent = registry.get<ig::TransformComponent>(newEntity);
@@ -87,6 +84,8 @@ namespace fe
 #endif
 
 #if !defined(TEST_ENTITY) && !defined(TEST_LIGHT)
+        IG_VERIFY(assetManager.Clone(testStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
+        IG_VERIFY(assetManager.Clone(testMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
         for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
         {
             for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)

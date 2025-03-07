@@ -7,11 +7,6 @@ struct PerFrameParams
     float4x4 Proj;
     float4x4 ViewProj;
 
-    uint LightStorageSrv;
-    uint MaterialStorageSrv;
-    uint StaticMeshStorageSrv;
-    uint MeshInstanceStorageSrv;
-
     uint LightClusterParamsCbv;
     uint3 Padding0;
 
@@ -32,19 +27,18 @@ struct UnifiedMeshStorageConstants
     uint MeshletStorageSrv;
 };
 
-struct SceneProxyLightStorageConstants
+/* @todo NumLights, NumMaterials, NumStaticMeshes, NumMeshInstances 같은 추가적인 정보도 추가하는게 좋을 까? */
+struct SceneProxyConstants
 {
     uint LightStorageSrv;
-};
-
-struct SceneProxytGeometryStorageConstants
-{
     uint MaterialStorageSrv;
     uint StaticMeshStorageSrv;
     uint MeshInstanceStorageSrv;
+
+    uint MeshInstanceIndicesBufferSrv;
 };
 
-struct ViewerParams
+struct ViewConstants
 {
     float4x4 View;
     float4x4 Proj;
@@ -162,6 +156,7 @@ struct DispatchMeshInstanceParams
     uint TargetLevelOfDetail;
     uint PerFrameParamsCbv;
     uint UnifiedMeshStorageConstantsCbv;
+    uint SceneProxyConstantsCbv;
     uint DepthPyramidParamsCbv;
 };
 

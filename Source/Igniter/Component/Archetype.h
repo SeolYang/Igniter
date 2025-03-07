@@ -37,6 +37,10 @@ namespace ig
             decltype(std::tuple_cat(std::declval<std::tuple<T>>(), std::declval<typename Rest::Components>()))>;
     };
 
+    /*
+     * Archetype을 사용하는 경우, 내부적으로 component의 static instance를 생성하기 때문에,
+     * Component 소멸시, Engine의 Instance에 접근하지 않도록 하여야 한다.
+     */
     template <typename... Components>
     struct Archetype
     {

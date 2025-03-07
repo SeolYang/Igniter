@@ -21,6 +21,7 @@ namespace ig
         U32 TargetLevelOfDetail;
         U32 PerFrameParamsCbv;
         U32 UnifiedMeshStorageConstantsCbv;
+        U32 SceneProxyConstantsCbv;
         U32 DepthPyramidParamsCbv;
     };
 
@@ -38,7 +39,7 @@ namespace ig
         GpuBuffer* ZeroFilledBuffer = nullptr;
         const GpuView* PerFrameParamsCbv = nullptr;
         const GpuView* UnifiedMeshStorageConstantsCbv = nullptr;
-        const GpuView* MeshInstanceIndicesBufferSrv = nullptr;
+        const GpuView* SceneProxyConstantsCbv = nullptr;
         GpuBuffer* DispatchOpaqueMeshInstanceStorageBuffer = nullptr;
         const GpuView* DispatchOpaqueMeshInstanceStorageUav = nullptr;
         GpuBuffer* DispatchTransparentMeshInstanceStorageBuffer = nullptr;
@@ -55,7 +56,7 @@ namespace ig
     {
         U32 PerFrameParamsCbv;
         U32 UnifiedMeshStorageConstantsCbv;
-        U32 MeshInstanceIndicesBufferSrv;
+        U32 SceneProxyConstantsCbv;
         U32 NumMeshInstances;
 
         U32 OpaqueMeshInstanceDispatchBufferUav;

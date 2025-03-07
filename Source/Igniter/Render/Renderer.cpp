@@ -37,11 +37,6 @@ namespace ig
         Matrix Proj;
         Matrix ViewProj;
 
-        U32 LightStorageSrv;
-        U32 MaterialStorageSrv;
-        U32 StaticMeshStorageSrv;
-        U32 MeshInstanceStorageSrv;
-
         U32 LightClusterParamsCbv;
         U32 Padding[3];
 
@@ -174,7 +169,7 @@ namespace ig
 
         CommandSignatureDesc dispatchMeshInstanceCmdSignatureDesc{};
         dispatchMeshInstanceCmdSignatureDesc.SetCommandByteStride<DispatchMeshInstance>();
-        dispatchMeshInstanceCmdSignatureDesc.AddConstant(0, 0, 4);
+        dispatchMeshInstanceCmdSignatureDesc.AddConstant(0, 0, 6);
         dispatchMeshInstanceCmdSignatureDesc.AddDispatchMeshArgument();
         dispatchMeshInstanceCmdSignature = MakePtr<CommandSignature>(
             gpuDevice.CreateCommandSignature(
@@ -255,11 +250,6 @@ namespace ig
 
         PerFrameParams perFrameParams{};
         TempConstantBuffer perFrameParamsCb = tempConstantBufferAllocator->Allocate<PerFrameParams>(localFrameIdx);
-
-        perFrameParams.LightStorageSrv = renderContext->Lookup(sceneProxy->GetLightStorageSrv())->Index;
-        perFrameParams.MaterialStorageSrv = renderContext->Lookup(sceneProxy->GetMaterialProxyStorageSrv())->Index;
-        perFrameParams.StaticMeshStorageSrv = renderContext->Lookup(sceneProxy->GetStaticMeshProxyStorageSrv())->Index;
-        perFrameParams.MeshInstanceStorageSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceProxyStorageSrv())->Index;
 
         const auto camView = registry.view<const TransformComponent, const CameraComponent>();
         Matrix cpuCamViewMat{};
@@ -431,7 +421,8 @@ namespace ig
                 .LightClusteringCmdList = lightClusteringCmdList,
                 .View = cpuCamViewMat,
                 .TargetViewport = mainViewport,
-                .PerFrameParamsCbvPtr = perFrameParamsCbvPtr
+                .PerFrameParamsCbvPtr = perFrameParamsCbvPtr,
+                .SceneProxyConstantsCbvPtr =  renderContext->Lookup(sceneProxy->GetSceneProxyConstantsCbv())
             });
 
             lightClusteringPass->Record(localFrameIdx);
@@ -460,7 +451,7 @@ namespace ig
                 .ZeroFilledBuffer = zeroFilledBuffer.get(),
                 .PerFrameParamsCbv = perFrameParamsCbvPtr,
                 .UnifiedMeshStorageConstantsCbv = renderContext->Lookup(unifiedMeshStorage.GetStorageConstantsCbv()),
-                .MeshInstanceIndicesBufferSrv = renderContext->Lookup(sceneProxy->GetMeshInstanceIndicesBufferSrv()),
+                .SceneProxyConstantsCbv = renderContext->Lookup(sceneProxy->GetSceneProxyConstantsCbv()),
                 .DispatchOpaqueMeshInstanceStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer()),
                 .DispatchOpaqueMeshInstanceStorageUav = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetUav()),
                 .DispatchTransparentMeshInstanceStorageBuffer = nullptr,

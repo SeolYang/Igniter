@@ -13,8 +13,9 @@ void main(
 {
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gParams.PerFrameParamsCbv];
     ConstantBuffer<UnifiedMeshStorageConstants> unifiedMeshStorageConstants = ResourceDescriptorHeap[gParams.UnifiedMeshStorageConstantsCbv];
-    StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[perFrameParams.MeshInstanceStorageSrv];
-    StructuredBuffer<Mesh> staticMeshStorage = ResourceDescriptorHeap[perFrameParams.StaticMeshStorageSrv];
+    ConstantBuffer<SceneProxyConstants> sceneProxyConstants = ResourceDescriptorHeap[gParams.SceneProxyConstantsCbv];
+    StructuredBuffer<MeshInstance> meshInstanceStorage = ResourceDescriptorHeap[sceneProxyConstants.MeshInstanceStorageSrv];
+    StructuredBuffer<Mesh> staticMeshStorage = ResourceDescriptorHeap[sceneProxyConstants.StaticMeshStorageSrv];
     StructuredBuffer<Meshlet> meshletStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.MeshletStorageSrv];
     StructuredBuffer<uint> triangleStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.TriangleStorageSrv];
     StructuredBuffer<uint> indexStorage = ResourceDescriptorHeap[unifiedMeshStorageConstants.IndexStorageSrv];

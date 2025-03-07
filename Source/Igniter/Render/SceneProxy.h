@@ -20,6 +20,16 @@ namespace ig
     class SceneProxy
     {
     public:
+        struct GpuConstants
+        {
+            U32 LightStorageSrv = IG_NUMERIC_MAX_OF(LightStorageSrv);
+            U32 MaterialStorageSrv = IG_NUMERIC_MAX_OF(MaterialStorageSrv);
+            U32 StaticMeshStorageSrv = IG_NUMERIC_MAX_OF(StaticMeshStorageSrv);
+            U32 MeshInstanceStorageSrv = IG_NUMERIC_MAX_OF(MeshInstanceStorageSrv);
+
+            U32 MeshInstanceIndicesBufferSrv = IG_NUMERIC_MAX_OF(MeshInstanceIndicesBufferSrv);
+        };
+
         template <typename GpuDataType>
         struct GpuProxy
         {
@@ -103,32 +113,17 @@ namespace ig
         SceneProxy& operator=(SceneProxy&&) noexcept = delete;
 
         // 여기서 렌더링 전 필요한 Scene 정보를 모두 모으고, GPU 메모리에 변경점 들을 반영해주어야 한다
-        [[nodiscard]] GpuSyncPoint Replicate(const LocalFrameIndex localFrameIdx, const World& world);
+        void Replicate(const LocalFrameIndex localFrameIdx, const World& world);
         void PrepareNextFrame(const LocalFrameIndex localFrameIdx);
 
-        [[nodiscard]] Handle<GpuView> GetMaterialProxyStorageSrv() const
-        {
-            return materialProxyPackage.Storage->GetSrv();
-        }
-
-        [[nodiscard]] Handle<GpuView> GetLightStorageSrv() const
-        {
-            return lightProxyPackage.Storage->GetSrv();
-        }
-
-        [[nodiscard]] Handle<GpuBuffer> GetLightStorageBuffer() const
-        {
-            return lightProxyPackage.Storage->GetGpuBuffer();
-        }
-
-        [[nodiscard]] Handle<GpuView> GetStaticMeshProxyStorageSrv() const { return staticMeshProxyPackage.Storage->GetSrv(); }
-        [[nodiscard]] Handle<GpuView> GetMeshInstanceProxyStorageSrv() const { return meshInstanceProxyPackage.Storage->GetSrv(); }
-        [[nodiscard]] Handle<GpuView> GetMeshInstanceIndicesBufferSrv() const { return meshInstanceIndicesBufferSrv; }
+        [[nodiscard]] Handle<GpuView> GetSceneProxyConstantsCbv() const noexcept { return gpuConstantsCbv; }
 
         [[nodiscard]] U32 GetNumMeshInstances() const noexcept { return numMeshInstances; }
         [[nodiscard]] U16 GetNumLights() const noexcept { return (U16)lightProxyPackage.ProxyMap.size(); }
 
         [[nodiscard]] const auto& GetLightProxyMap() const noexcept { return lightProxyPackage.ProxyMap; }
+
+        [[nodiscard]] GpuSyncPoint GetReplicationSyncPoint() const noexcept { return replicationSyncPoint; }
 
     private:
         void UpdateLightProxy(tf::Subflow& subflow, const Registry& registry);
@@ -171,5 +166,11 @@ namespace ig
         Handle<GpuBuffer> meshInstanceIndicesBuffer{};
         Handle<GpuView> meshInstanceIndicesBufferSrv{};
         Ptr<GpuStagingBuffer> meshInstanceIndicesStagingBuffer{nullptr};
+
+        GpuSyncPoint replicationSyncPoint{};
+
+        GpuConstants gpuConstants{};
+        Handle<GpuBuffer> gpuConstantsBuffer{};
+        Handle<GpuView> gpuConstantsCbv{};
     };
 } // namespace ig

@@ -5,6 +5,7 @@
 struct LightClusteringConstants
 {
     uint PerFrameParamsCbv;
+    uint SceneProxyConstantsCbv;
     uint LightIdxListSrv;
     uint TileBitfieldsUav;
     uint DepthBinsUav;
@@ -25,12 +26,13 @@ void main(uint lightIdxListIdx : SV_DispatchThreadID)
     RWStructuredBuffer<uint> tileBitfields = ResourceDescriptorHeap[gConstants.TileBitfieldsUav];
 
     ConstantBuffer<PerFrameParams> perFrameParams = ResourceDescriptorHeap[gConstants.PerFrameParamsCbv];
+    ConstantBuffer<SceneProxyConstants> sceneProxyConstants = ResourceDescriptorHeap[gConstants.SceneProxyConstantsCbv];
     float s_nearPlane = perFrameParams.ViewFrustumParams.z;
     float s_farPlane = perFrameParams.ViewFrustumParams.w;
     float s_invCamPlaneDist = 1.f / (s_farPlane - s_nearPlane);
 
     StructuredBuffer<uint> lightIdxList = ResourceDescriptorHeap[gConstants.LightIdxListSrv];
-    StructuredBuffer<Light> lightStorage = ResourceDescriptorHeap[perFrameParams.LightStorageSrv];
+    StructuredBuffer<Light> lightStorage = ResourceDescriptorHeap[sceneProxyConstants.LightStorageSrv];
     uint v_lightIdx = lightIdxList[lightIdxListIdx];
     Light v_light = lightStorage[v_lightIdx];
 

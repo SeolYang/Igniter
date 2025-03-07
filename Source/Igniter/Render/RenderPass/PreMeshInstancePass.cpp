@@ -37,7 +37,7 @@ namespace ig
         IG_CHECK(newParams.ZeroFilledBuffer != nullptr);
         IG_CHECK(newParams.PerFrameParamsCbv != nullptr);
         IG_CHECK(newParams.UnifiedMeshStorageConstantsCbv != nullptr);
-        IG_CHECK(newParams.MeshInstanceIndicesBufferSrv != nullptr);
+        IG_CHECK(newParams.SceneProxyConstantsCbv != nullptr);
         IG_CHECK(newParams.DispatchOpaqueMeshInstanceStorageBuffer != nullptr);
         IG_CHECK(newParams.DispatchOpaqueMeshInstanceStorageUav != nullptr);
         IG_CHECK(newParams.DispatchTransparentMeshInstanceStorageBuffer == nullptr && "미구현");
@@ -60,7 +60,7 @@ namespace ig
         {
             .PerFrameParamsCbv = params.PerFrameParamsCbv->Index,
             .UnifiedMeshStorageConstantsCbv = params.UnifiedMeshStorageConstantsCbv->Index,
-            .MeshInstanceIndicesBufferSrv = params.MeshInstanceIndicesBufferSrv->Index,
+            .SceneProxyConstantsCbv = params.SceneProxyConstantsCbv->Index,
             .NumMeshInstances = params.NumMeshInstances,
             .OpaqueMeshInstanceDispatchBufferUav = params.DispatchOpaqueMeshInstanceStorageUav->Index,
             .TransparentMeshInstanceDispatchBufferUav = 0xFFFFFFFF,

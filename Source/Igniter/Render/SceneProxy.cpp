@@ -35,6 +35,13 @@ namespace ig
         {
             meshInstanceIndices.resize(initNumMeshInstanceIndicesPerWorker);
         }
+
+        GpuBufferDesc gpuConstantsBufferDesc{};
+        gpuConstantsBufferDesc.AsConstantBuffer<GpuConstants>();
+        gpuConstantsBufferDesc.DebugName = "SceneProxyConstantsBuffer"_fs;
+        gpuConstantsBufferDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+        gpuConstantsBuffer = renderContext.CreateBuffer(gpuConstantsBufferDesc);
+        gpuConstantsCbv = renderContext.CreateConstantBufferView(gpuConstantsBuffer);
     }
 
     SceneProxy::~SceneProxy()
@@ -48,9 +55,19 @@ namespace ig
         {
             renderContext->DestroyGpuView(meshInstanceIndicesBufferSrv);
         }
+
+        if (gpuConstantsCbv)
+        {
+            renderContext->DestroyGpuView(gpuConstantsCbv);
+        }
+
+        if (gpuConstantsBuffer)
+        {
+            renderContext->DestroyBuffer(gpuConstantsBuffer);
+        }
     }
 
-    GpuSyncPoint SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
+    void SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
     {
         IG_CHECK(taskExecutor != nullptr);
         IG_CHECK(renderContext != nullptr);
@@ -153,10 +170,62 @@ namespace ig
         taskExecutor->run(rootTaskFlow).wait();
         // 현재 프레임 작업 완료
 
-        CommandQueue& asyncCopyQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
-        IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
-        GpuSyncPoint syncPoint = asyncCopyQueue.MakeSyncPointWithSignal();
-        return syncPoint;
+        bool bDirtyGpuConstants = false;
+        const GpuView* lightStorageSrv = renderContext->Lookup(lightProxyPackage.Storage->GetSrv());
+        IG_CHECK(lightStorageSrv != nullptr);
+        if (gpuConstants.LightStorageSrv != lightStorageSrv->Index)
+        {
+            gpuConstants.LightStorageSrv = lightStorageSrv->Index;
+            bDirtyGpuConstants = true;
+        }
+        const GpuView* materialStorageSrv = renderContext->Lookup(materialProxyPackage.Storage->GetSrv());
+        IG_CHECK(materialStorageSrv != nullptr);
+        if (gpuConstants.MaterialStorageSrv != materialStorageSrv->Index)
+        {
+            gpuConstants.MaterialStorageSrv = materialStorageSrv->Index;
+            bDirtyGpuConstants = true;
+        }
+        const GpuView* staticMeshStorageSrv = renderContext->Lookup(staticMeshProxyPackage.Storage->GetSrv());
+        IG_CHECK(staticMeshStorageSrv != nullptr);
+        if (gpuConstants.StaticMeshStorageSrv != staticMeshStorageSrv->Index)
+        {
+            gpuConstants.StaticMeshStorageSrv = staticMeshStorageSrv->Index;
+            bDirtyGpuConstants = true;
+        }
+        const GpuView* meshInstanceStorageSrv = renderContext->Lookup(meshInstanceProxyPackage.Storage->GetSrv());
+        IG_CHECK(meshInstanceStorageSrv != nullptr);
+        if (gpuConstants.MeshInstanceStorageSrv != meshInstanceStorageSrv->Index)
+        {
+            gpuConstants.MeshInstanceStorageSrv = meshInstanceStorageSrv->Index;
+            bDirtyGpuConstants = true;
+        }
+        const GpuView* meshInstanceIndicesBufferSrvPtr = renderContext->Lookup(meshInstanceIndicesBufferSrv);
+        IG_CHECK(meshInstanceIndicesBufferSrvPtr != nullptr);
+        if (gpuConstants.MeshInstanceIndicesBufferSrv != meshInstanceIndicesBufferSrvPtr->Index)
+        {
+            gpuConstants.MeshInstanceIndicesBufferSrv = meshInstanceIndicesBufferSrvPtr->Index;
+            bDirtyGpuConstants = true;
+        }
+
+        replicationSyncPoint = GpuSyncPoint::Invalid();
+        if (bDirtyGpuConstants)
+        {
+            GpuBuffer* gpuConstantsBufferPtr = renderContext->Lookup(gpuConstantsBuffer);
+            IG_CHECK(gpuConstantsBufferPtr != nullptr);
+            GpuUploader& gpuUplaoder = renderContext->GetFrameCriticalGpuUploader();
+            UploadContext uploadContext = gpuUplaoder.Reserve(sizeof(GpuConstants));
+            GpuConstants* mappedBuffer = reinterpret_cast<GpuConstants*>(uploadContext.GetOffsettedCpuAddress());
+            *mappedBuffer = gpuConstants;
+            uploadContext.CopyBuffer(0, sizeof(GpuConstants), *gpuConstantsBufferPtr);
+            replicationSyncPoint = gpuUplaoder.Submit(uploadContext);
+        }
+
+        if (!replicationSyncPoint.IsValid())
+        {
+            CommandQueue& asyncCopyQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
+            IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
+            replicationSyncPoint = asyncCopyQueue.MakeSyncPointWithSignal();
+        }
     }
 
     void SceneProxy::PrepareNextFrame(const LocalFrameIndex localFrameIdx)
