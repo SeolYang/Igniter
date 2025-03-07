@@ -90,14 +90,33 @@ namespace ig
         depthBinInitBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
         GpuBuffer* depthBinInitBufferPtr = renderContext.Lookup(depthBinInitBuffer);
         GpuUploader& gpuUploader = renderContext.GetNonFrameCriticalGpuUploader();
-        UploadContext uploadCtx = gpuUploader.Reserve(depthBinsBufferDesc.GetSizeAsBytes());
-        DepthBin* uploadDataPtr = reinterpret_cast<DepthBin*>(uploadCtx.GetOffsettedCpuAddress());
+        UploadContext depthBinInitContext = gpuUploader.Reserve(depthBinsBufferDesc.GetSizeAsBytes());
+        DepthBin* uploadDataPtr = reinterpret_cast<DepthBin*>(depthBinInitContext.GetOffsettedCpuAddress());
         for (Index idx = 0; idx < kNumDepthBins; ++idx)
         {
             uploadDataPtr[idx] = DepthBin{.FirstLightIdx = 0xFFFFFFFF, .LastLightIdx = 0};
         }
-        uploadCtx.CopyBuffer(0, depthBinsBufferDesc.GetSizeAsBytes(), *depthBinInitBufferPtr);
-        gpuUploader.Submit(uploadCtx).WaitOnCpu();
+        depthBinInitContext.CopyBuffer(0, depthBinsBufferDesc.GetSizeAsBytes(), *depthBinInitBufferPtr);
+        gpuUploader.Submit(depthBinInitContext).WaitOnCpu();
+
+        GpuBufferDesc lightClusterConstantsBufferDesc{};
+        lightClusterConstantsBufferDesc.AsConstantBuffer<LightClusterConstants>();
+        lightClusterConstantsBufferDesc.DebugName = "UnifiedMeshStorageConstants"_fs;
+        lightClusterConstantsBufferDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+        lightClusterConstantsBuffer = renderContext.CreateBuffer(lightClusterConstantsBufferDesc);
+        lightClusterConstantsCbv = renderContext.CreateConstantBufferView(lightClusterConstantsBuffer);
+        
+        GpuBuffer* lightClusterConstantsBufferPtr = renderContext.Lookup(lightClusterConstantsBuffer);
+        IG_CHECK(lightClusterConstantsBufferPtr != nullptr);
+        UploadContext lightClusterConstantsUploadContext = gpuUploader.Reserve(sizeof(LightClusterConstants));
+        LightClusterConstants* mappedConstants = reinterpret_cast<LightClusterConstants*>(lightClusterConstantsUploadContext.GetOffsettedCpuAddress());
+        *mappedConstants = LightClusterConstants{
+            .LightIdxListSrv = renderContext.Lookup(lightIdxListBufferPackage.Srv)->Index,
+            .TileBitfieldsSrv = renderContext.Lookup(lightTileBitfieldsBufferPackage.Srv)->Index,
+            .DepthBinsSrv = renderContext.Lookup(depthBinsBufferPackage.Srv)->Index
+        };
+        lightClusterConstantsUploadContext.CopyBuffer(0, sizeof(LightClusterConstants), *lightClusterConstantsBufferPtr);
+        gpuUploader.Submit(lightClusterConstantsUploadContext).WaitOnCpu();
     }
 
     LightClusteringPass::~LightClusteringPass()
@@ -119,6 +138,9 @@ namespace ig
         renderContext->DestroyGpuView(depthBinsBufferPackage.Uav);
         renderContext->DestroyBuffer(depthBinsBufferPackage.Buffer);
         renderContext->DestroyBuffer(depthBinInitBuffer);
+
+        renderContext->DestroyGpuView(lightClusterConstantsCbv);
+        renderContext->DestroyBuffer(lightClusterConstantsBuffer);
     }
 
     void LightClusteringPass::SetParams(const LightClusteringPassParams& newParams)
@@ -130,23 +152,6 @@ namespace ig
         IG_CHECK(newParams.PerFrameParamsCbvPtr != nullptr);
         IG_CHECK(newParams.SceneProxyConstantsCbvPtr != nullptr);
         params = newParams;
-    }
-
-    LightClusterParams LightClusteringPass::GetLightClusterParams() const
-    {
-        IG_CHECK(renderContext != nullptr);
-
-        const GpuView* lightIdxListSrvPtr = renderContext->Lookup(lightIdxListBufferPackage.Srv);
-        IG_CHECK(lightIdxListSrvPtr != nullptr);
-        const GpuView* tileBitfieldsSrvPtr = renderContext->Lookup(lightTileBitfieldsBufferPackage.Srv);
-        IG_CHECK(tileBitfieldsSrvPtr != nullptr);
-        const GpuView* depthBinsSrvPtr = renderContext->Lookup(depthBinsBufferPackage.Srv);
-        IG_CHECK(depthBinsSrvPtr != nullptr);
-        return LightClusterParams{
-            .LightIdxListSrv = lightIdxListSrvPtr->Index,
-            .TileBitfieldsSrv = tileBitfieldsSrvPtr->Index,
-            .DepthBinsSrv = depthBinsSrvPtr->Index
-        };
     }
 
     void LightClusteringPass::OnRecord(const LocalFrameIndex localFrameIdx)
@@ -252,7 +257,7 @@ namespace ig
                 lightClusteringCmdList.SetDescriptorHeaps(descriptorHeapsSpan);
                 lightClusteringCmdList.SetRootSignature(*bindlessRootSignature);
 
-                const LightClusteringConstants gpuConstants{
+                const LightClusteringPassConstants gpuConstants{
                     .PerFrameParamsCbv = params.PerFrameParamsCbvPtr->Index,
                     .SceneProxyConstantsCbv = params.SceneProxyConstantsCbvPtr->Index,
                     .LightIdxListSrv = lghtIdxListSrvPtr->Index,

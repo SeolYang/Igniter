@@ -7,7 +7,7 @@ struct PerFrameParams
     float4x4 Proj;
     float4x4 ViewProj;
 
-    uint LightClusterParamsCbv;
+    uint LightClusterConstantsCbv;
     uint3 Padding0;
 
     /* (x,y,z): cam pos, w: inv aspect ratio */
@@ -53,7 +53,7 @@ struct ViewConstants
     float ViewportHeight;
 };
 
-struct LightClusterParams
+struct LightClusterConstants
 {
     uint LightIdxListSrv;
     uint TileBitfieldsSrv;

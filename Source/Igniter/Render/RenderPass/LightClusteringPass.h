@@ -27,7 +27,7 @@ namespace ig
         const GpuView* SceneProxyConstantsCbvPtr = nullptr;
     };
 
-    struct LightClusteringConstants
+    struct LightClusteringPassConstants
     {
         U32 PerFrameParamsCbv;
         U32 SceneProxyConstantsCbv;
@@ -38,7 +38,7 @@ namespace ig
         U32 NumLights;
     };
 
-    struct LightClusterParams
+    struct LightClusterConstants
     {
         U32 LightIdxListSrv = IG_NUMERIC_MAX_OF(LightIdxListSrv);
         U32 TileBitfieldsSrv = IG_NUMERIC_MAX_OF(TileBitfieldsSrv);
@@ -84,13 +84,8 @@ namespace ig
 
         void SetParams(const LightClusteringPassParams& newParams);
 
-        [[nodiscard]] Handle<GpuView> GetLightIdxListSrv() const noexcept { return lightIdxListBufferPackage.Srv; }
-        [[nodiscard]] Handle<GpuView> GetTileBitfieldsSrv() const noexcept { return lightTileBitfieldsBufferPackage.Srv; }
         [[nodiscard]] Handle<GpuBuffer> GetDepthBinInitBuffer() const noexcept { return depthBinInitBuffer; }
-        [[nodiscard]] Handle<GpuView> GetDepthBinsSrv() const noexcept { return depthBinsBufferPackage.Srv; }
-
-        /* @todo 이 쪽도 그냥 바로 constant buffer로 관리 해버리기 */
-        [[nodiscard]] LightClusterParams GetLightClusterParams() const;
+        [[nodiscard]] Handle<GpuView> GetLightClusterConstantsCbv() const noexcept { return lightClusterConstantsCbv; }
 
     protected:
         void OnRecord(const LocalFrameIndex localFrameIdx) override;
@@ -131,5 +126,8 @@ namespace ig
         Handle<GpuBuffer> depthBinInitBuffer;
 
         LightClusteringPassParams params;
+
+        Handle<GpuBuffer> lightClusterConstantsBuffer;
+        Handle<GpuView> lightClusterConstantsCbv;
     };
 } // namespace ig

@@ -273,9 +273,7 @@ namespace ig
         }
         perFrameParams.ViewportWidth = mainViewport.width;
         perFrameParams.ViewportHeight = mainViewport.height;
-
-        TempConstantBuffer lightClusterParamsCb = tempConstantBufferAllocator->Allocate<LightClusterParams>(localFrameIdx);
-        perFrameParams.LightClusterParamsCbv = renderContext->Lookup(lightClusterParamsCb.GetConstantBufferView())->Index;
+        perFrameParams.LightClusterParamsCbv = renderContext->Lookup(lightClusteringPass->GetLightClusterConstantsCbv())->Index;
 
         perFrameParamsCb.Write(perFrameParams);
 
@@ -354,9 +352,6 @@ namespace ig
         {
             auto descriptorHeaps = renderContext->GetBindlessDescriptorHeaps();
             const auto descriptorHeapsSpan = MakeSpan(descriptorHeaps);
-            // 가장 간단한 방법으론 DepthPyramid.MipLevels-1 번 만큼의 Dispatch가 필요..
-            // Dispatch를 최소화 하는 방법은?
-            // SPD는 어떻게 구현되어 있는걸까?
             for (U16 depthPyramidMipLevel = 1; depthPyramidMipLevel < depthPyramidExtents.size(); ++depthPyramidMipLevel)
             {
                 const GpuView* prevMipUav = renderContext->Lookup(depthPyramidMipsUav[depthPyramidMipLevel - 1]);
@@ -426,7 +421,6 @@ namespace ig
             });
 
             lightClusteringPass->Record(localFrameIdx);
-            lightClusterParamsCb.Write(lightClusteringPass->GetLightClusterParams());
 
             frameCritCopyQueue.ExecuteCommandList(*copyLightIdxListCmdList);
             GpuSyncPoint copyLightIdxSyncPoint = frameCritCopyQueue.MakeSyncPointWithSignal();
@@ -533,4 +527,9 @@ namespace ig
         return mainGfxQueue.MakeSyncPointWithSignal();
         /*********************/
     }
+    //
+    // void Renderer::ScheduleRenderTasks(tf::Subflow& renderFlow, const LocalFrameIndex localFrameIdx, tf::Task sceneProxyReplicationTask)
+    // {
+    //     
+    // }
 } // namespace ig

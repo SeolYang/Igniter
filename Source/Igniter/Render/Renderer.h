@@ -42,6 +42,10 @@ namespace ig
         void PreRender(const LocalFrameIndex localFrameIdx);
         GpuSyncPoint Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint);
 
+        /* @new_api */
+        void ScheduleRenderTasks(tf::Subflow& renderFlow, const LocalFrameIndex localFrameIdx, tf::Task sceneProxyReplicationTask);
+        [[nodiscard]] GpuSyncPoint GetRenderSyncPoint() const noexcept { return renderSyncPoint; }
+
         /* #sy_todo 내용을 직접 밖으로 노출하지 말고, Statistics struct를 만들어서 채워서 내보내기 */
         [[nodiscard]] const TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
 
@@ -93,5 +97,8 @@ namespace ig
         //Handle<GpuBuffer> opaqueMeshInstanceBucket;
         //Handle<GpuBuffer> transparentMeshInstanceBucket;
         ////////////////////////////////////////////////////////////////
+
+        GpuSyncPoint renderSyncPoint;
+        
     };
 } // namespace ig
