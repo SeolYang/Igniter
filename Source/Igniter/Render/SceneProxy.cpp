@@ -67,7 +67,7 @@ namespace ig
         }
     }
 
-    void SceneProxy::Replicate(const LocalFrameIndex localFrameIdx, const World& world)
+    void SceneProxy::Replicate(tf::Subflow& replicationSubflow, const LocalFrameIndex localFrameIdx, const World& world)
     {
         IG_CHECK(taskExecutor != nullptr);
         IG_CHECK(renderContext != nullptr);
@@ -81,16 +81,14 @@ namespace ig
 
         const Registry& registry = world.GetRegistry();
 
-        tf::Taskflow rootTaskFlow{};
-
-        tf::Task updateLightTask = rootTaskFlow.emplace(
+        tf::Task updateLightTask = replicationSubflow.emplace(
             [this, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("UpdateLightProxy");
                 UpdateLightProxy(subflow, registry);
-            });
+            }).name("SceneProxy.UpdateLightProxy");
 
-        tf::Task updateMaterialTask = rootTaskFlow.emplace(
+        tf::Task updateMaterialTask = replicationSubflow.emplace(
             [this]()
             {
                 // Material의 경우 분산 처리하기에는 상대적으로 그 수가 매우 작을 수 있기 때문에
@@ -102,63 +100,63 @@ namespace ig
                 Logger::GetInstance().SuppressLogInCurrentThread();
                 UpdateMaterialProxy();
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
-            });
+            }).name("SceneProxy.UpdateMaterialProxy");
 
-        tf::Task updateStaticMeshTask = rootTaskFlow.emplace(
+        tf::Task updateStaticMeshTask = replicationSubflow.emplace(
             [this](tf::Subflow& subflow)
             {
                 ZoneScopedN("UpdateStaticMeshProxy");
                 Logger::GetInstance().SuppressLogInCurrentThread();
                 UpdateStaticMeshProxy(subflow);
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
-            });
+            }).name("SceneProxy.UpdateStaticMeshProxy");
 
-        tf::Task updateSkeletalMeshTask = rootTaskFlow.emplace(
-            [this]([[maybe_unused]] tf::Subflow& subflow) {});
+        tf::Task updateSkeletalMeshTask = replicationSubflow.emplace(
+            [this]([[maybe_unused]] tf::Subflow& subflow) {}).name("SceneProxy.UpdateSkeletalMeshProxy");
 
-        tf::Task updateMeshInstanceTask = rootTaskFlow.emplace(
+        tf::Task updateMeshInstanceTask = replicationSubflow.emplace(
             [this, &registry](tf::Subflow& subflow)
             {
                 ZoneScopedN("UpdateMeshInstanceProxy");
                 UpdateMeshInstanceProxy(subflow, registry);
-            });
+            }).name("SceneProxy.UpdateMeshInstanceProxy");
 
         updateMeshInstanceTask.succeed(updateMaterialTask, updateStaticMeshTask, updateSkeletalMeshTask);
 
-        tf::Task replicateLightData = rootTaskFlow.emplace(
+        tf::Task replicateLightData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
                 ZoneScopedN("ReplicateLightData");
                 ReplicateProxyData(subflow, localFrameIdx, lightProxyPackage);
-            });
+            }).name("SceneProxy.ReplicateLightData");
 
-        tf::Task replicateMaterialData = rootTaskFlow.emplace(
+        tf::Task replicateMaterialData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
                 ZoneScopedN("ReplicateMaterialData");
                 ReplicateProxyData(subflow, localFrameIdx, materialProxyPackage);
-            });
+            }).name("SceneProxy.ReplicateMaterialData");
 
-        tf::Task replicateStaticMeshData = rootTaskFlow.emplace(
+        tf::Task replicateStaticMeshData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
                 ZoneScopedN("ReplicateStaticMeshData");
                 ReplicateProxyData(subflow, localFrameIdx, staticMeshProxyPackage);
-            });
+            }).name("SceneProxy.ReplicateStaticMeshData");
 
-        tf::Task replicateMeshInstanceData = rootTaskFlow.emplace(
+        tf::Task replicateMeshInstanceData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
                 ZoneScopedN("ReplicateMeshInstanceData");
                 ReplicateProxyData(subflow, localFrameIdx, meshInstanceProxyPackage);
-            });
+            }).name("SceneProxy.ReplicateMeshInstanceData");
 
-        tf::Task uploadMeshInstanceIndices = rootTaskFlow.emplace(
+        tf::Task uploadMeshInstanceIndices = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
                 ZoneScopedN("UploadMeshInstanceIndices");
                 UploadMeshInstanceIndices(subflow, localFrameIdx);
-            });
+            }).name("SceneProxy.UploadMeshInstanceIndices");
 
         replicateLightData.succeed(updateLightTask);
         replicateMaterialData.succeed(updateMaterialTask);
@@ -166,66 +164,70 @@ namespace ig
         replicateMeshInstanceData.succeed(updateMeshInstanceTask);
         uploadMeshInstanceIndices.succeed(updateMeshInstanceTask);
 
-        // 현재 프레임 작업 시작
-        taskExecutor->run(rootTaskFlow).wait();
-        // 현재 프레임 작업 완료
+        tf::Task updateGpuConstantsBuffer = replicationSubflow.emplace([this]()
+        {
+            bool bDirtyGpuConstants = false;
+            const GpuView* lightStorageSrv = renderContext->Lookup(lightProxyPackage.Storage->GetSrv());
+            IG_CHECK(lightStorageSrv != nullptr);
+            if (gpuConstants.LightStorageSrv != lightStorageSrv->Index)
+            {
+                gpuConstants.LightStorageSrv = lightStorageSrv->Index;
+                bDirtyGpuConstants = true;
+            }
+            const GpuView* materialStorageSrv = renderContext->Lookup(materialProxyPackage.Storage->GetSrv());
+            IG_CHECK(materialStorageSrv != nullptr);
+            if (gpuConstants.MaterialStorageSrv != materialStorageSrv->Index)
+            {
+                gpuConstants.MaterialStorageSrv = materialStorageSrv->Index;
+                bDirtyGpuConstants = true;
+            }
+            const GpuView* staticMeshStorageSrv = renderContext->Lookup(staticMeshProxyPackage.Storage->GetSrv());
+            IG_CHECK(staticMeshStorageSrv != nullptr);
+            if (gpuConstants.StaticMeshStorageSrv != staticMeshStorageSrv->Index)
+            {
+                gpuConstants.StaticMeshStorageSrv = staticMeshStorageSrv->Index;
+                bDirtyGpuConstants = true;
+            }
+            const GpuView* meshInstanceStorageSrv = renderContext->Lookup(meshInstanceProxyPackage.Storage->GetSrv());
+            IG_CHECK(meshInstanceStorageSrv != nullptr);
+            if (gpuConstants.MeshInstanceStorageSrv != meshInstanceStorageSrv->Index)
+            {
+                gpuConstants.MeshInstanceStorageSrv = meshInstanceStorageSrv->Index;
+                bDirtyGpuConstants = true;
+            }
+            const GpuView* meshInstanceIndicesBufferSrvPtr = renderContext->Lookup(meshInstanceIndicesBufferSrv);
+            IG_CHECK(meshInstanceIndicesBufferSrvPtr != nullptr);
+            if (gpuConstants.MeshInstanceIndicesBufferSrv != meshInstanceIndicesBufferSrvPtr->Index)
+            {
+                gpuConstants.MeshInstanceIndicesBufferSrv = meshInstanceIndicesBufferSrvPtr->Index;
+                bDirtyGpuConstants = true;
+            }
 
-        bool bDirtyGpuConstants = false;
-        const GpuView* lightStorageSrv = renderContext->Lookup(lightProxyPackage.Storage->GetSrv());
-        IG_CHECK(lightStorageSrv != nullptr);
-        if (gpuConstants.LightStorageSrv != lightStorageSrv->Index)
-        {
-            gpuConstants.LightStorageSrv = lightStorageSrv->Index;
-            bDirtyGpuConstants = true;
-        }
-        const GpuView* materialStorageSrv = renderContext->Lookup(materialProxyPackage.Storage->GetSrv());
-        IG_CHECK(materialStorageSrv != nullptr);
-        if (gpuConstants.MaterialStorageSrv != materialStorageSrv->Index)
-        {
-            gpuConstants.MaterialStorageSrv = materialStorageSrv->Index;
-            bDirtyGpuConstants = true;
-        }
-        const GpuView* staticMeshStorageSrv = renderContext->Lookup(staticMeshProxyPackage.Storage->GetSrv());
-        IG_CHECK(staticMeshStorageSrv != nullptr);
-        if (gpuConstants.StaticMeshStorageSrv != staticMeshStorageSrv->Index)
-        {
-            gpuConstants.StaticMeshStorageSrv = staticMeshStorageSrv->Index;
-            bDirtyGpuConstants = true;
-        }
-        const GpuView* meshInstanceStorageSrv = renderContext->Lookup(meshInstanceProxyPackage.Storage->GetSrv());
-        IG_CHECK(meshInstanceStorageSrv != nullptr);
-        if (gpuConstants.MeshInstanceStorageSrv != meshInstanceStorageSrv->Index)
-        {
-            gpuConstants.MeshInstanceStorageSrv = meshInstanceStorageSrv->Index;
-            bDirtyGpuConstants = true;
-        }
-        const GpuView* meshInstanceIndicesBufferSrvPtr = renderContext->Lookup(meshInstanceIndicesBufferSrv);
-        IG_CHECK(meshInstanceIndicesBufferSrvPtr != nullptr);
-        if (gpuConstants.MeshInstanceIndicesBufferSrv != meshInstanceIndicesBufferSrvPtr->Index)
-        {
-            gpuConstants.MeshInstanceIndicesBufferSrv = meshInstanceIndicesBufferSrvPtr->Index;
-            bDirtyGpuConstants = true;
-        }
+            replicationSyncPoint = GpuSyncPoint::Invalid();
+            if (bDirtyGpuConstants)
+            {
+                GpuBuffer* gpuConstantsBufferPtr = renderContext->Lookup(gpuConstantsBuffer);
+                IG_CHECK(gpuConstantsBufferPtr != nullptr);
+                GpuUploader& gpuUplaoder = renderContext->GetFrameCriticalGpuUploader();
+                UploadContext uploadContext = gpuUplaoder.Reserve(sizeof(GpuConstants));
+                GpuConstants* mappedBuffer = reinterpret_cast<GpuConstants*>(uploadContext.GetOffsettedCpuAddress());
+                *mappedBuffer = gpuConstants;
+                uploadContext.CopyBuffer(0, sizeof(GpuConstants), *gpuConstantsBufferPtr);
+                replicationSyncPoint = gpuUplaoder.Submit(uploadContext);
+            }
+        }).name("SceneProxy.UpdateGpuConstants");
+        updateGpuConstantsBuffer.succeed(replicateLightData, replicateMaterialData, replicateStaticMeshData, replicateMeshInstanceData, uploadMeshInstanceIndices);
 
-        replicationSyncPoint = GpuSyncPoint::Invalid();
-        if (bDirtyGpuConstants)
+        tf::Task finalizeReplication = replicationSubflow.emplace([this]()
         {
-            GpuBuffer* gpuConstantsBufferPtr = renderContext->Lookup(gpuConstantsBuffer);
-            IG_CHECK(gpuConstantsBufferPtr != nullptr);
-            GpuUploader& gpuUplaoder = renderContext->GetFrameCriticalGpuUploader();
-            UploadContext uploadContext = gpuUplaoder.Reserve(sizeof(GpuConstants));
-            GpuConstants* mappedBuffer = reinterpret_cast<GpuConstants*>(uploadContext.GetOffsettedCpuAddress());
-            *mappedBuffer = gpuConstants;
-            uploadContext.CopyBuffer(0, sizeof(GpuConstants), *gpuConstantsBufferPtr);
-            replicationSyncPoint = gpuUplaoder.Submit(uploadContext);
-        }
-
-        if (!replicationSyncPoint.IsValid())
-        {
-            CommandQueue& asyncCopyQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
-            IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
-            replicationSyncPoint = asyncCopyQueue.MakeSyncPointWithSignal();
-        }
+            if (!replicationSyncPoint.IsValid())
+            {
+                CommandQueue& asyncCopyQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
+                IG_CHECK(asyncCopyQueue.GetType() == EQueueType::Copy);
+                replicationSyncPoint = asyncCopyQueue.MakeSyncPointWithSignal();
+            }     
+        }).name("SceneProxy.FinalizeReplication");
+        finalizeReplication.succeed(updateGpuConstantsBuffer);
     }
 
     void SceneProxy::PrepareNextFrame(const LocalFrameIndex localFrameIdx)
@@ -330,7 +332,7 @@ namespace ig
                         lightProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
                     }
                 }
-            });
+            }).name("SceneProxy.UpdateProxy");
 
         tf::Task commitPendingProxyTask = subflow.emplace(
             [this, &entityProxyMap, &storage]()
@@ -344,7 +346,7 @@ namespace ig
                     }
                     lightProxyPackage.PendingProxyGroups[groupIdx].clear();
                 }
-            });
+            }).name("SceneProxy.CommitProxyConstructions");
 
         tf::Task commitDestructions = subflow.emplace(
             [this, &entityProxyMap, &storage]()
@@ -365,7 +367,7 @@ namespace ig
                     storage.Deallocate(extractedElement->second.StorageSpace);
                 }
                 lightProxyPackage.PendingDestructions.clear();
-            });
+            }).name("SceneProxy.CommitProxyDestructions");
 
         updateLightProxy.precede(commitPendingProxyTask);
         commitPendingProxyTask.precede(commitDestructions);
@@ -513,7 +515,7 @@ namespace ig
                         staticMeshProxyPackage.PendingReplicationGroups[workerId].emplace_back(cachedStaticMesh);
                     }
                 }
-            });
+            }).name("SceneProxy.UpdateProxy");
 
         tf::Task commitPendingProxyTask = subflow.emplace(
             [this, &proxyMap, &storage]()
@@ -527,7 +529,7 @@ namespace ig
                     }
                     staticMeshProxyPackage.PendingProxyGroups[groupIdx].clear();
                 }
-            });
+            }).name("SceneProxy.CommitProxyConstructions");
 
         tf::Task commitDestructions = subflow.emplace(
             [this, &proxyMap, &storage]()
@@ -548,7 +550,7 @@ namespace ig
                     storage.Deallocate(extractedElement->second.StorageSpace);
                 }
                 staticMeshProxyPackage.PendingDestructions.clear();
-            });
+            }).name("SceneProxy.CommitProxyDestructions");
 
         updateStaticMeshProxy.precede(commitPendingProxyTask);
         commitPendingProxyTask.precede(commitDestructions);
@@ -622,7 +624,7 @@ namespace ig
 
                     meshInstanceIndicesGroups[workerId].emplace_back((U32)proxy.StorageSpace.OffsetIndex);
                 }
-            });
+            }).name("SceneProxy.UpdateProxy");
 
         tf::Task commitPendingProxyTask = subflow.emplace(
             [this, &entityProxyMap, &storage]()
@@ -636,7 +638,7 @@ namespace ig
                     }
                     meshInstanceProxyPackage.PendingProxyGroups[groupIdx].clear();
                 }
-            });
+            }).name("SceneProxy.CommitProxyConstructions");
 
         tf::Task commitDestructions = subflow.emplace(
             [this, &entityProxyMap, &storage]()
@@ -657,7 +659,7 @@ namespace ig
                     storage.Deallocate(extractedElement->second.StorageSpace);
                 }
                 meshInstanceProxyPackage.PendingDestructions.clear();
-            });
+            }).name("SceneProxy.CommitProxyDestructions");
 
         updateStaticMeshInstances.precede(commitPendingProxyTask);
         commitPendingProxyTask.precede(commitDestructions);
@@ -713,7 +715,7 @@ namespace ig
                         proxyPackage.StagingBuffer[localFrameIdx]->Map();
                     proxyPackage.StagingBufferSize[localFrameIdx] = newSize;
                 }
-            });
+            }).name("SceneProxy.ScheduleReplication");
 
         // SceneProxy가 Storage를 소유하고 있기때문에 작업 실행 중에 해제되지 않음이 보장됨.
         const Handle<GpuBuffer> storageBuffer = proxyPackage.Storage->GetGpuBuffer();
@@ -794,7 +796,7 @@ namespace ig
                 cmdList->Close();
 
                 pendingReplications.clear();
-            });
+            }).name("SceneProxy.RecordReplicationCommands");
 
         tf::Task submitCmdList = subflow.emplace(
             [this, &proxyPackage]()
@@ -820,7 +822,7 @@ namespace ig
                     compactedCmdLists.data(),
                     compactedCmdLists.size()
                 });
-            });
+            }).name("SceneProxy.SubmitReplicationCommands");
 
         prepareReplication.precede(recordReplicateDataCmd);
         recordReplicateDataCmd.precede(submitCmdList);

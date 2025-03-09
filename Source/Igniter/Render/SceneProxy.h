@@ -113,7 +113,7 @@ namespace ig
         SceneProxy& operator=(SceneProxy&&) noexcept = delete;
 
         // 여기서 렌더링 전 필요한 Scene 정보를 모두 모으고, GPU 메모리에 변경점 들을 반영해주어야 한다
-        void Replicate(const LocalFrameIndex localFrameIdx, const World& world);
+        void Replicate(tf::Subflow& replicationSubflow, const LocalFrameIndex localFrameIdx, const World& world);
         void PrepareNextFrame(const LocalFrameIndex localFrameIdx);
 
         [[nodiscard]] Handle<GpuView> GetSceneProxyConstantsCbv() const noexcept { return gpuConstantsCbv; }

@@ -29,7 +29,7 @@ namespace ig
     Engine::Engine(const IgniterDesc& desc)
         :
 #if defined(DEBUG) || defined(_DEBUG)
-        taskExecutor(1)
+        taskExecutor(2)
 #else
         taskExecutor(std::thread::hardware_concurrency())
 #endif
@@ -114,8 +114,9 @@ namespace ig
             const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
             timer->Begin();
 
+            /* OS Event 처리는 메인 스레드에서 이루어져야 한다. */
             {
-                ZoneScopedN("Engine: Proccess Events");
+                ZoneScopedN("Engine: Process Events");
                 window->PumpMessage();
                 if (bShouldExit)
                 {
@@ -126,21 +127,15 @@ namespace ig
                 assetManager->DispatchEvent();
             }
 
-            const F32 deltaTime = timer->GetDeltaTime();
-            {
-                ZoneScopedN("Engine: PreUpdate");
-                application.PreUpdate(deltaTime);
-            }
-
             {
                 ZoneScopedN("Engine: Update");
+                const F32 deltaTime = timer->GetDeltaTime();
                 application.Update(deltaTime);
             }
 
             {
                 ZoneScopedN("Engine: PostUpdate");
                 inputManager->PostUpdate();
-                application.PostUpdate(deltaTime);
             }
 
             {
@@ -148,33 +143,16 @@ namespace ig
                 application.OnImGui();
             }
 
-            /* Rendering: Wait for GPU */
-            {
-                ZoneScopedN("Engine: WaitForLocalFrame");
-                localFrameSyncs[localFrameIdx].WaitOnCpu();
-            }
+            const GlobalFrameIndex globalFrameIdx = FrameManager::GetGlobalFrameIndex();
+            tf::Taskflow frameTaskflow{std::format("Frame#{}", globalFrameIdx)};
+            [[maybe_unused]] tf::Task finalizeRenderFrameTask = ScheduleRenderFrame(frameTaskflow);
+            taskExecutor.run(frameTaskflow).wait();
 
-            GpuSyncPoint replicationSyncPoint;
+            static std::once_flag onceflag;
+            std::call_once(onceflag, [&frameTaskflow]()
             {
-                ZoneScopedN("Engine: PreRender");
-                renderContext->PreRender(localFrameIdx, localFrameSyncs[prevLocalFrameIdx]);
-                sceneProxy->Replicate(localFrameIdx, *world);
-                replicationSyncPoint = sceneProxy->GetReplicationSyncPoint();
-                sceneProxy->PrepareNextFrame(localFrameIdx);
-                renderer->PreRender(localFrameIdx);
-                application.PreRender(localFrameIdx);
-            }
-
-            {
-                ZoneScopedN("Engine: Render");
-                localFrameSyncs[localFrameIdx] = renderer->Render(localFrameIdx, *world, replicationSyncPoint);
-            }
-
-            {
-                ZoneScopedN("Engine: PostRender");
-                renderContext->PostRender(localFrameIdx);
-                application.PostRender(localFrameIdx);
-            }
+                frameTaskflow.dump(std::cout);
+            });
 
             prevLocalFrameIdx = localFrameIdx;
             timer->End();
@@ -184,6 +162,50 @@ namespace ig
         renderContext->FlushQueues();
         IG_LOG(EngineLog, Info, "Extinguishing Engine Main Loop.");
         return 0;
+    }
+
+    tf::Task Engine::ScheduleRenderFrame(tf::Taskflow& frameTaskflow)
+    {
+        const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
+
+        tf::Task waitForLocalFrameTask = frameTaskflow.emplace([this, localFrameIdx]()
+        {
+            ZoneScopedN("Engine: WaitForLocalFrame");
+            localFrameRenderSyncPoint[localFrameIdx].WaitOnCpu();
+        }).name("Engine.WaitForLocalFrame");
+
+        tf::Task preRenderTask = frameTaskflow.emplace([this, localFrameIdx]()
+        {
+            ZoneScopedN("Engine: PreRender");
+            renderContext->PreRender(localFrameIdx, localFrameRenderSyncPoint[prevLocalFrameIdx]);
+            renderer->PreRender(localFrameIdx);
+        }).name("Engine.PreRender");
+
+        tf::Task beginRenderTask = frameTaskflow.emplace([]() {}).name("Engine.BeginRender");
+
+        tf::Task replicatateSceneProxyTask = frameTaskflow.emplace([this, localFrameIdx](tf::Subflow& replicationSubflow)
+        {
+            sceneProxy->Replicate(replicationSubflow, localFrameIdx, *world);
+            replicationSubflow.join();
+            
+            /* 비동기적으로 실행 */
+            sceneProxy->PrepareNextFrame(localFrameIdx);
+        }).name("Engine.ReplicateSceneProxy");
+
+        preRenderTask.succeed(waitForLocalFrameTask);
+        replicatateSceneProxyTask.succeed(preRenderTask);
+        beginRenderTask.succeed(preRenderTask);
+
+        tf::Task finalizeRenderTask = renderer->ScheduleRenderTasks(frameTaskflow,
+            RenderFrameSchedulingParams{.localFrameIdx = localFrameIdx, .BeginRender = beginRenderTask, .SceneProxyReplication = replicatateSceneProxyTask});
+
+        tf::Task finalizeRenderFrameTask = frameTaskflow.emplace([this, localFrameIdx]()
+        {
+            localFrameRenderSyncPoint[localFrameIdx] = renderer->GetLocalFrarmeRenderSyncPoint();
+        }).name("Engine.FinalizeRenderFrame");
+        finalizeRenderFrameTask.succeed(finalizeRenderTask);
+
+        return finalizeRenderFrameTask;
     }
 
     void Engine::Stop()

@@ -2,6 +2,7 @@
 #include "Igniter/D3D12/GpuSyncPoint.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/Render/GpuStorage.h"
+#include "Igniter/Render/TempConstantBufferAllocator.h"
 #include "Igniter/Render/Mesh.h"
 
 namespace ig
@@ -28,6 +29,13 @@ namespace ig
         U32 NumDepthPyramidMips;
     };
 
+    struct RenderFrameSchedulingParams
+    {
+        LocalFrameIndex localFrameIdx;
+        tf::Task BeginRender;
+        tf::Task SceneProxyReplication;
+    };
+
     class Renderer final
     {
     public:
@@ -43,8 +51,12 @@ namespace ig
         GpuSyncPoint Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint);
 
         /* @new_api */
-        void ScheduleRenderTasks(tf::Subflow& renderFlow, const LocalFrameIndex localFrameIdx, tf::Task sceneProxyReplicationTask);
-        [[nodiscard]] GpuSyncPoint GetRenderSyncPoint() const noexcept { return renderSyncPoint; }
+        /*
+         * 내부에서 렌더링에 필요한 Task들을 모두 frame task flow에 스케줄링함.
+         * @return Present Swapchain Task
+         */
+        tf::Task ScheduleRenderTasks(tf::Taskflow& frameTaskflow, RenderFrameSchedulingParams renderFrameSchedulingParams);
+        [[nodiscard]] GpuSyncPoint GetLocalFrarmeRenderSyncPoint() const noexcept { return localFrameRenderSyncPoint; }
 
         /* #sy_todo 내용을 직접 밖으로 노출하지 말고, Statistics struct를 만들어서 채워서 내보내기 */
         [[nodiscard]] const TempConstantBufferAllocator* GetTempConstantBufferAllocator() const noexcept { return tempConstantBufferAllocator.get(); }
@@ -98,7 +110,18 @@ namespace ig
         //Handle<GpuBuffer> transparentMeshInstanceBucket;
         ////////////////////////////////////////////////////////////////
 
-        GpuSyncPoint renderSyncPoint;
+        TempConstantBuffer depthPyramidCb;
+        TempConstantBuffer perFrameParamsCb;
+        Matrix cpuCamViewMat{};
+        Matrix gpuCamViewMat{};
+        const GpuView* perFrameParamsCbvPtr = nullptr;
+        
+        GpuSyncPoint generateDepthPyramidSyncPoint;
+        GpuSyncPoint lightClusteringSyncPoint;
+        GpuSyncPoint preMeshInstancePassSyncPoint;
+        GpuSyncPoint zPrePassSyncPoint;
+        GpuSyncPoint forwardOpaqueMeshInstanceSyncPoint;
+        GpuSyncPoint localFrameRenderSyncPoint;
         
     };
 } // namespace ig

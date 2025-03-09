@@ -54,13 +54,14 @@ namespace ig
 
     private:
         int Execute(Application& application);
+        tf::Task ScheduleRenderFrame(tf::Taskflow& frameTaskflow);
 
     private:
         static Engine* instance;
         bool bInitialized = false;
         bool bShouldExit = false;
 
-        InFlightFramesResource<GpuSyncPoint> localFrameSyncs{};
+        InFlightFramesResource<GpuSyncPoint> localFrameRenderSyncPoint{};
         LocalFrameIndex prevLocalFrameIdx = 0;
 
         tf::Executor taskExecutor{};
