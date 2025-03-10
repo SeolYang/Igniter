@@ -156,7 +156,6 @@ namespace ig
 
     void LightClusteringPass::OnRecord(const LocalFrameIndex localFrameIdx)
     {
-        ZoneScoped;
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(sceneProxy != nullptr);
 

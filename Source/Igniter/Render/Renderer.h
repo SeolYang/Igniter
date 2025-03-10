@@ -48,12 +48,10 @@ namespace ig
         Renderer& operator=(Renderer&&) noexcept = delete;
 
         void PreRender(const LocalFrameIndex localFrameIdx);
-        GpuSyncPoint Render(const LocalFrameIndex localFrameIdx, const World& world, GpuSyncPoint sceneProxyRepSyncPoint);
 
-        /* @new_api */
         /*
          * 내부에서 렌더링에 필요한 Task들을 모두 frame task flow에 스케줄링함.
-         * @return Present Swapchain Task
+         * @return FinalizeRenderTask
          */
         tf::Task ScheduleRenderTasks(tf::Taskflow& frameTaskflow, RenderFrameSchedulingParams renderFrameSchedulingParams);
         [[nodiscard]] GpuSyncPoint GetLocalFrarmeRenderSyncPoint() const noexcept { return localFrameRenderSyncPoint; }

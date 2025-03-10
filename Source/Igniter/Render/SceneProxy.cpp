@@ -84,7 +84,7 @@ namespace ig
         tf::Task updateLightTask = replicationSubflow.emplace(
             [this, &registry](tf::Subflow& subflow)
             {
-                ZoneScopedN("UpdateLightProxy");
+                ZoneScopedN("SceneProxy.UpdateLightProxy");
                 UpdateLightProxy(subflow, registry);
             }).name("SceneProxy.UpdateLightProxy");
 
@@ -93,7 +93,7 @@ namespace ig
             {
                 // Material의 경우 분산 처리하기에는 상대적으로 그 수가 매우 작을 수 있기 때문에
                 // 별도의 분산처리는 하지 않는다.
-                ZoneScopedN("UpdateMaterialProxy");
+                ZoneScopedN("SceneProxy.UpdateMaterialProxy");
 
                 // 현재 스레드의 로그를 잠시 막을 수 있지만, 만약 work stealing이 일어난다면
                 // 다른 부분에서 발생하는 로그가 기록되지 않는 현상이 일어 날 수도 있음.
@@ -105,7 +105,7 @@ namespace ig
         tf::Task updateStaticMeshTask = replicationSubflow.emplace(
             [this](tf::Subflow& subflow)
             {
-                ZoneScopedN("UpdateStaticMeshProxy");
+                ZoneScopedN("SceneProxy.UpdateStaticMeshProxy");
                 Logger::GetInstance().SuppressLogInCurrentThread();
                 UpdateStaticMeshProxy(subflow);
                 Logger::GetInstance().UnsuppressLogInCurrentThread();
@@ -117,7 +117,7 @@ namespace ig
         tf::Task updateMeshInstanceTask = replicationSubflow.emplace(
             [this, &registry](tf::Subflow& subflow)
             {
-                ZoneScopedN("UpdateMeshInstanceProxy");
+                ZoneScopedN("SceneProxy.UpdateMeshInstanceProxy");
                 UpdateMeshInstanceProxy(subflow, registry);
             }).name("SceneProxy.UpdateMeshInstanceProxy");
 
@@ -126,35 +126,35 @@ namespace ig
         tf::Task replicateLightData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
-                ZoneScopedN("ReplicateLightData");
+                ZoneScopedN("SceneProxy.ReplicateLightData");
                 ReplicateProxyData(subflow, localFrameIdx, lightProxyPackage);
             }).name("SceneProxy.ReplicateLightData");
 
         tf::Task replicateMaterialData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
-                ZoneScopedN("ReplicateMaterialData");
+                ZoneScopedN("SceneProxy.ReplicateMaterialData");
                 ReplicateProxyData(subflow, localFrameIdx, materialProxyPackage);
             }).name("SceneProxy.ReplicateMaterialData");
 
         tf::Task replicateStaticMeshData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
-                ZoneScopedN("ReplicateStaticMeshData");
+                ZoneScopedN("SceneProxy.ReplicateStaticMeshData");
                 ReplicateProxyData(subflow, localFrameIdx, staticMeshProxyPackage);
             }).name("SceneProxy.ReplicateStaticMeshData");
 
         tf::Task replicateMeshInstanceData = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
-                ZoneScopedN("ReplicateMeshInstanceData");
+                ZoneScopedN("SceneProxy.ReplicateMeshInstanceData");
                 ReplicateProxyData(subflow, localFrameIdx, meshInstanceProxyPackage);
             }).name("SceneProxy.ReplicateMeshInstanceData");
 
         tf::Task uploadMeshInstanceIndices = replicationSubflow.emplace(
             [this, localFrameIdx](tf::Subflow& subflow)
             {
-                ZoneScopedN("UploadMeshInstanceIndices");
+                ZoneScopedN("SceneProxy.UploadMeshInstanceIndices");
                 UploadMeshInstanceIndices(subflow, localFrameIdx);
             }).name("SceneProxy.UploadMeshInstanceIndices");
 
@@ -166,6 +166,7 @@ namespace ig
 
         tf::Task updateGpuConstantsBuffer = replicationSubflow.emplace([this]()
         {
+            ZoneScopedN("SceneProxy.UpdateGpuConstantsBuffer");
             bool bDirtyGpuConstants = false;
             const GpuView* lightStorageSrv = renderContext->Lookup(lightProxyPackage.Storage->GetSrv());
             IG_CHECK(lightStorageSrv != nullptr);
@@ -238,7 +239,7 @@ namespace ig
         [[maybe_unused]] tf::Task invalidateLightProxy = prepareNextFrameFlow.emplace(
             [this](tf::Subflow& subflow)
             {
-                ZoneScopedN("InvalidateNextFrameLightProxy");
+                ZoneScopedN("SceneProxy.InvalidateNextFrameLightProxy");
                 subflow.for_each(
                     lightProxyPackage.ProxyMap.begin(), lightProxyPackage.ProxyMap.end(),
                     [](auto& keyValuePair)
@@ -251,7 +252,7 @@ namespace ig
         [[maybe_unused]] tf::Task invalidateStaticMeshProxy = prepareNextFrameFlow.emplace(
             [this](tf::Subflow& subflow)
             {
-                ZoneScopedN("InvalidateNextFrameStaticMeshProxy");
+                ZoneScopedN("SceneProxy.InvalidateNextFrameStaticMeshProxy");
                 subflow.for_each(
                     staticMeshProxyPackage.ProxyMap.begin(), staticMeshProxyPackage.ProxyMap.end(),
                     [](auto& keyValuePair)
@@ -264,7 +265,7 @@ namespace ig
         [[maybe_unused]] tf::Task invalidateMaterialProxy = prepareNextFrameFlow.emplace(
             [this](tf::Subflow& subflow)
             {
-                ZoneScopedN("InvalidateNextFrameMaterialProxy");
+                ZoneScopedN("SceneProxy.InvalidateNextFrameMaterialProxy");
                 subflow.for_each(
                     materialProxyPackage.ProxyMap.begin(), materialProxyPackage.ProxyMap.end(),
                     [](auto& keyValuePair)
@@ -277,7 +278,7 @@ namespace ig
         [[maybe_unused]] tf::Task invalidateMeshInstanceProxy = prepareNextFrameFlow.emplace(
             [this](tf::Subflow& subflow)
             {
-                ZoneScopedN("InvalidateNextFrameMeshInstProxy");
+                ZoneScopedN("SceneProxy.InvalidateNextFrameMeshInstProxy");
                 subflow.for_each(
                     meshInstanceProxyPackage.ProxyMap.begin(), meshInstanceProxyPackage.ProxyMap.end(),
                     [](auto& keyValuePair)

@@ -245,6 +245,7 @@ namespace ig
 
         tf::Task initConstantBuffersTask = frameTaskflow.emplace([this, localFrameIdx]()
         {
+            ZoneScopedN("Renderer.InitConstantBuffers");
             depthPyramidCb = tempConstantBufferAllocator->Allocate<DepthPyramidConstants>(localFrameIdx);
             depthPyramidCb.Write(depthPyramidConstants);
 
@@ -279,6 +280,7 @@ namespace ig
 
         tf::Task generateDepthPyramidTask = frameTaskflow.emplace([this, localFrameIdx, &mainGfxCmdListPool, &mainGfxQueue, &asyncComputeCmdListPool, &asyncComputeQueue, depthBufferPtr, depthPyramidPtr]()
         {
+            ZoneScopedN("Renderer.GenerateDepthPyramid");
             /* Copy Depth Buffer for Depth Pyramid gen at next frame. */
             {
                 /*
@@ -394,6 +396,7 @@ namespace ig
 
         tf::Task clusterLightsTask = frameTaskflow.emplace([this, localFrameIdx, &asyncCopyCmdListPool, &frameCritCopyQueue, &asyncComputeCmdListPool, &asyncComputeQueue]()
         {
+            ZoneScopedN("Renderer.ClusterLights");
             auto copyLightIdxListCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "LightClustering.CopyLightIdxList"_fs);
             auto clearTileBitfieldsCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClustering.ClearTileBitfields"_fs);
             auto lightClusteringCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClustering.Main"_fs);
@@ -424,6 +427,7 @@ namespace ig
 
         tf::Task preMeshInstancePassTask = frameTaskflow.emplace([this, localFrameIdx, &asyncComputeCmdListPool, &asyncComputeQueue]()
             {
+                ZoneScopedN("Renderer.PreMeshInstance");
                 const U32 numMeshInstances = sceneProxy->GetNumMeshInstances();
                 if (numMeshInstances > 0)
                 {
@@ -463,6 +467,7 @@ namespace ig
 
         tf::Task forwardOpaqueMeshInstancePassTask = frameTaskflow.emplace([this, localFrameIdx, &mainGfxCmdListPool, &mainGfxQueue, backBufferPtr, backBufferRtvPtr]()
         {
+            ZoneScopedN("Renderer.ForwardOpaqueMeshInstancePass");
             GpuBuffer* opaqueMeshInstanceDispatchStorageBuffer = renderContext->Lookup(opaqueMeshInstanceDispatchStorage->GetGpuBuffer());
             const GpuView* dsvPtr = renderContext->Lookup(depthBufferDsv);
             /* Z-Pre Pass */
@@ -508,6 +513,7 @@ namespace ig
 
         tf::Task imguiRenderPassTask = frameTaskflow.emplace([this, localFrameIdx, &mainGfxCmdListPool, &mainGfxQueue, &swapchain]()
         {
+            ZoneScopedN("Renderer.ImGuiRenderPass");
             IG_CHECK(imguiRenderPass != nullptr);
             auto imguiRenderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList"_fs);
             imguiRenderPass->SetParams({
@@ -525,6 +531,7 @@ namespace ig
 
         tf::Task finalizeRenderTask = frameTaskflow.emplace([this, &swapchain, &mainGfxQueue]()
         {
+            ZoneScopedN("Renderer.FinalizeRender");
             swapchain.Present();
             localFrameRenderSyncPoint = mainGfxQueue.MakeSyncPointWithSignal();
         }).name("Renderer.FinalizeRender");

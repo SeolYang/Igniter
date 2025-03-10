@@ -57,7 +57,6 @@ namespace ig
 
     void ZPrePass::OnRecord([[maybe_unused]] const LocalFrameIndex localFrameIdx)
     {
-        ZoneScoped;
         IG_CHECK(pso != nullptr);
 
         CommandList& cmdList = *params.GfxCmdList;

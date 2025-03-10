@@ -116,7 +116,7 @@ namespace ig
 
             /* OS Event 처리는 메인 스레드에서 이루어져야 한다. */
             {
-                ZoneScopedN("Engine: Process Events");
+                ZoneScopedN("Engine.Process Events");
                 window->PumpMessage();
                 if (bShouldExit)
                 {
@@ -128,18 +128,18 @@ namespace ig
             }
 
             {
-                ZoneScopedN("Engine: Update");
+                ZoneScopedN("Engine.Update");
                 const F32 deltaTime = timer->GetDeltaTime();
                 application.Update(deltaTime);
             }
 
             {
-                ZoneScopedN("Engine: PostUpdate");
+                ZoneScopedN("Engine.PostUpdate");
                 inputManager->PostUpdate();
             }
 
             {
-                ZoneScopedN("Engine: OnImGui");
+                ZoneScopedN("Engine.OnImGui");
                 application.OnImGui();
             }
 
@@ -147,12 +147,6 @@ namespace ig
             tf::Taskflow frameTaskflow{std::format("Frame#{}", globalFrameIdx)};
             [[maybe_unused]] tf::Task finalizeRenderFrameTask = ScheduleRenderFrame(frameTaskflow);
             taskExecutor.run(frameTaskflow).wait();
-
-            static std::once_flag onceflag;
-            std::call_once(onceflag, [&frameTaskflow]()
-            {
-                frameTaskflow.dump(std::cout);
-            });
 
             prevLocalFrameIdx = localFrameIdx;
             timer->End();
@@ -170,13 +164,13 @@ namespace ig
 
         tf::Task waitForLocalFrameTask = frameTaskflow.emplace([this, localFrameIdx]()
         {
-            ZoneScopedN("Engine: WaitForLocalFrame");
+            ZoneScopedN("Engine.WaitForLocalFrame");
             localFrameRenderSyncPoint[localFrameIdx].WaitOnCpu();
         }).name("Engine.WaitForLocalFrame");
 
         tf::Task preRenderTask = frameTaskflow.emplace([this, localFrameIdx]()
         {
-            ZoneScopedN("Engine: PreRender");
+            ZoneScopedN("Engine.PreRender");
             renderContext->PreRender(localFrameIdx, localFrameRenderSyncPoint[prevLocalFrameIdx]);
             renderer->PreRender(localFrameIdx);
         }).name("Engine.PreRender");
@@ -185,6 +179,7 @@ namespace ig
 
         tf::Task replicatateSceneProxyTask = frameTaskflow.emplace([this, localFrameIdx](tf::Subflow& replicationSubflow)
         {
+            ZoneScopedN("Engine.ReplicateScene");
             sceneProxy->Replicate(replicationSubflow, localFrameIdx, *world);
             replicationSubflow.join();
             
