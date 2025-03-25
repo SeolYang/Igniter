@@ -56,7 +56,7 @@ namespace ig
         StaticMesh* mesh = assetManager.Lookup(Mesh);
         if (mesh != nullptr)
         {
-            archive[ContainerKey][MeshGuidKey] = ToJson(mesh->GetSnapshot().Info.GetGuid());
+            archive[kContainerKey][kMeshGuidKey] = ToJson(mesh->GetSnapshot().Info.GetGuid());
         }
 
         return archive;
@@ -65,7 +65,7 @@ namespace ig
     const Json& StaticMeshComponent::Deserialize(const Json& archive)
     {
         Guid staticMeshGuid{};
-        if (FromJson(archive[ContainerKey][MeshGuidKey], staticMeshGuid))
+        if (FromJson(archive[kContainerKey][kMeshGuidKey], staticMeshGuid))
         {
             AssetManager& assetManager = Engine::GetAssetManager();
             Mesh = assetManager.Load<StaticMesh>(staticMeshGuid);

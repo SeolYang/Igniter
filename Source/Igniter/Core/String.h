@@ -26,6 +26,7 @@ namespace ig
         return result;
     }
 
+    // @todo utf8 기준 iterator 및 length() 등 함수의 구현
     /**
      * The String class is light-weight strictly UTF-8 Encoded String.
      * It provides light-weight string-string comparing based on 'CRC64' hash.

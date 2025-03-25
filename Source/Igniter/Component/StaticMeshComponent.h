@@ -1,6 +1,5 @@
 #pragma once
 #include "Igniter/Core/Handle.h"
-#include "Igniter/Asset/Common.h"
 #include "Igniter/Core/Meta.h"
 
 namespace ig
@@ -24,15 +23,15 @@ namespace ig
         const Json& Deserialize(const Json& archive);
         static void OnInspector(Registry* registry, const Entity entity);
 
-    public:
-        Handle<StaticMesh> Mesh{};
-
     private:
         void Destroy();
 
     private:
-        constexpr static std::string_view ContainerKey{"StaticMeshComponent"};
-        constexpr static std::string_view MeshGuidKey{"StaticMeshGuid"};
+        constexpr static std::string_view kContainerKey{"StaticMeshComponent"};
+        constexpr static std::string_view kMeshGuidKey{"StaticMeshGuid"};
+        
+    public:
+        Handle<StaticMesh> Mesh{};
     };
 
     IG_DECLARE_META(StaticMeshComponent);

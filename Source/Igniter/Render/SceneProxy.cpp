@@ -72,7 +72,7 @@ namespace ig
         IG_CHECK(taskExecutor != nullptr);
         IG_CHECK(renderContext != nullptr);
         IG_CHECK(assetManager != nullptr);
-        ZoneScoped;
+        ZoneScopedN("SceneProxy.ReplicateScene");
 
         if (invalidationFuture[localFrameIdx].valid())
         {
