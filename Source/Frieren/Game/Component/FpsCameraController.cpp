@@ -8,31 +8,38 @@ namespace fe
     template <>
     void DefineMeta<FpsCameraController>()
     {
-        IG_SET_ON_INSPECTOR_META(FpsCameraController, FpsCameraController::OnInspector);
+        IG_SET_ON_INSPECTOR_META(FpsCameraController);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(FpsCameraController);
     }
+    IG_DEFINE_COMPONENT_META(FpsCameraController);
+} // namespace fe
 
-    ig::Json& FpsCameraController::Serialize(ig::Json& archive) const
+namespace ig
+{
+    template <>
+    Json& ig::Serialize<Json, fe::FpsCameraController>(Json& archive, const fe::FpsCameraController& controller)
     {
-        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MovementPower);
-        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MovementPowerAttenuationTime);
-        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MouseYawSentisitivity);
-        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, MousePitchSentisitivity);
-        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, SprintFactor);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, controller.MovementPower);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, controller.MovementPowerAttenuationTime);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, controller.MouseYawSentisitivity);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, controller.MousePitchSentisitivity);
+        IG_SERIALIZE_TO_JSON(FpsCameraController, archive, controller.SprintFactor);
         return archive;
     }
 
-    const ig::Json& FpsCameraController::Deserialize(const ig::Json& archive)
+    template <>
+    const Json& ig::Deserialize<Json, fe::FpsCameraController>(const Json& archive, fe::FpsCameraController& controller)
     {
-        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MovementPower, 25.f);
-        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MovementPowerAttenuationTime, 0.65f);
-        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MouseYawSentisitivity, 0.03f);
-        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, MousePitchSentisitivity, 0.03f);
-        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, SprintFactor, 4.f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, controller.MovementPower, 25.f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, controller.MovementPowerAttenuationTime, 0.65f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, controller.MouseYawSentisitivity, 0.03f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, controller.MousePitchSentisitivity, 0.03f);
+        IG_DESERIALIZE_FROM_JSON_FALLBACK(FpsCameraController, archive, controller.SprintFactor, 4.f);
         return archive;
     }
 
-    void FpsCameraController::OnInspector(ig::Registry* registry, const ig::Entity entity)
+    template <>
+    void OnInspector<fe::FpsCameraController>(Registry* registry, Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         fe::FpsCameraController& controller = registry->get<fe::FpsCameraController>(entity);
@@ -49,6 +56,4 @@ namespace fe
         ImGui::InputFloat("Current Yaw", &controller.CurrentYaw, 0.f, 0.f, "%.3f deg", ImGuiInputTextFlags_ReadOnly);
         ImGui::InputFloat("Current Pitch", &controller.CurrentPitch, 0.f, 0.f, "%.3f deg", ImGuiInputTextFlags_ReadOnly);
     }
-
-    IG_DEFINE_COMPONENT_META(FpsCameraController);
-} // namespace fe
+}

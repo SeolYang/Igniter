@@ -327,7 +327,7 @@ namespace ig
                     {
                         proxy.GpuData.Property = lightComponent.Property;
                         proxy.GpuData.WorldPosition = transformComponent.Position;
-                        proxy.GpuData.Forward = transformComponent.GetForward();
+                        proxy.GpuData.Forward = TransformUtility::MakeForward(transformComponent);
 
                         proxy.DataHashValue = currentDataHashValue;
                         lightProxyPackage.PendingReplicationGroups[workerId].emplace_back(entity);
@@ -609,7 +609,7 @@ namespace ig
                     if (const U64 currentHashVal = HashInstances(transform, staticMeshComponent, materialComponent);
                         proxy.DataHashValue != currentHashVal)
                     {
-                        const Matrix transformMat{transform.CreateTransformation()};
+                        const Matrix transformMat{TransformUtility::CreateTransformation(transform)};
                         proxy.GpuData.ToWorld[0] = Vector4{transformMat.m[0][0], transformMat.m[1][0], transformMat.m[2][0], transformMat.m[3][0]};
                         proxy.GpuData.ToWorld[1] = Vector4{transformMat.m[0][1], transformMat.m[1][1], transformMat.m[2][1], transformMat.m[3][1]};
                         proxy.GpuData.ToWorld[2] = Vector4{transformMat.m[0][2], transformMat.m[1][2], transformMat.m[2][2], transformMat.m[3][2]};

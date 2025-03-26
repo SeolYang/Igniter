@@ -8,23 +8,29 @@ namespace ig
     template <>
     void DefineMeta<NameComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(NameComponent, NameComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(NameComponent);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(NameComponent);
     }
+    IG_DEFINE_COMPONENT_META(NameComponent);
 
-    Json& NameComponent::Serialize(Json& archive) const
+    template <>
+    Json& Serialize<nlohmann::basic_json<>, NameComponent>(Json& archive, const NameComponent& name)
     {
+        const String& Name = name.Name;
         IG_SERIALIZE_TO_JSON(NameComponent, archive, Name);
         return archive;
     }
 
-    const ig::Json& NameComponent::Deserialize(const Json& archive)
+    template <>
+    const Json& Deserialize<nlohmann::basic_json<>, NameComponent>(const Json& archive, NameComponent& name)
     {
+        String& Name = name.Name;
         IG_DESERIALIZE_FROM_JSON(NameComponent, archive, Name);
         return archive;
     }
 
-    void NameComponent::OnInspector(Registry* registry, const Entity entity)
+    template <>
+    void OnInspector<NameComponent>(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         NameComponent& nameComponent = registry->get<NameComponent>(entity);
@@ -34,6 +40,4 @@ namespace ig
             nameComponent.Name = String{nameInput};
         }
     }
-
-    IG_DEFINE_COMPONENT_META(NameComponent);
 } // namespace ig

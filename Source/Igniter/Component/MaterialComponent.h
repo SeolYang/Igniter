@@ -6,32 +6,19 @@ namespace ig
 {
     class Material;
 
-    class MaterialComponent
+    struct MaterialComponent
     {
-    public:
-        MaterialComponent();
-        MaterialComponent(const Handle<Material> ownedInstance);
-        MaterialComponent(const MaterialComponent& other);
-        MaterialComponent(MaterialComponent&& other) noexcept;
-        ~MaterialComponent();
-
-        MaterialComponent& operator=(const MaterialComponent& rhs);
-        MaterialComponent& operator=(MaterialComponent&& rhs) noexcept;
-
-        Json& Serialize(Json& archive) const;
-        const Json& Deserialize(const Json& archive);
-        static void OnInspector(Registry* registry, const Entity entity);
-
-    public:
         Handle<Material> Instance{};
-
-    private:
-        void Destroy();
-
-    private:
-        constexpr static std::string_view ContainerKey{"MaterialComponent"};
-        constexpr static std::string_view MeshGuidKey{"MaterialGuid"};
     };
+
+    template <>
+    Json& Serialize(Json& archive, const MaterialComponent& materialComponent);
+
+    template <>
+    const Json& Deserialize(const Json& archive, MaterialComponent& materialComponent);
+
+    template <>
+    void OnInspector<MaterialComponent>(Registry* registry, const Entity entity);
 
     IG_DECLARE_META(MaterialComponent);
 } // namespace ig

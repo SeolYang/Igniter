@@ -1,6 +1,6 @@
 #include "Igniter/Igniter.h"
+#include "Igniter/Core/Math.h"
 #include "Igniter/Core/Json.h"
-#include "Igniter/Core/Serialization.h"
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Component/CameraComponent.h"
 
@@ -9,12 +9,30 @@ namespace ig
     template <>
     void DefineMeta<CameraComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(CameraComponent, CameraComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(CameraComponent);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(CameraComponent);
     }
 
-    Json& CameraComponent::Serialize(Json& archive) const
+    Matrix CameraUtility::CreatePerspective(const CameraComponent& camera)
     {
+        const F32 aspectRatio = camera.CameraViewport.AspectRatio();
+        IG_CHECK(aspectRatio >= 0.f);
+        const F32 fovRads = Deg2Rad(camera.Fov);
+        return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, camera.NearZ, camera.FarZ);
+    }
+
+    Matrix CameraUtility::CreatePerspectiveForReverseZ(const CameraComponent& camera)
+    {
+        const F32 aspectRatio = camera.CameraViewport.AspectRatio();
+        IG_CHECK(aspectRatio >= 0.f);
+        const F32 fovRads = Deg2Rad(camera.Fov);
+        return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, camera.FarZ, camera.NearZ);
+    }
+
+    template <>
+    Json& Serialize<nlohmann::basic_json<>, CameraComponent>(Json& archive, const CameraComponent& camera)
+    {
+        const auto& [CameraViewport, NearZ, FarZ, Fov, bEnableFrustumCull, bIsMainCamera] = camera;
         /* Viewport */
         IG_SERIALIZE_TO_JSON(CameraComponent, archive, CameraViewport.x);
         IG_SERIALIZE_TO_JSON(CameraComponent, archive, CameraViewport.y);
@@ -34,8 +52,10 @@ namespace ig
         return archive;
     }
 
-    const Json& CameraComponent::Deserialize(const Json& archive)
+    template <>
+    const Json& Deserialize<nlohmann::basic_json<>, CameraComponent>(const Json& archive, CameraComponent& camera)
     {
+        auto& [CameraViewport, NearZ, FarZ, Fov, bEnableFrustumCull, bIsMainCamera] = camera;
         /* Viewport */
         IG_DESERIALIZE_FROM_JSON_FALLBACK(CameraComponent, archive, CameraViewport.x, 0.f);
         IG_DESERIALIZE_FROM_JSON_FALLBACK(CameraComponent, archive, CameraViewport.y, 0.f);
@@ -51,11 +71,11 @@ namespace ig
 
         /* Miscs */
         IG_DESERIALIZE_FROM_JSON_FALLBACK(CameraComponent, archive, bIsMainCamera, false);
-
         return archive;
     }
 
-    void CameraComponent::OnInspector(Registry* registry, const Entity entity)
+    template <>
+    void OnInspector<CameraComponent>(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         CameraComponent& camera = registry->get<CameraComponent>(entity);

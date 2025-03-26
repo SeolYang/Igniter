@@ -123,6 +123,9 @@ namespace ig
         IG_CHECK(entity != entt::null);
         return registryRef.get().remove<T>(entity) > 0;
     }
+
+    template <typename T>
+    void OnInspector(Registry* registryPtr, const Entity entity);
 } // namespace ig
 
 #define IG_DECLARE_META(T)              \
@@ -198,6 +201,6 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                              \
     }
 
-#define IG_SET_ON_INSPECTOR_META(T, Func)                                                \
-    static_assert(std::is_invocable_v<decltype(Func), ig::Registry*, const ig::Entity>); \
-    entt::meta<T>().func<&Func>(ig::meta::OnInspectorFunc)
+#define IG_SET_ON_INSPECTOR_META(T)                                                \
+    static_assert(std::is_invocable_v<decltype(&ig::OnInspector<T>), ig::Registry*, const ig::Entity>); \
+    entt::meta<T>().func<&ig::OnInspector<T>>(ig::meta::OnInspectorFunc)

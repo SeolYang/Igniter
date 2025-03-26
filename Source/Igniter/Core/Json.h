@@ -73,7 +73,6 @@ namespace ig::details
 namespace ig
 {
     template <typename T>
-        requires Serializable<Json, T>
     Json ToJson(const T& data)
     {
         Json newJson{};
@@ -91,7 +90,6 @@ namespace ig
      * 예시. 빈 json object를 Deserialize 하였을 때, Data 내부를 fallback value로 채워 넣는 것은 정상적인 작동 방식이다.
      */
     template <typename T>
-        requires Serializable<Json, T>
     bool FromJson(const Json& json, T& data)
     {
         if (!json.is_object() && !json.is_null())
@@ -289,29 +287,44 @@ namespace ig
 } // namespace ig
 
 #define IG_SERIALIZE_TO_JSON(CLASS, ARCHIVE, VARIABLE) ARCHIVE[#CLASS][#VARIABLE] = ig::ToJson(VARIABLE)
+#define IG_SERIALIZE_TO_JSON_EXPR(CLASS, ARCHIVE, VARIABLE, EXPRESSION) \
+    static_assert(!std::is_void_v<decltype(CLASS::VARIABLE)>); \
+    ARCHIVE[#CLASS][#VARIABLE] = ig::ToJson(EXPRESSION)
 
 /* FromJson 실패 시 Variable Type의 Default Constructor를 Fallback 값으로 사용 */
-#define IG_DESERIALIZE_FROM_JSON(CLASS, ARCHIVE, VARIABLE)    \
+#define IG_DESERIALIZE_FROM_JSON_TEMP(CLASS, ARCHIVE, VARIABLE, TEMP)    \
     if (!ARCHIVE.contains(#CLASS) ||                          \
         !ARCHIVE[#CLASS].contains(#VARIABLE) ||               \
         !ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], VARIABLE))  \
     {                                                         \
-        VARIABLE = std::remove_cvref_t<decltype(VARIABLE)>{}; \
+        TEMP = std::remove_cvref_t<decltype(TEMP)>{}; \
     }
 
 /* FromJson 실패 시 지정된 Fallback 값을 사용. */
-#define IG_DESERIALIZE_FROM_JSON_FALLBACK(CLASS, ARCHIVE, VARIABLE, FALLBACK) \
+#define IG_DESERIALIZE_FROM_JSON_TEMP_FALLBACK(CLASS, ARCHIVE, VARIABLE, TEMP, FALLBACK) \
     if (!ARCHIVE.contains(#CLASS) ||                                          \
         !ARCHIVE[#CLASS].contains(#VARIABLE) ||                               \
-        !ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], VARIABLE))                  \
+        !ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], TEMP))                  \
     {                                                                         \
-        VARIABLE = FALLBACK;                                                  \
+        TEMP = FALLBACK;                                                  \
     }
 
 /* FromJson 실패 시 기존 값 유지. 단 Vector와 Array는 최초 실패 지점 전 까지의 원소가 반영 됨. */
-#define IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(CLASS, ARCHIVE, VARIABLE) \
+#define IG_DESERIALIZE_FROM_JSON_TEMP_NO_FALLBACK(CLASS, ARCHIVE, VARIABLE, TEMP) \
     if (ARCHIVE.contains(#CLASS) &&                                    \
         ARCHIVE[#CLASS].contains(#VARIABLE))                           \
     {                                                                  \
-        ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], VARIABLE);            \
+        ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], TEMP);            \
     }
+
+/* FromJson 실패 시 Variable Type의 Default Constructor를 Fallback 값으로 사용 */
+#define IG_DESERIALIZE_FROM_JSON(CLASS, ARCHIVE, VARIABLE)    \
+    IG_DESERIALIZE_FROM_JSON_TEMP(CLASS, ARCHIVE, VARIABLE, VARIABLE)
+
+/* FromJson 실패 시 지정된 Fallback 값을 사용. */
+#define IG_DESERIALIZE_FROM_JSON_FALLBACK(CLASS, ARCHIVE, VARIABLE, FALLBACK) \
+    IG_DESERIALIZE_FROM_JSON_TEMP_FALLBACK(CLASS, ARCHIVE, VARIABLE, VARIABLE, FALLBACK)
+
+/* FromJson 실패 시 기존 값 유지. 단 Vector와 Array는 최초 실패 지점 전 까지의 원소가 반영 됨. */
+#define IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(CLASS, ARCHIVE, VARIABLE) \
+    IG_DESERIALIZE_FROM_JSON_TEMP_NO_FALLBACK(CLASS, ARCHIVE, VARIABLE, VARIABLE)

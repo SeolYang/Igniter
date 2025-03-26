@@ -1,7 +1,6 @@
 #pragma once
-#include "Igniter/Core/Math.h"
-#include "Igniter/Core/BoundingVolume.h"
 #include "Igniter/Core/Meta.h"
+#include "Igniter/Core/Serialization.h"
 
 namespace ig
 {
@@ -9,28 +8,6 @@ namespace ig
 
     struct CameraComponent
     {
-    public:
-        [[nodiscard]] Matrix CreatePerspective() const
-        {
-            const F32 aspectRatio = CameraViewport.AspectRatio();
-            IG_CHECK(aspectRatio >= 0.f);
-            const F32 fovRads = Deg2Rad(Fov);
-            return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, NearZ, FarZ);
-        }
-
-        [[nodiscard]] Matrix CreatePerspectiveForReverseZ() const
-        {
-            const F32 aspectRatio = CameraViewport.AspectRatio();
-            IG_CHECK(aspectRatio >= 0.f);
-            const F32 fovRads = Deg2Rad(Fov);
-            return DirectX::XMMatrixPerspectiveFovLH(fovRads, aspectRatio, FarZ, NearZ);
-        }
-
-        Json& Serialize(Json& archive) const;
-        const Json& Deserialize(const Json& archive);
-        static void OnInspector(Registry* registry, const Entity entity);
-
-    public:
         Viewport CameraViewport{0.f, 0.f, 1280.f, 720.f};
         F32 NearZ = 0.1f;
         F32 FarZ = 1000.f;
@@ -40,6 +17,22 @@ namespace ig
         bool bEnableFrustumCull = true;
         bool bIsMainCamera = false;
     };
+
+    class CameraUtility
+    {
+    public:
+        [[nodiscard]] static Matrix CreatePerspective(const CameraComponent& camera);
+        [[nodiscard]] static Matrix CreatePerspectiveForReverseZ(const CameraComponent& camera);
+    };
+
+    template <>
+    Json& Serialize<Json, CameraComponent>(Json& archive, const CameraComponent& camera);
+
+    template <>
+    const Json& Deserialize(const Json& archive, CameraComponent& camera);
+
+    template <>
+    void OnInspector<CameraComponent>(Registry* registry, const Entity entity);
 
     IG_DECLARE_META(CameraComponent);
 } // namespace ig

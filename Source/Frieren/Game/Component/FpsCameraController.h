@@ -6,24 +6,11 @@ namespace fe
 {
     struct FpsCameraController
     {
-      public:
-        ~FpsCameraController() = default;
-
-        ig::Vector3 GetCurrentVelocity() const
-        {
-            return ig::Lerp(LatestImpulse, ig::Vector3::Zero, ig::SmoothStep(0.f, MovementPowerAttenuationTime, ElapsedTimeAfterLatestImpulse));
-        }
-
-        ig::Quaternion GetCurrentRotation() const
-        {
-            return ig::Quaternion::CreateFromYawPitchRoll(ig::Deg2Rad(CurrentYaw), ig::Deg2Rad(CurrentPitch), 0.f);
-        }
-
+    public:
         ig::Json& Serialize(ig::Json& archive) const;
         const ig::Json& Deserialize(const ig::Json& archive);
         static void OnInspector(ig::Registry* registry, const ig::Entity entity);
 
-      public:
         float MovementPower = 8.f;
         float MovementPowerAttenuationTime = 0.65f; /* Seconds */
         float MouseYawSentisitivity = 0.03f;        /* Degrees */
@@ -39,5 +26,31 @@ namespace fe
         constexpr static float MaxPitchDegrees = 90.f - 0.01f;
     };
 
+    class FPSCameraControllerUtility
+    {
+    public:
+        static ig::Vector3 CalculateCurrentVelocity(const FpsCameraController& controller)
+        {
+            return ig::Lerp(controller.LatestImpulse, ig::Vector3::Zero, ig::SmoothStep(0.f, controller.MovementPowerAttenuationTime, controller.ElapsedTimeAfterLatestImpulse));
+        }
+
+        static ig::Quaternion CalculateCurrentRotation(const FpsCameraController& controller)
+        {
+            return ig::Quaternion::CreateFromYawPitchRoll(ig::Deg2Rad(controller.CurrentYaw), ig::Deg2Rad(controller.CurrentPitch), 0.f);
+        }
+    };
+
     IG_DECLARE_META(FpsCameraController);
 } // namespace fe
+
+namespace ig
+{
+    template <>
+    Json& Serialize(Json& archive, const fe::FpsCameraController& controller);
+
+    template <>
+    const Json& Deserialize(const Json& archive, fe::FpsCameraController& controller);
+
+    template <>
+    void OnInspector<fe::FpsCameraController>(Registry* registry, Entity entity);
+}

@@ -254,8 +254,8 @@ namespace ig
             PerFrameParams perFrameParams{};
             for (const auto& [entity, transform, camera] : camView.each())
             {
-                cpuCamViewMat = transform.CreateView();
-                const Matrix proj = camera.CreatePerspectiveForReverseZ();
+                cpuCamViewMat = TransformUtility::CreateView(transform);
+                const Matrix proj = CameraUtility::CreatePerspectiveForReverseZ(camera);
                 gpuCamViewMat = ConvertToShaderSuitableForm(cpuCamViewMat);
                 perFrameParams.View = gpuCamViewMat;
                 perFrameParams.Proj = ConvertToShaderSuitableForm(proj);

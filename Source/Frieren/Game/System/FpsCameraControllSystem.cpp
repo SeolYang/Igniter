@@ -58,22 +58,22 @@ namespace fe
                 ig::Vector3 direction{};
                 if (moveLeftAction.IsAnyPressing())
                 {
-                    direction += transform.GetLeft();
+                    direction += ig::TransformUtility::MakeLeft(transform);
                 }
 
                 if (moveRightAction.IsAnyPressing())
                 {
-                    direction += transform.GetRight();
+                    direction += ig::TransformUtility::MakeRight(transform);
                 }
 
                 if (moveForwardAction.IsAnyPressing())
                 {
-                    direction += transform.GetForward();
+                    direction += ig::TransformUtility::MakeForward(transform);
                 }
 
                 if (moveBackwardAction.IsAnyPressing())
                 {
-                    direction += transform.GetBackward();
+                    direction += ig::TransformUtility::MakeBackward(transform);
                 }
 
                 if (moveUpAction.IsAnyPressing())
@@ -107,8 +107,8 @@ namespace fe
             }
 
             controller.ElapsedTimeAfterLatestImpulse += deltaTime;
-            transform.Position += controller.GetCurrentVelocity();
-            transform.Rotation = controller.GetCurrentRotation();
+            transform.Position += FPSCameraControllerUtility::CalculateCurrentVelocity(controller);
+            transform.Rotation = FPSCameraControllerUtility::CalculateCurrentRotation(controller);
         }
     }
 } // namespace fe

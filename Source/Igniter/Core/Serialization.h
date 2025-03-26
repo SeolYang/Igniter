@@ -10,66 +10,65 @@ namespace ig::meta
 namespace ig
 {
     template <typename Archive, typename Ty>
-    concept Serializable = requires(Archive& archive, const Archive& constArchive, Ty& data, const Ty& constData)
+    concept SelfSerializable = requires(Archive& archive, const Archive& constArchive, Ty& data, const Ty& constData)
     {
-        {
-            constData.Serialize(archive)
-        } -> std::same_as<Archive&>;
-
-        {
-            data.Deserialize(constArchive)
-        } -> std::same_as<const Archive&>;
+        { constData.Serialize(archive) } -> std::same_as<Archive&>;
+        { data.Deserialize(constArchive) } -> std::same_as<const Archive&>;
     };
 
     template <typename Archive, typename Ty>
-        requires Serializable<Archive, Ty>
+    Archive& Serialize(Archive& archive, const Ty& data);
+
+    template <typename Archive, typename Ty>
+    const Archive& Deserialize(const Archive& archive, Ty& data);
+
+    template <typename Archive, typename Ty>
+        requires SelfSerializable<Archive, Ty>
     Archive& Serialize(Archive& archive, const Ty& data)
     {
         return data.Serialize(archive);
     }
 
     template <typename Archive, typename Ty>
-        requires Serializable<Archive, Ty>
+        requires SelfSerializable<Archive, Ty>
     const Archive& Deserialize(const Archive& archive, Ty& data)
     {
         return data.Deserialize(archive);
     }
 
     template <typename Archive, typename Ty>
-        requires Serializable<Archive, Ty>
+        requires SelfSerializable<Archive, Ty>
     Archive& operator<<(Archive& archive, const Ty& data)
     {
         return data.Serialize(archive);
     }
 
     template <typename Archive, typename Ty>
-        requires Serializable<Archive, Ty>
+        requires SelfSerializable<Archive, Ty>
     const Archive& operator>>(const Archive& archive, Ty& data)
     {
         return data.Deserialize(archive);
     }
 
     template <typename Archive, typename Ty>
-        requires Serializable<Archive, Ty>
     void SerializeComponent(Ref<Archive> archiveRef, Ref<const Registry> registryRef, const Entity entity)
     {
         const Registry& registry = registryRef.get();
         if (registry.all_of<Ty>(entity))
         {
             const Ty& component = registry.get<Ty>(entity);
-            component.Serialize(archiveRef.get());
+            Serialize<Archive, Ty>(archiveRef.get(), component);
         }
     }
 
     template <typename Archive, typename Ty>
-        requires Serializable<Archive, Ty>
     void DeserializeComponent(Ref<const Archive> archiveRef, Ref<Registry> registryRef, const Entity entity)
     {
         Registry& registry = registryRef.get();
         if (registry.all_of<Ty>(entity))
         {
             Ty& component = registry.get<Ty>(entity);
-            component.Deserialize(archiveRef.get());
+            Deserialize<Archive, Ty>(archiveRef.get(), component);
         }
     }
 } // namespace ig

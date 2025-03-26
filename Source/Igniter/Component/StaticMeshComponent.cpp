@@ -10,71 +10,42 @@ namespace ig
     template <>
     void DefineMeta<StaticMeshComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(StaticMeshComponent, StaticMeshComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(StaticMeshComponent);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(StaticMeshComponent);
     }
-
-    StaticMeshComponent::StaticMeshComponent(const StaticMeshComponent& other)
+    
+    template <>
+    Json& Serialize<Json, StaticMeshComponent>(Json& archive, const StaticMeshComponent& staticMesh)
     {
         AssetManager& assetManager = Engine::GetAssetManager();
-        if (assetManager.Clone(other.Mesh))
+        if (const StaticMesh* mesh = assetManager.Lookup(staticMesh.Mesh);
+            mesh != nullptr)
         {
-            Mesh = other.Mesh;
-        }
-    }
-
-    StaticMeshComponent::StaticMeshComponent(StaticMeshComponent&& other) noexcept
-        : Mesh(std::exchange(other.Mesh, {}))
-    {}
-
-    StaticMeshComponent::~StaticMeshComponent()
-    {
-        Destroy();
-    }
-
-    StaticMeshComponent& StaticMeshComponent::operator=(const StaticMeshComponent& rhs)
-    {
-        this->Destroy();
-        AssetManager& assetManager = Engine::GetAssetManager();
-        if (assetManager.Clone(rhs.Mesh))
-        {
-            Mesh = rhs.Mesh;
-        }
-        return *this;
-    }
-
-    StaticMeshComponent& StaticMeshComponent::operator=(StaticMeshComponent&& rhs) noexcept
-    {
-        this->Destroy();
-        Mesh = std::exchange(rhs.Mesh, {});
-        return *this;
-    }
-
-    Json& StaticMeshComponent::Serialize(Json& archive) const
-    {
-        AssetManager& assetManager = Engine::GetAssetManager();
-        StaticMesh* mesh = assetManager.Lookup(Mesh);
-        if (mesh != nullptr)
-        {
-            archive[kContainerKey][kMeshGuidKey] = ToJson(mesh->GetSnapshot().Info.GetGuid());
+            const Guid& meshGuid = mesh->GetSnapshot().Info.GetGuid();
+            IG_SERIALIZE_TO_JSON(StaticMeshComponent, archive, meshGuid);
         }
 
         return archive;
     }
 
-    const Json& StaticMeshComponent::Deserialize(const Json& archive)
+    template <>
+    const Json& Deserialize<Json, StaticMeshComponent>(const Json& archive, StaticMeshComponent& staticMesh)
     {
-        Guid staticMeshGuid{};
-        if (FromJson(archive[kContainerKey][kMeshGuidKey], staticMeshGuid))
+        /* @todo 실패 시 Engine Default Model의 GUID를 사용하도록 할 것(error model) */
+        Guid meshGuid{};
+        IG_DESERIALIZE_FROM_JSON_NO_FALLBACK(StaticMeshComponent, archive, meshGuid);
+
+        if (meshGuid.isValid())
         {
             AssetManager& assetManager = Engine::GetAssetManager();
-            Mesh = assetManager.Load<StaticMesh>(staticMeshGuid);
+            staticMesh.Mesh = assetManager.Load<StaticMesh>(meshGuid);
         }
-
+        
         return archive;
     }
 
-    void StaticMeshComponent::OnInspector(Registry* registry, const Entity entity)
+    template <>
+    void OnInspector<StaticMeshComponent>(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         AssetManager& assetManager = Engine::GetAssetManager();
@@ -115,16 +86,6 @@ namespace ig
                 staticMeshComponent.Mesh = selectedAsset;
             }
             staticMeshSelectModalPopup.End();
-        }
-    }
-
-    void StaticMeshComponent::Destroy()
-    {
-        if (Mesh)
-        {
-            AssetManager& assetManager = Engine::GetAssetManager();
-            assetManager.Unload(Mesh);
-            Mesh = {};
         }
     }
 

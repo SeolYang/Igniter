@@ -11,76 +11,43 @@ namespace ig
     template <>
     void DefineMeta<MaterialComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(MaterialComponent, MaterialComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(MaterialComponent);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(MaterialComponent);
     }
+    IG_DEFINE_COMPONENT_META(MaterialComponent);
 
-    MaterialComponent::MaterialComponent()
-    {}
-
-    MaterialComponent::MaterialComponent(const MaterialComponent& other)
-        : Instance(Engine::GetAssetManager().Clone(other.Instance))
-    {}
-
-    MaterialComponent::MaterialComponent(MaterialComponent&& other) noexcept
-        : Instance(std::exchange(other.Instance, {}))
-    {}
-
-    MaterialComponent::MaterialComponent(const Handle<Material> ownedInstance)
-        : Instance(ownedInstance)
-    {}
-
-    MaterialComponent::~MaterialComponent()
+    template <>
+    Json& Serialize<Json, MaterialComponent>(Json& archive, const MaterialComponent& materialComponent)
     {
-        Destroy();
-    }
+        const Material* material = Engine::GetAssetManager().Lookup(materialComponent.Instance);
+        IG_SERIALIZE_TO_JSON_EXPR(MaterialComponent, archive, Instance,
+            material != nullptr ?
+            material->GetSnapshot().Info.GetGuid() :
+            Guid{DefaultMaterialGuid});
 
-    MaterialComponent& MaterialComponent::operator=(const MaterialComponent& rhs)
-    {
-        Destroy();
-        if (Engine::GetAssetManager().Clone(rhs.Instance))
-        {
-            Instance = rhs.Instance;
-        }
-        return *this;
-    }
-
-    MaterialComponent& MaterialComponent::operator=(MaterialComponent&& rhs) noexcept
-    {
-        Destroy();
-        Instance = std::exchange(rhs.Instance, {});
-        return *this;
-    }
-
-    Json& MaterialComponent::Serialize(Json& archive) const
-    {
-        Material* material = Engine::GetAssetManager().Lookup(Instance);
-        if (material != nullptr)
-        {
-            archive[ContainerKey][MeshGuidKey] = ToJson(material->GetSnapshot().Info.GetGuid());
-        }
-        else
-        {
-            archive[ContainerKey][MeshGuidKey] = ToJson(Guid{DefaultMaterialGuid});
-        }
         return archive;
     }
 
-    const Json& MaterialComponent::Deserialize(const Json& archive)
+    template <>
+    const Json& Deserialize<Json, MaterialComponent>(const Json& archive, MaterialComponent& materialComponent)
     {
         AssetManager& assetManager = Engine::GetAssetManager();
         Guid materialGuid{};
-        if (FromJson(archive[ContainerKey][MeshGuidKey], materialGuid))
+        IG_DESERIALIZE_FROM_JSON_TEMP_NO_FALLBACK(MaterialComponent, archive, Instance, materialGuid);
+        if (materialGuid.isValid())
         {
-            materialGuid = Guid{DefaultMaterialGuid};
+            if (materialComponent.Instance)
+            {
+                assetManager.Unload<Material>(materialComponent.Instance);
+            }
+            materialComponent.Instance = assetManager.Load<Material>(materialGuid);
         }
 
-        Instance = assetManager.Load<Material>(materialGuid);
-        IG_CHECK(Instance);
         return archive;
     }
 
-    void MaterialComponent::OnInspector(Registry* registry, const Entity entity)
+    template <>
+    void OnInspector<MaterialComponent>(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != NullEntity);
         AssetManager& assetManager = Engine::GetAssetManager();
@@ -122,16 +89,4 @@ namespace ig
             materialSelectPopup.End();
         }
     }
-
-    void MaterialComponent::Destroy()
-    {
-        if (Instance)
-        {
-            AssetManager& assetManager = Engine::GetAssetManager();
-            assetManager.Unload(Instance);
-            Instance = {};
-        }
-    }
-
-    IG_DEFINE_COMPONENT_META(MaterialComponent);
 } // namespace ig

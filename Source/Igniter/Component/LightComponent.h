@@ -1,19 +1,23 @@
 #pragma once
 #include "Igniter/Core/Meta.h"
+#include "Igniter/Core/Serialization.h"
 #include "Igniter/Render/Light.h"
 
 namespace ig
 {
     struct LightComponent
     {
-    public:
-        Json& Serialize(Json& archive) const;
-        const Json& Deserialize(const Json& archive);
-        static void OnInspector(Registry* registry, const Entity entity);
-
-    public:
         Light Property;
     };
+
+    template <>
+    Json& Serialize<Json, LightComponent>(Json& archive, const LightComponent& light);
+
+    template<>
+    const Json& Deserialize<Json, LightComponent>(const Json& archive, LightComponent& light);
+
+    template <>
+    void OnInspector<LightComponent>(Registry* registry, const Entity entity);
 
     IG_DECLARE_META(LightComponent);
 } // namespace ig

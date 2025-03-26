@@ -10,12 +10,15 @@ namespace ig
     template <>
     void DefineMeta<TransformComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(TransformComponent, TransformComponent::OnInspector);
+        IG_SET_ON_INSPECTOR_META(TransformComponent);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(TransformComponent);
     }
 
-    Json& TransformComponent::Serialize(Json& archive) const
+    template <>
+    Json& Serialize<nlohmann::basic_json<>, TransformComponent>(Json& archive, const TransformComponent& transform)
     {
+        const auto& [Position, Scale, Rotation] = transform;
+        
         /* Position */
         IG_SERIALIZE_TO_JSON(TransformComponent, archive, Position.x);
         IG_SERIALIZE_TO_JSON(TransformComponent, archive, Position.y);
@@ -35,8 +38,11 @@ namespace ig
         return archive;
     }
 
-    const Json& TransformComponent::Deserialize(const Json& archive)
+    template <>
+    const Json& Deserialize<nlohmann::basic_json<>, TransformComponent>(const Json& archive, TransformComponent& transform)
     {
+        auto& [Position, Scale, Rotation] = transform;
+        
         /* Position */
         IG_DESERIALIZE_FROM_JSON_FALLBACK(TransformComponent, archive, Position.x, 0.f);
         IG_DESERIALIZE_FROM_JSON_FALLBACK(TransformComponent, archive, Position.y, 0.f);
@@ -52,11 +58,12 @@ namespace ig
         IG_DESERIALIZE_FROM_JSON_FALLBACK(TransformComponent, archive, Rotation.x, 0.f);
         IG_DESERIALIZE_FROM_JSON_FALLBACK(TransformComponent, archive, Rotation.y, 0.f);
         IG_DESERIALIZE_FROM_JSON_FALLBACK(TransformComponent, archive, Rotation.z, 0.f);
-
+        
         return archive;
     }
 
-    void TransformComponent::OnInspector(Registry* registry, const Entity entity)
+    template <>
+    void OnInspector<TransformComponent>(Registry* registry, const Entity entity)
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         TransformComponent& transform = registry->get<TransformComponent>(entity);
