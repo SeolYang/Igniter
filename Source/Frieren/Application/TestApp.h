@@ -1,10 +1,13 @@
 #pragma once
 #include "Igniter/Application/Application.h"
+#include "Igniter/Core/Handle.h"
 
 namespace ig
 {
     class World;
     class GameSystem;
+    class StaticMesh;
+    class Material;
 } // namespace ig
 
 namespace fe
@@ -28,6 +31,9 @@ namespace fe
       private:
         ig::Ptr<ig::GameSystem> gameSystem;
         ig::Ptr<EditorCanvas> editorCanvas;
+
+        ig::Handle<ig::StaticMesh> testStaticMesh;
+        ig::Handle<ig::Material> testMaterial;
 
 #if defined(DEBUG) || defined(_DEBUG)
         constexpr static ig::U32 kAxeGridSizeX = 10;

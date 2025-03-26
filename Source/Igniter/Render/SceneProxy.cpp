@@ -841,6 +841,7 @@ namespace ig
         }
 
         renderContext->DestroyBuffer(meshInstanceIndicesBuffer);
+        renderContext->DestroyGpuView(meshInstanceIndicesBufferSrv);
         meshInstanceIndicesStagingBuffer.reset();
 
         /* 이 때, Staging Buffer는 2개 프레임 분의 버퍼를 재할당 하기 때문에 비효율 적일 수 있다. */

@@ -64,7 +64,7 @@ namespace ig
         CallStack& callStack = GetCallStack();
         CapturedFrames frames{};
         DWORD backTraceHash{};
-        frames.NumCapturedFrames = CaptureStackBackTrace(1, MaxNumBackTraceCapture, &frames.Frames[0], &backTraceHash);
+        frames.NumCapturedFrames = CaptureStackBackTrace(1, kMaxNumBackTraceCapture, &frames.Frames[0], &backTraceHash);
 
         {
             UniqueLock lock{callStack.mutex};

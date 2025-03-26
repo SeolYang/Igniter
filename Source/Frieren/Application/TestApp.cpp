@@ -47,21 +47,21 @@ namespace fe
         gameSystem = std::move(*entt::resolve<TestGameSystem>().func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>());
         /************************************/
 
-        ig::World& worldInstance = ig::Engine::GetWorld();
-        ig::Registry& registry = worldInstance.GetRegistry();
-        const ig::Entity mainCam = FpsCameraArchetype::Create(&registry);
-        auto& cameraComponent = registry.get<ig::CameraComponent>(mainCam);
-        cameraComponent.bIsMainCamera = true;
-        auto& cameraTransform = registry.get<ig::TransformComponent>(mainCam);
-        cameraTransform.Position.z = 0.f;
-        auto& camController = registry.get<FpsCameraController>(mainCam);
-        camController.MovementPower = 1.f;
-        
-        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
-        //ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
-        ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
-        //ig::Handle<ig::StaticMesh> testStaticMesh = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
-        ig::Handle<ig::Material> testMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
+         ig::World& worldInstance = ig::Engine::GetWorld();
+         ig::Registry& registry = worldInstance.GetRegistry();
+         const ig::Entity mainCam = FpsCameraArchetype::Create(&registry);
+         auto& cameraComponent = registry.get<ig::CameraComponent>(mainCam);
+         cameraComponent.bIsMainCamera = true;
+         auto& cameraTransform = registry.get<ig::TransformComponent>(mainCam);
+         cameraTransform.Position.z = 0.f;
+         auto& camController = registry.get<FpsCameraController>(mainCam);
+         camController.MovementPower = 1.f;
+         
+         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+         //testStaticMesh = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
+         testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+         //testStaticMesh = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
+         testMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
 
 #ifdef TEST_ENTITY
         ig::Entity newEntity = ig::StaticMeshArchetype::Create(&registry);
@@ -84,8 +84,6 @@ namespace fe
 #endif
 
 #if !defined(TEST_ENTITY) && !defined(TEST_LIGHT)
-        IG_VERIFY(assetManager.Clone(testStaticMesh, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
-        IG_VERIFY(assetManager.Clone(testMaterial, (kAxeGridSizeX * kAxeGridSizeY * kAxeGridSizeZ) - 1));
         for (ig::U32 axeGridX = 0; axeGridX < kAxeGridSizeX; ++axeGridX)
         {
             for (ig::U32 axeGridY = 0; axeGridY < kAxeGridSizeY; ++axeGridY)
@@ -104,13 +102,6 @@ namespace fe
                     matComp.Instance = testMaterial;
         
                     RandMovementComponent& randComp = registry.emplace<RandMovementComponent>(newAxeEntity);
-                    // randComp.MoveDirection = ig::Vector3{
-                    //     ig::Random(-1.f, 1.f),
-                    //     ig::Random(-1.f, 1.f),
-                    //     ig::Random(-1.f, 1.f)};
-                    // randComp.MoveDirection.Normalize();
-                    // randComp.MoveSpeed = ig::Random(0.1f, 1.5f);
-        
                     randComp.Rotation = ig::Vector3{ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f), ig::Random(-1.f, 1.f)};
                     randComp.RotateSpeed = ig::Random(0.f, 15.f);
                 }
@@ -130,7 +121,6 @@ namespace fe
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newLightEntity);
                     nameComponent.Name = ig::String(std::format("Light ({}, {}, {})", lightGridX, lightGridY, lightGridZ));
                     auto& lightComponent = registry.emplace<ig::LightComponent>(newLightEntity);
-                    // lightComponent.Property.FalloffRadius = 30.f;
                     lightComponent.Property.FalloffRadius = 15.f;
                     lightComponent.Property.Intensity = 20.f;
                     lightComponent.Property.Color = ig::Vector3{ig::Random(0.f, 1.f), ig::Random(0.f, 1.f), ig::Random(0.f, 1.f)};
@@ -150,7 +140,9 @@ namespace fe
 
     TestApp::~TestApp()
     {
-        // Empty
+        ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
+        assetManager.Unload(testStaticMesh);
+        assetManager.Unload(testMaterial);
     }
 
     void TestApp::Update(const float deltaTime)

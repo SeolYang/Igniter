@@ -38,6 +38,10 @@ namespace ig
         if (meshGuid.isValid())
         {
             AssetManager& assetManager = Engine::GetAssetManager();
+            if (staticMesh.Mesh)
+            {
+                assetManager.Unload(staticMesh.Mesh);
+            }
             staticMesh.Mesh = assetManager.Load<StaticMesh>(meshGuid);
         }
         

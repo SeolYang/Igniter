@@ -3,8 +3,10 @@
 #include "Igniter/Core/Memory.h"
 #include "Igniter/Core/Log.h"
 #include "Igniter/Core/Handle.h"
-#if defined(DEBUG) || defined(_DEBUG)
 #include "Igniter/Core/DebugTools.h"
+
+#if defined(DEBUG) || defined(_DEBUG)
+#define IG_ENABLE_HANDLE_TRACKING
 #endif
 
 IG_DECLARE_LOG_CATEGORY(HandleStorageLog);
@@ -35,7 +37,11 @@ namespace ig
         using VersionType = U32;
 
     public:
-        HandleStorage() { GrowChunks(); }
+        HandleStorage()
+        {
+            GrowChunks();
+        }
+
         HandleStorage(const HandleStorage&) = delete;
         HandleStorage(HandleStorage&&) noexcept = delete;
 
@@ -43,18 +49,19 @@ namespace ig
         {
             if (freeSlots.size() != slotCapacity)
             {
-                IG_LOG(HandleStorageLog, Fatal, "{} handles are leaked!!!", (slotCapacity - freeSlots.size()));
+                IG_LOG(HandleStorageLog, Fatal, "{} handles are leaked!!! =>\n{}", (slotCapacity - freeSlots.size()), CallStack::Dump(CallStack::Capture()));
                 for (const auto slot : views::iota(0Ui32, slotCapacity))
                 {
                     if (!IsMarkedAsFreeSlot(slot))
                     {
                         Ty* slotElementPtr = CalcAddressOfSlot(slot);
                         slotElementPtr->~Ty();
-
-#if defined(DEBUG) || defined(_DEBUG)
+#if defined(IG_ENABLE_HANDLE_TRACKING)
+                        const std::string_view dumpedCallstack = CallStack::Dump(lastCallStackTable[slot]);
                         PrintToDebugger("*** Found Leaked Handle!!! ***\n");
-                        PrintToDebugger(CallStack::Dump(lastCallStackTable[slot]));
+                        PrintToDebugger(dumpedCallstack);
                         PrintToDebugger("\n");
+                        IG_LOG(HandleStorageLog, Fatal, "Leaked at: {}", dumpedCallstack);
 #endif
                         IG_CHECK_NO_ENTRY();
                     }
@@ -97,7 +104,7 @@ namespace ig
             newHandle.Value = SetBits<VersionOffset, VersionSizeInBits>(newHandle.Value, slotVersions[newSlot]);
             IG_CHECK(!reservedToDestroyFlags[newSlot]);
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if defined(IG_ENABLE_HANDLE_TRACKING)
             lastCallStackTable[newSlot] = CallStack::Capture();
 #endif
 
@@ -287,10 +294,9 @@ namespace ig
                 MarkAsFreeSlot(newSlot);
             }
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if defined(IG_ENABLE_HANDLE_TRACKING)
             lastCallStackTable.resize(slotCapacity);
 #endif
-
             return true;
         }
 
@@ -373,8 +379,7 @@ namespace ig
         eastl::vector<SlotType> freeSlots{};
         eastl::vector<VersionType> slotVersions{};
         eastl::bitvector<> reservedToDestroyFlags{};
-
-#if defined(DEBUG) || defined(_DEBUG)
+#if defined(IG_ENABLE_HANDLE_TRACKING)
         eastl::vector<DWORD> lastCallStackTable{};
 #endif
     };

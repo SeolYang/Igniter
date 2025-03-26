@@ -8,11 +8,11 @@ namespace ig
     class CallStack
     {
     private:
-        constexpr static uint16_t MaxNumBackTraceCapture = 16;
+        constexpr static uint16_t kMaxNumBackTraceCapture = 16;
 
         struct CapturedFrames
         {
-            void* Frames[MaxNumBackTraceCapture]{};
+            void* Frames[kMaxNumBackTraceCapture]{};
             uint16_t NumCapturedFrames{0};
         };
 
