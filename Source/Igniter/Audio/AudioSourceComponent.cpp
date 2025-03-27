@@ -7,10 +7,9 @@ namespace ig
     template <>
     void DefineMeta<AudioSourceComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(AudioSourceComponent);
+        IG_META_SET_ON_INSPECTOR(AudioSourceComponent);
     }
-
-    IG_DEFINE_COMPONENT_META(AudioSourceComponent);
+    IG_META_DEFINE_AS_COMPONENT(AudioSourceComponent);
 
     template <>
     void OnInspector<AudioSourceComponent>(Registry* registry, const Entity entity)

@@ -128,7 +128,7 @@ namespace ig
     void OnInspector(Registry* registryPtr, const Entity entity);
 } // namespace ig
 
-#define IG_DECLARE_META(T)              \
+#define IG_META_DECLARE(T)              \
     template <typename Ty>              \
     void DefineMeta();                  \
     namespace details::meta             \
@@ -142,7 +142,7 @@ namespace ig
         };                              \
     }
 
-#define IG_DEFINE_META(T)                                                                 \
+#define IG_META_DEFINE(T)                                                                 \
     namespace details::meta                                                               \
     {                                                                                     \
         T##_DefineMeta::T##_DefineMeta()                                                  \
@@ -155,7 +155,7 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                              \
     }
 
-#define IG_DEFINE_COMPONENT_META(T)                                                                \
+#define IG_META_DEFINE_AS_COMPONENT(T)                                                                \
     namespace details::meta                                                                        \
     {                                                                                              \
         T##_DefineMeta::T##_DefineMeta()                                                           \
@@ -171,7 +171,7 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                                       \
     }
 
-#define IG_DEFINE_ARCHETYPE_META(T)                                                             \
+#define IG_META_DEFINE_AS_ARCHETYPE(T)                                                             \
     namespace details::meta                                                                     \
     {                                                                                           \
         T##_DefineMeta::T##_DefineMeta()                                                        \
@@ -186,7 +186,7 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                                    \
     }
 
-#define IG_DEFINE_STARTUP_APP_META(T)                                                     \
+#define IG_META_DEFINE_AS_STARTUP_APP(T)                                                     \
     namespace details::meta                                                               \
     {                                                                                     \
         T##_DefineMeta::T##_DefineMeta()                                                  \
@@ -201,6 +201,6 @@ namespace ig
         T##_DefineMeta T##_DefineMeta::_reg;                                              \
     }
 
-#define IG_SET_ON_INSPECTOR_META(T)                                                \
+#define IG_META_SET_ON_INSPECTOR(T)                                                \
     static_assert(std::is_invocable_v<decltype(&ig::OnInspector<T>), ig::Registry*, const ig::Entity>); \
     entt::meta<T>().func<&ig::OnInspector<T>>(ig::meta::OnInspectorFunc)

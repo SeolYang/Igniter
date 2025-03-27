@@ -73,6 +73,6 @@ namespace ig
     }
 } // namespace ig
 
-#define IG_SET_META_JSON_SERIALIZABLE_COMPONENT(T)                                                             \
+#define IG_META_SET_JSON_SERIALIZABLE_COMPONENT(T)                                                             \
     entt::meta<T>().template func<&ig::SerializeComponent<ig::Json, T>>(ig::meta::SerializeComponentJsonFunc); \
     entt::meta<T>().template func<&ig::DeserializeComponent<ig::Json, T>>(ig::meta::DeserializeComponentJsonFunc);

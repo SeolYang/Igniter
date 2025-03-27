@@ -20,5 +20,5 @@ namespace ig
     template <>
     void OnInspector<MaterialComponent>(Registry* registry, const Entity entity);
 
-    IG_DECLARE_META(MaterialComponent);
+    IG_META_DECLARE(MaterialComponent);
 } // namespace ig

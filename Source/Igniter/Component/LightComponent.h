@@ -19,5 +19,5 @@ namespace ig
     template <>
     void OnInspector<LightComponent>(Registry* registry, const Entity entity);
 
-    IG_DECLARE_META(LightComponent);
+    IG_META_DECLARE(LightComponent);
 } // namespace ig

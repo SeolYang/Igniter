@@ -39,7 +39,7 @@ namespace ig
     }
 } // namespace ig
 
-#define IG_DEFINE_TYPE_META_AS_GAME_SYSTEM(T)                                                  \
+#define IG_META_DEFINE_AS_GAME_SYSTEM(T)                                                  \
     namespace details::meta                                                                    \
     {                                                                                          \
         T##_DefineMeta::T##_DefineMeta()                                                       \

@@ -34,5 +34,5 @@ namespace ig
     template <>
     void OnInspector<CameraComponent>(Registry* registry, const Entity entity);
 
-    IG_DECLARE_META(CameraComponent);
+    IG_META_DECLARE(CameraComponent);
 } // namespace ig

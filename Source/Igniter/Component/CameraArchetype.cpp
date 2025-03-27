@@ -3,5 +3,5 @@
 
 namespace ig
 {
-    IG_DEFINE_ARCHETYPE_META(CameraArchetype);
+    IG_META_DEFINE_AS_ARCHETYPE(CameraArchetype);
 }

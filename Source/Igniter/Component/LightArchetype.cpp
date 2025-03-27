@@ -3,5 +3,5 @@
 
 namespace ig
 {
-    IG_DEFINE_ARCHETYPE_META(PointLightArchetype);
+    IG_META_DEFINE_AS_ARCHETYPE(PointLightArchetype);
 }

@@ -8,5 +8,5 @@
 namespace ig
 {
     using StaticMeshArchetype = Archetype<TransformComponent, StaticMeshComponent, MaterialComponent, RenderableTag>;
-    IG_DECLARE_META(StaticMeshArchetype);
+    IG_META_DECLARE(StaticMeshArchetype);
 } // namespace ig

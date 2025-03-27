@@ -13,5 +13,5 @@ namespace fe
     template <>
     void DefineMeta<TestGameSystem>() {}
 
-    IG_DEFINE_TYPE_META_AS_GAME_SYSTEM(TestGameSystem);
+    IG_META_DEFINE_AS_GAME_SYSTEM(TestGameSystem);
 } // namespace fe

@@ -21,5 +21,5 @@ namespace ig
         light.Property.FalloffRadius = 1.f;
         return newEntity;
     }
-    IG_DECLARE_META(PointLightArchetype);
+    IG_META_DECLARE(PointLightArchetype);
 }

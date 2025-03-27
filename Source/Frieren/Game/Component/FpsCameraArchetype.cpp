@@ -3,5 +3,5 @@
 
 namespace fe
 {
-    IG_DEFINE_ARCHETYPE_META(FpsCameraArchetype);
+    IG_META_DEFINE_AS_ARCHETYPE(FpsCameraArchetype);
 }

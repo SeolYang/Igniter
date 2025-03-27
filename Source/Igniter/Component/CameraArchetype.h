@@ -6,5 +6,5 @@
 namespace ig
 {
     using CameraArchetype = Archetype<CameraComponent, TransformComponent>;
-    IG_DECLARE_META(CameraArchetype);
+    IG_META_DECLARE(CameraArchetype);
 } // namespace ig

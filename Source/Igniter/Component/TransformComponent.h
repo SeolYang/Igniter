@@ -72,5 +72,5 @@ namespace ig
     template <>
     void OnInspector<TransformComponent>(Registry* registry, const Entity entity);
 
-    IG_DECLARE_META(TransformComponent);
+    IG_META_DECLARE(TransformComponent);
 } // namespace ig

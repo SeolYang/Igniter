@@ -40,7 +40,7 @@ namespace fe
         }
     };
 
-    IG_DECLARE_META(FpsCameraController);
+    IG_META_DECLARE(FpsCameraController);
 } // namespace fe
 
 namespace ig

@@ -8,10 +8,10 @@ namespace fe
     template <>
     void DefineMeta<FpsCameraController>()
     {
-        IG_SET_ON_INSPECTOR_META(FpsCameraController);
-        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(FpsCameraController);
+        IG_META_SET_ON_INSPECTOR(FpsCameraController);
+        IG_META_SET_JSON_SERIALIZABLE_COMPONENT(FpsCameraController);
     }
-    IG_DEFINE_COMPONENT_META(FpsCameraController);
+    IG_META_DEFINE_AS_COMPONENT(FpsCameraController);
 } // namespace fe
 
 namespace ig

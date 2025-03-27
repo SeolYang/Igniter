@@ -8,10 +8,10 @@ namespace ig
     template <>
     void DefineMeta<NameComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(NameComponent);
-        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(NameComponent);
+        IG_META_SET_ON_INSPECTOR(NameComponent);
+        IG_META_SET_JSON_SERIALIZABLE_COMPONENT(NameComponent);
     }
-    IG_DEFINE_COMPONENT_META(NameComponent);
+    IG_META_DEFINE_AS_COMPONENT(NameComponent);
 
     template <>
     Json& Serialize<nlohmann::basic_json<>, NameComponent>(Json& archive, const NameComponent& name)

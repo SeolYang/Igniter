@@ -21,5 +21,5 @@ namespace ig
     template <>
     void OnInspector<StaticMeshComponent>(Registry* registry, const Entity entity);
     
-    IG_DECLARE_META(StaticMeshComponent);
+    IG_META_DECLARE(StaticMeshComponent);
 } // namespace ig

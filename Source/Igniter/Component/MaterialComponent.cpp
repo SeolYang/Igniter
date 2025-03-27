@@ -11,10 +11,10 @@ namespace ig
     template <>
     void DefineMeta<MaterialComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(MaterialComponent);
-        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(MaterialComponent);
+        IG_META_SET_ON_INSPECTOR(MaterialComponent);
+        IG_META_SET_JSON_SERIALIZABLE_COMPONENT(MaterialComponent);
     }
-    IG_DEFINE_COMPONENT_META(MaterialComponent);
+    IG_META_DEFINE_AS_COMPONENT(MaterialComponent);
 
     template <>
     Json& Serialize<Json, MaterialComponent>(Json& archive, const MaterialComponent& materialComponent)

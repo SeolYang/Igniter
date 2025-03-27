@@ -24,5 +24,5 @@ namespace fe
         void Update(const float deltaTime, ig::World& world) override;
     };
 
-    IG_DECLARE_META(JustSpinningSystem);
+    IG_META_DECLARE(JustSpinningSystem);
 } // namespace fe

@@ -9,8 +9,8 @@ namespace ig
     template <>
     void DefineMeta<LightComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(LightComponent);
-        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(LightComponent);
+        IG_META_SET_ON_INSPECTOR(LightComponent);
+        IG_META_SET_JSON_SERIALIZABLE_COMPONENT(LightComponent);
     }
 
     template <>
@@ -55,5 +55,5 @@ namespace ig
         }
     }
 
-    IG_DEFINE_COMPONENT_META(LightComponent);
+    IG_META_DEFINE_AS_COMPONENT(LightComponent);
 } // namespace ig

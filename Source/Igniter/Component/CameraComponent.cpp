@@ -9,8 +9,8 @@ namespace ig
     template <>
     void DefineMeta<CameraComponent>()
     {
-        IG_SET_ON_INSPECTOR_META(CameraComponent);
-        IG_SET_META_JSON_SERIALIZABLE_COMPONENT(CameraComponent);
+        IG_META_SET_ON_INSPECTOR(CameraComponent);
+        IG_META_SET_JSON_SERIALIZABLE_COMPONENT(CameraComponent);
     }
 
     Matrix CameraUtility::CreatePerspective(const CameraComponent& camera)
@@ -93,5 +93,5 @@ namespace ig
         ImGui::Checkbox("Enable Frustum Culling", &camera.bEnableFrustumCull);
     }
 
-    IG_DEFINE_COMPONENT_META(CameraComponent);
+    IG_META_DEFINE_AS_COMPONENT(CameraComponent);
 } // namespace ig

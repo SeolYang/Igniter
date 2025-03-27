@@ -142,7 +142,7 @@ namespace fe
             }
         }
 
-        testAudioClip = ig::Engine::GetAudioSystem().CreateClip("Resources/BGM/battle_cry_Ver2.0_Loop.ogg");
+        testAudioClip = ig::Engine::GetAudioSystem().CreateClip("Resources/BGM/FirstFlower_NightWind_and_ChildhoodFriend.ogg");
         const ig::Entity audioSourceEntity = registry.create();
         ig::AudioSourceComponent& audioSource = registry.emplace<ig::AudioSourceComponent>(audioSourceEntity);
         audioSource.Clip = testAudioClip;

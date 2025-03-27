@@ -57,5 +57,5 @@ namespace ig
     template <>
     void OnInspector<AudioSourceComponent>(Registry* registry, const Entity entity);
 
-    IG_DECLARE_META(AudioSourceComponent);
+    IG_META_DECLARE(AudioSourceComponent);
 }

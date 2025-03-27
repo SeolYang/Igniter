@@ -19,5 +19,5 @@ namespace ig
     template <>
     void OnInspector<NameComponent>(Registry* registry, const Entity entity);
 
-    IG_DECLARE_META(NameComponent);
+    IG_META_DECLARE(NameComponent);
 } // namespace ig

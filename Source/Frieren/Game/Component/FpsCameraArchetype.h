@@ -22,5 +22,5 @@ namespace fe
         }
     };
 
-    IG_DECLARE_META(FpsCameraArchetype);
+    IG_META_DECLARE(FpsCameraArchetype);
 } // namespace fe
