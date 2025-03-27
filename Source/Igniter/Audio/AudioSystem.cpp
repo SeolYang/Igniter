@@ -102,7 +102,10 @@ namespace ig
 
         constexpr auto kCalcVelocity = [](const FMOD_VECTOR prevPos, const FMOD_VECTOR currentPos, const float dt)
         {
-            IG_CHECK(dt > 0.f);
+            if (dt <= FLT_EPSILON)
+            {
+                return FMOD_VECTOR{0.f, 0.f, 0.f};
+            }
             const float invDeltaTime = 1.f / dt;
             const FMOD_VECTOR currentVelocity{
                 .x = (currentPos.x - prevPos.x) * invDeltaTime,
@@ -188,9 +191,9 @@ namespace ig
             {
                 IG_CHECK(channel != nullptr);
                 const FMOD_VECTOR prevPos{
-                    transform.Position.x,
-                    transform.Position.y,
-                    transform.Position.z
+                    audioSource.PrevPosition.x,
+                    audioSource.PrevPosition.y,
+                    audioSource.PrevPosition.z
                 };
                 const FMOD_VECTOR currentPos{
                     .x = transform.Position.x,
