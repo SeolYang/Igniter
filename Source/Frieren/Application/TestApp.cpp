@@ -14,11 +14,13 @@
 #include "Igniter/Component/RenderableTag.h"
 #include "Igniter/Audio/AudioSystem.h"
 #include "Igniter/Audio/AudioSourceComponent.h"
+#include "Igniter/Audio/AudioListenerComponent.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/Game/Component/FpsCameraArchetype.h"
 #include "Frieren/Game/Component/RandMovementComponent.h"
 #include "Frieren/Gui/EditorCanvas.h"
 #include "Frieren/Application/TestApp.h"
+
 
 namespace fe
 {
@@ -58,6 +60,7 @@ namespace fe
          cameraTransform.Position.z = 0.f;
          auto& camController = registry.get<FpsCameraController>(mainCam);
          camController.MovementPower = 1.f;
+        registry.emplace<ig::AudioListenerComponent>(mainCam);
          
          ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
          //testStaticMesh = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
@@ -146,6 +149,7 @@ namespace fe
         audioSource.NextEvent = ig::EAudioEvent::Play;
         audioSource.bLoop = true;
         audioSource.bShouldUpdatePropertiesOnThisFrame = true;
+        registry.emplace<ig::TransformComponent>(audioSourceEntity);
     }
 
     TestApp::~TestApp()

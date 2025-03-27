@@ -34,13 +34,7 @@ namespace ig
         }
 
         /* Read Only */
-        if (EAudioStatus latestStatus = audioSource.LatestStatus;
-            ImGuiX::BeginEnumCombo("Latest Status", latestStatus)
-        )
-        {
-            ImGuiX::EndEnumCombo();
-        }
-
+        ImGui::Text(std::format("Latest Status: {}", audioSource.LatestStatus).c_str());
         if (ImGuiX::BeginEnumCombo("Next Event", audioSource.NextEvent))
         {
             ImGuiX::EndEnumCombo();

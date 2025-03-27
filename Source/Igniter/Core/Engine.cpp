@@ -120,6 +120,7 @@ namespace ig
             /********  Begin Frame  *******/
             const LocalFrameIndex localFrameIdx = FrameManager::GetLocalFrameIndex();
             timer->Begin();
+            const F32 deltaTime = timer->GetDeltaTime();
 
             /* OS Event 처리는 메인 스레드에서 이루어져야 한다. */
             {
@@ -136,7 +137,6 @@ namespace ig
 
             {
                 ZoneScopedN("Engine.Update");
-                const F32 deltaTime = timer->GetDeltaTime();
                 application.Update(deltaTime);
             }
 
@@ -153,9 +153,9 @@ namespace ig
             const GlobalFrameIndex globalFrameIdx = FrameManager::GetGlobalFrameIndex();
             tf::Taskflow frameTaskflow{std::format("Frame#{}", globalFrameIdx)};
             [[maybe_unused]] tf::Task finalizeRenderFrameTask = ScheduleRenderFrame(frameTaskflow);
-            tf::Task audioUpdateTask = frameTaskflow.emplace([this]()
+            tf::Task audioUpdateTask = frameTaskflow.emplace([this, deltaTime]()
             {
-               audioSystem->Update(this->world->GetRegistry()); 
+               audioSystem->Update(this->world->GetRegistry(), deltaTime); 
             });
             taskExecutor.run(frameTaskflow).wait();
 

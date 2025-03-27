@@ -26,7 +26,7 @@ namespace ig
         Handle<AudioClip> CreateClip(const std::string_view path);
         void Destroy(const Handle<AudioClip> clip);
 
-        void Update(Registry& registry);
+        void Update(Registry& registry, const float deltaTime);
 
     private:
         FMOD::Channel* UpdateAudioStatusUnsafe(const Entity entity, AudioSourceComponent& audioSource);

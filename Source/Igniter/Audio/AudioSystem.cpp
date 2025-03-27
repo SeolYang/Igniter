@@ -1,6 +1,7 @@
 #include "Igniter/Igniter.h"
 #include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Audio/AudioSourceComponent.h"
+#include "Igniter/Audio/AudioListenerComponent.h"
 #include "Igniter/Audio/AudioSystem.h"
 
 IG_DECLARE_PRIVATE_LOG_CATEGORY(AudioSystemLog);
@@ -94,10 +95,56 @@ namespace ig
         }
     }
 
-    void AudioSystem::Update(Registry& registry)
+    void AudioSystem::Update(Registry& registry, const float deltaTime)
     {
         ZoneScopedN("AudioSystem.Update");
         IG_CHECK(system != nullptr);
+
+        constexpr auto kCalcVelocity = [](const FMOD_VECTOR prevPos, const FMOD_VECTOR currentPos, const float dt)
+        {
+            IG_CHECK(dt > 0.f);
+            const float invDeltaTime = 1.f / dt;
+            const FMOD_VECTOR currentVelocity{
+                .x = (currentPos.x - prevPos.x) * invDeltaTime,
+                .y = (currentPos.y - prevPos.y) * invDeltaTime,
+                .z = (currentPos.z - prevPos.z) * invDeltaTime
+            };
+            return currentVelocity;
+        };
+
+        const auto listenerView = registry.view<AudioListenerComponent, const TransformComponent>();
+        system->set3DNumListeners((int)listenerView.size_hint());
+        int listenerIdx = 0;
+        for (auto [entity, listener, transform] : listenerView.each())
+        {
+            const FMOD_VECTOR prevPos{
+                .x = listener.PrevPosition.x,
+                .y = listener.PrevPosition.y,
+                .z = listener.PrevPosition.z
+            };
+            const FMOD_VECTOR currentPos{
+                .x = transform.Position.x,
+                .y = transform.Position.y,
+                .z = transform.Position.z
+            };
+            const FMOD_VECTOR currentVelocity = kCalcVelocity(prevPos, currentPos, deltaTime);
+            const Vector3 forward = TransformUtility::MakeForward(transform);
+            const Vector3 up = TransformUtility::MakeUp(transform);
+            const FMOD_VECTOR fmodForward{
+                .x = forward.x,
+                .y = forward.y,
+                .z = forward.z
+            };
+            const FMOD_VECTOR fmodUp{
+                .x = up.x,
+                .y = up.y,
+                .z = up.z
+            };
+            system->set3DListenerAttributes(listenerIdx, &currentPos, &currentVelocity, &fmodForward, &fmodUp);
+            listener.PrevPosition = transform.Position;
+            ++listenerIdx;
+        }
+
         ReadOnlyLock lock{audioClipStorageMutex};
         for (auto [entity, audioSource] : registry.view<AudioSourceComponent>(entt::exclude_t<TransformComponent>{}).each())
         {
@@ -136,6 +183,24 @@ namespace ig
                 channel->setMode(newMode);
                 audioSource.bShouldUpdatePropertiesOnThisFrame = false;
             }
+
+            if (audioSource.LatestStatus == EAudioStatus::Playing)
+            {
+                IG_CHECK(channel != nullptr);
+                const FMOD_VECTOR prevPos{
+                    transform.Position.x,
+                    transform.Position.y,
+                    transform.Position.z
+                };
+                const FMOD_VECTOR currentPos{
+                    .x = transform.Position.x,
+                    .y = transform.Position.y,
+                    .z = transform.Position.z
+                };
+                const FMOD_VECTOR currentVelocity = kCalcVelocity(prevPos, currentPos, deltaTime);
+                channel->set3DAttributes(&currentPos, &currentVelocity);
+            }
+            audioSource.PrevPosition = transform.Position;
         }
 
         if (const FMOD_RESULT updateResult = system->update();

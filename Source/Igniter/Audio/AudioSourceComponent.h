@@ -50,6 +50,8 @@ namespace ig
         EAudioStatus LatestStatus = EAudioStatus::Stopped;
         /* 다음 프레임에서 반영할 상태(이벤트) */
         EAudioEvent NextEvent = EAudioEvent::None;
+
+        Vector3 PrevPosition = Vector3::Zero;
     };
 
     template <>
