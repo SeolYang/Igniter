@@ -47,7 +47,7 @@ namespace ig
         }
     }
 
-    Handle<AudioClip> AudioSystem::CreateClip(const std::string_view path)
+    Handle<Audio> AudioSystem::CreateAudio(const std::string_view path)
     {
         IG_CHECK(system != nullptr);
 
@@ -61,19 +61,19 @@ namespace ig
         IG_CHECK(newSound != nullptr);
 
         ReadWriteLock lock{audioClipStorageMutex};
-        return Handle<AudioClip>{audioClipStorage.Create(newSound).Value};
+        return Handle<Audio>{audioClipStorage.Create(newSound).Value};
     }
 
-    void AudioSystem::Destroy(const Handle<AudioClip> clip)
+    void AudioSystem::Destroy(const Handle<Audio> audioHandle)
     {
         IG_CHECK(system != nullptr);
-        if (!clip)
+        if (!audioHandle)
         {
             IG_LOG(AudioSystemLog, Warning, "Trying to destroy invalid audio clip.");
             return;
         }
 
-        const auto soundHandle = Handle<FMOD::Sound*>{clip.Value};
+        const auto soundHandle = Handle<FMOD::Sound*>{audioHandle.Value};
         FMOD::Sound* sound = nullptr;
         {
             ReadWriteLock lock{audioClipStorageMutex};
@@ -333,9 +333,9 @@ namespace ig
         return channel;
     }
 
-    FMOD::Sound* AudioSystem::LookupUnsafe(const Handle<AudioClip> clip)
+    FMOD::Sound* AudioSystem::LookupUnsafe(const Handle<Audio> audio)
     {
-        FMOD::Sound** soundPtr = audioClipStorage.Lookup(Handle<FMOD::Sound*>{clip.Value});
+        FMOD::Sound** soundPtr = audioClipStorage.Lookup(Handle<FMOD::Sound*>{audio.Value});
         return soundPtr != nullptr ? *soundPtr : nullptr;
     }
 }

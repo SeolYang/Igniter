@@ -142,10 +142,10 @@ namespace fe
             }
         }
 
-        testAudioClip = ig::Engine::GetAudioSystem().CreateClip("Resources/BGM/FirstFlower_NightWind_and_ChildhoodFriend.ogg");
+        testAudio = ig::Engine::GetAudioSystem().CreateAudio("Resources/BGM/FirstFlower_NightWind_and_ChildhoodFriend.ogg");
         const ig::Entity audioSourceEntity = registry.create();
         ig::AudioSourceComponent& audioSource = registry.emplace<ig::AudioSourceComponent>(audioSourceEntity);
-        audioSource.Clip = testAudioClip;
+        audioSource.Clip = testAudio;
         audioSource.NextEvent = ig::EAudioEvent::Play;
         audioSource.bLoop = true;
         audioSource.bShouldUpdatePropertiesOnThisFrame = true;
@@ -158,7 +158,7 @@ namespace fe
         assetManager.Unload(testStaticMesh);
         assetManager.Unload(testMaterial);
 
-        ig::Engine::GetAudioSystem().Destroy(testAudioClip);
+        ig::Engine::GetAudioSystem().Destroy(testAudio);
     }
 
     void TestApp::Update(const float deltaTime)

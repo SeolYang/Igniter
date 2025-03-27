@@ -9,7 +9,7 @@ namespace ig
     class Engine;
 
     /* Mimickinng FMOD::Sound */
-    class AudioClip;
+    class Audio;
     struct AudioSourceComponent;
 
     class AudioSystem
@@ -23,14 +23,14 @@ namespace ig
         AudioSystem& operator=(const AudioSystem&) = delete;
         AudioSystem& operator=(AudioSystem&&) noexcept = delete;
 
-        Handle<AudioClip> CreateClip(const std::string_view path);
-        void Destroy(const Handle<AudioClip> clip);
+        Handle<Audio> CreateAudio(const std::string_view path);
+        void Destroy(const Handle<Audio> audioHandle);
 
         void Update(Registry& registry, const float deltaTime);
 
     private:
         FMOD::Channel* UpdateAudioStatusUnsafe(const Entity entity, AudioSourceComponent& audioSource);
-        FMOD::Sound* LookupUnsafe(const Handle<AudioClip> clip);
+        FMOD::Sound* LookupUnsafe(const Handle<Audio> audio);
 
     private:
         constexpr static int kMaxChannels = 512;

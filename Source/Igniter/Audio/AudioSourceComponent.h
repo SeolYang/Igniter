@@ -23,13 +23,13 @@ namespace ig
         Stop,
     };
 
-    class AudioClip;
+    class Audio;
 
     struct AudioSourceComponent
     {
         //Handle<AudioClip> Clip{};
         /* Test Purpose */
-        Handle<AudioClip> Clip;
+        Handle<Audio> Clip;
 
         /* Properties */
         float Volume = 0.5f;

@@ -8,7 +8,7 @@ namespace ig
     class GameSystem;
     class StaticMesh;
     class Material;
-    class AudioClip;
+    class Audio;
 } // namespace ig
 
 namespace fe
@@ -36,7 +36,7 @@ namespace fe
         ig::Handle<ig::StaticMesh> testStaticMesh;
         ig::Handle<ig::Material> testMaterial;
 
-        ig::Handle<ig::AudioClip> testAudioClip;
+        ig::Handle<ig::Audio> testAudio;
 
 #if defined(DEBUG) || defined(_DEBUG)
         constexpr static ig::U32 kAxeGridSizeX = 10;
