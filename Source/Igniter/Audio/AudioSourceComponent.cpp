@@ -21,7 +21,7 @@ namespace ig
         /* @todo Audio Asset 선택 가능하도록 하기 */
         ImGui::SliderFloat("Volume", &audioSource.Volume, 0.f, 1.f);
         ImGui::SliderFloat("Pitch", &audioSource.Pitch, 0.f, 1.f);
-        ImGui::SliderFloat("Pan", &audioSource.Pan, 0.f, 1.f);
+        ImGui::SliderFloat("Pan", &audioSource.Pan, -1.f, 1.f);
         ImGui::Checkbox("Mute", &audioSource.bMute);
         ImGui::Checkbox("Loop", &audioSource.bLoop);
         if (ImGui::InputFloat("Min Distance", &audioSource.MinDistance, 0.1f, 10.f, "%.3f"))
