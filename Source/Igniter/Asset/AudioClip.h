@@ -3,7 +3,7 @@
 
 namespace ig
 {
-    class Audio
+    class AudioClip
     {
     public:
     

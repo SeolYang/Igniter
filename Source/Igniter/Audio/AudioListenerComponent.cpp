@@ -1,7 +1,6 @@
 #include "Igniter/Igniter.h"
-#include "Igniter/Audio/AudioListenerComponent.h"
-
 #include "Igniter/ImGui/ImGuiExtensions.h"
+#include "Igniter/Audio/AudioListenerComponent.h"
 
 namespace ig
 {

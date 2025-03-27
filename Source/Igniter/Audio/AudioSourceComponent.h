@@ -4,7 +4,7 @@
 
 namespace ig
 {
-    class Audio;
+    class AudioClip;
 
     enum class EAudioStatus : U8
     {
@@ -27,7 +27,7 @@ namespace ig
 
     struct AudioSourceComponent
     {
-        //Handle<Audio> Source{};
+        //Handle<AudioClip> Clip{};
         /* Test Purpose */
         Handle<AudioClip> Clip;
 
