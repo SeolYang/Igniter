@@ -37,8 +37,8 @@ namespace ig
         float Pan = 0.f;
         bool bMute = false;
         bool bLoop = false;
-        float MinDistance = 0.0f;
-        float MaxDistance = 1000.f;
+        float MinDistance = 1.f;
+        float MaxDistance = 10000.f;
         /* Per Frame Flags*/
         /*
          * 변경된 프로퍼티 값을 시스템에 반영 시키기 위해선 해당 플래그를 true로 변경해주어야 함.
