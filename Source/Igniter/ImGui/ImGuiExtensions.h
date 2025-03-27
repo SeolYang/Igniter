@@ -35,7 +35,7 @@ namespace ig::ImGuiX
         requires std::is_enum_v<E>
     bool BeginEnumCombo(const std::string_view name, E& enumValue)
     {
-        int selected = 0;
+        int selected = (int)((std::underlying_type_t<E>)enumValue);
         const bool bSuccuess = BeginEnumCombo<E>(name, selected);
         if (bSuccuess)
         {
