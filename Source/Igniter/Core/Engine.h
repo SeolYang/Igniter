@@ -22,6 +22,7 @@ namespace ig
     class World;
     class SceneProxy;
     class Renderer;
+    class AudioSystem;
 
     class Engine final
     {
@@ -40,6 +41,7 @@ namespace ig
         [[nodiscard]] static Timer& GetTimer();
         [[nodiscard]] static Window& GetWindow();
         [[nodiscard]] static InputManager& GetInputManager();
+        [[nodiscard]] static AudioSystem& GetAudioSystem();
         [[nodiscard]] static RenderContext& GetRenderContext();
         [[nodiscard]] static AssetManager& GetAssetManager();
         [[nodiscard]] static ImGuiContext& GetImGuiContext();
@@ -68,6 +70,7 @@ namespace ig
         Ptr<Timer> timer;
         Ptr<Window> window;
         Ptr<InputManager> inputManager;
+        Ptr<AudioSystem> audioSystem;
 
         Ptr<RenderContext> renderContext;
 

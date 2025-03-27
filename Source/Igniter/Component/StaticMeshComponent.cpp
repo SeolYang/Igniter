@@ -13,7 +13,8 @@ namespace ig
         IG_SET_ON_INSPECTOR_META(StaticMeshComponent);
         IG_SET_META_JSON_SERIALIZABLE_COMPONENT(StaticMeshComponent);
     }
-    
+    IG_DEFINE_COMPONENT_META(StaticMeshComponent);
+
     template <>
     Json& Serialize<Json, StaticMeshComponent>(Json& archive, const StaticMeshComponent& staticMesh)
     {
@@ -92,6 +93,4 @@ namespace ig
             staticMeshSelectModalPopup.End();
         }
     }
-
-    IG_DEFINE_COMPONENT_META(StaticMeshComponent);
 } // namespace ig

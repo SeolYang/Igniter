@@ -49,6 +49,7 @@
     <ClInclude Include="Asset\AssetCache.h" />
     <ClInclude Include="Asset\AssetManager.h" />
     <ClInclude Include="Asset\AssetMonitor.h" />
+    <ClInclude Include="Asset\Audio.h" />
     <ClInclude Include="Asset\Common.h" />
     <ClInclude Include="Asset\Map.h" />
     <ClInclude Include="Asset\MapCreator.h" />
@@ -62,6 +63,9 @@
     <ClInclude Include="Asset\Texture.h" />
     <ClInclude Include="Asset\TextureImporter.h" />
     <ClInclude Include="Asset\TextureLoader.h" />
+    <ClInclude Include="Audio\AudioListenerComponent.h" />
+    <ClInclude Include="Audio\AudioSourceComponent.h" />
+    <ClInclude Include="Audio\AudioSystem.h" />
     <ClInclude Include="Component\Archetype.h" />
     <ClInclude Include="Component\CameraArchetype.h" />
     <ClInclude Include="Component\CameraComponent.h" />
@@ -190,6 +194,7 @@
     <ClCompile Include="Application\Application.cpp" />
     <ClCompile Include="Asset\AssetManager.cpp" />
     <ClCompile Include="Asset\AssetMonitor.cpp" />
+    <ClCompile Include="Asset\Audio.cpp" />
     <ClCompile Include="Asset\Common.cpp" />
     <ClCompile Include="Asset\MapCreator.cpp" />
     <ClCompile Include="Asset\MapLoader.cpp" />
@@ -202,6 +207,9 @@
     <ClCompile Include="Asset\Texture.cpp" />
     <ClCompile Include="Asset\TextureImporter.cpp" />
     <ClCompile Include="Asset\TextureLoader.cpp" />
+    <ClCompile Include="Audio\AudioListenerComponent.cpp" />
+    <ClCompile Include="Audio\AudioSourceComponent.cpp" />
+    <ClCompile Include="Audio\AudioSystem.cpp" />
     <ClCompile Include="Component\CameraArchetype.cpp" />
     <ClCompile Include="Component\CameraComponent.cpp" />
     <ClCompile Include="Component\LightArchetype.cpp" />
@@ -635,6 +643,8 @@ xcopy "$(SolutionDir)Thirdparty\fmod\bin\fmodL.dll" "$(TargetDir)" /e /r /i /y /
       <MaxFilesInUnityFile>4</MaxFilesInUnityFile>
       <ExceptionHandling>false</ExceptionHandling>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

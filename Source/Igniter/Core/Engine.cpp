@@ -9,6 +9,7 @@
 #include "Igniter/Core/ComInitializer.h"
 #include "Igniter/Core/Thread.h"
 #include "Igniter/Input/InputManager.h"
+#include "Igniter/Audio/AudioSystem.h"
 #include "Igniter/D3D12/GpuSyncPoint.h"
 #include "Igniter/Render/RenderContext.h"
 #include "Igniter/Render/SceneProxy.h"
@@ -50,6 +51,9 @@ namespace ig
         inputManager = MakePtr<InputManager>();
         IG_LOG(EngineLog, Info, "Input Manager Initialized.");
 
+        audioSystem = MakePtr<AudioSystem>();
+        IG_LOG(EngineLog, Info, "Audio System Initialized.");
+
         renderContext = MakePtr<RenderContext>(*window);
         IG_LOG(EngineLog, Info, "OnImGui Context Initialized.");
 
@@ -90,7 +94,10 @@ namespace ig
         IG_LOG(EngineLog, Info, "Asset Manager Deinitialized.");
 
         renderContext.reset();
-        IG_LOG(EngineLog, Info, "OnImGui Context Deinitialized.");
+        IG_LOG(EngineLog, Info, "Render Context Deinitialized.");
+
+        audioSystem.reset();
+        IG_LOG(EngineLog, Info, "Audio System Deinitialized.");
 
         inputManager.reset();
         IG_LOG(EngineLog, Info, "Input Manager Deinitialized.");
@@ -146,6 +153,10 @@ namespace ig
             const GlobalFrameIndex globalFrameIdx = FrameManager::GetGlobalFrameIndex();
             tf::Taskflow frameTaskflow{std::format("Frame#{}", globalFrameIdx)};
             [[maybe_unused]] tf::Task finalizeRenderFrameTask = ScheduleRenderFrame(frameTaskflow);
+            tf::Task audioUpdateTask = frameTaskflow.emplace([this]()
+            {
+               audioSystem->Update(this->world->GetRegistry()); 
+            });
             taskExecutor.run(frameTaskflow).wait();
 
             prevLocalFrameIdx = localFrameIdx;
@@ -237,6 +248,12 @@ namespace ig
     {
         IG_CHECK(instance != nullptr);
         return *instance->inputManager;
+    }
+
+    AudioSystem& Engine::GetAudioSystem()
+    {
+        IG_CHECK(instance != nullptr);
+        return *instance->audioSystem;
     }
 
     AssetManager& Engine::GetAssetManager()

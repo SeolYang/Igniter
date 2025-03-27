@@ -12,6 +12,8 @@
 #include "Igniter/Component/LightArchetype.h"
 #include "Igniter/Component/StaticMeshArchetype.h"
 #include "Igniter/Component/RenderableTag.h"
+#include "Igniter/Audio/AudioSystem.h"
+#include "Igniter/Audio/AudioSourceComponent.h"
 #include "Frieren/Game/System/TestGameSystem.h"
 #include "Frieren/Game/Component/FpsCameraArchetype.h"
 #include "Frieren/Game/Component/RandMovementComponent.h"
@@ -136,6 +138,14 @@ namespace fe
                 }
             }
         }
+
+        testAudioClip = ig::Engine::GetAudioSystem().CreateClip("Resources/BGM/battle_cry_Ver2.0_Loop.ogg");
+        const ig::Entity audioSourceEntity = registry.create();
+        ig::AudioSourceComponent& audioSource = registry.emplace<ig::AudioSourceComponent>(audioSourceEntity);
+        audioSource.Clip = testAudioClip;
+        audioSource.NextEvent = ig::EAudioEvent::Play;
+        audioSource.bLoop = true;
+        audioSource.bShouldUpdatePropertiesOnThisFrame = true;
     }
 
     TestApp::~TestApp()
@@ -143,6 +153,8 @@ namespace fe
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         assetManager.Unload(testStaticMesh);
         assetManager.Unload(testMaterial);
+
+        ig::Engine::GetAudioSystem().Destroy(testAudioClip);
     }
 
     void TestApp::Update(const float deltaTime)

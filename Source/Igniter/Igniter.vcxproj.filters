@@ -405,9 +405,6 @@
     <ClInclude Include="D3D12\GpuFence.h">
       <Filter>Source\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\MeshStorage.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\SceneProxy.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
@@ -435,25 +432,10 @@
     <ClInclude Include="Component\LightArchetype.h">
       <Filter>Source\Component\Archetype</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RenderPass\FrustumCullingPass.h">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RenderPass\CompactMeshLodInstancesPass.h">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.h">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RenderPass\TestForwardShadingPass.h">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClInclude>
     <ClInclude Include="Render\RenderPass\ImGuiRenderPass.h">
       <Filter>Source\Render\RenderPass</Filter>
     </ClInclude>
     <ClInclude Include="Render\RenderPass\LightClusteringPass.h">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\RenderPass\DebugLightClusterPass.h">
       <Filter>Source\Render\RenderPass</Filter>
     </ClInclude>
     <ClInclude Include="Render\RenderPass\ZPrePass.h">
@@ -471,6 +453,15 @@
     <ClInclude Include="Render\GpuStagingBuffer.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Audio\AudioChannel.h" />
+    <ClInclude Include="Audio\AudioClip.h" />
+    <ClInclude Include="Audio\AudioListenerComponent.h" />
+    <ClInclude Include="Audio\AudioSourceComponent.h" />
+    <ClInclude Include="Audio\AudioSystem.h" />
+    <ClInclude Include="Audio\SpatialAudioSourceComponent.h" />
+    <ClInclude Include="Component\Archetype.h" />
+    <ClInclude Include="Render\RenderPass\ForwardOpaqueMeshRenderPass.h" />
+    <ClInclude Include="Render\RenderPass\PreMeshInstancePass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp">
@@ -650,9 +641,6 @@
     <ClCompile Include="Render\GpuStorage.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render\MeshStorage.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\SceneProxy.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
@@ -683,25 +671,10 @@
     <ClCompile Include="Component\LightArchetype.cpp">
       <Filter>Source\Component\Archetype</Filter>
     </ClCompile>
-    <ClCompile Include="Render\RenderPass\FrustumCullingPass.cpp">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\RenderPass\CompactMeshLodInstancesPass.cpp">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\RenderPass\GenerateMeshLodDrawCommandsPass.cpp">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\RenderPass\TestForwardShadingPass.cpp">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClCompile>
     <ClCompile Include="Render\RenderPass\ImGuiRenderPass.cpp">
       <Filter>Source\Render\RenderPass</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderPass\LightClusteringPass.cpp">
-      <Filter>Source\Render\RenderPass</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\RenderPass\DebugLightClusterPass.cpp">
       <Filter>Source\Render\RenderPass</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderPass\ZPrePass.cpp">
@@ -713,6 +686,14 @@
     <ClCompile Include="Render\GpuStagingBuffer.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Audio\AudioChannel.cpp" />
+    <ClCompile Include="Audio\AudioClip.cpp" />
+    <ClCompile Include="Audio\AudioListenerComponent.cpp" />
+    <ClCompile Include="Audio\AudioSourceComponent.cpp" />
+    <ClCompile Include="Audio\AudioSystem.cpp" />
+    <ClCompile Include="Audio\SpatialAudioSourceComponent.cpp" />
+    <ClCompile Include="Render\RenderPass\ForwardOpaqueMeshRenderPass.cpp" />
+    <ClCompile Include="Render\RenderPass\PreMeshInstancePass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Thirdparty\DirectXTex\include\DirectXTex\DirectXTex.inl">
@@ -730,73 +711,39 @@
     <None Include="..\..\Thirdparty\fmod\include\fmod\fmod.cs">
       <Filter>Thirdparty\fmod</Filter>
     </None>
-    <None Include="..\..\Assets\Shaders\Constants.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </None>
     <None Include="..\..\Assets\Shaders\BRDF.hlsl">
       <Filter>Source\Shaders</Filter>
     </None>
-    <None Include="..\..\Assets\Shaders\NewTypes.hlsli">
-      <Filter>Source\Shaders</Filter>
-    </None>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassPS.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </None>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePass.hlsli">
-      <Filter>Source\Shaders</Filter>
-    </None>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassAS.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </None>
-    <None Include="..\..\Assets\Shaders\ForwardMeshInstancePassMS.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </None>
+    <None Include="..\..\Assets\Shaders\MeshInstancePass.hlsli" />
+    <None Include="..\..\Assets\Shaders\MeshInstanceAS.hlsl" />
+    <None Include="..\..\Assets\Shaders\MeshInstanceMS.hlsl" />
+    <None Include="..\..\Assets\Shaders\ForwardPS.hlsl" />
+    <None Include="..\..\Assets\Shaders\DepthOnlyMeshInstanceMS.hlsl" />
+    <None Include="..\..\Assets\Shaders\GenerateDepthPyramid.hlsl" />
+    <None Include="..\..\Assets\Shaders\Constants.hlsli" />
+    <None Include="..\..\Assets\Shaders\Types.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\..\Thirdparty\EASTL\EASTL.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\..\Assets\Shaders\BasicVertexShader.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\BasicPixelShader.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\FrustumCulling.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\Common.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\CompactMeshLodInstances.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\GenerateDrawInstanceCommand.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\LightClustering.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Assets\Shaders\ClearU32Buffer.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\DebugLightCluster.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\Types.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\Utils.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\ZPrePass.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\QuadVertexShader.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Assets\Shaders\MeshInstancePass.hlsl">
-      <Filter>Source\Shaders</Filter>
-    </FxCompile>
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\BasicPixelShader.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\BasicVertexShader.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\Common.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\CompactMeshLodInstances.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\DebugLightCluster.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\FrustumCulling.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\GenerateDrawInstanceCommand.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\Types.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Deprecated\ZPrePass.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\PreMeshInstanceCS.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\QuadVS.hlsl" />
+    <FxCompile Include="..\..\Assets\Shaders\Utils.hlsli" />
   </ItemGroup>
 </Project>
