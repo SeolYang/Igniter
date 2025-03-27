@@ -112,11 +112,8 @@ namespace fe
                 componentToRemove = componentInfoIdx;
             }
             ig::ImGuiX::PopNegativeButtonHighlightColor();
-
-            if (!ig::meta::Invoke(componentInfo.Type, ig::meta::OnInspectorFunc, &registry, selectedEntity))
-            {
-                continue;
-            }
+            ig::meta::Invoke(componentInfo.Type, ig::meta::OnInspectorFunc, &registry, selectedEntity);
+            ImGui::NewLine();
         }
 
         if (componentToRemove != (size_t)-1)
