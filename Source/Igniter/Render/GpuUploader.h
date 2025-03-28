@@ -107,7 +107,7 @@ namespace ig
     class GpuUploader final
     {
     public:
-        GpuUploader(const String name, GpuDevice& gpuDevice, CommandQueue& copyQueue, const Size initRingBufferSize);
+        GpuUploader(const std::string_view name, GpuDevice& gpuDevice, CommandQueue& copyQueue, const Size initRingBufferSize);
         GpuUploader(const GpuUploader&) = delete;
         GpuUploader(GpuUploader&&) noexcept = delete;
         ~GpuUploader();
@@ -141,7 +141,7 @@ namespace ig
         void FlushQueue();
 
     private:
-        String name = "UnnamedGpuUploader"_fs;
+        std::string name = "UnnamedGpuUploader";
         GpuDevice* gpuDevice = nullptr;
         CommandQueue* copyQueue = nullptr;
 

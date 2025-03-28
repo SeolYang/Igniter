@@ -15,7 +15,8 @@ namespace ig
         bufferDesc.AsUploadBuffer((U32)desc.BufferSize, false);
         for (const LocalFrameIndex localFrameIdx : LocalFramesView)
         {
-            bufferDesc.DebugName = String(std::format("{} ({})", desc.DebugName, localFrameIdx));
+            const std::string debugName = std::format("{} ({})", desc.DebugName, localFrameIdx);
+            bufferDesc.DebugName = debugName;
             buffer[localFrameIdx] = renderCtx.CreateBuffer(bufferDesc);
             mappedBuffer[localFrameIdx] = renderCtx.Lookup(buffer[localFrameIdx])->Map();
         }

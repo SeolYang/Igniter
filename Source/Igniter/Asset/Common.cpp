@@ -18,11 +18,11 @@ namespace ig
         return archive;
     }
 
-    AssetInfo::AssetInfo(const String virtualPath, const EAssetCategory category)
+    AssetInfo::AssetInfo(const std::string_view virtualPath, const EAssetCategory category)
         : AssetInfo(xg::newGuid(), virtualPath, category, EAssetScope::Managed)
     {}
 
-    AssetInfo::AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope)
+    AssetInfo::AssetInfo(const Guid& guid, const std::string_view virtualPath, const EAssetCategory category, const EAssetScope scope)
         : creationTime(Timer::Now())
         , guid(guid)
         , virtualPath(virtualPath)
@@ -69,7 +69,7 @@ namespace ig
         return guid.isValid() && IsValidVirtualPath(virtualPath) && category != EAssetCategory::Unknown;
     }
 
-    void AssetInfo::SetVirtualPath(const String newVirtualPath)
+    void AssetInfo::SetVirtualPath(const std::string_view newVirtualPath)
     {
         virtualPath = newVirtualPath;
         ConstructVirtualPathHierarchy();
@@ -78,7 +78,7 @@ namespace ig
     void AssetInfo::ConstructVirtualPathHierarchy()
     {
         IG_CHECK(IsValidVirtualPath(virtualPath));
-        virtualPathHierarchy = virtualPath.Split(details::VirtualPathSeparator);
+        virtualPathHierarchy = Split(virtualPath, details::VirtualPathSeparator);
     }
 
     Path MakeResourceMetadataPath(Path resPath)
@@ -176,9 +176,9 @@ namespace ig
         return xg::Guid{path.replace_extension().filename().string()};
     }
 
-    bool IsValidVirtualPath(const String virtualPath)
+    bool IsValidVirtualPath(const std::string_view virtualPath)
     {
-        if (!virtualPath.IsValid())
+        if (virtualPath.empty())
         {
             return false;
         }
@@ -187,15 +187,15 @@ namespace ig
         return RegexMatch(virtualPath, VirtualPathRegex);
     }
 
-    String MakeVirtualPathPreferred(const String virtualPath)
+    std::string MakeVirtualPathPreferred(const std::string_view virtualPath)
     {
-        if (!virtualPath.IsValid())
+        if (virtualPath.empty())
         {
-            return String{};
+            return {};
         }
 
         static const std::regex ReplaceWhiteSpacesRegex{R"(\s+)", std::regex_constants::optimize};
         static const std::regex ReplaceUnpreferredSlash{"/+", std::regex_constants::optimize};
-        return RegexReplace(RegexReplace(virtualPath, ReplaceWhiteSpacesRegex, "_"_fs), ReplaceUnpreferredSlash, details::VirtualPathSeparator);
+        return RegexReplace(RegexReplace(virtualPath, ReplaceWhiteSpacesRegex, "_"), ReplaceUnpreferredSlash, details::VirtualPathSeparator);
     }
 } // namespace ig

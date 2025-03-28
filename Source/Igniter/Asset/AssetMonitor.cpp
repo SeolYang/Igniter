@@ -89,7 +89,8 @@ namespace ig::details
                     serializedMetadata >> assetInfo;
 
                     const Guid guid{assetInfo.GetGuid()};
-                    const String virtualPath{assetInfo.GetVirtualPath()};
+                    const std::string_view virtualPath{assetInfo.GetVirtualPath()};
+                    const U64 virtualPathHash = Hash(virtualPath);
 
                     if (!assetInfo.IsValid())
                     {
@@ -108,7 +109,7 @@ namespace ig::details
                         continue;
                     }
 
-                    if (virtualPathGuidTable.contains(virtualPath))
+                    if (virtualPathGuidTable.contains(virtualPathHash))
                     {
                         IG_LOG(AssetMonitorLog, Error, "{}: Asset {} ({}) ignored. Which has duplicated virtual path.", assetInfo.GetCategory(),
                             virtualPath, guid);
@@ -124,7 +125,7 @@ namespace ig::details
                         serializedMetadata << assetInfo;
                     }
 
-                    virtualPathGuidTable[virtualPath] = guid;
+                    virtualPathGuidTable[virtualPathHash] = guid;
                     IG_LOG(AssetMonitorLog, Debug, "VirtualPath: {}, Guid: {}", virtualPath, guid);
                     IG_CHECK(!Contains(guid));
                     TypelessAssetDescMap& descTable{GetDescMap(assetInfo.GetCategory())};
@@ -181,22 +182,22 @@ namespace ig::details
         return false;
     }
 
-    bool AssetMonitor::ContainsUnsafe(const EAssetCategory assetType, const String virtualPath) const
+    bool AssetMonitor::ContainsUnsafe(const EAssetCategory assetType, const std::string_view virtualPath) const
     {
         IG_CHECK(assetType != EAssetCategory::Unknown);
 
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-        const auto itr = virtualPathGuidTable.find(virtualPath);
+        const auto itr = virtualPathGuidTable.find(Hash(virtualPath));
         return itr != virtualPathGuidTable.cend() && ContainsUnsafe(itr->second);
     }
 
-    Guid AssetMonitor::GetGuidUnsafe(const EAssetCategory assetType, const String virtualPath) const
+    Guid AssetMonitor::GetGuidUnsafe(const EAssetCategory assetType, const std::string_view virtualPath) const
     {
         IG_CHECK(assetType != EAssetCategory::Unknown);
         IG_CHECK(IsValidVirtualPath(virtualPath));
 
         const VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(assetType);
-        const auto itr = virtualPathGuidTable.find(virtualPath);
+        const auto itr = virtualPathGuidTable.find(Hash(virtualPath));
         IG_CHECK(itr != virtualPathGuidTable.cend());
 
         const Guid guid{itr->second};
@@ -211,13 +212,13 @@ namespace ig::details
         return ContainsUnsafe(guid);
     }
 
-    bool AssetMonitor::Contains(const EAssetCategory assetType, const String virtualPath) const
+    bool AssetMonitor::Contains(const EAssetCategory assetType, const std::string_view virtualPath) const
     {
         ReadOnlyLock lock{mutex};
         return ContainsUnsafe(assetType, virtualPath);
     }
 
-    Guid AssetMonitor::GetGuid(const EAssetCategory assetType, const String virtualPath) const
+    Guid AssetMonitor::GetGuid(const EAssetCategory assetType, const std::string_view virtualPath) const
     {
         ReadOnlyLock lock{mutex};
         return GetGuidUnsafe(assetType, virtualPath);
@@ -246,7 +247,7 @@ namespace ig::details
         return GetAssetInfoUnsafe(guid);
     }
 
-    AssetInfo AssetMonitor::GetAssetInfo(const EAssetCategory assetType, const String virtualPath) const
+    AssetInfo AssetMonitor::GetAssetInfo(const EAssetCategory assetType, const std::string_view virtualPath) const
     {
         ReadOnlyLock lock{mutex};
         return GetAssetInfoUnsafe(GetGuidUnsafe(assetType, virtualPath));
@@ -255,7 +256,8 @@ namespace ig::details
     void AssetMonitor::UpdateInfo(const AssetInfo& newInfo)
     {
         const Guid guid{newInfo.GetGuid()};
-        const String virtualPath{newInfo.GetVirtualPath()};
+        const std::string_view virtualPath{newInfo.GetVirtualPath()};
+        const U64 virtualPathHash = Hash(virtualPath);
         IG_CHECK(IsValidVirtualPath(virtualPath));
 
         ReadWriteLock rwLock{mutex};
@@ -264,16 +266,17 @@ namespace ig::details
 
         const AssetInfo& oldInfo = GetAssetInfoUnsafe(guid);
         const Guid oldGuid{oldInfo.GetGuid()};
-        const String oldVirtualPath{oldInfo.GetVirtualPath()};
+        const std::string_view oldVirtualPath{oldInfo.GetVirtualPath()};
+        const U64 oldVirtualPathHash = Hash(oldVirtualPath);
         IG_CHECK(guid == oldGuid);
         IG_CHECK(newInfo.GetCategory() == oldInfo.GetCategory());
 
         VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetCategory());
-        if (virtualPath != oldVirtualPath)
+        if (virtualPathHash != oldVirtualPathHash)
         {
-            IG_CHECK(!virtualPathGuidTable.contains(virtualPath));
-            virtualPathGuidTable.erase(oldVirtualPath);
-            virtualPathGuidTable[virtualPath] = guid;
+            IG_CHECK(!virtualPathGuidTable.contains(virtualPathHash));
+            virtualPathGuidTable.erase(oldVirtualPathHash);
+            virtualPathGuidTable[virtualPathHash] = guid;
         }
 
         TypelessAssetDescMap& descMap{GetDescMap(newInfo.GetCategory())};
@@ -289,23 +292,24 @@ namespace ig::details
         IG_CHECK(info.IsValid());
         IG_CHECK(info.GetGuid() == guid);
 
-        const String virtualPath{info.GetVirtualPath()};
+        const std::string_view virtualPath{info.GetVirtualPath()};
+        const U64 virtualPathHash = Hash(virtualPath);
 
         VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(info.GetCategory());
-        IG_CHECK(virtualPathGuidTable.contains(virtualPath));
-        IG_CHECK(virtualPathGuidTable[virtualPath] == guid);
+        IG_CHECK(virtualPathGuidTable.contains(virtualPathHash));
+        IG_CHECK(virtualPathGuidTable[virtualPathHash] == guid);
 
         if (bShouldExpired)
         {
             expiredAssetInfos[guid] = info;
         }
 
-        virtualPathGuidTable.erase(virtualPath);
+        virtualPathGuidTable.erase(virtualPathHash);
 
         for (auto& assetTypeDescTablePair : guidDescTables)
         {
-            TypelessAssetDescMap& descMap{*assetTypeDescTablePair.second};
-            if (descMap.Contains(guid))
+            if (TypelessAssetDescMap& descMap{*assetTypeDescTablePair.second};
+                descMap.Contains(guid))
             {
                 descMap.Erase(guid);
             }
@@ -321,7 +325,7 @@ namespace ig::details
             const AssetInfo& expiredAssetInfo{expiredAssetInfoPair.second};
             IG_CHECK(expiredAssetInfo.IsValid());
             const Guid expiredGuid{expiredAssetInfo.GetGuid()};
-            const String expiredVirtualPath{expiredAssetInfo.GetVirtualPath()};
+            const std::string_view expiredVirtualPath{expiredAssetInfo.GetVirtualPath()};
 
             IG_CHECK(expiredAssetInfoPair.first == expiredGuid);
             const Path metadataPath{MakeAssetMetadataPath(expiredAssetInfo.GetCategory(), expiredGuid)};
@@ -358,7 +362,7 @@ namespace ig::details
                 if (assetInfo.GetScope() != EAssetScope::Engine)
                 {
                     const Guid guid{assetInfo.GetGuid()};
-                    const String virtualPath{assetInfo.GetVirtualPath()};
+                    const std::string_view virtualPath{assetInfo.GetVirtualPath()};
 
                     const Path metadataPath{MakeAssetMetadataPath(assetInfo.GetCategory(), guid)};
                     IG_ENSURE(SaveJsonToFile(metadataPath, serializedDesc));

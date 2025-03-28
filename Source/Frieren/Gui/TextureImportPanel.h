@@ -20,7 +20,7 @@ namespace fe
         void SelectFileToImport();
 
       private:
-        ig::String path{};
+        std::string path{};
         ig::TextureImportDesc config;
         ig::EOpenFileDialogStatus status{};
 

@@ -76,7 +76,7 @@ namespace ig
         Vector<D3D12_SUBRESOURCE_DATA> GenerateSubresourcesData(const std::span<uint8_t> memoryBlock) const;
 
     public:
-        String DebugName = String{"Unknown Texture"};
+        std::string_view DebugName = "Unknown Texture";
         D3D12_BARRIER_LAYOUT InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
         F32 ClearDepthValue = 1.f;

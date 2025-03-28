@@ -52,7 +52,7 @@ namespace ig
                         Json componentRoot{};
                         const auto nameProperty = type.prop(meta::NameProperty);
                         IG_CHECK(nameProperty);
-                        componentRoot[ComponentNameHintKey] = nameProperty.value().cast<String>();
+                        componentRoot[ComponentNameHintKey] = *nameProperty.value().try_cast<std::string>();
                         auto serializeJson = type.func(meta::SerializeComponentJsonFunc);
                         if (serializeJson)
                         {
@@ -95,7 +95,7 @@ namespace ig
                 const auto nameProperty = resolvedType.prop(meta::NameProperty);
                 if (!resolvedType)
                 {
-                    IG_LOG(WorldLog, Warning, "Ignored Component {}({}): {} does not registered to meta registry.", nameProperty.value().cast<String>(),
+                    IG_LOG(WorldLog, Warning, "Ignored Component {}({}): {} does not registered to meta registry.", *nameProperty.value().try_cast<std::string>(),
                         componentID);
                     continue;
                 }
@@ -104,13 +104,13 @@ namespace ig
                 if (!addComponent)
                 {
                     IG_LOG(WorldLog, Warning, "Ignored Type ID: {} add component meta function does not registered to meta registry.",
-                        nameProperty.value().cast<String>());
+                        *nameProperty.value().try_cast<std::string>());
                     continue;
                 }
 
                 if (!addComponent.invoke(resolvedType, std::ref(registry), entity).cast<bool>())
                 {
-                    IG_LOG(WorldLog, Warning, "Failed to add component {}({}) to entity", nameProperty.value().cast<String>(), componentID);
+                    IG_LOG(WorldLog, Warning, "Failed to add component {}({}) to entity", *nameProperty.value().try_cast<std::string>(), componentID);
                     continue;
                 }
 
@@ -118,7 +118,7 @@ namespace ig
                 if (!deserializeJson)
                 {
                     IG_LOG(WorldLog, Warning, "Ignored component {}({}) deserialization. The deserialize meta function does not registered.",
-                        nameProperty.value().cast<String>(), componentID);
+                        *nameProperty.value().try_cast<std::string>(), componentID);
                     continue;
                 }
 

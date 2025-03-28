@@ -89,11 +89,11 @@ namespace ig
         }
     }
 
-    Result<Texture::Desc, ETextureImportStatus> TextureImporter::Import(const String resPathStr, TextureImportDesc importDesc)
+    Result<Texture::Desc, ETextureImportStatus> TextureImporter::Import(const std::string_view resPathStr, TextureImportDesc importDesc)
     {
         CoInitializeUnique();
 
-        const Path resPath{resPathStr.ToStringView()};
+        const Path resPath{resPathStr};
         if (!fs::exists(resPath))
         {
             return MakeFail<Texture::Desc, ETextureImportStatus::FileDoesNotExists>();
@@ -113,7 +113,7 @@ namespace ig
             IG_LOG(TextureImporterLog, Warning,
                 "For DDS files, the provided configuration values are disregarded, "
                 "and the supplied file is used as the asset as it is. File: {}",
-                resPathStr.ToStringView());
+                resPathStr);
 
             loadRes = DirectX::LoadFromDDSFile(resPath.c_str(), DirectX::DDS_FLAGS_NONE, &texMetadata, targetTex);
             bIsDDSFormat = true;
@@ -180,7 +180,7 @@ namespace ig
                         "The compression method for HDR extension textures is "
                         "enforced "
                         "to be the 'BC6H' algorithm. File: {}",
-                        resPathStr.ToStringView());
+                        resPathStr);
 
                     importDesc.CompressionMode = ETextureCompressionMode::BC6H;
                 }
@@ -190,7 +190,7 @@ namespace ig
                         "The compression method for greyscale-formatted "
                         "textures is "
                         "enforced to be the 'BC4' algorithm. File: {}",
-                        resPathStr.ToStringView());
+                        resPathStr);
 
                     importDesc.CompressionMode = ETextureCompressionMode::BC4;
                 }
@@ -241,7 +241,7 @@ namespace ig
         /* Configure Texture Asset Metadata */
         texMetadata = targetTex.GetMetadata();
 
-        const AssetInfo assetInfo{MakeVirtualPathPreferred(String(resPath.filename().replace_extension().string())), EAssetCategory::Texture};
+        const AssetInfo assetInfo{MakeVirtualPathPreferred(resPath.filename().replace_extension().string()), EAssetCategory::Texture};
         const TextureLoadDesc newLoadConfig{
             .Format = texMetadata.format,
             .Dimension = details::AsTexDimension(texMetadata.dimension),

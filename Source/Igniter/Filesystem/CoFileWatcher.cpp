@@ -8,8 +8,8 @@ IG_DEFINE_LOG_CATEGORY(CoFileWatcherLog);
 
 namespace ig
 {
-    CoFileWatcher::CoFileWatcher(const String directoryPathStr, const EFileWatchFilterFlags filters, const bool bWatchRecursively /*= true*/)
-        : directoryPath(directoryPathStr.ToStringView())
+    CoFileWatcher::CoFileWatcher(const std::string_view directoryPathStr, const EFileWatchFilterFlags filters, const bool bWatchRecursively /*= true*/)
+        : directoryPath(directoryPathStr)
         , directory(CreateFile(directoryPath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
             FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, nullptr))
         , filters(filters)

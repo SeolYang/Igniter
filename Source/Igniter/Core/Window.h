@@ -6,16 +6,16 @@ namespace ig
 {
     struct WindowDescription
     {
-        const U32 Width;
-        const U32 Height;
-        const String Title;
+        U32 Width;
+        U32 Height;
+        std::string_view Title;
     };
 
     // @dependency	ig::Engine, ig::Logger, ig::InputManager
     class Window final
     {
     public:
-        Window(const WindowDescription& description);
+        explicit Window(const WindowDescription& description);
         ~Window();
         Window(const Window&) = delete;
         Window(Window&&) noexcept = delete;

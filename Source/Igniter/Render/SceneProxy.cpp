@@ -21,10 +21,10 @@ namespace ig
         , renderContext(&renderContext)
         , assetManager(&assetManager)
         , numWorkers((U32)taskExecutor.num_workers())
-        , lightProxyPackage(renderContext, GpuStorageDesc{String(std::format("GpuLightDataStorage(SceneProxy)")), LightProxy::kDataSize, kNumInitLightElements}, numWorkers)
-        , materialProxyPackage(renderContext, GpuStorageDesc{String(std::format("GpuMaterialStorage(SceneProxy)")), MaterialProxy::kDataSize, kNumInitMaterialElements}, numWorkers)
-        , staticMeshProxyPackage(renderContext, GpuStorageDesc{String(std::format("GpuStaticMeshStorage(SceneProxy)")), MeshProxy::kDataSize, kNumInitMeshProxies}, numWorkers)
-        , meshInstanceProxyPackage(renderContext, GpuStorageDesc{String(std::format("GpuMeshInstanceStorage(SceneProxy)")), MeshInstanceProxy::kDataSize, kNumInitMeshProxies}, numWorkers)
+        , lightProxyPackage(renderContext, GpuStorageDesc{"GpuLightDataStorage(SceneProxy)", LightProxy::kDataSize, kNumInitLightElements}, numWorkers)
+        , materialProxyPackage(renderContext, GpuStorageDesc{"GpuMaterialStorage(SceneProxy)", MaterialProxy::kDataSize, kNumInitMaterialElements}, numWorkers)
+        , staticMeshProxyPackage(renderContext, GpuStorageDesc{"GpuStaticMeshStorage(SceneProxy)", MeshProxy::kDataSize, kNumInitMeshProxies}, numWorkers)
+        , meshInstanceProxyPackage(renderContext, GpuStorageDesc{"GpuMeshInstanceStorage(SceneProxy)", MeshInstanceProxy::kDataSize, kNumInitMeshProxies}, numWorkers)
     {
         ResizeMeshInstanceIndicesBuffer(kInitNumMeshInstanceIndices);
 
@@ -38,7 +38,7 @@ namespace ig
 
         GpuBufferDesc gpuConstantsBufferDesc{};
         gpuConstantsBufferDesc.AsConstantBuffer<GpuConstants>();
-        gpuConstantsBufferDesc.DebugName = "SceneProxyConstantsBuffer"_fs;
+        gpuConstantsBufferDesc.DebugName = "SceneProxyConstantsBuffer";
         gpuConstantsBufferDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
         gpuConstantsBuffer = renderContext.CreateBuffer(gpuConstantsBufferDesc);
         gpuConstantsCbv = renderContext.CreateConstantBufferView(gpuConstantsBuffer);
@@ -689,7 +689,7 @@ namespace ig
                     CommandListPool& asyncCopyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
                     if (workGroupDataSize > 0)
                     {
-                        proxyPackage.WorkGroupCmdLists[groupIdx] = asyncCopyCmdListPool.Request(localFrameIdx, String(std::format("ProxyRep.{}", groupIdx)));
+                        proxyPackage.WorkGroupCmdLists[groupIdx] = asyncCopyCmdListPool.Request(localFrameIdx, std::format("ProxyRep.{}", groupIdx));
                     }
                     else
                     {
@@ -858,7 +858,7 @@ namespace ig
             *renderContext,
             GpuStagingBufferDesc{
                 .BufferSize = newBufferSize,
-                .DebugName = "MeshInstanceIndicesStagingBuffer(SceneProxy)"_fs
+                .DebugName = "MeshInstanceIndicesStagingBuffer(SceneProxy)"
             });
 
         meshInstanceIndicesBufferSize = newBufferSize;
@@ -914,7 +914,7 @@ namespace ig
         CommandQueue& copyQueue = renderContext->GetFrameCriticalAsyncCopyQueue();
         IG_CHECK(copyQueue.GetType() == EQueueType::Copy);
         CommandListPool& copyCmdListPool = renderContext->GetAsyncCopyCommandListPool();
-        auto copyCmdList = copyCmdListPool.Request(localFrameIdx, "UploadMeshInstanceIndices"_fs);
+        auto copyCmdList = copyCmdListPool.Request(localFrameIdx, "UploadMeshInstanceIndices");
         copyCmdList->Open();
         copyCmdList->CopyBuffer(*stagingBufferPtr, 0, uploadOffsetBytes, *bufferPtr, 0);
         copyCmdList->Close();

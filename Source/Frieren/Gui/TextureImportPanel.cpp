@@ -20,7 +20,7 @@ namespace fe
         else
         {
             ImGui::SameLine();
-            ImGui::Text("%s", path.ToStringView().data());
+            ImGui::Text("%s", path.c_str());
 
             if (ig::ImGuiX::BeginEnumCombo<ig::ETextureCompressionMode>("Compression Mode", selectedCompModeIdx))
             {
@@ -75,10 +75,10 @@ namespace fe
         config = {};
 
         static const ig::Vector<ig::DialogFilter> Filters{
-            ig::DialogFilter{.Name = "Texture Resources"_fs, .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"_fs},
+            ig::DialogFilter{.Name = "Texture Resources", .FilterPattern = "*.jpg;*.png;*.hdr;*.dds"},
         };
 
-        ig::Result<ig::String, ig::EOpenFileDialogStatus> result = ig::OpenFileDialog::Show(nullptr, "Texture to import"_fs, Filters);
+        ig::Result<std::string, ig::EOpenFileDialogStatus> result = ig::OpenFileDialog::Show(nullptr, "Texture to import", Filters);
         status = result.GetStatus();
         if (result.HasOwnership())
         {

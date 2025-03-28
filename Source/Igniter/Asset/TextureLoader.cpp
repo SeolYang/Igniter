@@ -122,7 +122,8 @@ namespace ig
             IG_CHECK(!loadDesc.IsArray());
             texDesc.AsTexture3D(loadDesc.Width, loadDesc.Height, loadDesc.DepthOrArrayLength, loadDesc.Mips, loadDesc.Format);
         }
-        texDesc.DebugName = String(std::format("{}({})", assetInfo.GetVirtualPath(), assetInfo.GetGuid()));
+        const std::string debugName = std::format("{}({})", assetInfo.GetVirtualPath(), assetInfo.GetGuid());
+        texDesc.DebugName = debugName;
         texDesc.InitialLayout = D3D12_BARRIER_LAYOUT_COMMON;
 
         /* Create Texture from GpuDevice */
@@ -161,7 +162,7 @@ namespace ig
         texUploadSync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload"_fs);
+        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfterUpload_TexUpload");
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
@@ -238,7 +239,7 @@ namespace ig
 
         GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
-        texDesc.DebugName = String(assetInfo.GetVirtualPath());
+        texDesc.DebugName = assetInfo.GetVirtualPath();
         Handle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
         if (!newTexture)
         {
@@ -267,7 +268,7 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
+        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload");
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,
@@ -339,7 +340,7 @@ namespace ig
 
         GpuTextureDesc texDesc{};
         texDesc.AsTexture2D(Width, Height, 1, Format);
-        texDesc.DebugName = String(assetInfo.GetVirtualPath());
+        texDesc.DebugName = assetInfo.GetVirtualPath();
         const Handle<GpuTexture> newTexture{renderContext.CreateTexture(texDesc)};
         if (!newTexture)
         {
@@ -367,7 +368,7 @@ namespace ig
         sync->WaitOnCpu();
 
         CommandQueue& mainGfxQueue = renderContext.GetMainGfxQueue();
-        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload"_fs);
+        auto cmdList = renderContext.GetMainGfxCommandListPool().Request(FrameManager::GetLocalFrameIndex(), "BarrierAfter_TexUpload");
         {
             cmdList->Open();
             cmdList->AddPendingTextureBarrier(*newTexturePtr,

@@ -75,7 +75,7 @@ namespace ig
         rawMouseInputPollingThread = std::jthread{
             [this]()
             {
-                HWND window = CreateWindowEx(0, TEXT("Message"), NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
+                const HWND window = CreateWindowEx(0, TEXT("Message"), NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
                 if (window == NULL)
                 {
                     IG_LOG(InputManagerLog, Fatal, "Failed to create raw input message window. {:#X}", GetLastError());
@@ -140,9 +140,9 @@ namespace ig
         }
     }
 
-    void InputManager::MapAction(const String name, const EInput input)
+    void InputManager::MapAction(const std::string& name, const EInput input)
     {
-        if (!name.IsValid() || name.IsEmpty())
+        if (name.empty())
         {
             IG_LOG(InputManagerLog, Error, "The Name string has invalid or empty value.");
             return;
@@ -154,7 +154,7 @@ namespace ig
             return;
         }
 
-        if (nameActionTable.contains(name))
+        if (nameActionTable.contains(name.data()))
         {
             IG_LOG(InputManagerLog, Error, "The Map action ignored due to duplication of {} mapping.");
             return;
@@ -167,24 +167,24 @@ namespace ig
         IG_LOG(InputManagerLog, Info, "Action {} mapped to '{}'", name, input);
     }
 
-    void InputManager::UnmapAction(const String name)
+    void InputManager::UnmapAction(const std::string& name)
     {
-        if (!nameActionTable.contains(name))
+        if (!nameActionTable.contains(name.data()))
         {
             IG_LOG(InputManagerLog, Error, "Action {} does not exists.", name);
             return;
         }
 
-        const auto [handle, mappedInput] = nameActionTable[name];
+        const auto [handle, mappedInput] = nameActionTable[name.data()];
         IG_CHECK(actionSets[ToUnderlying(mappedInput)].contains(handle));
         actionSets[ToUnderlying(mappedInput)].erase(handle);
         actionRegistry.Destroy(handle);
         IG_LOG(InputManagerLog, Info, "Action {} unmapped from '{}'.", name, mappedInput);
     }
 
-    void InputManager::MapAxis(const String name, const EInput input, const F32 scale)
+    void InputManager::MapAxis(const std::string& name, const EInput input, const F32 scale)
     {
-        if (!name.IsValid() || name.IsEmpty())
+        if (name.empty())
         {
             IG_LOG(InputManagerLog, Error, "The Name string has invalid or empty value.");
             return;
@@ -209,7 +209,7 @@ namespace ig
         IG_LOG(InputManagerLog, Info, "Axis {} mapped to '{}'", name, input);
     }
 
-    void InputManager::UnmapAxis(const String name)
+    void InputManager::UnmapAxis(const std::string& name)
     {
         if (!nameAxisTable.contains(name))
         {
@@ -224,7 +224,7 @@ namespace ig
         IG_LOG(InputManagerLog, Info, "Axis {} unmapped from '{}'.", name, mappedInput);
     }
 
-    void InputManager::SetScale(const String name, const F32 newScale)
+    void InputManager::SetScale(const std::string& name, const F32 newScale)
     {
         if (!nameAxisTable.contains(name))
         {
@@ -237,7 +237,7 @@ namespace ig
         axisPtr->Scale = newScale;
     }
 
-    Handle<Action> InputManager::QueryAction(const String name) const
+    Handle<Action> InputManager::QueryAction(const std::string& name) const
     {
         const auto mappingItr = nameActionTable.find(name);
         if (mappingItr != nameActionTable.cend())
@@ -249,7 +249,7 @@ namespace ig
         return Handle<Action>{};
     }
 
-    Handle<Axis> InputManager::QueryAxis(const String name) const
+    Handle<Axis> InputManager::QueryAxis(const std::string& name) const
     {
         const auto mappingItr = nameAxisTable.find(name);
         if (mappingItr != nameAxisTable.cend())

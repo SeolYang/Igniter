@@ -26,19 +26,25 @@ namespace ig
     {
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
 
-        const ShaderCompileDesc clearU32BufferShaderDesc{.SourcePath = "Assets/Shaders/ClearU32Buffer.hlsl"_fs, .Type = EShaderType::Compute};
+        constexpr ShaderCompileDesc clearU32BufferShaderDesc{
+            .SourcePath = "Assets/Shaders/ClearU32Buffer.hlsl",
+            .Type = EShaderType::Compute
+        };
         clearU32BufferShader = MakePtr<ShaderBlob>(clearU32BufferShaderDesc);
         ComputePipelineStateDesc clearU32BufferPsoDesc{};
-        clearU32BufferPsoDesc.Name = "ClearU32BufferPSO"_fs;
+        clearU32BufferPsoDesc.Name = "ClearU32BufferPSO";
         clearU32BufferPsoDesc.SetComputeShader(*clearU32BufferShader);
         clearU32BufferPsoDesc.SetRootSignature(bindlessRootSignature);
         clearU32BufferPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(clearU32BufferPsoDesc).value());
         IG_CHECK(clearU32BufferPso->IsCompute());
 
-        const ShaderCompileDesc lightClusteringShaderDesc{.SourcePath = "Assets/Shaders/LightClustering.hlsl"_fs, .Type = EShaderType::Compute};
+        constexpr ShaderCompileDesc lightClusteringShaderDesc{
+            .SourcePath = "Assets/Shaders/LightClustering.hlsl",
+            .Type = EShaderType::Compute
+        };
         lightClusteringShader = MakePtr<ShaderBlob>(lightClusteringShaderDesc);
         ComputePipelineStateDesc lightClusteringPsoDesc{};
-        lightClusteringPsoDesc.Name = "LightClusteringPSO"_fs;
+        lightClusteringPsoDesc.Name = "LightClusteringPSO";
         lightClusteringPsoDesc.SetComputeShader(*lightClusteringShader);
         lightClusteringPsoDesc.SetRootSignature(bindlessRootSignature);
         lightClusteringPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(lightClusteringPsoDesc).value());
@@ -53,7 +59,8 @@ namespace ig
         lightIdxListStagingBufferDesc.AsUploadBuffer((U32)sizeof(U32) * kMaxNumLights);
         for (const LocalFrameIndex localFrameIdx : LocalFramesView)
         {
-            lightIdxListStagingBufferDesc.DebugName = String(std::format("LightIdxListStaging.{}", localFrameIdx));
+            const std::string lightIdxListStagingBufferDebugName = std::format("LightIdxListStaging.{}", localFrameIdx);
+            lightIdxListStagingBufferDesc.DebugName = lightIdxListStagingBufferDebugName;
 
             const Handle<GpuBuffer> newLightIdxListStagingBuffer = renderContext.CreateBuffer(lightIdxListStagingBufferDesc);
             lightIdxListStagingBuffer[localFrameIdx] = newLightIdxListStagingBuffer;
@@ -63,7 +70,7 @@ namespace ig
 
         GpuBufferDesc lightIdxListBufferDesc{};
         lightIdxListBufferDesc.AsStructuredBuffer<U32>(kMaxNumLights, false, false);
-        lightIdxListBufferDesc.DebugName = String(std::format("LightIdxListBuffer"));
+        lightIdxListBufferDesc.DebugName = "LightIdxListBuffer";
         lightIdxListBufferPackage.Buffer = renderContext.CreateBuffer(lightIdxListBufferDesc);
         lightIdxListBufferPackage.Srv = renderContext.CreateShaderResourceView(lightIdxListBufferPackage.Buffer);
 
@@ -73,8 +80,8 @@ namespace ig
         GpuBufferDesc depthBinsBufferDesc{};
         lightTileBitfieldsBufferDesc.AsStructuredBuffer<U32>((U32)numTileDwords, true);
         depthBinsBufferDesc.AsStructuredBuffer<DepthBin>((U32)kNumDepthBins, true);
-        lightTileBitfieldsBufferDesc.DebugName = String(std::format("LightTileBitfields"));
-        depthBinsBufferDesc.DebugName = String(std::format("DepthBins"));
+        lightTileBitfieldsBufferDesc.DebugName = "LightTileBitfields";
+        depthBinsBufferDesc.DebugName = "DepthBins";
 
         const Handle<GpuBuffer> newTileDwordsBuffer = renderContext.CreateBuffer(lightTileBitfieldsBufferDesc);
         lightTileBitfieldsBufferPackage.Buffer = newTileDwordsBuffer;
@@ -86,7 +93,7 @@ namespace ig
         depthBinsBufferPackage.Srv = renderContext.CreateShaderResourceView(newDepthBinsBuffer);
         depthBinsBufferPackage.Uav = renderContext.CreateUnorderedAccessView(newDepthBinsBuffer);
 
-        depthBinsBufferDesc.DebugName = "DepthBinInitBuffer"_fs;
+        depthBinsBufferDesc.DebugName = "DepthBinInitBuffer";
         depthBinInitBuffer = renderContext.CreateBuffer(depthBinsBufferDesc);
         GpuBuffer* depthBinInitBufferPtr = renderContext.Lookup(depthBinInitBuffer);
         GpuUploader& gpuUploader = renderContext.GetNonFrameCriticalGpuUploader();
@@ -101,11 +108,11 @@ namespace ig
 
         GpuBufferDesc lightClusterConstantsBufferDesc{};
         lightClusterConstantsBufferDesc.AsConstantBuffer<LightClusterConstants>();
-        lightClusterConstantsBufferDesc.DebugName = "UnifiedMeshStorageConstants"_fs;
+        lightClusterConstantsBufferDesc.DebugName = "UnifiedMeshStorageConstants";
         lightClusterConstantsBufferDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
         lightClusterConstantsBuffer = renderContext.CreateBuffer(lightClusterConstantsBufferDesc);
         lightClusterConstantsCbv = renderContext.CreateConstantBufferView(lightClusterConstantsBuffer);
-        
+
         GpuBuffer* lightClusterConstantsBufferPtr = renderContext.Lookup(lightClusterConstantsBuffer);
         IG_CHECK(lightClusterConstantsBufferPtr != nullptr);
         UploadContext lightClusterConstantsUploadContext = gpuUploader.Reserve(sizeof(LightClusterConstants));

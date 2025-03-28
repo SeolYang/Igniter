@@ -4,61 +4,60 @@
 namespace ig
 {
     bool RegexMatch(
-        const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
+        const std::string_view str, const std::regex& regex, const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
-        if (!str.IsValid())
+        if (str.empty())
         {
             return false;
         }
 
-        return std::regex_match(str.ToCString(), regex, flags);
+        return std::regex_match(str.data(), regex, flags);
     }
 
-    Vector<String> RegexMatchN(const String str, const std::regex& regex, const std::regex_constants::match_flag_type flags
-                               /*= std::regex_constants::match_default*/)
+    Vector<std::string> RegexMatchN(const std::string_view str, const std::regex& regex, const std::regex_constants::match_flag_type flags
+                                    /*= std::regex_constants::match_default*/)
     {
-        Vector<String> result{};
-        if (str.IsValid())
+        Vector<std::string> result{};
+        std::cmatch matches{};
+        if (std::regex_match(str.data(), matches, regex, flags))
         {
-            std::cmatch matches{};
-            if (std::regex_match(str.ToCString(), matches, regex, flags))
+            result.reserve(matches.size());
+            for (const auto& subMatch : matches)
             {
-                result.reserve(matches.size());
-                for (const auto& subMatch : matches)
-                {
-                    result.emplace_back(std::string_view{subMatch.first, static_cast<Size>(subMatch.length())});
-                }
+                result.emplace_back(std::string_view{subMatch.first, static_cast<Size>(subMatch.length())});
             }
         }
 
         return result;
     }
 
-    Vector<String> RegexSearch(const String str, const std::regex& regex)
+    Vector<std::string> RegexSearch(const std::string_view str, const std::regex& regex)
     {
-        Vector<String> result{};
-        if (str.IsValid())
+        Vector<std::string> result{};
+
+        if (str.empty())
         {
-            const char* searchBegin{str.ToCString()};
-            std::cmatch match{};
-            while (std::regex_search(searchBegin, match, regex))
-            {
-                result.emplace_back(std::string_view{match[0].first, static_cast<Size>(match[0].length())});
-                searchBegin = match.suffix().first;
-            }
+            return result;
+        }
+        const char* searchBegin{str.data()};
+        std::cmatch match{};
+        while (std::regex_search(searchBegin, match, regex))
+        {
+            result.emplace_back(std::string_view{match[0].first, static_cast<Size>(match[0].length())});
+            searchBegin = match.suffix().first;
         }
 
         return result;
     }
 
-    String RegexReplace(const String str, const std::regex& regex, const String replacePattern,
-                        const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
+    std::string RegexReplace(const std::string_view str, const std::regex& regex, const std::string_view replacePattern,
+                             const std::regex_constants::match_flag_type flags /*= std::regex_constants::match_default*/)
     {
-        if (!str.IsValid())
+        if (str.empty() || replacePattern.empty())
         {
-            return {};
+            return std::string{};
         }
-
-        return String{std::regex_replace(str.ToStandard(), regex, replacePattern.ToStandard(), flags)};
+        
+        return std::regex_replace(str.data(), regex, replacePattern.data(), flags);
     }
 } // namespace ig

@@ -202,7 +202,7 @@ namespace ig
             {
                 CommandQueue& asyncCopyQueue = renderContext.GetFrameCriticalAsyncCopyQueue();
                 CommandListPool& cmdListPool = renderContext.GetAsyncCopyCommandListPool();
-                auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy"_fs);
+                auto copyCmdList = cmdListPool.Request(FrameManager::GetLocalFrameIndex(), "GpuStorageGrowCopy");
                 copyCmdList->Open();
                 {
                     copyCmdList->CopyBuffer(*gpuBufferPtr, *newGpuBufferPtr);

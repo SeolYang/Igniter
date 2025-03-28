@@ -145,14 +145,14 @@ namespace ig
 #define IG_META_DEFINE(T)                                                                 \
     namespace details::meta                                                               \
     {                                                                                     \
-        T##_DefineMeta::T##_DefineMeta()                                                  \
-        {                                                                                 \
-            entt::meta<T>().type(TypeHash<T>);                                            \
-            entt::meta<T>().prop(ig::meta::NameProperty, #T);                             \
-            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase()); \
-            DefineMeta<T>();                                                              \
-        }                                                                                 \
-        T##_DefineMeta T##_DefineMeta::_reg;                                              \
+        T##_DefineMeta::T##_DefineMeta()                                                \
+        {                                                                               \
+            entt::meta<T>().type(TypeHash<T>);                                          \
+            entt::meta<T>().prop(ig::meta::NameProperty, std::string{#T});         \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, ig::ToTitleCase(#T)); \
+            DefineMeta<T>();                                                            \
+        }                                                                               \
+        T##_DefineMeta T##_DefineMeta::_reg;                                            \
     }
 
 #define IG_META_DEFINE_AS_COMPONENT(T)                                                                \
@@ -161,8 +161,8 @@ namespace ig
         T##_DefineMeta::T##_DefineMeta()                                                           \
         {                                                                                          \
             entt::meta<T>().type(ig::TypeHash<T>);                                                 \
-            entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                                 \
-            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase());          \
+            entt::meta<T>().prop(ig::meta::NameProperty, std::string{#T});                         \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, ig::ToTitleCase(#T));            \
             entt::meta<T>().prop(ig::meta::ComponentProperty);                                     \
             entt::meta<T>().template func<&ig::AddComponent<T>>(ig::meta::AddComponentFunc);       \
             entt::meta<T>().template func<&ig::RemoveComponent<T>>(ig::meta::RemoveComponentFunc); \
@@ -178,29 +178,29 @@ namespace ig
         {                                                                                       \
             static_assert(std::is_same_v<decltype(&T::Create), ig::Entity (*)(ig::Registry*)>); \
             entt::meta<T>().type(ig::TypeHash<T>);                                              \
-            entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                              \
-            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase());       \
+            entt::meta<T>().prop(ig::meta::NameProperty, std::string{#T});                      \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, ig::ToTitleCase(#T));         \
             entt::meta<T>().prop(ig::meta::ArchetypeProperty);                                  \
             entt::meta<T>().template func<&T::Create>(ig::meta::ArchetypeCreateFunc);           \
         }                                                                                       \
         T##_DefineMeta T##_DefineMeta::_reg;                                                    \
     }
 
-#define IG_META_DEFINE_AS_STARTUP_APP(T)                                                     \
-    namespace details::meta                                                               \
-    {                                                                                     \
-        T##_DefineMeta::T##_DefineMeta()                                                  \
-        {                                                                                 \
-            static_assert(std::is_base_of_v<class ig::Application, T>);                   \
-            IG_CHECK(!entt::resolve(StartupAppClass));                                    \
-            entt::meta<T>().type(StartupAppClass);                                        \
-            entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                        \
-            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase()); \
-            DefineMeta<T>();                                                              \
-        }                                                                                 \
-        T##_DefineMeta T##_DefineMeta::_reg;                                              \
+#define IG_META_DEFINE_STARTUP_APP(T)                                                   \
+    namespace details::meta                                                             \
+    {                                                                                   \
+        T##_DefineMeta::T##_DefineMeta()                                                \
+        {                                                                               \
+            static_assert(std::is_base_of_v<class ig::Application, T>);                 \
+            IG_CHECK(!entt::resolve(StartupAppClass));                                  \
+            entt::meta<T>().type(StartupAppClass);                                      \
+            entt::meta<T>().prop(ig::meta::NameProperty, std::string{#T});              \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, ig::ToTitleCase(#T)); \
+            DefineMeta<T>();                                                            \
+        }                                                                               \
+        T##_DefineMeta T##_DefineMeta::_reg;                                            \
     }
 
-#define IG_META_SET_ON_INSPECTOR(T)                                                \
+#define IG_META_SET_ON_INSPECTOR(T)                                                                     \
     static_assert(std::is_invocable_v<decltype(&ig::OnInspector<T>), ig::Registry*, const ig::Entity>); \
     entt::meta<T>().func<&ig::OnInspector<T>>(ig::meta::OnInspectorFunc)

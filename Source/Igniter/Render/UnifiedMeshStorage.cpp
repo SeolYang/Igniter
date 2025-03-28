@@ -8,25 +8,25 @@ namespace ig
     UnifiedMeshStorage::UnifiedMeshStorage(RenderContext& renderContext)
         : renderContext(&renderContext)
         , vertexStorage(renderContext, GpuStorageDesc{
-            .DebugName = "VertexStorage(UnifiedMeshStorage)"_fs,
+            .DebugName = "VertexStorage(UnifiedMeshStorage)",
             .ElementSize = sizeof(U32),
             .NumInitElements = 65'536Ui32,
             .Flags = EGpuStorageFlags::RawBuffer
         })
         , indexStorage(renderContext, GpuStorageDesc{
-            .DebugName = "IndexStorage(UnifiedMeshStorage)"_fs,
+            .DebugName = "IndexStorage(UnifiedMeshStorage)",
             .ElementSize = sizeof(U32),
             .NumInitElements = 32'768Ui32,
             .Flags = EGpuStorageFlags::None
         })
         , triangleStorage(renderContext, GpuStorageDesc{
-            .DebugName = "TriangleStorage(UnifiedMeshStorage)"_fs,
+            .DebugName = "TriangleStorage(UnifiedMeshStorage)",
             .ElementSize = sizeof(U32),
             .NumInitElements = 65'536Ui32 / 3Ui32,
             .Flags = EGpuStorageFlags::None
         })
         , meshletStorage(renderContext, GpuStorageDesc{
-            .DebugName = "MeshletStorage(UnifiedMeshStorage)"_fs,
+            .DebugName = "MeshletStorage(UnifiedMeshStorage)",
             .ElementSize = sizeof(Meshlet),
             .NumInitElements = 8192,
             .Flags = EGpuStorageFlags::None
@@ -34,7 +34,7 @@ namespace ig
     {
         GpuBufferDesc gpuStorageConstantsBufferDesc{};
         gpuStorageConstantsBufferDesc.AsConstantBuffer<GpuStorageConstants>();
-        gpuStorageConstantsBufferDesc.DebugName = "UnifiedMeshStorageConstants"_fs;
+        gpuStorageConstantsBufferDesc.DebugName = "UnifiedMeshStorageConstants";
         gpuStorageConstantsBufferDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
         gpuStorageConstantsBuffer = renderContext.CreateBuffer(gpuStorageConstantsBufferDesc);
         gpuStorageConstantsCbv = renderContext.CreateConstantBufferView(gpuStorageConstantsBuffer);

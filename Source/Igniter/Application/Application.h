@@ -7,7 +7,7 @@ namespace ig
 {
     struct AppDesc
     {
-        String WindowTitle;
+        std::string_view WindowTitle;
         U32 WindowWidth, WindowHeight;
     };
 

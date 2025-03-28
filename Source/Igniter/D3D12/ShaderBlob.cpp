@@ -112,7 +112,7 @@ namespace ig
         IG_VERIFY_SUCCEEDED(DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.ReleaseAndGetAddressOf())));
 
         U32 codePage = CP_UTF8;
-        const std::wstring wideSourcePath = desc.SourcePath.ToWideString();
+        const std::wstring wideSourcePath = Utf8ToUtf16(desc.SourcePath);
         ComPtr<IDxcBlobEncoding> sourceBlob;
         IG_VERIFY_SUCCEEDED(library->CreateBlobFromFile(wideSourcePath.c_str(), &codePage, &sourceBlob));
 
@@ -128,7 +128,7 @@ namespace ig
         compiledResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(errors.GetAddressOf()), nullptr);
         if (errors && errors->GetStringLength() > 0)
         {
-            IG_LOG(ShaderBlobLog, Fatal, "Failed to compile shader {}; {}", desc.SourcePath.ToStringView(), errors->GetStringPointer());
+            IG_LOG(ShaderBlobLog, Fatal, "Failed to compile shader {}; {}", desc.SourcePath, errors->GetStringPointer());
         }
 
         IG_VERIFY_SUCCEEDED(compiledResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr));

@@ -19,7 +19,7 @@ namespace fe
         {
             // 만약에 Resource Metadatas가 있다면 해당 데이터 활용
             ImGui::SameLine();
-            ImGui::Text("%s", path.ToStringView().data());
+            ImGui::Text("%s", path.c_str());
 
             ImGui::Checkbox("Make Left Handed", &config.bMakeLeftHanded);
             ImGui::Checkbox("Flip UV Coordinates", &config.bFlipUVs);
@@ -48,10 +48,10 @@ namespace fe
         config = {};
 
         static const ig::Vector<ig::DialogFilter> Filters{
-            ig::DialogFilter{.Name = "Model Resources"_fs, .FilterPattern = "*.fbx;*.obj;*.gltf"_fs},
+            ig::DialogFilter{.Name = "Model Resources", .FilterPattern = "*.fbx;*.obj;*.gltf"},
         };
 
-        ig::Result<ig::String, ig::EOpenFileDialogStatus> result = ig::OpenFileDialog::Show(nullptr, "Model resource to import"_fs, Filters);
+        ig::Result<std::string, ig::EOpenFileDialogStatus> result = ig::OpenFileDialog::Show(nullptr, "Model resource to import", Filters);
         status = result.GetStatus();
         if (result.HasOwnership())
         {

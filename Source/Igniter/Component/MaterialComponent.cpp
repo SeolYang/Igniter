@@ -64,7 +64,7 @@ namespace ig
             ImGui::Text("Material Instance does not selected.");
         }
 
-        static ImGuiX::AssetSelectModalPopup materialSelectPopup{"Select Material Asset"_fs, EAssetCategory::Material};
+        static ImGuiX::AssetSelectModalPopup materialSelectPopup{"Select Material Asset", EAssetCategory::Material};
         if (ImGui::Button("Select Asset##MaterialComponentInspector", ImVec2{-FLT_MIN, 0.f}))
         {
             materialSelectPopup.Open();

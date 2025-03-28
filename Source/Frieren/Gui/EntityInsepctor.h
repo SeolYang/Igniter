@@ -17,9 +17,9 @@ namespace fe
         {
             entt::id_type ID;
             ig::meta::Type Type;
-            ig::String NameToDisplay;
-            ig::String RemoveButtonLabel;
-            ig::String AttachSelectableLabel;
+            std::string NameToDisplay;
+            std::string RemoveButtonLabel;
+            std::string AttachSelectableLabel;
         };
 
       public:

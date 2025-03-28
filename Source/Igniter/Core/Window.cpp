@@ -13,7 +13,7 @@ namespace ig
     Window::Window(const WindowDescription& description)
         : windowDesc(description)
     {
-        windowTitle = description.Title.ToWideString();
+        windowTitle = Utf8ToUtf16(description.Title);
         IG_CHECK(description.Width > 0 && description.Height > 0);
         windowClass = {
             sizeof(WNDCLASSEX), CS_OWNDC, WindowProc, 0L, 0L, GetModuleHandle(NULL), NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL,

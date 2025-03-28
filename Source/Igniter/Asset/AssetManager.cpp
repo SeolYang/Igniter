@@ -116,7 +116,7 @@ namespace ig
         IG_LOG(AssetManagerLog, Info, "Engine Default Assets have been successfully unregistered from Asset Manager.");
     }
 
-    Guid AssetManager::Import(const String resPath, const TextureImportDesc& config, const bool bShouldSuppressDirty)
+    Guid AssetManager::Import(const std::string_view resPath, const TextureImportDesc& config, const bool bShouldSuppressDirty)
     {
         Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
         const std::optional<Guid> guidOpt{ImportImpl<Texture>(resPath, result, bShouldSuppressDirty)};
@@ -139,7 +139,7 @@ namespace ig
         return cachedTex;
     }
 
-    Handle<Texture> AssetManager::LoadTexture(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<Texture> AssetManager::LoadTexture(const std::string_view virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -156,7 +156,7 @@ namespace ig
         return LoadTexture(assetMonitor->GetGuid(EAssetCategory::Texture, virtualPath));
     }
 
-    Vector<Guid> AssetManager::Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty)
+    Vector<Guid> AssetManager::Import(const std::string_view resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty)
     {
         Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results = staticMeshImporter->Import(resPath, desc);
         Vector<Guid> output;
@@ -178,7 +178,7 @@ namespace ig
         return LoadImpl<StaticMesh>(guid, *staticMeshLoader, bShouldSuppressDirty);
     }
 
-    Handle<StaticMesh> AssetManager::LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<StaticMesh> AssetManager::LoadStaticMesh(const std::string_view virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -195,7 +195,7 @@ namespace ig
         return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader, bShouldSuppressDirty);
     }
 
-    Guid AssetManager::Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty)
+    Guid AssetManager::Import(const std::string_view virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -224,7 +224,7 @@ namespace ig
         return cachedMat;
     }
 
-    Handle<Material> AssetManager::LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<Material> AssetManager::LoadMaterial(const std::string_view virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -241,7 +241,7 @@ namespace ig
         return LoadMaterial(assetMonitor->GetGuid(EAssetCategory::Material, virtualPath));
     }
 
-    Guid AssetManager::Import(const String virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty)
+    Guid AssetManager::Import(const std::string_view virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -270,7 +270,7 @@ namespace ig
         return cachedMap;
     }
 
-    Handle<Map> AssetManager::LoadMap(const String virtualPath, const bool bShouldSuppressDirty)
+    Handle<Map> AssetManager::LoadMap(const std::string_view virtualPath, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -298,7 +298,7 @@ namespace ig
         DeleteImpl(assetMonitor->GetAssetInfo(guid).GetCategory(), guid, bShouldSuppressDirty);
     }
 
-    void AssetManager::Delete(const EAssetCategory assetType, const String virtualPath, const bool bShouldSuppressDirty)
+    void AssetManager::Delete(const EAssetCategory assetType, const std::string_view virtualPath, const bool bShouldSuppressDirty)
     {
         if (assetType == EAssetCategory::Unknown)
         {

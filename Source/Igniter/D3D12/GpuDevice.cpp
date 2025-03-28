@@ -126,7 +126,7 @@ namespace ig
         DXGI_ADAPTER_DESC adapterDesc;
         adapter->GetDesc(&adapterDesc);
 
-        name = Narrower(adapterDesc.Description);
+        name = Utf16ToUtf8(adapterDesc.Description);
         IG_LOG(GpuDeviceLog, Info, "----------- The GPU Infos -----------");
         IG_LOG(GpuDeviceLog, Info, "{}", name);
         IG_LOG(GpuDeviceLog, Info, "Vendor ID: {}", adapterDesc.VendorId);

@@ -29,18 +29,18 @@ namespace fe
     {
         /* #sy_test 입력 매니저 테스트 */
         ig::InputManager& inputManager = ig::Engine::GetInputManager();
-        inputManager.MapAction("MoveLeft"_fs, ig::EInput::A);
-        inputManager.MapAction("MoveRight"_fs, ig::EInput::D);
-        inputManager.MapAction("MoveForward"_fs, ig::EInput::W);
-        inputManager.MapAction("MoveBackward"_fs, ig::EInput::S);
-        inputManager.MapAction("MoveUp"_fs, ig::EInput::MouseRB);
-        inputManager.MapAction("MoveDown"_fs, ig::EInput::MouseLB);
-        inputManager.MapAction("Sprint"_fs, ig::EInput::Shift);
+        inputManager.MapAction("MoveLeft", ig::EInput::A);
+        inputManager.MapAction("MoveRight", ig::EInput::D);
+        inputManager.MapAction("MoveForward", ig::EInput::W);
+        inputManager.MapAction("MoveBackward", ig::EInput::S);
+        inputManager.MapAction("MoveUp", ig::EInput::MouseRB);
+        inputManager.MapAction("MoveDown", ig::EInput::MouseLB);
+        inputManager.MapAction("Sprint", ig::EInput::Shift);
 
-        inputManager.MapAxis("TurnYaw"_fs, ig::EInput::MouseDeltaX, 1.f);
-        inputManager.MapAxis("TurnAxis"_fs, ig::EInput::MouseDeltaY, 1.f);
+        inputManager.MapAxis("TurnYaw", ig::EInput::MouseDeltaX, 1.f);
+        inputManager.MapAxis("TurnAxis", ig::EInput::MouseDeltaY, 1.f);
 
-        inputManager.MapAction(ig::String("TogglePossessCamera"), ig::EInput::Space);
+        inputManager.MapAction("TogglePossessCamera", ig::EInput::Space);
         /********************************/
 
         /* #sy_test ImGui 통합 테스트 */
@@ -64,7 +64,7 @@ namespace fe
          
          ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
          //testStaticMesh = assetManager.Load<ig::StaticMesh>("bunny_defaultobject_0"_fs);
-         testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0"_fs);
+         testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0");
          //testStaticMesh = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
          testMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
 
@@ -102,7 +102,7 @@ namespace fe
                     ig::StaticMeshComponent& staticMeshComponent = registry.get<ig::StaticMeshComponent>(newAxeEntity);
                     staticMeshComponent.Mesh = testStaticMesh;
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newAxeEntity);
-                    nameComponent.Name = ig::String(std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ));
+                    nameComponent.Name = std::format("Axe ({}, {}, {})", axeGridX, axeGridY, axeGridZ);
                     ig::MaterialComponent& matComp = registry.get<ig::MaterialComponent>(newAxeEntity);
                     matComp.Instance = testMaterial;
         
@@ -124,7 +124,7 @@ namespace fe
                     ig::TransformComponent& transform = registry.emplace<ig::TransformComponent>(newLightEntity);
                     transform.Position = kLightOffset + (kAxeSpaceInterval * ig::Vector3{(ig::F32)lightGridX, (ig::F32)lightGridY, (ig::F32)lightGridZ});
                     ig::NameComponent& nameComponent = registry.emplace<ig::NameComponent>(newLightEntity);
-                    nameComponent.Name = ig::String(std::format("Light ({}, {}, {})", lightGridX, lightGridY, lightGridZ));
+                    nameComponent.Name = std::format("Light ({}, {}, {})", lightGridX, lightGridY, lightGridZ);
                     auto& lightComponent = registry.emplace<ig::LightComponent>(newLightEntity);
                     lightComponent.Property.FalloffRadius = 15.f;
                     lightComponent.Property.Intensity = 20.f;

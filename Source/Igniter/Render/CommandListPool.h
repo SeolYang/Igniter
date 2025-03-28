@@ -59,7 +59,7 @@ namespace ig
         CommandListPool& operator=(const CommandListPool&) = delete;
         CommandListPool& operator=(CommandListPool&&) noexcept = delete;
 
-        auto Request(const LocalFrameIndex localFrameIdx, const String debugName)
+        auto Request(const LocalFrameIndex localFrameIdx, const std::string_view debugName)
         {
             IG_CHECK(localFrameIdx < NumFramesInFlight);
 

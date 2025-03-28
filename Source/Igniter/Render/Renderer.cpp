@@ -84,7 +84,7 @@ namespace ig
         bindlessRootSignature = MakePtr<RootSignature>(gpuDevice.CreateBindlessRootSignature().value());
 
         GpuTextureDesc depthStencilDesc;
-        depthStencilDesc.DebugName = "DepthStencilBufferTex"_fs;
+        depthStencilDesc.DebugName = "DepthStencilBufferTex";
         depthStencilDesc.AsDepthStencil(static_cast<U32>(mainViewport.width), static_cast<U32>(mainViewport.height), DXGI_FORMAT_D32_FLOAT, true);
         depthStencilDesc.InitialLayout = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
         depthBuffer = renderContext.CreateTexture(depthStencilDesc);
@@ -148,7 +148,7 @@ namespace ig
 
         GpuBufferDesc zeroFilledBufferDesc{};
         zeroFilledBufferDesc.AsUploadBuffer(kZeroFilledBufferSize);
-        zeroFilledBufferDesc.DebugName = "ZeroFilledBuffer"_fs;
+        zeroFilledBufferDesc.DebugName = "ZeroFilledBuffer";
         zeroFilledBuffer = MakePtr<GpuBuffer>(gpuDevice.CreateBuffer(zeroFilledBufferDesc).value());
         U8* const mappedZeroFilledBuffer = zeroFilledBuffer->Map();
         ZeroMemory(mappedZeroFilledBuffer, kZeroFilledBufferSize);
@@ -161,10 +161,10 @@ namespace ig
             EGpuStorageFlags::EnableUavCounter |
             EGpuStorageFlags::EnableLinearAllocation;
 
-        dispatchMeshInstanceStorageDesc.DebugName = "DispatchOpaqueMeshInstanceStorage"_fs;
+        dispatchMeshInstanceStorageDesc.DebugName = "DispatchOpaqueMeshInstanceStorage";
         opaqueMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, dispatchMeshInstanceStorageDesc);
 
-        dispatchMeshInstanceStorageDesc.DebugName = "DispatchTransparentMeshInstanceStorage"_fs;
+        dispatchMeshInstanceStorageDesc.DebugName = "DispatchTransparentMeshInstanceStorage";
         transparentMeshInstanceDispatchStorage = MakePtr<GpuStorage>(renderContext, dispatchMeshInstanceStorageDesc);
 
         CommandSignatureDesc dispatchMeshInstanceCmdSignatureDesc{};
@@ -187,7 +187,7 @@ namespace ig
         generateDepthPyramidShader = MakePtr<ShaderBlob>(genDepthPyramidShaderDesc);
 
         ComputePipelineStateDesc genDepthPyramidPsoDesc{};
-        genDepthPyramidPsoDesc.Name = "GenDepthPyramidPSO"_fs;
+        genDepthPyramidPsoDesc.Name = "GenDepthPyramidPSO";
         genDepthPyramidPsoDesc.SetRootSignature(*bindlessRootSignature);
         genDepthPyramidPsoDesc.SetComputeShader(*generateDepthPyramidShader);
         generateDepthPyramidPso = MakePtr<PipelineState>(gpuDevice.CreateComputePipelineState(genDepthPyramidPsoDesc).value());
@@ -290,7 +290,7 @@ namespace ig
                  * MainGfxQueue에서 Copy 및 Layout Transition 진행.
                  * (GraphicsQueue는 모든 Layout의 전환이 가능하므로)
                  */
-                auto mainGfxCmdList = mainGfxCmdListPool.Request(localFrameIdx, "CopyDepthToDepthPyramidMip0"_fs);
+                auto mainGfxCmdList = mainGfxCmdListPool.Request(localFrameIdx, "CopyDepthToDepthPyramidMip0");
                 mainGfxCmdList->Open();
                 mainGfxCmdList->AddPendingTextureBarrier(
                     *depthBufferPtr,
@@ -345,7 +345,7 @@ namespace ig
                     const GpuView* prevMipUav = renderContext->Lookup(depthPyramidMipsUav[depthPyramidMipLevel - 1]);
                     const GpuView* currMipUav = renderContext->Lookup(depthPyramidMipsUav[depthPyramidMipLevel]);
 
-                    auto cmdList = asyncComputeCmdListPool.Request(localFrameIdx, String(std::format("GenDepthPyrmiad.{}", depthPyramidMipLevel)));
+                    auto cmdList = asyncComputeCmdListPool.Request(localFrameIdx, std::format("GenDepthPyrmiad.{}", depthPyramidMipLevel));
                     cmdList->Open(generateDepthPyramidPso.get());
                     cmdList->SetDescriptorHeaps(descriptorHeapsSpan);
                     cmdList->SetRootSignature(*bindlessRootSignature);
@@ -397,9 +397,9 @@ namespace ig
         tf::Task clusterLightsTask = frameTaskflow.emplace([this, localFrameIdx, &asyncCopyCmdListPool, &frameCritCopyQueue, &asyncComputeCmdListPool, &asyncComputeQueue]()
         {
             ZoneScopedN("Renderer.ClusterLights");
-            auto copyLightIdxListCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "LightClustering.CopyLightIdxList"_fs);
-            auto clearTileBitfieldsCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClustering.ClearTileBitfields"_fs);
-            auto lightClusteringCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClustering.Main"_fs);
+            auto copyLightIdxListCmdList = asyncCopyCmdListPool.Request(localFrameIdx, "LightClustering.CopyLightIdxList");
+            auto clearTileBitfieldsCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClustering.ClearTileBitfields");
+            auto lightClusteringCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "LightClustering.Main");
             lightClusteringPass->SetParams(LightClusteringPassParams{
                 .CopyLightIdxListCmdList = copyLightIdxListCmdList,
                 .ClearTileBitfieldsCmdList = clearTileBitfieldsCmdList,
@@ -438,7 +438,7 @@ namespace ig
                 }
 
                 UnifiedMeshStorage& unifiedMeshStorage = renderContext->GetUnifiedMeshStorage();
-                auto meshInstancePassCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "MeshInstancePass"_fs);
+                auto meshInstancePassCmdList = asyncComputeCmdListPool.Request(localFrameIdx, "MeshInstancePass");
                 meshInstancePass->SetParams(MeshInstancePassParams{
                     .ComputeCmdList = meshInstancePassCmdList,
                     .ZeroFilledBuffer = zeroFilledBuffer.get(),
@@ -472,7 +472,7 @@ namespace ig
             const GpuView* dsvPtr = renderContext->Lookup(depthBufferDsv);
             /* Z-Pre Pass */
             {
-                auto zPrePassCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ZPrePass"_fs);
+                auto zPrePassCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ZPrePass");
                 zPrePass->SetParams(ZPrePassParams{
                     .GfxCmdList = zPrePassCmdList,
                     .DispatchMeshInstanceCmdSignature = dispatchMeshInstanceCmdSignature.get(),
@@ -489,7 +489,7 @@ namespace ig
 
             /* Forward Mesh Instance Pass */
             {
-                auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ForwardMeshInstance"_fs);
+                auto renderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ForwardMeshInstance");
 
                 forwardOpaqueMeshRenderPass->SetParams(
                     ForwardOpaqueMeshRenderPassParams{
@@ -515,7 +515,7 @@ namespace ig
         {
             ZoneScopedN("Renderer.ImGuiRenderPass");
             IG_CHECK(imguiRenderPass != nullptr);
-            auto imguiRenderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList"_fs);
+            auto imguiRenderCmdList = mainGfxCmdListPool.Request(localFrameIdx, "ImGuiRenderCmdList");
             imguiRenderPass->SetParams({
                 .CmdList = imguiRenderCmdList,
                 .BackBuffer = swapchain.GetBackBuffer(),

@@ -20,20 +20,20 @@ namespace ig
         IG_CHECK(this->bindlessRootSignature != nullptr);
 
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
-        const ShaderCompileDesc vsDesc{
-            .SourcePath = "Assets/Shaders/MeshInstanceAS.hlsl"_fs,
+        constexpr ShaderCompileDesc vsDesc{
+            .SourcePath = "Assets/Shaders/MeshInstanceAS.hlsl",
             .Type = EShaderType::Amplification
         };
         as = MakePtr<ShaderBlob>(vsDesc);
 
-        const ShaderCompileDesc msDesc{
-            .SourcePath = "Assets/Shaders/DepthOnlyMeshInstanceMS.hlsl"_fs,
+        constexpr ShaderCompileDesc msDesc{
+            .SourcePath = "Assets/Shaders/DepthOnlyMeshInstanceMS.hlsl",
             .Type = EShaderType::Mesh
         };
         ms = MakePtr<ShaderBlob>(msDesc);
 
         MeshShaderPipelineStateDesc psoDesc{};
-        psoDesc.Name = "ZPrePassPSO"_fs;
+        psoDesc.Name = "ZPrePassPSO";
         psoDesc.SetAmplificationShader(*as);
         psoDesc.SetMeshShader(*ms);
         psoDesc.SetRootSignature(bindlessRootSignature);

@@ -20,8 +20,10 @@ namespace ig
 
         for (const LocalFrameIndex localFrameIdx : std::views::iota(0Ui8, NumFramesInFlight))
         {
+            /* @todo 더 빠르게 만들기 위해선 DebugName을 이동으로만 처리하는 것 */
+            const std::string debugName = std::format("TempConstantBuffer.LocalFrame{}", localFrameIdx);
             allocatedSizeInBytes[localFrameIdx] = 0;
-            desc.DebugName = String(std::format("TempConstantBuffer.LocalFrame{}", localFrameIdx));
+            desc.DebugName = debugName;
             buffers[localFrameIdx] = renderContext.CreateBuffer(desc);
         }
     }

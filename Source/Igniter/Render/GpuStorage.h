@@ -21,7 +21,7 @@ namespace ig
 
     struct GpuStorageDesc
     {
-        String DebugName = "UnknownStorage"_fs;
+        std::string_view DebugName = "UnknownStorage";
         U32 ElementSize = 0;
         U32 NumInitElements = 0;
         EGpuStorageFlags Flags = EGpuStorageFlags::None;
@@ -103,7 +103,7 @@ namespace ig
 
         RenderContext& renderContext;
 
-        String debugName;
+        std::string debugName;
 
         U32 elementSize = 1;
         Size allocatedSize = 0;
