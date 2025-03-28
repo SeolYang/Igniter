@@ -5,7 +5,6 @@
 
 namespace fe
 {
-    class CachedStringDebugger;
     class EntityList;
     class EntityInspector;
     class StatisticsPanel;
@@ -27,7 +26,6 @@ namespace fe
       private:
         TestApp& app;
         ig::Ptr<StatisticsPanel> statisticsPanel{};
-        ig::Ptr<CachedStringDebugger> cachedStringDebugger{};
         ig::Ptr<EntityList> entityList{};
         ig::Ptr<EntityInspector> entityInspector{};
         ig::Ptr<TextureImportPanel> textureImportPanel{};
@@ -35,7 +33,6 @@ namespace fe
         ig::Ptr<AssetInspector> assetInspector{};
 
         bool bStatisticsPanelOpend = false;
-        bool bCachedStringDebuggerOpend = false;
         bool bEntityInspectorOpend = false;
         bool bEntityListOpend = false;
         bool bTextureImportPanelOpend = false;

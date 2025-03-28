@@ -14,8 +14,8 @@ namespace ig
         , nonFrameCriticalAsyncCopyQueue(*gpuDevice.CreateCommandQueue("NonFrameCriticalAsyncCopyQueue", EQueueType::Copy))
         , asyncCopyCmdListPool(gpuDevice, EQueueType::Copy)
         , gpuViewManager(gpuDevice)
-        , frameCriticalGpuUploader("FrameCriticalUploader"_fs, gpuDevice, frameCriticalAsyncCopyQueue, kFrameCriticalGpuUploaderInitSize)
-        , nonFrameCriticalGpuUploader("NonFrameCriticalUploader"_fs, gpuDevice, nonFrameCriticalAsyncCopyQueue, kNonFrameCriticalGpuUploaderInitSize)
+        , frameCriticalGpuUploader("FrameCriticalUploader", gpuDevice, frameCriticalAsyncCopyQueue, kFrameCriticalGpuUploaderInitSize)
+        , nonFrameCriticalGpuUploader("NonFrameCriticalUploader", gpuDevice, nonFrameCriticalAsyncCopyQueue, kNonFrameCriticalGpuUploaderInitSize)
         , unifiedMeshStorage(MakePtr<UnifiedMeshStorage>(*this))
         , swapchain(MakePtr<Swapchain>(window, *this))
     {}

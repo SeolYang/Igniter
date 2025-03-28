@@ -38,7 +38,7 @@ namespace ig
         TextureImporter& operator=(TextureImporter&&) noexcept = delete;
 
     private:
-        Result<Texture::Desc, ETextureImportStatus> Import(const String resPathStr, TextureImportDesc config);
+        Result<Texture::Desc, ETextureImportStatus> Import(const std::string_view resPathStr, TextureImportDesc config);
 
     private:
         Mutex compressionMutex{};

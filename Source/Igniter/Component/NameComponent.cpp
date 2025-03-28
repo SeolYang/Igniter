@@ -16,16 +16,14 @@ namespace ig
     template <>
     Json& Serialize<nlohmann::basic_json<>, NameComponent>(Json& archive, const NameComponent& name)
     {
-        const String& Name = name.Name;
-        IG_SERIALIZE_TO_JSON(NameComponent, archive, Name);
+        IG_SERIALIZE_TO_JSON_EXPR(NameComponent, archive, Name, name.Name);
         return archive;
     }
 
     template <>
     const Json& Deserialize<nlohmann::basic_json<>, NameComponent>(const Json& archive, NameComponent& name)
     {
-        String& Name = name.Name;
-        IG_DESERIALIZE_FROM_JSON(NameComponent, archive, Name);
+        IG_DESERIALIZE_FROM_JSON_TEMP(NameComponent, archive, Name, name.Name);
         return archive;
     }
 
@@ -34,10 +32,6 @@ namespace ig
     {
         IG_CHECK(registry != nullptr && entity != entt::null);
         NameComponent& nameComponent = registry->get<NameComponent>(entity);
-        std::string nameInput = nameComponent.Name.ToStandard();
-        if (ImGui::InputText("Name", &nameInput, ImGuiInputTextFlags_EnterReturnsTrue))
-        {
-            nameComponent.Name = String{nameInput};
-        }
+        ImGui::InputText("Name", &nameComponent.Name, ImGuiInputTextFlags_EnterReturnsTrue);
     }
 } // namespace ig

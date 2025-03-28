@@ -176,7 +176,7 @@ namespace ig
     public:
         using UavCounter = U32;
         constexpr static Size kUavCounterSize = sizeof(UavCounter);
-        String DebugName = String{"Unknown Buffer"};
+        std::string_view DebugName = "Unknown Buffer";
         D3D12_HEAP_TYPE HeapType = kAutoHeapType;
         bool bIsRawBuffer = false;
 

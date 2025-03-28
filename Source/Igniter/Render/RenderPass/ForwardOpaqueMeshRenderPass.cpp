@@ -15,28 +15,28 @@ namespace ig
     {
         ShaderCompileDesc forwardMeshInstanceAmpShaderDesc
         {
-            .SourcePath = "Assets/Shaders/MeshInstanceAS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/MeshInstanceAS.hlsl",
             .Type = EShaderType::Amplification
         };
         as = MakePtr<ShaderBlob>(forwardMeshInstanceAmpShaderDesc);
 
         ShaderCompileDesc forwardMeshInstanceMeshShaderDesc
         {
-            .SourcePath = "Assets/Shaders/MeshInstanceMS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/MeshInstanceMS.hlsl",
             .Type = EShaderType::Mesh
         };
         ms = MakePtr<ShaderBlob>(forwardMeshInstanceMeshShaderDesc);
 
         ShaderCompileDesc forwardMeshInstancePixelShaderDesc
         {
-            .SourcePath = "Assets/Shaders/ForwardPS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/ForwardPS.hlsl",
             .Type = EShaderType::Pixel
         };
         ps = MakePtr<ShaderBlob>(forwardMeshInstancePixelShaderDesc);
 
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();
         MeshShaderPipelineStateDesc forwardMeshInstancePipelineDesc{};
-        forwardMeshInstancePipelineDesc.Name = "ForwardMeshInstancePSO"_fs;
+        forwardMeshInstancePipelineDesc.Name = "ForwardMeshInstancePSO";
         forwardMeshInstancePipelineDesc.SetRootSignature(bindlessRootSignature);
         forwardMeshInstancePipelineDesc.NumRenderTargets = 1;
         forwardMeshInstancePipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;

@@ -48,7 +48,7 @@ namespace ig
         void SetRootSignature(RootSignature& rootSignature);
 
     public:
-        String Name;
+        std::string_view Name;
     };
 
     class ComputePipelineStateDesc : public D3D12_COMPUTE_PIPELINE_STATE_DESC
@@ -68,7 +68,7 @@ namespace ig
         void SetRootSignature(RootSignature& rootSignature);
 
     public:
-        String Name;
+        std::string_view Name;
     };
 
     class MeshShaderPipelineStateDesc : public D3DX12_MESH_SHADER_PIPELINE_STATE_DESC
@@ -101,6 +101,6 @@ namespace ig
         void SetPixelShader(ShaderBlob& pixelShader);
 
     public:
-        String Name;
+        std::string_view Name;
     };
 } // namespace ig

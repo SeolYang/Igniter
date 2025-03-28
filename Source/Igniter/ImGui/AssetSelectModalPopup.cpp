@@ -4,7 +4,7 @@
 
 namespace ig::ImGuiX
 {
-    AssetSelectModalPopup::AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter)
+    AssetSelectModalPopup::AssetSelectModalPopup(const std::string_view label, const ig::EAssetCategory assetCategoryToFilter)
         : label(label)
         , assetInfoChildLabel(std::format("{}##Child", label))
         , assetCategoryToFilter(assetCategoryToFilter)
@@ -17,7 +17,7 @@ namespace ig::ImGuiX
         selectedGuid = {};
         bAssetSelected = false;
         TakeAssetSnapshotsFromManager();
-        ImGui::OpenPopup(label.ToCString());
+        ImGui::OpenPopup(label.c_str());
     }
 
     void AssetSelectModalPopup::TakeAssetSnapshotsFromManager()
@@ -34,19 +34,19 @@ namespace ig::ImGuiX
         {
             if (snapshot.Info.GetCategory() == assetCategoryToFilter)
             {
-                cachedAssetInfos.emplace_back(AssetInfo{snapshot, ig::String{std::format("{}##Selectable", snapshot.Info.GetVirtualPath())}});
+                cachedAssetInfos.emplace_back(AssetInfo{snapshot, std::format("{}##Selectable", snapshot.Info.GetVirtualPath())});
             }
         }
 
         std::sort(cachedAssetInfos.begin(), cachedAssetInfos.end(), [](const AssetInfo& lhs, const AssetInfo& rhs)
         {
-            return (lhs.Snapshot.Info.GetVirtualPath().Compare(rhs.Snapshot.Info.GetVirtualPath())) < 0;
+            return (lhs.Snapshot.Info.GetVirtualPath().compare(rhs.Snapshot.Info.GetVirtualPath())) < 0;
         });
     }
 
     bool AssetSelectModalPopup::Begin()
     {
-        if (!ImGui::BeginPopupModal(label.ToCString(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        if (!ImGui::BeginPopupModal(label.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             return false;
         }
@@ -54,7 +54,7 @@ namespace ig::ImGuiX
         filter.Draw();
         ImGui::Separator();
 
-        if (ImGui::BeginChild(assetInfoChildLabel.ToCString(),
+        if (ImGui::BeginChild(assetInfoChildLabel.c_str(),
             ImVec2{-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8.f},
             ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY,
             ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar))
@@ -63,8 +63,8 @@ namespace ig::ImGuiX
             {
                 const ig::Guid& guid = cachedAssetInfo.Snapshot.Info.GetGuid();
                 bool bSelected = guid == selectedGuid;
-                if (filter.PassFilter(cachedAssetInfo.Snapshot.Info.GetVirtualPath().ToCString()) &&
-                    ImGui::Selectable(cachedAssetInfo.SelectableLabel.ToCString(), &bSelected, ImGuiSelectableFlags_DontClosePopups))
+                if (filter.PassFilter(cachedAssetInfo.Snapshot.Info.GetVirtualPath().data()) &&
+                    ImGui::Selectable(cachedAssetInfo.SelectableLabel.c_str(), &bSelected, ImGuiSelectableFlags_DontClosePopups))
                 {
                     selectedGuid = guid;
                 }

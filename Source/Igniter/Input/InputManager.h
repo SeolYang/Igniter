@@ -82,15 +82,15 @@ namespace ig
         InputManager& operator=(const InputManager&) = delete;
         InputManager& operator=(InputManager&&) noexcept = delete;
 
-        void MapAction(const String name, const EInput input);
-        void UnmapAction(const String name);
+        void MapAction(const std::string& name, const EInput input);
+        void UnmapAction(const std::string& name);
 
-        void MapAxis(const String name, const EInput input, const F32 scale = 1.f);
-        void UnmapAxis(const String name);
-        void SetScale(const String name, const F32 newScale);
+        void MapAxis(const std::string& name, const EInput input, const F32 scale = 1.f);
+        void UnmapAxis(const std::string& name);
+        void SetScale(const std::string& name, const F32 newScale);
 
-        [[nodiscard]] Handle<Action> QueryAction(const String name) const;
-        [[nodiscard]] Handle<Axis> QueryAxis(const String name) const;
+        [[nodiscard]] Handle<Action> QueryAction(const std::string& name) const;
+        [[nodiscard]] Handle<Axis> QueryAxis(const std::string& name) const;
 
         [[nodiscard]] Action GetAction(const Handle<Action> action) const;
         [[nodiscard]] Axis GetAxis(const Handle<Axis> axis) const;
@@ -115,12 +115,13 @@ namespace ig
         HandleStorage<Action> actionRegistry;
         HandleStorage<Axis> axisRegistry;
 
-        UnorderedMap<String, ActionMapping> nameActionTable{};
-        UnorderedMap<String, AxisMapping> nameAxisTable{};
+        /* @todo https://github.com/martinus/unordered_dense?tab=readme-ov-file#324-heterogeneous-overloads-using-is_transparent 를 활용하여 임시 std::string 객체 생성 최소화 하기 */
+        UnorderedMap<std::string, ActionMapping> nameActionTable{};
+        UnorderedMap<std::string, AxisMapping> nameAxisTable{};
 
-        constexpr static Size NumScopedInputs = magic_enum::enum_count<EInput>();
-        eastl::array<UnorderedSet<Handle<Action>>, NumScopedInputs> actionSets;
-        eastl::array<UnorderedSet<Handle<Axis>>, NumScopedInputs> axisSets;
+        constexpr static Size kNumScopedInputs = magic_enum::enum_count<EInput>();
+        eastl::array<UnorderedSet<Handle<Action>>, kNumScopedInputs> actionSets;
+        eastl::array<UnorderedSet<Handle<Axis>>, kNumScopedInputs> axisSets;
 
         UnorderedSet<EInput> processedInputs;
 

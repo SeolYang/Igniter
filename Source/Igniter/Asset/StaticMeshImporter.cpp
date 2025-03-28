@@ -19,21 +19,21 @@ namespace ig
         : assetManager(assetManager)
     {}
 
-    static bool CheckAssimpSceneLoadingSucceed(const String resPathStr, const Assimp::Importer& importer, const aiScene* scene)
+    static bool CheckAssimpSceneLoadingSucceed(const std::string_view resPathStr, const Assimp::Importer& importer, const aiScene* scene)
     {
         if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr)
         {
-            IG_LOG(StaticMeshImporterLog, Error, "Load model file from \"{}\" failed: \"{}\"", resPathStr.ToStringView(), importer.GetErrorString());
+            IG_LOG(StaticMeshImporterLog, Error, "Load model file from \"{}\" failed: \"{}\"", resPathStr, importer.GetErrorString());
             return false;
         }
 
         return true;
     }
 
-    Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::Import(const String resPathStr, const StaticMesh::ImportDesc& desc)
+    Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> StaticMeshImporter::Import(const std::string_view resPathStr, const StaticMesh::ImportDesc& desc)
     {
         Vector<Result<StaticMesh::Desc, EStaticMeshImportStatus>> results;
-        const Path resPath{resPathStr.ToStringView()};
+        const Path resPath{resPathStr};
         if (!fs::exists(resPath))
         {
             results.emplace_back(MakeFail<StaticMesh::Desc, EStaticMeshImportStatus::FileDoesNotExists>());
@@ -43,7 +43,7 @@ namespace ig
         const U32 importFlags = MakeAssimpImportFlagsFromDesc(desc);
 
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(resPathStr.ToStandard(), importFlags);
+        const aiScene* scene = importer.ReadFile(resPathStr.data(), importFlags);
         {
             if (!CheckAssimpSceneLoadingSucceed(resPathStr, importer, scene))
             {
@@ -65,7 +65,7 @@ namespace ig
 
             tf::Executor& taskExecutor = Engine::GetTaskExecutor();
             tf::Taskflow meshImportFlow;
-            tf::Task procMeshes = meshImportFlow.for_each_index(
+            [[maybe_unused]] tf::Task procMeshes = meshImportFlow.for_each_index(
                 0, (S32)scene->mNumMeshes, 1,
                 [scene, &results, &staticMeshes, &desc, &modelName](const Index meshIdx)
                 {
@@ -122,7 +122,7 @@ namespace ig
         for (U32 materialIdx = 0; materialIdx < scene.mNumMaterials; ++materialIdx)
         {
             const aiMaterial& material = *scene.mMaterials[materialIdx];
-            const Guid importedGuid = assetManager.Import(MakeVirtualPathPreferred(String(material.GetName().C_Str())),
+            const Guid importedGuid = assetManager.Import(MakeVirtualPathPreferred(material.GetName().C_Str()),
                 MaterialAssetCreateDesc{.DiffuseVirtualPath = Texture::EngineDefault});
             numImportedMaterials = importedGuid.isValid() ? (numImportedMaterials + 1) : numImportedMaterials;
         }

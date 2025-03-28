@@ -29,7 +29,7 @@ namespace ig
     class ShaderCompileDesc final
     {
     public:
-        String SourcePath;
+        std::string_view SourcePath;
         EShaderType Type;
         bool bPackMarticesInRowMajor = false;                                      // -Zpr
         EShaderOptimizationLevel OptimizationLevel = EShaderOptimizationLevel::O3; // -Od~-O3

@@ -26,7 +26,7 @@ namespace ig
     public:
         struct Statistics
         {
-            String DeviceName{};
+            std::string_view DeviceName{};
             bool bIsUma; // false == discrete gpu, true == integrated gpu
 
             Size DedicatedVideoMemUsage{0};
@@ -104,7 +104,7 @@ namespace ig
 
     private:
         ComPtr<IDXGIAdapter> adapter;
-        String name{};
+        std::string name{};
 
         ComPtr<ID3D12Device10> device;
 

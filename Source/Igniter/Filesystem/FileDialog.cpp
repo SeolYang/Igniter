@@ -14,8 +14,8 @@ namespace ig
         std::wstring FilterPattern;
     };
 
-    Result<String, EOpenFileDialogStatus> OpenFileDialog::Show(
-        const HWND parentWindowHandle, const String dialogTitle, const std::span<const DialogFilter> filters)
+    Result<std::string, EOpenFileDialogStatus> OpenFileDialog::Show(
+        const HWND parentWindowHandle, const std::string_view dialogTitle, const std::span<const DialogFilter> filters)
     {
         CoInitializeUnique();
         Microsoft::WRL::ComPtr<IFileDialog> fileDialog;
@@ -26,14 +26,14 @@ namespace ig
         HRESULT result = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
         if (FAILED(result))
         {
-            return MakeFail<String, EOpenFileDialogStatus::CreateDialog>();
+            return MakeFail<std::string, EOpenFileDialogStatus::CreateDialog>();
         }
 
         Vector<WideDialogFilter> wideFilters(filters.size());
         std::transform(filters.begin(), filters.end(), wideFilters.begin(),
             [](const DialogFilter& filter)
             {
-                return WideDialogFilter{.Name = filter.Name.ToWideString(), .FilterPattern = filter.FilterPattern.ToWideString()};
+                return WideDialogFilter{.Name = Utf8ToUtf16(filter.Name), .FilterPattern = Utf8ToUtf16(filter.FilterPattern)};
             });
 
         Vector<COMDLG_FILTERSPEC> filterSpecs(filters.size());
@@ -46,32 +46,32 @@ namespace ig
         result = fileDialog->SetFileTypes(static_cast<U32>(filterSpecs.size()), filterSpecs.data());
         if (FAILED(result))
         {
-            return MakeFail<String, EOpenFileDialogStatus::SetFileTypes>();
+            return MakeFail<std::string, EOpenFileDialogStatus::SetFileTypes>();
         }
 
-        fileDialog->SetTitle(dialogTitle.ToWideString().c_str());
+        fileDialog->SetTitle(Utf8ToUtf16(dialogTitle).c_str());
 
         result = fileDialog->Show(parentWindowHandle);
         if (FAILED(result))
         {
-            return MakeFail<String, EOpenFileDialogStatus::ShowDialog>();
+            return MakeFail<std::string, EOpenFileDialogStatus::ShowDialog>();
         }
 
         result = fileDialog->GetResult(&shellItem);
         if (FAILED(result))
         {
-            return MakeFail<String, EOpenFileDialogStatus::GetResult>();
+            return MakeFail<std::string, EOpenFileDialogStatus::GetResult>();
         }
 
         PWSTR filePath{nullptr};
         result = shellItem->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
         if (FAILED(result))
         {
-            return MakeFail<String, EOpenFileDialogStatus::GetDisplayName>();
+            return MakeFail<std::string, EOpenFileDialogStatus::GetDisplayName>();
         }
 
-        String resultPath{Narrower(filePath)};
+        std::string resultPath{Utf16ToUtf8(filePath)};
         CoTaskMemFree(filePath);
-        return MakeSuccess<String, EOpenFileDialogStatus>(resultPath);
+        return MakeSuccess<std::string, EOpenFileDialogStatus>(resultPath);
     }
 } // namespace ig

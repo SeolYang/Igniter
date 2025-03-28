@@ -14,18 +14,18 @@ namespace fe
     FpsCameraControllSystem::FpsCameraControllSystem()
     {
         auto& inputManager = ig::Engine::GetInputManager();
-        moveLeftActionHandle = inputManager.QueryAction(ig::String("MoveLeft"));
-        moveRightActionHandle = inputManager.QueryAction(ig::String("MoveRight"));
-        moveForwardActionHandle = inputManager.QueryAction(ig::String("MoveForward"));
-        moveBackwardActionHandle = inputManager.QueryAction(ig::String("MoveBackward"));
+        moveLeftActionHandle = inputManager.QueryAction("MoveLeft");
+        moveRightActionHandle = inputManager.QueryAction("MoveRight");
+        moveForwardActionHandle = inputManager.QueryAction("MoveForward");
+        moveBackwardActionHandle = inputManager.QueryAction("MoveBackward");
 
-        moveUpActionHandle = inputManager.QueryAction(ig::String("MoveUp"));
-        moveDownActionHandle = inputManager.QueryAction(ig::String("MoveDown"));
+        moveUpActionHandle = inputManager.QueryAction("MoveUp");
+        moveDownActionHandle = inputManager.QueryAction("MoveDown");
 
-        sprintActionHandle = inputManager.QueryAction(ig::String("Sprint"));
+        sprintActionHandle = inputManager.QueryAction("Sprint");
 
-        turnYawAxisHandle = inputManager.QueryAxis(ig::String("TurnYaw"));
-        turnPitchAxisHandle = inputManager.QueryAxis(ig::String("TurnAxis"));
+        turnYawAxisHandle = inputManager.QueryAxis("TurnYaw");
+        turnPitchAxisHandle = inputManager.QueryAxis("TurnAxis");
     }
 
     void FpsCameraControllSystem::Update(const float deltaTime, ig::World& world)

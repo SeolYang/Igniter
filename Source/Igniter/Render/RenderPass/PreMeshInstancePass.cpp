@@ -14,12 +14,12 @@ namespace ig
     {
         const ShaderCompileDesc meshInstancePassShaderDesc
         {
-            .SourcePath = "Assets/Shaders/PreMeshInstanceCS.hlsl"_fs,
+            .SourcePath = "Assets/Shaders/PreMeshInstanceCS.hlsl",
             .Type = EShaderType::Compute,
         };
         cs = MakePtr<ShaderBlob>(meshInstancePassShaderDesc);
         ComputePipelineStateDesc meshInstancePassPsoDesc{};
-        meshInstancePassPsoDesc.Name = "PreMeshInstancePass"_fs;
+        meshInstancePassPsoDesc.Name = "PreMeshInstancePass";
         meshInstancePassPsoDesc.SetComputeShader(*cs);
         meshInstancePassPsoDesc.SetRootSignature(bindlessRootSignature);
         GpuDevice& gpuDevice = renderContext.GetGpuDevice();

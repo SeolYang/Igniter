@@ -11,13 +11,12 @@ namespace fe
       public:
         static ig::Entity Create(ig::Registry* registry)
         {
-            using namespace ig::literals;
             const ig::Entity newEntity = registry->create();
             auto& cameraComponent = registry->emplace<ig::CameraComponent>(newEntity);
             cameraComponent.bIsMainCamera = false;
             registry->emplace<ig::TransformComponent>(newEntity);
             registry->emplace<FpsCameraController>(newEntity);
-            registry->emplace<ig::NameComponent>(newEntity, "FpsCamera"_fs);
+            registry->emplace<ig::NameComponent>(newEntity, "FpsCamera");
             return newEntity;
         }
     };

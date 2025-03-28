@@ -33,7 +33,6 @@
     <ClCompile Include="Game\System\JustSpinningSystem.cpp" />
     <ClCompile Include="Game\System\TestGameSystem.cpp" />
     <ClCompile Include="Gui\AssetInspector.cpp" />
-    <ClCompile Include="Gui\CachedStringDebugger.cpp" />
     <ClCompile Include="Gui\EditorCanvas.cpp" />
     <ClCompile Include="Gui\EntityInspector.cpp" />
     <ClCompile Include="Gui\EntityList.cpp" />
@@ -53,7 +52,6 @@
     <ClInclude Include="Game\System\JustSpinningSystem.h" />
     <ClInclude Include="Game\System\TestGameSystem.h" />
     <ClInclude Include="Gui\AssetInspector.h" />
-    <ClInclude Include="Gui\CachedStringDebugger.h" />
     <ClInclude Include="Gui\EditorCanvas.h" />
     <ClInclude Include="Gui\EntityInsepctor.h" />
     <ClInclude Include="Gui\EntityList.h" />

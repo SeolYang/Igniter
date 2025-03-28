@@ -93,7 +93,7 @@ namespace ig
     class CoFileWatcher final
     {
     public:
-        CoFileWatcher(const String directoryPathStr, const EFileWatchFilterFlags filters, const bool bWatchRecursively = true);
+        CoFileWatcher(const std::string_view directoryPathStr, const EFileWatchFilterFlags filters, const bool bWatchRecursively = true);
         ~CoFileWatcher();
 
         Vector<FileChangeInfo> RequestChanges(const bool bEnsureCatch, const bool bIgnoreDirectory = true);

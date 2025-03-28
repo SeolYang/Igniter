@@ -145,25 +145,6 @@ namespace ig
         return true;
     }
 
-    template <>
-    inline Json ToJson(const String& str)
-    {
-        return ToJson(str.ToStandard());
-    }
-
-    template <>
-    inline bool FromJson(const Json& json, String& str)
-    {
-        const std::string* serializedPtr = json.template get_ptr<const std::string*>();
-        if (serializedPtr == nullptr)
-        {
-            return false;
-        }
-
-        str = String(*serializedPtr);
-        return true;
-    }
-
     template <typename E>
         requires std::is_enum_v<E>
     Json ToJson(const E& enumerator)
@@ -295,7 +276,7 @@ namespace ig
 #define IG_DESERIALIZE_FROM_JSON_TEMP(CLASS, ARCHIVE, VARIABLE, TEMP)    \
     if (!ARCHIVE.contains(#CLASS) ||                          \
         !ARCHIVE[#CLASS].contains(#VARIABLE) ||               \
-        !ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], VARIABLE))  \
+        !ig::FromJson(ARCHIVE[#CLASS][#VARIABLE], TEMP))  \
     {                                                         \
         TEMP = std::remove_cvref_t<decltype(TEMP)>{}; \
     }

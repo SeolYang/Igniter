@@ -9,7 +9,7 @@ namespace ig
     struct MaterialAssetCreateDesc final
     {
     public:
-        String DiffuseVirtualPath{};
+        std::string_view DiffuseVirtualPath{};
     };
 
     struct MaterialAssetLoadDesc final

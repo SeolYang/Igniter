@@ -17,11 +17,11 @@ namespace ig::ImGuiX
         struct AssetInfo
         {
             AssetSnapshot Snapshot;
-            ig::String SelectableLabel;
+            std::string SelectableLabel;
         };
 
     public:
-        AssetSelectModalPopup(const ig::String label, const ig::EAssetCategory assetCategoryToFilter);
+        AssetSelectModalPopup(const std::string_view label, const ig::EAssetCategory assetCategoryToFilter);
         AssetSelectModalPopup(const AssetSelectModalPopup&) = delete;
         AssetSelectModalPopup(AssetSelectModalPopup&&) noexcept = delete;
         ~AssetSelectModalPopup() = default;
@@ -40,8 +40,8 @@ namespace ig::ImGuiX
         void TakeAssetSnapshotsFromManager();
 
     private:
-        ig::String label;
-        ig::String assetInfoChildLabel;
+        std::string label;
+        std::string assetInfoChildLabel;
         ig::EAssetCategory assetCategoryToFilter = ig::EAssetCategory::Unknown;
         eastl::vector<AssetInfo> cachedAssetInfos;
         ImGuiTextFilter filter;

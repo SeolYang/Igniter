@@ -1,9 +1,6 @@
 #include "Frieren/Frieren.h"
 #include "Igniter/Core/Engine.h"
 #include "Igniter/Core/Meta.h"
-#include "Igniter/Core/ContainerUtils.h"
-#include "Igniter/Component/NameComponent.h"
-#include "Igniter/Component/TransformComponent.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiExtensions.h"
 #include "Frieren/Gui/EntityInsepctor.h"
@@ -32,12 +29,12 @@ namespace fe
                 }
             }
 
-            const ig::String* name = nameProperty.value().try_cast<ig::String>();
+            const std::string* name = nameProperty.value().try_cast<std::string>();
             IG_CHECK(name != nullptr);
 
             componentInfos.emplace_back(ComponentInfo{
-                typeID, type, *name, ig::String{std::format("Detach Component##{}", *name)},
-                ig::String{std::format("{}##SelectableComponent", *name)}});
+                typeID, type, *name, std::format("Detach Component##{}", *name),
+                std::format("{}##SelectableComponent", *name)});
         }
 
         componentInfos.shrink_to_fit();
@@ -75,12 +72,12 @@ namespace fe
             for (const size_t addableComponentInfoIdx : addableComponentInfoIndices)
             {
                 const ComponentInfo& componentInfo = componentInfos[addableComponentInfoIdx];
-                if (!filter.PassFilter(componentInfo.NameToDisplay.ToCString()))
+                if (!filter.PassFilter(componentInfo.NameToDisplay.c_str()))
                 {
                     continue;
                 }
 
-                if (ImGui::Selectable(componentInfo.AttachSelectableLabel.ToCString()))
+                if (ImGui::Selectable(componentInfo.AttachSelectableLabel.c_str()))
                 {
                     if (ig::meta::Invoke(componentInfo.Type, ig::meta::AddComponentFunc, ig::Ref{registry}, selectedEntity))
                     {
@@ -101,13 +98,13 @@ namespace fe
         for (const size_t componentInfoIdx : componentInfoIndicesToDisplay)
         {
             const ComponentInfo& componentInfo = componentInfos[componentInfoIdx];
-            if (!ImGui::CollapsingHeader(componentInfo.NameToDisplay.ToCString(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
+            if (!ImGui::CollapsingHeader(componentInfo.NameToDisplay.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
             {
                 continue;
             }
 
             ig::ImGuiX::PushNegativeButtonHighlightColor();
-            if (ImGui::Button(componentInfo.RemoveButtonLabel.ToCString(), ImVec2(-FLT_MIN, 0.0f)))
+            if (ImGui::Button(componentInfo.RemoveButtonLabel.c_str(), ImVec2(-FLT_MIN, 0.0f)))
             {
                 componentToRemove = componentInfoIdx;
             }

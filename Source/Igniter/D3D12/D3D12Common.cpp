@@ -51,7 +51,7 @@ namespace ig
     {
         if (object != nullptr)
         {
-            object->SetName(Wider(name).c_str());
+            object->SetName(Utf8ToUtf16(name).c_str());
         }
     }
 } // namespace ig

@@ -40,12 +40,12 @@ namespace ig
     class AssetManager final
     {
     private:
-        using VirtualPathGuidTable = UnorderedMap<String, Guid>;
+        using VirtualPathGuidTable = UnorderedMap<U64, Guid>;
         using AssetMutex = Mutex;
         using AssetLock = UniqueLock;
 
     public:
-        using ModifiedEvent = Event<String, std::reference_wrapper<const AssetManager>>;
+        using ModifiedEvent = Event<std::string, std::reference_wrapper<const AssetManager>>;
 
         struct Snapshot
         {
@@ -59,7 +59,7 @@ namespace ig
         };
 
     public:
-        AssetManager(RenderContext& renderContext);
+        explicit AssetManager(RenderContext& renderContext);
         AssetManager(const AssetManager&) = delete;
         AssetManager(AssetManager&&) noexcept = delete;
         ~AssetManager();
@@ -73,21 +73,21 @@ namespace ig
          * 에셋의 레퍼런스 카운트가 증가함. 즉 반드시 1번의 로드에 최소 1번의 언로드를 매칭 시켜주어야 함.
          */
 
-        Guid Import(const String resPath, const TextureImportDesc& desc, const bool bShouldSuppressDirty = false);
+        Guid Import(const std::string_view resPath, const TextureImportDesc& desc, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<Texture> LoadTexture(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] Handle<Texture> LoadTexture(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Texture> LoadTexture(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
-        Vector<Guid> Import(const String resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty = false);
+        Vector<Guid> Import(const std::string_view resPath, const StaticMeshImportDesc& desc, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
-        Guid Import(const String virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty = false);
+        Guid Import(const std::string_view virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<Material> LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] Handle<Material> LoadMaterial(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Material> LoadMaterial(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
-        Guid Import(const String virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty = false);
+        Guid Import(const std::string_view virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<Map> LoadMap(const Guid& guid, const bool bShouldSuppressDirty = false);
-        [[nodiscard]] Handle<Map> LoadMap(const String virtualPath, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<Map> LoadMap(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
         [[nodiscard]] Handle<T> Load(const Guid& guid, const bool bShouldSuppressDirty = false)
@@ -115,7 +115,7 @@ namespace ig
         }
 
         template <typename T>
-        [[nodiscard]] Handle<T> Load(const String virtualPath, const bool bShouldSuppressDirty = false)
+        [[nodiscard]] Handle<T> Load(const std::string_view virtualPath, const bool bShouldSuppressDirty = false)
         {
             if constexpr (AssetCategoryOf<T> == EAssetCategory::Texture)
             {
@@ -173,7 +173,7 @@ namespace ig
         }
 
         void Delete(const Guid& guid, const bool bShouldSuppressDirty = false);
-        void Delete(const EAssetCategory assetType, const String virtualPath, const bool bShouldSuppressDirty = false);
+        void Delete(const EAssetCategory assetType, const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
         bool Clone(const Handle<T> handle, const U32 numClones = 1, const bool bShouldSuppressDirty = false)
@@ -298,7 +298,7 @@ namespace ig
         const details::TypelessAssetCache& GetTypelessCache(const EAssetCategory assetType) const;
 
         template <typename T, ResultStatus ImportStatus>
-        std::optional<Guid> ImportImpl(String resPath, Result<typename T::Desc, ImportStatus>& result, const bool bShouldSuppressDirty)
+        std::optional<Guid> ImportImpl(std::string_view resPath, Result<typename T::Desc, ImportStatus>& result, const bool bShouldSuppressDirty)
         {
             constexpr auto AssetType{AssetCategoryOf<T>};
             if (!result.HasOwnership())
@@ -313,7 +313,7 @@ namespace ig
             IG_CHECK(assetInfo.IsValid());
             IG_CHECK(assetInfo.GetCategory() == AssetType);
 
-            const String virtualPath{assetInfo.GetVirtualPath()};
+            const std::string_view virtualPath{assetInfo.GetVirtualPath()};
             IG_CHECK(IsValidVirtualPath(virtualPath));
 
             bool bShouldReload{false};
@@ -463,7 +463,7 @@ namespace ig
         [[nodiscard]] AssetMutex& GetAssetMutex(const Guid& guid);
 
         template <typename T, ResultStatus Status>
-        void RegisterEngineInternalAsset(const String requiredVirtualPath, Result<T, Status> assetResult)
+        void RegisterEngineInternalAsset(const std::string_view requiredVirtualPath, Result<T, Status> assetResult)
         {
             if (!assetResult.HasOwnership())
             {

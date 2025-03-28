@@ -17,7 +17,7 @@ namespace fe
     {
         ig::AssetManager& assetManager{ig::Engine::GetAssetManager()};
         ig::AssetManager::ModifiedEvent& modifiedEvent{assetManager.GetModifiedEvent()};
-        modifiedEvent.Subscribe("AssetInspector"_fs,
+        modifiedEvent.Subscribe("AssetInspector",
             [this]([[maybe_unused]] const ig::CRef<ig::AssetManager> assetManagerRef)
             {
                 bIsDirty = true;
@@ -171,7 +171,7 @@ namespace fe
                         case 1:
                             return bAscendingRequired ? lhs.Info.GetGuid().bytes() < rhs.Info.GetGuid().bytes() : lhs.Info.GetGuid().bytes() > rhs.Info.GetGuid().bytes();
                         case 2:
-                            comp = lhs.Info.GetVirtualPath().Compare(rhs.Info.GetVirtualPath());
+                            comp = lhs.Info.GetVirtualPath().compare(rhs.Info.GetVirtualPath());
                             return bAscendingRequired ? comp < 0 : comp > 0;
 
                         case 3:
@@ -224,7 +224,7 @@ namespace fe
                     }
 
                     ImGui::TableNextColumn();
-                    ImGui::Text(snapshot.Info.GetVirtualPath().ToCString());
+                    ImGui::Text(snapshot.Info.GetVirtualPath().data());
                     ImGui::TableNextColumn();
                     ImGui::Text(ToCStr(snapshot.Info.GetScope()));
                     ImGui::TableNextColumn();

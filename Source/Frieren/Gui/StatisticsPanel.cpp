@@ -64,7 +64,7 @@ namespace fe
             };
 
             const ig::GpuDevice::Statistics gpuStats = ig::Engine::GetRenderContext().GetGpuDevice().GetStatistics();
-            ImGui::Text("GPU: %s", gpuStats.DeviceName.ToCString());
+            ImGui::Text("GPU: %s", gpuStats.DeviceName.data());
             ImGui::Text("GPU Type: %s", (gpuStats.bIsUma ? "Integrated GPU" : "Discrete GPU"));
 
             ImGui::Separator();

@@ -7,7 +7,7 @@ namespace ig
 {
     struct NameComponent
     {
-        String Name{"New Entity"};
+        std::string Name{"New Entity"};
     };
 
     template <>

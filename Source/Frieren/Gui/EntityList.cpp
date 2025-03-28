@@ -100,7 +100,7 @@ namespace fe
                     {
                         IG_CHECK(selectedEntity != ig::NullEntity);
                         const auto* nameComponent = registry.try_get<ig::NameComponent>(selectedEntity);
-                        const ig::String nameStr = nameComponent == nullptr ? "Unnamed"_fs : nameComponent->Name;
+                        const std::string_view nameStr = nameComponent == nullptr ? "Unnamed" : nameComponent->Name;
                         IG_LOG(
                             EditorEntityList, Info, "Delete entity \"{} ({})\" from world.", nameStr, entt::to_integral(selectedEntity));
                         registry.destroy(selectedEntity);
@@ -160,7 +160,7 @@ namespace fe
                         }
                     }
 
-                    const ig::String* name = nameProperty.value().try_cast<ig::String>();
+                    const std::string* name = nameProperty.value().try_cast<std::string>();
                     IG_CHECK(name != nullptr);
 
                     if (ImGui::Selectable(std::format("Create {}", *name).c_str()))

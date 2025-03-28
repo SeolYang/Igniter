@@ -67,7 +67,7 @@ namespace ig
             ImGui::Text("Static Mesh Component does not selected.");
         }
 
-        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{"Select Static Mesh Asset"_fs, EAssetCategory::StaticMesh};
+        static ImGuiX::AssetSelectModalPopup staticMeshSelectModalPopup{"Select Static Mesh Asset", EAssetCategory::StaticMesh};
         if (ImGui::Button("Select Asset##StaticMeshComponentInspector", ImVec2{-FLT_MIN, 0.f}))
         {
             staticMeshSelectModalPopup.Open();

@@ -1,12 +1,9 @@
 #include "Frieren/Frieren.h"
 #include "Igniter/Core/Engine.h"
-#include "Igniter/Render/Renderer.h"
 #include "Igniter/Asset/AssetManager.h"
 #include "Igniter/Gameplay/GameSystem.h"
-#include "Igniter/ImGui/ImGuiCanvas.h"
 #include "Frieren/Application/TestApp.h"
 #include "Frieren/Gui/StatisticsPanel.h"
-#include "Frieren/Gui/CachedStringDebugger.h"
 #include "Frieren/Gui/EntityInsepctor.h"
 #include "Frieren/Gui/EntityList.h"
 #include "Frieren/Gui/TextureImportPanel.h"
@@ -19,7 +16,6 @@ namespace fe
     EditorCanvas::EditorCanvas(TestApp& testApp)
         : app(testApp)
         , statisticsPanel(ig::MakePtr<StatisticsPanel>())
-        , cachedStringDebugger(ig::MakePtr<CachedStringDebugger>())
         , entityList(ig::MakePtr<EntityList>())
         , entityInspector(ig::MakePtr<EntityInspector>(*entityList))
         , textureImportPanel(ig::MakePtr<TextureImportPanel>())
@@ -101,11 +97,6 @@ namespace fe
                     bStatisticsPanelOpend = !bStatisticsPanelOpend;
                 }
 
-                if (ImGui::MenuItem("Debug Cached String"))
-                {
-                    bCachedStringDebuggerOpend = !bCachedStringDebuggerOpend;
-                }
-
                 ImGui::EndMenu();
             }
 
@@ -115,7 +106,7 @@ namespace fe
                 {
                     if (type.prop(ig::meta::GameSystemProperty))
                     {
-                        if (ImGui::MenuItem(type.prop(ig::meta::TitleCaseNameProperty).value().cast<ig::String>().ToCString()))
+                        if (ImGui::MenuItem(type.prop(ig::meta::TitleCaseNameProperty).value().try_cast<std::string>()->c_str()))
                         {
                             app.SetGameSystem(
                                 std::move(*type.func(ig::meta::GameSystemConstructFunc).invoke({}).try_cast<ig::Ptr<ig::GameSystem>>()));
@@ -134,15 +125,6 @@ namespace fe
             if (ImGui::Begin("Statistics", &bStatisticsPanelOpend))
             {
                 statisticsPanel->OnImGui();
-            }
-            ImGui::End();
-        }
-
-        if (bCachedStringDebuggerOpend)
-        {
-            if (ImGui::Begin("Cached String Debugger", &bCachedStringDebuggerOpend))
-            {
-                cachedStringDebugger->OnImGui();
             }
             ImGui::End();
         }

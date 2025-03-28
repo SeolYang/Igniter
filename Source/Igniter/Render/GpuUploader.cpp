@@ -8,7 +8,7 @@
 
 namespace ig
 {
-    GpuUploader::GpuUploader(const String name, GpuDevice& gpuDevice, CommandQueue& copyQueue, const Size initRingBufferSize)
+    GpuUploader::GpuUploader(const std::string_view name, GpuDevice& gpuDevice, CommandQueue& copyQueue, const Size initRingBufferSize)
         : name(name)
         , gpuDevice(&gpuDevice)
         , copyQueue(&copyQueue)
@@ -210,9 +210,10 @@ namespace ig
                 bufferCpuAddr = nullptr;
             }
 
+            const std::string debugName = std::format("{}.Buffer", name);
             GpuBufferDesc bufferDesc{};
             bufferDesc.AsUploadBuffer(static_cast<U32>(alignedNewSize));
-            bufferDesc.DebugName = String(std::format("{}.Buffer", name));
+            bufferDesc.DebugName = debugName;
             buffer = MakePtr<GpuBuffer>(gpuDevice->CreateBuffer(bufferDesc).value());
 
             bufferCapacity = alignedNewSize;

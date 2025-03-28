@@ -45,8 +45,8 @@ namespace ig
         T##_DefineMeta::T##_DefineMeta()                                                       \
         {                                                                                      \
             entt::meta<T>().type(ig::TypeHash<T>);                                             \
-            entt::meta<T>().prop(ig::meta::NameProperty, #T##_fs);                             \
-            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, #T##_fs.ToTitleCase());      \
+            entt::meta<T>().prop(ig::meta::NameProperty, std::string{#T});                             \
+            entt::meta<T>().prop(ig::meta::TitleCaseNameProperty, ig::ToTitleCase(#T));      \
             entt::meta<T>().prop(ig::meta::GameSystemProperty);                                \
             entt::meta<T>().func<&ig::CreateGameSystem<T>>(ig::meta::GameSystemConstructFunc); \
             DefineMeta<T>();                                                                   \

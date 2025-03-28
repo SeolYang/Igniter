@@ -14,7 +14,7 @@ namespace ig
     {
         Bytes BufferSize = 0; // Assert(>0)
         EGpuStagingBufferFlags Flags = EGpuStagingBufferFlags::None;
-        String DebugName = "UnnamedStagingBuffer"_fs;
+        std::string_view DebugName = "UnnamedStagingBuffer";
     };
 
     class GpuBuffer;

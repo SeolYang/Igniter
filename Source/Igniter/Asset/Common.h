@@ -75,7 +75,7 @@ namespace ig
         AssetInfo() = default;
         AssetInfo(const AssetInfo&) = default;
         AssetInfo(AssetInfo&&) noexcept = default;
-        AssetInfo(const String virtualPath, const EAssetCategory category);
+        AssetInfo(const std::string_view virtualPath, const EAssetCategory category);
         ~AssetInfo() = default;
 
         AssetInfo& operator=(const AssetInfo&) = default;
@@ -87,24 +87,25 @@ namespace ig
         [[nodiscard]] bool IsValid() const;
 
         const Guid& GetGuid() const { return guid; }
-        String GetVirtualPath() const { return virtualPath; }
+        std::string_view GetVirtualPath() const { return virtualPath; }
         EAssetCategory GetCategory() const { return category; }
         EAssetScope GetScope() const { return scope; }
-        const Vector<String>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
+        /* @todo Vector to span */
+        const Vector<std::string>& GetVirtualPathHierarchy() const { return virtualPathHierarchy; }
 
-        void SetVirtualPath(const String newVirtualPath);
+        void SetVirtualPath(const std::string_view newVirtualPath);
         void SetScope(const EAssetScope newScope) { scope = (newScope == EAssetScope::Engine) ? EAssetScope::Static : newScope; }
 
     private:
-        AssetInfo(const Guid& guid, const String virtualPath, const EAssetCategory category, const EAssetScope scope);
+        AssetInfo(const Guid& guid, const std::string_view virtualPath, const EAssetCategory category, const EAssetScope scope);
         void ConstructVirtualPathHierarchy();
         void SetGuid(const Guid& newGuid) { this->guid = newGuid; }
 
     private:
         uint64_t creationTime = 0;
         Guid guid{};
-        String virtualPath{};
-        Vector<String> virtualPathHierarchy{};
+        std::string virtualPath{};
+        Vector<std::string> virtualPathHierarchy{};
         EAssetCategory category = EAssetCategory::Unknown;
         EAssetScope scope = EAssetScope::Managed;
     };
@@ -149,9 +150,9 @@ namespace ig
 
     Guid ConvertMetadataPathToGuid(Path path);
 
-    bool IsValidVirtualPath(const String virtualPath);
+    bool IsValidVirtualPath(const std::string_view virtualPath);
 
-    String MakeVirtualPathPreferred(const String virtualPath);
+    std::string MakeVirtualPathPreferred(const std::string_view virtualPath);
 } // namespace ig
 
 template <>

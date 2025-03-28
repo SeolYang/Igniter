@@ -1,6 +1,5 @@
 #pragma once
 #include "Igniter/Igniter.h"
-#include "Igniter/Core/String.h"
 #include "Igniter/Render/Common.h"
 #include "Igniter/D3D12/GpuSyncPoint.h"
 
@@ -9,7 +8,7 @@ namespace ig
     struct IgniterDesc
     {
         U32 WindowWidth, WindowHeight;
-        String WindowTitle;
+        std::string_view WindowTitle;
     };
 
     class Application;
