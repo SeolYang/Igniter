@@ -50,6 +50,8 @@
     <ClInclude Include="Asset\AssetManager.h" />
     <ClInclude Include="Asset\AssetMonitor.h" />
     <ClInclude Include="Asset\AudioClip.h" />
+    <ClInclude Include="Asset\AudioClipImporter.h" />
+    <ClInclude Include="Asset\AudioClipLoader.h" />
     <ClInclude Include="Asset\Common.h" />
     <ClInclude Include="Asset\Map.h" />
     <ClInclude Include="Asset\MapCreator.h" />
@@ -195,6 +197,8 @@
     <ClCompile Include="Asset\AssetManager.cpp" />
     <ClCompile Include="Asset\AssetMonitor.cpp" />
     <ClCompile Include="Asset\AudioClip.cpp" />
+    <ClCompile Include="Asset\AudioClipImporter.cpp" />
+    <ClCompile Include="Asset\AudioClipLoader.cpp" />
     <ClCompile Include="Asset\Common.cpp" />
     <ClCompile Include="Asset\MapCreator.cpp" />
     <ClCompile Include="Asset\MapLoader.cpp" />

@@ -27,9 +27,7 @@ namespace ig
 
     struct AudioSourceComponent
     {
-        //Handle<AudioClip> Clip{};
-        /* Test Purpose */
-        Handle<Audio> Clip;
+        Handle<AudioClip> Clip{};
 
         /* Properties */
         float Volume = 0.5f;

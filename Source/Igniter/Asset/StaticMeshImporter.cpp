@@ -122,7 +122,7 @@ namespace ig
         for (U32 materialIdx = 0; materialIdx < scene.mNumMaterials; ++materialIdx)
         {
             const aiMaterial& material = *scene.mMaterials[materialIdx];
-            const Guid importedGuid = assetManager.Import(MakeVirtualPathPreferred(material.GetName().C_Str()),
+            const Guid importedGuid = assetManager.Create(MakeVirtualPathPreferred(material.GetName().C_Str()),
                 MaterialAssetCreateDesc{.DiffuseVirtualPath = Texture::EngineDefault});
             numImportedMaterials = importedGuid.isValid() ? (numImportedMaterials + 1) : numImportedMaterials;
         }

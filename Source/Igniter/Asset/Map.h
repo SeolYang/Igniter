@@ -38,8 +38,8 @@ namespace ig
         Map& operator=(const Map&) = delete;
         Map& operator=(Map&&) noexcept = default;
 
-        const Desc& GetSnapshot() const { return snapshot; }
-        const Json& GetSerializedWorld() const { return serializedWorld; }
+        [[nodiscard]] const Desc& GetSnapshot() const { return snapshot; }
+        [[nodiscard]] const Json& GetSerializedWorld() const { return serializedWorld; }
 
     private:
         Desc snapshot{};

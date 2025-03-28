@@ -20,7 +20,7 @@ namespace ig
 
         if (assetInfo.GetCategory() != EAssetCategory::Material)
         {
-            return MakeFail<Material, EMaterialLoadStatus::AssetTypeMismatch>();
+            return MakeFail<Material, EMaterialLoadStatus::AssetCategoryMismatch>();
         }
 
         const Handle<Texture> diffuse{assetManager.LoadTexture(loadDesc.DiffuseTexGuid)};

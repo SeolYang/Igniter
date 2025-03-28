@@ -48,6 +48,8 @@ namespace ig
     constexpr inline EAssetCategory AssetCategoryOf<class StaticMesh> = EAssetCategory::StaticMesh;
     template <>
     constexpr inline EAssetCategory AssetCategoryOf<class Texture> = EAssetCategory::Texture;
+    template <>
+    constexpr inline EAssetCategory AssetCategoryOf<class AudioClip> = EAssetCategory::Audio;
 
     struct ResourceInfo
     {

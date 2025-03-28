@@ -4,7 +4,7 @@
 
 namespace ig::details
 {
-    enum class EMakeDefaultMatStatus
+    enum class EMakeDefaultMatStatus : U8
     {
         Success,
         InvalidAssetInfo
@@ -13,11 +13,11 @@ namespace ig::details
 
 namespace ig
 {
-    enum class EMaterialLoadStatus
+    enum class EMaterialLoadStatus : U8
     {
         Success,
         InvalidAssetInfo,
-        AssetTypeMismatch,
+        AssetCategoryMismatch,
         FailedLoadDiffuse, /* #sy_todo 추후 엔진 기본 텍스처가 추가되면 대체 */
     };
 
@@ -28,7 +28,7 @@ namespace ig
         friend class AssetManager;
 
     public:
-        MaterialLoader(AssetManager& assetManager);
+        explicit MaterialLoader(AssetManager& assetManager);
         MaterialLoader(const MaterialLoader&) = delete;
         MaterialLoader(MaterialLoader&&) noexcept = delete;
         ~MaterialLoader() = default;

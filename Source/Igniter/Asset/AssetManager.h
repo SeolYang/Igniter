@@ -13,6 +13,8 @@
 #include "Igniter/Asset/MaterialLoader.h"
 #include "Igniter/Asset/Map.h"
 #include "Igniter/Asset/MapLoader.h"
+#include "Igniter/Asset/AudioClip.h"
+#include "Igniter/Asset/AudioClipLoader.h"
 
 IG_DECLARE_LOG_CATEGORY(AssetManagerLog);
 
@@ -26,6 +28,8 @@ namespace ig::details
 
 namespace ig
 {
+    class RenderContext;
+    class AudioSystem;
     class TextureImporter;
     class TextureLoader;
     class StaticMeshImporter;
@@ -34,6 +38,8 @@ namespace ig
     class MaterialLoader;
     class MapCreator;
     class MapLoader;
+    class AudioClipImporter;
+    class AudioClipLoader;
 
     // #sy_todo bIsSuppress 같은걸 flag로 관리 하기
     // ex. EAssetManagerOptionFlag, SuppressLog, SuppressDirty etc..
@@ -59,7 +65,7 @@ namespace ig
         };
 
     public:
-        explicit AssetManager(RenderContext& renderContext);
+        explicit AssetManager(RenderContext& renderContext, AudioSystem& audioSystem);
         AssetManager(const AssetManager&) = delete;
         AssetManager(AssetManager&&) noexcept = delete;
         ~AssetManager();
@@ -81,13 +87,17 @@ namespace ig
         [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const Guid& guid, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<StaticMesh> LoadStaticMesh(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
-        Guid Import(const std::string_view virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty = false);
+        Guid Create(const std::string_view virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<Material> LoadMaterial(const Guid& guid, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<Material> LoadMaterial(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
-        Guid Import(const std::string_view virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty = false);
+        Guid Create(const std::string_view virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<Map> LoadMap(const Guid& guid, const bool bShouldSuppressDirty = false);
         [[nodiscard]] Handle<Map> LoadMap(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
+
+        Guid Import(const std::string_view resPath, const AudioClipImportDesc& desc, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<AudioClip> LoadAudioClip(const Guid& guid, const bool bShouldSuppressDirty = false);
+        [[nodiscard]] Handle<AudioClip> LoadAudioClip(const std::string_view virtualPath, const bool bShouldSuppressDirty = false);
 
         template <typename T>
         [[nodiscard]] Handle<T> Load(const Guid& guid, const bool bShouldSuppressDirty = false)
@@ -107,6 +117,10 @@ namespace ig
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
             {
                 return LoadMap(guid, bShouldSuppressDirty);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Audio)
+            {
+                return LoadAudioClip(guid, bShouldSuppressDirty);
             }
             else
             {
@@ -132,6 +146,14 @@ namespace ig
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
             {
                 return LoadMap(virtualPath);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Audio)
+            {
+                return LoadAudioClip(virtualPath);
+            }
+            else
+            {
+                return {};
             }
         }
 
@@ -162,6 +184,10 @@ namespace ig
             else if constexpr (AssetCategoryOf<T> == EAssetCategory::Map)
             {
                 bSuceeded = ReloadImpl<Map>(guid, desc, *mapLoader, bShouldSuppressDirty);
+            }
+            else if constexpr (AssetCategoryOf<T> == EAssetCategory::Audio)
+            {
+                bSuceeded = ReloadImpl<AudioClip>(guid, desc, *audioLoader, bShouldSuppressDirty);
             }
             else
             {
@@ -517,6 +543,9 @@ namespace ig
 
         Ptr<MapCreator> mapCreator;
         Ptr<MapLoader> mapLoader;
+
+        Ptr<AudioClipImporter> audioImporter;
+        Ptr<AudioClipLoader> audioLoader;
 
         std::atomic_bool bIsDirty{false};
         ModifiedEvent assetModifiedEvent;

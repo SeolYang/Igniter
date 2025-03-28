@@ -1,23 +1,24 @@
 #include "Igniter/Igniter.h"
-#include "Igniter/D3D12/GpuTexture.h"
-#include "Igniter/D3D12/GpuBuffer.h"
 #include "Igniter/Asset/TextureImporter.h"
 #include "Igniter/Asset/StaticMeshImporter.h"
 #include "Igniter/Asset/MaterialImporter.h"
 #include "Igniter/Asset/MapCreator.h"
+#include "Igniter/Asset/AudioClipImporter.h"
 #include "Igniter/Asset/AssetManager.h"
 
 IG_DEFINE_LOG_CATEGORY(AssetManagerLog);
 
 namespace ig
 {
-    AssetManager::AssetManager(RenderContext& renderContext)
+    AssetManager::AssetManager(RenderContext& renderContext, AudioSystem& audioSystem)
         : textureImporter(MakePtr<TextureImporter>())
         , textureLoader(MakePtr<TextureLoader>(renderContext))
         , staticMeshImporter(MakePtr<StaticMeshImporter>(*this))
         , staticMeshLoader(MakePtr<StaticMeshLoader>(renderContext, *this))
         , materialImporter(MakePtr<MaterialImporter>(*this))
         , materialLoader(MakePtr<MaterialLoader>(*this))
+        , audioImporter(MakePtr<AudioClipImporter>())
+        , audioLoader(MakePtr<AudioClipLoader>(audioSystem))
     {
         RestoreTempAssets();
         assetMonitor = MakePtr<details::AssetMonitor>();
@@ -26,6 +27,7 @@ namespace ig
         assetCaches.emplace_back(MakePtr<details::AssetCache<StaticMesh>>());
         assetCaches.emplace_back(MakePtr<details::AssetCache<Material>>());
         assetCaches.emplace_back(MakePtr<details::AssetCache<Map>>());
+        assetCaches.emplace_back(MakePtr<details::AssetCache<AudioClip>>());
         RegisterEngineDefault();
     }
 
@@ -195,7 +197,7 @@ namespace ig
         return LoadImpl<StaticMesh>(assetMonitor->GetGuid(EAssetCategory::StaticMesh, virtualPath), *staticMeshLoader, bShouldSuppressDirty);
     }
 
-    Guid AssetManager::Import(const std::string_view virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty)
+    Guid AssetManager::Create(const std::string_view virtualPath, const MaterialAssetCreateDesc& createDesc, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -241,7 +243,7 @@ namespace ig
         return LoadMaterial(assetMonitor->GetGuid(EAssetCategory::Material, virtualPath));
     }
 
-    Guid AssetManager::Import(const std::string_view virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty)
+    Guid AssetManager::Create(const std::string_view virtualPath, const MapCreateDesc& desc, const bool bShouldSuppressDirty)
     {
         if (!IsValidVirtualPath(virtualPath))
         {
@@ -285,6 +287,46 @@ namespace ig
         }
 
         return LoadMap(assetMonitor->GetGuid(EAssetCategory::Map, virtualPath), bShouldSuppressDirty);
+    }
+
+    Guid AssetManager::Import(const std::string_view resPath, const AudioClipImportDesc& desc, const bool bShouldSuppressDirty)
+    {
+        Result<AudioClip::Desc, EAudioClipImportError> result{audioImporter->Import(desc)};
+        const std::optional<Guid> guidOpt{ImportImpl<AudioClip>(resPath, result, bShouldSuppressDirty)};
+        if (!guidOpt)
+        {
+            return Guid{};
+        }
+
+        return *guidOpt;
+    }
+    
+    Handle<AudioClip> AssetManager::LoadAudioClip(const Guid& guid, const bool bShouldSuppressDirty)
+    {
+        const Handle<AudioClip> cachedAudioClipHandle{LoadImpl<AudioClip>(guid, *audioLoader, bShouldSuppressDirty)};
+        if (!cachedAudioClipHandle)
+        {
+            IG_LOG(AssetManagerLog, Error, "Failed to load audio clip {}.", guid);
+        }
+
+        return cachedAudioClipHandle;
+    }
+    
+    Handle<AudioClip> AssetManager::LoadAudioClip(const std::string_view virtualPath, const bool bShouldSuppressDirty)
+    {
+        if (!IsValidVirtualPath(virtualPath))
+        {
+            IG_LOG(AssetManagerLog, Error, "Load Audio Clip: Invalid Virtual Path {}", virtualPath);
+            return {};
+        }
+
+        if (!assetMonitor->Contains(EAssetCategory::Audio, virtualPath))
+        {
+            IG_LOG(AssetManagerLog, Error, "Audio Clip \"{}\" is invisible to asset manager.", virtualPath);
+            return {};
+        }
+
+        return LoadAudioClip(assetMonitor->GetGuid(EAssetCategory::Audio, virtualPath), bShouldSuppressDirty);
     }
 
     void AssetManager::Delete(const Guid& guid, const bool bShouldSuppressDirty)

@@ -57,7 +57,7 @@ namespace ig
         renderContext = MakePtr<RenderContext>(*window);
         IG_LOG(EngineLog, Info, "OnImGui Context Initialized.");
 
-        assetManager = MakePtr<AssetManager>(*renderContext);
+        assetManager = MakePtr<AssetManager>(*renderContext, *audioSystem);
         IG_LOG(EngineLog, Info, "Asset Manager Initialized.");
         imguiContext = MakePtr<ImGuiContext>(*window, *renderContext);
         IG_LOG(EngineLog, Info, "ImGui Context Initialized.");

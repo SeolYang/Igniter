@@ -3,6 +3,7 @@
 #include "Igniter/Core/FrameManager.h"
 #include "Igniter/Input/InputManager.h"
 #include "Igniter/Asset/AssetManager.h"
+#include "Igniter/Asset/AudioClip.h"
 #include "Igniter/Core/BoundingVolume.h"
 #include "Igniter/Gameplay/World.h"
 #include "Igniter/ImGui/ImGuiCanvas.h"
@@ -20,7 +21,6 @@
 #include "Frieren/Game/Component/RandMovementComponent.h"
 #include "Frieren/Gui/EditorCanvas.h"
 #include "Frieren/Application/TestApp.h"
-
 
 namespace fe
 {
@@ -67,6 +67,9 @@ namespace fe
          testStaticMesh = assetManager.Load<ig::StaticMesh>("sphere_Cube.001_0");
          //testStaticMesh = assetManager.Load<ig::StaticMesh>("DragonAttenuation_Dragon_1"_fs);
          testMaterial = assetManager.Load<ig::Material>(ig::Guid{ig::DefaultMaterialGuid});
+
+        /* @test Audio Clip Import Test */
+        //assetManager.Import("Resources/BGM/FirstFlower_NightWind_and_ChildhoodFriend.ogg", ig::AudioClipImportDesc{.Path = "Resources/BGM/FirstFlower_NightWind_and_ChildhoodFriend.ogg"});
 
 #ifdef TEST_ENTITY
         ig::Entity newEntity = ig::StaticMeshArchetype::Create(&registry);
@@ -142,10 +145,10 @@ namespace fe
             }
         }
 
-        testAudio = ig::Engine::GetAudioSystem().CreateAudio("Resources/BGM/FirstFlower_NightWind_and_ChildhoodFriend.ogg");
+        testAudioClip = assetManager.Load<ig::AudioClip>("FirstFlower_NightWind_and_ChildhoodFriend");
         const ig::Entity audioSourceEntity = registry.create();
         ig::AudioSourceComponent& audioSource = registry.emplace<ig::AudioSourceComponent>(audioSourceEntity);
-        audioSource.Clip = testAudio;
+        audioSource.Clip = testAudioClip;
         audioSource.NextEvent = ig::EAudioEvent::Play;
         audioSource.bLoop = true;
         audioSource.bShouldUpdatePropertiesOnThisFrame = true;
@@ -157,8 +160,7 @@ namespace fe
         ig::AssetManager& assetManager = ig::Engine::GetAssetManager();
         assetManager.Unload(testStaticMesh);
         assetManager.Unload(testMaterial);
-
-        ig::Engine::GetAudioSystem().Destroy(testAudio);
+        assetManager.Unload(testAudioClip);
     }
 
     void TestApp::Update(const float deltaTime)

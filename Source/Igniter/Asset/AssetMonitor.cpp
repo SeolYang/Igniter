@@ -5,6 +5,7 @@
 #include "Igniter/Asset/StaticMesh.h"
 #include "Igniter/Asset/Material.h"
 #include "Igniter/Asset/Map.h"
+#include "Igniter/Asset/AudioClip.h"
 #include "Igniter/Asset/AssetMonitor.h"
 
 IG_DECLARE_LOG_CATEGORY(AssetMonitorLog);
@@ -29,6 +30,7 @@ namespace ig::details
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::StaticMesh, MakePtr<AssetDescMap<StaticMesh>>()));
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::Material, MakePtr<AssetDescMap<Material>>()));
         guidDescTables.emplace_back(std::make_pair(EAssetCategory::Map, MakePtr<AssetDescMap<Map>>()));
+        guidDescTables.emplace_back(std::make_pair(EAssetCategory::Audio, MakePtr<AssetDescMap<AudioClip>>()));
     }
 
     void AssetMonitor::InitVirtualPathGuidTables()

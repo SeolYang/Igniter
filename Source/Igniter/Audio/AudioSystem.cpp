@@ -4,6 +4,9 @@
 #include "Igniter/Audio/AudioListenerComponent.h"
 #include "Igniter/Audio/AudioSystem.h"
 
+#include "Igniter/Asset/AssetManager.h"
+#include "Igniter/Core/Engine.h"
+
 IG_DECLARE_PRIVATE_LOG_CATEGORY(AudioSystemLog);
 
 namespace ig
@@ -151,14 +154,13 @@ namespace ig
         ReadOnlyLock lock{audioClipStorageMutex};
         for (auto [entity, audioSource] : registry.view<AudioSourceComponent>(entt::exclude_t<TransformComponent>{}).each())
         {
-            FMOD::Channel* channel = UpdateAudioStatusUnsafe(entity, audioSource);
             /*
              * 처리 결과에 따라 현재 프레임에 프로퍼티 값을 반영할지 하지 않을지 결정
              * 만약 당장 프로퍼티를 반영할 수 없다면, 다음 프레임으로 지연
              */
-            if (audioSource.bShouldUpdatePropertiesOnThisFrame && audioSource.LatestStatus != EAudioStatus::Stopped)
+            if (FMOD::Channel* channel = UpdateAudioStatusUnsafe(entity, audioSource);
+                channel != nullptr)
             {
-                IG_CHECK(channel != nullptr);
                 channel->setVolume(audioSource.Volume);
                 channel->setPitch(audioSource.Pitch);
                 channel->setPan(audioSource.Pan);
@@ -166,16 +168,14 @@ namespace ig
                 FMOD_MODE newMode = FMOD_2D;
                 newMode |= audioSource.bLoop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
                 channel->setMode(newMode);
-                audioSource.bShouldUpdatePropertiesOnThisFrame = false;
             }
         }
 
         for (auto [entity, transform, audioSource] : registry.view<TransformComponent, AudioSourceComponent>().each())
         {
-            FMOD::Channel* channel = UpdateAudioStatusUnsafe(entity, audioSource);
-            if (audioSource.bShouldUpdatePropertiesOnThisFrame && audioSource.LatestStatus != EAudioStatus::Stopped)
+            if (FMOD::Channel* channel = UpdateAudioStatusUnsafe(entity, audioSource);
+                channel != nullptr)
             {
-                IG_CHECK(channel != nullptr);
                 channel->setVolume(audioSource.Volume);
                 channel->setPitch(audioSource.Pitch);
                 channel->setPan(audioSource.Pan);
@@ -184,26 +184,25 @@ namespace ig
                 FMOD_MODE newMode = FMOD_3D;
                 newMode |= audioSource.bLoop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
                 channel->setMode(newMode);
-                audioSource.bShouldUpdatePropertiesOnThisFrame = false;
-            }
 
-            if (audioSource.LatestStatus == EAudioStatus::Playing)
-            {
-                IG_CHECK(channel != nullptr);
-                const FMOD_VECTOR prevPos{
-                    audioSource.PrevPosition.x,
-                    audioSource.PrevPosition.y,
-                    audioSource.PrevPosition.z
-                };
-                const FMOD_VECTOR currentPos{
-                    .x = transform.Position.x,
-                    .y = transform.Position.y,
-                    .z = transform.Position.z
-                };
-                const FMOD_VECTOR currentVelocity = kCalcVelocity(prevPos, currentPos, deltaTime);
-                channel->set3DAttributes(&currentPos, &currentVelocity);
+                if (audioSource.LatestStatus == EAudioStatus::Playing)
+                {
+                    IG_CHECK(channel != nullptr);
+                    const FMOD_VECTOR prevPos{
+                        audioSource.PrevPosition.x,
+                        audioSource.PrevPosition.y,
+                        audioSource.PrevPosition.z
+                    };
+                    const FMOD_VECTOR currentPos{
+                        .x = transform.Position.x,
+                        .y = transform.Position.y,
+                        .z = transform.Position.z
+                    };
+                    const FMOD_VECTOR currentVelocity = kCalcVelocity(prevPos, currentPos, deltaTime);
+                    channel->set3DAttributes(&currentPos, &currentVelocity);
+                }
+                audioSource.PrevPosition = transform.Position;
             }
-            audioSource.PrevPosition = transform.Position;
         }
 
         if (const FMOD_RESULT updateResult = system->update();
@@ -248,7 +247,14 @@ namespace ig
             if (!bIsPlaying)
             {
                 IG_CHECK(channel == nullptr);
-                if (FMOD::Sound* sound = LookupUnsafe(audioSource.Clip);
+
+                const AudioClip* audioClip = audioSource.Clip ?
+                                                 Engine::GetAssetManager().Lookup(audioSource.Clip) :
+                                                 nullptr;
+                const Handle<Audio> audioHandle = audioClip != nullptr ?
+                                                      audioClip->GetAudio() :
+                                                      Handle<Audio>{};
+                if (FMOD::Sound* sound = LookupUnsafe(audioHandle);
                     sound != nullptr)
                 {
                     if (const FMOD_RESULT result = system->playSound(sound, nullptr, audioSource.NextEvent == EAudioEvent::PlayAsPaused, &channel);
