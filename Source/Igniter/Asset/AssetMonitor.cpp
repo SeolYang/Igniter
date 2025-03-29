@@ -267,10 +267,9 @@ namespace ig::details
         IG_CHECK(ContainsUnsafe(guid));
 
         const AssetInfo& oldInfo = GetAssetInfoUnsafe(guid);
-        const Guid oldGuid{oldInfo.GetGuid()};
         const std::string_view oldVirtualPath{oldInfo.GetVirtualPath()};
         const U64 oldVirtualPathHash = Hash(oldVirtualPath);
-        IG_CHECK(guid == oldGuid);
+        IG_CHECK(guid == oldInfo.GetGuid());
         IG_CHECK(newInfo.GetCategory() == oldInfo.GetCategory());
 
         VirtualPathGuidTable& virtualPathGuidTable = GetVirtualPathGuidTable(newInfo.GetCategory());

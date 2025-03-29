@@ -89,18 +89,18 @@ namespace ig
         IG_LOG(AssetManagerLog, Info, "Load and register Engine Default Assets to Asset Manager.");
 
         /* #sy_wip 기본 에셋 Virtual Path들도 AssetManager 컴파일 타임 상수로 통합 */
-        AssetInfo defaultTexInfo{Guid{DefaultTextureGuid}, Texture::EngineDefault, EAssetCategory::Texture, EAssetScope::Engine};
+        const AssetInfo defaultTexInfo{Guid{DefaultTextureGuid}, Texture::EngineDefault, EAssetCategory::Texture, EAssetScope::Engine};
         RegisterEngineInternalAsset<Texture>(defaultTexInfo.GetVirtualPath(), textureLoader->MakeDefault(defaultTexInfo));
 
-        AssetInfo defaultWhiteTexInfo{Guid{DefaultWhiteTextureGuid}, Texture::EngineDefaultWhite, EAssetCategory::Texture, EAssetScope::Engine};
+        const AssetInfo defaultWhiteTexInfo{Guid{DefaultWhiteTextureGuid}, Texture::EngineDefaultWhite, EAssetCategory::Texture, EAssetScope::Engine};
         RegisterEngineInternalAsset<Texture>(
             defaultWhiteTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultWhiteTexInfo, Color{1.f, 1.f, 1.f}));
 
-        AssetInfo defaultBlackTexInfo{Guid{DefaultBlackTextureGuid}, Texture::EngineDefaultBlack, EAssetCategory::Texture, EAssetScope::Engine};
+        const AssetInfo defaultBlackTexInfo{Guid{DefaultBlackTextureGuid}, Texture::EngineDefaultBlack, EAssetCategory::Texture, EAssetScope::Engine};
         RegisterEngineInternalAsset<Texture>(
             defaultBlackTexInfo.GetVirtualPath(), textureLoader->MakeMonochrome(defaultBlackTexInfo, Color{0.f, 0.f, 0.f}));
 
-        AssetInfo defaultMatInfo{Guid{DefaultMaterialGuid}, Material::EngineDefault, EAssetCategory::Material, EAssetScope::Engine};
+        const AssetInfo defaultMatInfo{Guid{DefaultMaterialGuid}, Material::EngineDefault, EAssetCategory::Material, EAssetScope::Engine};
         RegisterEngineInternalAsset<Material>(defaultMatInfo.GetVirtualPath(), materialLoader->MakeDefault(defaultMatInfo));
 
         IG_LOG(AssetManagerLog, Info, "Engine Default Assets have been successfully registered to Asset Manager.");
@@ -118,9 +118,9 @@ namespace ig
         IG_LOG(AssetManagerLog, Info, "Engine Default Assets have been successfully unregistered from Asset Manager.");
     }
 
-    Guid AssetManager::Import(const std::string_view resPath, const TextureImportDesc& config, const bool bShouldSuppressDirty)
+    Guid AssetManager::Import(const std::string_view resPath, const TextureImportDesc& desc, const bool bShouldSuppressDirty)
     {
-        Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, config);
+        Result<Texture::Desc, ETextureImportStatus> result = textureImporter->Import(resPath, desc);
         const std::optional<Guid> guidOpt{ImportImpl<Texture>(resPath, result, bShouldSuppressDirty)};
         if (!guidOpt)
         {

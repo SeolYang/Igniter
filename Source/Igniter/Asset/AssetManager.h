@@ -56,7 +56,7 @@ namespace ig
         struct Snapshot
         {
         public:
-            bool IsCached() const { return RefCount > 0 || Info.GetScope() == EAssetScope::Static || Info.GetScope() == EAssetScope::Engine; }
+            [[nodiscard]] bool IsCached() const noexcept { return RefCount > 0 || Info.GetScope() == EAssetScope::Static || Info.GetScope() == EAssetScope::Engine; }
 
         public:
             AssetInfo Info{};
@@ -251,7 +251,7 @@ namespace ig
             T* ptr = cache.Lookup(handle);
             if (ptr != nullptr)
             {
-                const T::Desc desc = ptr->GetSnapshot();
+                const typename T::Desc desc = ptr->GetSnapshot();
                 AssetLock assetLock{GetAssetMutex(desc.Info.GetGuid())};
                 cache.Unload(desc.Info);
 
@@ -326,10 +326,10 @@ namespace ig
         template <typename T, ResultStatus ImportStatus>
         std::optional<Guid> ImportImpl(std::string_view resPath, Result<typename T::Desc, ImportStatus>& result, const bool bShouldSuppressDirty)
         {
-            constexpr auto AssetType{AssetCategoryOf<T>};
+            constexpr auto kAssetCategory{AssetCategoryOf<T>};
             if (!result.HasOwnership())
             {
-                IG_LOG(AssetManagerLog, Error, "{}: Failed({}) to import \"{}\".", AssetType, result.GetStatus(), resPath);
+                IG_LOG(AssetManagerLog, Error, "{}: Failed({}) to import \"{}\".", kAssetCategory, result.GetStatus(), resPath);
 
                 return std::nullopt;
             }
@@ -343,13 +343,13 @@ namespace ig
             IG_CHECK(IsValidVirtualPath(virtualPath));
 
             bool bShouldReload{false};
-            if (assetMonitor->Contains(AssetType, virtualPath))
+            if (assetMonitor->Contains(kAssetCategory, virtualPath))
             {
-                const AssetInfo oldAssetInfo{assetMonitor->GetAssetInfo(AssetType, virtualPath)};
+                const AssetInfo oldAssetInfo{assetMonitor->GetAssetInfo(kAssetCategory, virtualPath)};
                 IG_CHECK(oldAssetInfo.IsValid());
                 if (oldAssetInfo.GetScope() == EAssetScope::Engine)
                 {
-                    IG_LOG(AssetManagerLog, Error, "{}: Failed to import \"{}\". Given virtual path {} was reserved by engine.", AssetType, resPath,
+                    IG_LOG(AssetManagerLog, Error, "{}: Failed to import \"{}\". Given virtual path {} was reserved by engine.", kAssetCategory, resPath,
                         virtualPath);
 
                     return std::nullopt;
@@ -357,16 +357,16 @@ namespace ig
 
                 assetMonitor->Remove(oldAssetInfo.GetGuid(), false);
 
-                const Path tempAssetDirPath = GetTempAssetDirectoryPath(AssetType);
+                const Path tempAssetDirPath = GetTempAssetDirectoryPath(kAssetCategory);
                 if (!fs::exists(tempAssetDirPath))
                 {
                     fs::create_directory(tempAssetDirPath);
                 }
 
-                const Path oldAssetPath{MakeAssetPath(AssetType, oldAssetInfo.GetGuid())};
-                const Path oldAssetMetadataPath{MakeAssetMetadataPath(AssetType, oldAssetInfo.GetGuid())};
-                const Path oldAssetTempPath{MakeTempAssetPath(AssetType, oldAssetInfo.GetGuid())};
-                const Path oldAssetMetadataTempPath{MakeTempAssetMetadataPath(AssetType, oldAssetInfo.GetGuid())};
+                const Path oldAssetPath{MakeAssetPath(kAssetCategory, oldAssetInfo.GetGuid())};
+                const Path oldAssetMetadataPath{MakeAssetMetadataPath(kAssetCategory, oldAssetInfo.GetGuid())};
+                const Path oldAssetTempPath{MakeTempAssetPath(kAssetCategory, oldAssetInfo.GetGuid())};
+                const Path oldAssetMetadataTempPath{MakeTempAssetMetadataPath(kAssetCategory, oldAssetInfo.GetGuid())};
 
                 const bool bShouldTemporalizeAsset = !fs::exists(oldAssetTempPath) && fs::exists(oldAssetPath);
                 const bool bShouldTemporalizeMeta = !fs::exists(oldAssetMetadataTempPath) && fs::exists(oldAssetMetadataPath);
@@ -378,8 +378,8 @@ namespace ig
                 fs::remove(oldAssetPath);
                 fs::remove(oldAssetMetadataPath);
 
-                const Path newAssetPath{MakeAssetPath(AssetType, assetInfo.GetGuid())};
-                const Path newAssetMetadataPath{MakeAssetMetadataPath(AssetType, assetInfo.GetGuid())};
+                const Path newAssetPath{MakeAssetPath(kAssetCategory, assetInfo.GetGuid())};
+                const Path newAssetMetadataPath{MakeAssetMetadataPath(kAssetCategory, assetInfo.GetGuid())};
                 fs::rename(newAssetPath, oldAssetPath);
                 fs::rename(newAssetMetadataPath, oldAssetMetadataPath);
 
@@ -388,7 +388,7 @@ namespace ig
             }
 
             assetMonitor->Create<T>(assetInfo, desc.LoadDescriptor);
-            IG_LOG(AssetManagerLog, Info, "{}: \"{}\" imported as {} ({}).", AssetType, resPath, virtualPath, assetInfo.GetGuid());
+            IG_LOG(AssetManagerLog, Info, "{}: \"{}\" imported as {} ({}).", kAssetCategory, resPath, virtualPath, assetInfo.GetGuid());
 
             if (bShouldReload)
             {
@@ -416,7 +416,7 @@ namespace ig
             details::AssetCache<T>& assetCache{GetCache<T>()};
             if (!assetCache.IsCached(guid))
             {
-                const T::Desc desc{assetMonitor->GetDesc<T>(guid)};
+                const typename T::Desc desc{assetMonitor->GetDesc<T>(guid)};
                 IG_CHECK(desc.Info.GetGuid() == guid);
                 auto result{loader.Load(desc)};
                 if (!result.HasOwnership())

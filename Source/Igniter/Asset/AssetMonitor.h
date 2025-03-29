@@ -231,7 +231,7 @@ namespace ig::details
 
         void ReflectExpiredToFilesUnsafe();
         void ReflectRemainedToFilesUnsafe();
-        void CleanupOrphanFiles();
+        static void CleanupOrphanFiles();
 
     private:
         mutable SharedMutex mutex;
